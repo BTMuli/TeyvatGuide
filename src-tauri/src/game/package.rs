@@ -68,6 +68,16 @@ const INSTALL_STALL_PAUSE_MESSAGE: &str =
 const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
 const INSTALL_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到磁盘 I/O 持续停滞，请检查磁盘状态后手动继续。";
+const MAIN_UPDATE_AUTO_STALL_RETRY_MESSAGE: &str = "检测到正式更新准备持续停滞，正在自动重试 1/1";
+const MAIN_UPDATE_STALL_PAUSE_MESSAGE: &str =
+  "检测到正式更新下载写入或资源组装持续停滞，任务已自动暂停；可从任务记录继续。";
+const MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE: &str =
+  "自动重试后仍检测到正式更新下载写入或资源组装停滞，任务已暂停；请检查磁盘状态后从任务记录继续。";
+const MAIN_UPDATE_WORKER_DRAIN_MESSAGE: &str =
+  "旧的正式更新组装 worker 未在超时内退出，任务保持暂停；请确认磁盘健康后再次恢复。";
+const MAIN_UPDATE_STALL_NOTIFICATION_TITLE: &str = "正式更新已暂停";
+const MAIN_UPDATE_STALL_NOTIFICATION_BODY: &str =
+  "自动重试后仍检测到下载写入或资源组装持续停滞，请检查磁盘状态后手动继续。";
 /// 配音包同时让 4 个资源占用下载槽；真正下多少仍由这个焦点信号量卡住。
 const AUDIO_DOWNLOAD_FOCUS: usize = 4;
 /// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
@@ -453,6 +463,147 @@ pub(crate) struct AudioApplyContext {
   pub installation: GameInstallation,
   pub machine_uid: String,
   pub registration_pool: sqlx::SqlitePool,
+}
+
+/// 正式更新准备流水线的停滞监测上下文。
+struct MainUpdateWatchdogContext {
+  download_telemetry: Arc<DownloadTelemetry>,
+  assembly_telemetry: Arc<assembler::AssemblyTelemetry>,
+  stall_pause_requested: Arc<AtomicBool>,
+  retry_budget_exhausted: bool,
+  abort_handle: AbortHandle,
+}
+
+/// 正式更新准备流水线停滞看门狗。
+#[allow(clippy::too_many_arguments)]
+fn spawn_main_update_stall_watchdog(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  plan_id: String,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  paused: Arc<AtomicBool>,
+  canceled: Arc<AtomicBool>,
+  context: MainUpdateWatchdogContext,
+) {
+  let runtime = tokio::runtime::Handle::current();
+  std::thread::spawn(move || {
+    let journal_path = journal::journal_path(&task_root, &plan_id);
+    let mut last_signature = None;
+    let mut last_progress_at = Instant::now();
+    let mut confirmations = 0_usize;
+    loop {
+      std::thread::sleep(INSTALL_STALL_POLL_INTERVAL);
+      if paused.load(Ordering::Acquire) || canceled.load(Ordering::Acquire) {
+        break;
+      }
+      let Some((state, revision)) = install_watchdog_live_progress(&journal, &journal_path) else {
+        continue;
+      };
+      if !matches!(state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+        break;
+      }
+      let download = context.download_telemetry.snapshot();
+      let assembly = context.assembly_telemetry.snapshot();
+      let signature = install_watchdog_progress_signature(revision, &download, &assembly);
+      if last_signature != Some(signature) {
+        last_signature = Some(signature);
+        last_progress_at = Instant::now();
+        confirmations = 0;
+        continue;
+      }
+      let stalled_for = last_progress_at.elapsed();
+      if install_watchdog_is_network_only_wait(&download, &assembly) {
+        if stalled_for >= INSTALL_STALL_THRESHOLD {
+          log::info!(
+            "[game-main-update][{plan_id}] 仅网络等待持续 {}s，交由单对象超时处理",
+            stalled_for.as_secs()
+          );
+          last_progress_at = Instant::now();
+        }
+        confirmations = 0;
+        continue;
+      }
+      if stalled_for < INSTALL_STALL_THRESHOLD {
+        continue;
+      }
+      confirmations = confirmations.saturating_add(1);
+      log::warn!(
+        "[game-main-update][{plan_id}] 正式更新准备停滞样本：stalled={}s confirmation={}/{} downloadHeartbeatAge={}ms downloadWriteActive={} downloadWrittenBytes={} assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyWrittenBytes={} assemblyHashedBytes={}",
+        stalled_for.as_secs(),
+        confirmations,
+        INSTALL_STALL_CONFIRMATIONS,
+        download.last_activity_age_millis,
+        download.active_local_writes,
+        download.local_written_bytes,
+        assembly.last_activity_age_millis,
+        assembly.active_reads,
+        assembly.active_writes,
+        assembly.active_hashes,
+        assembly.active_syncs,
+        assembly.written_bytes,
+        assembly.hashed_bytes,
+      );
+      if confirmations < INSTALL_STALL_CONFIRMATIONS
+        || context.stall_pause_requested.swap(true, Ordering::AcqRel)
+      {
+        continue;
+      }
+      paused.store(true, Ordering::Release);
+      let message = if context.retry_budget_exhausted {
+        MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE
+      } else {
+        MAIN_UPDATE_STALL_PAUSE_MESSAGE
+      };
+      if context.retry_budget_exhausted
+        && let Err(error) = app_handle
+          .notification()
+          .builder()
+          .title(MAIN_UPDATE_STALL_NOTIFICATION_TITLE)
+          .body(MAIN_UPDATE_STALL_NOTIFICATION_BODY)
+          .show()
+      {
+        log::error!("[game-main-update][{plan_id}] 发送正式更新停滞通知失败：{error}");
+      }
+      persist_main_update_watchdog_pause(
+        &app_handle,
+        &task_root,
+        &plan_id,
+        &journal,
+        message,
+        &runtime,
+      );
+      context.abort_handle.abort();
+      break;
+    }
+  });
+}
+
+/// 持久化正式更新看门狗暂停状态并同步给前端。
+fn persist_main_update_watchdog_pause(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  plan_id: &str,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  message: &str,
+  runtime: &tokio::runtime::Handle,
+) {
+  let pause = async {
+    match tokio::time::timeout(
+      INSTALL_WATCHDOG_PAUSE_LOCK_TIMEOUT,
+      apply_install_watchdog_pause_locked(task_root, journal, message),
+    )
+    .await
+    {
+      Ok(Some(summary)) => Some(summary),
+      Ok(None) => None,
+      Err(_) => persist_install_watchdog_pause_from_disk(task_root, plan_id, message),
+    }
+  };
+  let Some(summary) = runtime.block_on(pause) else {
+    return;
+  };
+  emit_state(app_handle, &summary);
+  emit_progress(app_handle, &summary);
 }
 
 /// 组装进度条用写出增量叠加已完成成品，不把预分配或会话写出写进 journal。
@@ -923,6 +1074,36 @@ fn spawn_install_assembly_worker(
       &telemetry,
     );
     (result, timing)
+  })
+}
+
+/// 派生正式更新组装 worker，并登记到中止后的退出栅栏。
+#[allow(clippy::too_many_arguments)]
+fn spawn_main_update_assembly_worker(
+  plan: Arc<PersistedPlan>,
+  asset_index: usize,
+  game_root: PathBuf,
+  task_root: PathBuf,
+  output_root: PathBuf,
+  canceled: Arc<AtomicBool>,
+  telemetry: Arc<assembler::AssemblyTelemetry>,
+) -> tauri::async_runtime::JoinHandle<Result<(), String>> {
+  let slot = assembly_worker_slot(&plan.plan_id);
+  slot.active.fetch_add(1, Ordering::AcqRel);
+  let worker_slot = Arc::clone(&slot);
+  tauri::async_runtime::spawn_blocking(move || {
+    let _done = AssemblyWorkerDoneGuard { slot: worker_slot };
+    assembler::assemble_plan_asset_to_root(
+      &plan,
+      asset_index,
+      &game_root,
+      &task_root,
+      &output_root,
+      &canceled,
+      Some(&telemetry),
+    )?;
+    evidence::capture_and_persist_asset_evidence(&task_root, &plan, asset_index, &output_root)?;
+    Ok(())
   })
 }
 
@@ -2323,6 +2504,7 @@ impl GamePackageManager {
     options: PackageTaskOptions,
     recovering: bool,
     audio_apply: Option<AudioApplyContext>,
+    main_apply: Option<GameInstallation>,
     recovery_progress: Option<Channel<PackageRecoveryProgress>>,
   ) -> Result<PackageTaskSummary, String> {
     if self.verify.is_running(&plan.installation_id)? {
@@ -2457,14 +2639,17 @@ impl GamePackageManager {
     }
 
     let summary = journal.summary();
+    let retry_budget_exhausted =
+      journal.install_auto_stall_retry_count >= INSTALL_AUTO_STALL_RETRY_LIMIT;
     let paused = Arc::new(AtomicBool::new(false));
     let paused_slot = Arc::new(Mutex::new(Arc::clone(&paused)));
+    let manual_pause_requested = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
-      paused: paused_slot,
-      manual_pause_requested: Arc::new(AtomicBool::new(false)),
+      paused: Arc::clone(&paused_slot),
+      manual_pause_requested: Arc::clone(&manual_pause_requested),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -2476,21 +2661,60 @@ impl GamePackageManager {
       let _reservation = reservation;
       let stream_assemble = audio_apply.is_some() || plan.target == PackagePlanTarget::Main;
       if stream_assemble {
-        run_streaming_prepare_task(
-          app_handle.clone(),
-          task_root.clone(),
-          cache_root,
-          game_root,
-          plan.clone(),
-          download_client,
-          Arc::clone(&shared_journal),
-          Arc::clone(&canceled),
-          Arc::clone(&paused),
-          concurrency,
-          options.max_bytes_per_second,
-          audio_apply.is_some(),
-        )
-        .await;
+        if plan.target == PackagePlanTarget::Main {
+          run_main_streaming_prepare_supervisor(
+            app_handle.clone(),
+            task_root.clone(),
+            cache_root,
+            game_root.clone(),
+            plan.clone(),
+            download_client,
+            Arc::clone(&shared_journal),
+            Arc::clone(&canceled),
+            paused_slot,
+            manual_pause_requested,
+            concurrency,
+            options.max_bytes_per_second,
+            retry_budget_exhausted,
+          )
+          .await;
+        } else {
+          run_streaming_prepare_task(
+            app_handle.clone(),
+            task_root.clone(),
+            cache_root,
+            game_root.clone(),
+            plan.clone(),
+            download_client,
+            Arc::clone(&shared_journal),
+            Arc::clone(&canceled),
+            Arc::clone(&paused),
+            concurrency,
+            options.max_bytes_per_second,
+            audio_apply.is_some(),
+            None,
+          )
+          .await;
+        }
+        if let Some(installation) = main_apply {
+          let ready_to_apply = shared_journal.lock().await.state == PackageTaskState::ReadyToApply;
+          if ready_to_apply && is_game_running() {
+            log::info!("[game-package] 正式更新已组装完成，游戏仍在运行，等待前端确认停游后应用");
+          } else if ready_to_apply
+            && let Err(error) = apply_main_after_download(
+              app_handle.clone(),
+              task_root.clone(),
+              game_root.clone(),
+              plan.clone(),
+              Arc::clone(&shared_journal),
+              Arc::clone(&canceled),
+              installation,
+            )
+            .await
+          {
+            log::warn!("[game-package] 正式更新自动应用失败：{error}");
+          }
+        }
         if let Some(context) = audio_apply
           && let Err(error) = apply_audio_after_download(
             app_handle.clone(),
@@ -3800,32 +4024,45 @@ async fn assemble_audio_asset(
     overlay_audio_summary(&value, &telemetry, &overlay)
   };
   events.publish_progress(summary);
-  let worker_plan = Arc::clone(&plan);
-  let worker_task_root = task_root.clone();
-  let worker_output_root = output_root.clone();
-  let worker_canceled = Arc::clone(&canceled);
-  let worker_telemetry = Arc::clone(&telemetry);
-  let result = tauri::async_runtime::spawn_blocking(move || {
-    assembler::assemble_plan_asset_to_root(
-      &worker_plan,
+  let worker = if plan.target == PackagePlanTarget::Main {
+    spawn_main_update_assembly_worker(
+      Arc::clone(&plan),
       asset_index,
-      &game_root,
-      &worker_task_root,
-      &worker_output_root,
-      &worker_canceled,
-      Some(&worker_telemetry),
-    )?;
-    evidence::capture_and_persist_asset_evidence(
-      &worker_task_root,
-      &worker_plan,
-      asset_index,
-      &worker_output_root,
-    )?;
-    Ok::<(), String>(())
-  })
-  .await
-  .map_err(|error| format!("配音资源组装 worker 异常退出：{error}"))
-  .and_then(|result| result);
+      game_root,
+      task_root.clone(),
+      output_root,
+      Arc::clone(&canceled),
+      Arc::clone(&telemetry),
+    )
+  } else {
+    let worker_plan = Arc::clone(&plan);
+    let worker_task_root = task_root.clone();
+    let worker_output_root = output_root;
+    let worker_canceled = Arc::clone(&canceled);
+    let worker_telemetry = Arc::clone(&telemetry);
+    tauri::async_runtime::spawn_blocking(move || {
+      assembler::assemble_plan_asset_to_root(
+        &worker_plan,
+        asset_index,
+        &game_root,
+        &worker_task_root,
+        &worker_output_root,
+        &worker_canceled,
+        Some(&worker_telemetry),
+      )?;
+      evidence::capture_and_persist_asset_evidence(
+        &worker_task_root,
+        &worker_plan,
+        asset_index,
+        &worker_output_root,
+      )?;
+      Ok::<(), String>(())
+    })
+  };
+  let result = worker
+    .await
+    .map_err(|error| format!("资源组装 worker 异常退出：{error}"))
+    .and_then(|result| result);
   drop(permit);
   let summary = {
     let mut value = journal.lock().await;
@@ -3856,6 +4093,7 @@ async fn run_audio_asset_job(
   download_slots: Arc<Semaphore>,
   download_guards: Arc<AsyncMutex<HashMap<String, Arc<AsyncMutex<()>>>>>,
   assembly_slots: Arc<Semaphore>,
+  download_telemetry: Option<Arc<DownloadTelemetry>>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
   overlay: Arc<AudioLiveAssemblyOverlay>,
   completed_cache_keys: Arc<Mutex<HashSet<String>>>,
@@ -3881,6 +4119,7 @@ async fn run_audio_asset_job(
         let slots = Arc::clone(&download_slots);
         let guards = Arc::clone(&download_guards);
         let labels = Arc::clone(&labels);
+        let telemetry = download_telemetry.clone();
         async move {
           let download_guard = {
             let mut values = guards.lock().await;
@@ -3898,19 +4137,18 @@ async fn run_audio_asset_job(
             .map_err(|error| format!("获取配音下载并发槽位失败：{error}"))?;
           let current_file =
             labels.get(&download.cache_key).cloned().unwrap_or_else(|| download.id.clone());
-          let result = download_object(
-            &client,
-            &root,
-            &download,
-            DownloadControl::new(
-              &task_id,
-              &canceled,
-              &paused,
-              &limiter,
-              DownloadDurability::Strict,
-            ),
-          )
-          .await;
+          let control = DownloadControl::new(
+            &task_id,
+            &canceled,
+            &paused,
+            &limiter,
+            DownloadDurability::Strict,
+          );
+          let control = match telemetry {
+            Some(telemetry) => control.with_telemetry(telemetry),
+            None => control,
+          };
+          let result = download_object(&client, &root, &download, control).await;
           drop(permit);
           result.map(|downloaded| (download_index, Some((downloaded, current_file))))
         }
@@ -3953,7 +4191,7 @@ async fn run_audio_asset_job(
     assemble_audio_asset(
       events,
       task_root,
-      game_root,
+      game_root.clone(),
       output_root,
       plan,
       asset_index,
@@ -3989,6 +4227,189 @@ fn discover_audio_delete_progress(
     }
   }
   Ok((pending, completed_bytes))
+}
+
+/// 把正式更新任务保持为可恢复暂停，并向前端发布原因。
+async fn persist_main_update_paused_message(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  message: &str,
+) {
+  let mut value = journal.lock().await;
+  value.state = PackageTaskState::Paused;
+  value.error_message = Some(message.to_string());
+  value.auto_retry_message = None;
+  value.active_assembly_count = 0;
+  value.current_file = None;
+  value.download_current_file = None;
+  value.assembly_current_file = None;
+  value.bytes_per_second = 0;
+  value.eta_seconds = None;
+  value.assembly_bytes_per_second = 0;
+  value.assembly_eta_seconds = None;
+  value.touch();
+  if let Err(error) = journal::persist(task_root, &value) {
+    log::error!("[game-main-update][{}] 持久化暂停状态失败：{error}", value.plan_id);
+  }
+  let _ = journal::forget_progress(task_root, &value.task_id);
+  let summary = value.summary();
+  drop(value);
+  emit_state(app_handle, &summary);
+  emit_progress(app_handle, &summary);
+}
+
+#[allow(clippy::too_many_arguments)]
+/// 监督正式更新准备流水线，停滞时安全退出旧 worker 并自动重试一次。
+async fn run_main_streaming_prepare_supervisor(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  cache_root: PathBuf,
+  game_root: PathBuf,
+  plan: PersistedPlan,
+  download_client: reqwest::Client,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused_slot: Arc<Mutex<Arc<AtomicBool>>>,
+  manual_pause_requested: Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
+  mut retry_budget_exhausted: bool,
+) {
+  loop {
+    let paused = match paused_slot.lock() {
+      Ok(value) => value.clone(),
+      Err(_) => {
+        log::error!("[game-main-update][{}] 暂停令牌锁已损坏", plan.plan_id);
+        break;
+      }
+    };
+    if !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {
+      log::error!("[game-main-update][{}] 上一次正式更新组装 worker 未在超时内结束", plan.plan_id);
+      persist_main_update_paused_message(
+        &app_handle,
+        &task_root,
+        &journal,
+        MAIN_UPDATE_WORKER_DRAIN_MESSAGE,
+      )
+      .await;
+      break;
+    }
+
+    let stall_pause_requested = Arc::new(AtomicBool::new(false));
+    let (abort_handle, abort_registration) = futures_util::future::AbortHandle::new_pair();
+    let watchdog_context = MainUpdateWatchdogContext {
+      download_telemetry: DownloadTelemetry::new(),
+      assembly_telemetry: assembler::AssemblyTelemetry::new(),
+      stall_pause_requested: Arc::clone(&stall_pause_requested),
+      retry_budget_exhausted,
+      abort_handle,
+    };
+    let pipeline = futures_util::future::Abortable::new(
+      run_streaming_prepare_task(
+        app_handle.clone(),
+        task_root.clone(),
+        cache_root.clone(),
+        game_root.clone(),
+        plan.clone(),
+        download_client.clone(),
+        Arc::clone(&journal),
+        Arc::clone(&canceled),
+        paused,
+        concurrency,
+        max_bytes_per_second,
+        false,
+        Some(watchdog_context),
+      ),
+      abort_registration,
+    );
+    let _ = pipeline.await;
+
+    if !stall_pause_requested.load(Ordering::Acquire)
+      || canceled.load(Ordering::Acquire)
+      || manual_pause_requested.load(Ordering::Acquire)
+      || retry_budget_exhausted
+    {
+      break;
+    }
+    if !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {
+      log::error!(
+        "[game-main-update][{}] 停滞中止后的组装 worker 未在超时内结束，取消自动重试",
+        plan.plan_id
+      );
+      persist_main_update_paused_message(
+        &app_handle,
+        &task_root,
+        &journal,
+        MAIN_UPDATE_WORKER_DRAIN_MESSAGE,
+      )
+      .await;
+      break;
+    }
+
+    let next_paused = Arc::new(AtomicBool::new(false));
+    let pause_slot_updated = match paused_slot.lock() {
+      Ok(mut value) => {
+        *value = Arc::clone(&next_paused);
+        true
+      }
+      Err(_) => false,
+    };
+    if !pause_slot_updated {
+      log::error!("[game-main-update][{}] 自动恢复时暂停令牌锁已损坏", plan.plan_id);
+      break;
+    }
+
+    let retry_summary = {
+      let mut value = journal.lock().await;
+      if value.plan_id != plan.plan_id
+        || value.installation_id != plan.installation_id
+        || value.target != PackagePlanTarget::Main
+        || value.state != PackageTaskState::Paused
+        || value.install_auto_stall_retry_count >= INSTALL_AUTO_STALL_RETRY_LIMIT
+        || canceled.load(Ordering::Acquire)
+        || manual_pause_requested.load(Ordering::Acquire)
+      {
+        None
+      } else {
+        value.install_auto_stall_retry_count =
+          value.install_auto_stall_retry_count.saturating_add(1);
+        value.resume_elapsed();
+        value.state = PackageTaskState::Queued;
+        value.error_message = None;
+        value.auto_retry_message = Some(MAIN_UPDATE_AUTO_STALL_RETRY_MESSAGE.to_string());
+        value.current_file = Some(MAIN_UPDATE_AUTO_STALL_RETRY_MESSAGE.to_string());
+        value.download_current_file = None;
+        value.assembly_current_file = None;
+        value.active_assembly_count = 0;
+        value.bytes_per_second = 0;
+        value.eta_seconds = None;
+        value.assembly_bytes_per_second = 0;
+        value.assembly_eta_seconds = None;
+        value.touch();
+        match journal::persist(&task_root, &value) {
+          Ok(()) => Some(value.summary()),
+          Err(error) => {
+            log::error!("[game-main-update][{}] 持久化自动重试状态失败：{error}", plan.plan_id);
+            None
+          }
+        }
+      }
+    };
+    let Some(summary) = retry_summary else {
+      break;
+    };
+    if next_paused.load(Ordering::Acquire)
+      || canceled.load(Ordering::Acquire)
+      || manual_pause_requested.load(Ordering::Acquire)
+    {
+      break;
+    }
+    log::warn!("[game-main-update][{}] 首次停滞已安全退出，开始唯一一次自动重试", plan.plan_id);
+    emit_state(&app_handle, &summary);
+    emit_progress(&app_handle, &summary);
+    retry_budget_exhausted = true;
+  }
 }
 
 /// 并发删除单个待移除配音资源：把文件移入备份目录并累计删除进度。
@@ -4052,7 +4473,14 @@ async fn run_streaming_prepare_task(
   concurrency: usize,
   max_bytes_per_second: Option<u64>,
   stage_audio_deletes: bool,
+  watchdog_context: Option<MainUpdateWatchdogContext>,
 ) {
+  let download_telemetry =
+    watchdog_context.as_ref().map(|context| Arc::clone(&context.download_telemetry));
+  let assembly_telemetry =
+    watchdog_context.as_ref().map_or_else(assembler::AssemblyTelemetry::new, |context| {
+      Arc::clone(&context.assembly_telemetry)
+    });
   let output_root = match committer::prepare_apply_assembly(&plan, &game_root) {
     Ok(path) => path,
     Err(error) => {
@@ -4210,6 +4638,7 @@ async fn run_streaming_prepare_task(
     value.download_current_file = None;
     value.current_file = None;
     value.error_message = None;
+    value.auto_retry_message = None;
     value.touch();
     if let Err(error) = journal::persist(&task_root, &value) {
       persist_terminal_journal(&task_root, &mut value, error, false, |summary| {
@@ -4221,7 +4650,6 @@ async fn run_streaming_prepare_task(
     drop(value);
     events.publish_state(summary);
   }
-  let assembly_telemetry = assembler::AssemblyTelemetry::new();
   let assembly_overlay = Arc::new(AudioLiveAssemblyOverlay::new());
   let _assembly_progress_monitor = start_assembly_write_progress_monitor(
     events.clone(),
@@ -4231,6 +4659,17 @@ async fn run_streaming_prepare_task(
     Arc::clone(&canceled),
     Arc::clone(&paused),
   );
+  if let Some(context) = watchdog_context {
+    spawn_main_update_stall_watchdog(
+      app_handle.clone(),
+      task_root.clone(),
+      plan.plan_id.clone(),
+      Arc::clone(&journal),
+      Arc::clone(&paused),
+      Arc::clone(&canceled),
+      context,
+    );
+  }
   let download_focus = Arc::new(Semaphore::new(AUDIO_DOWNLOAD_FOCUS));
   let download_slots = Arc::new(Semaphore::new(install_download_concurrency(concurrency)));
   let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
@@ -4312,6 +4751,7 @@ async fn run_streaming_prepare_task(
           Arc::clone(&download_slots),
           Arc::clone(&download_guards),
           Arc::clone(&assembly_slots),
+          download_telemetry.clone(),
           Arc::clone(&assembly_telemetry),
           Arc::clone(&assembly_overlay),
           Arc::clone(&completed_cache_keys),
@@ -4460,6 +4900,68 @@ async fn persist_audio_pipeline_error(
   if persisted {
     emit_progress(app_handle, &summary);
     emit_state(app_handle, &summary);
+  }
+}
+
+/// 正式更新下载与组装完成后，沿用当前任务预留直接进入可逆提交。
+async fn apply_main_after_download(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  game_root: PathBuf,
+  plan: PersistedPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  installation: GameInstallation,
+) -> Result<(), String> {
+  let heartbeat_stop =
+    spawn_apply_heartbeat(app_handle.clone(), Arc::clone(&journal), Arc::clone(&canceled));
+  let apply_plan = plan.clone();
+  let apply_game_root = game_root.clone();
+  let apply_task_root = task_root.clone();
+  let apply_canceled = Arc::clone(&canceled);
+  let apply_journal = Arc::clone(&journal);
+  let apply_handle = app_handle.clone();
+  let worker_result = tauri::async_runtime::spawn_blocking(move || {
+    let mut journal_value = apply_journal.blocking_lock().clone();
+    let emit = |value: &TaskJournal| {
+      *apply_journal.blocking_lock() = value.clone();
+      let summary = value.summary();
+      emit_state(&apply_handle, &summary);
+      emit_progress(&apply_handle, &summary);
+    };
+    committer::execute_apply(
+      &apply_plan,
+      &apply_game_root,
+      &apply_task_root,
+      &mut journal_value,
+      &apply_canceled,
+      emit,
+    )
+  })
+  .await;
+  let result = match worker_result {
+    Ok(result) => result,
+    Err(error) => {
+      heartbeat_stop.store(true, Ordering::Release);
+      return Err(format!("自动应用资源任务异常退出：{error}"));
+    }
+  };
+  match result {
+    Ok(committer::ApplyOutcome::Completed) => {
+      heartbeat_stop.store(true, Ordering::Release);
+      Ok(())
+    }
+    Ok(committer::ApplyOutcome::RepairNeeded) => {
+      let result =
+        continue_repair(app_handle, task_root, game_root, installation, plan, journal, canceled)
+          .await;
+      heartbeat_stop.store(true, Ordering::Release);
+      result
+    }
+    Err(error) => {
+      heartbeat_stop.store(true, Ordering::Release);
+      Err(error)
+    }
   }
 }
 

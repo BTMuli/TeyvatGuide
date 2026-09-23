@@ -1493,6 +1493,9 @@ pub async fn game_package_start(
   let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
   persist_validated_plan(&task_root, &plan)?;
   let game_root = PathBuf::from(&installation.root_path);
+  let main_apply = (plan.target == PackagePlanTarget::Main
+    && plan.source_tag.as_deref() != Some(plan.target_tag.as_str()))
+  .then(|| installation.clone());
   let audio_apply = if plan.target == PackagePlanTarget::Audio {
     Some(AudioApplyContext {
       installation,
@@ -1511,6 +1514,7 @@ pub async fn game_package_start(
       options.unwrap_or_default(),
       false,
       audio_apply,
+      main_apply,
       None,
     )
     .await
@@ -1820,6 +1824,9 @@ pub async fn game_package_recover(
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
       persist_validated_plan(&task_root, &plan)?;
       let game_root = PathBuf::from(&installation.root_path);
+      let main_apply = (plan.target == PackagePlanTarget::Main
+        && plan.source_tag.as_deref() != Some(plan.target_tag.as_str()))
+      .then(|| installation.clone());
       let audio_apply = if plan.target == PackagePlanTarget::Audio {
         Some(AudioApplyContext {
           installation,
@@ -1838,6 +1845,7 @@ pub async fn game_package_recover(
           PackageTaskOptions::default(),
           true,
           audio_apply,
+          main_apply,
           Some(on_progress),
         )
         .await

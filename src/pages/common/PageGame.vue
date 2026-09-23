@@ -77,6 +77,7 @@
         :installation="installation"
         :installation-count="installations.length"
         @pre-download-requested="openPreDownloadOverlay(installation)"
+        @update-requested="openUpdateOverlay(installation)"
         @updated="refreshPageData"
         @change-path="openPathOverlay"
       />
@@ -127,6 +128,12 @@
     v-model="preDownloadOverlay"
     :installation="preDownloadTarget"
   />
+  <PgoUpdate
+    v-if="updateMounted && updateTarget !== null"
+    :key="updateTarget.id"
+    v-model="updateOverlay"
+    :installation="updateTarget"
+  />
   <PgoTaskHistory v-if="taskHistoryMounted" v-model="taskHistoryOverlay" />
 </template>
 
@@ -159,6 +166,7 @@ const PgInstallation = defineAsyncComponent(() => import("@comp/pageGame/pg-inst
 const PgoClientSource = defineAsyncComponent(() => import("@comp/pageGame/pgo-client-source.vue"));
 const PgoInstall = defineAsyncComponent(() => import("@comp/pageGame/pgo-install.vue"));
 const PgoPredownload = defineAsyncComponent(() => import("@comp/pageGame/pgo-predownload.vue"));
+const PgoUpdate = defineAsyncComponent(() => import("@comp/pageGame/pgo-update.vue"));
 const PgoPath = defineAsyncComponent(() => import("@comp/pageGame/pgo-path.vue"));
 const PgoTaskHistory = defineAsyncComponent(() => import("@comp/pageGame/pgo-task-history.vue"));
 
@@ -173,12 +181,15 @@ const installOverlay = ref<boolean>(false);
 const taskHistoryOverlay = ref<boolean>(false);
 const preDownloadOverlay = ref<boolean>(false);
 const preDownloadTarget = ref<TGApp.Game.Installation.Item | null>(null);
+const updateOverlay = ref<boolean>(false);
+const updateTarget = ref<TGApp.Game.Installation.Item | null>(null);
 // 浮层首次打开后保持挂载，关闭只切 v-model，让 TOverlay 的消失过渡有播放时间
 const clientSourceMounted = ref<boolean>(false);
 const pathMounted = ref<boolean>(false);
 const installMounted = ref<boolean>(false);
 const taskHistoryMounted = ref<boolean>(false);
 const preDownloadMounted = ref<boolean>(false);
+const updateMounted = ref<boolean>(false);
 type InstallInitialConfig = {
   scheme: TGApp.Game.Installation.SchemeEnum;
   installRoot: string | null;
@@ -250,6 +261,12 @@ function openPreDownloadOverlay(installation: TGApp.Game.Installation.Item): voi
   preDownloadTarget.value = installation;
   preDownloadMounted.value = true;
   preDownloadOverlay.value = true;
+}
+
+function openUpdateOverlay(installation: TGApp.Game.Installation.Item): void {
+  updateTarget.value = installation;
+  updateMounted.value = true;
+  updateOverlay.value = true;
 }
 
 function openPathOverlay(installation: TGApp.Game.Installation.Item | null): void {
@@ -703,6 +720,9 @@ watch(taskHistoryOverlay, (open) => {
 });
 watch(preDownloadOverlay, (open) => {
   if (open) preDownloadMounted.value = true;
+});
+watch(updateOverlay, (open) => {
+  if (open) updateMounted.value = true;
 });
 watch(installOverlay, (visible) => {
   if (!visible) installInitialConfig.value = null;

@@ -107,6 +107,7 @@
       :installation="installation"
       @updated="refreshRegistered"
       @pre-download-requested="emit('pre-download-requested')"
+      @update-requested="emit('update-requested')"
     >
       <template #facts="version">
         <PgScheme :installation="installation" @switched="refreshRegistered">
@@ -123,14 +124,18 @@
                   >
                     mdi-check-circle-outline
                   </v-icon>
-                  <v-icon
+                  <v-btn
                     v-else-if="version.snapshot !== null && !isLatestOfficial(version.snapshot)"
-                    :title="`正式 ${version.snapshot.main.tag}`"
+                    :aria-label="version.updateStatusLabel"
+                    :disabled="version.updateActionDisabled"
+                    :title="version.updateStatusLabel"
                     color="var(--tgc-od-orange)"
-                    size="16"
-                  >
-                    mdi-arrow-up-circle-outline
-                  </v-icon>
+                    density="compact"
+                    icon="mdi-arrow-up-circle-outline"
+                    size="small"
+                    variant="text"
+                    @click="version.triggerUpdate()"
+                  />
                   <div class="game-fact-acts">
                     <v-btn
                       :disabled="version.refreshDisabled"
@@ -380,6 +385,7 @@ const emit = defineEmits<{
   updated: [];
   "change-path": [installation: TGApp.Game.Installation.Item];
   "pre-download-requested": [];
+  "update-requested": [];
 }>();
 
 type AccountChoice = {

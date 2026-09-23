@@ -12,7 +12,10 @@
       :refreshDisabled
       :refreshSnapshot
       :snapshot
+      :triggerUpdate="handleUpdateAction"
       :triggerPreDownload="handlePreDownloadAction"
+      :updateActionDisabled
+      :updateStatusLabel
       :startVerify="verifyInstallation"
       :verifyActive
       :verifyBusy
@@ -78,29 +81,6 @@
       :text="errorMessage"
       tone="warning"
     />
-    <div v-if="snapshot?.updateAvailable" class="version-actions">
-      <v-btn
-        v-if="snapshot.updateAvailable"
-        :disabled="planningTarget !== null || taskActive || verifyActive || occupyingTask"
-        :loading="planningTarget === gameEnum.package.planTarget.MAIN"
-        prepend-icon="mdi-file-tree-outline"
-        size="small"
-        variant="outlined"
-        @click="createPlan(gameEnum.package.planTarget.MAIN)"
-      >
-        评估正式更新
-      </v-btn>
-    </div>
-
-    <PgProgress
-      v-if="planningTarget !== null"
-      ariaLabel="资源计划评估进度"
-      :caption="planProgress?.message ?? '正在准备资源评估…'"
-      :facts="planProgress === null ? [] : [`步骤 ${planProgress.step} / ${planProgress.total}`]"
-      :indeterminate="planProgress === null"
-      :percent="planProgressPercent"
-    />
-
     <div v-if="visiblePlan !== null" class="plan-summary" aria-live="polite">
       <div class="plan-title">
         <div>
@@ -204,7 +184,6 @@ import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { confirmStopRunningGame } from "@utils/TGGame.js";
 import {
-  createGamePackagePlan,
   getGamePackageApplySpace,
   getGamePackageSnapshot,
   getGamePreDownloadCacheStatus,
@@ -231,7 +210,10 @@ type VersionFactsSlot = {
   refreshSnapshot: () => Promise<void>;
   snapshot: TGApp.Game.Package.Snapshot | null;
   startVerify: () => Promise<void>;
+  triggerUpdate: () => void;
   triggerPreDownload: () => Promise<void>;
+  updateActionDisabled: boolean;
+  updateStatusLabel: string;
   verifyActive: boolean;
   verifyBusy: boolean;
   verifyPending: boolean;
@@ -242,6 +224,7 @@ const { installation } = defineProps<Props>();
 const emit = defineEmits<{
   updated: [];
   "pre-download-requested": [];
+  "update-requested": [];
 }>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
 const taskStore = useGameLauncherStore();
@@ -254,8 +237,6 @@ const preDownloadCacheState = ref<"unknown" | "checking" | "ready" | "missing" |
   "unknown",
 );
 const preDownloadCacheStatus = ref<{ targetTag: string; ready: boolean } | null>(null);
-const planningTarget = ref<TGApp.Game.Package.PlanTargetEnum | null>(null);
-const planProgress = ref<TGApp.Game.Package.PlanProgress | null>(null);
 const exitingGame = ref<boolean>(false);
 const errorMessage = ref<string | null>(null);
 const verifyStartError = ref<string | null>(null);
@@ -268,6 +249,8 @@ let applySpaceSequence = 0;
 let snapshotRefreshTimer: number | null = null;
 let preDownloadCachePromise: Promise<{ targetTag: string; ready: boolean } | null> | null = null;
 let preDownloadCacheInstallationId: string | null = null;
+let automaticApplyTimer: number | null = null;
+const automaticApplyTasks = new Set<string>();
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
@@ -492,7 +475,7 @@ const preDownloadColor = computed<string | undefined>(() => {
   return undefined;
 });
 const preDownloadActionDisabled = computed<boolean>(() => {
-  if (preDownloadActive.value || verifyBusy.value || planningTarget.value !== null) return true;
+  if (preDownloadActive.value || verifyBusy.value) return true;
   if (occupyingTask.value && !preDownloadTaskWaiting.value) return true;
   if (
     preDownloadReady.value ||
@@ -502,6 +485,15 @@ const preDownloadActionDisabled = computed<boolean>(() => {
     return false;
   }
   return snapshot.value?.preDownloadAvailable !== true || occupyingTask.value;
+});
+const updateActionDisabled = computed<boolean>(() => {
+  return snapshot.value?.updateAvailable !== true || verifyBusy.value || occupyingTask.value;
+});
+const updateStatusLabel = computed<string>(() => {
+  const currentSnapshot = snapshot.value;
+  if (currentSnapshot === null) return "正在读取正式版本";
+  if (!currentSnapshot.updateAvailable) return `已是最新正式版本 ${currentSnapshot.main.tag}`;
+  return `评估正式更新 ${currentSnapshot.localVersion} → ${currentSnapshot.main.tag}`;
 });
 const preDownloadTaskCurrent = computed<boolean>(() => {
   const task = preDownloadTask.value;
@@ -561,7 +553,7 @@ const taskActive = computed<boolean>(() => {
   );
 });
 const refreshDisabled = computed<boolean>(() => {
-  return planningTarget.value !== null || taskActive.value || verifyActive.value;
+  return taskActive.value || verifyActive.value;
 });
 const taskActionPending = computed<boolean>(() => {
   const taskId = currentTask.value?.taskId;
@@ -571,12 +563,6 @@ const taskActionPending = computed<boolean>(() => {
     (taskId !== undefined && pendingActions.value[taskId] === true)
   );
 });
-const planProgressPercent = computed<number>(() => {
-  const progress = planProgress.value;
-  if (progress === null || progress.total === 0) return 0;
-  return Math.min(100, (progress.step / progress.total) * 100);
-});
-
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   const units = ["KiB", "MiB", "GiB", "TiB"];
@@ -736,7 +722,7 @@ async function handlePreDownloadAction(): Promise<void> {
     cacheStatus !== null && isCurrentPreDownloadTarget(cacheStatus.targetTag);
   if (cacheStatusCurrent && cacheStatus.ready) {
     if (cacheStatus.targetTag === snapshot.value?.main.tag) {
-      await createPlan(gameEnum.package.planTarget.MAIN);
+      handleUpdateAction();
     } else {
       await refreshSnapshot();
     }
@@ -751,7 +737,7 @@ async function handlePreDownloadAction(): Promise<void> {
     taskTargetTag === currentSnapshot.main.tag &&
     currentSnapshot.localVersion !== currentSnapshot.main.tag
   ) {
-    await createPlan(gameEnum.package.planTarget.MAIN);
+    handleUpdateAction();
     return;
   }
   if (task?.state === gameEnum.package.taskState.READY_TO_APPLY) {
@@ -764,7 +750,7 @@ async function handlePreDownloadAction(): Promise<void> {
     const published = task.targetTag === snapshot.value?.main.tag;
     try {
       await taskStore.recoverTask(task.taskId, gameEnum.package.recoveryAction.ROLLBACK);
-      if (published) await createPlan(gameEnum.package.planTarget.MAIN);
+      if (published) handleUpdateAction();
       else emit("pre-download-requested");
     } catch (error) {
       showSnackbar.error(`重新评估预下载失败：${error}`);
@@ -798,7 +784,7 @@ async function loadApplySpace(): Promise<void> {
 }
 
 function canRefreshSnapshotSilently(): boolean {
-  return !loading.value && planningTarget.value === null && !verifyActive.value;
+  return !loading.value && !verifyActive.value;
 }
 
 function handlePromotionVisibility(): void {
@@ -829,27 +815,13 @@ function stopPromotionWatch(): void {
   document.removeEventListener("visibilitychange", handlePromotionVisibility);
 }
 
-async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
-  if (planningTarget.value !== null || verifyActive.value || occupyingTask.value) {
-    return;
-  }
-  planningTarget.value = target;
-  planProgress.value = null;
-  errorMessage.value = null;
-  try {
-    plan.value = await createGamePackagePlan(installation.id, target, (progress) => {
-      planProgress.value = progress;
-    });
-  } catch (error) {
-    errorMessage.value = `生成资源计划失败：${error}`;
-  } finally {
-    planningTarget.value = null;
-    planProgress.value = null;
-  }
+function handleUpdateAction(): void {
+  if (updateActionDisabled.value) return;
+  emit("update-requested");
 }
 
 async function verifyInstallation(): Promise<void> {
-  if (planningTarget.value !== null || verifyBusy.value || taskActive.value) return;
+  if (verifyBusy.value || taskActive.value) return;
   const paused = currentVerify.value?.state === gameEnum.package.verifyState.CANCELED;
   if (!paused) {
     const failed = currentVerify.value?.state === gameEnum.package.verifyState.FAILED;
@@ -918,8 +890,15 @@ async function handleStartRequested(): Promise<void> {
 
 async function handleApplyRequested(): Promise<void> {
   const task = currentTask.value;
+  if (task === null) return;
+  await applyTask(task, true);
+}
+
+async function applyTask(
+  task: TGApp.Game.Package.TaskSummary,
+  requestConfirmation: boolean,
+): Promise<void> {
   if (
-    task === null ||
     task.target === gameEnum.package.planTarget.AUDIO ||
     task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
   ) {
@@ -957,8 +936,10 @@ async function handleApplyRequested(): Promise<void> {
     successMessage = "已开始应用资源修复";
     errorPrefix = "应用资源修复";
   }
-  const confirmed = await showDialog.checkF({ title, text, confirmLabel });
-  if (confirmed !== true) return;
+  if (requestConfirmation) {
+    const confirmed = await showDialog.checkF({ title, text, confirmLabel });
+    if (confirmed !== true) return;
+  }
   try {
     exitingGame.value = true;
     if (!(await confirmStopRunningGame("应用更新"))) return;
@@ -970,7 +951,9 @@ async function handleApplyRequested(): Promise<void> {
   }
   try {
     const updatedTask = await taskStore.applyTask(task.taskId);
-    showSnackbar.success(successMessage);
+    showSnackbar.success(
+      requestConfirmation ? successMessage : "资源已组装完成，正在自动应用游戏更新",
+    );
     if (updatedTask.state === gameEnum.package.taskState.COMPLETED) await loadSnapshot(false);
   } catch (error) {
     showSnackbar.error(`${errorPrefix}失败：${error}`);
@@ -1091,6 +1074,29 @@ watch(
 watch(
   [() => currentTask.value?.taskId, () => currentTask.value?.state],
   ([taskId, state], [previousTaskId, previousState]) => {
+    const task = currentTask.value;
+    if (
+      task !== null &&
+      task.target === gameEnum.package.planTarget.MAIN &&
+      task.sourceTag !== task.targetTag &&
+      state === gameEnum.package.taskState.READY_TO_APPLY &&
+      previousState !== gameEnum.package.taskState.READY_TO_APPLY &&
+      targetPublished.value &&
+      !automaticApplyTasks.has(task.taskId)
+    ) {
+      automaticApplyTasks.add(task.taskId);
+      if (automaticApplyTimer !== null) window.clearTimeout(automaticApplyTimer);
+      automaticApplyTimer = window.setTimeout(() => {
+        automaticApplyTimer = null;
+        const readyTask = currentTask.value;
+        if (
+          readyTask?.taskId === task.taskId &&
+          readyTask.state === gameEnum.package.taskState.READY_TO_APPLY
+        ) {
+          void applyTask(readyTask, false);
+        }
+      }, 1000);
+    }
     if (
       taskId !== undefined &&
       state === gameEnum.package.taskState.COMPLETED &&
@@ -1148,6 +1154,7 @@ watch(currentVerify, (next, previous) => {
 
 onUnmounted(() => {
   clearVerifyHideTimer();
+  if (automaticApplyTimer !== null) window.clearTimeout(automaticApplyTimer);
   window.removeEventListener("focus", handlePreDownloadVisibility);
   document.removeEventListener("visibilitychange", handlePreDownloadVisibility);
   verifyStopping.value = false;
@@ -1175,15 +1182,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-}
-
-.version-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  color: var(--box-text-2);
-  font-size: 12px;
   gap: 8px;
 }
 

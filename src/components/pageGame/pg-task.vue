@@ -33,7 +33,7 @@
         <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
       </div>
       <div class="task-heading-actions">
-        <template v-if="task !== null">
+        <template v-if="task !== null && !readOnly">
           <v-btn
             v-if="canPause"
             :disabled="actionPending"
@@ -178,7 +178,7 @@
       </template>
     </template>
 
-    <div class="task-actions">
+    <div v-if="!readOnly" class="task-actions">
       <v-btn
         v-if="canStart"
         :disabled="plan === null || !canStartBySpace"
@@ -232,6 +232,7 @@ type Props = {
   recoveryProgress: TGApp.Game.Package.RecoveryProgress | null;
   targetPublished: boolean;
   applySpace?: TGApp.Game.Package.ApplySpaceSummary | null;
+  readOnly?: boolean;
 };
 
 const {
@@ -241,6 +242,7 @@ const {
   recoveryProgress,
   targetPublished,
   applySpace = null,
+  readOnly = false,
 } = defineProps<Props>();
 const emit = defineEmits<{
   startRequested: [];
