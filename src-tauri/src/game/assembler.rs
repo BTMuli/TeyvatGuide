@@ -1,5 +1,5 @@
 //! 将已验证的 manifest-diff 计划流式组装到任务 staging 目录。
-//! @since Beta v0.12.3
+//! @since Beta v0.12.4
 
 use super::{
   model::PackagePlanStrategy,
@@ -1241,7 +1241,7 @@ fn report_asset_progress(
 
 /// 组装并校验单个 patch 资源。
 ///
-/// @since Beta v0.12.3
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `asset`: 资源。
@@ -1285,7 +1285,7 @@ fn assemble_patch_asset(
   remove_stale_partial(&partial)?;
   remove_stale_output(&output)?;
   let result = (|| {
-    if patch.original_name.is_empty() {
+    if patch.original_size == 0 {
       if patch.range_length != asset.size {
         return Err(format!("新增 patch 范围与目标大小不一致：{}", asset.name));
       }
@@ -1363,7 +1363,7 @@ fn copy_container_range(
 
 /// 使用 HDiffPatch 将原文件与差分合成为目标文件。
 ///
-/// @since Beta v0.12.3
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `asset`: 资源。
@@ -1399,23 +1399,26 @@ fn apply_hdiff_patch(
     if patch.original_size == 0 || patch.original_md5.len() != 32 {
       return Err(format!("修改型 patch 原文件元数据无效：{}", asset.name));
     }
-    let source_path = resolve_existing_manifest_file(game_root, &asset.name)
-      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", asset.name))?;
+    let source_path = resolve_existing_manifest_file(game_root, &patch.original_name)
+      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", patch.original_name))?;
     let source_len = fs::metadata(&source_path)
-      .map_err(|error| format!("读取修改型 patch 原文件失败：{}：{error}", asset.name))?
+      .map_err(|error| format!("读取修改型 patch 原文件失败：{}：{error}", patch.original_name))?
       .len();
     if source_len != patch.original_size {
-      return Err(format!("修改型 patch 原文件长度校验失败：{}", asset.name));
+      return Err(format!(
+        "修改型 patch 原文件长度校验失败：{}（实际 {source_len}，预期 {}）",
+        patch.original_name, patch.original_size
+      ));
     }
     let mut source = File::open(&source_path)
-      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", asset.name))?;
+      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", patch.original_name))?;
     let actual_md5 = hash_exact_file(&mut source, patch.original_size, canceled)?;
     if !actual_md5.eq_ignore_ascii_case(&patch.original_md5) {
-      return Err(format!("修改型 patch 原文件 MD5 校验失败：{}", asset.name));
+      return Err(format!("修改型 patch 原文件 MD5 校验失败：{}", patch.original_name));
     }
     source
       .seek(SeekFrom::Start(0))
-      .map_err(|error| format!("定位修改型 patch 原文件失败：{}：{error}", asset.name))?;
+      .map_err(|error| format!("定位修改型 patch 原文件失败：{}：{error}", patch.original_name))?;
     let container = File::open(cache_root.join(&download.cache_key))
       .map_err(|error| format!("打开差分容器失败：{}：{error}", patch.id))?;
     let create_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));

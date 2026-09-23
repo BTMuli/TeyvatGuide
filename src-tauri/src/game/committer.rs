@@ -2679,6 +2679,14 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
     .map(|asset| CommitStep {
       kind: match asset.action {
         PlanAssetAction::Add => CommitStepKind::Add,
+        // 修改型 patch 的差分源由 assembler 按 original_name 单独校验；提交阶段只需
+        // 将已组装目标覆盖到游戏目录，目标原先不存在时也可以直接写入。
+        PlanAssetAction::Modify
+          if plan.strategy == PackagePlanStrategy::Patch
+            && matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) =>
+        {
+          CommitStepKind::Repair
+        }
         PlanAssetAction::Modify => CommitStepKind::Modify,
         PlanAssetAction::Repair => CommitStepKind::Repair,
       },
