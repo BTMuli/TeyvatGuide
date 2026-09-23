@@ -17,15 +17,11 @@
       <v-btn class="test-btn" @click="testReply()">回复测试</v-btn>
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
-    <div style="height: 400px">
-      <GroRerun />
-    </div>
   </div>
   <VpReplyDebug v-model="showReply" />
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import GroRerun from "@comp/userGacha/gro-rerun.vue";
 import VpReplyDebug from "@comp/viewPost/vp-reply-debug.vue";
 import recordReq from "@req/recordReq.js";
 import useUserStore from "@store/user.js";

@@ -199,7 +199,7 @@ async function listenCloseSub(): Promise<UnlistenFn> {
 
 function handleSubScroll(e: globalThis.Event): void {
   if (!(e.target instanceof HTMLElement)) return;
-  // Check if scrolled to bottom for auto-load
+  // Check if scrolled to bottom for autoload
   const scrollTop = e.target.scrollTop;
   const clientHeight = e.target.clientHeight;
   const scrollHeight = e.target.scrollHeight;

@@ -226,8 +226,7 @@
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
-      <!-- TODO:UI调整 -->
-      <v-tab v-if="false" value="rerun">复刻周期</v-tab>
+      <v-tab value="rerun">复刻周期</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
@@ -246,7 +245,12 @@
         <GroTable v-model="gachaListView" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="rerun">
-        <GroRerun />
+        <GroRerun
+          :periodEnd="periodRange.end"
+          :periodStart="periodRange.start"
+          :versionFilter
+          @clear-period="clearPeriod"
+        />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="history">
         <GroHistory
@@ -1426,6 +1430,7 @@ async function checkData(): Promise<void> {
 
 .gacha-tab {
   height: 40px;
+  flex: none;
   color: var(--box-text-4);
   font-family: var(--font-title);
 
@@ -1438,8 +1443,13 @@ async function checkData(): Promise<void> {
 
 .gacha-window {
   width: 100%;
-  height: 100%;
+  min-height: 0;
+  flex: 1;
   padding: 8px;
+}
+
+.gacha-window :deep(.v-window__container) {
+  height: 100%;
 }
 
 .gacha-window-item {
