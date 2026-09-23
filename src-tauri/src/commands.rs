@@ -234,6 +234,17 @@ pub async fn init_app(app_handle: AppHandle) {
         log::warn!("[defender] 清理遗留排除失败：{error}");
       }
     });
+    match crate::game::commands::sweep_orphan_transactions(&app_handle).await {
+      Ok(summary) if summary.removed_count > 0 => {
+        log::info!(
+          "[game-package] 启动清理 {} 个无主游戏目录事务，释放 {} 字节",
+          summary.removed_count,
+          summary.removed_bytes
+        );
+      }
+      Ok(_) => {}
+      Err(error) => log::warn!("[game-package] 启动清理无主游戏目录事务失败：{error}"),
+    }
   }
   unsafe {
     APP_INITIALIZED = true;

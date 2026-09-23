@@ -3685,7 +3685,26 @@ impl GamePackageManager {
         })
         .collect::<Vec<_>>();
       let plan_only = !journals.iter().any(|journal| journal.task_id == task_id);
-      let summary = journal::cleanup_task_record(task_root, &active_ids, &task_id)?;
+      let removable = journals.iter().find(|journal| journal.task_id == task_id);
+      let mut summary = journal::cleanup_task_record(task_root, &active_ids, &task_id)?;
+      // 记录删除后该计划在游戏目录中的事务目录不再有所有者：只要任务已终结，就一并回收，
+      // 避免边下边组装留下的成品长期占用游戏盘。
+      if summary.removed_task_ids.iter().any(|id| id == &task_id)
+        && let Some(journal) = removable
+        && journal.state.is_history_terminal()
+        && let Some(game_root) = journal.game_root.as_deref()
+      {
+        match committer::discard_transaction_directory(&task_id, Path::new(game_root)) {
+          Ok(bytes) if bytes > 0 => {
+            summary.removed_bytes = summary.removed_bytes.saturating_add(bytes);
+            log::info!("[game-package][{task_id}] 删除任务记录时回收游戏目录事务 {bytes} 字节");
+          }
+          Ok(_) => {}
+          Err(error) => {
+            log::warn!("[game-package][{task_id}] 清理游戏目录事务失败：{error}");
+          }
+        }
+      }
       let retained = journals
         .iter()
         .filter(|journal| !summary.removed_task_ids.contains(&journal.task_id))
@@ -3704,6 +3723,82 @@ impl GamePackageManager {
       active.retired_task_ids.remove(&task_id);
     }
     result
+  }
+
+  /// 回收不再被任何任务记录或运行中任务引用的游戏目录事务目录。
+  ///
+  /// 正式更新与配音包变更边下边组装，成品落在 `<游戏根>/.teyvatguide-update/<planId>`；
+  /// 任务记录被删除、计划被清理后这些目录不再有所有者，需要启动时兜底回收。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `task_root`: 任务根目录。
+  /// - `game_roots`: 已知游戏安装根目录。
+  ///
+  /// # 返回
+  /// - `Ok(PackageTaskCleanupSummary)`: 回收的目录数与字节数。
+  /// - `Err(String)`: 读取任务记录失败的错误描述。
+  pub(crate) fn cleanup_orphan_transactions(
+    &self,
+    task_root: &Path,
+    game_roots: &[PathBuf],
+  ) -> Result<PackageTaskCleanupSummary, String> {
+    with_active_task_ids(&self.active, |active_ids| {
+      let mut summary = empty_task_cleanup_summary();
+      if game_roots.is_empty() {
+        return Ok(summary);
+      }
+      let mut protected = persistent_plan_references(task_root)?;
+      protected.extend(active_ids.iter().cloned());
+      for record in journal::scan_records(task_root)? {
+        match record {
+          journal::TaskDirectoryRecord::Journal(journal) => {
+            protected.insert(journal.task_id);
+          }
+          journal::TaskDirectoryRecord::PlanOnly { task_id, .. }
+          | journal::TaskDirectoryRecord::Invalid { task_id, .. } => {
+            protected.insert(task_id);
+          }
+        }
+      }
+      for game_root in game_roots {
+        let entries = match fs::read_dir(committer::transaction_root(game_root)) {
+          Ok(entries) => entries,
+          Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+          Err(error) => {
+            log::warn!("[game-package] 读取游戏目录事务失败：{error}");
+            continue;
+          }
+        };
+        for entry in entries {
+          let entry = match entry {
+            Ok(entry) => entry,
+            Err(error) => {
+              log::warn!("[game-package] 读取游戏目录事务项失败：{error}");
+              continue;
+            }
+          };
+          let task_id = entry.file_name().to_string_lossy().into_owned();
+          if Uuid::parse_str(&task_id).is_err() || protected.contains(&task_id) {
+            continue;
+          }
+          match committer::discard_transaction_directory(&task_id, game_root) {
+            Ok(bytes) if bytes > 0 => {
+              summary.removed_count += 1;
+              summary.removed_bytes = summary.removed_bytes.saturating_add(bytes);
+              summary.removed_task_ids.push(task_id.clone());
+              log::info!("[game-package][{task_id}] 启动清理回收游戏目录事务 {bytes} 字节");
+            }
+            Ok(_) => {}
+            Err(error) => {
+              log::warn!("[game-package][{task_id}] 清理游戏目录事务失败：{error}");
+            }
+          }
+        }
+      }
+      Ok(summary)
+    })
   }
 
   /// 把磁盘 journal 与活动任务合并为按更新时间倒序的安全投影。
@@ -3796,11 +3891,13 @@ impl GamePackageManager {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     restore_prep_staged_audio_deletions(task_root, &mut journal)?;
-    if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload)
-      && let Some(game_root) = journal.game_root.as_deref()
-      && let Ok(plan) = load_persisted_plan(task_root, &journal.plan_id)
+    // 正式更新与配音包变更会边下边组装，组装成品直接写入游戏目录事务目录；
+    // 放弃任务时必须整目录回收，避免残留占用游戏盘。
+    if let Some(game_root) = journal.game_root.as_deref()
+      && let Err(error) =
+        committer::discard_transaction_directory(&journal.plan_id, Path::new(game_root))
     {
-      committer::cleanup_uncommitted_transaction(&plan, Path::new(game_root), task_root);
+      log::warn!("[game-package] 放弃任务时清理游戏目录事务失败：{error}");
     }
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
     cleanup_task_partials(&task_root.join("cache/sdks"), task_id)?;
@@ -4860,6 +4957,7 @@ async fn run_streaming_prepare_task(
     });
     return;
   }
+  discard_plan_transaction_on_cancel(&value);
   let summary = value.summary();
   drop(value);
   events.publish_state(summary);
@@ -4894,6 +4992,7 @@ async fn persist_audio_pipeline_error(
   value.assembly_bytes_per_second = 0;
   value.assembly_eta_seconds = None;
   value.touch();
+  discard_plan_transaction_on_cancel(&value);
   let persisted = journal::persist(task_root, &value).is_ok();
   let summary = value.summary();
   drop(value);
@@ -7595,6 +7694,7 @@ async fn run_task(
   {
     let _ = fs::remove_dir_all(spool_root);
   }
+  discard_plan_transaction_on_cancel(&journal_value);
   let summary = journal_value.summary();
   drop(journal_value);
   events.publish_state(summary);
@@ -7933,6 +8033,25 @@ fn truncate_progress_label(value: String) -> String {
     end -= 1;
   }
   format!("{}{}", &value[..end], suffix)
+}
+
+/// 取消任务时回收该计划在游戏目录中已组装的事务目录。
+///
+/// 正式更新与配音包变更边下边组装，组装成品落在 `<游戏根>/.teyvatguide-update/<planId>`；
+/// 取消是用户明确的结束意图，这里整目录回收以免残留占用游戏盘。已下载的分片缓存不在此列，
+/// 之后恢复任务只需重新组装，无需重新下载。
+fn discard_plan_transaction_on_cancel(journal: &TaskJournal) {
+  if journal.state != PackageTaskState::Canceled {
+    return;
+  }
+  let Some(game_root) = journal.game_root.as_deref() else {
+    return;
+  };
+  if let Err(error) =
+    committer::discard_transaction_directory(&journal.plan_id, Path::new(game_root))
+  {
+    log::warn!("[game-package][{}] 取消任务时清理游戏目录事务失败：{error}", journal.plan_id);
+  }
 }
 
 /// 清理指定任务残留的 `.part.<task_id>` 下载临时文件。

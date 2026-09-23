@@ -1600,7 +1600,8 @@ pub async fn game_package_task_history_list(
   manager.record_list(&game_task_root(&app_handle)?).await
 }
 
-/// 删除一个已结束的游戏资源任务记录，不触碰游戏文件或共享缓存。
+/// 删除一个已结束的游戏资源任务记录，并回收该任务自己的游戏目录事务目录；
+/// 不触碰游戏资源文件与共享缓存。
 #[tauri::command]
 pub fn game_package_task_remove(
   app_handle: AppHandle,
@@ -1619,6 +1620,47 @@ pub fn game_package_task_cleanup(
   manager: tauri::State<'_, GamePackageManager>,
 ) -> Result<PackageTaskCleanupSummary, String> {
   manager.cleanup_tasks(&game_task_root(&app_handle)?, None)
+}
+
+/// 启动清理：回收没有任务记录或运行中任务引用的游戏目录事务目录。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+///
+/// # 返回
+/// - `Ok(PackageTaskCleanupSummary)`: 回收的目录数与字节数。
+/// - `Err(String)`: 读取安装记录或清理目录失败的错误描述。
+pub(crate) async fn sweep_orphan_transactions(
+  app_handle: &AppHandle,
+) -> Result<PackageTaskCleanupSummary, String> {
+  let game_roots = {
+    let db_instances = app_handle.state::<DbInstances>();
+    let pool = sqlite_pool(&db_instances).await?;
+    sqlx::query_scalar::<_, String>("SELECT rootPath FROM GameInstallation")
+      .fetch_all(&pool)
+      .await
+      .map_err(|error| format!("读取游戏安装路径失败：{error}"))?
+      .into_iter()
+      .map(PathBuf::from)
+      .collect::<Vec<_>>()
+  };
+  if game_roots.is_empty() {
+    return Ok(PackageTaskCleanupSummary {
+      removed_count: 0,
+      removed_bytes: 0,
+      removed_task_ids: Vec::new(),
+    });
+  }
+  let handle = app_handle.clone();
+  tauri::async_runtime::spawn_blocking(move || {
+    let task_root = game_task_root(&handle)?;
+    let manager = handle.state::<GamePackageManager>();
+    manager.cleanup_orphan_transactions(&task_root, &game_roots)
+  })
+  .await
+  .map_err(|error| format!("清理游戏目录事务任务异常退出：{error}"))?
 }
 
 /// 恢复中断的下载/提交，或安全回滚任务拥有的临时文件与游戏备份。

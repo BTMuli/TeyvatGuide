@@ -27,6 +27,7 @@ use std::{
   sync::atomic::{AtomicBool, Ordering},
   time::{Duration, Instant},
 };
+use uuid::Uuid;
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
@@ -939,13 +940,94 @@ fn incoming_is_preassembled(
   Ok(evidence::trusted_asset_indices(task_root, plan, incoming_root)?.len() == plan.assets.len())
 }
 
-/// 放弃未提交的更新/预下载时，清掉下载阶段写入的 incoming。
-pub(crate) fn cleanup_uncommitted_transaction(
-  plan: &PersistedPlan,
+/// 返回游戏目录中的事务根目录（不创建）。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `game_root`: 游戏安装根目录。
+///
+/// # 返回
+/// 事务根目录路径。
+pub(crate) fn transaction_root(game_root: &Path) -> PathBuf {
+  game_root.join(TRANSACTION_DIRECTORY)
+}
+
+/// 整目录回收指定计划在游戏目录中的事务目录。
+///
+/// 正式更新与配音包变更会边下边组装，组装成品直接落在
+/// `<游戏根>/.teyvatguide-update/<planId>`；任务被取消、放弃或记录被清理后该目录不再
+/// 有所有者，必须整目录回收，否则最多一个载荷大小的残留会长期占用游戏盘。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan_id`: 计划 ID（必须是 UUID）。
+/// - `game_root`: 游戏安装根目录。
+///
+/// # 返回
+/// - `Ok(bytes)`: 实际释放的字节数；目录不存在时为 0。
+/// - `Err(String)`: 计划 ID 无效或删除失败的错误描述。
+pub(crate) fn discard_transaction_directory(
+  plan_id: &str,
   game_root: &Path,
-  task_root: &Path,
-) {
-  cleanup_known_transaction_files(plan, game_root, task_root);
+) -> Result<u64, String> {
+  if Uuid::parse_str(plan_id).is_err() {
+    return Err("游戏资源计划 ID 无效".to_string());
+  }
+  let transaction_root = game_root.join(TRANSACTION_DIRECTORY);
+  let directory = transaction_root.join(plan_id);
+  let metadata = match fs::symlink_metadata(&directory) {
+    Ok(metadata) => metadata,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(0),
+    Err(error) => return Err(format!("读取资源事务目录失败：{error}")),
+  };
+  if metadata.file_type().is_symlink() || !metadata.is_dir() {
+    return Err("资源事务目录不是普通目录".to_string());
+  }
+  let bytes = directory_size(&directory)?;
+  fs::remove_dir_all(&directory).map_err(|error| format!("清理资源事务目录失败：{error}"))?;
+  remove_empty_directory_tree(&transaction_root);
+  Ok(bytes)
+}
+
+/// 递归统计目录内普通文件的总字节数。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `directory`: 待统计目录。
+///
+/// # 返回
+/// - `Ok(u64)`: 文件总字节数。
+/// - `Err(String)`: 读取目录失败的错误描述。
+fn directory_size(directory: &Path) -> Result<u64, String> {
+  let mut total = 0_u64;
+  let mut pending = vec![directory.to_path_buf()];
+  while let Some(current) = pending.pop() {
+    let entries = match fs::read_dir(&current) {
+      Ok(entries) => entries,
+      Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+      Err(error) => return Err(format!("读取资源事务目录失败：{error}")),
+    };
+    for entry in entries {
+      let entry = entry.map_err(|error| format!("读取资源事务目录项失败：{error}"))?;
+      let metadata = match fs::symlink_metadata(entry.path()) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+        Err(error) => return Err(format!("读取资源事务目录项失败：{error}")),
+      };
+      if metadata.file_type().is_symlink() {
+        continue;
+      }
+      if metadata.is_dir() {
+        pending.push(entry.path());
+        continue;
+      }
+      total = total.saturating_add(metadata.len());
+    }
+  }
+  Ok(total)
 }
 
 /// 下载阶段还需要写入 incoming 的剩余字节；已有证据的成品不再计入。
@@ -3659,6 +3741,27 @@ mod tests {
   fn client_state_target_rejects_audio_plan_without_selection() {
     let plan = plan_with(PackagePlanTarget::Audio, vec![value_file()]);
     assert!(client_state_target(&plan).is_err());
+  }
+
+  #[test]
+  fn discard_transaction_directory_removes_plan_namespace_only() {
+    let root = std::env::temp_dir().join(format!("tg-discard-{}", uuid::Uuid::new_v4()));
+    let plan_id = "11111111-1111-4111-8111-111111111111";
+    let other_id = "22222222-2222-4222-8222-222222222222";
+    let plan_dir = root.join(".teyvatguide-update").join(plan_id).join("incoming");
+    let other_dir = root.join(".teyvatguide-update").join(other_id);
+    fs::create_dir_all(&plan_dir).unwrap();
+    fs::create_dir_all(&other_dir).unwrap();
+    fs::write(plan_dir.join("payload.bin"), vec![0_u8; 2048]).unwrap();
+    fs::write(other_dir.join("keep.bin"), vec![0_u8; 16]).unwrap();
+
+    assert_eq!(discard_transaction_directory(plan_id, &root), Ok(2048));
+    assert!(!root.join(".teyvatguide-update").join(plan_id).exists());
+    assert!(other_dir.join("keep.bin").exists());
+    assert_eq!(discard_transaction_directory(plan_id, &root), Ok(0));
+    assert!(discard_transaction_directory("not-a-uuid", &root).is_err());
+    assert_eq!(discard_transaction_directory(other_id, &root), Ok(16));
+    fs::remove_dir_all(&root).unwrap();
   }
 
   #[test]
