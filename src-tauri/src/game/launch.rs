@@ -1,5 +1,5 @@
 //! 国服官服与哔哩哔哩服客户端启动实现。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.3
 
 use super::{audio_language, model::SchemeId};
 use std::path::Path;
@@ -7,7 +7,7 @@ use std::path::Path;
 /// 启动游戏前让游戏自身保存的当前配音与所选安装实际存在的配音包保持一致，
 /// 并同步客户端维护的配音语言清单。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.3
 ///
 /// # 参数
 /// - `game_root`: 游戏安装根目录。

@@ -1649,7 +1649,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
 
 /// 校验提交日志字段合法性。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.12.3
 ///
 /// # 参数
 /// - `apply`: 提交日志。

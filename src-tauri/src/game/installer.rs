@@ -2,7 +2,7 @@
 //!
 //! An installation draft is deliberately kept outside `GameInstallation` until
 //! the final tree has been published and inspected successfully.
-//! @since Beta v0.12.1
+//! @since Beta v0.12.3
 
 use super::{
   assembler,
@@ -1082,7 +1082,7 @@ pub(crate) fn prepare_install_assembly(
 
 /// 注册安装到数据库。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.3
 ///
 /// # 参数
 /// - `pool`: SQLite 连接池。
