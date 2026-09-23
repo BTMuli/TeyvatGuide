@@ -1,83 +1,109 @@
-<!-- 祈愿复刻组件，TODO：采用vuetify组件优化UI -->
+<!-- 祈愿复刻周期组件 -->
 <template>
   <section class="rerun" @keydown.esc="closeDetail">
     <header class="rerun-heading">
       <div class="rerun-title">
-        <i aria-hidden="true" class="mdi mdi-history"></i>
+        <v-icon icon="mdi-history" size="24" />
         <h2>祈愿复刻周期</h2>
       </div>
       <span class="rerun-source">卡池记录至 {{ dataThrough }}</span>
     </header>
     <div class="rerun-toolbar">
-      <div aria-label="物品分类" class="rerun-tabs" role="group">
-        <button
-          v-for="tab in categoryTabs"
-          :key="tab.value"
-          :aria-pressed="category === tab.value"
-          type="button"
-          @click="category = tab.value"
-        >
+      <v-btn-toggle
+        v-model="category"
+        class="rerun-category"
+        color="var(--tgc-od-blue)"
+        size="default"
+        variant="outlined"
+      >
+        <v-btn v-for="tab in categoryTabs" :key="tab.value" :value="tab.value">
           {{ tab.label }}
-        </button>
-      </div>
-      <div class="rerun-search">
-        <i aria-hidden="true" class="mdi mdi-magnify"></i>
-        <input
-          ref="searchInput"
-          v-model="search"
-          :aria-label="`搜索${categoryLabel}`"
-          :placeholder="`搜索${categoryLabel}名称或 ID`"
-          type="search"
-        />
-      </div>
-      <select v-model="sortOrder" aria-label="排序方式">
-        <option value="waiting">{{ hasScope ? "结束时间最早" : "最久未 UP" }}</option>
-        <option value="recent">{{ lastUpLabel }}</option>
-        <option value="first">{{ hasScope ? "范围内最早 UP" : "首次 UP 顺序" }}</option>
-        <option value="least">UP 期数从少到多</option>
-        <option value="most">UP 期数从多到少</option>
-      </select>
+        </v-btn>
+      </v-btn-toggle>
+      <v-text-field
+        ref="searchInput"
+        v-model="search"
+        :aria-label="`搜索${categoryLabel}名称或 ID`"
+        class="rerun-search"
+        clearable
+        color="var(--tgc-od-blue)"
+        density="compact"
+        hide-details
+        :placeholder="`搜索${categoryLabel}名称或 ID`"
+        prepend-inner-icon="mdi-magnify"
+        type="search"
+        variant="outlined"
+      />
+      <v-select
+        v-model="sortOrder"
+        aria-label="排序方式"
+        class="rerun-sort"
+        color="var(--tgc-od-blue)"
+        density="compact"
+        hide-details
+        :items="sortOptions"
+        prepend-inner-icon="mdi-sort"
+        variant="outlined"
+      />
     </div>
     <div class="rerun-meta">
       <span aria-live="polite" class="rerun-result">
-        {{ sortedRows.length }} {{ isCharacterCategory ? "位角色" : "件武器" }}
+        <strong>{{ sortedRows.length }}</strong>
+        <span>{{ isCharacterCategory ? "位角色" : "件武器" }}</span>
       </span>
-      <label class="rerun-mix"><input v-model="includeMix" type="checkbox" />含集录祈愿</label>
-      <button
+      <v-checkbox
+        v-model="includeMix"
+        class="rerun-mix"
+        color="var(--tgc-od-blue)"
+        density="compact"
+        hide-details
+        label="含集录祈愿"
+      />
+      <v-btn
         v-if="hasScope"
+        append-icon="mdi-close"
         :aria-label="`清除时间筛选：${scopeLabel}`"
         class="rerun-scope"
+        prepend-icon="mdi-calendar-range"
+        size="small"
         title="清除时间筛选"
-        type="button"
+        variant="outlined"
         @click="emit('clearPeriod')"
       >
-        <i aria-hidden="true" class="mdi mdi-calendar-range"></i>
-        <span>{{ scopeLabel }}</span>
-        <i aria-hidden="true" class="mdi mdi-close"></i>
-      </button>
+        <span class="rerun-scope-label">{{ scopeLabel }}</span>
+      </v-btn>
       <span v-if="view === 'timeline'" class="rerun-direction">版本由近到远</span>
-      <div aria-label="展示方式" class="rerun-tabs rerun-view" role="group">
-        <button :aria-pressed="view === 'list'" type="button" @click="view = 'list'">
-          <i aria-hidden="true" class="mdi mdi-format-list-bulleted"></i>复刻列表
-        </button>
-        <button :aria-pressed="view === 'timeline'" type="button" @click="view = 'timeline'">
-          <i aria-hidden="true" class="mdi mdi-chart-timeline-variant"></i>版本时间轴
-        </button>
-      </div>
+      <v-btn-toggle
+        v-model="view"
+        class="rerun-view"
+        color="var(--tgc-od-blue)"
+        size="default"
+        variant="outlined"
+      >
+        <v-btn prepend-icon="mdi-format-list-bulleted" value="list">复刻列表</v-btn>
+        <v-btn prepend-icon="mdi-chart-timeline-variant" value="timeline">版本时间轴</v-btn>
+      </v-btn-toggle>
     </div>
-    <div v-if="sortedRows.length === 0" class="rerun-empty">
-      <i aria-hidden="true" class="mdi mdi-magnify"></i>
-      <strong>{{ hasScope ? "所选范围内没有匹配的" : "没有找到匹配的" }}{{ categoryLabel }}</strong>
-      <span>
-        {{
-          hasScope
-            ? "调整顶部时间范围，或清除时间筛选后查看全部记录"
-            : "试试名称中的几个字，或切换分类"
-        }}
-      </span>
-      <button v-if="search" type="button" @click="clearSearch">清除搜索</button>
-      <button v-if="hasScope" type="button" @click="emit('clearPeriod')">清除时间筛选</button>
-    </div>
+    <v-empty-state
+      v-if="sortedRows.length === 0"
+      class="rerun-empty"
+      icon="mdi-magnify"
+      :size="40"
+      :text="
+        hasScope
+          ? '调整顶部时间范围，或清除时间筛选后查看全部记录'
+          : '试试名称中的几个字，或切换分类'
+      "
+      :text-width="260"
+      :title="`${hasScope ? '所选范围内没有匹配的' : '没有找到匹配的'}${categoryLabel}`"
+    >
+      <template #actions>
+        <v-btn v-if="search" size="small" variant="outlined" @click="clearSearch">清除搜索</v-btn>
+        <v-btn v-if="hasScope" size="small" variant="outlined" @click="emit('clearPeriod')">
+          清除时间筛选
+        </v-btn>
+      </template>
+    </v-empty-state>
     <div v-else :class="{ 'has-detail': selectedRow }" class="rerun-body">
       <div
         ref="tableScroll"
@@ -85,7 +111,7 @@
         class="rerun-scroll"
         tabindex="0"
       >
-        <table v-if="view === 'list'" class="rerun-table rerun-list">
+        <v-table v-if="view === 'list'" class="rerun-table rerun-list" density="compact">
           <thead>
             <tr>
               <th class="rerun-identity" scope="col">{{ categoryLabel }}</th>
@@ -108,13 +134,14 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <button
+                <v-btn
                   ref="rowButtons"
                   :aria-controls="detailId"
                   :aria-expanded="selectedId === row.id"
                   :data-item-id="row.id"
+                  block
                   class="rerun-name"
-                  type="button"
+                  variant="text"
                   @click="selectRow(row.id)"
                 >
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
@@ -122,8 +149,8 @@
                     <strong>{{ row.name }}</strong>
                     <span class="rerun-mobile-wait">{{ waitingLabel(row) }}</span>
                   </span>
-                  <i aria-hidden="true" class="mdi mdi-chevron-right"></i>
-                </button>
+                  <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
+                </v-btn>
               </th>
               <td>
                 <template v-if="row.lastPool">
@@ -138,7 +165,9 @@
                 <span v-else class="rerun-muted">尚未开始</span>
               </td>
               <td class="rerun-wait-column">
-                <span v-if="row.isActive" class="rerun-current">UP 进行中</span>
+                <v-chip v-if="row.isActive" class="rerun-current" label size="small" variant="flat">
+                  UP 进行中
+                </v-chip>
                 <span v-else-if="row.waitingDays !== null" class="rerun-wait">
                   <strong>{{ row.waitingDays }}</strong> 天
                 </span>
@@ -149,29 +178,35 @@
               </td>
               <td class="rerun-recent-column">
                 <div class="rerun-recent">
-                  <button
+                  <v-btn
                     v-for="pool in row.recentPools"
                     :key="poolKey(pool)"
                     :aria-label="`查看${row.name} ${pool.version} ${periodLabel(pool)}记录`"
-                    :title="`${dateLabel(pool.from)} — ${dateLabel(pool.to)} · ${periodLabel(pool)}`"
-                    type="button"
+                    class="rerun-recent-btn"
+                    size="small"
+                    variant="outlined"
                     @click="selectRow(row.id, poolKey(pool))"
                   >
-                    {{ pool.version }}<span>{{ periodLabel(pool, true) }}</span>
-                  </button>
+                    <span class="rerun-recent-version">{{ pool.version }}</span>
+                    <span class="rerun-recent-period">{{ periodLabel(pool, true) }}</span>
+                    <v-tooltip activator="parent" location="top">
+                      {{ dateLabel(pool.from) }} — {{ dateLabel(pool.to) }} ·
+                      {{ periodLabel(pool) }}
+                    </v-tooltip>
+                  </v-btn>
                   <span v-if="row.recentPools.length === 0" class="rerun-muted">—</span>
                 </div>
               </td>
             </tr>
           </tbody>
-        </table>
-        <table v-else class="rerun-table rerun-timeline">
+        </v-table>
+        <v-table v-else class="rerun-table rerun-timeline" density="compact">
           <thead>
             <tr>
               <th class="rerun-identity" scope="col">{{ categoryLabel }}</th>
               <th v-for="vg in displayVersionGroups" :key="vg.version" scope="col">
-                <strong>{{ vg.version }}</strong
-                ><span class="rerun-date">{{ vg.timeRange }}</span>
+                <strong>{{ vg.version }}</strong>
+                <span class="rerun-date">{{ vg.timeRange }}</span>
               </th>
             </tr>
           </thead>
@@ -182,13 +217,14 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <button
+                <v-btn
                   ref="rowButtons"
                   :aria-controls="detailId"
                   :aria-expanded="selectedId === row.id"
                   :data-item-id="row.id"
+                  block
                   class="rerun-name"
-                  type="button"
+                  variant="text"
                   @click="selectRow(row.id)"
                 >
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
@@ -196,41 +232,46 @@
                     <strong>{{ row.name }}</strong>
                     <span class="rerun-muted">{{ waitingLabel(row) }}</span>
                   </span>
-                  <i aria-hidden="true" class="mdi mdi-chevron-right"></i>
-                </button>
+                  <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
+                </v-btn>
               </th>
               <td v-for="vg in displayVersionGroups" :key="vg.version">
                 <GroRerunCell :itemId="row.id" :versionGroup="vg" />
               </td>
             </tr>
           </tbody>
-        </table>
+        </v-table>
       </div>
-      <aside
+      <v-card
         v-if="selectedRow"
         :id="detailId"
         :aria-label="`${selectedRow.name}${hasScope ? '范围内' : '历次'} UP 记录`"
         class="rerun-detail"
+        flat
+        rounded="0"
+        tag="aside"
       >
-        <div class="rerun-detail-heading">
-          <TItemBox :modelValue="selectedRow.boxData" aria-hidden="true" />
-          <div>
-            <h3>{{ selectedRow.name }}</h3>
-            <span class="rerun-muted">
-              {{ hasScope ? "范围内已" : "已" }} UP {{ selectedRow.upCount }} 期 ·
-              {{ includeMix ? "含" : "不含" }}集录祈愿
-            </span>
-          </div>
-          <button
-            ref="closeButton"
-            aria-label="关闭记录，返回列表"
-            class="rerun-close"
-            type="button"
-            @click="closeDetail"
-          >
-            <i aria-hidden="true" class="mdi mdi-close"></i>
-          </button>
-        </div>
+        <v-card-item class="rerun-detail-heading">
+          <template #prepend>
+            <TItemBox :modelValue="selectedRow.boxData" aria-hidden="true" />
+          </template>
+          <v-card-title class="rerun-detail-name">{{ selectedRow.name }}</v-card-title>
+          <v-card-subtitle class="rerun-detail-meta">
+            {{ hasScope ? "范围内已" : "已" }} UP {{ selectedRow.upCount }} 期 ·
+            {{ includeMix ? "含" : "不含" }}集录祈愿
+          </v-card-subtitle>
+          <template #append>
+            <v-btn
+              ref="closeButton"
+              aria-label="关闭记录，返回列表"
+              class="rerun-close"
+              density="comfortable"
+              icon="mdi-close"
+              variant="text"
+              @click="closeDetail"
+            />
+          </template>
+        </v-card-item>
         <div class="rerun-detail-summary">
           <span>{{ lastUpLabel }}</span>
           <strong>
@@ -248,27 +289,51 @@
           class="rerun-history-scroll"
           tabindex="0"
         >
-          <ol class="rerun-history">
-            <li
+          <v-timeline
+            align="start"
+            class="rerun-history"
+            density="compact"
+            :line-thickness="1"
+            side="end"
+            truncate-line="both"
+          >
+            <v-timeline-item
               v-for="(pool, index) in history"
               :key="poolKey(pool)"
-              ref="historyItems"
-              :class="{ 'is-target': selectedPoolKey === poolKey(pool) }"
-              :data-pool-key="poolKey(pool)"
+              :dot-color="index === 0 ? 'var(--tgc-yellow-3)' : 'var(--app-page-content)'"
+              :fill-dot="index === 0"
+              size="x-small"
             >
-              <span v-if="index > 0" class="rerun-gap">{{ gapLabel(index - 1) }}</span>
-              <div class="rerun-history-card">
-                <div class="rerun-history-title">
-                  <strong>{{ pool.version }} · {{ periodLabel(pool) }}</strong>
-                  <span class="rerun-history-tag">{{ historyLabel(pool, index) }}</span>
-                </div>
-                <p>{{ dateLabel(pool.from) }} — {{ dateLabel(pool.to) }}</p>
-                <span class="rerun-muted">{{ pool.name }}</span>
+              <div
+                ref="historyItems"
+                :class="{ 'is-target': selectedPoolKey === poolKey(pool) }"
+                :data-pool-key="poolKey(pool)"
+                class="rerun-history-item"
+              >
+                <v-sheet class="rerun-history-card" rounded="md">
+                  <div class="rerun-history-title">
+                    <strong>{{ pool.version }} · {{ periodLabel(pool) }}</strong>
+                    <v-chip
+                      v-if="historyLabel(pool, index)"
+                      class="rerun-history-tag"
+                      label
+                      size="x-small"
+                      variant="outlined"
+                    >
+                      {{ historyLabel(pool, index) }}
+                    </v-chip>
+                  </div>
+                  <p>{{ dateLabel(pool.from) }} — {{ dateLabel(pool.to) }}</p>
+                  <span class="rerun-muted">{{ pool.name }}</span>
+                </v-sheet>
+                <span v-if="index < history.length - 1" class="rerun-gap">
+                  {{ gapLabel(index) }}
+                </span>
               </div>
-            </li>
-          </ol>
+            </v-timeline-item>
+          </v-timeline>
         </div>
-      </aside>
+      </v-card>
     </div>
     <footer class="rerun-footer">
       <span>{{ hasScope ? "显示与所选时段相交的完整卡池" : "点击名称查看历次 UP" }}</span>
@@ -287,6 +352,7 @@ import {
 } from "@utils/gachaVersion.js";
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, useTemplateRef, watch } from "vue";
+import { VBtn, VTextField } from "vuetify/components";
 
 import GroRerunCell from "./gro-rerun-cell.vue";
 
@@ -312,6 +378,8 @@ type RerunRow = RerunItem & {
   isActive: boolean;
   waitingDays: number | null;
 };
+/** Vuetify 按钮实例，模板 ref 需要通过 `$el` 取回原生按钮以管理焦点。 */
+type ButtonInstance = InstanceType<typeof VBtn>;
 
 const props = defineProps<{
   /** 版本筛选；未传或 all 表示全部版本。 */
@@ -331,19 +399,19 @@ const categoryTabs: Array<{ value: Category; label: string }> = [
 ];
 const category = ref<Category>("5char");
 const sortOrder = ref<SortOrder>("waiting");
-const search = ref<string>("");
+const search = ref<string | null>("");
 const view = ref<"list" | "timeline">("list");
 const selectedId = ref<number | null>(null);
 const selectedPoolKey = ref<string | null>(null);
 const includeMix = ref<boolean>(true);
 const now = ref<number>(Date.now());
 const detailId = useId();
-const searchInput = useTemplateRef<HTMLInputElement>("searchInput");
+const searchInput = useTemplateRef<InstanceType<typeof VTextField>>("searchInput");
 const tableScroll = useTemplateRef<HTMLDivElement>("tableScroll");
 const historyScroll = useTemplateRef<HTMLDivElement>("historyScroll");
-const rowButtons = useTemplateRef<Array<HTMLButtonElement>>("rowButtons");
-const historyItems = useTemplateRef<Array<HTMLLIElement>>("historyItems");
-const closeButton = useTemplateRef<HTMLButtonElement>("closeButton");
+const rowButtons = useTemplateRef<Array<ButtonInstance>>("rowButtons");
+const historyItems = useTemplateRef<Array<HTMLElement>>("historyItems");
+const closeButton = useTemplateRef<ButtonInstance>("closeButton");
 let clock: ReturnType<typeof setInterval> | undefined;
 
 onMounted(() => {
@@ -377,6 +445,13 @@ const scopeLabel = computed<string>(() => {
   return labels.join(" · ");
 });
 const lastUpLabel = computed<string>(() => (hasScope.value ? "范围内最近 UP" : "最近 UP"));
+const sortOptions = computed<Array<{ title: string; value: SortOrder }>>(() => [
+  { title: hasScope.value ? "结束时间最早" : "最久未 UP", value: "waiting" },
+  { title: lastUpLabel.value, value: "recent" },
+  { title: hasScope.value ? "范围内最早 UP" : "首次 UP 顺序", value: "first" },
+  { title: "UP 期数从少到多", value: "least" },
+  { title: "UP 期数从多到少", value: "most" },
+]);
 const scopedPools = computed<Array<Pool>>(() => {
   if (!hasScope.value) return allUpPools.value;
   const start = props.periodStart ? toGachaPeriodStartBound(props.periodStart) : "";
@@ -456,7 +531,7 @@ const categoryRows = computed<Array<RerunRow>>(() =>
 );
 
 const sortedRows = computed<Array<RerunRow>>(() => {
-  const query = search.value.trim().toLocaleLowerCase();
+  const query = (search.value ?? "").trim().toLocaleLowerCase();
   return categoryRows.value
     .filter((row) => row.name.toLocaleLowerCase().includes(query) || String(row.id).includes(query))
     .sort((a, b) => {
@@ -561,6 +636,16 @@ function historyLabel(pool: Pool, index: number): string {
   return selectedRow.value?.lastPool === pool ? lastUpLabel.value : "";
 }
 
+/** 取回 Vuetify 按钮的原生元素，模板 ref 指向组件实例。 */
+function buttonElement(instance: ButtonInstance | null | undefined): HTMLButtonElement | undefined {
+  const el = instance?.$el;
+  return el instanceof HTMLButtonElement ? el : undefined;
+}
+
+function focusButton(instance: ButtonInstance | null | undefined): void {
+  buttonElement(instance)?.focus({ preventScroll: true });
+}
+
 async function selectRow(id: number, key: string | null = null): Promise<void> {
   if (selectedId.value === id && key === null) {
     await closeDetail();
@@ -569,10 +654,20 @@ async function selectRow(id: number, key: string | null = null): Promise<void> {
   selectedId.value = id;
   selectedPoolKey.value = key;
   await nextTick();
-  closeButton.value?.focus({ preventScroll: true });
+  focusButton(closeButton.value);
+  scrollHistoryTo(key);
+}
+
+/** 记录条目嵌在 Vuetify 时间轴内，按视口差值换算滚动位置。 */
+function scrollHistoryTo(key: string | null): void {
+  const box = historyScroll.value;
   const item = historyItems.value?.find((element) => element.dataset.poolKey === key);
-  if (item && historyScroll.value) historyScroll.value.scrollTop = Math.max(0, item.offsetTop - 8);
-  else historyScroll.value?.scrollTo({ top: 0 });
+  if (!box || !item) {
+    box?.scrollTo({ top: 0 });
+    return;
+  }
+  const offset = item.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+  box.scrollTop = Math.max(0, offset - 8);
 }
 
 async function closeDetail(): Promise<void> {
@@ -581,9 +676,10 @@ async function closeDetail(): Promise<void> {
   selectedId.value = null;
   selectedPoolKey.value = null;
   await nextTick();
-  rowButtons.value
-    ?.find((button) => button.dataset.itemId === String(id))
-    ?.focus({ preventScroll: true });
+  const target = rowButtons.value?.find(
+    (instance) => buttonElement(instance)?.dataset.itemId === String(id),
+  );
+  focusButton(target);
 }
 
 function clearSearch(): void {
@@ -610,31 +706,6 @@ function clearSearch(): void {
   container: rerun / inline-size;
   font-size: 14px;
   line-height: 20px;
-
-  button,
-  input,
-  select {
-    font: inherit;
-  }
-
-  button,
-  select {
-    color: inherit;
-    cursor: pointer;
-  }
-
-  button {
-    padding: 0;
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
-  }
-
-  input[type="search"] {
-    padding: 0;
-    border: 0;
-    background: transparent;
-  }
 }
 
 .rerun-muted,
@@ -660,81 +731,47 @@ function clearSearch(): void {
   align-items: center;
   color: var(--rerun-accent);
   gap: 8px;
-}
 
-.rerun-title > i {
-  font-size: 24px;
-}
-
-.rerun-title > h2 {
-  margin: 0;
-  font-family: var(--font-title);
-  font-size: 20px;
-  font-weight: normal;
-  line-height: 28px;
+  h2 {
+    margin: 0;
+    font-family: var(--font-title);
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 28px;
+  }
 }
 
 .rerun-toolbar {
   display: flex;
   flex: none;
   flex-wrap: wrap;
+  align-items: center;
   padding: 0 16px 12px;
   gap: 12px;
 }
 
-.rerun-toolbar > select {
-  min-height: 36px;
-  padding: 4px 28px 4px 12px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
-  appearance: auto;
-  background: var(--box-bg-1);
-}
-
-.rerun-tabs {
-  display: flex;
+.rerun-category {
   flex: none;
-  padding: 4px;
-  border-radius: 4px;
-  background: var(--box-bg-3);
-  gap: 4px;
-}
 
-.rerun-tabs > button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 12px;
-  gap: 4px;
-  white-space: nowrap;
+  /* Vuetify 按钮组固定 48px 高度，交给按钮自身控制以对齐 40px 输入框。 */
+
+  :deep(.v-btn) {
+    height: 40px;
+  }
 }
 
 .rerun-search {
-  display: flex;
-  min-width: 180px;
-  flex: 1;
-  align-items: center;
-  padding: 4px 12px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
-  gap: 8px;
+  --v-input-control-height: 40px;
 
-  i {
-    color: var(--rerun-muted);
-    font-size: 20px;
-  }
+  min-width: 200px;
+  flex: 1 1 200px;
+}
 
-  input {
-    width: 100%;
-    min-width: 0;
-    color: inherit;
-    outline: none !important;
+.rerun-sort {
+  --v-input-control-height: 40px;
 
-    &::placeholder {
-      color: var(--rerun-muted);
-      opacity: 1;
-    }
-  }
+  min-width: 184px;
+  flex: none;
 }
 
 .rerun-meta {
@@ -748,40 +785,46 @@ function clearSearch(): void {
 }
 
 .rerun-result {
+  display: flex;
+  align-items: baseline;
+  color: var(--rerun-muted);
   font-variant-numeric: tabular-nums;
+  gap: 4px;
+  white-space: nowrap;
+
+  strong {
+    color: var(--app-page-content);
+    font-size: 14px;
+    font-weight: 600;
+  }
 }
 
 .rerun-mix {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 4px;
-}
+  --v-input-control-height: 32px;
 
-.rerun-mix > input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--tgc-yellow-3);
+  flex: none;
+
+  :deep(.v-label) {
+    color: var(--app-page-content);
+    font-size: 12px;
+    opacity: 1;
+  }
 }
 
 .rerun-scope {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  padding: 4px 8px;
-  border: 1px solid var(--common-shadow-2);
-  background: var(--box-bg-1);
-  gap: 4px;
+  max-width: 100%;
+  flex: none;
+  font-size: 12px;
+
+  &.v-btn {
+    height: 32px;
+  }
 }
 
-.rerun-scope > span {
+.rerun-scope-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.rerun-scope:hover {
-  background: var(--box-bg-4);
 }
 
 .rerun-direction {
@@ -790,9 +833,34 @@ function clearSearch(): void {
 }
 
 .rerun-view {
-  padding: 0;
+  flex: none;
   margin-left: auto;
-  background: transparent;
+
+  :deep(.v-btn) {
+    height: 40px;
+  }
+}
+
+.rerun-empty {
+  flex: 1;
+
+  :deep(.v-empty-state__media .v-icon) {
+    color: var(--rerun-muted);
+    opacity: 1;
+  }
+
+  :deep(.v-empty-state__title) {
+    color: var(--app-page-content);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+  }
+
+  :deep(.v-empty-state__text) {
+    color: var(--rerun-muted);
+    font-size: 12px;
+    line-height: 18px;
+  }
 }
 
 .rerun-body {
@@ -811,30 +879,36 @@ function clearSearch(): void {
 }
 
 .rerun-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  --v-table-header-height: 40px;
+  --v-table-row-height: 64px;
+
+  background: transparent;
+  color: var(--app-page-content);
+  line-height: 20px;
+
+  :deep(.v-table__wrapper) {
+    overflow: visible;
+  }
 }
 
 .rerun-table th,
 .rerun-table td {
-  height: 60px;
-  padding: 8px 16px;
   border-bottom: 1px solid var(--common-shadow-1);
-  text-align: left;
-  vertical-align: middle;
   white-space: nowrap;
 }
 
-.rerun-table thead th {
+.rerun-table :deep(.v-table__wrapper thead th) {
   position: sticky;
   z-index: 2;
   top: 0;
-  height: 40px;
   background: var(--box-bg-3);
   color: var(--rerun-muted);
   font-size: 12px;
   font-weight: normal;
+}
+
+.rerun-table tbody tr {
+  background: var(--app-page-bg);
 }
 
 .rerun-table tbody tr:nth-child(even) {
@@ -845,7 +919,8 @@ function clearSearch(): void {
   background: var(--box-bg-1);
 }
 
-.rerun-table tbody tr.selected {
+.rerun-table tbody tr.selected,
+.rerun-table tbody tr.selected:hover {
   background: var(--rerun-selected);
 }
 
@@ -854,7 +929,7 @@ function clearSearch(): void {
   z-index: 1;
   left: 0;
   min-width: 196px;
-  background: var(--app-page-bg);
+  background: inherit;
 }
 
 .rerun-table thead .rerun-identity {
@@ -862,38 +937,50 @@ function clearSearch(): void {
   background: var(--box-bg-3);
 }
 
+.rerun-table tbody th.rerun-identity {
+  height: var(--v-table-row-height);
+  font-weight: normal;
+}
+
 .rerun-table tr.selected .rerun-identity {
-  background: var(--rerun-selected);
   box-shadow: inset 3px 0 var(--tgc-yellow-3);
 }
 
 .rerun-name {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 12px;
+  padding: 0 8px;
+  color: inherit;
+  font-weight: normal;
   text-align: left;
-}
 
-.rerun-name > :first-child {
-  flex-shrink: 0;
-}
+  &.v-btn {
+    height: 44px;
+  }
 
-.rerun-name > i {
-  margin-left: auto;
-  color: var(--rerun-muted);
-  font-size: 18px;
+  :deep(.v-btn__content) {
+    min-width: 0;
+    flex: 1 0 auto;
+    justify-content: flex-start;
+    gap: 12px;
+  }
 }
 
 .rerun-name-text {
   display: flex;
+  min-width: 0;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
+
+  strong {
+    font-size: 14px;
+    font-weight: 600;
+  }
 }
 
-.rerun-name-text > strong {
-  font-size: 14px;
-  font-weight: 600;
+.rerun-name-arrow {
+  margin-left: auto;
+  color: var(--rerun-muted);
+  font-size: 18px;
 }
 
 .rerun-mobile-wait {
@@ -907,17 +994,17 @@ function clearSearch(): void {
   display: flex;
   align-items: baseline;
   gap: 8px;
-}
 
-.rerun-pool-label > strong {
-  color: var(--rerun-accent);
-  font-size: 16px;
-  font-variant-numeric: tabular-nums;
-}
+  strong {
+    color: var(--rerun-accent);
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
 
-.rerun-pool-label > span {
-  color: var(--rerun-muted);
-  font-size: 12px;
+  span {
+    color: var(--rerun-muted);
+    font-size: 12px;
+  }
 }
 
 .rerun-date {
@@ -928,17 +1015,15 @@ function clearSearch(): void {
 .rerun-wait {
   color: var(--rerun-muted);
   font-size: 12px;
-}
 
-.rerun-wait > strong {
-  color: var(--app-page-content);
-  font-size: 16px;
-  font-variant-numeric: tabular-nums;
+  strong {
+    color: var(--app-page-content);
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .rerun-current {
-  padding: 4px 8px;
-  border-radius: 4px;
   background: var(--rerun-selected);
   color: var(--rerun-accent);
   font-size: 12px;
@@ -954,28 +1039,31 @@ function clearSearch(): void {
   gap: 8px;
 }
 
-.rerun-recent > button {
-  display: flex;
+.rerun-recent-btn {
   min-width: 64px;
-  flex-direction: column;
-  padding: 4px 8px;
-  border: 1px solid var(--common-shadow-1);
-  background: var(--box-bg-1);
+  padding: 0 8px;
+  color: var(--app-page-content);
+  font-size: 12px;
+  line-height: 16px;
+
+  &.v-btn {
+    height: 40px;
+    border-color: var(--common-shadow-2);
+  }
+
+  :deep(.v-btn__content) {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+}
+
+.rerun-recent-version {
   font-variant-numeric: tabular-nums;
-  text-align: center;
 }
 
-.rerun-timeline td {
-  min-width: 168px;
-}
-
-.rerun-timeline thead th:not(.rerun-identity) {
-  padding-block: 8px;
-}
-
-.rerun-timeline thead .rerun-date {
-  max-width: 140px;
-  white-space: pre-line;
+.rerun-recent-period {
+  color: var(--rerun-muted);
 }
 
 .rerun-detail {
@@ -987,34 +1075,34 @@ function clearSearch(): void {
   flex-direction: column;
   border-left: 1px solid var(--common-shadow-1);
   background: var(--box-bg-1);
+  color: var(--app-page-content);
 }
 
 .rerun-detail-heading {
-  display: flex;
   flex: none;
-  align-items: center;
-  padding: 16px;
-  gap: 12px;
-}
 
-.rerun-detail-heading h3 {
-  margin: 0 0 4px;
-  color: var(--rerun-accent);
-  font-family: var(--font-title);
-  font-size: 18px;
-  font-weight: normal;
+  :deep(.v-card-title) {
+    padding: 0;
+    color: var(--rerun-accent);
+    font-family: var(--font-title);
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 24px;
+    white-space: normal;
+  }
+
+  :deep(.v-card-subtitle) {
+    padding: 0;
+    color: var(--rerun-muted);
+    font-size: 12px;
+    line-height: 16px;
+    opacity: 1;
+    white-space: normal;
+  }
 }
 
 .rerun-close {
-  width: 32px;
-  height: 32px;
   flex: none;
-  margin-left: auto;
-  font-size: 20px;
-}
-
-.rerun-close:hover {
-  background: var(--box-bg-4);
 }
 
 .rerun-detail-summary {
@@ -1044,41 +1132,35 @@ function clearSearch(): void {
   overflow: auto;
   min-height: 0;
   flex: 1;
+  padding: 4px 16px 12px 8px;
 }
 
 .rerun-history {
-  padding: 4px 16px 16px 28px;
-  margin: 0;
-  list-style: none;
+  row-gap: 8px;
+
+  :deep(.v-timeline-divider__dot) {
+    width: 12px;
+    height: 12px;
+    background: var(--box-bg-1);
+  }
+
+  :deep(.v-timeline-divider__before),
+  :deep(.v-timeline-divider__after) {
+    background: var(--common-shadow-2);
+  }
+
+  :deep(.v-timeline-item__body) {
+    width: 100%;
+  }
 }
 
-.rerun-history > li {
-  position: relative;
-  padding-left: 16px;
-  border-left: 1px solid var(--common-shadow-2);
-}
-
-.rerun-history > li::before {
-  position: absolute;
-  z-index: 1;
-  top: 44px;
-  left: -4px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid var(--tgc-yellow-3);
-  border-radius: 50%;
-  background: var(--box-bg-1);
-  content: "";
-}
-
-.rerun-history > li:first-child::before {
-  top: 12px;
-  background: var(--tgc-yellow-3);
+.rerun-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .rerun-gap {
-  display: block;
-  padding: 8px 0;
   color: var(--rerun-muted);
   font-size: 12px;
   line-height: 16px;
@@ -1087,8 +1169,8 @@ function clearSearch(): void {
 .rerun-history-card {
   padding: 8px 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
   background: var(--app-page-bg);
+  color: var(--app-page-content);
 }
 
 .is-target > .rerun-history-card {
@@ -1110,6 +1192,7 @@ function clearSearch(): void {
 }
 
 .rerun-history-tag {
+  height: 20px;
   color: var(--rerun-accent);
   font-size: 12px;
 }
@@ -1119,31 +1202,18 @@ function clearSearch(): void {
   font-size: 12px;
 }
 
-.rerun-empty {
-  display: flex;
-  min-height: 120px;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  gap: 8px;
+.rerun-timeline td {
+  min-width: 168px;
 }
 
-.rerun-empty > i {
-  color: var(--rerun-muted);
-  font-size: 28px;
+.rerun-timeline thead strong {
+  color: var(--rerun-accent);
+  font-size: 14px;
 }
 
-.rerun-empty > span {
-  color: var(--rerun-muted);
-  font-size: 12px;
-}
-
-.rerun-empty > button {
-  padding: 4px 12px;
-  border: 1px solid var(--common-shadow-2);
-  background: var(--box-bg-1);
+.rerun-timeline thead .rerun-date {
+  max-width: 140px;
+  white-space: pre-line;
 }
 
 .rerun-footer {
@@ -1158,32 +1228,8 @@ function clearSearch(): void {
   gap: 4px 12px;
 }
 
-.rerun-tabs > button:hover {
-  background: var(--box-bg-4);
-}
-
-.rerun-tabs > button[aria-pressed="true"] {
-  background: var(--app-page-bg);
-  box-shadow: 0 1px 3px var(--common-shadow-1);
-  color: var(--rerun-accent);
-}
-
-.rerun-recent > button:hover {
-  border-color: var(--tgc-yellow-3);
-  background: var(--rerun-selected);
-}
-
-.rerun-recent > button > span {
-  color: var(--rerun-muted);
-  font-size: 12px;
-}
-
-.rerun-timeline thead strong {
-  color: var(--rerun-accent);
-  font-size: 14px;
-}
-
-.rerun :is(button, input, select, [tabindex]):focus-visible {
+.rerun-scroll:focus-visible,
+.rerun-history-scroll:focus-visible {
   outline: 2px solid var(--rerun-accent);
   outline-offset: -2px;
 }
@@ -1227,11 +1273,11 @@ function clearSearch(): void {
     gap: 8px;
   }
 
-  .rerun-toolbar > .rerun-tabs {
+  .rerun-toolbar > .rerun-category {
     width: 100%;
   }
 
-  .rerun-toolbar > .rerun-tabs > button {
+  .rerun-category :deep(.v-btn) {
     flex: 1;
   }
 
@@ -1247,10 +1293,6 @@ function clearSearch(): void {
 
   .rerun-toolbar {
     padding: 0 12px 8px;
-  }
-
-  .rerun-tabs > button {
-    padding: 4px 8px;
   }
 
   .rerun-meta {
@@ -1276,11 +1318,11 @@ function clearSearch(): void {
     white-space: normal;
   }
 
-  .rerun-name {
+  .rerun-name :deep(.v-btn__content) {
     gap: 8px;
   }
 
-  .rerun-name > i,
+  .rerun-name-arrow,
   .rerun-footer > span:first-child,
   .rerun-direction {
     display: none;
