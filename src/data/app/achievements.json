@@ -11113,11 +11113,18 @@
           "description": "完成「冰宫密令·其一」。",
           "reward": 5,
           "version": "7.1",
-          "hidden": true,
+          "hidden": false,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_PARENT_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_PARENT_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 77669,
+                "type": "WQ",
+                "name": "女皇的棋局·其一"
+              }
+            ]
           },
           "partials": []
         },
@@ -12781,10 +12788,10 @@
           "description": "在仅使用火元素攻击的情况下，破除游雪的护刃的「冰棺」。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_COMBAT_CONFIG_COMMON",
+            "type": "COMBAT_CONFIG_COMMON",
             "tasks": []
           },
           "partials": []
@@ -19166,11 +19173,18 @@
           "description": "与达妮卡在最好玩的「摩拉游戏」中展开较量。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7015,
+                "type": "AQ",
+                "name": "溯见光影交织"
+              }
+            ]
           },
           "partials": []
         },
@@ -19182,11 +19196,18 @@
           "description": "结识了统治提瓦特尘世的全部七位…或是八位神明。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7015,
+                "type": "AQ",
+                "name": "溯见光影交织"
+              }
+            ]
           },
           "partials": []
         },
@@ -19198,11 +19219,18 @@
           "description": "击败生之执政制造出的魔物。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7017,
+                "type": "AQ",
+                "name": "仅此一着"
+              }
+            ]
           },
           "partials": []
         },
@@ -19214,11 +19242,18 @@
           "description": "完成「白夜似梦初醒」。",
           "reward": 10,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7017,
+                "type": "AQ",
+                "name": "仅此一着"
+              }
+            ]
           },
           "partials": []
         },
@@ -19230,11 +19265,18 @@
           "description": "在「丑角」的记忆中见到尚未成为「贤者」的海洛塔帝。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7019,
+                "type": "AQ",
+                "name": "被镌刻的时光"
+              }
+            ]
           },
           "partials": []
         },
@@ -19246,11 +19288,18 @@
           "description": "在大战到来前度过了久违的惬意时光…",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7020,
+                "type": "AQ",
+                "name": "于饯别之时散落的黑羽"
+              }
+            ]
           },
           "partials": []
         },
@@ -19262,11 +19311,18 @@
           "description": "击败「死之执政」若娜瓦。",
           "reward": 5,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7020,
+                "type": "AQ",
+                "name": "于饯别之时散落的黑羽"
+              }
+            ]
           },
           "partials": []
         },
@@ -19278,11 +19334,18 @@
           "description": "完成「往冥府的安魂歌」。",
           "reward": 10,
           "version": "7.1",
-          "hidden": false,
+          "hidden": true,
           "target": 1,
           "trigger": {
-            "type": "TRIGGER_FINISH_QUEST_AND",
-            "tasks": []
+            "type": "FINISH_QUEST_AND",
+            "tasks": [
+              {
+                "taskId": 0,
+                "questId": 7020,
+                "type": "AQ",
+                "name": "于饯别之时散落的黑羽"
+              }
+            ]
           },
           "partials": []
         },
