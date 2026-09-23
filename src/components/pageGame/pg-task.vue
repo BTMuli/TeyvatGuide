@@ -113,6 +113,11 @@
       <template v-if="recoveryProgress === null">
         <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
         <PgNotice
+          v-else-if="task.autoRetryMessage !== null"
+          :text="task.autoRetryMessage"
+          tone="info"
+        />
+        <PgNotice
           v-else-if="
             task.state === gameEnum.package.taskState.REGISTRATION_PENDING &&
             task.target === gameEnum.package.planTarget.AUDIO

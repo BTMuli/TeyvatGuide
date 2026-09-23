@@ -62,6 +62,8 @@ const INSTALL_STALL_CONFIRMATIONS: usize = 3;
 // 避免被“持有锁等待无超时磁盘 I/O”的流水线永久卡住。
 const INSTALL_WATCHDOG_PAUSE_LOCK_TIMEOUT: Duration = Duration::from_secs(5);
 const INSTALL_AUTO_STALL_RETRY_LIMIT: usize = 1;
+/// 连续多少轮“仅网络等待”仍没有任何字节进展后，升级为可恢复暂停 / 单次自动重试。
+const INSTALL_NETWORK_STALL_CYCLES: usize = 3;
 const INSTALL_AUTO_STALL_RETRY_MESSAGE: &str = "检测到持续停滞，正在自动重试 1/1";
 const INSTALL_STALL_PAUSE_MESSAGE: &str =
   "检测到下载写入或资源组装持续停滞，任务已自动暂停；可从任务记录继续。详情见运行日志。";
@@ -73,11 +75,17 @@ const MAIN_UPDATE_STALL_PAUSE_MESSAGE: &str =
   "检测到正式更新下载写入或资源组装持续停滞，任务已自动暂停；可从任务记录继续。";
 const MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE: &str =
   "自动重试后仍检测到正式更新下载写入或资源组装停滞，任务已暂停；请检查磁盘状态后从任务记录继续。";
+const MAIN_UPDATE_NETWORK_STALL_PAUSE_MESSAGE: &str =
+  "检测到正式更新下载长时间没有数据，任务已自动暂停；请检查网络后从任务记录继续。";
+const MAIN_UPDATE_NETWORK_STALL_RETRY_EXHAUSTED_MESSAGE: &str =
+  "自动重试后仍未收到正式更新下载数据，任务已暂停；请检查网络后从任务记录继续。";
 const MAIN_UPDATE_WORKER_DRAIN_MESSAGE: &str =
   "旧的正式更新组装 worker 未在超时内退出，任务保持暂停；请确认磁盘健康后再次恢复。";
 const MAIN_UPDATE_STALL_NOTIFICATION_TITLE: &str = "正式更新已暂停";
 const MAIN_UPDATE_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到下载写入或资源组装持续停滞，请检查磁盘状态后手动继续。";
+const MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY: &str =
+  "自动重试后仍未收到下载数据，请检查网络后手动继续。";
 /// 配音包同时让 4 个资源占用下载槽；真正下多少仍由这个焦点信号量卡住。
 const AUDIO_DOWNLOAD_FOCUS: usize = 4;
 /// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
@@ -258,7 +266,8 @@ fn install_watchdog_progress_signature(
   )
 }
 
-/// 纯网络等待由单对象 I/O 超时处理；看门狗只对写盘/组装停滞整单暂停。
+/// 纯网络等待先交给单对象 I/O 超时处理；连续多轮仍无任何字节进展时，
+/// 调用方会升级为可恢复暂停 + 单次自动重试，避免任务无声卡住。
 fn install_watchdog_is_network_only_wait(
   download: &super::downloader::DownloadTelemetrySnapshot,
   assembly: &assembler::AssemblyTelemetrySnapshot,
@@ -491,6 +500,7 @@ fn spawn_main_update_stall_watchdog(
     let mut last_signature = None;
     let mut last_progress_at = Instant::now();
     let mut confirmations = 0_usize;
+    let mut network_stall_cycles = 0_usize;
     loop {
       std::thread::sleep(INSTALL_STALL_POLL_INTERVAL);
       if paused.load(Ordering::Acquire) || canceled.load(Ordering::Acquire) {
@@ -509,60 +519,82 @@ fn spawn_main_update_stall_watchdog(
         last_signature = Some(signature);
         last_progress_at = Instant::now();
         confirmations = 0;
+        network_stall_cycles = 0;
         continue;
       }
       let stalled_for = last_progress_at.elapsed();
-      if install_watchdog_is_network_only_wait(&download, &assembly) {
+      let network_only = install_watchdog_is_network_only_wait(&download, &assembly);
+      if network_only {
         if stalled_for >= INSTALL_STALL_THRESHOLD {
+          network_stall_cycles = network_stall_cycles.saturating_add(1);
           log::info!(
-            "[game-main-update][{plan_id}] 仅网络等待持续 {}s，交由单对象超时处理",
-            stalled_for.as_secs()
+            "[game-main-update][{plan_id}] 仅网络等待持续 {}s（{}/{}），本轮未收到任何下载数据",
+            stalled_for.as_secs(),
+            network_stall_cycles,
+            INSTALL_NETWORK_STALL_CYCLES
           );
           last_progress_at = Instant::now();
         }
         confirmations = 0;
-        continue;
+        // 单对象超时可能反复重试，长时间只看到“网络等待”；连续多轮没有任何字节进展时同样
+        // 升级为可恢复暂停 + 单次自动重试，避免任务无声卡住、前端没有可用的重试入口。
+        if network_stall_cycles < INSTALL_NETWORK_STALL_CYCLES {
+          continue;
+        }
+      } else {
+        if stalled_for < INSTALL_STALL_THRESHOLD {
+          continue;
+        }
+        confirmations = confirmations.saturating_add(1);
+        log::warn!(
+          "[game-main-update][{plan_id}] 正式更新准备停滞样本：stalled={}s confirmation={}/{} downloadHeartbeatAge={}ms downloadWriteActive={} downloadWrittenBytes={} assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyWrittenBytes={} assemblyHashedBytes={}",
+          stalled_for.as_secs(),
+          confirmations,
+          INSTALL_STALL_CONFIRMATIONS,
+          download.last_activity_age_millis,
+          download.active_local_writes,
+          download.local_written_bytes,
+          assembly.last_activity_age_millis,
+          assembly.active_reads,
+          assembly.active_writes,
+          assembly.active_hashes,
+          assembly.active_syncs,
+          assembly.written_bytes,
+          assembly.hashed_bytes,
+        );
+        if confirmations < INSTALL_STALL_CONFIRMATIONS {
+          continue;
+        }
       }
-      if stalled_for < INSTALL_STALL_THRESHOLD {
-        continue;
-      }
-      confirmations = confirmations.saturating_add(1);
-      log::warn!(
-        "[game-main-update][{plan_id}] 正式更新准备停滞样本：stalled={}s confirmation={}/{} downloadHeartbeatAge={}ms downloadWriteActive={} downloadWrittenBytes={} assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyWrittenBytes={} assemblyHashedBytes={}",
-        stalled_for.as_secs(),
-        confirmations,
-        INSTALL_STALL_CONFIRMATIONS,
-        download.last_activity_age_millis,
-        download.active_local_writes,
-        download.local_written_bytes,
-        assembly.last_activity_age_millis,
-        assembly.active_reads,
-        assembly.active_writes,
-        assembly.active_hashes,
-        assembly.active_syncs,
-        assembly.written_bytes,
-        assembly.hashed_bytes,
-      );
-      if confirmations < INSTALL_STALL_CONFIRMATIONS
-        || context.stall_pause_requested.swap(true, Ordering::AcqRel)
-      {
+      if context.stall_pause_requested.swap(true, Ordering::AcqRel) {
         continue;
       }
       paused.store(true, Ordering::Release);
-      let message = if context.retry_budget_exhausted {
-        MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE
-      } else {
-        MAIN_UPDATE_STALL_PAUSE_MESSAGE
+      let message = match (network_only, context.retry_budget_exhausted) {
+        (false, false) => MAIN_UPDATE_STALL_PAUSE_MESSAGE,
+        (false, true) => MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE,
+        (true, false) => MAIN_UPDATE_NETWORK_STALL_PAUSE_MESSAGE,
+        (true, true) => MAIN_UPDATE_NETWORK_STALL_RETRY_EXHAUSTED_MESSAGE,
       };
-      if context.retry_budget_exhausted
-        && let Err(error) = app_handle
+      log::error!(
+        "[game-main-update][{plan_id}] 已确认停滞（networkOnly={network_only}，retryExhausted={}），自动转为可恢复暂停状态",
+        context.retry_budget_exhausted
+      );
+      if context.retry_budget_exhausted {
+        let body = if network_only {
+          MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY
+        } else {
+          MAIN_UPDATE_STALL_NOTIFICATION_BODY
+        };
+        if let Err(error) = app_handle
           .notification()
           .builder()
           .title(MAIN_UPDATE_STALL_NOTIFICATION_TITLE)
-          .body(MAIN_UPDATE_STALL_NOTIFICATION_BODY)
+          .body(body)
           .show()
-      {
-        log::error!("[game-main-update][{plan_id}] 发送正式更新停滞通知失败：{error}");
+        {
+          log::error!("[game-main-update][{plan_id}] 发送正式更新停滞通知失败：{error}");
+        }
       }
       persist_main_update_watchdog_pause(
         &app_handle,
