@@ -2,12 +2,31 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-08-30
-Update: 2026-09-15
+Update: 2026-09-23
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-08-30 15:00:05`
 >
-> 更新于 `2026-09-15 10:41:38`
+> 更新于 `2026-09-23 14:51:55`
+
+## [0.12.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.3) (2026-09-23)
+
+- 🍱 更新7.1版本资源
+- 🍱 角色故事&语音新增解锁条件展示
+- ✨ 祈愿页面新增复刻周期组件
+- 🐛 修复 MSIX 版 Yae DLL 复制时的加密错误
+- 🐛 修复旅行者养成计算选取异常
+- 🐛 修复回复分享图生成异常截断
+- 🐛 修复预下载&更新功能异常，重构相关处理逻辑
+- 🐛 修复0星材料渲染异常
+- 💄 优化成就列表项未完成状态UI表现
+- 💄 完善养成材料浮窗与汇总的合成消耗展示
+- 💄 为危险操作按钮补充红色标注
+- 💄 弱化公告详情AnnoId&应用信息，调整默认字高
+- ♻️ 设置页UI改版
+- 🚸 优化首页实时便笺组件1034触发处理
+- 🚸 优化养成计划汇总进度计算逻辑
+- 🚸 武器图鉴添加副属性筛选
 
 ## [0.12.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.2) (2026-09-15)
 
