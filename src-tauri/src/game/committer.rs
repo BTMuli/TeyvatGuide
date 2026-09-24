@@ -9,7 +9,7 @@ use super::{
   evidence,
   journal::{
     self, ActiveCommitStep, ApplyJournal, ClientStateJournal, CommitStepKind, CommitStepPhase,
-    ConfigCommitPhase, TaskJournal,
+    ConfigCommitPhase, RepairJournal, TaskJournal,
   },
   model::{PackageApplySpaceSummary, PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
   path_guard::{
@@ -49,7 +49,9 @@ pub(crate) enum ApplyOutcome {
 
 #[derive(Clone)]
 struct InventoryIssue {
+  name: String,
   message: String,
+  repairable: bool,
 }
 
 #[derive(Clone)]
@@ -204,6 +206,60 @@ where
     persist_and_emit(task_root, journal, &emit)?;
     if plan.target == PackagePlanTarget::Audio {
       verify_changed_files(plan, game_root, task_root, journal, canceled, &emit)?;
+    } else if plan.target == PackagePlanTarget::Main && journal.requires_full_verification {
+      let (inventory_count, inventory_bytes) = inventory_verification_totals(plan);
+      journal.verification_completed_count = 0;
+      journal.verification_total_count = inventory_count;
+      journal.verification_completed_bytes = 0;
+      journal.verification_total_bytes = inventory_bytes;
+      journal.commit_current_step = Some(format!("校验目标清单 0/{inventory_count}"));
+      persist_and_emit(task_root, journal, &emit)?;
+      let issues = inspect_inventory_with_journal_progress(
+        plan,
+        game_root,
+        journal,
+        task_root,
+        canceled,
+        &emit,
+        0,
+        0,
+        inventory_count,
+        inventory_bytes,
+      )?;
+      if !issues.is_empty() {
+        if let Some(issue) = issues.iter().find(|issue| !issue.repairable) {
+          return Err(issue.message.clone());
+        }
+        let mut repair_files = Vec::with_capacity(issues.len());
+        let inventory = plan
+          .inventory
+          .iter()
+          .map(|file| (file.name.as_str(), file))
+          .collect::<std::collections::HashMap<_, _>>();
+        for issue in &issues {
+          let file = inventory
+            .get(issue.name.as_str())
+            .ok_or_else(|| format!("目标清单问题缺少修复文件：{}", issue.name))?;
+          repair_files.push((*file).clone());
+        }
+        if repair_files.is_empty() {
+          return Err("目标清单校验失败但没有可修复资源".to_string());
+        }
+        let message = issues
+          .first()
+          .map_or_else(|| "目标清单校验失败".to_string(), |issue| issue.message.clone());
+        if journal.update_repair_attempts >= 1 {
+          return Err("完整复验仍未通过，不再自动创建第二轮修复".to_string());
+        }
+        journal.update_repair_attempts = 1;
+        journal.repair = Some(RepairJournal { files: repair_files, apply: None });
+        journal.state = PackageTaskState::RepairRequired;
+        journal.error_message = Some(message);
+        journal.current_file = None;
+        journal.commit_current_step = Some("等待修复目标清单".to_string());
+        persist_and_emit(task_root, journal, &emit)?;
+        return Ok(ApplyOutcome::RepairNeeded);
+      }
     } else {
       inspect_changed_layout_with_journal_progress(
         plan, game_root, journal, task_root, canceled, &emit,
@@ -261,6 +317,9 @@ where
   {
     return Err("修复计划与当前资源任务不匹配".to_string());
   }
+  if journal.update_repair_attempts > 1 || journal.repair.is_none() {
+    return Err("资源自动修复已达到一次修复上限，请执行安全恢复后重试".to_string());
+  }
   journal.ensure_update_commit_progress(plan);
   let incoming_bytes = repair_plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "修复空间需求溢出".to_string())
@@ -274,9 +333,13 @@ where
     return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
   }
 
+  // 恢复同一份持久化修复清单不消耗新轮次；只有创建新的清单才计数。
+  journal.update_repair_attempts = 1;
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
   journal.reset_assembly_progress(repair_plan.assets.len(), incoming_bytes);
+  journal.completed_asset_cursor = 0;
+  journal.assembly_completed_bytes_total = 0;
   journal.current_file = Some("组装修复文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
@@ -328,6 +391,9 @@ where
       inventory_verification_totals(plan).0,
       inventory_verification_totals(plan).1,
     )?;
+    if matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+      commit_client_state(&plan.plan_id, game_root, task_root, journal, &emit)?;
+    }
     commit_version(plan, game_root, task_root, journal, &emit)?;
     journal.repair = None;
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
@@ -688,7 +754,12 @@ fn finish_failed_repair<F>(
 where
   F: Fn(&TaskJournal),
 {
-  let _ = plan;
+  if let Err(rollback_error) = restore_repair_publication(&plan.plan_id, game_root, journal) {
+    journal.state = PackageTaskState::RecoveryRequired;
+    journal.error_message = Some(format!("{error}；恢复版本状态失败：{rollback_error}"));
+    let _ = persist_and_emit(task_root, journal, emit);
+    return Err(journal.error_message.clone().unwrap_or(error));
+  }
   if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
     journal.state = PackageTaskState::RollingBack;
     journal.error_message = Some(error.clone());
@@ -701,13 +772,13 @@ where
       return Err(combined);
     }
   }
-  cleanup_repair_files(repair_plan, game_root, task_root);
   if let Some(repair) = journal.repair.as_mut() {
     repair.apply = None;
   }
   journal.state = PackageTaskState::RepairRequired;
   journal.error_message = (!canceled).then_some(error.clone());
-  let _ = persist_and_emit(task_root, journal, emit);
+  persist_and_emit(task_root, journal, emit)?;
+  cleanup_repair_files(repair_plan, game_root, task_root);
   Err(if canceled { "应用更新已取消".to_string() } else { error })
 }
 
@@ -730,6 +801,7 @@ pub(crate) fn revert_incomplete_repair(
   task_root: &Path,
   journal: &mut TaskJournal,
 ) -> Result<(), String> {
+  restore_repair_publication(&repair_plan.plan_id, game_root, journal)?;
   if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
     if let Err(error) = rollback_repair(repair_plan, game_root, journal) {
       journal.state = PackageTaskState::RecoveryRequired;
@@ -739,7 +811,6 @@ pub(crate) fn revert_incomplete_repair(
       return Err(error);
     }
   }
-  cleanup_repair_files(repair_plan, game_root, task_root);
   if let Some(repair) = journal.repair.as_mut() {
     repair.apply = None;
   }
@@ -747,7 +818,9 @@ pub(crate) fn revert_incomplete_repair(
   journal.error_message = None;
   journal.current_file = None;
   journal.touch();
-  journal::persist(task_root, journal)
+  journal::persist(task_root, journal)?;
+  cleanup_repair_files(repair_plan, game_root, task_root);
+  Ok(())
 }
 
 /// 回滚修复提交的资源。
@@ -810,6 +883,10 @@ fn rollback_repair(
           fs::rename(path, incoming)
             .map_err(|error| format!("回滚修复新增资源失败：{}：{error}", step.name))?;
         }
+        Some(_)
+          if incoming
+            .as_ref()
+            .is_some_and(|path| file_matches(path, step.size, &step.md5).unwrap_or(false)) => {}
         Some(_) => return Err(format!("修复资源处于未知状态：{}", step.name)),
         None => {
           if let Some(incoming) = incoming {
@@ -867,6 +944,13 @@ fn prepare_transaction(
   task_root: &Path,
   journal: &mut TaskJournal,
 ) -> Result<(), String> {
+  journal::validate_fallback_activation(journal, plan)?;
+  if !journal.fallback_assets.is_empty() {
+    journal.requires_full_verification = true;
+  }
+  if observe_capable_main_anomalies(plan, game_root)? {
+    journal.requires_full_verification = true;
+  }
   let commit = file_commit_from_plan(plan)?;
   let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
   let original =
@@ -880,6 +964,39 @@ fn prepare_transaction(
     &commit, &original, &target, game_root, task_root, journal, true, false,
   )?;
   prepare_client_state(plan, game_root, journal)
+}
+
+/// 只观察 capable Main 计划的目标尺寸/存在性，不读取现有内容哈希。
+///
+/// 这些状态会使传统 Add/Modify 语义失去前提，但可以安全降级为 Repair
+/// 式覆盖；完整 inventory 校验延迟到提交后，以免给正常路径增加整库读取。
+fn observe_capable_main_anomalies(plan: &PersistedPlan, game_root: &Path) -> Result<bool, String> {
+  if plan.target != PackagePlanTarget::Main || plan.fallback.is_none() {
+    return Ok(false);
+  }
+  for asset in &plan.assets {
+    let current = resolve_optional_manifest_file(game_root, &asset.name)?;
+    match asset.action {
+      PlanAssetAction::Add if current.is_some() => return Ok(true),
+      PlanAssetAction::Modify => {
+        let Some(path) = current else {
+          return Ok(true);
+        };
+        let Some(source) = asset.source.as_ref() else {
+          return Ok(true);
+        };
+        let size = fs::metadata(&path)
+          .map_err(|error| format!("读取待更新资源状态失败：{}：{error}", asset.name))?
+          .len();
+        if size != source.size {
+          return Ok(true);
+        }
+      }
+      PlanAssetAction::Repair => {}
+      PlanAssetAction::Add => {}
+    }
+  }
+  Ok(false)
 }
 
 /// 返回应用的 incoming 暂存目录。
@@ -1694,13 +1811,17 @@ fn inspect_inventory_with_progress(
   for file in &plan.inventory {
     check_canceled(canceled)?;
     match resolve_optional_manifest_file(game_root, &file.name)? {
-      None => {
-        issues.push(InventoryIssue { message: format!("目标清单文件缺失：{}", file.name) })
-      }
+      None => issues.push(InventoryIssue {
+        name: file.name.clone(),
+        message: format!("目标清单文件缺失：{}", file.name),
+        repairable: true,
+      }),
       Some(path) => {
         if !file_matches(&path, file.size, &file.md5)? {
           issues.push(InventoryIssue {
-            message: format!("目标清单文件校验失败：{}", file.name)
+            name: file.name.clone(),
+            message: format!("目标清单文件校验失败：{}", file.name),
+            repairable: true,
           });
         }
       }
@@ -1713,7 +1834,9 @@ fn inspect_inventory_with_progress(
     check_canceled(canceled)?;
     if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
       issues.push(InventoryIssue {
+        name: deleted.name.clone(),
         message: format!("目标版本应删除的文件仍然存在：{}", deleted.name),
+        repairable: false,
       });
     }
     completed_count = completed_count.saturating_add(1).min(total_count);
@@ -2073,6 +2196,11 @@ fn rollback_file_transaction_with_progress(
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   for (index, step) in touched_steps.iter().rev().enumerate() {
+    // 修复子事务先恢复了它看到的实际前态，该前态可能正是主事务复验发现的坏文件。
+    let repaired_overlap = journal
+      .repair
+      .as_ref()
+      .is_some_and(|repair| repair.files.iter().any(|file| file.name == step.name));
     let target = resolve_optional_manifest_file(game_root, &step.name)?;
     let incoming = resolve_optional_manifest_file(&incoming_root, &step.name)?;
     let backup = resolve_optional_manifest_file(&backup_root, &step.name)?;
@@ -2158,12 +2286,14 @@ fn rollback_file_transaction_with_progress(
       CommitStepKind::Repair => match backup {
         Some(backup) => {
           if let Some(incoming_file) = &incoming {
-            if !file_matches(incoming_file, step.size, &step.md5)? {
+            if !repaired_overlap && !file_matches(incoming_file, step.size, &step.md5)? {
               return Err(format!("修复资源 incoming 完整性校验失败：{}", step.name));
             }
           }
           if let Some(target) = target {
-            if !file_matches(&target, step.size, &step.md5)? || incoming.is_some() {
+            if (!repaired_overlap && !file_matches(&target, step.size, &step.md5)?)
+              || incoming.is_some()
+            {
               return Err(format!("修复资源处于未知状态：{}", step.name));
             }
             let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
@@ -2177,16 +2307,23 @@ fn rollback_file_transaction_with_progress(
             .map_err(|error| format!("恢复待修复资源失败：{}：{error}", step.name))?;
         }
         None => match target {
-          Some(path) if file_matches(&path, step.size, &step.md5)? && incoming.is_none() => {
+          Some(path)
+            if (repaired_overlap || file_matches(&path, step.size, &step.md5)?)
+              && incoming.is_none() =>
+          {
             let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
             ensure_game_stopped()?;
             fs::rename(path, incoming)
               .map_err(|error| format!("回滚修复新增资源失败：{}：{error}", step.name))?;
           }
+          Some(_)
+            if incoming.as_ref().is_some_and(|path| {
+              repaired_overlap || file_matches(path, step.size, &step.md5).unwrap_or(false)
+            }) => {}
           Some(_) => return Err(format!("修复资源处于未知状态：{}", step.name)),
           None => {
             if let Some(incoming) = incoming {
-              if !file_matches(&incoming, step.size, &step.md5)? {
+              if !repaired_overlap && !file_matches(&incoming, step.size, &step.md5)? {
                 return Err(format!("修复资源 incoming 完整性校验失败：{}", step.name));
               }
             }
@@ -2269,6 +2406,41 @@ fn rollback_touched_steps<'a>(
 /// # 返回
 /// - `Ok(())`: 回滚成功。
 /// - `Err(String)`: 回滚失败的错误描述。
+/// 修复恢复必须先撤销版本发布，再撤销文件子事务；保留可重试的配置两端快照。
+pub(crate) fn restore_repair_publication(
+  plan_id: &str,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+) -> Result<(), String> {
+  let config_root = transaction_subdirectory(game_root, plan_id, "config")?;
+  let config = resolve_existing_manifest_file(game_root, "config.ini")?;
+  let current = fs::read(&config).map_err(|error| format!("读取修复配置失败：{error}"))?;
+  if sha256_bytes(&current) == apply(journal)?.config_target_sha256 {
+    write_verified_bytes(&config_root.join("target"), &current)?;
+  }
+  rollback_config(plan_id, game_root, journal)?;
+  let original = fs::read(&config).map_err(|error| format!("读取恢复配置失败：{error}"))?;
+  write_verified_bytes(&config_root.join("original"), &original)?;
+  if let Some(state) = apply(journal)?.client_state.clone() {
+    let root = transaction_subdirectory(game_root, plan_id, CLIENT_STATE_DIRECTORY)?;
+    if let Some(path) = resolve_optional_manifest_file(game_root, &state.marker_path)? {
+      let bytes = fs::read(path).map_err(|error| format!("读取修复客户端状态失败：{error}"))?;
+      if sha256_bytes(&bytes) == state.target_sha256 {
+        write_verified_bytes(&root.join("target"), &bytes)?;
+      }
+    }
+    rollback_client_state(plan_id, game_root, journal)?;
+    if state.original_sha256.is_some() {
+      let path = resolve_existing_manifest_file(game_root, &state.marker_path)?;
+      let bytes = fs::read(path).map_err(|error| format!("读取恢复客户端状态失败：{error}"))?;
+      write_verified_bytes(&root.join("original"), &bytes)?;
+    }
+    set_client_state_phase(journal, ConfigCommitPhase::Prepared);
+  }
+  apply_mut(journal)?.config_phase = ConfigCommitPhase::Prepared;
+  Ok(())
+}
+
 fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   let config = resolve_existing_manifest_file(game_root, "config.ini")?;
   let current = fs::read(&config).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
@@ -2673,14 +2845,17 @@ fn is_hex_md5(value: &str) -> bool {
 /// # 返回
 /// 提交步骤列表。
 fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
+  let capable_main = plan.target == PackagePlanTarget::Main && plan.fallback.is_some();
   let mut steps = plan
     .assets
     .iter()
     .map(|asset| CommitStep {
       kind: match asset.action {
+        PlanAssetAction::Add if capable_main => CommitStepKind::Repair,
         PlanAssetAction::Add => CommitStepKind::Add,
         // 修改型 patch 的差分源由 assembler 按 original_name 单独校验；提交阶段只需
         // 将已组装目标覆盖到游戏目录，目标原先不存在时也可以直接写入。
+        PlanAssetAction::Modify if capable_main => CommitStepKind::Repair,
         PlanAssetAction::Modify
           if plan.strategy == PackagePlanStrategy::Patch
             && matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) =>

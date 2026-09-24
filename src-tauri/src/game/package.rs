@@ -21,9 +21,10 @@ use super::{
   plan_lifecycle,
   planner::{
     PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, cached_chunk_matches_async,
-    default_install_concurrency, flush_cache_validation_index, hydrate_and_validate_apply_plan,
-    hydrate_and_validate_repair_plan, install_spool_window, invalidate_cached_download,
-    load_persisted_plan, persist_validated_plan, same_volume, scan_cached_downloads,
+    default_install_concurrency, fallback_asset_plan, flush_cache_validation_index,
+    hydrate_and_validate_apply_plan, hydrate_and_validate_repair_plan, install_spool_window,
+    invalidate_cached_download, load_persisted_plan, persist_validated_plan, same_volume,
+    scan_cached_downloads,
   },
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
@@ -1157,28 +1158,32 @@ fn spawn_install_assembly_worker(
 fn spawn_main_update_assembly_worker(
   plan: Arc<PersistedPlan>,
   asset_index: usize,
+  fallback: bool,
   game_root: PathBuf,
   task_root: PathBuf,
   output_root: PathBuf,
   canceled: Arc<AtomicBool>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
-) -> tauri::async_runtime::JoinHandle<Result<(), String>> {
+) -> tauri::async_runtime::JoinHandle<Result<assembler::AssetAssemblyOutcome, String>> {
   let slot = assembly_worker_slot(&plan.plan_id);
   slot.active.fetch_add(1, Ordering::AcqRel);
   let worker_slot = Arc::clone(&slot);
   tauri::async_runtime::spawn_blocking(move || {
     let _done = AssemblyWorkerDoneGuard { slot: worker_slot };
-    assembler::assemble_plan_asset_to_root(
-      &plan,
-      asset_index,
+    let fallback_plan = fallback.then(|| fallback_asset_plan(&plan, asset_index)).transpose()?;
+    let outcome = assembler::assemble_plan_asset_with_source_outcome(
+      fallback_plan.as_ref().unwrap_or(&plan),
+      if fallback { 0 } else { asset_index },
       &game_root,
       &task_root,
       &output_root,
       &canceled,
       Some(&telemetry),
     )?;
-    evidence::capture_and_persist_asset_evidence(&task_root, &plan, asset_index, &output_root)?;
-    Ok(())
+    if matches!(outcome, assembler::AssetAssemblyOutcome::Assembled) {
+      evidence::capture_and_persist_asset_evidence(&task_root, &plan, asset_index, &output_root)?;
+    }
+    Ok(outcome)
   })
 }
 
@@ -2616,12 +2621,18 @@ impl GamePackageManager {
     let download_client = create_http_client()?;
     let scan_task_id = plan.plan_id.clone();
     let scan_cache_root = cache_root.clone();
-    let scan_plan = Arc::clone(&plan);
+    let mut journal = journal::load_or_create(&task_root, &plan)?;
+    let active_downloads = active_update_downloads(&plan, &journal.fallback_assets)?;
+    update_download_totals(&mut journal, &active_downloads)?;
+    journal.fallback_download_bytes = journal
+      .total_bytes
+      .saturating_sub(plan.downloads.iter().map(|item| item.compressed_size).sum::<u64>());
+    let scan_downloads = active_downloads.clone();
     let scan_progress = recovery_progress.clone();
     let cache_scan = tauri::async_runtime::spawn_blocking(move || {
       scan_cached_downloads(
         &scan_cache_root,
-        &scan_plan.downloads,
+        &scan_downloads,
         |scanned_objects, total_objects, confirmed_bytes| {
           if let Some(channel) = &scan_progress {
             let _ = channel.send(PackageRecoveryProgress {
@@ -2672,7 +2683,6 @@ impl GamePackageManager {
       }
     }
 
-    let mut journal = journal::load_or_create(&task_root, &plan)?;
     journal.ensure_update_commit_progress(&plan);
     if journal.state.blocks_launch() {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
@@ -2706,8 +2716,8 @@ impl GamePackageManager {
         task_id: plan.plan_id.clone(),
         step: 4,
         total_steps: 4,
-        scanned_objects: plan.downloads.len(),
-        total_objects: plan.downloads.len(),
+        scanned_objects: active_downloads.len(),
+        total_objects: active_downloads.len(),
         confirmed_bytes: journal.downloaded_bytes,
         message: "缓存核对完成，正在继续任务".to_string(),
       });
@@ -4108,6 +4118,145 @@ fn restore_prep_staged_audio_deletions(
   journal::persist(task_root, journal)?;
   Ok(())
 }
+struct UpdateSpaceReservation {
+  cache_root: PathBuf,
+  game_root: PathBuf,
+  cache_remaining: u64,
+  incoming_remaining: u64,
+}
+
+static UPDATE_SPACE_RESERVATIONS: LazyLock<Mutex<HashMap<String, UpdateSpaceReservation>>> =
+  LazyLock::new(|| Mutex::new(HashMap::new()));
+
+struct UpdateSpaceGuard(String);
+
+impl Drop for UpdateSpaceGuard {
+  fn drop(&mut self) {
+    if let Ok(mut values) = UPDATE_SPACE_RESERVATIONS.lock() {
+      values.remove(&self.0);
+    }
+  }
+}
+
+/// 同卷主任务共享尚未完成的写入预算。完成对象后释放预留；部分写入暂按保守上界保留。
+fn reserve_update_space(task_id: &str, candidate: UpdateSpaceReservation) -> Result<(), String> {
+  let mut values =
+    UPDATE_SPACE_RESERVATIONS.lock().map_err(|_| "更新空间预算锁已损坏".to_string())?;
+  check_update_space(&values, task_id, &candidate)?;
+  values.insert(task_id.to_string(), candidate);
+  Ok(())
+}
+
+fn check_update_space(
+  values: &HashMap<String, UpdateSpaceReservation>,
+  task_id: &str,
+  candidate: &UpdateSpaceReservation,
+) -> Result<(), String> {
+  for root in [&candidate.cache_root, &candidate.game_root] {
+    let required = values
+      .iter()
+      .filter(|(id, _)| id.as_str() != task_id)
+      .map(|(_, value)| value)
+      .chain(std::iter::once(candidate))
+      .try_fold(SAFETY_MARGIN_BYTES, |sum, value| {
+        let cache = if same_volume(root, &value.cache_root) { value.cache_remaining } else { 0 };
+        let incoming =
+          if same_volume(root, &value.game_root) { value.incoming_remaining } else { 0 };
+        sum
+          .checked_add(cache)
+          .and_then(|sum| sum.checked_add(incoming))
+          .ok_or_else(|| "更新空间预算溢出".to_string())
+      })?;
+    let available =
+      fs2::available_space(root).map_err(|error| format!("读取更新磁盘空间失败：{error}"))?;
+    if available < required {
+      return Err(format!(
+        "更新磁盘空间不足：包含并发任务至少还需 {required} 字节，可用 {available} 字节；释放空间后恢复任务"
+      ));
+    }
+  }
+  Ok(())
+}
+
+fn release_update_space(task_id: &str, cache_bytes: u64, incoming_bytes: u64) {
+  if let Ok(mut values) = UPDATE_SPACE_RESERVATIONS.lock()
+    && let Some(value) = values.get_mut(task_id)
+  {
+    value.cache_remaining = value.cache_remaining.saturating_sub(cache_bytes);
+    value.incoming_remaining = value.incoming_remaining.saturating_sub(incoming_bytes);
+  }
+}
+
+/// 激活预算修改由流水线的共享互斥锁串行化，避免并发回退丢失追加预留。
+fn grow_update_space(task_id: &str, additional: u64) -> Result<(), String> {
+  let mut values =
+    UPDATE_SPACE_RESERVATIONS.lock().map_err(|_| "更新空间预算锁已损坏".to_string())?;
+  let candidate = {
+    let value = values.get(task_id).ok_or_else(|| "更新任务缺少空间预留".to_string())?;
+    UpdateSpaceReservation {
+      cache_root: value.cache_root.clone(),
+      game_root: value.game_root.clone(),
+      cache_remaining: value
+        .cache_remaining
+        .checked_add(additional)
+        .ok_or_else(|| "更新空间预算溢出".to_string())?,
+      incoming_remaining: value.incoming_remaining,
+    }
+  };
+  check_update_space(&values, task_id, &candidate)?;
+  values.insert(task_id.to_string(), candidate);
+  Ok(())
+}
+
+/// 首选对象始终保留；只有持久化激活的备用对象才参与缓存扫描和统计。
+fn active_update_downloads(
+  plan: &PersistedPlan,
+  fallback_assets: &[usize],
+) -> Result<Vec<PlanDownload>, String> {
+  let mut downloads = plan.downloads.clone();
+  let mut keys = downloads.iter().map(|item| item.cache_key.clone()).collect::<HashSet<_>>();
+  if fallback_assets.is_empty() {
+    return Ok(downloads);
+  }
+  if plan.target != PackagePlanTarget::Main {
+    return Err("非正式更新任务不能激活备用资源".to_string());
+  }
+  let fallback =
+    plan.fallback.as_ref().ok_or_else(|| "旧资源计划不支持单文件回退，请重新评估".to_string())?;
+  let catalog =
+    fallback.downloads.iter().map(|item| (item.id.as_str(), item)).collect::<HashMap<_, _>>();
+  let mut seen_assets = HashSet::new();
+  for index in fallback_assets {
+    if !seen_assets.insert(*index) {
+      return Err("资源回退记录包含重复索引".to_string());
+    }
+    let asset = fallback.assets.get(*index).ok_or_else(|| "资源回退索引越界".to_string())?;
+    if plan.assets.get(*index).is_none_or(|primary| primary.name != asset.name) {
+      return Err("备用资源与原计划不匹配".to_string());
+    }
+    for chunk in &asset.chunks {
+      let item =
+        catalog.get(chunk.id.as_str()).ok_or_else(|| "备用资源缺少下载对象".to_string())?;
+      if keys.insert(item.cache_key.clone()) {
+        downloads.push((*item).clone());
+      }
+    }
+  }
+  Ok(downloads)
+}
+
+fn update_download_totals(
+  journal: &mut TaskJournal,
+  downloads: &[PlanDownload],
+) -> Result<(), String> {
+  journal.total_bytes = downloads.iter().try_fold(0_u64, |sum, item| {
+    sum.checked_add(item.compressed_size).ok_or_else(|| "资源下载预算溢出".to_string())
+  })?;
+  journal.total_count = downloads.len();
+  journal.planned_steps = downloads.len();
+  Ok(())
+}
+
 /// 按计划策略映射每个配音资源所需的下载对象索引。
 fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usize>>, String> {
   let mut downloads = HashMap::with_capacity(plan.downloads.len());
@@ -4161,7 +4310,6 @@ fn prepare_audio_asset_job(
   asset_index: usize,
   dependencies: &[Vec<usize>],
   available_downloads: &mut HashSet<usize>,
-  cache_root: &Path,
 ) -> AudioAssetJob {
   let pending = dependencies
     .get(asset_index)
@@ -4173,10 +4321,6 @@ fn prepare_audio_asset_job(
         return None;
       }
       let download = plan.downloads.get(index)?.clone();
-      if cached_chunk_matches(cache_root, &download) {
-        available_downloads.insert(index);
-        return None;
-      }
       Some((index, download))
     })
     .collect();
@@ -4201,12 +4345,13 @@ async fn assemble_audio_asset(
   output_root: PathBuf,
   plan: Arc<PersistedPlan>,
   asset_index: usize,
+  fallback: bool,
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   assembly_slots: Arc<Semaphore>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
   overlay: Arc<AudioLiveAssemblyOverlay>,
-) -> Result<(), String> {
+) -> Result<assembler::AssetAssemblyOutcome, String> {
   let permit = match assembly_slots.acquire_owned().await {
     Ok(permit) => permit,
     Err(error) => return Err(format!("获取配音组装并发槽位失败：{error}")),
@@ -4224,6 +4369,7 @@ async fn assemble_audio_asset(
     spawn_main_update_assembly_worker(
       Arc::clone(&plan),
       asset_index,
+      fallback,
       game_root,
       task_root.clone(),
       output_root,
@@ -4252,7 +4398,7 @@ async fn assemble_audio_asset(
         asset_index,
         &worker_output_root,
       )?;
-      Ok::<(), String>(())
+      Ok::<_, String>(assembler::AssetAssemblyOutcome::Assembled)
     })
   };
   let result = worker
@@ -4301,7 +4447,7 @@ async fn run_audio_asset_job(
   let needs_download = !pending.is_empty();
   let result = async {
     if needs_download {
-      let _focus = download_focus
+      let _focus = Arc::clone(&download_focus)
         .acquire_owned()
         .await
         .map_err(|error| format!("获取配音下载焦点失败：{error}"))?;
@@ -4320,7 +4466,9 @@ async fn run_audio_asset_job(
           let download_guard = {
             let mut values = guards.lock().await;
             Arc::clone(
-              values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+              values
+                .entry(download.cache_key.clone())
+                .or_insert_with(|| Arc::new(AsyncMutex::new(()))),
             )
           };
           let _download_guard = download_guard.lock().await;
@@ -4358,6 +4506,7 @@ async fn run_audio_asset_job(
             let summary = {
               let mut value = journal.lock().await;
               if completed_cache_keys.lock().unwrap().insert(downloaded.cache_key.clone()) {
+                release_update_space(&plan.plan_id, downloaded.bytes, 0);
                 value.owned_cache_files.push(downloaded.cache_key);
                 value.committed_step = value.owned_cache_files.len();
                 value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
@@ -4379,25 +4528,168 @@ async fn run_audio_asset_job(
           }
           Ok((download_index, None)) => {
             available_downloads.lock().unwrap().insert(download_index);
+            let download = &plan.downloads[download_index];
+            let mut value = journal.lock().await;
+            if completed_cache_keys.lock().unwrap().insert(download.cache_key.clone()) {
+              value.owned_cache_files.push(download.cache_key.clone());
+              value.committed_step = value.owned_cache_files.len();
+              value.downloaded_bytes =
+                value.downloaded_bytes.saturating_add(download.compressed_size);
+              release_update_space(&plan.plan_id, download.compressed_size, 0);
+              value.touch();
+              journal::persist(&task_root, &value)?;
+            }
           }
           Err(error) => return Err(error),
         }
       }
     }
-    assemble_audio_asset(
-      events,
-      task_root,
-      game_root.clone(),
-      output_root,
-      plan,
-      asset_index,
-      journal,
-      canceled,
-      assembly_slots,
-      telemetry,
-      overlay,
-    )
-    .await
+    let resumed_fallback = journal.lock().await.fallback_assets.contains(&asset_index);
+    let outcome = if resumed_fallback {
+      assembler::AssetAssemblyOutcome::FallbackRequired(
+        assembler::AssetFallbackReason::SourceMismatch,
+      )
+    } else {
+      assemble_audio_asset(
+        events.clone(),
+        task_root.clone(),
+        game_root.clone(),
+        output_root.clone(),
+        Arc::clone(&plan),
+        asset_index,
+        false,
+        Arc::clone(&journal),
+        Arc::clone(&canceled),
+        Arc::clone(&assembly_slots),
+        Arc::clone(&telemetry),
+        Arc::clone(&overlay),
+      )
+      .await?
+    };
+    if let assembler::AssetAssemblyOutcome::FallbackRequired(reason) = outcome {
+      let fallback_plan = fallback_asset_plan(&plan, asset_index)?;
+      {
+        let activation_guard = {
+          let mut guards = download_guards.lock().await;
+          Arc::clone(
+            guards
+              .entry("fallback-activation".to_string())
+              .or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+          )
+        };
+        let _activation_guard = activation_guard.lock().await;
+        let activated_before = journal.lock().await.fallback_assets.clone();
+        if !activated_before.contains(&asset_index) {
+          let before = active_update_downloads(&plan, &activated_before)?;
+          let mut activated = activated_before;
+          activated.push(asset_index);
+          let active = active_update_downloads(&plan, &activated)?;
+          let old_keys = before.iter().map(|item| item.cache_key.as_str()).collect::<HashSet<_>>();
+          let mut additional = 0_u64;
+          let mut cached_new = Vec::new();
+          for item in active.iter().filter(|item| !old_keys.contains(item.cache_key.as_str())) {
+            if cached_chunk_matches_async(&cache_root, item).await {
+              cached_new.push(item);
+            } else {
+              additional = additional
+                .checked_add(item.compressed_size)
+                .ok_or_else(|| "备用下载预算溢出".to_string())?;
+            }
+          }
+          grow_update_space(&plan.plan_id, additional)?;
+          let mut value = journal.lock().await;
+          value.fallback_assets = activated;
+          value.requires_full_verification = true;
+          update_download_totals(&mut value, &active)?;
+          value.fallback_download_bytes = value
+            .total_bytes
+            .saturating_sub(plan.downloads.iter().map(|item| item.compressed_size).sum::<u64>());
+          for item in cached_new {
+            if completed_cache_keys.lock().unwrap().insert(item.cache_key.clone()) {
+              value.owned_cache_files.push(item.cache_key.clone());
+              value.downloaded_bytes = value.downloaded_bytes.saturating_add(item.compressed_size);
+            }
+          }
+          value.committed_step = value.owned_cache_files.len();
+          value.touch();
+          // 空间预留与激活串行化；持久化成功前不允许下载备用对象。
+          journal::persist(&task_root, &value)?;
+        }
+        let mut value = journal.lock().await;
+        value.download_current_file = Some(format!("回退下载：{}", plan.assets[asset_index].name));
+        events.publish_progress(overlay_audio_summary(&value, &telemetry, &overlay));
+      }
+      log::info!("[game-update] 文件回退：{} reason={reason:?}", plan.assets[asset_index].name);
+      let _focus = download_focus
+        .acquire_owned()
+        .await
+        .map_err(|error| format!("获取回退下载槽失败：{error}"))?;
+      for download in &fallback_plan.downloads {
+        if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
+          return Err("资源回退已停止".to_string());
+        }
+        let guard = {
+          let mut guards = download_guards.lock().await;
+          Arc::clone(
+            guards
+              .entry(download.cache_key.clone())
+              .or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+          )
+        };
+        let _guard = guard.lock().await;
+        if !cached_chunk_matches_async(&cache_root, download).await {
+          let _permit = Arc::clone(&download_slots)
+            .acquire_owned()
+            .await
+            .map_err(|error| format!("获取回退下载并发槽失败：{error}"))?;
+          let control = DownloadControl::new(
+            &plan.plan_id,
+            &canceled,
+            &paused,
+            &limiter,
+            DownloadDurability::Strict,
+          );
+          let control = match &download_telemetry {
+            Some(telemetry) => control.with_telemetry(Arc::clone(telemetry)),
+            None => control,
+          };
+          download_object(&download_client, &cache_root, download, control).await?;
+        }
+        let mut value = journal.lock().await;
+        if completed_cache_keys.lock().unwrap().insert(download.cache_key.clone()) {
+          value.owned_cache_files.push(download.cache_key.clone());
+          value.committed_step = value.owned_cache_files.len();
+          value.downloaded_bytes = value.downloaded_bytes.saturating_add(download.compressed_size);
+          release_update_space(&plan.plan_id, download.compressed_size, 0);
+        }
+        value.touch();
+        journal::persist(&task_root, &value)?;
+        events.publish_progress(overlay_audio_summary(&value, &telemetry, &overlay));
+      }
+      drop(_focus);
+      match assemble_audio_asset(
+        events,
+        task_root,
+        game_root,
+        output_root,
+        plan,
+        asset_index,
+        true,
+        journal,
+        canceled,
+        assembly_slots,
+        telemetry,
+        overlay,
+      )
+      .await?
+      {
+        assembler::AssetAssemblyOutcome::Assembled => {}
+        assembler::AssetAssemblyOutcome::FallbackRequired(_) => {
+          return Err("完整文件回退仍依赖旧文件，请重新评估计划".to_string());
+        }
+      }
+    }
+    Ok(())
   }
   .await;
   AudioAssetJobCompletion { asset_index, needs_download, result }
@@ -4728,6 +5020,28 @@ async fn run_streaming_prepare_task(
     .enumerate()
     .filter(|(index, _)| !completed_assets.contains(index))
     .fold(0_u64, |total, (_, asset)| total.saturating_add(asset.size));
+  let _space_guard = if plan.fallback.is_some() {
+    let cache_remaining = {
+      let value = journal.lock().await;
+      value.total_bytes.saturating_sub(value.downloaded_bytes)
+    };
+    if let Err(error) = reserve_update_space(
+      &plan.plan_id,
+      UpdateSpaceReservation {
+        cache_root: cache_root.clone(),
+        game_root: game_root.clone(),
+        cache_remaining,
+        incoming_remaining: remaining_incoming_bytes,
+      },
+    ) {
+      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+        .await;
+      return;
+    }
+    Some(UpdateSpaceGuard(plan.plan_id.clone()))
+  } else {
+    None
+  };
   let required = remaining_incoming_bytes.saturating_add(SAFETY_MARGIN_BYTES);
   let available = match fs2::available_space(&game_root) {
     Ok(available) => available,
@@ -4916,7 +5230,7 @@ async fn run_streaming_prepare_task(
       {
         let job = {
           let mut available = available_downloads.lock().unwrap();
-          prepare_audio_asset_job(&plan, asset_index, &dependencies, &mut available, &cache_root)
+          prepare_audio_asset_job(&plan, asset_index, &dependencies, &mut available)
         };
         let needs_download = !job.pending.is_empty();
         if needs_download && inflight_downloads >= max_in_flight {
@@ -4975,6 +5289,7 @@ async fn run_streaming_prepare_task(
             completed_assets.insert(completion.asset_index);
             if let Some(asset) = plan.assets.get(completion.asset_index) {
               assembly_overlay.account_completed(asset.size);
+              release_update_space(&plan.plan_id, 0, asset.size);
             }
             let completed_bytes = completed_assets
               .iter()
@@ -7239,12 +7554,26 @@ async fn run_repair(
   app_handle: AppHandle,
   task_root: PathBuf,
   game_root: PathBuf,
-  installation: GameInstallation,
+  mut installation: GameInstallation,
   plan: PersistedPlan,
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   files: Vec<super::planner::PlanFile>,
 ) -> Result<(), String> {
+  {
+    let mut value = journal.lock().await;
+    if let Err(error) = committer::restore_repair_publication(&plan.plan_id, &game_root, &mut value)
+    {
+      value.state = PackageTaskState::RecoveryRequired;
+      value.error_message = Some(error.clone());
+      value.touch();
+      journal::persist(&task_root, &value)?;
+      return Err(error);
+    }
+    value.touch();
+    journal::persist(&task_root, &value)?;
+    installation.version = plan.source_tag.clone();
+  }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
   let branches = get_game_branches(&client, scheme).await?;
@@ -7272,6 +7601,30 @@ async fn run_repair(
     .filter(|download| !cached_chunk_matches(&cache_root, download))
     .cloned()
     .collect::<Vec<_>>();
+  let _space_guard = if plan.fallback.is_some() {
+    let download_remaining = pending.iter().try_fold(0_u64, |sum, item| {
+      sum.checked_add(item.compressed_size).ok_or_else(|| "修复下载预算溢出".to_string())
+    })?;
+    let incoming_remaining = repair_plan.assets.iter().try_fold(0_u64, |sum, item| {
+      sum.checked_add(item.size).ok_or_else(|| "修复组装预算溢出".to_string())
+    })?;
+    // 修复先在任务卷 staging 组装，再复制到游戏卷 repair-incoming。
+    let cache_remaining = download_remaining
+      .checked_add(incoming_remaining)
+      .ok_or_else(|| "修复暂存预算溢出".to_string())?;
+    reserve_update_space(
+      &plan.plan_id,
+      UpdateSpaceReservation {
+        cache_root: cache_root.clone(),
+        game_root: game_root.clone(),
+        cache_remaining,
+        incoming_remaining,
+      },
+    )?;
+    Some(UpdateSpaceGuard(plan.plan_id.clone()))
+  } else {
+    None
+  };
   if !pending.is_empty() {
     {
       let mut journal_value = journal.lock().await;
@@ -7303,7 +7656,8 @@ async fn run_repair(
     .buffer_unordered(default_concurrency());
     futures_util::pin_mut!(downloads);
     while let Some(result) = downloads.next().await {
-      result?;
+      let downloaded = result?;
+      release_update_space(&plan.plan_id, downloaded.bytes, 0);
       if canceled.load(Ordering::Acquire) {
         return Err("应用更新已取消".to_string());
       }

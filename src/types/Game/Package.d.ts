@@ -209,6 +209,12 @@ declare namespace TGApp.Game.Package {
     totalBytes: number;
     completedCount: number;
     totalCount: number;
+    /** 已切换为完整文件下载的资源数。 */
+    fallbackAssetCount: number;
+    /** 去重后的备用对象追加下载预算（含缓存命中）。 */
+    fallbackDownloadBytes: number;
+    /** 本次更新需要完整目标清单校验。 */
+    requiresFullVerification: boolean;
     assemblyCompletedCount: number;
     assemblyTotalCount: number;
     assemblyCompletedBytes: number;

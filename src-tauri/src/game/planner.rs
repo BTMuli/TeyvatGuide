@@ -32,7 +32,8 @@ use tauri::ipc::Channel;
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 6;
+const LEGACY_PLAN_SCHEMA_VERSION: u32 = 6;
+const PLAN_SCHEMA_VERSION: u32 = 7;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MIN_INSTALL_SPOOL_WINDOW_BYTES: u64 = 256 * 1024 * 1024;
 const MIN_INSTALL_CONCURRENCY: usize = 4;
@@ -156,11 +157,23 @@ pub(crate) struct PersistedPlan {
   pub(crate) assets: Vec<PlanAsset>,
   pub(crate) delete_files: Vec<PlanDelete>,
   pub(crate) inventory: Vec<PlanFile>,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub(crate) fallback: Option<PlanFallback>,
   #[serde(default)]
   pub(crate) install_overlay: Option<InstallOverlay>,
   #[serde(default)]
   pub(crate) audio_selection: Option<PlanAudioSelection>,
   pub(crate) created_at: String,
+}
+
+/// Immutable, source-free chunk metadata for retrying one asset when the
+/// preferred update path cannot use the locally installed source.
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PlanFallback {
+  pub(crate) manifest_digest: String,
+  pub(crate) downloads: Vec<PlanDownload>,
+  pub(crate) assets: Vec<PlanAsset>,
 }
 
 /// 已安装游戏语音包变更计划绑定的源集合与目标集合。
@@ -329,6 +342,7 @@ pub(crate) struct PlanParts {
   assets: Vec<PlanAsset>,
   delete_files: Vec<PlanDelete>,
   inventory: Vec<PlanFile>,
+  fallback: Option<PlanFallback>,
 }
 
 /// 请求远端清单，生成可执行的 patch 或 manifest-diff 计划并原子写入应用数据目录。
@@ -371,6 +385,7 @@ pub async fn create_and_persist_plan(
     target_branch,
     source_tag,
     &installation.audio_languages,
+    target == PackagePlanTarget::Main,
   )
   .await?;
   report_plan_progress(on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
@@ -571,6 +586,11 @@ pub(crate) fn persist_plan_parts(
     assets: parts.assets,
     delete_files: parts.delete_files,
     inventory: parts.inventory,
+    fallback: if target == PackagePlanTarget::Main && source_tag != target_tag {
+      parts.fallback
+    } else {
+      None
+    },
     install_overlay: None,
     audio_selection,
     created_at: Utc::now().to_rfc3339(),
@@ -733,6 +753,7 @@ fn persist_install_plan_from_decoded(
     assets: parts.assets,
     delete_files: Vec::new(),
     inventory: parts.inventory,
+    fallback: None,
     install_overlay: Some(overlay),
     audio_selection: None,
     created_at: Utc::now().to_rfc3339(),
@@ -888,6 +909,7 @@ fn build_full_install_plan(target: DecodedBuild) -> Result<PlanParts, String> {
     assets,
     delete_files: Vec::new(),
     inventory,
+    fallback: None,
   })
 }
 
@@ -1119,12 +1141,17 @@ pub(crate) async fn hydrate_and_validate_plan(
     return Err("资源计划目标版本已变化，请重新评估".to_string());
   }
   let client = create_http_client()?;
+  let include_fallback = plan_requires_fallback(&plan);
   let fresh = match plan.strategy {
     PackagePlanStrategy::Patch => {
-      let build =
-        get_decoded_patch_build(&client, target_branch, source_tag, &installation.audio_languages)
-          .await?;
-      build_patch_plan(build, source_tag)?
+      hydrate_patch_parts(
+        &client,
+        target_branch,
+        source_tag,
+        &installation.audio_languages,
+        include_fallback,
+      )
+      .await?
     }
     PackagePlanStrategy::ManifestDiff => {
       build_manifest_plan(
@@ -1132,6 +1159,7 @@ pub(crate) async fn hydrate_and_validate_plan(
         &branches.main.with_tag(source_tag),
         target_branch,
         &installation.audio_languages,
+        include_fallback,
       )
       .await?
     }
@@ -1144,12 +1172,14 @@ pub(crate) async fn hydrate_and_validate_plan(
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
     || fresh.inventory != plan.inventory
+    || !fallbacks_match(fresh.fallback.as_ref(), plan.fallback.as_ref())
   {
     return Err("远端资源清单已变化，请重新评估".to_string());
   }
   plan.downloads = fresh.downloads;
   plan.assets = fresh.assets;
   plan.inventory = fresh.inventory;
+  plan.fallback = fresh.fallback;
   Ok(plan)
 }
 
@@ -1191,12 +1221,17 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     });
   }
   let client = create_http_client()?;
+  let include_fallback = plan_requires_fallback(&plan);
   let fresh = match plan.strategy {
     PackagePlanStrategy::Patch => {
-      let build =
-        get_decoded_patch_build(&client, &branches.main, source_tag, &installation.audio_languages)
-          .await?;
-      build_patch_plan(build, source_tag)?
+      hydrate_patch_parts(
+        &client,
+        &branches.main,
+        source_tag,
+        &installation.audio_languages,
+        include_fallback,
+      )
+      .await?
     }
     PackagePlanStrategy::ManifestDiff => {
       build_manifest_plan(
@@ -1204,6 +1239,7 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
         &branches.main.with_tag(source_tag),
         &branches.main,
         &installation.audio_languages,
+        include_fallback,
       )
       .await?
     }
@@ -1216,12 +1252,14 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
     || fresh.inventory != plan.inventory
+    || !fallbacks_match(fresh.fallback.as_ref(), plan.fallback.as_ref())
   {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
   plan.downloads = fresh.downloads;
   plan.assets = fresh.assets;
   plan.inventory = fresh.inventory;
+  plan.fallback = fresh.fallback;
   Ok(plan)
 }
 
@@ -1242,7 +1280,7 @@ async fn hydrate_audio_plan(
   branches: &GameBranches,
   mut plan: PersistedPlan,
 ) -> Result<PersistedPlan, String> {
-  if plan.schema_version != PLAN_SCHEMA_VERSION
+  if !is_supported_plan_schema(plan.schema_version)
     || plan.strategy != PackagePlanStrategy::ManifestDiff
     || plan.source_tag.as_deref() != Some(branches.main.tag.as_str())
     || plan.target_tag != branches.main.tag
@@ -1356,6 +1394,14 @@ fn overlay_repair_parts(
   if parts.inventory != plan.inventory {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
+  if let Some(fallback) = &plan.fallback {
+    if parts.manifest_digest != fallback.manifest_digest {
+      return Err("完整目标资源清单已变化，请重新评估".to_string());
+    }
+    // 子计划仅在内存中用于无源修复，独立绑定完整目标清单，不再是增量更新计划。
+    plan.source_tag = Some(plan.target_tag.clone());
+    plan.manifest_digest = parts.manifest_digest.clone();
+  }
   if plan.target != PackagePlanTarget::Audio
     && plan.strategy == PackagePlanStrategy::ManifestDiff
     && parts.manifest_digest != plan.manifest_digest
@@ -1365,6 +1411,7 @@ fn overlay_repair_parts(
   plan.downloads = parts.downloads;
   plan.assets = parts.assets;
   plan.delete_files = Vec::new();
+  plan.fallback = None;
   plan.strategy = PackagePlanStrategy::ManifestDiff;
   validate_persisted_plan(&plan, &plan.plan_id)?;
   Ok(plan)
@@ -1425,6 +1472,92 @@ fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
     && plan.assets.iter().all(|asset| asset.action == PlanAssetAction::Repair)
 }
 
+/// 判断当前计划是否为需要冻结完整目标 chunk 回退目录的新主版本更新。
+fn plan_requires_fallback(plan: &PersistedPlan) -> bool {
+  plan.schema_version == PLAN_SCHEMA_VERSION
+    && plan.target == PackagePlanTarget::Main
+    && plan.source_tag.as_deref().is_some_and(|source_tag| source_tag != plan.target_tag)
+    && !is_integrity_repair_plan(plan)
+}
+
+/// 重新构造 patch 首选路径，并按需补齐完整目标回退目录。
+async fn hydrate_patch_parts(
+  client: &reqwest::Client,
+  target_branch: &super::hoyoplay::BranchDescriptor,
+  source_tag: &str,
+  audio_languages: &[String],
+  include_fallback: bool,
+) -> Result<PlanParts, String> {
+  let build = get_decoded_patch_build(client, target_branch, source_tag, audio_languages).await?;
+  let parts = build_patch_plan(build, source_tag)?;
+  if include_fallback {
+    let target = get_decoded_build(client, target_branch, audio_languages).await?;
+    attach_fallback(parts, &target)
+  } else {
+    Ok(parts)
+  }
+}
+
+/// 比较首选计划重新生成的回退元数据，且不信任持久化的下载签名字段。
+fn fallbacks_match(left: Option<&PlanFallback>, right: Option<&PlanFallback>) -> bool {
+  match (left, right) {
+    (None, None) => true,
+    (Some(left), Some(right)) => {
+      left.manifest_digest == right.manifest_digest
+        && downloads_match(&left.downloads, &right.downloads)
+        && assets_match(&left.assets, &right.assets)
+    }
+    _ => false,
+  }
+}
+
+/// 为回退组装构造一个只包含单个目标资源的临时计划。
+///
+/// 该计划沿用原计划 ID 与目标清单摘要，且不再携带回退目录，避免组装阶段
+/// 将同一目录递归解释为新的备用路径。
+pub(crate) fn fallback_asset_plan(
+  plan: &PersistedPlan,
+  index: usize,
+) -> Result<PersistedPlan, String> {
+  let fallback =
+    plan.fallback.as_ref().ok_or_else(|| "资源计划没有可用的完整目标回退目录".to_string())?;
+  if fallback.assets.len() != plan.assets.len() {
+    return Err("资源计划回退资源与首选资源数量不一致".to_string());
+  }
+  let asset =
+    fallback.assets.get(index).cloned().ok_or_else(|| "资源计划回退资源索引无效".to_string())?;
+  let ids = asset.chunks.iter().map(|chunk| chunk.id.as_str()).collect::<HashSet<_>>();
+  let downloads = fallback
+    .downloads
+    .iter()
+    .filter(|download| ids.contains(download.id.as_str()))
+    .cloned()
+    .collect::<Vec<_>>();
+  if downloads.len() != ids.len() {
+    return Err("资源计划回退资源缺少下载对象".to_string());
+  }
+  Ok(PersistedPlan {
+    schema_version: plan.schema_version,
+    plan_id: plan.plan_id.clone(),
+    installation_id: plan.installation_id.clone(),
+    source_scheme: plan.source_scheme,
+    target_scheme: plan.target_scheme,
+    target: plan.target,
+    source_tag: plan.source_tag.clone(),
+    target_tag: plan.target_tag.clone(),
+    manifest_digest: plan.manifest_digest.clone(),
+    strategy: PackagePlanStrategy::ManifestDiff,
+    downloads,
+    assets: vec![asset],
+    delete_files: Vec::new(),
+    inventory: Vec::new(),
+    fallback: None,
+    install_overlay: None,
+    audio_selection: None,
+    created_at: plan.created_at.clone(),
+  })
+}
+
 /// 判断两个下载列表是否一致。
 ///
 /// @since Beta v0.12.1
@@ -1445,6 +1578,12 @@ fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
         && left.compressed_size == right.compressed_size
         && left.decompressed_size == right.decompressed_size
         && left.encoding == right.encoding
+        && (left.url_prefix.is_empty()
+          || right.url_prefix.is_empty()
+          || left.url_prefix == right.url_prefix)
+        && (left.url_suffix.is_empty()
+          || right.url_suffix.is_empty()
+          || left.url_suffix == right.url_suffix)
         && left.range_start == right.range_start
         && left.range_length == right.range_length
     })
@@ -1493,6 +1632,7 @@ async fn build_executable_plan(
   target_branch: &super::hoyoplay::BranchDescriptor,
   source_tag: &str,
   audio_languages: &[String],
+  include_fallback: bool,
 ) -> Result<PlanParts, String> {
   if target_branch.diff_tags.iter().any(|tag| tag == source_tag) {
     match get_decoded_patch_build(client, target_branch, source_tag, audio_languages)
@@ -1503,6 +1643,12 @@ async fn build_executable_plan(
         if !parts.inventory.is_empty()
           && (!parts.assets.is_empty() || !parts.delete_files.is_empty()) =>
       {
+        let parts = if include_fallback {
+          let target = get_decoded_build(client, target_branch, audio_languages).await?;
+          attach_fallback(parts, &target)?
+        } else {
+          parts
+        };
         log::info!("[game-package] {source_tag} → {} 使用 patch 计划", target_branch.tag);
         return Ok(parts);
       }
@@ -1520,8 +1666,14 @@ async fn build_executable_plan(
       }
     }
   }
-  build_manifest_plan(client, &branches.main.with_tag(source_tag), target_branch, audio_languages)
-    .await
+  build_manifest_plan(
+    client,
+    &branches.main.with_tag(source_tag),
+    target_branch,
+    audio_languages,
+    include_fallback,
+  )
+  .await
 }
 
 /// 拉取源与目标清单并生成 manifest-diff 计划。
@@ -1542,12 +1694,13 @@ async fn build_manifest_plan(
   source_branch: &super::hoyoplay::BranchDescriptor,
   target_branch: &super::hoyoplay::BranchDescriptor,
   audio_languages: &[String],
+  include_fallback: bool,
 ) -> Result<PlanParts, String> {
   let (source, target) = futures_util::try_join!(
     get_decoded_build(client, source_branch, audio_languages),
     get_decoded_build(client, target_branch, audio_languages),
   )?;
-  build_manifest_diff(source, target)
+  build_manifest_diff_with_fallback(source, target, include_fallback)
 }
 
 /// 生成语音包 manifest-diff 计划。
@@ -1589,6 +1742,14 @@ async fn build_audio_manifest_plan(
 /// - `Ok(PlanParts)`: 计划部件。
 /// - `Err(String)`: 元数据无效的错误描述。
 fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<PlanParts, String> {
+  build_manifest_diff_with_fallback(source, target, false)
+}
+
+fn build_manifest_diff_with_fallback(
+  source: DecodedBuild,
+  target: DecodedBuild,
+  include_fallback: bool,
+) -> Result<PlanParts, String> {
   let source_assets = collect_assets(&source)?;
   let target_assets = collect_assets(&target)?;
   let inventory = collect_inventory(&target_assets)?;
@@ -1646,6 +1807,11 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
   assets.sort_by(|left, right| left.name.cmp(&right.name));
   let mut downloads = downloads.into_values().collect::<Vec<_>>();
   downloads.sort_by(|left, right| left.id.cmp(&right.id));
+  let fallback = if include_fallback {
+    Some(build_fallback_metadata(&target, &target_assets, &assets)?)
+  } else {
+    None
+  };
   Ok(PlanParts {
     strategy: PackagePlanStrategy::ManifestDiff,
     manifest_digest: manifest_digest(&target),
@@ -1653,7 +1819,54 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
     assets,
     delete_files,
     inventory,
+    fallback,
   })
+}
+
+/// 将完整目标构建的无源 chunk 目录附加到一个主版本更新计划。
+fn attach_fallback(mut parts: PlanParts, target: &DecodedBuild) -> Result<PlanParts, String> {
+  let target_assets = collect_assets(target)?;
+  let inventory = collect_inventory(&target_assets)?;
+  let fallback = build_fallback_metadata(target, &target_assets, &parts.assets)?;
+  parts.inventory = inventory;
+  parts.fallback = Some(fallback);
+  Ok(parts)
+}
+
+/// 为首选计划中的每个资源冻结一份不依赖本地源文件的完整目标 chunk 描述。
+fn build_fallback_metadata(
+  target: &DecodedBuild,
+  target_assets: &HashMap<String, &Asset>,
+  primary_assets: &[PlanAsset],
+) -> Result<PlanFallback, String> {
+  let target_downloads = collect_category_downloads(target)?;
+  let mut downloads = HashMap::<String, PlanDownload>::new();
+  let mut assets = Vec::with_capacity(primary_assets.len());
+  for primary in primary_assets {
+    let target_asset = target_assets
+      .get(&primary.name)
+      .ok_or_else(|| format!("回退目标不在正式清单中：{}", primary.name))?;
+    if nonnegative_u64(target_asset.asset_size, "回退资源大小")? != primary.size
+      || !target_asset.asset_hash_md5.eq_ignore_ascii_case(&primary.md5)
+    {
+      return Err(format!("回退目标元数据与首选计划不一致：{}", primary.name));
+    }
+    let download = target_downloads
+      .get(&primary.name)
+      .ok_or_else(|| format!("回退目标资源缺少 chunk 下载信息：{}", primary.name))?;
+    assets.push(plan_target_asset(
+      primary.name.clone(),
+      target_asset,
+      PlanAssetAction::Repair,
+      None,
+      download,
+      &HashMap::new(),
+      &mut downloads,
+    )?);
+  }
+  let mut downloads = downloads.into_values().collect::<Vec<_>>();
+  downloads.sort_by(|left, right| left.id.cmp(&right.id));
+  Ok(PlanFallback { manifest_digest: manifest_digest(target), downloads, assets })
 }
 
 /// 从差分构建生成 patch 计划。
@@ -1758,6 +1971,7 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
     assets,
     delete_files,
     inventory,
+    fallback: None,
   })
 }
 
@@ -1815,6 +2029,7 @@ pub(crate) fn build_repair_parts(
     assets,
     delete_files: Vec::new(),
     inventory,
+    fallback: None,
   })
 }
 
@@ -2752,7 +2967,7 @@ pub(crate) fn load_persisted_plan(
 /// - `Ok(())`: 计划合法。
 /// - `Err(String)`: 字段无效的错误描述。
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
-  if plan.schema_version != PLAN_SCHEMA_VERSION || plan.plan_id != plan_id {
+  if !is_supported_plan_schema(plan.schema_version) || plan.plan_id != plan_id {
     return Err("游戏资源计划版本或身份不匹配".to_string());
   }
   let source_tag_valid = plan.source_tag.as_deref().is_some_and(|source_tag| {
@@ -2763,7 +2978,7 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
     && plan.source_tag.is_none()
     && plan.install_overlay.is_some();
   let audio_plan_valid = if plan.target == PackagePlanTarget::Audio {
-    plan.schema_version == PLAN_SCHEMA_VERSION
+    is_supported_plan_schema(plan.schema_version)
       && plan.strategy == PackagePlanStrategy::ManifestDiff
       && plan.install_overlay.is_none()
       && plan.source_tag.as_deref() == Some(plan.target_tag.as_str())
@@ -2829,7 +3044,12 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
     }
   }
   validate_plan_assets(plan)?;
+  validate_plan_fallback(plan)?;
   Ok(())
+}
+
+fn is_supported_plan_schema(schema_version: u32) -> bool {
+  matches!(schema_version, LEGACY_PLAN_SCHEMA_VERSION | PLAN_SCHEMA_VERSION)
 }
 
 /// 校验计划资产与 chunk 布局。
@@ -2964,6 +3184,144 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
     return Err("plan inventory does not match changed assets".to_string());
   }
   Ok(())
+}
+
+/// 校验主版本更新的完整目标 chunk 回退目录。
+fn validate_plan_fallback(plan: &PersistedPlan) -> Result<(), String> {
+  match (plan.schema_version, plan.fallback.as_ref()) {
+    (LEGACY_PLAN_SCHEMA_VERSION, None) => return Ok(()),
+    (LEGACY_PLAN_SCHEMA_VERSION, Some(_)) => {
+      return Err("旧版游戏资源计划不能包含回退目录".to_string());
+    }
+    (PLAN_SCHEMA_VERSION, None) if plan_requires_fallback(plan) => {
+      return Err("主版本更新计划缺少完整目标回退目录".to_string());
+    }
+    (PLAN_SCHEMA_VERSION, None) => return Ok(()),
+    (PLAN_SCHEMA_VERSION, Some(fallback)) => {
+      if plan.target != PackagePlanTarget::Main
+        || !plan.source_tag.as_deref().is_some_and(|source_tag| source_tag != plan.target_tag)
+        || is_integrity_repair_plan(plan)
+      {
+        return Err("仅主版本更新计划允许包含回退目录".to_string());
+      }
+      if fallback.manifest_digest.len() != 64
+        || !fallback.manifest_digest.bytes().all(|byte| byte.is_ascii_hexdigit())
+        || fallback.downloads.len() > 5_000_000
+        || fallback.assets.len() != plan.assets.len()
+      {
+        return Err("游戏资源计划回退目录字段无效".to_string());
+      }
+      let mut downloads = HashMap::<&str, &PlanDownload>::with_capacity(fallback.downloads.len());
+      let mut cache_keys = HashSet::with_capacity(fallback.downloads.len());
+      for download in &fallback.downloads {
+        if download.id.is_empty()
+          || download.cache_key.is_empty()
+          || download.cache_key.len() > 256
+          || !download
+            .cache_key
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
+          || download.compressed_size == 0
+          || download.decompressed_size == 0
+          || (download.encoding == PayloadEncoding::Raw
+            && download.compressed_size != download.decompressed_size)
+          || download.hash_kind != PlanDownloadHashKind::XxHash64
+          || !chunk_xxhash64(&download.id).is_some_and(|expected| {
+            format!("{expected:016x}").eq_ignore_ascii_case(&download.expected_hash)
+          })
+          || download.range_start.is_some()
+          || download.range_length.is_some()
+          || !downloads.insert(download.id.as_str(), download).is_none()
+          || !cache_keys.insert(download.cache_key.as_str())
+        {
+          return Err("游戏资源计划回退下载条目无效".to_string());
+        }
+      }
+      let inventory =
+        plan.inventory.iter().map(|file| (file.name.as_str(), file)).collect::<HashMap<_, _>>();
+      let mut referenced = HashSet::new();
+      for (index, asset) in fallback.assets.iter().enumerate() {
+        let primary = plan
+          .assets
+          .get(index)
+          .ok_or_else(|| "游戏资源计划回退资源与首选资源数量不一致".to_string())?;
+        if asset.name != primary.name
+          || asset.action != PlanAssetAction::Repair
+          || asset.source.is_some()
+          || asset.patch.is_some()
+          || !is_md5(&asset.md5)
+        {
+          return Err("游戏资源计划回退资源条目无效".to_string());
+        }
+        let target = inventory
+          .get(asset.name.as_str())
+          .ok_or_else(|| "游戏资源计划回退资源不在目标库存中".to_string())?;
+        if target.size != asset.size || !target.md5.eq_ignore_ascii_case(&asset.md5) {
+          return Err("游戏资源计划回退资源与目标库存不一致".to_string());
+        }
+        let mut ranges = Vec::with_capacity(asset.chunks.len());
+        for chunk in &asset.chunks {
+          let end = chunk
+            .target_offset
+            .checked_add(chunk.decompressed_size)
+            .ok_or_else(|| "游戏资源计划回退 chunk 范围溢出".to_string())?;
+          if chunk.id.is_empty()
+            || !is_md5(&chunk.decompressed_md5)
+            || chunk.compressed_size == 0
+            || chunk.decompressed_size == 0
+            || end > asset.size
+            || chunk.reuse.is_some()
+          {
+            return Err("游戏资源计划回退 chunk 条目无效".to_string());
+          }
+          let download = downloads
+            .get(chunk.id.as_str())
+            .ok_or_else(|| "游戏资源计划回退 chunk 缺少下载对象".to_string())?;
+          if download.compressed_size != chunk.compressed_size
+            || download.decompressed_size != chunk.decompressed_size
+          {
+            return Err("游戏资源计划回退 chunk 与下载对象大小不一致".to_string());
+          }
+          referenced.insert(chunk.id.as_str());
+          ranges.push((chunk.target_offset, end));
+        }
+        ranges.sort_unstable();
+        if ranges.windows(2).any(|pair| pair[0].1 > pair[1].0) {
+          return Err("游戏资源计划回退资源包含重叠 chunk".to_string());
+        }
+      }
+      if referenced.len() != fallback.downloads.len() {
+        return Err("游戏资源计划回退目录包含未使用下载对象".to_string());
+      }
+      let primary_downloads = plan
+        .downloads
+        .iter()
+        .map(|download| (download.cache_key.as_str(), download))
+        .collect::<HashMap<_, _>>();
+      for fallback_download in &fallback.downloads {
+        if let Some(primary_download) = primary_downloads.get(fallback_download.cache_key.as_str())
+          && !downloads_same_payload(primary_download, fallback_download)
+        {
+          return Err("首选与回退下载对象的缓存键元数据冲突".to_string());
+        }
+      }
+    }
+    _ => return Err("游戏资源计划 schema 版本不受支持".to_string()),
+  }
+  Ok(())
+}
+
+fn downloads_same_payload(left: &PlanDownload, right: &PlanDownload) -> bool {
+  left.id == right.id
+    && left.hash_kind == right.hash_kind
+    && left.expected_hash.eq_ignore_ascii_case(&right.expected_hash)
+    && left.compressed_size == right.compressed_size
+    && left.decompressed_size == right.decompressed_size
+    && left.encoding == right.encoding
+    && left.url_prefix == right.url_prefix
+    && left.url_suffix == right.url_suffix
+    && left.range_start == right.range_start
+    && left.range_length == right.range_length
 }
 
 /// 校验库存列表。

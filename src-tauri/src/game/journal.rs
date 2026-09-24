@@ -28,6 +28,18 @@ const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
 const ATOMIC_REPLACE_RETRIES: usize = 10;
 const ATOMIC_REPLACE_RETRY_INTERVAL: StdDuration = StdDuration::from_millis(100);
 
+fn is_zero(value: &usize) -> bool {
+  *value == 0
+}
+
+fn is_zero_u64(value: &u64) -> bool {
+  *value == 0
+}
+
+fn is_false(value: &bool) -> bool {
+  !*value
+}
+
 #[derive(Clone)]
 pub(crate) enum TaskDirectoryRecord {
   Journal(TaskJournal),
@@ -177,6 +189,9 @@ pub(crate) struct TaskJournal {
   pub(crate) state: PackageTaskState,
   pub(crate) downloaded_bytes: u64,
   pub(crate) total_bytes: u64,
+  /// Additional download bytes activated by persisted fallback assets.
+  #[serde(default, skip_serializing_if = "is_zero_u64")]
+  pub(crate) fallback_download_bytes: u64,
   pub(crate) planned_steps: usize,
   pub(crate) committed_step: usize,
   pub(crate) owned_cache_files: Vec<String>,
@@ -242,6 +257,15 @@ pub(crate) struct TaskJournal {
   /// 发布前资源自动修复的逐资源累计次数；键为计划资源索引。
   #[serde(default)]
   pub(crate) install_asset_repair_attempts: HashMap<usize, usize>,
+  /// Main 更新完整校验后的自动修复累计次数；首期最多允许一轮。
+  #[serde(default, skip_serializing_if = "is_zero")]
+  pub(crate) update_repair_attempts: usize,
+  /// 已激活备用资源的计划资产索引；仅新 Main 计划允许非空。
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) fallback_assets: Vec<usize>,
+  /// 提交前观察到混合状态后，版本登记前必须执行完整 inventory 校验。
+  #[serde(default, skip_serializing_if = "is_false")]
+  pub(crate) requires_full_verification: bool,
   pub(crate) current_file: Option<String>,
   #[serde(default)]
   pub(crate) download_current_file: Option<String>,
@@ -316,6 +340,7 @@ impl TaskJournal {
       state: PackageTaskState::Queued,
       downloaded_bytes: 0,
       total_bytes: plan.downloads.iter().map(|download| download.compressed_size).sum(),
+      fallback_download_bytes: 0,
       planned_steps: plan.downloads.len(),
       committed_step: 0,
       owned_cache_files: Vec::new(),
@@ -358,6 +383,9 @@ impl TaskJournal {
       install_repair_attempts: 0,
       install_auto_stall_retry_count: 0,
       install_asset_repair_attempts: HashMap::new(),
+      update_repair_attempts: 0,
+      fallback_assets: Vec::new(),
+      requires_full_verification: false,
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
@@ -421,6 +449,7 @@ impl TaskJournal {
       state: PackageTaskState::Queued,
       downloaded_bytes: 0,
       total_bytes,
+      fallback_download_bytes: 0,
       planned_steps: total_count,
       committed_step: 0,
       owned_cache_files: Vec::new(),
@@ -447,6 +476,9 @@ impl TaskJournal {
       install_repair_attempts: 0,
       install_auto_stall_retry_count: 0,
       install_asset_repair_attempts: HashMap::new(),
+      update_repair_attempts: 0,
+      fallback_assets: Vec::new(),
+      requires_full_verification: false,
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
@@ -604,6 +636,9 @@ impl TaskJournal {
       state: self.state,
       downloaded_bytes: self.downloaded_bytes,
       total_bytes: self.total_bytes,
+      fallback_asset_count: self.fallback_assets.len(),
+      fallback_download_bytes: self.fallback_download_bytes,
+      requires_full_verification: self.requires_full_verification,
       completed_count: self.committed_step,
       total_count: self.total_count,
       assembly_completed_count: self.assembly_completed_count,
@@ -1552,6 +1587,47 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
   {
     return Err("任务日志与不可变计划不匹配".to_string());
   }
+  validate_fallback_activation(journal, plan)?;
+  Ok(())
+}
+
+/// 校验日志中已激活的备用资源索引仍然绑定到不可变 Main 计划。
+///
+/// 空集合是旧日志和未触发回退的新任务的兼容表示；非空集合不能脱离
+/// `PersistedPlan.fallback` 单独解释，否则恢复时可能把一个资产的备用 chunk
+/// 错装到另一个资产。
+pub(crate) fn validate_fallback_activation(
+  journal: &TaskJournal,
+  plan: &PersistedPlan,
+) -> Result<(), String> {
+  if journal.fallback_assets.is_empty() {
+    return Ok(());
+  }
+  if plan.target != PackagePlanTarget::Main {
+    return Err("非正式更新任务不能激活备用资源".to_string());
+  }
+  let fallback =
+    plan.fallback.as_ref().ok_or_else(|| "旧资源计划不支持单文件回退，请重新评估".to_string())?;
+  if plan.strategy == super::model::PackagePlanStrategy::ManifestDiff
+    && fallback.manifest_digest != plan.manifest_digest
+  {
+    return Err("备用资源清单摘要与原计划不一致".to_string());
+  }
+  let mut seen = HashSet::with_capacity(journal.fallback_assets.len());
+  for &index in &journal.fallback_assets {
+    if !seen.insert(index) {
+      return Err("资源回退记录包含重复索引".to_string());
+    }
+    let primary = plan.assets.get(index).ok_or_else(|| "资源回退索引越界".to_string())?;
+    let fallback_asset =
+      fallback.assets.get(index).ok_or_else(|| "备用资源回退索引越界".to_string())?;
+    if fallback_asset.name != primary.name
+      || fallback_asset.size != primary.size
+      || !fallback_asset.md5.eq_ignore_ascii_case(&primary.md5)
+    {
+      return Err("备用资源与原计划目标不匹配".to_string());
+    }
+  }
   Ok(())
 }
 
@@ -1585,6 +1661,8 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
       && journal.committed_step != journal.owned_cache_files.len())
     || journal.committed_step > journal.planned_steps
     || journal.downloaded_bytes > journal.total_bytes
+    || journal.fallback_download_bytes > journal.total_bytes
+    || journal.fallback_assets.len() > 500_000
     || journal.assembly_completed_count > journal.assembly_total_count
     || journal.assembly_completed_bytes > journal.assembly_total_bytes
     || journal.commit_completed_count > journal.commit_total_count
@@ -1593,6 +1671,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.completed_asset_cursor > journal.assembly_total_count
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
     || journal.install_repair_attempts > 3
+    || journal.update_repair_attempts > 1
     || journal.install_auto_stall_retry_count > 1
     || journal.install_asset_repair_attempts.len() > journal.assembly_total_count
     || journal.install_asset_repair_attempts.iter().any(|(index, attempts)| {
@@ -1622,6 +1701,10 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
       || !completed.insert(cache_key.as_str())
   }) {
     return Err("游戏资源任务日志包含无效缓存对象".to_string());
+  }
+  let mut fallback_assets = HashSet::with_capacity(journal.fallback_assets.len());
+  if journal.fallback_assets.iter().any(|index| !fallback_assets.insert(index)) {
+    return Err("游戏资源任务包含重复备用资源索引".to_string());
   }
   if let Some(apply) = &journal.apply {
     validate_apply_journal(apply)?;

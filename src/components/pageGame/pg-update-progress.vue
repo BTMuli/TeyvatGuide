@@ -251,9 +251,16 @@ const verificationStatus = computed<string | null>(() => {
   if (verificationComplete.value) return "已完成";
   if (task.state === gameEnum.package.taskState.REPAIR_REQUIRED) return "发现文件需要修复";
   if (task.state === gameEnum.package.taskState.VERIFYING) {
-    return task.currentFile ?? (integrityRepair.value ? "正在校验目标清单" : "正在校验本次变更");
+    return (
+      task.currentFile ??
+      (integrityRepair.value || task.requiresFullVerification
+        ? "正在校验目标清单"
+        : "正在校验本次变更")
+    );
   }
-  return integrityRepair.value ? "等待完整复验" : "等待校验本次变更";
+  return integrityRepair.value || task.requiresFullVerification
+    ? "等待完整复验"
+    : "等待校验本次变更";
 });
 const acquisitionRow = computed<ProgressRow>(() => ({
   label: isPreDownload.value ? "预下载资源" : integrityRepair.value ? "修复资源" : "资源下载",
@@ -273,6 +280,11 @@ const acquisitionRow = computed<ProgressRow>(() => ({
     task.totalCount > 0
       ? `下载对象 ${task.completedCount} / ${task.totalCount}`
       : "没有需要下载的对象",
+    ...(task.fallbackAssetCount > 0
+      ? [
+          `回退 ${task.fallbackAssetCount} 个文件 · 追加资源 ${formatBytes(task.fallbackDownloadBytes)}（含缓存）`,
+        ]
+      : []),
   ],
   downloadObjectStatus: null,
   activeAssemblyCount: 0,
@@ -316,7 +328,7 @@ const commitRow = computed<ProgressRow>(() => ({
   activeAssemblyCount: 0,
 }));
 const verificationRow = computed<ProgressRow>(() => ({
-  label: integrityRepair.value ? "完整复验" : "变更校验",
+  label: integrityRepair.value || task.requiresFullVerification ? "完整复验" : "变更校验",
   percent: verificationPercent.value,
   indeterminate: verificationIndeterminate.value,
   complete: verificationComplete.value,

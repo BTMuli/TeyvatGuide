@@ -5,7 +5,7 @@ use super::{
   model::PackagePlanStrategy,
   path_guard::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
-    resolve_existing_manifest_file,
+    resolve_optional_manifest_file,
   },
   planner::{
     PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, PlanDownload, PlanPatch,
@@ -51,6 +51,60 @@ pub(crate) fn cache_integrity_chunk_id(error: &str) -> Option<&str> {
 pub(crate) struct AssemblySummary {
   pub(crate) asset_count: usize,
   pub(crate) assembled_bytes: u64,
+}
+
+/// 单资产组装时，首选源内容无法使用的原因。
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum AssetFallbackReason {
+  SourceMissing,
+  SourceMismatch,
+  ReuseChunkMismatch,
+}
+
+/// 单资产组装结果；仅源内容异常允许调用方激活完整 chunk 回退。
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum AssetAssemblyOutcome {
+  Assembled,
+  FallbackRequired(AssetFallbackReason),
+}
+
+/// 组装过程中的内部错误。
+///
+/// 源文件缺失或内容不匹配必须沿着类型通道传递到单资产入口；缓存、路径安全、
+/// 磁盘写入和取消等错误则保持普通失败，不能被调用方误判为可回退源异常。
+#[derive(Debug)]
+enum AssetAssemblyError {
+  Source { reason: AssetFallbackReason, message: String },
+  Other(String),
+}
+
+impl AssetAssemblyError {
+  fn source(reason: AssetFallbackReason, message: impl Into<String>) -> Self {
+    Self::Source { reason, message: message.into() }
+  }
+
+  fn other(message: impl Into<String>) -> Self {
+    Self::Other(message.into())
+  }
+
+  fn into_message(self) -> String {
+    match self {
+      Self::Source { message, .. } | Self::Other(message) => message,
+    }
+  }
+
+  fn into_outcome(self) -> Result<AssetAssemblyOutcome, String> {
+    match self {
+      Self::Source { reason, .. } => Ok(AssetAssemblyOutcome::FallbackRequired(reason)),
+      Self::Other(message) => Err(message),
+    }
+  }
+}
+
+impl From<String> for AssetAssemblyError {
+  fn from(message: String) -> Self {
+    Self::Other(message)
+  }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -900,6 +954,49 @@ pub(crate) fn assemble_plan_asset_to_root(
   canceled: &AtomicBool,
   telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
+  assemble_plan_asset_with_source_error(
+    plan,
+    asset_index,
+    game_root,
+    task_root,
+    output_root,
+    canceled,
+    telemetry,
+  )
+  .map_err(AssetAssemblyError::into_message)
+}
+
+/// Assemble one asset and classify failures caused by its local source data.
+pub(crate) fn assemble_plan_asset_with_source_outcome(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
+) -> Result<AssetAssemblyOutcome, String> {
+  assemble_plan_asset_with_source_error(
+    plan,
+    asset_index,
+    game_root,
+    task_root,
+    output_root,
+    canceled,
+    telemetry,
+  )
+  .map_or_else(AssetAssemblyError::into_outcome, |_| Ok(AssetAssemblyOutcome::Assembled))
+}
+
+fn assemble_plan_asset_with_source_error(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
+) -> Result<(), AssetAssemblyError> {
   check_canceled(canceled)?;
   let asset = plan.assets.get(asset_index).ok_or_else(|| "资源组装游标越界".to_string())?;
   let cache_root = task_root.join("cache").join("chunks");
@@ -930,7 +1027,7 @@ pub(crate) fn assemble_plan_asset_to_root(
       let download = downloads
         .get(patch.id.as_str())
         .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
-      assemble_patch_asset(
+      assemble_patch_asset_with_source_error(
         asset,
         patch,
         download,
@@ -941,7 +1038,9 @@ pub(crate) fn assemble_plan_asset_to_root(
         telemetry,
       )
     }
-    PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
+    PackagePlanStrategy::Full => {
+      Err(AssetAssemblyError::other("全新安装计划必须使用专用安装组装器"))
+    }
   }
 }
 
@@ -1266,8 +1365,31 @@ fn assemble_patch_asset(
   canceled: &AtomicBool,
   telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
+  assemble_patch_asset_with_source_error(
+    asset,
+    patch,
+    download,
+    game_root,
+    cache_root,
+    staging_root,
+    canceled,
+    telemetry,
+  )
+  .map_err(AssetAssemblyError::into_message)
+}
+
+fn assemble_patch_asset_with_source_error(
+  asset: &PlanAsset,
+  patch: &PlanPatch,
+  download: &super::planner::PlanDownload,
+  game_root: &Path,
+  cache_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
+) -> Result<(), AssetAssemblyError> {
   if !asset.chunks.is_empty() {
-    return Err(format!("patch 资源不能包含 chunk：{}", asset.name));
+    return Err(AssetAssemblyError::other(format!("patch 资源不能包含 chunk：{}", asset.name)));
   }
   if patch.range_length == 0
     || patch
@@ -1275,10 +1397,10 @@ fn assemble_patch_asset(
       .checked_add(patch.range_length)
       .is_none_or(|end| end > download.compressed_size)
   {
-    return Err(format!("patch 范围超出差分容器：{}", asset.name));
+    return Err(AssetAssemblyError::other(format!("patch 范围超出差分容器：{}", asset.name)));
   }
   if !cached_chunk_matches(cache_root, download) {
-    return Err(format!("差分容器完整性复验失败：{}", patch.id));
+    return Err(AssetAssemblyError::other(format!("差分容器完整性复验失败：{}", patch.id)));
   }
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   let partial = partial_path(&output)?;
@@ -1287,7 +1409,10 @@ fn assemble_patch_asset(
   let result = (|| {
     if patch.original_size == 0 {
       if patch.range_length != asset.size {
-        return Err(format!("新增 patch 范围与目标大小不一致：{}", asset.name));
+        return Err(AssetAssemblyError::other(format!(
+          "新增 patch 范围与目标大小不一致：{}",
+          asset.name
+        )));
       }
       copy_container_range(cache_root, download, patch, &partial, canceled, telemetry)?;
     } else {
@@ -1295,7 +1420,8 @@ fn assemble_patch_asset(
         asset, patch, download, game_root, cache_root, &partial, canceled, telemetry,
       )?;
     }
-    finalize_staging_file(&partial, &output, asset, canceled, telemetry)
+    finalize_staging_file(&partial, &output, asset, canceled, telemetry)?;
+    Ok(())
   })();
   if result.is_err() {
     let _ = fs::remove_file(&partial);
@@ -1387,34 +1513,72 @@ fn apply_hdiff_patch(
   output: &Path,
   canceled: &AtomicBool,
   telemetry: Option<&AssemblyTelemetry>,
-) -> Result<(), String> {
+) -> Result<(), AssetAssemblyError> {
   #[cfg(not(windows))]
   {
     let _ = (asset, patch, download, game_root, cache_root, output, canceled, telemetry);
-    return Err(format!("修改型 patch 仅支持 Windows：{}", asset.name));
+    return Err(AssetAssemblyError::other(format!("修改型 patch 仅支持 Windows：{}", asset.name)));
   }
   #[cfg(windows)]
   {
     check_canceled(canceled)?;
     if patch.original_size == 0 || patch.original_md5.len() != 32 {
-      return Err(format!("修改型 patch 原文件元数据无效：{}", asset.name));
+      return Err(AssetAssemblyError::other(format!(
+        "修改型 patch 原文件元数据无效：{}",
+        asset.name
+      )));
     }
-    let source_path = resolve_existing_manifest_file(game_root, &patch.original_name)
-      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", patch.original_name))?;
+    let source_path = resolve_optional_manifest_file(game_root, &patch.original_name)
+      .map_err(AssetAssemblyError::other)?
+      .ok_or_else(|| {
+        AssetAssemblyError::source(
+          AssetFallbackReason::SourceMissing,
+          format!("打开修改型 patch 原文件失败：{}：文件不存在", patch.original_name),
+        )
+      })?;
     let source_len = fs::metadata(&source_path)
-      .map_err(|error| format!("读取修改型 patch 原文件失败：{}：{error}", patch.original_name))?
+      .map_err(|error| {
+        if error.kind() == std::io::ErrorKind::NotFound {
+          AssetAssemblyError::source(
+            AssetFallbackReason::SourceMissing,
+            format!("读取修改型 patch 原文件失败：{}：文件不存在", patch.original_name),
+          )
+        } else {
+          AssetAssemblyError::other(format!(
+            "读取修改型 patch 原文件失败：{}：{error}",
+            patch.original_name
+          ))
+        }
+      })?
       .len();
     if source_len != patch.original_size {
-      return Err(format!(
-        "修改型 patch 原文件长度校验失败：{}（实际 {source_len}，预期 {}）",
-        patch.original_name, patch.original_size
+      return Err(AssetAssemblyError::source(
+        AssetFallbackReason::SourceMismatch,
+        format!(
+          "修改型 patch 原文件长度校验失败：{}（实际 {source_len}，预期 {}）",
+          patch.original_name, patch.original_size
+        ),
       ));
     }
-    let mut source = File::open(&source_path)
-      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", patch.original_name))?;
-    let actual_md5 = hash_exact_file(&mut source, patch.original_size, canceled)?;
+    let mut source = File::open(&source_path).map_err(|error| {
+      if error.kind() == std::io::ErrorKind::NotFound {
+        AssetAssemblyError::source(
+          AssetFallbackReason::SourceMissing,
+          format!("打开修改型 patch 原文件失败：{}：文件不存在", patch.original_name),
+        )
+      } else {
+        AssetAssemblyError::other(format!(
+          "打开修改型 patch 原文件失败：{}：{error}",
+          patch.original_name
+        ))
+      }
+    })?;
+    let actual_md5 = hash_source_file(&mut source, patch.original_size, canceled)?;
     if !actual_md5.eq_ignore_ascii_case(&patch.original_md5) {
-      return Err(format!("修改型 patch 原文件 MD5 校验失败：{}", patch.original_name));
+      return Err(AssetAssemblyError::source(
+        AssetFallbackReason::SourceMismatch,
+        format!("修改型 patch 原文件 MD5 校验失败：{}", patch.original_name),
+      ));
     }
     source
       .seek(SeekFrom::Start(0))
@@ -1448,7 +1612,8 @@ fn apply_hdiff_patch(
       write_stage.finish(patch_result.as_ref().map_or(0, |_| asset.size));
     }
     patch_result?;
-    target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
+    target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))?;
+    Ok(())
   }
 }
 
@@ -1584,6 +1749,7 @@ fn assemble_asset<L: DownloadLookup>(
     None,
     None,
   )
+  .map_err(AssetAssemblyError::into_message)
 }
 
 /// 组装单个资源并记录计时。
@@ -1616,7 +1782,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
   telemetry: Option<&AssemblyTelemetry>,
-) -> Result<(), String> {
+) -> Result<(), AssetAssemblyError> {
   let prepare_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   let partial = partial_path(&output)?;
@@ -1680,7 +1846,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
       .map_err(|error| format!("读取资源临时文件长度失败：{}：{error}", asset.name))?
       .len();
     if output_size != asset.size {
-      return Err(format!("资源长度校验失败：{}", asset.name));
+      return Err(AssetAssemblyError::other(format!("资源长度校验失败：{}", asset.name)));
     }
     file
       .seek(SeekFrom::Start(0))
@@ -1693,7 +1859,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
       telemetry,
     )?;
     if !actual_asset_md5.eq_ignore_ascii_case(&asset.md5) {
-      return Err(format!("资源 MD5 校验失败：{}", asset.name));
+      return Err(AssetAssemblyError::other(format!("资源 MD5 校验失败：{}", asset.name)));
     }
     check_canceled(canceled)?;
     sync_staging_file(&file, asset.size, timing.as_deref_mut(), telemetry)
@@ -1786,7 +1952,8 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
       canceled,
       timing,
       telemetry,
-    );
+    )
+    .map_err(AssetAssemblyError::into_message);
   }
 
   let prepare_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
@@ -2063,7 +2230,9 @@ fn write_downloaded_chunk_with_timing(
         timing.as_deref_mut(),
         None,
         telemetry,
-      )?;
+        None,
+      )
+      .map_err(AssetAssemblyError::into_message)?;
     }
     PayloadEncoding::Zstd => {
       let mut reader = zstd::stream::read::Decoder::with_buffer(BufReader::new(file))
@@ -2078,9 +2247,10 @@ fn write_downloaded_chunk_with_timing(
         timing.as_deref_mut(),
         timing_enabled.then_some(&mut zstd_timing),
         telemetry,
+        None,
       );
       let result = match result {
-        Err(error) => Err(error),
+        Err(error) => Err(error.into_message()),
         Ok(()) => {
           let mut extra = [0_u8; 1];
           let live_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
@@ -2145,27 +2315,62 @@ fn write_reused_chunk_with_timing(
   canceled: &AtomicBool,
   timing: Option<&mut AssemblyTiming>,
   telemetry: Option<&AssemblyTelemetry>,
-) -> Result<(), String> {
+) -> Result<(), AssetAssemblyError> {
   let open_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
-  let path = resolve_existing_manifest_file(game_root, asset_name)?;
+  let path = resolve_optional_manifest_file(game_root, asset_name)
+    .map_err(AssetAssemblyError::other)?
+    .ok_or_else(|| {
+      AssetAssemblyError::source(
+        AssetFallbackReason::SourceMissing,
+        format!("复用 chunk 源文件不存在：{}", asset_name),
+      )
+    })?;
   let source_end = source_offset
     .checked_add(chunk.decompressed_size)
-    .ok_or_else(|| format!("复用 chunk 源范围溢出：{}", chunk.id))?;
-  let metadata = fs::metadata(&path)
-    .map_err(|error| format!("读取复用 chunk 源文件失败：{}：{error}", chunk.id))?;
+    .ok_or_else(|| AssetAssemblyError::other(format!("复用 chunk 源范围溢出：{}", chunk.id)))?;
+  let metadata = fs::metadata(&path).map_err(|error| {
+    if error.kind() == std::io::ErrorKind::NotFound {
+      AssetAssemblyError::source(
+        AssetFallbackReason::SourceMissing,
+        format!("读取复用 chunk 源文件失败：{}：文件不存在", chunk.id),
+      )
+    } else {
+      AssetAssemblyError::other(format!("读取复用 chunk 源文件失败：{}：{error}", chunk.id))
+    }
+  })?;
   if metadata.len() < source_end {
-    return Err(format!("复用 chunk 源文件范围不足：{}", chunk.id));
+    return Err(AssetAssemblyError::source(
+      AssetFallbackReason::ReuseChunkMismatch,
+      format!("复用 chunk 源文件范围不足：{}", chunk.id),
+    ));
   }
-  let mut file = File::open(&path)
-    .map_err(|error| format!("打开复用 chunk 源文件失败：{}：{error}", chunk.id))?;
-  file
-    .seek(SeekFrom::Start(source_offset))
-    .map_err(|error| format!("定位复用 chunk 源文件失败：{}：{error}", chunk.id))?;
+  let mut file = File::open(&path).map_err(|error| {
+    if error.kind() == std::io::ErrorKind::NotFound {
+      AssetAssemblyError::source(
+        AssetFallbackReason::SourceMissing,
+        format!("打开复用 chunk 源文件失败：{}：文件不存在", chunk.id),
+      )
+    } else {
+      AssetAssemblyError::other(format!("打开复用 chunk 源文件失败：{}：{error}", chunk.id))
+    }
+  })?;
+  file.seek(SeekFrom::Start(source_offset)).map_err(|error| {
+    AssetAssemblyError::other(format!("定位复用 chunk 源文件失败：{}：{error}", chunk.id))
+  })?;
   if let Some(open_stage) = open_stage {
     open_stage.finish(0);
   }
   let mut reader = BufReader::new(file);
-  write_exact_chunk_with_timing(output, chunk, &mut reader, canceled, timing, None, telemetry)
+  write_exact_chunk_with_timing(
+    output,
+    chunk,
+    &mut reader,
+    canceled,
+    timing,
+    None,
+    telemetry,
+    Some(AssetFallbackReason::ReuseChunkMismatch),
+  )
 }
 
 /// 按计划大小精确读取并写入 chunk，同时校验 MD5。
@@ -2192,7 +2397,8 @@ fn write_exact_chunk_with_timing<R: Read>(
   mut timing: Option<&mut AssemblyTiming>,
   mut zstd_timing: Option<&mut ZstdReadTiming>,
   telemetry: Option<&AssemblyTelemetry>,
-) -> Result<(), String> {
+  source_failure: Option<AssetFallbackReason>,
+) -> Result<(), AssetAssemblyError> {
   let mut remaining = chunk.decompressed_size;
   let mut chunk_hasher = Md5::new();
   let mut buffer = [0_u8; COPY_BUFFER_SIZE];
@@ -2219,7 +2425,11 @@ fn write_exact_chunk_with_timing<R: Read>(
       let read =
         read_result.map_err(|error| format!("读取资源 chunk 失败：{}：{error}", chunk.id))?;
       if read == 0 {
-        return Err(format!("资源 chunk 小于计划解压大小：{}", chunk.id));
+        let message = format!("资源 chunk 小于计划解压大小：{}", chunk.id);
+        return Err(match source_failure {
+          Some(reason) => AssetAssemblyError::source(reason, message),
+          None => AssetAssemblyError::other(message),
+        });
       }
       let live_write = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
       let write_result = output.write_all(&buffer[..read]);
@@ -2251,7 +2461,11 @@ fn write_exact_chunk_with_timing<R: Read>(
       md5_micros = md5_micros.saturating_add(duration_micros(hash_started_at.elapsed()));
     }
     if !actual_md5.eq_ignore_ascii_case(&chunk.decompressed_md5) {
-      return Err(format!("资源 chunk MD5 校验失败：{}", chunk.id));
+      let message = format!("资源 chunk MD5 校验失败：{}", chunk.id);
+      return Err(match source_failure {
+        Some(reason) => AssetAssemblyError::source(reason, message),
+        None => AssetAssemblyError::other(message),
+      });
     }
     Ok(())
   })();
@@ -2277,6 +2491,34 @@ fn write_exact_chunk_with_timing<R: Read>(
 /// - `Err(String)`: 读取失败的错误描述。
 fn hash_exact_file(file: &mut File, size: u64, canceled: &AtomicBool) -> Result<String, String> {
   hash_exact_file_with_timing(file, size, canceled, None, None)
+}
+
+/// 计算 patch 原文件 MD5，并将读取期间的 EOF 视为源内容不匹配。
+fn hash_source_file(
+  file: &mut File,
+  size: u64,
+  canceled: &AtomicBool,
+) -> Result<String, AssetAssemblyError> {
+  let mut remaining = size;
+  let mut hasher = Md5::new();
+  let mut buffer = [0_u8; COPY_BUFFER_SIZE];
+  while remaining > 0 {
+    check_canceled(canceled)?;
+    let maximum = usize::try_from(remaining.min(buffer.len() as u64))
+      .map_err(|_| AssetAssemblyError::other("资源源文件大小无法表示"))?;
+    let read = file
+      .read(&mut buffer[..maximum])
+      .map_err(|error| AssetAssemblyError::other(format!("读取资源源文件失败：{error}")))?;
+    if read == 0 {
+      return Err(AssetAssemblyError::source(
+        AssetFallbackReason::SourceMismatch,
+        "资源源文件小于计划大小",
+      ));
+    }
+    hasher.update(&buffer[..read]);
+    remaining -= read as u64;
+  }
+  Ok(hex::encode(hasher.finalize()))
 }
 
 /// 计算文件 MD5 并记录计时。
