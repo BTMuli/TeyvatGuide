@@ -1,11 +1,11 @@
 //! 游戏资源任务写前日志与重启恢复投影。
-//! @since Beta v0.12.3
+//! @since Beta v0.12.4
 
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
   plan_lifecycle,
-  planner::PersistedPlan,
+  planner::{PersistedPlan, PlanAssetAction},
   scheme::scheme_id_key,
 };
 use chrono::{DateTime, Duration, Utc};
@@ -86,6 +86,7 @@ pub(crate) enum CommitStepKind {
   Modify,
   Delete,
   Repair,
+  KeepTarget,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -148,6 +149,11 @@ pub(crate) struct ApplyJournal {
   pub(crate) config_original_sha256: String,
   pub(crate) config_target_sha256: String,
   pub(crate) config_phase: ConfigCommitPhase,
+  /// 提交准备阶段根据游戏目录证据冻结、并在提交中永不触碰的目标资源索引。
+  ///
+  /// 该字段只在正式 Main 更新中使用；空集合通过省略字段保持旧日志序列化兼容。
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) keep_target_assets: Vec<usize>,
   /// 客户端资源状态同步；计划不需要同步时为 `None`。
   #[serde(default)]
   pub(crate) client_state: Option<ClientStateJournal>,
@@ -192,6 +198,12 @@ pub(crate) struct TaskJournal {
   /// Additional download bytes activated by persisted fallback assets.
   #[serde(default, skip_serializing_if = "is_zero_u64")]
   pub(crate) fallback_download_bytes: u64,
+  /// 准备阶段发现、但尚未激活备用下载的目标资源索引。
+  ///
+  /// 候选证据失效时先进入该集合，由下载层在下一轮原子激活备用资源；不能在提交器中
+  /// 直接追加 `fallback_assets`，否则会绕过空间与预算预留边界。
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) target_reprepare_assets: Vec<usize>,
   pub(crate) planned_steps: usize,
   pub(crate) committed_step: usize,
   pub(crate) owned_cache_files: Vec<String>,
@@ -263,6 +275,11 @@ pub(crate) struct TaskJournal {
   /// 已激活备用资源的计划资产索引；仅新 Main 计划允许非空。
   #[serde(default, skip_serializing_if = "Vec::is_empty")]
   pub(crate) fallback_assets: Vec<usize>,
+  /// 提交准备前由目标文件证据识别出的候选资源索引。
+  ///
+  /// 该集合不是事务步骤；只有 `ApplyJournal.keep_target_assets` 才能作为冻结提交选择。
+  #[serde(default, skip_serializing_if = "Vec::is_empty")]
+  pub(crate) already_target_assets: Vec<usize>,
   /// 提交前观察到混合状态后，版本登记前必须执行完整 inventory 校验。
   #[serde(default, skip_serializing_if = "is_false")]
   pub(crate) requires_full_verification: bool,
@@ -300,7 +317,7 @@ pub(crate) struct TaskJournal {
 impl TaskJournal {
   /// 从资源计划构造初始任务日志。
   ///
-  /// @since Beta v0.12.0
+  /// @since Beta v0.12.4
   ///
   /// # 参数
   /// - `plan`: 持久化资源计划。
@@ -341,6 +358,7 @@ impl TaskJournal {
       downloaded_bytes: 0,
       total_bytes: plan.downloads.iter().map(|download| download.compressed_size).sum(),
       fallback_download_bytes: 0,
+      target_reprepare_assets: Vec::new(),
       planned_steps: plan.downloads.len(),
       committed_step: 0,
       owned_cache_files: Vec::new(),
@@ -385,6 +403,7 @@ impl TaskJournal {
       install_asset_repair_attempts: HashMap::new(),
       update_repair_attempts: 0,
       fallback_assets: Vec::new(),
+      already_target_assets: Vec::new(),
       requires_full_verification: false,
       current_file: None,
       download_current_file: None,
@@ -406,7 +425,7 @@ impl TaskJournal {
 
   /// 从换服参数构造初始任务日志。
   ///
-  /// @since Beta v0.12.0
+  /// @since Beta v0.12.4
   ///
   /// # 参数
   /// - `plan_id`: 计划 ID。
@@ -450,6 +469,7 @@ impl TaskJournal {
       downloaded_bytes: 0,
       total_bytes,
       fallback_download_bytes: 0,
+      target_reprepare_assets: Vec::new(),
       planned_steps: total_count,
       committed_step: 0,
       owned_cache_files: Vec::new(),
@@ -478,6 +498,7 @@ impl TaskJournal {
       install_asset_repair_attempts: HashMap::new(),
       update_repair_attempts: 0,
       fallback_assets: Vec::new(),
+      already_target_assets: Vec::new(),
       requires_full_verification: false,
       current_file: None,
       download_current_file: None,
@@ -1554,7 +1575,7 @@ fn directory_bytes(path: &Path) -> Result<u64, String> {
 
 /// 校验任务日志与不可变计划身份一致。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `journal`: 任务日志。
@@ -1588,6 +1609,11 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
     return Err("任务日志与不可变计划不匹配".to_string());
   }
   validate_fallback_activation(journal, plan)?;
+  validate_target_asset_indices(&journal.already_target_assets, plan, "目标文件候选")?;
+  validate_target_asset_indices(&journal.target_reprepare_assets, plan, "待重准备目标文件")?;
+  if let Some(apply) = &journal.apply {
+    validate_target_asset_indices(&apply.keep_target_assets, plan, "冻结目标文件")?;
+  }
   Ok(())
 }
 
@@ -1631,9 +1657,38 @@ pub(crate) fn validate_fallback_activation(
   Ok(())
 }
 
+/// 校验与目标文件证据绑定的资源索引集合。
+///
+/// 候选集合和提交日志中的冻结集合都必须按升序唯一保存。调用方仍需根据自身
+/// 状态决定候选是否可以冻结；本函数只校验其是否属于可回退的 Main 资源计划。
+pub(crate) fn validate_target_asset_indices(
+  indices: &[usize],
+  plan: &PersistedPlan,
+  label: &str,
+) -> Result<(), String> {
+  if indices.is_empty() {
+    return Ok(());
+  }
+  if plan.target != PackagePlanTarget::Main || plan.fallback.is_none() {
+    return Err(format!("{label}只能用于支持备用资源的 Main 更新"));
+  }
+  let mut previous = None;
+  for &index in indices {
+    if previous.is_some_and(|value| value >= index) {
+      return Err(format!("{label}必须按升序保存且不能重复"));
+    }
+    let asset = plan.assets.get(index).ok_or_else(|| format!("{label}索引越界"))?;
+    if asset.action == PlanAssetAction::Repair {
+      return Err(format!("{label}不能包含修复资源"));
+    }
+    previous = Some(index);
+  }
+  Ok(())
+}
+
 /// 校验任务日志字段合法性。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `journal`: 任务日志。
@@ -1663,6 +1718,8 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.downloaded_bytes > journal.total_bytes
     || journal.fallback_download_bytes > journal.total_bytes
     || journal.fallback_assets.len() > 500_000
+    || journal.already_target_assets.len() > 500_000
+    || journal.target_reprepare_assets.len() > 500_000
     || journal.assembly_completed_count > journal.assembly_total_count
     || journal.assembly_completed_bytes > journal.assembly_total_bytes
     || journal.commit_completed_count > journal.commit_total_count
@@ -1706,8 +1763,28 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   if journal.fallback_assets.iter().any(|index| !fallback_assets.insert(index)) {
     return Err("游戏资源任务包含重复备用资源索引".to_string());
   }
+  let pending = journal.target_reprepare_assets.iter().copied().collect::<HashSet<_>>();
+  if journal
+    .already_target_assets
+    .iter()
+    .any(|index| fallback_assets.contains(index) || pending.contains(index))
+    || pending.iter().any(|index| fallback_assets.contains(index))
+    || (journal.target != PackagePlanTarget::Main
+      && (!journal.already_target_assets.is_empty() || !pending.is_empty()))
+  {
+    return Err("游戏资源任务的目标保留与回退选择冲突".to_string());
+  }
+  if journal.already_target_assets.windows(2).any(|indices| indices[0] >= indices[1]) {
+    return Err("游戏资源任务包含无序或重复目标候选索引".to_string());
+  }
+  if journal.target_reprepare_assets.windows(2).any(|indices| indices[0] >= indices[1]) {
+    return Err("游戏资源任务包含无序或重复待重准备索引".to_string());
+  }
   if let Some(apply) = &journal.apply {
     validate_apply_journal(apply)?;
+    if journal.target != PackagePlanTarget::Main && !apply.keep_target_assets.is_empty() {
+      return Err("非正式更新事务不能保留目标文件".to_string());
+    }
   }
   if let Some(repair) = &journal.repair {
     if repair.files.is_empty() || repair.files.len() > 500_000 {
@@ -1725,6 +1802,9 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     }
     if let Some(apply) = &repair.apply {
       validate_apply_journal(apply)?;
+      if !apply.keep_target_assets.is_empty() {
+        return Err("修复子事务不能包含保留目标步骤".to_string());
+      }
     }
   }
   Ok(())
@@ -1732,7 +1812,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
 
 /// 校验提交日志字段合法性。
 ///
-/// @since Beta v0.12.3
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `apply`: 提交日志。
@@ -1754,7 +1834,11 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
       && step.index == apply.cursor
       && normalize_manifest_path(&step.relative_path).is_ok_and(|value| value == step.relative_path)
   });
-  if !hashes_valid || apply.cursor > apply.step_count || !active_valid {
+  let keep_target_valid =
+    apply.keep_target_assets.windows(2).all(|indices| indices[0] < indices[1])
+      && apply.keep_target_assets.len() <= 500_000
+      && apply.keep_target_assets.iter().all(|index| *index < apply.step_count);
+  if !hashes_valid || apply.cursor > apply.step_count || !active_valid || !keep_target_valid {
     return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
   if let Some(state) = &apply.client_state {

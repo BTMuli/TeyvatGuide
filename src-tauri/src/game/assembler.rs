@@ -65,6 +65,7 @@ pub(crate) enum AssetFallbackReason {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum AssetAssemblyOutcome {
   Assembled,
+  AlreadyTarget,
   FallbackRequired(AssetFallbackReason),
 }
 
@@ -74,13 +75,13 @@ pub(crate) enum AssetAssemblyOutcome {
 /// 磁盘写入和取消等错误则保持普通失败，不能被调用方误判为可回退源异常。
 #[derive(Debug)]
 enum AssetAssemblyError {
-  Source { reason: AssetFallbackReason, message: String },
+  Source { reason: AssetFallbackReason, message: String, actual_md5: Option<String> },
   Other(String),
 }
 
 impl AssetAssemblyError {
   fn source(reason: AssetFallbackReason, message: impl Into<String>) -> Self {
-    Self::Source { reason, message: message.into() }
+    Self::Source { reason, message: message.into(), actual_md5: None }
   }
 
   fn other(message: impl Into<String>) -> Self {
@@ -976,7 +977,20 @@ pub(crate) fn assemble_plan_asset_with_source_outcome(
   canceled: &AtomicBool,
   telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<AssetAssemblyOutcome, String> {
-  assemble_plan_asset_with_source_error(
+  let asset = plan.assets.get(asset_index).ok_or_else(|| "资源组装游标越界".to_string())?;
+  let capable = plan.target == super::model::PackagePlanTarget::Main && plan.fallback.is_some();
+  // 同路径 patch 的源哈希可以同时命中目标，不重复读取整文件。
+  let snapshot = if capable
+    && asset
+      .patch
+      .as_ref()
+      .is_some_and(|patch| patch.original_name == asset.name && patch.original_size == asset.size)
+  {
+    super::evidence::snapshot_target_file(plan, asset_index, game_root)?
+  } else {
+    None
+  };
+  let result = assemble_plan_asset_with_source_error(
     plan,
     asset_index,
     game_root,
@@ -984,8 +998,38 @@ pub(crate) fn assemble_plan_asset_with_source_outcome(
     output_root,
     canceled,
     telemetry,
-  )
-  .map_or_else(AssetAssemblyError::into_outcome, |_| Ok(AssetAssemblyOutcome::Assembled))
+  );
+  match result {
+    Ok(()) => Ok(AssetAssemblyOutcome::Assembled),
+    Err(AssetAssemblyError::Source { reason, actual_md5, .. }) if capable => {
+      // 确认首选临时输出已清理后才允许跳过或追加回退空间。
+      let output = prepare_manifest_output_file(output_root, &asset.name)?;
+      remove_stale_partial(&partial_path(&output)?)?;
+      let target_matches = match (snapshot.as_ref(), actual_md5.as_deref()) {
+        (Some(snapshot), Some(actual_md5)) => super::evidence::persist_target_evidence_from_hash(
+          task_root,
+          plan,
+          asset_index,
+          game_root,
+          snapshot,
+          actual_md5,
+        )?,
+        _ => super::evidence::verify_and_persist_target_evidence(
+          task_root,
+          plan,
+          asset_index,
+          game_root,
+          canceled,
+        )?,
+      };
+      if target_matches {
+        Ok(AssetAssemblyOutcome::AlreadyTarget)
+      } else {
+        Ok(AssetAssemblyOutcome::FallbackRequired(reason))
+      }
+    }
+    Err(error) => error.into_outcome(),
+  }
 }
 
 fn assemble_plan_asset_with_source_error(
@@ -1575,10 +1619,11 @@ fn apply_hdiff_patch(
     })?;
     let actual_md5 = hash_source_file(&mut source, patch.original_size, canceled)?;
     if !actual_md5.eq_ignore_ascii_case(&patch.original_md5) {
-      return Err(AssetAssemblyError::source(
-        AssetFallbackReason::SourceMismatch,
-        format!("修改型 patch 原文件 MD5 校验失败：{}", patch.original_name),
-      ));
+      return Err(AssetAssemblyError::Source {
+        reason: AssetFallbackReason::SourceMismatch,
+        message: format!("修改型 patch 原文件 MD5 校验失败：{}", patch.original_name),
+        actual_md5: Some(actual_md5),
+      });
     }
     source
       .seek(SeekFrom::Start(0))

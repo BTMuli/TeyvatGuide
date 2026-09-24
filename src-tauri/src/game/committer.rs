@@ -1,5 +1,5 @@
 //! 将已验证 staging 资源以可恢复事务提交到游戏目录。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.4
 
 use super::{
   assembler::{
@@ -21,6 +21,7 @@ use super::{
 use md5::{Digest as Md5Digest, Md5};
 use sha2::Sha256;
 use std::{
+  collections::HashSet,
   fs::{self, File, OpenOptions},
   io::{Read, Write},
   path::{Path, PathBuf},
@@ -45,6 +46,7 @@ const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 pub(crate) enum ApplyOutcome {
   Completed,
   RepairNeeded,
+  PrepareNeeded,
 }
 
 #[derive(Clone)]
@@ -91,6 +93,68 @@ pub(crate) struct SwitchApplyRequest {
   pub files: Vec<SwitchFileStep>,
 }
 
+/// 重新校验准备阶段记录的游戏目录目标文件候选。
+///
+/// 目标证据只用于候选识别，提交步骤仍须在 `prepare_transaction` 中重新从候选冻结。
+/// 已经激活备用资源的索引保留其下载预算，不再尝试把它们转换为 KeepTarget。
+fn invalid_target_candidates(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  game_root: &Path,
+  journal: &TaskJournal,
+  canceled: &AtomicBool,
+) -> Result<Vec<usize>, String> {
+  if journal.already_target_assets.is_empty() {
+    return Ok(Vec::new());
+  }
+  journal::validate_target_asset_indices(&journal.already_target_assets, plan, "目标文件候选")?;
+  // 批量校验只计算一次计划摘要并复验目标证据，避免对每个候选重复序列化完整计划。
+  let trusted = evidence::trusted_target_asset_indices(task_root, plan, game_root, canceled)?;
+  let activated = journal.fallback_assets.iter().copied().collect::<HashSet<_>>();
+  let mut invalid = Vec::new();
+  for &index in &journal.already_target_assets {
+    check_canceled(canceled)?;
+    if activated.contains(&index) {
+      return Err("目标保留与回退选择冲突".to_string());
+    }
+    if !trusted.contains(&index) {
+      evidence::invalidate_target_evidence(task_root, plan, index)?;
+      invalid.push(index);
+    }
+  }
+  Ok(invalid)
+}
+
+/// 将失效候选转成可恢复的重新准备状态。
+fn mark_prepare_needed<F>(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  invalid: &[usize],
+  emit: &F,
+) -> Result<ApplyOutcome, String>
+where
+  F: Fn(&TaskJournal),
+{
+  if invalid.is_empty() {
+    return Err("没有可重新准备的目标资源".to_string());
+  }
+  journal::validate_target_asset_indices(&journal.already_target_assets, plan, "目标文件候选")?;
+  let invalid_set = invalid.iter().copied().collect::<HashSet<_>>();
+  let activated = journal.fallback_assets.iter().copied().collect::<HashSet<_>>();
+  journal.already_target_assets.retain(|index| !invalid_set.contains(index));
+  journal
+    .target_reprepare_assets
+    .extend(invalid.iter().copied().filter(|index| !activated.contains(index)));
+  journal.target_reprepare_assets.sort_unstable();
+  journal.target_reprepare_assets.dedup();
+  journal.state = PackageTaskState::Paused;
+  journal.current_file = None;
+  journal.error_message = Some("游戏目录目标文件已变化，请重新准备更新".to_string());
+  persist_and_emit(task_root, journal, emit)?;
+  Ok(ApplyOutcome::PrepareNeeded)
+}
+
 /// 组装、提交并验证一个 ReadyToApply 任务。
 pub(crate) fn execute_apply<F>(
   plan: &PersistedPlan,
@@ -112,12 +176,28 @@ where
   if journal.state != PackageTaskState::ReadyToApply {
     return Err("资源任务尚未完成下载，不能应用更新".to_string());
   }
+  if journal.apply.is_some() {
+    return Err("已有冻结提交事务，请先执行安全恢复".to_string());
+  }
+  ensure_game_stopped()?;
+  let invalid = invalid_target_candidates(plan, task_root, game_root, journal, canceled)?;
+  if !invalid.is_empty() {
+    return mark_prepare_needed(plan, task_root, journal, &invalid, &emit);
+  }
   let incoming_root = prepare_apply_assembly(plan, game_root)?;
-  let incoming_preassembled = incoming_is_preassembled(plan, task_root, &incoming_root)?;
+  let mut preassembled_assets = evidence::trusted_asset_indices(task_root, plan, &incoming_root)?;
+  preassembled_assets.extend(journal.already_target_assets.iter().copied());
+  let incoming_preassembled = preassembled_assets.len() == plan.assets.len();
+  if !incoming_preassembled && plan.target == PackagePlanTarget::Main && plan.fallback.is_some() {
+    let missing = (0..plan.assets.len())
+      .filter(|index| !preassembled_assets.contains(index))
+      .collect::<Vec<_>>();
+    return mark_prepare_needed(plan, task_root, journal, &missing, &emit);
+  }
   let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
   })?;
-  let space = evaluate_apply_space_with_preassembled(plan, game_root, incoming_preassembled)?;
+  let space = evaluate_apply_space_with_preassembled(plan, game_root, &preassembled_assets)?;
   if !space.has_sufficient_space {
     return Err(format!(
       "游戏磁盘空间不足：至少需要 {} 字节，可用 {} 字节",
@@ -171,6 +251,11 @@ where
       )?;
     }
     check_canceled(canceled)?;
+    ensure_game_stopped()?;
+    let invalid = invalid_target_candidates(plan, task_root, game_root, journal, canceled)?;
+    if !invalid.is_empty() {
+      return mark_prepare_needed(plan, task_root, journal, &invalid, &emit);
+    }
     journal.assembly_current_file = None;
     journal.current_file = Some(if plan.target == PackagePlanTarget::Audio {
       "准备配音文件提交事务".to_string()
@@ -178,7 +263,15 @@ where
       "准备资源提交事务".to_string()
     });
     persist_and_emit(task_root, journal, &emit)?;
-    prepare_transaction(plan, game_root, task_root, journal)?;
+    if let Err(error) = prepare_transaction(plan, game_root, task_root, journal) {
+      if journal.apply.is_none() {
+        let invalid = invalid_target_candidates(plan, task_root, game_root, journal, canceled)?;
+        if !invalid.is_empty() {
+          return mark_prepare_needed(plan, task_root, journal, &invalid, &emit);
+        }
+      }
+      return Err(error);
+    }
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
     journal.current_file = Some("准备提交事务".to_string());
@@ -280,10 +373,11 @@ where
 
   match result {
     Ok(ApplyOutcome::Completed) => {
-      cleanup_known_transaction_files(plan, game_root, task_root);
+      cleanup_known_transaction_files(plan, journal, game_root, task_root);
       Ok(ApplyOutcome::Completed)
     }
     Ok(ApplyOutcome::RepairNeeded) => Ok(ApplyOutcome::RepairNeeded),
+    Ok(ApplyOutcome::PrepareNeeded) => Ok(ApplyOutcome::PrepareNeeded),
     Err(error) => {
       let canceled = canceled.load(Ordering::Acquire);
       finish_failed_apply(plan, game_root, task_root, journal, canceled, error, &emit)
@@ -418,7 +512,7 @@ where
       &emit,
     );
   }
-  cleanup_known_transaction_files(plan, game_root, task_root);
+  cleanup_known_transaction_files(plan, journal, game_root, task_root);
   cleanup_repair_files(repair_plan, game_root, task_root);
   Ok(())
 }
@@ -446,7 +540,7 @@ where
     journal.state = PackageTaskState::RollingBack;
     persist_and_emit(task_root, journal, &emit)?;
     if let Err(error) = rollback_file_transaction_with_progress(
-      &file_commit_from_plan(plan)?,
+      &file_commit_from_plan(plan, journal)?,
       game_root,
       journal,
       &mut report_progress,
@@ -458,7 +552,7 @@ where
     }
   }
   cleanup_repair_files(plan, game_root, task_root);
-  cleanup_known_transaction_files(plan, game_root, task_root);
+  cleanup_known_transaction_files(plan, journal, game_root, task_root);
   journal.apply = None;
   journal.repair = None;
   reset_audio_commit_progress(plan, journal);
@@ -513,7 +607,15 @@ where
       fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
     let target = patch_channel(&original, request.target_channel, request.target_sub_channel)?;
     prepare_file_transaction(
-      &commit, &original, &target, game_root, task_root, journal, false, true,
+      &commit,
+      &original,
+      &target,
+      game_root,
+      task_root,
+      journal,
+      &[],
+      false,
+      true,
     )?;
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
@@ -603,7 +705,7 @@ where
 
 /// 准备修复提交事务。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `original`: 原计划。
@@ -648,6 +750,7 @@ fn prepare_repair_transaction(
     config_original_sha256: original_apply.config_original_sha256,
     config_target_sha256: original_apply.config_target_sha256,
     config_phase: ConfigCommitPhase::Prepared,
+    keep_target_assets: Vec::new(),
     client_state: None,
   });
   Ok(())
@@ -927,7 +1030,7 @@ fn repair_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
 
 /// 准备文件提交事务。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
@@ -951,7 +1054,9 @@ fn prepare_transaction(
   if observe_capable_main_anomalies(plan, game_root)? {
     journal.requires_full_verification = true;
   }
-  let commit = file_commit_from_plan(plan)?;
+  let keep_target_assets = prepare_keep_target_assets(plan, journal)?;
+  journal.requires_full_verification |= !keep_target_assets.is_empty();
+  let commit = file_commit_from_plan_with_keep_targets(plan, &keep_target_assets)?;
   let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
   let original =
     fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
@@ -961,9 +1066,33 @@ fn prepare_transaction(
     patch_game_version(&original, &plan.target_tag)?
   };
   prepare_file_transaction(
-    &commit, &original, &target, game_root, task_root, journal, true, false,
+    &commit,
+    &original,
+    &target,
+    game_root,
+    task_root,
+    journal,
+    &keep_target_assets,
+    true,
+    false,
   )?;
   prepare_client_state(plan, game_root, journal)
+}
+
+/// 将候选目标资源冻结为正式提交步骤。
+fn prepare_keep_target_assets(
+  plan: &PersistedPlan,
+  journal: &TaskJournal,
+) -> Result<Vec<usize>, String> {
+  let keep = journal.already_target_assets.clone();
+  let activated = journal.fallback_assets.iter().copied().collect::<HashSet<_>>();
+  if keep.iter().any(|index| activated.contains(index))
+    || !journal.target_reprepare_assets.is_empty()
+  {
+    return Err("目标资源选择尚未完成准备".to_string());
+  }
+  journal::validate_target_asset_indices(&keep, plan, "冻结目标文件")?;
+  Ok(keep)
 }
 
 /// 只观察 capable Main 计划的目标尺寸/存在性，不读取现有内容哈希。
@@ -1024,37 +1153,33 @@ pub(crate) fn evaluate_apply_space(
   task_root: &Path,
 ) -> Result<PackageApplySpaceSummary, String> {
   let incoming_root = game_root.join(TRANSACTION_DIRECTORY).join(&plan.plan_id).join("incoming");
-  let incoming_preassembled = incoming_is_preassembled(plan, task_root, &incoming_root)?;
-  evaluate_apply_space_with_preassembled(plan, game_root, incoming_preassembled)
+  let preassembled = preassembled_asset_indices(
+    plan,
+    task_root,
+    &incoming_root,
+    game_root,
+    &AtomicBool::new(false),
+  )?;
+  evaluate_apply_space_with_preassembled(plan, game_root, &preassembled)
 }
 
-/// 判断 incoming 目录是否已预组装。
-///
-/// @since Beta v0.12.1
-///
-/// # 参数
-/// - `plan`: 资源计划。
-/// - `task_root`: 任务根目录。
-/// - `incoming_root`: incoming 目录。
-///
-/// # 返回
-/// - `Ok(bool)`: 是否预组装。
-/// - `Err(String)`: 检查失败的错误描述。
-fn incoming_is_preassembled(
+/// 返回已具备可靠成品的资源索引：组装目录证据与游戏目录目标证据的并集。
+fn preassembled_asset_indices(
   plan: &PersistedPlan,
   task_root: &Path,
   incoming_root: &Path,
-) -> Result<bool, String> {
-  if !matches!(
-    plan.target,
-    PackagePlanTarget::Audio | PackagePlanTarget::Main | PackagePlanTarget::PreDownload
-  ) {
-    return Ok(false);
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<HashSet<usize>, String> {
+  let mut trusted = if incoming_root.is_dir() {
+    evidence::trusted_asset_indices(task_root, plan, incoming_root)?
+  } else {
+    HashSet::new()
+  };
+  if plan.target == PackagePlanTarget::Main && plan.fallback.is_some() {
+    trusted.extend(evidence::trusted_target_asset_indices(task_root, plan, game_root, canceled)?);
   }
-  if !incoming_root.is_dir() {
-    return Ok(false);
-  }
-  Ok(evidence::trusted_asset_indices(task_root, plan, incoming_root)?.len() == plan.assets.len())
+  Ok(trusted)
 }
 
 /// 返回游戏目录中的事务根目录（不创建）。
@@ -1154,12 +1279,13 @@ pub(crate) fn remaining_incoming_bytes(
   task_root: &Path,
 ) -> Result<u64, String> {
   let incoming_root = game_root.join(TRANSACTION_DIRECTORY).join(&plan.plan_id).join("incoming");
-  if !incoming_root.is_dir() {
-    return plan.assets.iter().try_fold(0_u64, |total, asset| {
-      total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
-    });
-  }
-  let trusted = evidence::trusted_asset_indices(task_root, plan, &incoming_root)?;
+  let trusted = preassembled_asset_indices(
+    plan,
+    task_root,
+    &incoming_root,
+    game_root,
+    &AtomicBool::new(false),
+  )?;
   plan.assets.iter().enumerate().try_fold(0_u64, |total, (index, asset)| {
     if trusted.contains(&index) {
       return Ok(total);
@@ -1170,7 +1296,7 @@ pub(crate) fn remaining_incoming_bytes(
 
 /// 结合预组装状态评估应用空间。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
@@ -1183,16 +1309,18 @@ pub(crate) fn remaining_incoming_bytes(
 fn evaluate_apply_space_with_preassembled(
   plan: &PersistedPlan,
   game_root: &Path,
-  incoming_preassembled: bool,
+  preassembled: &HashSet<usize>,
 ) -> Result<PackageApplySpaceSummary, String> {
-  let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
-    total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
-  })?;
-  let required = if incoming_preassembled {
-    SAFETY_MARGIN_BYTES
-  } else {
-    incoming_bytes.checked_add(SAFETY_MARGIN_BYTES).ok_or_else(|| "提交空间需求溢出".to_string())?
-  };
+  let incoming_bytes =
+    plan.assets.iter().enumerate().try_fold(0_u64, |total, (index, asset)| {
+      if preassembled.contains(&index) {
+        return Ok(total);
+      }
+      total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
+    })?;
+  let required = incoming_bytes
+    .checked_add(SAFETY_MARGIN_BYTES)
+    .ok_or_else(|| "提交空间需求溢出".to_string())?;
   let available = fs2::available_space(game_root)
     .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
   Ok(PackageApplySpaceSummary {
@@ -1204,7 +1332,7 @@ fn evaluate_apply_space_with_preassembled(
 
 /// 准备文件提交事务，生成 backup 与 incoming 布局。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `commit`: 文件提交计划。
@@ -1226,6 +1354,7 @@ fn prepare_file_transaction(
   game_root: &Path,
   task_root: &Path,
   journal: &mut TaskJournal,
+  keep_target_assets: &[usize],
   trust_preverified_incoming: bool,
   verify_source: bool,
 ) -> Result<(), String> {
@@ -1241,6 +1370,9 @@ fn prepare_file_transaction(
     }
     if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
       return Err(format!("提交备份目录包含未恢复文件：{}", step.name));
+    }
+    if step.kind == CommitStepKind::KeepTarget {
+      continue;
     }
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
     if resolve_optional_manifest_file(&incoming_root, &step.name)?.is_none() {
@@ -1265,6 +1397,7 @@ fn prepare_file_transaction(
     config_original_sha256: sha256_bytes(original),
     config_target_sha256: sha256_bytes(target),
     config_phase: ConfigCommitPhase::Prepared,
+    keep_target_assets: keep_target_assets.to_vec(),
     client_state: None,
   });
   Ok(())
@@ -1272,7 +1405,7 @@ fn prepare_file_transaction(
 
 /// 预检提交目标状态。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `steps`: 提交步骤。
@@ -1305,6 +1438,10 @@ fn preflight_targets(
       // 删除目标已缺失视为目标已达成：资源准备阶段前移删除或外部已移除均可安全跳过。
       CommitStepKind::Delete => {}
       CommitStepKind::Repair => {}
+      CommitStepKind::KeepTarget if current.is_none() => {
+        return Err(format!("保留目标资源已缺失，请重新准备：{}", step.name));
+      }
+      CommitStepKind::KeepTarget => {}
       _ => {}
     }
   }
@@ -1313,7 +1450,7 @@ fn preflight_targets(
 
 /// 提交资源计划。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
@@ -1338,7 +1475,7 @@ where
   F: Fn(&TaskJournal),
 {
   commit_file_resources(
-    &file_commit_from_plan(plan)?,
+    &file_commit_from_plan(plan, journal)?,
     game_root,
     journal,
     task_root,
@@ -1349,7 +1486,7 @@ where
 
 /// 提交文件资源。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `commit`: 文件提交计划。
@@ -1401,6 +1538,31 @@ where
   }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
+    if step.kind == CommitStepKind::KeepTarget {
+      // KeepTarget 没有 incoming/backup，也不能通过 rename 触碰游戏目录；游标边界前
+      // 重新读取并校验目标内容，失败时只允许走事务恢复，绝不改写该目标。
+      ensure_game_stopped()?;
+      let target = resolve_existing_manifest_file(game_root, &step.name)?;
+      if !file_matches(&target, step.size, &step.md5)? {
+        return Err(format!("保留目标资源在提交前发生变化：{}", step.name));
+      }
+      {
+        let apply = apply_mut(journal)?;
+        apply.cursor = index + 1;
+        apply.active_step = None;
+      }
+      if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+        journal.commit_completed_count =
+          (index + 1).min(journal.commit_total_count.saturating_sub(1));
+        journal.commit_current_step = Some(format!(
+          "提交资源文件 {}/{}",
+          journal.commit_completed_count,
+          journal.commit_total_count.saturating_sub(1)
+        ));
+      }
+      persist_and_emit(task_root, journal, emit)?;
+      continue;
+    }
     if step.kind == CommitStepKind::Delete
       && resolve_optional_manifest_file(game_root, &step.name)?.is_none()
     {
@@ -1433,6 +1595,7 @@ where
       CommitStepKind::Add => false,
       CommitStepKind::Repair => resolve_optional_manifest_file(game_root, &step.name)?.is_some(),
       CommitStepKind::Modify | CommitStepKind::Delete => true,
+      CommitStepKind::KeepTarget => false,
     };
     if backup_existing {
       ensure_game_stopped()?;
@@ -1446,7 +1609,7 @@ where
             fs::metadata(&current).map_err(|error| format!("读取资源文件状态失败：{error}"))?.len()
               == expected
           }
-          CommitStepKind::Add | CommitStepKind::Repair => true,
+          CommitStepKind::Add | CommitStepKind::Repair | CommitStepKind::KeepTarget => true,
         };
         if !source_matches {
           return Err(format!("游戏资源在提交前发生变化：{}", step.name));
@@ -2096,7 +2259,7 @@ where
 
 /// 收尾失败的应用提交。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
@@ -2127,7 +2290,7 @@ where
     journal.error_message = Some(error.clone());
     let _ = persist_and_emit(task_root, journal, emit);
     if let Err(rollback_error) =
-      rollback_file_transaction(&file_commit_from_plan(plan)?, game_root, journal)
+      rollback_file_transaction(&file_commit_from_plan(plan, journal)?, game_root, journal)
     {
       let combined = format!("{error}；自动回滚失败：{rollback_error}");
       journal.state = PackageTaskState::RecoveryRequired;
@@ -2136,7 +2299,7 @@ where
       return Err(combined);
     }
   }
-  cleanup_known_transaction_files(plan, game_root, task_root);
+  cleanup_known_transaction_files(plan, journal, game_root, task_root);
   journal.apply = None;
   reset_audio_commit_progress(plan, journal);
   journal.state = PackageTaskState::ReadyToApply;
@@ -2167,7 +2330,7 @@ fn rollback_file_transaction(
 
 /// 回滚文件事务并上报进度。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `commit`: 文件提交计划。
@@ -2196,6 +2359,12 @@ fn rollback_file_transaction_with_progress(
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   for (index, step) in touched_steps.iter().rev().enumerate() {
+    if step.kind == CommitStepKind::KeepTarget {
+      // KeepTarget 从未移动目标文件；回滚必须连目标的存在性与内容都不读取，保证
+      // 外部已存在的文件不会被回滚逻辑删除、恢复或移入 incoming。
+      report_progress(index.saturating_add(3), total, &step.name);
+      continue;
+    }
     // 修复子事务先恢复了它看到的实际前态，该前态可能正是主事务复验发现的坏文件。
     let repaired_overlap = journal
       .repair
@@ -2330,6 +2499,7 @@ fn rollback_file_transaction_with_progress(
           }
         },
       },
+      CommitStepKind::KeepTarget => unreachable!("KeepTarget 已在回滚前跳过"),
     }
     report_progress(index.saturating_add(3), total, &step.name);
   }
@@ -2837,33 +3007,45 @@ fn is_hex_md5(value: &str) -> bool {
 
 /// 生成资源计划的提交步骤。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
 ///
 /// # 返回
 /// 提交步骤列表。
-fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
+fn commit_steps(
+  plan: &PersistedPlan,
+  keep_target_assets: &[usize],
+) -> Result<Vec<CommitStep>, String> {
+  journal::validate_target_asset_indices(keep_target_assets, plan, "冻结目标文件")?;
   let capable_main = plan.target == PackagePlanTarget::Main && plan.fallback.is_some();
   let mut steps = plan
     .assets
     .iter()
-    .map(|asset| CommitStep {
-      kind: match asset.action {
-        PlanAssetAction::Add if capable_main => CommitStepKind::Repair,
-        PlanAssetAction::Add => CommitStepKind::Add,
-        // 修改型 patch 的差分源由 assembler 按 original_name 单独校验；提交阶段只需
-        // 将已组装目标覆盖到游戏目录，目标原先不存在时也可以直接写入。
-        PlanAssetAction::Modify if capable_main => CommitStepKind::Repair,
-        PlanAssetAction::Modify
-          if plan.strategy == PackagePlanStrategy::Patch
-            && matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) =>
-        {
-          CommitStepKind::Repair
+    .enumerate()
+    .map(|(index, asset)| CommitStep {
+      kind: if keep_target_assets.binary_search(&index).is_ok() {
+        CommitStepKind::KeepTarget
+      } else {
+        match asset.action {
+          PlanAssetAction::Add if capable_main => CommitStepKind::Repair,
+          PlanAssetAction::Add => CommitStepKind::Add,
+          // 修改型 patch 的差分源由 assembler 按 original_name 单独校验；提交阶段只需
+          // 将已组装目标覆盖到游戏目录，目标原先不存在时也可以直接写入。
+          PlanAssetAction::Modify if capable_main => CommitStepKind::Repair,
+          PlanAssetAction::Modify
+            if plan.strategy == PackagePlanStrategy::Patch
+              && matches!(
+                plan.target,
+                PackagePlanTarget::Main | PackagePlanTarget::PreDownload
+              ) =>
+          {
+            CommitStepKind::Repair
+          }
+          PlanAssetAction::Modify => CommitStepKind::Modify,
+          PlanAssetAction::Repair => CommitStepKind::Repair,
         }
-        PlanAssetAction::Modify => CommitStepKind::Modify,
-        PlanAssetAction::Repair => CommitStepKind::Repair,
       },
       name: asset.name.clone(),
       source_size: asset.source.as_ref().map(|source| source.size),
@@ -2880,7 +3062,7 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
     size: file.size,
     md5: file.md5.clone(),
   }));
-  steps
+  Ok(steps)
 }
 
 /// 重置语音提交进度。
@@ -2920,7 +3102,7 @@ fn mark_update_commit_complete(journal: &mut TaskJournal) {
 
 /// 计算提交步骤摘要。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `steps`: 提交步骤。
@@ -2935,6 +3117,7 @@ fn steps_digest(steps: &[CommitStep]) -> String {
       CommitStepKind::Modify => 2,
       CommitStepKind::Delete => 3,
       CommitStepKind::Repair => 4,
+      CommitStepKind::KeepTarget => 5,
     }]);
     hasher.update(step.name.as_bytes());
     hasher.update([0]);
@@ -3273,7 +3456,7 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
 
 /// 从资源计划构造文件提交计划。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
@@ -3281,11 +3464,23 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
 /// # 返回
 /// - `Ok(FileCommitPlan)`: 文件提交计划。
 /// - `Err(String)`: 摘要计算失败的错误描述。
-fn file_commit_from_plan(plan: &PersistedPlan) -> Result<FileCommitPlan, String> {
+fn file_commit_from_plan(
+  plan: &PersistedPlan,
+  journal: &TaskJournal,
+) -> Result<FileCommitPlan, String> {
+  let apply = apply(journal)?;
+  file_commit_from_plan_with_keep_targets(plan, &apply.keep_target_assets)
+}
+
+/// 在 ApplyJournal 持久化前，以候选集合构造一次提交步骤并冻结其选择。
+fn file_commit_from_plan_with_keep_targets(
+  plan: &PersistedPlan,
+  keep_target_assets: &[usize],
+) -> Result<FileCommitPlan, String> {
   Ok(FileCommitPlan {
     plan_id: plan.plan_id.clone(),
     digest: plan_sha256(plan)?,
-    steps: commit_steps(plan),
+    steps: commit_steps(plan, keep_target_assets)?,
   })
 }
 
@@ -3319,7 +3514,7 @@ fn file_commit_from_switch(request: &SwitchApplyRequest) -> FileCommitPlan {
 
 /// 校验换服文件。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `commit`: 文件提交计划。
@@ -3348,7 +3543,9 @@ fn verify_switch_files(
           return Err(format!("换服应移出的文件仍存在：{}", step.name));
         }
       }
-      CommitStepKind::Repair => return Err("换服提交不能包含修复步骤".to_string()),
+      CommitStepKind::Repair | CommitStepKind::KeepTarget => {
+        return Err("换服提交不能包含修复或保留目标步骤".to_string());
+      }
     }
   }
   Ok(())
@@ -3658,14 +3855,19 @@ fn remove_empty_directory_tree(root: &Path) {
 
 /// 清理已知事务文件。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `plan`: 资源计划。
 /// - `game_root`: 游戏根目录。
 /// - `task_root`: 任务根目录。
-fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
-  if let Ok(commit) = file_commit_from_plan(plan) {
+fn cleanup_known_transaction_files(
+  plan: &PersistedPlan,
+  journal: &TaskJournal,
+  game_root: &Path,
+  task_root: &Path,
+) {
+  if let Ok(commit) = file_commit_from_plan(plan, journal) {
     cleanup_file_transaction(&commit, game_root, task_root);
   }
 }

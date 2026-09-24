@@ -1,5 +1,5 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
-//! @since Beta v0.12.3
+//! @since Beta v0.12.4
 
 use super::{
   assembler, committer, defender,
@@ -2756,7 +2756,7 @@ impl GamePackageManager {
             download_client,
             Arc::clone(&shared_journal),
             Arc::clone(&canceled),
-            paused_slot,
+            Arc::clone(&paused_slot),
             manual_pause_requested,
             concurrency,
             options.max_bytes_per_second,
@@ -2806,6 +2806,7 @@ impl GamePackageManager {
           }
         }
         if let Some(installation) = main_apply {
+          let apply_paused = paused_slot.lock().unwrap().clone();
           let ready_to_apply = shared_journal.lock().await.state == PackageTaskState::ReadyToApply;
           if ready_to_apply && is_game_running() {
             log::info!("[game-package] 正式更新已组装完成，游戏仍在运行，等待前端确认停游后应用");
@@ -2818,6 +2819,9 @@ impl GamePackageManager {
               Arc::clone(&shared_journal),
               Arc::clone(&canceled),
               installation,
+              apply_paused,
+              concurrency,
+              options.max_bytes_per_second,
             )
             .await
           {
@@ -3434,6 +3438,26 @@ impl GamePackageManager {
             completed = true;
           }
           Ok(Ok(committer::ApplyOutcome::RepairNeeded)) => {}
+          Ok(Ok(committer::ApplyOutcome::PrepareNeeded)) => {
+            apply_heartbeat_stop.store(true, Ordering::Release);
+            if let Err(error) = apply_main_after_download(
+              worker_app_handle.clone(),
+              task_root.clone(),
+              game_root.clone(),
+              plan.clone(),
+              Arc::clone(&snapshot),
+              Arc::clone(&canceled_flag),
+              installation.clone(),
+              Arc::clone(&paused),
+              default_concurrency(),
+              None,
+            )
+            .await
+            {
+              log::warn!("[game-package] 重新准备资源任务失败：{error}");
+            }
+            return;
+          }
           Ok(Err(error)) => {
             log::warn!("[game-package] 应用资源任务失败：{error}");
             return;
@@ -4409,6 +4433,15 @@ async fn assemble_audio_asset(
   let summary = {
     let mut value = journal.lock().await;
     value.active_assembly_count = value.active_assembly_count.saturating_sub(1);
+    if matches!(result, Ok(assembler::AssetAssemblyOutcome::AlreadyTarget)) {
+      if !value.already_target_assets.contains(&asset_index) {
+        value.already_target_assets.push(asset_index);
+        value.already_target_assets.sort_unstable();
+      }
+      value.requires_full_verification = true;
+      value.touch();
+      journal::persist(&task_root, &value)?;
+    }
     value.touch();
     overlay_audio_summary(&value, &telemetry, &overlay)
   };
@@ -4544,7 +4577,11 @@ async fn run_audio_asset_job(
         }
       }
     }
-    let resumed_fallback = journal.lock().await.fallback_assets.contains(&asset_index);
+    let resumed_fallback = {
+      let value = journal.lock().await;
+      value.fallback_assets.contains(&asset_index)
+        || value.target_reprepare_assets.contains(&asset_index)
+    };
     let outcome = if resumed_fallback {
       assembler::AssetAssemblyOutcome::FallbackRequired(
         assembler::AssetFallbackReason::SourceMismatch,
@@ -4599,6 +4636,8 @@ async fn run_audio_asset_job(
           grow_update_space(&plan.plan_id, additional)?;
           let mut value = journal.lock().await;
           value.fallback_assets = activated;
+          value.target_reprepare_assets.retain(|index| *index != asset_index);
+          value.already_target_assets.retain(|index| *index != asset_index);
           value.requires_full_verification = true;
           update_download_totals(&mut value, &active)?;
           value.fallback_download_bytes = value
@@ -4684,6 +4723,9 @@ async fn run_audio_asset_job(
       .await?
       {
         assembler::AssetAssemblyOutcome::Assembled => {}
+        assembler::AssetAssemblyOutcome::AlreadyTarget => {
+          return Err("完整回退组装不能跳过目标文件".to_string());
+        }
         assembler::AssetAssemblyOutcome::FallbackRequired(_) => {
           return Err("完整文件回退仍依赖旧文件，请重新评估计划".to_string());
         }
@@ -4991,11 +5033,43 @@ async fn run_streaming_prepare_task(
     let task_root = task_root.clone();
     let plan = plan.clone();
     let output_root = output_root.clone();
-    move || evidence::trusted_asset_indices(&task_root, &plan, &output_root)
+    let game_root = game_root.clone();
+    let canceled = Arc::clone(&canceled);
+    move || {
+      let mut completed = evidence::trusted_asset_indices(&task_root, &plan, &output_root)?;
+      let kept = evidence::trusted_target_asset_indices(&task_root, &plan, &game_root, &canceled)?;
+      completed.extend(kept.iter().copied());
+      Ok::<_, String>((completed, kept))
+    }
   })
   .await
   {
-    Ok(Ok(completed)) => completed,
+    Ok(Ok((mut completed, mut kept))) => {
+      let mut value = journal.lock().await;
+      // 已激活回退是持久化的选择，不能被旧 sidecar 重新降为 KeepTarget。
+      for index in value.fallback_assets.iter().chain(&value.target_reprepare_assets) {
+        if kept.remove(index) {
+          completed.remove(index);
+        }
+      }
+      let activated = value.fallback_assets.iter().copied().collect::<HashSet<_>>();
+      let invalid = value
+        .already_target_assets
+        .iter()
+        .filter(|index| !kept.contains(index) && !activated.contains(index))
+        .copied()
+        .collect::<Vec<_>>();
+      value.target_reprepare_assets.extend(invalid);
+      value.target_reprepare_assets.sort_unstable();
+      value.target_reprepare_assets.dedup();
+      for index in &value.target_reprepare_assets {
+        completed.remove(index);
+      }
+      value.already_target_assets = kept.into_iter().collect();
+      value.already_target_assets.sort_unstable();
+      value.requires_full_verification |= !value.already_target_assets.is_empty();
+      completed
+    }
     Ok(Err(error)) => {
       persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
         .await;
@@ -5357,8 +5431,8 @@ async fn run_streaming_prepare_task(
     value.error_message = Some(error);
   } else if completed_assets.len() == plan.assets.len() {
     value.state = PackageTaskState::ReadyToApply;
-    value.downloaded_bytes = value.total_bytes;
-    value.committed_step = value.total_count;
+    // 已有目标可以完成准备而不再需要缓存；不能把未下载对象伪报为已下载。
+    value.committed_step = value.owned_cache_files.len();
     value.assembly_completed_count = value.assembly_total_count;
     value.assembly_completed_bytes = value.assembly_total_bytes;
     value.error_message = None;
@@ -5427,57 +5501,153 @@ async fn apply_main_after_download(
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   installation: GameInstallation,
+  paused: Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
 ) -> Result<(), String> {
   let heartbeat_stop =
     spawn_apply_heartbeat(app_handle.clone(), Arc::clone(&journal), Arc::clone(&canceled));
-  let apply_plan = plan.clone();
-  let apply_game_root = game_root.clone();
-  let apply_task_root = task_root.clone();
-  let apply_canceled = Arc::clone(&canceled);
-  let apply_journal = Arc::clone(&journal);
-  let apply_handle = app_handle.clone();
-  let worker_result = tauri::async_runtime::spawn_blocking(move || {
-    let mut journal_value = apply_journal.blocking_lock().clone();
-    let emit = |value: &TaskJournal| {
-      *apply_journal.blocking_lock() = value.clone();
-      let summary = value.summary();
-      emit_state(&apply_handle, &summary);
-      emit_progress(&apply_handle, &summary);
+  // 持续外部写入时暂停，避免无限哈希/下载循环。
+  let mut reprepare_attempted = false;
+  loop {
+    if journal.lock().await.state == PackageTaskState::Paused && !reprepare_attempted {
+      if let Err(error) = reprepare_main_targets(
+        &app_handle,
+        &task_root,
+        &game_root,
+        &plan,
+        &journal,
+        &canceled,
+        &paused,
+        concurrency,
+        max_bytes_per_second,
+      )
+      .await
+      {
+        heartbeat_stop.store(true, Ordering::Release);
+        return Err(error);
+      }
+      reprepare_attempted = true;
+    }
+    let apply_plan = plan.clone();
+    let apply_game_root = game_root.clone();
+    let apply_task_root = task_root.clone();
+    let apply_canceled = Arc::clone(&canceled);
+    let apply_journal = Arc::clone(&journal);
+    let apply_handle = app_handle.clone();
+    let worker_result = tauri::async_runtime::spawn_blocking(move || {
+      let mut journal_value = apply_journal.blocking_lock().clone();
+      let emit = |value: &TaskJournal| {
+        *apply_journal.blocking_lock() = value.clone();
+        let summary = value.summary();
+        emit_state(&apply_handle, &summary);
+        emit_progress(&apply_handle, &summary);
+      };
+      committer::execute_apply(
+        &apply_plan,
+        &apply_game_root,
+        &apply_task_root,
+        &mut journal_value,
+        &apply_canceled,
+        emit,
+      )
+    })
+    .await;
+    let result = match worker_result {
+      Ok(result) => result,
+      Err(error) => {
+        heartbeat_stop.store(true, Ordering::Release);
+        return Err(format!("自动应用资源任务异常退出：{error}"));
+      }
     };
-    committer::execute_apply(
-      &apply_plan,
-      &apply_game_root,
-      &apply_task_root,
-      &mut journal_value,
-      &apply_canceled,
-      emit,
-    )
-  })
-  .await;
-  let result = match worker_result {
-    Ok(result) => result,
-    Err(error) => {
-      heartbeat_stop.store(true, Ordering::Release);
-      return Err(format!("自动应用资源任务异常退出：{error}"));
-    }
-  };
-  match result {
-    Ok(committer::ApplyOutcome::Completed) => {
-      heartbeat_stop.store(true, Ordering::Release);
-      Ok(())
-    }
-    Ok(committer::ApplyOutcome::RepairNeeded) => {
-      let result =
-        continue_repair(app_handle, task_root, game_root, installation, plan, journal, canceled)
-          .await;
-      heartbeat_stop.store(true, Ordering::Release);
-      result
-    }
-    Err(error) => {
-      heartbeat_stop.store(true, Ordering::Release);
-      Err(error)
+    match result {
+      Ok(committer::ApplyOutcome::Completed) => {
+        heartbeat_stop.store(true, Ordering::Release);
+        return Ok(());
+      }
+      Ok(committer::ApplyOutcome::RepairNeeded) => {
+        let result =
+          continue_repair(app_handle, task_root, game_root, installation, plan, journal, canceled)
+            .await;
+        heartbeat_stop.store(true, Ordering::Release);
+        return result;
+      }
+      Ok(committer::ApplyOutcome::PrepareNeeded) => {
+        if reprepare_attempted {
+          heartbeat_stop.store(true, Ordering::Release);
+          return Err("已有目标文件持续变化，任务已暂停，请关闭其他启动器后继续".to_string());
+        }
+        if let Err(error) = reprepare_main_targets(
+          &app_handle,
+          &task_root,
+          &game_root,
+          &plan,
+          &journal,
+          &canceled,
+          &paused,
+          concurrency,
+          max_bytes_per_second,
+        )
+        .await
+        {
+          heartbeat_stop.store(true, Ordering::Release);
+          return Err(error);
+        }
+        reprepare_attempted = true;
+      }
+      Err(error) => {
+        heartbeat_stop.store(true, Ordering::Release);
+        return Err(error);
+      }
     }
   }
+}
+
+/// KeepTarget 在提交边界前失效时，仍通过原流水线激活回退及预留空间。
+#[allow(clippy::too_many_arguments)]
+async fn reprepare_main_targets(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  game_root: &Path,
+  plan: &PersistedPlan,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  canceled: &Arc<AtomicBool>,
+  paused: &Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
+) -> Result<(), String> {
+  if plan.target != PackagePlanTarget::Main || plan.fallback.is_none() {
+    return Err("当前计划不支持重新准备已有目标文件".to_string());
+  }
+  if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
+    return Err("重新准备资源已停止".to_string());
+  }
+  if !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {
+    return Err(MAIN_UPDATE_WORKER_DRAIN_MESSAGE.to_string());
+  }
+  let cache_root = prepare_cache_root(task_root)?;
+  let client = create_http_client()?;
+  run_streaming_prepare_task(
+    app_handle.clone(),
+    task_root.to_path_buf(),
+    cache_root,
+    game_root.to_path_buf(),
+    plan.clone(),
+    client,
+    Arc::clone(journal),
+    Arc::clone(canceled),
+    Arc::clone(paused),
+    concurrency,
+    max_bytes_per_second,
+    false,
+    None,
+  )
+  .await;
+  let value = journal.lock().await;
+  if value.state != PackageTaskState::ReadyToApply {
+    return Err(value.error_message.clone().unwrap_or_else(|| "资源重新准备未完成".to_string()));
+  }
+  Ok(())
 }
 
 /// 配音包下载完成后自动退出游戏并提交、登记配音变更。
@@ -5560,7 +5730,10 @@ async fn apply_audio_after_download(
   })
   .await
   .map_err(|error| format!("应用配音包任务异常退出：{error}"))??;
-  if result == committer::ApplyOutcome::RepairNeeded {
+  if matches!(
+    result,
+    committer::ApplyOutcome::RepairNeeded | committer::ApplyOutcome::PrepareNeeded
+  ) {
     return Err("配音包提交后仍需修复，请执行安全恢复".to_string());
   }
   if journal.lock().await.state != PackageTaskState::RegistrationPending {
