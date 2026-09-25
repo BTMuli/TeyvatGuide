@@ -88,17 +88,17 @@
         </header>
         <TwcCostumes :costumes />
       </section>
-      <!-- 天赋 -->
+      <!-- 命座 -->
       <section class="twc-detail-section">
         <header class="twc-section-header">
-          <h2>天赋</h2>
-          <div v-if="currentTalent" class="twc-section-current">
+          <h2>命座</h2>
+          <div v-if="curConstellation" class="twc-section-current">
             <img
-              :src="`/icon/constellations/${currentTalent.Icon}.webp`"
+              :src="`/icon/constellations/${curConstellation.Icon}.webp`"
               alt=""
               aria-hidden="true"
             />
-            <span>{{ currentTalent.Name }}</span>
+            <span>{{ curConstellation.Name }}</span>
           </div>
         </header>
         <TwcConstellations v-model:selected="selectedTalent" :data="data.constellation" />
@@ -244,7 +244,7 @@ const selectedTalent = ref<string>("");
 const selectedSkill = ref<string>("");
 const scrollArea = useTemplateRef<HTMLDivElement>("scrollArea");
 let loadId = 0;
-const currentTalent = computed<TGApp.Plugins.Hutao.Character.RhisdTalent | undefined>(() =>
+const curConstellation = computed<TGApp.Plugins.Hutao.Character.RhisdTalent | undefined>(() =>
   data.value?.constellation.find((item) => item.Name === selectedTalent.value),
 );
 const currentSkill = computed<TGApp.App.Character.WikiSkill | undefined>(() =>
