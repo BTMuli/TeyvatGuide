@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.12.0
+//! @since Beta v0.12.4
 #![cfg(target_os = "windows")]
 
 pub mod cmd_parse;
@@ -86,7 +86,7 @@ pub fn call_yae_dll(
 
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
   dbg!("开始启动 YaeAchievementPipe 命名管道");
-  let _pipe_handle = create_named_pipe("YaeAchievementPipe");
+  let _pipe_handle = create_named_pipe("YaeAchievementPipe")?;
 
   // 1. 启动游戏进程
   let pi = spawn_process(&game_path, ticket);

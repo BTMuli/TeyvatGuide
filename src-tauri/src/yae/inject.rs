@@ -1,5 +1,5 @@
 //! DLL 注入相关功能
-//! @since Beta v0.9.2
+//! @since Beta v0.12.4
 #![cfg(target_os = "windows")]
 
 use std::ptr;
@@ -28,8 +28,8 @@ use windows_sys::Win32::System::Threading::{
   WaitForSingleObject,
 };
 
-/// 创建命名管道
-pub fn create_named_pipe(pipe_name: &str) -> HANDLE {
+/// 创建命名管道，失败时返回 Windows 错误码和描述。
+pub fn create_named_pipe(pipe_name: &str) -> Result<HANDLE, String> {
   let full_pipe_name = format!(r"\\.\pipe\{}", pipe_name);
   let wide = U16CString::from_str(&full_pipe_name).expect("invalid pipe name");
 
@@ -45,9 +45,15 @@ pub fn create_named_pipe(pipe_name: &str) -> HANDLE {
       ptr::null_mut(),
     );
     if handle == INVALID_HANDLE_VALUE {
-      panic!("CreateNamedPipeW failed");
+      let error_code = GetLastError();
+      let error = std::io::Error::from_raw_os_error(error_code as i32);
+      let message = format!(
+        "CreateNamedPipeW 创建 {full_pipe_name} 失败（Windows 错误码 {error_code}）：{error}"
+      );
+      log::error!("{message}");
+      return Err(message);
     }
-    handle
+    Ok(handle)
   }
 }
 
