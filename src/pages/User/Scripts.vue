@@ -6,7 +6,7 @@
         <img alt="icon" src="/UI/nav/toolbox.webp" />
         <span>实用脚本</span>
         <v-select
-          :disabled="runScript || runAll"
+          :disabled="runScript || runAll || testRunning"
           :hide-details="true"
           :items="accounts"
           :model-value="curAccount"
@@ -61,7 +61,7 @@
       </div>
     </template>
     <template #append>
-      <v-btn class="us-test-btn" title="点击验证" variant="elevated" @click="tryCkVerify()">
+      <v-btn class="us-test-btn" title="打卡测试" variant="elevated" @click="showSignTest = true">
         打卡测试
       </v-btn>
     </template>
@@ -75,16 +75,20 @@
     <!-- 右侧脚本输出 -->
     <TusOutput />
   </div>
+  <TusSignTest
+    v-model="showSignTest"
+    v-model:running="testRunning"
+    :account="curAccount"
+    :busy="runScript || runAll"
+  />
 </template>
 <script lang="ts" setup>
-import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TusMission from "@comp/userScripts/tus-mission.vue";
 import TusOutput from "@comp/userScripts/tus-output.vue";
+import TusSignTest from "@comp/userScripts/tus-sign-test.vue";
 import TusSign from "@comp/userScripts/tus-sign.vue";
-import apiHubReq from "@req/apiHubReq.js";
-import miscReq from "@req/miscReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import { exit } from "@tauri-apps/plugin-process";
@@ -107,6 +111,8 @@ const targetUids = shallowRef<Array<string>>([]);
 
 const runScript = ref<boolean>(false);
 const runAll = ref<boolean>(false);
+const showSignTest = ref<boolean>(false);
+const testRunning = ref<boolean>(false);
 
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const curAccount = shallowRef<TGApp.App.Account.User>();
@@ -164,50 +170,12 @@ async function tryAutoRun(): Promise<void> {
   }
 }
 
-async function tryCkVerify(): Promise<void> {
-  if (!curAccount.value) {
-    showSnackbar.warn("未检测到当前登录账号");
-    return;
-  }
-  const check = await showDialog.check("确定验证？", "将通过执行米社社区打卡以验证ck有效性");
-  if (!check) {
-    showSnackbar.cancel("已取消验证");
-    return;
-  }
-  const ck = {
-    stoken: curAccount.value.cookie.stoken,
-    stuid: curAccount.value.cookie.stuid,
-    mid: curAccount.value.cookie.mid,
-  };
-  let flag = false;
-  let challenge: string | undefined = undefined;
-  while (!flag) {
-    await showLoading.start("正在验证CK有效性");
-    const resp = await apiHubReq.sign(ck, 2, challenge);
-    await showLoading.update(`[${resp.retcode}] ${resp.message}`);
-    if (resp.retcode === -100) {
-      await showLoading.end();
-      break;
-    } else if (resp.retcode === 1034) {
-      await showLoading.end();
-      const cGet = await miscReq.challenge(ck);
-      if (cGet !== false) challenge = cGet;
-      else break;
-    } else {
-      flag = true;
-      await showLoading.end();
-    }
-  }
-  if (!flag) showSnackbar.error("CK验证失败");
-  else showSnackbar.success("CK验证成功");
-}
-
 async function tryExecSingle(): Promise<void> {
   if (!curAccount.value) {
     showSnackbar.warn("当前账号未选择，请先选择账号");
     return;
   }
-  if (runScript.value || runAll.value) {
+  if (runScript.value || runAll.value || testRunning.value) {
     showSnackbar.warn("脚本正在执行，请稍后");
     return;
   }
@@ -222,7 +190,7 @@ async function tryExecAllAccounts(): Promise<void> {
     showSnackbar.warn("未检测到可用账号");
     return;
   }
-  if (runScript.value || runAll.value) {
+  if (runScript.value || runAll.value || testRunning.value) {
     showSnackbar.warn("脚本正在执行，请稍后");
     return;
   }
