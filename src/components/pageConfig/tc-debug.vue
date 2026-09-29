@@ -135,7 +135,7 @@ async function switchResize(): Promise<void> {
   isNeedResize.value = !isNeedResize.value;
   needResize.value = isNeedResize.value.toString();
   await emitTauri("needResize", needResize.value);
-  if (isNeedResize.value) {
+  if (!isNeedResize.value) {
     showSnackbar.success("已关闭窗口回正!");
     return;
   }
