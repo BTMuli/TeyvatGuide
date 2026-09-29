@@ -6,7 +6,7 @@
       <span class="tuc-buff-title-level">Lv. {{ props.modelValue.summary.total_level }}</span>
     </div>
     <div class="tuc-buff-list">
-      <v-menu :close-on-content-click="false" location="bottom start">
+      <v-menu :close-on-content-click="false" location="bottom start" offset="4">
         <template #activator="{ props: menuProps }">
           <div class="tuc-buff-item is-summary" v-bind="menuProps">
             <div class="tuc-buff-summary">
@@ -33,10 +33,11 @@
         </div>
       </v-menu>
       <v-menu
-        v-for="buff in props.modelValue.buffs"
+        v-for="buff in sortedBuffs"
         :key="buff.icon"
         :close-on-content-click="false"
         location="bottom start"
+        offset="4"
       >
         <template #activator="{ props: menuProps }">
           <div class="tuc-buff-item" :class="{ 'is-lv0': buff.level === 0 }" v-bind="menuProps">
@@ -85,6 +86,11 @@ const props = defineProps<TucBuffBoxProps>();
 const appStore = useAppStore();
 const { theme } = storeToRefs(appStore);
 const isDark = computed<boolean>(() => theme.value === "dark");
+const sortedBuffs = computed<Array<TGApp.Game.Combat.Buff>>(() =>
+  props.modelValue.buffs.toSorted(
+    (left, right) => Number(left.level === 0) - Number(right.level === 0),
+  ),
+);
 const crownIcon = computed<string>(() =>
   isDark.value ? "/UI/combat/combatCrown2.webp" : "/UI/combat/combatCrown.webp",
 );
@@ -191,12 +197,6 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
 
 .tuc-buff-item.is-lv0 {
   opacity: 0.4;
-
-  &:hover {
-    border-color: var(--common-shadow-1);
-    box-shadow: none;
-    transform: none;
-  }
 }
 
 .tuc-buff-summary {
@@ -216,7 +216,6 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   padding: 4px;
   border-radius: 6px;
   background-color: var(--box-bg-3);
-  cursor: default;
 }
 
 .tuc-buff-icon img {

@@ -11,6 +11,7 @@
         :key="card.id"
         :close-on-content-click="false"
         location="bottom end"
+        offset="4"
       >
         <template #activator="{ props: menuProps }">
           <div class="tuc-card-item" v-bind="menuProps">
@@ -145,7 +146,6 @@ const props = defineProps<TucCardBoxProps>();
   padding: 4px;
   border-radius: 6px;
   background-color: var(--box-bg-3);
-  cursor: default;
 }
 
 .tuc-ci-icon img {
