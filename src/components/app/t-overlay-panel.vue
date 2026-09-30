@@ -26,6 +26,7 @@
           />
           <v-btn
             :aria-label="props.closeAriaLabel"
+            :disabled="props.closeDisabled"
             density="comfortable"
             icon="mdi-close"
             :title="props.closeAriaLabel"
@@ -68,6 +69,8 @@ import { computed, onMounted, ref, useSlots, useTemplateRef } from "vue";
 type TolpProps = {
   /** 关闭按钮 aria-label */
   closeAriaLabel?: string;
+  /** 操作期间禁止关闭 */
+  closeDisabled?: boolean;
   /**
    * 内容区最大高度
    * @remarks 传空字符串或 `none` 时不写 max-height，由面板高度 + flex 约束滚动
@@ -144,6 +147,7 @@ const contentStyle = computed<Record<string, string>>(() => {
  * @since Beta v0.11.4
  */
 function closePanel(): void {
+  if (props.closeDisabled) return;
   emits("close");
 }
 

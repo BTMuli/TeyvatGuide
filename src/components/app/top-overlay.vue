@@ -3,7 +3,7 @@
   <TOverlay
     v-model="visible"
     :blurVal="props.blurVal"
-    :outerClose="props.outerClose"
+    :outerClose="props.outerClose && !props.closeDisabled"
     :topOffset="props.topOffset"
     :zIndex="props.zIndex"
   >
@@ -12,6 +12,7 @@
       <TOverlayPanel
         ref="panelRef"
         :closeAriaLabel="props.closeAriaLabel"
+        :closeDisabled="props.closeDisabled"
         :contentMaxHeight="props.contentMaxHeight"
         :panelMaxHeight="props.panelMaxHeight"
         :panelWidth="props.panelWidth"
@@ -56,6 +57,8 @@ type TopOverlayProps = {
   blurVal?: string;
   /** 关闭按钮 aria-label */
   closeAriaLabel?: string;
+  /** 操作期间禁止关闭 */
+  closeDisabled?: boolean;
   /**
    * 内容区最大高度
    * @remarks 传空字符串或 `none` 时不写 max-height，由面板高度 + flex 约束滚动
@@ -114,6 +117,7 @@ const panelRef = useTemplateRef<InstanceType<typeof TOverlayPanel>>("panelRef");
  * @since Beta v0.11.4
  */
 function closeOverlay(): void {
+  if (props.closeDisabled) return;
   visible.value = false;
   emits("close");
 }

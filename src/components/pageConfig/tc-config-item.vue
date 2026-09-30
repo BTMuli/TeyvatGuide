@@ -1,7 +1,9 @@
 <template>
   <div :class="{ clickable: hasActivate }" class="config-item" @click="emit('activate')">
     <div class="item-action">
-      <span class="item-icon"><v-icon :icon /></span>
+      <span class="item-icon"
+        ><slot name="icon"><v-icon :icon /></slot
+      ></span>
       <span class="item-content">
         <span class="item-title">{{ title }}</span>
         <span v-if="subtitle || $slots.subtitle" class="item-subtitle"

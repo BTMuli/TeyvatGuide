@@ -45,14 +45,6 @@
           刷新
         </v-btn>
         <v-btn
-          class="uc-btn"
-          prepend-icon="mdi-download"
-          variant="elevated"
-          @click="tryReadCombat()"
-        >
-          导入
-        </v-btn>
-        <v-btn
           class="uc-btn danger-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
@@ -155,9 +147,6 @@ import TSUserCombat from "@Sqlm/userCombat.js";
 import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
-import { open } from "@tauri-apps/plugin-dialog";
-import { readTextFile } from "@tauri-apps/plugin-fs";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -512,60 +501,6 @@ async function uploadCombat(): Promise<void> {
     await TGLogger.Error(`[UserCombat][uploadCombat] 上传剧诗数据异常：${errMsg}`);
   }
   await showLoading.end();
-}
-
-/** 尝试读取胡桃工具箱导出的剧诗数据 */
-async function tryReadCombat(): Promise<void> {
-  const checkF = await showDialog.checkF({
-    title: "确认导入外部数据？",
-    text: "仅适用于特定工具导出的胡桃剧诗数据\n（不适配本应用备份数据）",
-    cancelLabel: "查看详细说明",
-  });
-  if (checkF === undefined) {
-    showSnackbar.cancel("取消导入剧诗数据");
-    return;
-  }
-  if (!checkF) {
-    await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html");
-    return;
-  }
-  const file = await open({
-    multiple: false,
-    title: "选择胡桃工具箱导出的剧诗数据文件",
-    filters: [{ name: "JSON 文件", extensions: ["json"] }],
-    directory: false,
-  });
-  if (file === null) {
-    showSnackbar.cancel("已取消文件选择");
-    return;
-  }
-  try {
-    await showLoading.start("正在导入剧诗数据文件", file);
-    const fileData = JSON.parse(await readTextFile(file));
-    if (!Array.isArray(fileData)) {
-      await showLoading.end();
-      showSnackbar.warn("文件数据格式错误");
-      return;
-    }
-    if (!Hutao.valid.combat(fileData)) {
-      await showLoading.end();
-      showSnackbar.warn("剧诗数据验证失败，请检查数据格式");
-      return;
-    }
-    // 类型收束后的安全访问
-    for (const item of fileData) {
-      await showLoading.update(`Uid: ${item.uid},ScheduleId: ${item.schedule_id}`);
-      await TSUserCombat.saveCombat(item.uid, item.data);
-    }
-    await showLoading.end();
-    showSnackbar.success(`成功导入 ${fileData.length} 条剧诗数据，即将刷新页面`);
-    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-    window.location.reload();
-  } catch (e) {
-    await TGLogger.Error(`[UserCombat][tryReadCombat] 导入剧诗数据失败: ${e}`);
-    await showLoading.end();
-    showSnackbar.error("导入剧诗数据失败，请检查文件格式是否正确");
-  }
 }
 </script>
 <style lang="scss" scoped>

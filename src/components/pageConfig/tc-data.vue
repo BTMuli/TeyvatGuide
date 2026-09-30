@@ -13,6 +13,16 @@
       @activate="confirmRestore()"
     />
     <TcConfigItem
+      subtitle="导入深渊、剧诗与危战 JSON 数据"
+      title="胡桃数据导入"
+      icon="mdi-file-import-outline"
+      @activate="showHutaoImport = true"
+    >
+      <template #icon
+        ><img src="/platforms/other/hutao.webp" alt="" width="36" height="36"
+      /></template>
+    </TcConfigItem>
+    <TcConfigItem
       subtitle="更新数据库到最新版本"
       title="数据更新"
       icon="mdi-database-arrow-up"
@@ -52,6 +62,7 @@
       @activate="confirmResetApp"
     />
   </TcConfigSection>
+  <TcoHutaoImport v-model="showHutaoImport" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -73,6 +84,7 @@ import { onMounted, ref } from "vue";
 
 import TcConfigItem from "./tc-config-item.vue";
 import TcConfigSection from "./tc-config-section.vue";
+import TcoHutaoImport from "./tco-hutao-import.vue";
 
 const appStore = useAppStore();
 const { deviceInfo, userDir, buildTime } = storeToRefs(appStore);
@@ -80,6 +92,7 @@ const homeStore = useHomeStore();
 // @ts-expect-error import.meta
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const cacheSize = ref<number>(0);
+const showHutaoImport = ref<boolean>(false);
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return `${error}`;
