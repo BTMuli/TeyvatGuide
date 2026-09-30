@@ -14,15 +14,6 @@
           label="存档UID"
           variant="outlined"
         />
-        <v-switch
-          v-if="YAE_AVATAR_AVAILABLE"
-          v-model="onlyEquipped"
-          class="pbw-equipped-switch"
-          color="var(--tgc-od-blue)"
-          density="compact"
-          hide-details
-          label="仅显示已装备"
-        />
       </div>
     </template>
     <template #append>
@@ -72,68 +63,76 @@
           @keydown.enter="submitSearch()"
           @click:append-inner="submitSearch()"
         />
-        <v-btn-toggle
-          v-model="viewMode"
-          aria-label="武器背包视图"
-          class="pbw-view-toggle"
-          color="var(--tgc-od-blue)"
-          density="compact"
-          :divided="false"
-          mandatory
-          variant="text"
-        >
-          <v-btn :value="BagViewMode.Individual" aria-label="单件视图" title="单件视图"
-            ><v-icon size="16">mdi-view-grid</v-icon></v-btn
+        <div class="pbw-view-tools">
+          <v-btn-toggle
+            v-model="viewMode"
+            aria-label="武器背包视图"
+            class="pbw-view-toggle"
+            color="var(--tgc-od-blue)"
+            density="compact"
+            :divided="false"
+            mandatory
+            variant="text"
           >
-          <v-btn :value="BagViewMode.Merged" aria-label="合并视图" title="合并视图"
-            ><v-icon size="20">mdi-layers-triple-outline</v-icon></v-btn
-          >
-        </v-btn-toggle>
-        <v-btn
-          :class="{ 'pbw-filter-active': activeFilterCount > 0 }"
-          aria-label="筛选武器"
-          class="pbw-filter-btn"
-          prepend-icon="mdi-filter-variant"
-          title="筛选武器"
-          variant="elevated"
-          @click="showFilter = true"
-          ><span class="pbw-filter-label">筛选</span>
-          <span v-if="activeFilterCount > 0" class="pbw-filter-count">{{ activeFilterCount }}</span>
-        </v-btn>
-        <div v-if="viewMode === BagViewMode.Merged" class="pbw-group-status" aria-live="polite">
-          <v-icon size="14">
-            {{ isFilteringActive ? "mdi-filter-check-outline" : "mdi-layers-triple-outline" }}
-          </v-icon>
-          <span v-if="isFilteringActive">
-            匹配 <strong>{{ visibleGroups.length }}</strong> / {{ allGroups.length }} 组 ·
-            <strong>{{ visibleItems.length }}</strong> / {{ sourceItems.length }} 件
-          </span>
-          <span v-else
-            >共 <strong>{{ allGroups.length }}</strong> 组 · {{ sourceItems.length }} 件</span
-          >
+            <v-btn :value="BagViewMode.Individual" aria-label="单件视图" title="单件视图"
+              ><v-icon size="16">mdi-view-grid</v-icon></v-btn
+            >
+            <v-btn :value="BagViewMode.Merged" aria-label="合并视图" title="合并视图"
+              ><v-icon size="20">mdi-layers-triple-outline</v-icon></v-btn
+            >
+          </v-btn-toggle>
+          <v-btn
+            :class="{ 'pbw-filter-active': activeFilterCount > 0 }"
+            aria-label="筛选武器"
+            class="pbw-filter-btn"
+            prepend-icon="mdi-filter-variant"
+            title="筛选武器"
+            variant="elevated"
+            @click="showFilter = true"
+            ><span class="pbw-filter-label">筛选</span>
+            <span v-if="activeFilterCount > 0" class="pbw-filter-count">{{
+              activeFilterCount
+            }}</span>
+          </v-btn>
+        </div>
+        <div class="pbw-toolbar-summary">
+          <div v-if="viewMode === BagViewMode.Merged" class="pbw-group-status" aria-live="polite">
+            <v-icon size="14">
+              {{ isFilteringActive ? "mdi-filter-check-outline" : "mdi-layers-triple-outline" }}
+            </v-icon>
+            <span v-if="isFilteringActive">
+              匹配 <strong>{{ visibleGroups.length }}</strong> / {{ allGroups.length }} 组 ·
+              <strong>{{ visibleItems.length }}</strong> / {{ sourceItems.length }} 件
+            </span>
+            <span v-else
+              >共 <strong>{{ allGroups.length }}</strong> 组 · {{ sourceItems.length }} 件</span
+            >
+          </div>
+          <v-checkbox-btn
+            v-if="YAE_AVATAR_AVAILABLE"
+            v-model="onlyEquipped"
+            class="pbw-equipped-check"
+            color="var(--tgc-od-blue)"
+            density="compact"
+            aria-label="仅显示已装备"
+            label="仅显示已装备"
+          />
         </div>
       </div>
     </template>
   </v-app-bar>
 
-  <div
-    v-if="viewMode === BagViewMode.Individual"
-    class="pbw-container"
-    role="listbox"
-    aria-label="武器实例"
-  >
-    <PbWeaponItem
-      v-for="weapon in visibleItems"
-      :key="weapon.tb.guid"
-      :avatar-id="equipAvatarMap.get(weapon.tb.guid)"
-      :cur="curWeapon"
-      :detail="showDetail"
-      :info="weapon.info"
-      :selected="weapon.tb.guid === curWeapon?.tb.guid"
-      :tb="weapon.tb"
-      @select="handleSelect"
+  <div v-if="viewMode === BagViewMode.Individual">
+    <PbWeaponWorkspace
+      v-model:selectedWeaponTypes="filterValue.weaponType"
+      v-model:selected-group-key="selectedGroupKey"
+      v-model:selected-instance-guid="selectedInstanceGuid"
+      :all-groups="allGroups"
+      :equip-avatar-map="equipAvatarMap"
+      :groups="visibleGroups"
+      :individual="true"
+      :items="visibleItems"
     />
-    <div v-if="visibleItems.length === 0" class="pbw-empty">当前条件下没有武器</div>
   </div>
   <div
     v-else-if="mergedLayout === MergedLayout.Grid"
@@ -164,12 +163,6 @@
     @back="backToGroups"
   />
 
-  <PbWeaponDetail
-    v-if="viewMode === BagViewMode.Individual && curWeapon"
-    v-model:show="showDetail"
-    :avatar-id="equipAvatarMap.get(curWeapon.tb.guid)"
-    :cur="curWeapon"
-  />
   <PbWeaponFilter v-model="showFilter" :value="filterValue" @filter="handleFilter" />
 </template>
 
@@ -177,10 +170,8 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
 import PbWeaponFilter, { type WeaponFilterValue } from "@comp/pageBag/pb-weapon-filter.vue";
 import PbWeaponGroupItem from "@comp/pageBag/pb-weapon-group-item.vue";
-import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
 import PbWeaponWorkspace from "@comp/pageBag/pb-weapon-workspace.vue";
 import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
@@ -208,11 +199,9 @@ const viewMode = ref<BagViewModeEnum>(readViewMode());
 const mergedLayout = ref<MergedLayoutEnum>(MergedLayout.Grid);
 const selectedGroupKey = ref<string>();
 const selectedInstanceGuid = ref<string>();
-const showDetail = ref<boolean>(false);
 const showFilter = ref<boolean>(false);
 const onlyEquipped = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
-const curWeapon = shallowRef<TGApp.App.UserBag.WeaponItem>();
 const sourceItems = shallowRef<Array<TGApp.App.UserBag.WeaponItem>>([]);
 const equipAvatarMap = shallowRef<Map<string, number>>(new Map());
 const groupGrid = useTemplateRef<HTMLElement>("groupGrid");
@@ -269,8 +258,6 @@ onMounted(async () => {
 watch(curUid, async (uid) => await loadWeaponList(uid));
 watch(viewMode, (value) => {
   localStorage.setItem(WEAPON_VIEW_MODE_KEY, value);
-  showDetail.value = false;
-  curWeapon.value = undefined;
   resetWorkspace();
 });
 watch(visibleGroups, () => reconcileWorkspaceSelection());
@@ -426,11 +413,6 @@ async function deleteUid(): Promise<void> {
   showSnackbar.success("已删除对应存档，即将刷新");
 }
 
-function handleSelect(weapon: TGApp.App.UserBag.WeaponItem): void {
-  curWeapon.value = weapon;
-  showDetail.value = true;
-}
-
 function openGroup(groupKey: string): void {
   const group = visibleGroups.value.find((item) => item.key === groupKey);
   if (!group) return;
@@ -439,7 +421,6 @@ function openGroup(groupKey: string): void {
   selectedGroupKey.value = groupKey;
   selectedInstanceGuid.value = group.visibleItems[0]?.tb.guid;
   mergedLayout.value = MergedLayout.Workspace;
-  showDetail.value = false;
   window.scrollTo({ top: 0 });
 }
 
@@ -456,9 +437,12 @@ function backToGroups(): void {
 
 function reconcileWorkspaceSelection(): void {
   if (mergedLayout.value !== MergedLayout.Workspace) return;
-  const group = visibleGroups.value.find((item) => item.key === selectedGroupKey.value);
+  const group =
+    visibleGroups.value.find((item) => item.key === selectedGroupKey.value) ??
+    visibleGroups.value[0];
+  selectedGroupKey.value = group?.key;
   if (!group) {
-    resetWorkspace();
+    selectedInstanceGuid.value = undefined;
     return;
   }
   if (!group.visibleItems.some((item) => item.tb.guid === selectedInstanceGuid.value))
@@ -475,8 +459,6 @@ function clearPageStateForUid(): void {
   filterValue.value = { star: [], weaponType: [], refine: [], subProp: [], locked: null };
   searchDraft.value = "";
   searchQuery.value = "";
-  curWeapon.value = undefined;
-  showDetail.value = false;
   resetWorkspace();
 }
 </script>
@@ -565,7 +547,7 @@ function clearPageStateForUid(): void {
 
 .pbw-filter-btn,
 .pbw-ne-btn {
-  height: 40px;
+  height: 36px;
   flex: none;
   border-radius: 4px;
   font-family: var(--font-title);
@@ -615,7 +597,6 @@ function clearPageStateForUid(): void {
   padding: 0 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  margin-left: auto;
   background: var(--box-bg-1);
   color: var(--box-text-4);
   font-size: 12px;
@@ -629,7 +610,6 @@ function clearPageStateForUid(): void {
   font-weight: 600;
 }
 
-.pbw-container,
 .pbw-group-grid {
   position: relative;
   display: grid;
@@ -639,13 +619,9 @@ function clearPageStateForUid(): void {
   gap: 12px;
 }
 
-.pbw-container {
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-}
-
 .pbw-group-grid {
   padding: 12px;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
 }
 
@@ -675,7 +651,7 @@ function clearPageStateForUid(): void {
 @media (width <= 839px) {
   .pbw-page-title,
   .pbw-filter-label,
-  .pbw-equipped-switch :deep(.v-label) {
+  .pbw-equipped-check :deep(.v-label) {
     display: none;
   }
 
@@ -687,7 +663,7 @@ function clearPageStateForUid(): void {
     width: 116px;
   }
 
-  .pbw-equipped-switch {
+  .pbw-equipped-check {
     width: 40px;
   }
 
@@ -717,7 +693,6 @@ function clearPageStateForUid(): void {
     display: none;
   }
 
-  .pbw-container,
   .pbw-group-grid {
     padding: 8px;
   }
@@ -725,5 +700,36 @@ function clearPageStateForUid(): void {
 
 .danger-btn {
   color: var(--tgc-od-red);
+}
+
+.pbw-equipped-check {
+  flex: none;
+}
+
+.pbw-view-tools,
+.pbw-toolbar-summary {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.pbw-toolbar-summary {
+  min-width: 0;
+  margin-left: auto;
+}
+
+.pbw-nav-append {
+  gap: 4px;
+}
+
+@media (width <= 479px) {
+  .pbw-nav-search {
+    min-width: 0;
+  }
+
+  .pbw-view-tools {
+    gap: 4px;
+  }
 }
 </style>

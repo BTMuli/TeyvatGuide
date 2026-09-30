@@ -14,15 +14,6 @@
           label="存档UID"
           variant="outlined"
         />
-        <v-switch
-          v-if="YAE_AVATAR_AVAILABLE"
-          v-model="onlyEquipped"
-          class="pbr-equipped-switch"
-          color="var(--tgc-od-blue)"
-          density="compact"
-          hide-details
-          label="仅显示已装备"
-        />
       </div>
     </template>
     <template #append>
@@ -72,82 +63,99 @@
           @keydown.enter="submitSearch()"
           @click:append-inner="submitSearch()"
         />
-        <v-btn-toggle
-          v-model="viewMode"
-          aria-label="圣遗物背包视图"
-          class="pbr-view-toggle"
-          color="var(--tgc-od-blue)"
-          density="compact"
-          :divided="false"
-          mandatory
-          variant="text"
-        >
-          <v-btn :value="BagViewMode.Individual" aria-label="单件视图" title="单件视图"
-            ><v-icon size="16">mdi-view-grid</v-icon></v-btn
+        <div class="pbr-view-tools">
+          <v-btn-toggle
+            v-model="viewMode"
+            aria-label="圣遗物背包视图"
+            class="pbr-view-toggle"
+            color="var(--tgc-od-blue)"
+            density="compact"
+            :divided="false"
+            mandatory
+            variant="text"
           >
-          <v-btn :value="BagViewMode.Merged" aria-label="合并视图" title="合并视图"
-            ><v-icon size="20">mdi-layers-triple-outline</v-icon></v-btn
-          >
-        </v-btn-toggle>
-        <v-btn
-          :class="{ 'pbr-filter-active': activeFilterCount > 0 }"
-          aria-label="筛选圣遗物"
-          class="pbr-filter-btn"
-          prepend-icon="mdi-filter-variant"
-          title="筛选圣遗物"
-          variant="elevated"
-          @click="showFilter = true"
-          ><span class="pbr-filter-label">筛选</span>
-          <span v-if="activeFilterCount > 0" class="pbr-filter-count">{{ activeFilterCount }}</span>
-        </v-btn>
-        <div v-if="viewMode === BagViewMode.Individual" class="pbr-load-status" aria-live="polite">
-          <span
-            >已显示 <strong>{{ visibleIndividualRelics.length }}</strong> /
-            {{ visibleItems.length }}</span
-          >
-          <v-progress-linear
-            :color="hasMoreRelics ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
-            :model-value="
-              visibleItems.length ? (visibleIndividualRelics.length / visibleItems.length) * 100 : 0
-            "
-            bg-color="var(--common-shadow-2)"
-            class="pbr-load-progress"
-            height="4"
-          />
+            <v-btn :value="BagViewMode.Individual" aria-label="单件视图" title="单件视图"
+              ><v-icon size="16">mdi-view-grid</v-icon></v-btn
+            >
+            <v-btn :value="BagViewMode.Merged" aria-label="合并视图" title="合并视图"
+              ><v-icon size="20">mdi-layers-triple-outline</v-icon></v-btn
+            >
+          </v-btn-toggle>
+          <v-btn
+            :class="{ 'pbr-filter-active': activeFilterCount > 0 }"
+            aria-label="筛选圣遗物"
+            class="pbr-filter-btn"
+            prepend-icon="mdi-filter-variant"
+            title="筛选圣遗物"
+            variant="elevated"
+            @click="showFilter = true"
+            ><span class="pbr-filter-label">筛选</span>
+            <span v-if="activeFilterCount > 0" class="pbr-filter-count">{{
+              activeFilterCount
+            }}</span>
+          </v-btn>
         </div>
-        <div v-else class="pbr-group-status" aria-live="polite">
-          <v-icon size="14">
-            {{ isFilteringActive ? "mdi-filter-check-outline" : "mdi-layers-triple-outline" }}
-          </v-icon>
-          <span v-if="isFilteringActive">
-            匹配 <strong>{{ visibleGroups.length }}</strong> / {{ allGroups.length }} 组 ·
-            <strong>{{ visibleItems.length }}</strong> / {{ sourceItems.length }} 件
-          </span>
-          <span v-else
-            >共 <strong>{{ allGroups.length }}</strong> 组 · {{ sourceItems.length }} 件</span
+        <div class="pbr-toolbar-summary">
+          <div
+            v-if="viewMode === BagViewMode.Individual"
+            class="pbr-load-status"
+            aria-live="polite"
           >
+            <span
+              >已显示 <strong>{{ visibleIndividualRelics.length }}</strong> /
+              {{ visibleItems.length }}</span
+            >
+            <v-progress-linear
+              :color="hasMoreRelics ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
+              :model-value="
+                visibleItems.length
+                  ? (visibleIndividualRelics.length / visibleItems.length) * 100
+                  : 0
+              "
+              bg-color="var(--common-shadow-2)"
+              class="pbr-load-progress"
+              height="4"
+            />
+          </div>
+          <div v-else class="pbr-group-status" aria-live="polite">
+            <v-icon size="14">
+              {{ isFilteringActive ? "mdi-filter-check-outline" : "mdi-layers-triple-outline" }}
+            </v-icon>
+            <span v-if="isFilteringActive">
+              匹配 <strong>{{ visibleGroups.length }}</strong> / {{ allGroups.length }} 组 ·
+              <strong>{{ visibleItems.length }}</strong> / {{ sourceItems.length }} 件
+            </span>
+            <span v-else
+              >共 <strong>{{ allGroups.length }}</strong> 组 · {{ sourceItems.length }} 件</span
+            >
+          </div>
+          <v-checkbox-btn
+            v-if="YAE_AVATAR_AVAILABLE"
+            v-model="onlyEquipped"
+            class="pbr-equipped-check"
+            color="var(--tgc-od-blue)"
+            density="compact"
+            aria-label="仅显示已装备"
+            label="仅显示已装备"
+          />
         </div>
       </div>
     </template>
   </v-app-bar>
 
-  <div
-    v-if="viewMode === BagViewMode.Individual"
-    class="pbr-container"
-    role="listbox"
-    aria-label="圣遗物实例"
-  >
-    <PbRelicItem
-      v-for="relic in visibleIndividualRelics"
-      :key="relic.guid"
-      :avatar-id="equipAvatarMap.get(relic.guid)"
-      :detail="showDetail"
-      :relic
-      :selected="relic.guid === curRelic?.guid"
-      @select="handleSelect"
+  <div v-if="viewMode === BagViewMode.Individual">
+    <PbRelicWorkspace
+      v-model:selectedPositions="filterValue.slot"
+      v-model:selected-group-key="selectedGroupKey"
+      v-model:selected-instance-guid="selectedInstanceGuid"
+      :equip-avatar-map="equipAvatarMap"
+      :groups="visibleGroups"
+      :has-more-items="hasMoreRelics"
+      :individual="true"
+      :items="visibleItems"
+      :rendered-items-count="renderedCount"
+      @load-more="loadMoreRelics"
     />
-    <div v-if="hasMoreRelics" ref="loadMoreRef" class="pbr-load-trigger" />
-    <div v-if="visibleItems.length === 0" class="pbr-empty">当前条件下没有圣遗物</div>
   </div>
   <div
     v-else-if="mergedLayout === MergedLayout.Grid"
@@ -177,12 +185,6 @@
     @back="backToGroups"
   />
 
-  <PbRelicDetail
-    v-if="viewMode === BagViewMode.Individual && curRelic"
-    v-model:show="showDetail"
-    :avatar-id="equipAvatarMap.get(curRelic.guid)"
-    :cur="curRelic"
-  />
   <PbRelicFilter v-model="showFilter" :value="filterValue" @filter="handleFilter" />
 </template>
 
@@ -190,10 +192,8 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
 import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
 import PbRelicGroupItem from "@comp/pageBag/pb-relic-group-item.vue";
-import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
 import PbRelicWorkspace from "@comp/pageBag/pb-relic-workspace.vue";
 import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
@@ -203,16 +203,7 @@ import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
 import { groupRelics } from "@utils/userBagGroup.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { storeToRefs } from "pinia";
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  shallowRef,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { wrSet } from "@/data/index.js";
 
@@ -236,15 +227,11 @@ const selectedGroupKey = ref<string>();
 const selectedInstanceGuid = ref<string>();
 const showFilter = ref<boolean>(false);
 const onlyEquipped = ref<boolean>(false);
-const showDetail = ref<boolean>(false);
-const curRelic = shallowRef<TGApp.Sqlite.UserBag.RelicTable>();
 const sourceItems = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const equipAvatarMap = shallowRef<Map<string, number>>(new Map());
 const renderedCount = ref<number>(RELIC_RENDER_SIZE);
-const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
 const groupGrid = useTemplateRef<HTMLElement>("groupGrid");
 const filterValue = ref<RelicFilterValue>(createEmptyFilter());
-let loadMoreObserver: IntersectionObserver | undefined;
 let groupGridScrollTop = 0;
 let lastGroupTriggerKey: string | undefined;
 
@@ -297,15 +284,11 @@ onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
   await reloadUid();
   await showLoading.end();
-  initLoadMoreObserver();
 });
-onBeforeUnmount(() => loadMoreObserver?.disconnect());
 watch(curUid, async (uid) => await loadRelicList(uid));
 watch(visibleItems, () => resetRenderedRelics());
 watch(viewMode, (value) => {
   localStorage.setItem(RELIC_VIEW_MODE_KEY, value);
-  showDetail.value = false;
-  curRelic.value = undefined;
   resetWorkspace();
   resetRenderedRelics();
 });
@@ -504,7 +487,6 @@ async function deleteUid(): Promise<void> {
 
 function resetRenderedRelics(): void {
   renderedCount.value = Math.min(RELIC_RENDER_SIZE, visibleItems.value.length);
-  nextTick(() => observeLoadMore());
 }
 
 function loadMoreRelics(): void {
@@ -515,27 +497,6 @@ function loadMoreRelics(): void {
     );
 }
 
-function initLoadMoreObserver(): void {
-  loadMoreObserver = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) loadMoreRelics();
-    },
-    { rootMargin: "360px" },
-  );
-  observeLoadMore();
-}
-
-function observeLoadMore(): void {
-  if (!loadMoreObserver || !loadMoreRef.value) return;
-  loadMoreObserver.disconnect();
-  loadMoreObserver.observe(loadMoreRef.value);
-}
-
-function handleSelect(relic: TGApp.Sqlite.UserBag.RelicTable): void {
-  curRelic.value = relic;
-  showDetail.value = true;
-}
-
 function openGroup(groupKey: string): void {
   const group = visibleGroups.value.find((item) => item.key === groupKey);
   if (!group) return;
@@ -544,7 +505,6 @@ function openGroup(groupKey: string): void {
   selectedGroupKey.value = groupKey;
   selectedInstanceGuid.value = group.visibleItems[0]?.guid;
   mergedLayout.value = MergedLayout.Workspace;
-  showDetail.value = false;
   window.scrollTo({ top: 0 });
 }
 
@@ -561,9 +521,12 @@ function backToGroups(): void {
 
 function reconcileWorkspaceSelection(): void {
   if (mergedLayout.value !== MergedLayout.Workspace) return;
-  const group = visibleGroups.value.find((item) => item.key === selectedGroupKey.value);
+  const group =
+    visibleGroups.value.find((item) => item.key === selectedGroupKey.value) ??
+    visibleGroups.value[0];
+  selectedGroupKey.value = group?.key;
   if (!group) {
-    resetWorkspace();
+    selectedInstanceGuid.value = undefined;
     return;
   }
   if (!group.visibleItems.some((item) => item.guid === selectedInstanceGuid.value))
@@ -580,8 +543,6 @@ function clearPageStateForUid(): void {
   filterValue.value = createEmptyFilter();
   searchDraft.value = "";
   searchQuery.value = "";
-  curRelic.value = undefined;
-  showDetail.value = false;
   resetWorkspace();
   resetRenderedRelics();
 }
@@ -671,7 +632,7 @@ function clearPageStateForUid(): void {
 
 .pbr-filter-btn,
 .pbr-ne-btn {
-  height: 40px;
+  height: 36px;
   flex: none;
   border-radius: 4px;
   font-family: var(--font-title);
@@ -743,7 +704,6 @@ function clearPageStateForUid(): void {
   padding: 0 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  margin-left: auto;
   background: var(--box-bg-1);
   color: var(--box-text-4);
   font-size: 12px;
@@ -757,7 +717,6 @@ function clearPageStateForUid(): void {
   font-weight: 600;
 }
 
-.pbr-container,
 .pbr-group-grid {
   position: relative;
   display: grid;
@@ -767,20 +726,10 @@ function clearPageStateForUid(): void {
   gap: 12px;
 }
 
-.pbr-container {
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-}
-
 .pbr-group-grid {
   padding: 12px;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-}
-
-.pbr-load-trigger {
-  width: 100%;
-  height: 1px;
-  grid-column: 1 / -1;
 }
 
 .pbr-empty {
@@ -809,7 +758,7 @@ function clearPageStateForUid(): void {
 @media (width <= 839px) {
   .pbr-page-title,
   .pbr-filter-label,
-  .pbr-equipped-switch :deep(.v-label) {
+  .pbr-equipped-check :deep(.v-label) {
     display: none;
   }
 
@@ -821,7 +770,7 @@ function clearPageStateForUid(): void {
     width: 116px;
   }
 
-  .pbr-equipped-switch {
+  .pbr-equipped-check {
     width: 40px;
   }
 
@@ -852,7 +801,6 @@ function clearPageStateForUid(): void {
     display: none;
   }
 
-  .pbr-container,
   .pbr-group-grid {
     padding: 8px;
   }
@@ -860,5 +808,36 @@ function clearPageStateForUid(): void {
 
 .danger-btn {
   color: var(--tgc-od-red);
+}
+
+.pbr-equipped-check {
+  flex: none;
+}
+
+.pbr-view-tools,
+.pbr-toolbar-summary {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.pbr-toolbar-summary {
+  min-width: 0;
+  margin-left: auto;
+}
+
+.pbr-nav-append {
+  gap: 4px;
+}
+
+@media (width <= 479px) {
+  .pbr-nav-search {
+    min-width: 0;
+  }
+
+  .pbr-view-tools {
+    gap: 4px;
+  }
 }
 </style>

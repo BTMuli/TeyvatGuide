@@ -1,18 +1,7 @@
 <!-- 武器详情正文 -->
 <template>
   <div ref="shareRef" class="pb-wd-box">
-    <div class="pb-wdt-meta">GUID:{{ props.cur.tb.guid }}</div>
-    <button
-      v-if="props.showActions && props.closeable !== false"
-      aria-label="收起武器详情"
-      class="pb-wdt-act"
-      data-html2canvas-ignore
-      title="收起"
-      type="button"
-      @click="handleClose"
-    >
-      <v-icon size="16">mdi-close</v-icon>
-    </button>
+    <div class="pb-wdt-meta" aria-hidden="true">GUID:{{ props.cur.tb.guid }}</div>
     <div class="pb-wd-top">
       <div class="pb-wdt-left">
         <img :src="`/icon/bg/${props.cur.info.star}-Star.webp`" alt="bg" class="pb-wdtl-bg" />
@@ -41,17 +30,6 @@
           class="pb-wdtl-avatar-icon"
         />
       </div>
-      <button
-        v-if="props.showActions"
-        aria-label="分享武器详情"
-        class="pb-wdt-share"
-        data-html2canvas-ignore
-        title="分享"
-        type="button"
-        @click="share"
-      >
-        <v-icon size="12">mdi-share-variant</v-icon>
-      </button>
     </div>
     <div class="pb-wd-stats">
       <div
@@ -72,7 +50,6 @@
       <span class="pb-wd-affix-desc" v-html="parseAffixDesc()" />
     </div>
     <div class="pb-wd-desc">
-      <span class="pb-wd-section-label">武器故事</span>
       <p>{{ props.cur.info.description }}</p>
     </div>
   </div>
@@ -91,14 +68,9 @@ import { AppCharacterData } from "@/data/index.js";
 type PbWeaponDetailContentProps = {
   cur: TGApp.App.UserBag.WeaponItem;
   avatarId?: number;
-  closeable?: boolean;
-  showActions?: boolean;
 };
 
-type PbWeaponDetailContentEmits = { close: [] };
-
-const props = withDefaults(defineProps<PbWeaponDetailContentProps>(), { showActions: true });
-const emits = defineEmits<PbWeaponDetailContentEmits>();
+const props = defineProps<PbWeaponDetailContentProps>();
 const shareRef = useTemplateRef<HTMLElement>("shareRef");
 const characterStarMap = new Map<number, number>(
   AppCharacterData.map((character) => [character.id, character.star]),
@@ -107,17 +79,21 @@ const avatarStar = computed<number | undefined>(() =>
   props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
 );
 
-function handleClose(): void {
-  emits("close");
-}
-
 async function share(): Promise<void> {
   if (shareRef.value === null) {
     showSnackbar.error("分享失败，未找到分享元素");
     return;
   }
   const fileName = `武器-${props.cur.info.name}-${props.cur.tb.guid}`;
-  await TGShare.modern(fileName, shareRef.value, 4);
+  await TGShare.modern(fileName, shareRef.value, 4, false, {
+    onCloneNode: (cloned) => {
+      if (!(cloned instanceof HTMLElement)) return;
+      const meta = cloned.querySelector<HTMLElement>(".pb-wdt-meta");
+      if (meta === null) return;
+      meta.style.visibility = "visible";
+      meta.style.zIndex = "0";
+    },
+  });
 }
 
 defineExpose({ share });
@@ -151,6 +127,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
+  color: var(--app-page-content);
   overflow-y: auto;
   row-gap: 8px;
 }
@@ -237,52 +214,21 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   justify-content: space-between;
 }
 
-.pb-wdt-act,
-.pb-wdt-share {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.pb-wdt-act {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  color: var(--tgc-od-red);
-}
-
-.pb-wdt-share {
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
-  left: -6px;
-  color: var(--tgc-od-blue);
-}
-
-.pb-wdt-act:focus-visible,
-.pb-wdt-share:focus-visible {
-  outline: 2px solid var(--tgc-od-blue);
-  outline-offset: 2px;
-}
-
 .pb-wdt-meta {
   position: absolute;
+  z-index: -1;
   right: 0;
   bottom: 0;
   color: var(--box-text-4);
   font-size: 10px;
+  visibility: hidden;
 }
 
 .pb-wd-desc {
   display: flex;
   flex-direction: column;
   padding-bottom: 16px;
-  color: var(--box-text-4);
+  color: var(--app-page-content);
   font-size: 12px;
   gap: 4px;
   line-height: 1.65;
@@ -290,6 +236,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 
 .pb-wd-desc p {
   margin: 0;
+  font-style: italic;
 }
 
 .pb-wd-section-label {
@@ -319,29 +266,55 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 }
 
 .pb-wd-stats {
-  position: relative;
   display: flex;
   width: 100%;
+  box-sizing: border-box;
   flex-direction: column;
   padding: 4px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 2px;
+  border-radius: 8px;
   background: var(--box-bg-1);
+  font-size: 14px;
+  gap: 2px;
+  line-height: 20px;
 }
 
 .pb-wd-stat {
-  position: relative;
   display: flex;
-  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  box-sizing: border-box;
   align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-title);
-  font-size: 16px;
-  font-weight: normal;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  font-weight: 600;
+  gap: 8px;
 
   &.sub {
-    font-family: var(--font-text);
-    font-size: 14px;
+    min-height: 28px;
+    padding: 4px 8px;
+    background: transparent;
+    font-weight: 400;
   }
+}
+
+.pb-wd-stat-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pb-wd-stat-val {
+  flex: none;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pb-wd-stat:not(.sub) .pb-wd-stat-val {
+  color: var(--common-text-title);
+}
+
+html.default .pb-wd-affix-desc :deep(span) {
+  filter: brightness(0.5);
 }
 </style>

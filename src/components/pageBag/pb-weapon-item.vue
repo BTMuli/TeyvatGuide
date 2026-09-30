@@ -114,8 +114,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
     filter: grayscale(0.75);
 
     &.selected {
-      border: 2px solid var(--tgc-od-blue);
-      background: var(--box-bg-4);
+      border: 0;
       filter: unset;
     }
   }

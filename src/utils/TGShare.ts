@@ -1780,6 +1780,8 @@ function hideShareBackdropCloneTargets(cloned: Node): void {
  * 大列表局部烘焙：对每个毛玻璃节点，只截其父容器（如名片中段），有限并发
  * @since Beta v0.12.0
  * @param root - 截图根（仅用于收集目标）
+ * @param onProgress - 截图进度
+ * @param blurScale - blur 值
  * @returns 还原函数
  */
 async function bakeShareBackdropFiltersLocal(
@@ -1888,6 +1890,8 @@ async function bakeShareBackdropFiltersLocal(
  * 同时处理真实节点与 ::before / ::after 伪元素。
  * @since Beta v0.12.0
  * @param root - 截图根节点
+ * @param onProgress - 截图进度
+ * @param blurScale - blur 值
  * @returns 还原函数
  */
 async function bakeShareBackdropFilters(
@@ -2214,7 +2218,7 @@ export async function generateShareImg(
 
 /**
  * modern 截图可选参数
- * @since Beta v0.12.0
+ * @since Beta v0.12.4
  */
 export type ShareModernOptions = {
   /** 毛玻璃：true 烘焙 / false flatten / none 跳过 / auto 少量烘焙、过多局部烘焙。默认 auto */
@@ -2231,6 +2235,11 @@ export type ShareModernOptions = {
    * @since Beta v0.12.0
    */
   onProgress?: ShareProgressFn;
+  /**
+   * 截图根节点克隆完成后的处理，仅影响截图副本
+   * @since Beta v0.12.4
+   */
+  onCloneNode?: (cloned: Node) => void;
 };
 
 /**
@@ -2357,7 +2366,7 @@ function bustShareFontUrl(url: string, nonce: string): string {
 
 /**
  * 仅生成 modern-screenshot Blob（不含保存/剪贴板）
- * @since Beta v0.12.0
+ * @since Beta v0.12.4
  */
 async function captureModernBlob(
   element: HTMLElement,
@@ -2422,7 +2431,10 @@ async function captureModernBlob(
         copyScrollbar: false,
         fixSvgXmlDecode: false,
       },
-      onCloneNode: injectors.onCloneNode,
+      onCloneNode: (cloned) => {
+        injectors.onCloneNode(cloned);
+        options?.onCloneNode?.(cloned);
+      },
       onCreateForeignObjectSvg: injectors.onCreateForeignObjectSvg,
     });
     await TGLogger.Info(

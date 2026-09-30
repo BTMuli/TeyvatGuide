@@ -1,14 +1,19 @@
 <!-- 背包合并视图工作台通用布局 -->
 <template>
-  <div class="pb-bws" @keydown.esc="groupsOpen = false">
+  <div
+    :class="{ 'pb-bws-no-groups': !props.showGroups }"
+    class="pb-bws"
+    @keydown.esc="groupsOpen = false"
+  >
     <button
-      v-if="groupsOpen"
+      v-if="groupsOpen && props.showGroups"
       aria-label="关闭分组列表"
       class="pb-bws-scrim"
       type="button"
       @click="groupsOpen = false"
     />
     <aside
+      v-if="props.showGroups"
       :aria-labelledby="props.groupsTitleId"
       :class="{ open: groupsOpen }"
       class="pb-bws-groups"
@@ -38,9 +43,14 @@
       <div class="pb-bws-scroll"><slot name="groups" /></div>
     </aside>
 
-    <main :aria-labelledby="props.itemsTitleId" class="pb-bws-items">
-      <div class="pb-bws-header pb-bws-items-header">
+    <main
+      :aria-labelledby="!props.showItemsHeader ? undefined : props.itemsTitleId"
+      :aria-label="!props.showItemsHeader ? '背包物品' : undefined"
+      class="pb-bws-items"
+    >
+      <div v-if="props.showItemsHeader" class="pb-bws-header pb-bws-items-header">
         <button
+          v-if="props.showGroups"
           :aria-expanded="groupsOpen"
           aria-label="打开分组列表"
           class="pb-bws-mobile-groups"
@@ -60,7 +70,7 @@
       :class="{ open: props.detailOpen }"
       class="pb-bws-detail"
     >
-      <div class="pb-bws-header"><slot name="detail-header" /></div>
+      <div class="pb-bws-header pb-bws-detail-header"><slot name="detail-header" /></div>
       <div class="pb-bws-scroll"><slot name="detail" /></div>
     </aside>
   </div>
@@ -72,6 +82,8 @@ type PbBagWorkspaceShellProps = {
   itemsTitleId: string;
   detailTitleId: string;
   detailOpen: boolean;
+  showGroups?: boolean;
+  showItemsHeader?: boolean;
 };
 
 const props = defineProps<PbBagWorkspaceShellProps>();
@@ -83,7 +95,7 @@ const groupsOpen = defineModel<boolean>("groupsOpen", { required: true });
   --bag-surface: var(--app-page-bg);
   --bag-surface-subtle: var(--box-bg-1);
   --bag-surface-hover: var(--box-bg-4);
-  --bag-surface-selected: color-mix(in srgb, var(--tgc-yellow-3) 12%, var(--bag-surface));
+  --bag-surface-selected: color-mix(in srgb, var(--app-page-content) 8%, var(--bag-surface));
   --bag-stroke: var(--common-shadow-1);
   --bag-stroke-strong: var(--common-shadow-2);
   --bag-text-secondary: var(--box-text-4);
@@ -103,7 +115,7 @@ const groupsOpen = defineModel<boolean>("groupsOpen", { required: true });
   margin: 12px;
   background: transparent;
   color: var(--app-page-content);
-  gap: 12px;
+  gap: 16px;
   grid-template-columns:
     clamp(240px, 22vw, 280px) minmax(300px, 1fr)
     clamp(320px, 28vw, 376px);
@@ -118,7 +130,7 @@ const groupsOpen = defineModel<boolean>("groupsOpen", { required: true });
   overflow: hidden;
   min-width: 0;
   flex-direction: column;
-  border: 1px solid var(--bag-stroke);
+  border: 1px solid var(--bag-stroke-strong);
   border-radius: 8px;
   background: var(--bag-surface);
 }
@@ -135,15 +147,32 @@ const groupsOpen = defineModel<boolean>("groupsOpen", { required: true });
   grid-column: 3;
 }
 
+.pb-bws-no-groups {
+  grid-template-columns: minmax(300px, 1fr) clamp(320px, 28vw, 376px);
+
+  .pb-bws-items {
+    grid-column: 1;
+  }
+
+  .pb-bws-detail {
+    grid-column: 2;
+  }
+}
+
 .pb-bws-header {
   display: flex;
-  min-height: 72px;
+  min-height: 68px;
   box-sizing: border-box;
   flex: none;
   align-items: center;
-  padding: 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--bag-stroke);
   gap: 8px;
+}
+
+.pb-bws-detail-header {
+  position: relative;
+  padding: 8px;
 }
 
 .pb-bws-groups-header {
@@ -193,8 +222,12 @@ const groupsOpen = defineModel<boolean>("groupsOpen", { required: true });
 
 @media (width <= 1179px) {
   .pb-bws {
-    gap: 8px;
+    gap: 12px;
     grid-template-columns: 48px minmax(260px, 1fr) clamp(300px, 34vw, 376px);
+  }
+
+  .pb-bws-no-groups {
+    grid-template-columns: minmax(260px, 1fr) clamp(300px, 34vw, 376px);
   }
 
   .pb-bws-groups {

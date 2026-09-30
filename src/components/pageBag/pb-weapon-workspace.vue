@@ -6,6 +6,8 @@
     :detailTitleId="detailTitleId"
     :groupsTitleId="groupsTitleId"
     :itemsTitleId="itemsTitleId"
+    :showGroups="!props.individual"
+    :showItemsHeader="!props.individual"
   >
     <template #groups-header>
       <div class="pb-wws-heading">
@@ -147,10 +149,12 @@
               alt=""
               class="pb-wws-title-icon"
             />
-            <h2 :id="itemsTitleId">{{ selectedGroup?.name ?? "武器" }}</h2>
-            <span v-if="selectedGroup" class="pb-wws-count-tag">{{
-              selectedGroup.totalCount
-            }}</span>
+            <h2 :id="itemsTitleId">
+              {{ props.individual ? "武器" : (selectedGroup?.name ?? "武器") }}
+            </h2>
+            <span v-if="props.individual || selectedGroup" class="pb-wws-count-tag">
+              {{ props.individual ? (props.items?.length ?? 0) : selectedGroup?.totalCount }}
+            </span>
           </div>
           <span v-if="selectedGroup && hasHiddenItems" class="pb-wws-match-summary">
             <template v-if="hasHiddenItems">
@@ -161,7 +165,7 @@
             </template>
           </span>
         </div>
-        <div class="pb-wws-header-actions">
+        <div v-if="!props.individual" class="pb-wws-header-actions">
           <button
             v-if="hasHiddenItems"
             :aria-pressed="showMatchesOnly"
@@ -186,7 +190,13 @@
           aria-live="polite"
           class="pb-wws-empty pb-wws-items-empty"
         >
-          {{ selectedGroup ? "当前分组没有符合条件的物品" : "请选择一个武器分组" }}
+          {{
+            props.individual
+              ? "当前条件下没有武器"
+              : selectedGroup
+                ? "当前分组没有符合条件的物品"
+                : "请选择一个武器分组"
+          }}
         </div>
         <div v-else :aria-labelledby="itemsTitleId" class="pb-wws-item-list" role="listbox">
           <PbWeaponItem
@@ -217,7 +227,7 @@
               alt=""
               class="pb-wws-title-icon"
             />
-            <h2 :id="detailTitleId">物品详情</h2>
+            <h2 :id="detailTitleId">武器详情</h2>
           </div>
           <span v-if="selectedItem">
             Lv.{{ selectedItem.tb.info.level }} · 精炼{{ getWeaponRefineLevel(selectedItem) }}
@@ -225,14 +235,21 @@
         </div>
         <div class="pb-wws-detail-actions">
           <button
-            :disabled="!selectedItem || !detailVisible"
+            :aria-busy="shareLoading"
+            :disabled="shareLoading || !selectedItem || !detailVisible"
             aria-label="分享武器物品详情"
             class="pb-wws-icon-button"
             title="分享详情"
             type="button"
             @click="shareDetail"
           >
-            <v-icon aria-hidden="true" size="18">mdi-share-variant-outline</v-icon>
+            <v-progress-circular
+              v-if="shareLoading"
+              aria-hidden="true"
+              indeterminate
+              size="18"
+              width="2"
+            /><v-icon v-else aria-hidden="true" size="18">mdi-share-variant-outline</v-icon>
           </button>
           <button
             :disabled="!canMovePrevious"
@@ -255,15 +272,16 @@
             <v-icon aria-hidden="true" size="20">mdi-chevron-right</v-icon>
           </button>
           <button
-            aria-label="关闭物品详情"
-            class="pb-wws-icon-button"
-            title="关闭详情"
+            aria-label="返回物品列表"
+            class="pb-wws-icon-button pb-wws-detail-back"
+            title="返回列表"
             type="button"
             @click="closeMobileDetail"
           >
-            <v-icon aria-hidden="true" size="20">mdi-close</v-icon>
+            <v-icon aria-hidden="true" size="20">mdi-arrow-left</v-icon>
           </button>
         </div>
+        <span v-if="selectedItem" class="pb-wws-detail-guid">GUID:{{ selectedItem.tb.guid }}</span>
       </div>
     </template>
 
@@ -272,9 +290,7 @@
         <PbWeaponDetailContent
           ref="detailContent"
           :avatarId="props.equipAvatarMap.get(selectedItem.guid)"
-          :closeable="false"
           :cur="selectedItem"
-          :showActions="false"
         />
       </div>
       <div v-else class="pb-wws-empty pb-wws-detail-empty">
@@ -295,6 +311,8 @@ type PbWeaponWorkspaceProps = {
   groups: Array<TGApp.App.UserBag.WeaponGroup>;
   allGroups: Array<TGApp.App.UserBag.WeaponGroup>;
   equipAvatarMap: ReadonlyMap<string, number>;
+  individual?: boolean;
+  items?: Array<TGApp.App.UserBag.WeaponItem>;
 };
 
 type WeaponTypeOption = {
@@ -315,6 +333,7 @@ const detailTitleId = `${componentId}-detail-title`;
 const groupsOpen = ref<boolean>(false);
 const mobileDetailOpen = ref<boolean>(false);
 const detailVisible = ref<boolean>(true);
+const shareLoading = ref<boolean>(false);
 const showMatchesOnly = ref<boolean>(true);
 const renderedCount = ref<number>(ITEM_PAGE_SIZE);
 const selectedWeaponTypes = defineModel<Array<string>>("selectedWeaponTypes", { required: true });
@@ -338,15 +357,23 @@ const visibleGroupSignature = computed<string>(() =>
   visibleGroups.value.map((group) => group.key).join("\u0000"),
 );
 const selectedGroup = computed<TGApp.App.UserBag.WeaponGroup | undefined>(() => {
+  if (props.individual) return undefined;
   const selected = visibleGroups.value.find((group) => group.key === selectedGroupKey.value);
   return selected ?? visibleGroups.value[0];
 });
 const displayItems = computed<Array<TGApp.App.UserBag.WeaponItem>>(() => {
+  if (props.individual) return props.items ?? [];
   const group = selectedGroup.value;
   if (group === undefined) return [];
   return showMatchesOnly.value ? group.visibleItems : group.items;
 });
 const selectedItem = computed<TGApp.App.UserBag.WeaponItem | undefined>(() => {
+  if (props.individual) {
+    return (
+      displayItems.value.find((item) => item.guid === selectedInstanceGuid.value) ??
+      displayItems.value[0]
+    );
+  }
   const group = selectedGroup.value;
   if (group === undefined) return undefined;
   const selected = group.items.find((item) => item.guid === selectedInstanceGuid.value);
@@ -358,9 +385,11 @@ const selectedIndex = computed<number>(() => {
   return displayItems.value.findIndex((item) => item.guid === guid);
 });
 const renderedItems = computed<Array<TGApp.App.UserBag.WeaponItem>>(() =>
-  displayItems.value.slice(0, renderedCount.value),
+  props.individual ? displayItems.value : displayItems.value.slice(0, renderedCount.value),
 );
-const hasMoreItems = computed<boolean>(() => renderedCount.value < displayItems.value.length);
+const hasMoreItems = computed<boolean>(
+  () => !props.individual && renderedCount.value < displayItems.value.length,
+);
 const hasHiddenItems = computed<boolean>(
   () =>
     selectedGroup.value !== undefined &&
@@ -376,10 +405,12 @@ const detailOpen = computed<boolean>(
 
 watch(
   () => [
+    props.individual,
     visibleGroupSignature.value,
     selectedGroupKey.value,
     selectedInstanceGuid.value,
     showMatchesOnly.value,
+    displayItems.value.map((item) => item.guid).join("\u0000"),
   ],
   normalizeSelection,
   { immediate: true },
@@ -395,6 +426,16 @@ watch(hasHiddenItems, (value) => {
 });
 
 function normalizeSelection(): void {
+  if (props.individual) {
+    selectedGroupKey.value = undefined;
+    if (
+      selectedInstanceGuid.value === undefined ||
+      !displayItems.value.some((item) => item.guid === selectedInstanceGuid.value)
+    ) {
+      selectedInstanceGuid.value = displayItems.value[0]?.guid;
+    }
+    return;
+  }
   const group = selectedGroup.value;
   if (group === undefined) {
     selectedGroupKey.value = undefined;
@@ -442,7 +483,7 @@ function toggleMatchScope(): void {
 }
 
 function selectInstance(item: TGApp.App.UserBag.WeaponItem): void {
-  if (!selectedGroup.value?.items.some((candidate) => candidate.guid === item.guid)) return;
+  if (!displayItems.value.some((candidate) => candidate.guid === item.guid)) return;
   selectedInstanceGuid.value = item.guid;
   detailVisible.value = true;
   mobileDetailOpen.value = true;
@@ -464,12 +505,18 @@ function loadMore(): void {
 }
 
 function closeMobileDetail(): void {
-  detailVisible.value = false;
   mobileDetailOpen.value = false;
 }
 
 async function shareDetail(): Promise<void> {
-  await detailContent.value?.share();
+  const content = detailContent.value;
+  if (shareLoading.value || content === null) return;
+  shareLoading.value = true;
+  try {
+    await content.share();
+  } finally {
+    shareLoading.value = false;
+  }
 }
 
 function backToGrid(): void {
@@ -532,15 +579,16 @@ function backToGrid(): void {
   min-width: 0;
   box-sizing: border-box;
   align-items: center;
-  padding: 4px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
   background: var(--bag-surface);
   color: var(--app-page-content);
   cursor: pointer;
   font: inherit;
-  gap: 4px;
-  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  opacity: 0.8;
   text-align: left;
   transition: none;
 }
@@ -548,11 +596,11 @@ function backToGrid(): void {
 .pb-wws-group-icon {
   position: relative;
   overflow: hidden;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   flex: none;
-  border: 1px solid var(--bag-stroke);
-  border-radius: 4px;
+  border: 1px solid var(--bag-stroke-strong);
+  border-radius: 8px;
   background: var(--bag-surface);
 }
 
@@ -567,10 +615,10 @@ function backToGrid(): void {
 
 .pb-wws-group-type-icon {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
 }
 
 .pb-wws-group-copy {
@@ -583,8 +631,8 @@ function backToGrid(): void {
 }
 
 .pb-wws-group-option:hover {
-  border-color: transparent;
   background: var(--bag-surface-hover);
+  opacity: 1;
 }
 
 .pb-wws-group-option:focus-visible {
@@ -623,8 +671,8 @@ function backToGrid(): void {
   align-items: center;
   padding: 0 4px;
   border-radius: 4px;
-  background: var(--box-bg-4);
-  color: var(--bag-text-secondary);
+  background: color-mix(in srgb, var(--app-page-content) 18%, var(--bag-surface));
+  color: var(--app-page-content);
   font-size: 12px;
   gap: 4px;
   line-height: 16px;
@@ -644,9 +692,8 @@ function backToGrid(): void {
 
 .pb-wws-group-selected,
 .pb-wws-group-selected:hover {
-  border-color: transparent;
   background: var(--bag-surface-selected);
-  box-shadow: inset 3px 0 var(--bag-accent);
+  opacity: 1;
 }
 
 .pb-wws-items-heading,
@@ -853,20 +900,26 @@ function backToGrid(): void {
 .pb-wws-item-list {
   display: grid;
   min-width: 0;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
 }
 
 .pb-wws-item-list :deep(.pb-wi-box.detail) {
+  border: 0;
   filter: none;
+  opacity: 0.65;
 
   &.selected {
-    border-color: var(--bag-accent);
-    background: var(--bag-surface-selected);
+    border: 0;
+    opacity: 1;
+  }
+
+  &:hover {
+    opacity: 1;
   }
 
   &:focus-visible {
-    outline-color: var(--bag-accent-text);
+    outline: 2px solid var(--bag-accent-text);
   }
 }
 
@@ -940,5 +993,32 @@ function backToGrid(): void {
   color: var(--bag-text-secondary);
   font-size: 12px;
   line-height: 20px;
+}
+
+.pb-wws-group-option:hover .pb-wws-group-count {
+  background: color-mix(in srgb, var(--app-page-content) 24%, var(--bag-surface));
+}
+
+.pb-wws-detail-back {
+  display: none;
+}
+
+@media (width <= 839px) {
+  .pb-wws-detail-back {
+    display: inline-flex;
+  }
+}
+
+.pb-wws-detail-guid {
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  min-width: 0;
+  max-width: calc(100% - 16px);
+  color: var(--bag-text-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 </style>

@@ -35,32 +35,46 @@
         <span class="pb-rgi-count">×{{ props.group.totalCount }}</span>
       </span>
       <span class="pb-rgi-positions" aria-label="部位分布">
-        <span v-for="position in props.group.positionCounts" :key="position.position">
+        <span
+          v-for="position in props.group.positionCounts"
+          :key="position.position"
+          :aria-label="`部位 ${position.position} ${position.count} 件`"
+          class="pb-rgi-position"
+          :title="`部位 ${position.position} ${position.count} 件`"
+        >
           <img :src="`/icon/relic/${position.position}.webp`" alt="" />
-          <span>{{ position.count }}</span>
+          <strong>{{ position.count }}</strong>
         </span>
       </span>
       <span class="pb-rgi-meta">{{ starSummary }}</span>
       <span class="pb-rgi-specs">
-        <span :title="'等级 ' + levelSummary" :aria-label="'等级 ' + levelSummary"
-          ><v-icon aria-hidden="true" size="14">mdi-arrow-up-bold-outline</v-icon
-          >{{ levelSummary.replace("Lv.", "") }}</span
+        <span
+          :aria-label="'等级 ' + levelSummary"
+          class="pb-rgi-spec"
+          :title="'等级 ' + levelSummary"
         >
+          <v-icon aria-hidden="true" size="14">mdi-arrow-up-bold-outline</v-icon>
+          <strong>{{ levelSummary.replace("Lv.", "") }}</strong>
+        </span>
 
         <span
           v-if="props.group.lockedCount"
-          title="锁定"
           :aria-label="'锁定 ' + props.group.lockedCount"
-          ><v-icon aria-hidden="true" size="14">mdi-lock-outline</v-icon
-          >{{ props.group.lockedCount }}</span
+          class="pb-rgi-spec"
+          title="锁定"
         >
+          <v-icon aria-hidden="true" size="14">mdi-lock-outline</v-icon>
+          <strong>{{ props.group.lockedCount }}</strong>
+        </span>
         <span
           v-if="props.group.equippedCount"
-          title="已装备"
           :aria-label="'已装备 ' + props.group.equippedCount"
-          ><v-icon aria-hidden="true" size="14">mdi-account-outline</v-icon
-          >{{ props.group.equippedCount }}</span
+          class="pb-rgi-spec"
+          title="已装备"
         >
+          <v-icon aria-hidden="true" size="14">mdi-account-outline</v-icon>
+          <strong>{{ props.group.equippedCount }}</strong>
+        </span>
       </span>
       <span v-if="hasPartialMatch" class="pb-rgi-match">
         <v-icon size="13">mdi-filter-check-outline</v-icon>
@@ -117,25 +131,28 @@ const ariaLabel = computed<string>(() => {
 
 <style lang="scss" scoped>
 .pb-rgi {
+  position: relative;
   display: flex;
   overflow: hidden;
-  min-height: 124px;
+  min-height: 112px;
   box-sizing: border-box;
   align-items: stretch;
   padding: 12px;
-  border: 1px solid var(--common-shadow-1);
+  border: 1px solid var(--common-shadow-2);
   border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--app-page-content);
-  column-gap: 12px;
+  column-gap: 8px;
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: none;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 
 .pb-rgi:hover {
-  border-color: var(--common-text-title);
+  border-color: var(--tgc-yellow-3);
   background: var(--box-bg-3);
 }
 
@@ -149,8 +166,8 @@ const ariaLabel = computed<string>(() => {
 }
 
 .pb-rgi-stack {
-  --stack-front-top: calc(9px + var(--stack-depth) * 3px);
-  --stack-front-left: calc(9px - var(--stack-depth) * 3px);
+  --stack-front-top: calc(8px + var(--stack-depth) * 3px);
+  --stack-front-left: calc(8px - var(--stack-depth) * 3px);
 
   position: relative;
   width: 88px;
@@ -165,10 +182,10 @@ const ariaLabel = computed<string>(() => {
   overflow: hidden;
   width: 68px;
   height: 68px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
   background: var(--app-page-bg);
-  box-shadow: 0 2px 4px var(--common-shadow-1);
+  box-shadow: 0 4px 8px var(--common-shadow-1);
 }
 
 .pb-rgi-layer-1 {
@@ -236,40 +253,42 @@ const ariaLabel = computed<string>(() => {
   overflow: hidden;
   min-width: 0;
   font-family: var(--font-title);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: normal;
-  line-height: 20px;
+  line-height: 22px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .pb-rgi-count {
   flex: none;
+  padding: 2px 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-4);
   color: var(--common-text-title);
   font-size: 14px;
   font-weight: 600;
-  line-height: 20px;
+  line-height: 18px;
   white-space: nowrap;
 }
 
-.pb-rgi-status,
 .pb-rgi-match {
   color: var(--box-text-4);
   font-size: 12px;
   line-height: 16px;
 }
 
-.pb-rgi-status {
-  overflow: hidden;
-  min-width: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .pb-rgi-match {
   display: inline-flex;
+  min-height: 24px;
+  box-sizing: border-box;
   flex: none;
   align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--tgc-yellow-3);
+  border-radius: 4px;
+  background: var(--box-bg-4);
   color: var(--common-text-title);
   gap: 3px;
   white-space: nowrap;
@@ -288,21 +307,33 @@ const ariaLabel = computed<string>(() => {
 .pb-rgi-positions {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--box-bg-4);
+  gap: 8px;
 }
 
-.pb-rgi-positions > span {
+.pb-rgi-position {
   display: inline-flex;
+  min-height: 24px;
+  box-sizing: border-box;
   align-items: center;
   color: var(--box-text-4);
   font-size: 12px;
   gap: 4px;
+  line-height: 16px;
 }
 
-.pb-rgi-positions img {
-  width: 16px;
-  height: 16px;
+.pb-rgi-position img {
+  width: 18px;
+  height: 18px;
   filter: var(--icon-filter);
+}
+
+.pb-rgi-position strong,
+.pb-rgi-spec strong {
+  color: var(--common-text-title);
+  font-weight: 600;
 }
 
 .pb-rgi-meta {
@@ -313,17 +344,21 @@ const ariaLabel = computed<string>(() => {
 
 .pb-rgi-specs {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   color: var(--box-text-4);
   font-size: 12px;
-  gap: 8px;
+  gap: 6px;
   line-height: 16px;
   white-space: nowrap;
 }
 
-.pb-rgi-specs > span {
+.pb-rgi-spec {
   display: inline-flex;
+  min-height: 24px;
+  box-sizing: border-box;
   align-items: center;
   gap: 4px;
+  line-height: 16px;
 }
 </style>

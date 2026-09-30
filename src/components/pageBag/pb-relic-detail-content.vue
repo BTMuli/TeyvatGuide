@@ -1,18 +1,7 @@
 <!-- 圣遗物详情正文 -->
 <template>
   <div ref="shareRef" class="pb-rd-box">
-    <div class="pb-rdt-meta">GUID:{{ props.cur.guid }}</div>
-    <button
-      v-if="props.showActions && props.closable"
-      aria-label="收起圣遗物详情"
-      class="pb-rdt-act"
-      data-html2canvas-ignore
-      title="收起"
-      type="button"
-      @click="emits('close')"
-    >
-      <v-icon size="16">mdi-close</v-icon>
-    </button>
+    <div class="pb-rdt-meta" aria-hidden="true">GUID:{{ props.cur.guid }}</div>
     <div class="pb-rd-top">
       <div class="pb-rdt-left">
         <img :src="`/icon/bg/${props.cur.brief.star}-Star.webp`" alt="bg" class="pb-rdtl-bg" />
@@ -44,31 +33,39 @@
           class="pb-rdtl-avatar-icon"
         />
       </div>
-      <button
-        v-if="props.showActions"
-        aria-label="分享圣遗物详情"
-        class="pb-rdt-share"
-        data-html2canvas-ignore
-        title="分享"
-        type="button"
-        @click="share()"
-      >
-        <v-icon size="12">mdi-share-variant</v-icon>
-      </button>
     </div>
     <div class="pb-rd-props">
       <div class="pb-rdp-main">
-        <img v-if="props.cur.mp.info.icon !== ''" :src="props.cur.mp.info.icon" alt="icon" />
-        <span v-else style="width: 16px" />
-        <span>{{ props.cur.mp.info.filter_name }}</span>
-        <span>{{ wikiUtils.propFmt(props.cur.mp.type, props.cur.mp.val) }}</span>
+        <img
+          v-if="props.cur.mp.info.icon !== ''"
+          :src="props.cur.mp.info.icon"
+          alt=""
+          class="pb-rdp-icon"
+        />
+        <span v-else class="pb-rdp-icon" aria-hidden="true" />
+        <span class="pb-rdp-label">{{ props.cur.mp.info.filter_name }}</span>
+        <span class="pb-rdp-value">{{
+          wikiUtils.propFmt(props.cur.mp.type, props.cur.mp.val)
+        }}</span>
       </div>
       <div v-for="prop in props.cur.sp" :key="prop.type" class="pb-rdp-sub">
-        <img v-if="prop.info.icon !== ''" :src="prop.info.icon" alt="icon" />
-        <span v-else style="width: 16px" />
-        <span>{{ prop.info.filter_name }}</span>
-        <span v-if="prop.vals.length > 1" class="pb-rdp-cnt">{{ prop.vals.length - 1 }}</span>
-        <span>{{ wikiUtils.propFmt(prop.type, prop.val) }}</span>
+        <img v-if="prop.info.icon !== ''" :src="prop.info.icon" alt="" class="pb-rdp-icon" />
+        <span v-else class="pb-rdp-icon" aria-hidden="true" />
+        <span class="pb-rdp-label">{{ prop.info.filter_name }}</span>
+        <span
+          v-if="prop.vals.length > 1"
+          :aria-label="`强化${prop.vals.length - 1}次`"
+          class="pb-rdp-cnt"
+          role="img"
+        >
+          <span
+            v-for="count in prop.vals.length - 1"
+            :key="count"
+            class="pb-rdp-cnt-bar"
+            aria-hidden="true"
+          />
+        </span>
+        <span class="pb-rdp-value">{{ wikiUtils.propFmt(prop.type, prop.val) }}</span>
       </div>
     </div>
     <div v-if="setInfo" class="pb-rd-set">
@@ -81,7 +78,6 @@
       </div>
     </div>
     <div v-if="posInfo" class="pb-rd-desc">
-      <span class="pb-rd-section-label">物件故事</span>
       <p>{{ posInfo.desc }}</p>
     </div>
   </div>
@@ -98,14 +94,9 @@ import { AppCharacterData, wrRelic, wrSet } from "@/data/index.js";
 type PbRelicDetailContentProps = {
   cur: TGApp.Sqlite.UserBag.RelicTable;
   avatarId?: number;
-  closable?: boolean;
-  showActions?: boolean;
 };
 
-type PbRelicDetailContentEmits = { close: [] };
-
-const props = withDefaults(defineProps<PbRelicDetailContentProps>(), { showActions: true });
-const emits = defineEmits<PbRelicDetailContentEmits>();
+const props = defineProps<PbRelicDetailContentProps>();
 const shareRef = useTemplateRef<HTMLElement>("shareRef");
 const characterStarMap = new Map<number, number>(
   AppCharacterData.map((character) => [character.id, character.star]),
@@ -130,7 +121,15 @@ async function share(): Promise<void> {
     return;
   }
   const fileName = `圣遗物-${props.cur.brief.name}-${props.cur.guid}`;
-  await TGShare.modern(fileName, shareRef.value, 4);
+  await TGShare.modern(fileName, shareRef.value, 4, false, {
+    onCloneNode: (cloned) => {
+      if (!(cloned instanceof HTMLElement)) return;
+      const meta = cloned.querySelector<HTMLElement>(".pb-rdt-meta");
+      if (meta === null) return;
+      meta.style.visibility = "visible";
+      meta.style.zIndex = "0";
+    },
+  });
 }
 
 defineExpose({ share });
@@ -153,6 +152,7 @@ function loadPosInfo(): void {
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
+  color: var(--app-page-content);
   overflow-y: auto;
   row-gap: 8px;
 }
@@ -247,53 +247,21 @@ function loadPosInfo(): void {
   column-gap: 4px;
 }
 
-.pb-rdt-act,
-.pb-rdt-share {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.pb-rdt-act {
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  margin-left: auto;
-  color: var(--tgc-od-red);
-}
-
-.pb-rdt-share {
-  position: absolute;
-  z-index: 1;
-  bottom: -4px;
-  left: -6px;
-  color: var(--tgc-od-blue);
-}
-
-.pb-rdt-act:focus-visible,
-.pb-rdt-share:focus-visible {
-  outline: 2px solid var(--tgc-od-blue);
-  outline-offset: 2px;
-}
-
 .pb-rdt-meta {
   position: absolute;
+  z-index: -1;
   right: 0;
   bottom: 0;
   color: var(--box-text-4);
   font-size: 10px;
+  visibility: hidden;
 }
 
 .pb-rd-desc {
   display: flex;
   flex-direction: column;
   padding-bottom: 16px;
-  color: var(--box-text-4);
+  color: var(--app-page-content);
   font-size: 12px;
   gap: 4px;
   line-height: 1.65;
@@ -301,6 +269,7 @@ function loadPosInfo(): void {
 
 .pb-rd-desc p {
   margin: 0;
+  font-style: italic;
 }
 
 .pb-rd-section-label {
@@ -312,76 +281,77 @@ function loadPosInfo(): void {
 .pb-rd-props {
   display: flex;
   width: 100%;
+  box-sizing: border-box;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-3);
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--box-bg-1);
   font-size: 14px;
+  gap: 2px;
+  line-height: 20px;
+}
+
+.pb-rdp-main,
+.pb-rdp-sub {
+  display: flex;
+  min-width: 0;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 8px;
 }
 
 .pb-rdp-main {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  border-bottom: 1px solid var(--common-shadow-2);
-  column-gap: 4px;
-  font-family: var(--font-title);
-
-  img {
-    width: 16px;
-    height: 16px;
-    filter: invert(1);
-
-    .dark & {
-      filter: unset;
-    }
-  }
-
-  :last-child {
-    margin-left: auto;
-  }
+  min-height: 36px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  font-weight: 600;
 }
 
 .pb-rdp-sub {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  column-gap: 4px;
+  min-height: 28px;
+  color: var(--box-text-4);
+}
 
-  img {
-    width: 16px;
-    height: 16px;
-    filter: invert(1);
+.pb-rdp-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  filter: var(--icon-filter);
+  object-fit: contain;
+}
 
-    .dark & {
-      filter: unset;
-    }
-  }
+.pb-rdp-label {
+  min-width: 0;
+  color: var(--app-page-content);
+  overflow-wrap: anywhere;
+}
 
-  :last-child {
-    margin-left: auto;
-  }
+.pb-rdp-value {
+  flex: none;
+  margin-left: auto;
+  color: var(--app-page-content);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pb-rdp-main .pb-rdp-value {
+  color: var(--common-text-title);
 }
 
 .pb-rdp-cnt {
-  position: relative;
-  display: flex;
-  width: 16px;
-  height: 16px;
+  display: inline-flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-1);
-  color: var(--tgc-od-red);
-  font-family: var(--font-title);
-  font-size: 12px;
-  line-height: 16px;
+  gap: 2px;
+}
+
+.pb-rdp-cnt-bar {
+  width: 4px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--tgc-od-orange);
 }
 
 .pb-rd-set {
@@ -410,5 +380,9 @@ function loadPosInfo(): void {
   :nth-child(1) {
     color: var(--tgc-od-orange);
   }
+}
+
+html.default .pb-rds-effect :nth-child(1) {
+  filter: brightness(0.65);
 }
 </style>

@@ -6,6 +6,8 @@
     :detailTitleId="detailTitleId"
     :groupsTitleId="groupsTitleId"
     :itemsTitleId="itemsTitleId"
+    :showGroups="!props.individual"
+    :showItemsHeader="!props.individual"
   >
     <template #groups-header>
       <div class="pb-rw-heading">
@@ -53,20 +55,11 @@
               </span></span
             >
             <span class="pb-rw-group-positions" aria-label="部位分布">
-              <template
-                v-for="(position, positionIndex) in group.positionCounts"
-                :key="position.position"
-              >
+              <template v-for="position in group.positionCounts" :key="position.position">
                 <span class="pb-rw-group-position">
                   <img :src="`/icon/relic/${position.position}.webp`" alt="" />
                   <span>{{ position.count }}</span>
                 </span>
-                <span
-                  v-if="positionIndex < group.positionCounts.length - 1"
-                  aria-hidden="true"
-                  class="pb-rw-group-position-separator"
-                  >·</span
-                >
               </template>
             </span>
           </span>
@@ -80,7 +73,9 @@
     <template #items-header>
       <div class="pb-rw-items-heading">
         <div>
-          <h2 :id="itemsTitleId">{{ currentGroup?.setName ?? "圣遗物分组" }}</h2>
+          <h2 :id="itemsTitleId">
+            {{ props.individual ? "圣遗物" : (currentGroup?.setName ?? "圣遗物分组") }}
+          </h2>
           <span v-if="currentGroup" class="pb-rw-position-summary"
             ><span
               v-for="position in summaryPositions"
@@ -92,8 +87,11 @@
               }}</span
             ><span class="pb-rw-items-count">{{ itemsSummary }}</span></span
           >
+          <span v-else-if="props.individual" class="pb-rw-items-count"
+            >{{ currentItems.length }} 件</span
+          >
         </div>
-        <div class="pb-rw-items-actions">
+        <div v-if="!props.individual" class="pb-rw-items-actions">
           <v-menu
             v-if="currentGroup"
             v-model="positionMenuOpen"
@@ -220,6 +218,11 @@
       <button v-if="hasMoreItems" class="pb-rw-load-more" type="button" @click="loadMoreItems">
         加载更多（{{ currentItems.length - renderedItems.length }}）
       </button>
+      <div
+        v-if="props.individual && props.hasMoreItems"
+        ref="loadMoreRef"
+        class="pb-rw-load-trigger"
+      />
     </template>
 
     <template #detail-header>
@@ -232,7 +235,7 @@
               :alt="getPositionName(selectedInstance.brief.pos)"
               class="pb-rw-title-icon"
             />
-            <h2 :id="detailTitleId">{{ selectedInstance?.brief.name ?? "物品详情" }}</h2>
+            <h2 :id="detailTitleId">圣遗物详情</h2>
           </div>
           <span v-if="selectedInstance">
             Lv.{{ selectedInstance.level - 1 }} ·
@@ -241,14 +244,21 @@
         </div>
         <div class="pb-rw-detail-actions">
           <button
-            :disabled="!selectedInstance || !detailVisible"
+            :aria-busy="shareLoading"
+            :disabled="shareLoading || !selectedInstance || !detailVisible"
             aria-label="分享圣遗物物品详情"
             class="pb-rw-icon-btn"
             title="分享详情"
             type="button"
             @click="shareDetail"
           >
-            <v-icon size="18">mdi-share-variant-outline</v-icon>
+            <v-progress-circular
+              v-if="shareLoading"
+              aria-hidden="true"
+              indeterminate
+              size="18"
+              width="2"
+            /><v-icon v-else aria-hidden="true" size="18">mdi-share-variant-outline</v-icon>
           </button>
           <button
             :aria-label="'上一件圣遗物'"
@@ -271,15 +281,18 @@
             <v-icon size="18">mdi-chevron-right</v-icon>
           </button>
           <button
-            aria-label="关闭详情"
-            class="pb-rw-icon-btn pb-rw-detail-close"
-            title="关闭详情"
+            aria-label="返回物品列表"
+            class="pb-rw-icon-btn pb-rw-detail-back"
+            title="返回列表"
             type="button"
             @click="closeDetail"
           >
-            <v-icon size="18">mdi-close</v-icon>
+            <v-icon aria-hidden="true" size="20">mdi-arrow-left</v-icon>
           </button>
         </div>
+        <span v-if="selectedInstance" class="pb-rw-detail-guid"
+          >GUID:{{ selectedInstance.guid }}</span
+        >
       </div>
     </template>
 
@@ -288,21 +301,21 @@
         v-if="selectedInstance && detailVisible"
         ref="detailContent"
         :avatarId="props.equipAvatarMap.get(selectedInstance.guid)"
-        :closable="false"
         :cur="selectedInstance"
-        :showActions="false"
       />
       <div v-else class="pb-rw-empty pb-rw-detail-empty" role="status">
         <span>{{
           selectedInstance
             ? "详情已收起，选择任一物品可重新打开"
-            : hasPositionFilter
-              ? "当前部件筛选没有匹配的物品"
-              : "当前分组没有符合条件的物品"
+            : props.individual
+              ? "当前条件下没有圣遗物"
+              : hasPositionFilter
+                ? "当前部件筛选没有匹配的物品"
+                : "当前分组没有符合条件的物品"
         }}</span>
         <div class="pb-rw-empty-actions">
           <button
-            v-if="hasPositionFilter"
+            v-if="!props.individual && hasPositionFilter"
             class="pb-rw-empty-action"
             type="button"
             @click="clearPositionFilter"
@@ -310,7 +323,9 @@
             清除部件筛选
           </button>
           <button
-            v-if="currentGroup && !showAllInGroup && currentGroup.items.length > 0"
+            v-if="
+              !props.individual && currentGroup && !showAllInGroup && currentGroup.items.length > 0
+            "
             class="pb-rw-empty-action"
             type="button"
             @click="setShowAll(true)"
@@ -328,14 +343,27 @@ import PbBagWorkspaceShell from "@comp/pageBag/pb-bag-workspace-shell.vue";
 import PbRelicDetailContent from "@comp/pageBag/pb-relic-detail-content.vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
 import wikiUtils from "@utils/wikiUtils.js";
-import { computed, ref, useId, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useId,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 type PbRelicWorkspaceProps = {
   groups: Array<TGApp.App.UserBag.RelicGroup>;
   equipAvatarMap: ReadonlyMap<string, number>;
+  individual?: boolean;
+  items?: Array<TGApp.Sqlite.UserBag.RelicTable>;
+  renderedItemsCount?: number;
+  hasMoreItems?: boolean;
 };
 
-type PbRelicWorkspaceEmits = { back: [] };
+type PbRelicWorkspaceEmits = { back: []; loadMore: [] };
 
 const props = defineProps<PbRelicWorkspaceProps>();
 const emits = defineEmits<PbRelicWorkspaceEmits>();
@@ -350,12 +378,16 @@ const groupsOpen = ref<boolean>(false);
 const showAllInGroup = ref<boolean>(false);
 const mobileDetailOpen = ref<boolean>(false);
 const detailVisible = ref<boolean>(true);
+const shareLoading = ref<boolean>(false);
 const renderedCount = ref<number>(100);
 const selectedPositions = defineModel<Array<number>>("selectedPositions", { required: true });
 const positionMenuOpen = ref<boolean>(false);
 const detailContent = useTemplateRef<{ share: () => Promise<void> }>("detailContent");
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
+let loadMoreObserver: IntersectionObserver | undefined;
 
 const currentGroup = computed<TGApp.App.UserBag.RelicGroup | undefined>(() => {
+  if (props.individual) return undefined;
   const selected = selectedGroupKey.value;
   return (
     (selected === undefined ? undefined : props.groups.find((group) => group.key === selected)) ??
@@ -363,17 +395,24 @@ const currentGroup = computed<TGApp.App.UserBag.RelicGroup | undefined>(() => {
   );
 });
 const scopedItems = computed<Array<TGApp.Sqlite.UserBag.RelicTable>>(() => {
+  if (props.individual) return props.items ?? [];
   const group = currentGroup.value;
   if (group === undefined) return [];
   return showAllInGroup.value ? group.items : group.visibleItems;
 });
 const currentItems = computed<Array<TGApp.Sqlite.UserBag.RelicTable>>(() => {
+  if (props.individual) return scopedItems.value;
   if (selectedPositions.value.length === 0) return scopedItems.value;
   const positionSet = new Set(selectedPositions.value);
   return scopedItems.value.filter((item) => positionSet.has(item.brief.pos));
 });
 const renderedItems = computed<Array<TGApp.Sqlite.UserBag.RelicTable>>(() =>
-  currentItems.value.slice(0, renderedCount.value),
+  currentItems.value.slice(
+    0,
+    props.individual
+      ? (props.renderedItemsCount ?? currentItems.value.length)
+      : renderedCount.value,
+  ),
 );
 const selectedInstance = computed<TGApp.Sqlite.UserBag.RelicTable | undefined>(() =>
   currentItems.value.find((item) => item.guid === selectedInstanceGuid.value),
@@ -407,6 +446,7 @@ const summaryPositions = computed<Array<TGApp.App.UserBag.RelicPositionCount>>((
     .map((position) => ({ ...position, count: counts.get(position.position) ?? 0 }));
 });
 const itemsSummary = computed<string>(() => {
+  if (props.individual) return `${currentItems.value.length} 件`;
   const countSummary = hasPositionFilter.value
     ? `显示 ${currentItems.value.length} / ${scopedItems.value.length} 件`
     : hasHiddenItems.value && !showAllInGroup.value
@@ -414,8 +454,10 @@ const itemsSummary = computed<string>(() => {
       : `${scopedItems.value.length} 件`;
   return countSummary;
 });
-const hasMoreItems = computed<boolean>(
-  () => renderedItems.value.length < currentItems.value.length,
+const hasMoreItems = computed<boolean>(() =>
+  props.individual
+    ? (props.hasMoreItems ?? renderedItems.value.length < currentItems.value.length)
+    : renderedItems.value.length < currentItems.value.length,
 );
 const hasHiddenItems = computed<boolean>(
   () =>
@@ -429,6 +471,7 @@ const canNavigateNext = computed<boolean>(
 );
 const selectionSignature = computed<string>(() =>
   [
+    props.individual ? "individual" : "merged",
     currentGroup.value?.key ?? "",
     showAllInGroup.value ? "all" : "matching",
     selectedPositions.value.join(","),
@@ -453,9 +496,42 @@ watch(
     positionMenuOpen.value = false;
   },
 );
+watch(
+  () => [props.individual, props.hasMoreItems, renderedItems.value.length],
+  () => {
+    nextTick(observeLoadMore);
+  },
+);
+onMounted(() => observeLoadMore());
+onBeforeUnmount(() => loadMoreObserver?.disconnect());
+
+function observeLoadMore(): void {
+  loadMoreObserver?.disconnect();
+  if (!props.individual || !props.hasMoreItems || !loadMoreRef.value) return;
+  loadMoreObserver ??= new IntersectionObserver(
+    (entries) => {
+      const entry = entries.find((item) => item.isIntersecting);
+      if (!entry) return;
+      loadMoreObserver?.unobserve(entry.target);
+      emits("loadMore");
+    },
+    { rootMargin: "360px" },
+  );
+  loadMoreObserver.observe(loadMoreRef.value);
+}
 
 function syncSelection(): void {
   mobileDetailOpen.value = false;
+  if (props.individual) {
+    selectedGroupKey.value = undefined;
+    if (
+      selectedInstanceGuid.value === undefined ||
+      !currentItems.value.some((item) => item.guid === selectedInstanceGuid.value)
+    ) {
+      selectedInstanceGuid.value = currentItems.value[0]?.guid;
+    }
+    return;
+  }
   const group = currentGroup.value;
   if (group === undefined) {
     selectedGroupKey.value = undefined;
@@ -506,6 +582,10 @@ function clearPositionFilter(): void {
 }
 
 function loadMoreItems(): void {
+  if (props.individual) {
+    emits("loadMore");
+    return;
+  }
   renderedCount.value = Math.min(renderedCount.value + 100, currentItems.value.length);
 }
 
@@ -513,18 +593,31 @@ function navigateInstance(offset: number): void {
   const nextIndex = selectedInstanceIndex.value + offset;
   const nextItem = currentItems.value[nextIndex];
   if (nextItem !== undefined) {
+    if (
+      props.individual &&
+      props.hasMoreItems &&
+      nextIndex >= (props.renderedItemsCount ?? currentItems.value.length)
+    ) {
+      emits("loadMore");
+    }
     selectedInstanceGuid.value = nextItem.guid;
     detailVisible.value = true;
   }
 }
 
 function closeDetail(): void {
-  detailVisible.value = false;
   mobileDetailOpen.value = false;
 }
 
 async function shareDetail(): Promise<void> {
-  await detailContent.value?.share();
+  const content = detailContent.value;
+  if (shareLoading.value || content === null) return;
+  shareLoading.value = true;
+  try {
+    await content.share();
+  } finally {
+    shareLoading.value = false;
+  }
 }
 
 function getPositionName(position: number): string {
@@ -618,18 +711,18 @@ function handleBack(): void {
   flex: none;
   padding: 0 4px;
   border-radius: 4px;
-  background: var(--box-bg-4);
-  color: var(--bag-text-secondary);
+  background: color-mix(in srgb, var(--app-page-content) 18%, var(--bag-surface));
+  color: var(--app-page-content);
   gap: 4px;
 }
 
 .pb-rw-group-positions {
-  overflow: hidden;
-  gap: 4px;
-  text-overflow: ellipsis;
+  flex-wrap: wrap;
+  gap: 4px 8px;
 }
 
 .pb-rw-group-position {
+  flex: none;
   gap: 2px;
 }
 
@@ -651,7 +744,7 @@ function handleBack(): void {
 .pb-rw-group-list {
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  padding: 12px;
   gap: 8px;
 }
 
@@ -662,38 +755,38 @@ function handleBack(): void {
   min-width: 0;
   box-sizing: border-box;
   align-items: center;
-  padding: 4px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
   background: var(--bag-surface);
   color: var(--app-page-content);
   cursor: pointer;
   font: inherit;
-  gap: 4px;
-  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  grid-template-columns: 48px minmax(0, 1fr);
+  opacity: 0.8;
   text-align: left;
   transition: none;
 }
 
 .pb-rw-group-option:hover {
-  border-color: transparent;
   background: var(--bag-surface-hover);
+  opacity: 1;
 }
 
 .pb-rw-group-option[aria-selected="true"] {
-  border-color: transparent;
   background: var(--bag-surface-selected);
-  box-shadow: inset 3px 0 var(--bag-accent);
+  opacity: 1;
 }
 
 .pb-rw-group-icon {
   position: relative;
   overflow: hidden;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   flex: none;
-  border: 1px solid var(--bag-stroke);
-  border-radius: 4px;
+  border: 1px solid var(--bag-stroke-strong);
+  border-radius: 8px;
   background: var(--bag-surface);
 }
 
@@ -710,11 +803,12 @@ function handleBack(): void {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .pb-rw-group-title {
   overflow: hidden;
+  min-width: 0;
   padding-right: 4px;
   font-family: var(--font-title);
   font-size: 14px;
@@ -916,19 +1010,31 @@ function handleBack(): void {
 .pb-rw-items-grid {
   display: grid;
   padding: 12px;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(96px, 100%), 1fr));
+}
+
+.pb-rw-load-trigger {
+  width: 100%;
+  height: 1px;
+  grid-column: 1 / -1;
 }
 
 .pb-rw-items-grid :deep(.pb-ri-box.detail) {
   filter: none;
+  opacity: 0.65;
 
   &.selected {
-    outline-color: var(--bag-accent);
+    opacity: 1;
+    outline: none;
+  }
+
+  &:hover {
+    opacity: 1;
   }
 
   &:focus-visible {
-    outline-color: var(--bag-accent-text);
+    outline: 2px solid var(--bag-accent-text);
   }
 }
 
@@ -1141,5 +1247,32 @@ function handleBack(): void {
   width: 16px;
   height: 16px;
   filter: var(--icon-filter);
+}
+
+.pb-rw-group-option:hover .pb-rw-group-total {
+  background: color-mix(in srgb, var(--app-page-content) 24%, var(--bag-surface));
+}
+
+.pb-rw-detail-back {
+  display: none;
+}
+
+@media (width <= 839px) {
+  .pb-rw-detail-back {
+    display: inline-flex;
+  }
+}
+
+.pb-rw-detail-guid {
+  position: absolute;
+  right: 8px;
+  bottom: 2px;
+  min-width: 0;
+  max-width: calc(100% - 16px);
+  color: var(--bag-text-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 </style>
