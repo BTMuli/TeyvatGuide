@@ -50,6 +50,12 @@
       </template>
     </TcConfigItem>
     <TcConfigItem
+      subtitle="手动修改已保存的设备标识和型号等信息"
+      title="编辑设备信息"
+      icon="mdi-pencil-outline"
+      @activate="showDeviceEditor = true"
+    />
+    <TcConfigItem
       :subtitle="`当前缓存大小：${fmtUtil.size(cacheSize)}`"
       title="清除缓存"
       icon="mdi-delete-sweep"
@@ -62,6 +68,7 @@
       @activate="confirmResetApp"
     />
   </TcConfigSection>
+  <TcoDeviceInfo v-model="showDeviceEditor" />
   <TcoHutaoImport v-model="showHutaoImport" />
 </template>
 <script lang="ts" setup>
@@ -84,6 +91,7 @@ import { onMounted, ref } from "vue";
 
 import TcConfigItem from "./tc-config-item.vue";
 import TcConfigSection from "./tc-config-section.vue";
+import TcoDeviceInfo from "./tco-device-info.vue";
 import TcoHutaoImport from "./tco-hutao-import.vue";
 
 const appStore = useAppStore();
@@ -92,6 +100,7 @@ const homeStore = useHomeStore();
 // @ts-expect-error import.meta
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const cacheSize = ref<number>(0);
+const showDeviceEditor = ref<boolean>(false);
 const showHutaoImport = ref<boolean>(false);
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
