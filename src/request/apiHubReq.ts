@@ -1,9 +1,10 @@
 /**
  * apiHub下的请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.4
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGBbs from "@utils/TGBbs.js";
 import TGHttps from "@utils/TGHttps.js";
 
 // MysApiHubBaseUrl => Mahbu
@@ -154,7 +155,7 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.HomeResp> {
 
 /**
  * 签到
- * @since Beta v0.10.1
+ * @since Beta v0.12.4
  * @remarks **需要验证码登录获取的 Cookie**
  * @param cookie - 用户 Cookie
  * @param gid - 分区ID
@@ -169,7 +170,9 @@ async function signIn(
   const data = { gids: gid };
   let header: Record<string, string> = {
     ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
+    "user-agent": TGBbs.ua,
     "x-rpc-client_type": "2",
+    referer: "https://app.mihoyo.com",
   };
   if (challenge) header = { ...header, "x-rpc-challenge": challenge };
   const resp = await TGHttps.post<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
