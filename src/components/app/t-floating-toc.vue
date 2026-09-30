@@ -1,5 +1,5 @@
 <template>
-  <nav v-if="items.length" :aria-label="label" class="tur-toc">
+  <nav v-if="items.length" :aria-label="label" :class="{ contained }" class="tur-toc">
     <v-tooltip v-for="item in items" :key="item.id" :text="item.label" location="left">
       <template #activator="{ props }">
         <button
@@ -12,7 +12,14 @@
           type="button"
           @click="scrollToSection(item.id)"
         >
-          <v-icon :icon="item.icon" size="20" />
+          <img
+            v-if="item.image"
+            :src="item.image"
+            :class="{ 'tur-toc-image--original': item.imageFilter === false }"
+            alt=""
+            class="tur-toc-image"
+          />
+          <v-icon v-else :icon="item.icon" size="20" />
           <span v-if="item.badge !== undefined" aria-hidden="true" class="tur-toc-badge">
             {{ item.badge }}
           </span>
@@ -24,11 +31,23 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-export type FloatingTocItem = { id: string; label: string; icon: string; badge?: number };
+export type FloatingTocItem = {
+  id: string;
+  label: string;
+  icon: string;
+  image?: string;
+  imageFilter?: boolean;
+  badge?: number;
+};
 
-const { items, label = "战绩目录" } = defineProps<{
+const {
+  items,
+  label = "战绩目录",
+  contained = false,
+} = defineProps<{
   items: Array<FloatingTocItem>;
   label?: string;
+  contained?: boolean;
 }>();
 const activeId = ref<string>();
 let frame = 0;
@@ -124,6 +143,24 @@ onUnmounted(() => {
   gap: 4px;
   overflow-y: auto;
   transform: translateY(-50%);
+
+  &.contained {
+    position: absolute;
+    top: 50%;
+    right: -4px;
+    max-height: calc(100% - 16px);
+  }
+}
+
+.tur-toc-image {
+  width: 20px;
+  height: 20px;
+  filter: var(--icon-filter);
+  object-fit: contain;
+
+  &--original {
+    filter: none;
+  }
 }
 
 .tur-toc-badge {

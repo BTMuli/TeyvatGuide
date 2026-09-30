@@ -44,12 +44,12 @@
 </template>
 <script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { nextTick, ref, watch } from "vue";
+import { nextTick, watch } from "vue";
 
 type TwcConstellationProps = { costumes: Array<TGApp.App.Character.Costume> };
 
 const props = defineProps<TwcConstellationProps>();
-const tab = ref<number>(0);
+const tab = defineModel<number>("selected", { required: true });
 
 async function loadData(): Promise<void> {
   await nextTick();

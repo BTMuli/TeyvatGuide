@@ -80,121 +80,129 @@
       <PwMaterialList :data="data.materials" />
     </div>
     <v-divider />
-    <div ref="scrollArea" class="twc-scroll">
-      <!-- 衣装 -->
-      <section class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>衣装</h2>
-        </header>
-        <TwcCostumes :costumes />
-      </section>
-      <!-- 命座 -->
-      <section class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>命座</h2>
-          <div v-if="curConstellation" class="twc-section-current">
-            <img
-              :src="`/icon/constellations/${curConstellation.Icon}.webp`"
-              alt=""
-              aria-hidden="true"
-            />
-            <span>{{ curConstellation.Name }}</span>
-          </div>
-        </header>
-        <TwcConstellations v-model:selected="selectedTalent" :data="data.constellation" />
-      </section>
-      <!-- 技能 -->
-      <section class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>技能</h2>
-          <div v-if="currentSkill" class="twc-section-current">
-            <img :src="`/icon/talents/${currentSkill.icon}.webp`" alt="" aria-hidden="true" />
-            <span>{{ currentSkill.name }}</span>
-          </div>
-        </header>
-        <TwcSkills v-model:selected="selectedSkill" :data="data.skills" />
-      </section>
-      <!-- 料理 -->
-      <section v-if="data.food" class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>料理</h2>
-        </header>
-        <TwcFood :food="data.food" />
-      </section>
-      <!-- 资料 -->
-      <section class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>资料</h2>
-        </header>
-        <v-tabs v-model="talksTab" class="twc-detail-tabs" density="compact" show-arrows>
-          <v-tab v-for="(item, index) in data.talks" :key="item.group" :value="index">
-            {{ item.group }}
-          </v-tab>
-        </v-tabs>
-        <v-window v-model="talksTab" :transition="false" class="twc-text-window">
-          <v-window-item
-            v-for="(item, index) in data.talks"
-            :key="item.group"
-            :value="index"
-            class="twc-text-window-item"
-          >
-            <div v-for="talk in item.list" :key="talk.title" class="twc-text-talk">
-              <div class="twc-text-heading">
-                <span class="twc-text-title">{{ talk.title }}</span>
-                <span v-if="talk.unlock.length" class="twc-text-unlock">
+    <div class="twc-detail-area">
+      <div ref="scrollArea" class="twc-scroll">
+        <!-- 衣装 -->
+        <section id="wiki-character-costumes" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>衣装</h2>
+          </header>
+          <TwcCostumes v-model:selected="selectedCostume" :costumes />
+        </section>
+        <!-- 命座 -->
+        <section id="wiki-character-constellations" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>命座</h2>
+            <div v-if="curConstellation" class="twc-section-current">
+              <img
+                :src="`/icon/constellations/${curConstellation.Icon}.webp`"
+                alt=""
+                aria-hidden="true"
+              />
+              <span>{{ curConstellation.Name }}</span>
+            </div>
+          </header>
+          <TwcConstellations v-model:selected="selectedTalent" :data="data.constellation" />
+        </section>
+        <!-- 技能 -->
+        <section id="wiki-character-skills" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>技能</h2>
+            <div v-if="currentSkill" class="twc-section-current">
+              <img :src="`/icon/talents/${currentSkill.icon}.webp`" alt="" aria-hidden="true" />
+              <span>{{ currentSkill.name }}</span>
+            </div>
+          </header>
+          <TwcSkills v-model:selected="selectedSkill" :data="data.skills" />
+        </section>
+        <!-- 料理 -->
+        <section v-if="data.food" id="wiki-character-food" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>料理</h2>
+          </header>
+          <TwcFood :food="data.food" />
+        </section>
+        <!-- 语音 -->
+        <section id="wiki-character-talks" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>语音</h2>
+          </header>
+          <v-tabs v-model="talksTab" class="twc-detail-tabs" density="compact" show-arrows>
+            <v-tab v-for="(item, index) in data.talks" :key="item.group" :value="index">
+              {{ item.group }}
+            </v-tab>
+          </v-tabs>
+          <v-window v-model="talksTab" :transition="false" class="twc-text-window">
+            <v-window-item
+              v-for="(item, index) in data.talks"
+              :key="item.group"
+              :value="index"
+              class="twc-text-window-item"
+            >
+              <div v-for="talk in item.list" :key="talk.title" class="twc-text-talk">
+                <div class="twc-text-heading">
+                  <span class="twc-text-title">{{ talk.title }}</span>
+                  <span v-if="talk.unlock.length" class="twc-text-unlock">
+                    <span
+                      v-for="condition in talk.unlock"
+                      :key="condition"
+                      class="twc-text-unlock-tag"
+                    >
+                      <v-icon aria-hidden="true" icon="mdi-lock" size="12" />
+                      {{ condition }}
+                    </span>
+                  </span>
+                </div>
+                <div class="twc-text-talk-content">
+                  <span v-html="parseHtmlText(talk.talk)" />
+                </div>
+              </div>
+            </v-window-item>
+          </v-window>
+        </section>
+        <!-- 故事 -->
+        <section id="wiki-character-stories" class="twc-detail-section">
+          <header class="twc-section-header">
+            <h2>故事</h2>
+          </header>
+          <v-tabs v-model="storiesTab" class="twc-detail-tabs" density="compact" show-arrows>
+            <v-tab v-for="(item, index) in data.stories" :key="index" :value="index">
+              {{ item.Title }}
+            </v-tab>
+          </v-tabs>
+          <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
+            <v-window-item
+              v-for="(item, index) in data.stories"
+              :key="item.Title"
+              :value="index"
+              class="twc-text-content"
+            >
+              <div class="twc-text-heading twc-text-story-heading">
+                <span class="twc-text-title">{{ item.Title }}</span>
+                <span v-if="item.unlock.length" class="twc-text-unlock">
                   <span
-                    v-for="condition in talk.unlock"
+                    v-for="condition in item.unlock"
                     :key="condition"
                     class="twc-text-unlock-tag"
                   >
-                    <v-icon aria-hidden="true" icon="mdi-lock" size="12" />
+                    <v-icon aria-hidden="true" icon="mdi-lock" size="8" />
                     {{ condition }}
                   </span>
                 </span>
               </div>
-              <div class="twc-text-talk-content">
-                <span v-html="parseHtmlText(talk.talk)" />
-              </div>
-            </div>
-          </v-window-item>
-        </v-window>
-      </section>
-      <!-- 故事 -->
-      <section class="twc-detail-section">
-        <header class="twc-section-header">
-          <h2>故事</h2>
-        </header>
-        <v-tabs v-model="storiesTab" class="twc-detail-tabs" density="compact" show-arrows>
-          <v-tab v-for="(item, index) in data.stories" :key="index" :value="index">
-            {{ item.Title }}
-          </v-tab>
-        </v-tabs>
-        <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
-          <v-window-item
-            v-for="(item, index) in data.stories"
-            :key="item.Title"
-            :value="index"
-            class="twc-text-content"
-          >
-            <div class="twc-text-heading twc-text-story-heading">
-              <span class="twc-text-title">{{ item.Title }}</span>
-              <span v-if="item.unlock.length" class="twc-text-unlock">
-                <span v-for="condition in item.unlock" :key="condition" class="twc-text-unlock-tag">
-                  <v-icon aria-hidden="true" icon="mdi-lock" size="8" />
-                  {{ condition }}
-                </span>
-              </span>
-            </div>
-            <span>{{ item.Context }}</span>
-          </v-window-item>
-        </v-window>
-      </section>
+              <span>{{ item.Context }}</span>
+            </v-window-item>
+          </v-window>
+        </section>
+      </div>
     </div>
+    <TFloatingToc :items="tocItems" class="twc-toc" contained label="角色图鉴详情目录" />
     <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
     <PwCultivationCalc v-model="showCalc" v-model:inPlan="inPlan" :character="data" />
   </div>
 </template>
 <script lang="ts" setup>
+import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
@@ -240,9 +248,44 @@ const box = computed<TItemBoxData>(() => ({
 
 const talksTab = ref<number>(0);
 const storiesTab = ref<number>(0);
+const selectedCostume = ref<number>(0);
 const selectedTalent = ref<string>("");
 const selectedSkill = ref<string>("");
 const scrollArea = useTemplateRef<HTMLDivElement>("scrollArea");
+const tocItems = computed<Array<FloatingTocItem>>(() => {
+  const costume = costumes.value.find((item) => item.id === selectedCostume.value);
+  const constellation = curConstellation.value ?? data.value?.constellation[0];
+  const skill = currentSkill.value ?? data.value?.skills[0];
+  const items: Array<FloatingTocItem> = [
+    {
+      id: "wiki-character-costumes",
+      label: "衣装",
+      icon: "mdi-hanger",
+      image: costume && !costume.isDefault ? `/WIKI/costume/${costume.id}_side.webp` : undefined,
+      imageFilter: false,
+    },
+    {
+      id: "wiki-character-constellations",
+      label: "命座",
+      icon: "mdi-star-four-points-outline",
+      image: constellation ? `/icon/constellations/${constellation.Icon}.webp` : undefined,
+    },
+    {
+      id: "wiki-character-skills",
+      label: "技能",
+      icon: "mdi-sword-cross",
+      image: skill ? `/icon/talents/${skill.icon}.webp` : undefined,
+    },
+  ];
+  if (data.value?.food) {
+    items.push({ id: "wiki-character-food", label: "料理", icon: "mdi-food" });
+  }
+  items.push(
+    { id: "wiki-character-talks", label: "语音", icon: "mdi-microphone-outline" },
+    { id: "wiki-character-stories", label: "故事", icon: "mdi-book-open-page-variant-outline" },
+  );
+  return items;
+});
 let loadId = 0;
 const curConstellation = computed<TGApp.Plugins.Hutao.Character.RhisdTalent | undefined>(() =>
   data.value?.constellation.find((item) => item.Name === selectedTalent.value),
@@ -289,6 +332,7 @@ function resetDetailState(): void {
   costumes.value = [];
   talksTab.value = 0;
   storiesTab.value = 0;
+  selectedCostume.value = 0;
   selectedTalent.value = "";
   selectedSkill.value = "";
   showCalc.value = false;
@@ -310,12 +354,13 @@ async function toBirth(date: string): Promise<void> {
 </script>
 <style lang="scss" scoped>
 .twc-box {
-  display: flex;
-  overflow: hidden;
+  position: relative;
+  display: grid;
   height: 100%;
   min-height: 0;
-  flex-direction: column;
   margin: 0 auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   row-gap: 8px;
 }
 
@@ -326,11 +371,20 @@ async function toBirth(date: string): Promise<void> {
   gap: 8px;
 }
 
+.twc-detail-area {
+  min-height: 0;
+}
+
+.twc-toc {
+  // 保持目录挂在详情容器，以第三行滚动区域作为绝对定位范围。
+  grid-area: 3 / 1 / 4 / 2;
+}
+
 .twc-scroll {
   display: flex;
   overflow: hidden auto;
+  height: 100%;
   min-height: 0;
-  flex: 1;
   flex-direction: column;
   gap: 8px;
 }
