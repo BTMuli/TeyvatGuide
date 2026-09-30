@@ -2,12 +2,30 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-08-30
-Update: 2026-09-23
+Update: 2026-09-30
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-08-30 15:00:05`
 >
-> 更新于 `2026-09-23 14:51:55`
+> 更新于 `2026-09-30 18:08:12`
+
+## [0.12.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.4) (2026-09-30)
+
+- 🍱 修正七神神之心描述文本
+- 🍱 全面更新元数据&图像资源，降低资源空间占用
+- ✨ 游戏安装：轮换背景支持动态背景、暂停与进度条
+- ✨ 将胡桃数据导入集中到设置页浮窗
+- 🐛 修复编辑养成计划时新增目标未保存
+- 🐛 游戏安装：隐藏已放弃的资源任务
+- 🐛 游戏安装：修复启动器部分更新后的应用内更新回退
+- 💄 统一背包视图布局并优化详情样式
+- 🚸 非最新版游戏禁用完整性校验/换服/语音修改
+- 🚸 优化打卡测试交互体验
+- 🚸 优化剧诗UX
+- 🚸 角色图鉴添加悬浮TOC
+- 🚸 支持手动修改FP
+- ✏️ 角色图鉴：修正描述，“天赋”→“命座”
+- 🥅 捕获createNamedPipe异常
 
 ## [0.12.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.3) (2026-09-23)
 
