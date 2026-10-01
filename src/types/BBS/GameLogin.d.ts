@@ -1,6 +1,6 @@
 /**
  * Mys 插件 Game 登录类型定义文件
- * @since Beta v0.6.8
+ * @since Beta v0.12.5
  */
 
 declare namespace TGApp.BBS.GameLogin {
@@ -58,11 +58,11 @@ declare namespace TGApp.BBS.GameLogin {
 
   /**
    * 获取登录状态数据（未确认）
-   * @since Beta v0.6.8
+   * @since Beta v0.12.5
    */
   type GetLoginStatusDataUnconfirmed = GetLoginStatusDataCommon & {
     /** 状态 */
-    status: "Created" | "Scanned";
+    status: "Init" | "Created" | "Scanned";
   };
 
   /**

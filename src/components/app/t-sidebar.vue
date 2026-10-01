@@ -355,7 +355,7 @@
               </template>
             </v-list-item>
             <v-list-item class="side-item-menu sub" @click="tryCodeLogin()">
-              <v-list-item-title>扫码登录</v-list-item-title>
+              <v-list-item-title>扫码登录✨推荐</v-list-item-title>
               <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
               <template #prepend>
                 <img alt="launcher" class="side-icon-menu" src="/platforms/mhy/mys.webp" />

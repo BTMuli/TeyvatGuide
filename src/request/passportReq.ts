@@ -1,8 +1,8 @@
 /**
  * Passport 相关请求
- * @since Beta v0.10.3
+ * @since Beta v0.12.5
  */
-import { getRequestHeader } from "@utils/getRequestHeader.js";
+import { getDS4JS, getRequestHeader } from "@utils/getRequestHeader.js";
 import TGBbs from "@utils/TGBbs.js";
 import TGHttps from "@utils/TGHttps.js";
 import { getDeviceInfo } from "@utils/toolFunc.js";
@@ -12,8 +12,6 @@ import { JSEncrypt } from "jsencrypt";
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";
 /* PassportV4ApiBaseUrl => p4Abu */
 const p4Abu: Readonly<string> = "https://passport-api-v4.mihoyo.com/";
-/* HoyoLauncherVersion => hlv */
-const hlv: Readonly<string> = "1.3.3.182";
 /* 加密密钥 */
 const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
@@ -96,58 +94,101 @@ async function createLoginCaptcha(
 }
 
 /**
+ * 获取扫码登录请求头
+ * @since Beta v0.12.5
+ * @remarks user-agent 需与米游社 App 一致，扫码得到的 stoken 才能用于米社
+ * @param body - 请求体字符串，用于计算 DS 签名
+ * @returns 请求头
+ */
+function getQrHeaders(body: string): Record<string, string> {
+  return {
+    "user-agent": `Mozilla/5.0 miHoYoBBS/${TGBbs.version} Capture/2.2.0`,
+    accept: "*/*",
+    "accept-language": "zh-cn",
+    "x-rpc-client_type": "3",
+    "x-rpc-app_version": TGBbs.version,
+    "x-rpc-sdk_version": TGBbs.version,
+    "x-rpc-account_version": TGBbs.version,
+    "x-rpc-app_id": "bll8iq97cem8",
+    "x-rpc-game_biz": "bbs_cn",
+    "x-rpc-device_id": getDeviceInfo("device_id"),
+    "x-rpc-device_fp": getDeviceInfo("device_fp"),
+    "x-rpc-device_name": getDeviceInfo("device_name"),
+    "x-rpc-device_model": getDeviceInfo("product"),
+    DS: getDS4JS("X4", 2, body),
+    "content-type": "application/json",
+  };
+}
+
+/**
  * 创建登录二维码
  * @since Beta v0.10.3
- * @remarks 获取到的 stoken 无法用于米社打卡
  * @returns 二维码响应数据
  */
 async function createQrLogin(): Promise<TGApp.BBS.GameLogin.GetLoginQrResponse> {
+  const body = "{}";
   const resp = await TGHttps.post<TGApp.BBS.GameLogin.GetLoginQrResponse>(
     `${pAbu}account/ma-cn-passport/app/createQRLogin`,
-    {
-      headers: {
-        "x-rpc-device_id": getDeviceInfo("device_id"),
-        "user-agent": `HYPContainer/${hlv}`,
-        "x-rpc-app_id": "ddxf5dufpuyo",
-        "x-rpc-client_type": "3",
-      },
-    },
+    { headers: getQrHeaders(body), body },
   );
   return resp.data;
 }
 
 /**
- * 根据 stoken 获取 cookie_token
- * @since Beta v0.10.1
+ * 获取 stoken 换票请求头
+ * @since Beta v0.12.5
  * @param cookie - Cookie
+ * @param clientType - 客户端类型
+ * @param aigis - 极验验证数据，非空时携带 x-rpc-aigis
+ * @returns 请求头
+ */
+function getPassportHeaders(
+  cookie: TGApp.App.Account.Cookie,
+  clientType: string = "5",
+  aigis?: string,
+): Record<string, string> {
+  const ck = { mid: cookie.mid, stoken: cookie.stoken };
+  const params = { stoken: cookie.stoken };
+  const headers = getRequestHeader(ck, "GET", params);
+  headers["x-rpc-client_type"] = clientType;
+  if (aigis) headers["x-rpc-aigis"] = aigis;
+  return headers;
+}
+
+/**
+ * 根据 stoken 获取 cookie_token
+ * @since Beta v0.12.5
+ * @param cookie - Cookie
+ * @param clientType - 客户端类型，默认 `2`
+ * @param aigis - 极验验证数据，非空时携带 x-rpc-aigis
  * @returns cookie_token 响应数据
  */
 async function getCookieAccountInfoBySToken(
   cookie: TGApp.App.Account.Cookie,
+  clientType: string = "2",
+  aigis?: string,
 ): Promise<TGApp.BBS.Passport.CookieTokenResp> {
-  const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { stoken: cookie.stoken };
   const resp = await TGHttps.get<TGApp.BBS.Passport.CookieTokenResp>(
     `${pAbu}account/auth/api/getCookieAccountInfoBySToken`,
-    { headers: getRequestHeader(ck, "GET", params), query: params },
+    { headers: getPassportHeaders(cookie, clientType, aigis), query: params },
   );
   return resp.data;
 }
 
 /**
  * 根据 stoken_v2 获取 ltoken
- * @since Beta v0.10.1
+ * @since Beta v0.12.5
  * @param cookie - Cookie
  * @returns ltoken 响应数据
  */
 async function getLTokenBySToken(
   cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Passport.LTokenResp> {
-  const ck = { mid: cookie.mid, stoken: cookie.stoken };
   const params = { stoken: cookie.stoken };
   const resp = await TGHttps.get<TGApp.BBS.Passport.LTokenResp>(
     `${pAbu}account/auth/api/getLTokenBySToken`,
-    { headers: getRequestHeader(ck, "GET", params), query: params },
+    { headers: getPassportHeaders(cookie), query: params },
   );
   return resp.data;
 }
@@ -192,25 +233,17 @@ async function loginByMobileCaptcha(
 
 /**
  * 获取登录状态
- * @since Beta v0.10.3
- * @remarks 获取到的 stoken 无法用于米社打卡
+ * @since Beta v0.12.5
  * @param ticket - 二维码 ticket
  * @returns 登录状态响应数据
  */
 async function queryLoginStatus(
   ticket: string,
 ): Promise<TGApp.BBS.GameLogin.GetLoginStatusResponse> {
+  const body = JSON.stringify({ ticket });
   const resp = await TGHttps.post<TGApp.BBS.GameLogin.GetLoginStatusResponse>(
     `${pAbu}account/ma-cn-passport/app/queryQRLoginStatus`,
-    {
-      headers: {
-        "x-rpc-device_id": getDeviceInfo("device_id"),
-        "user-agent": `HYPContainer/${hlv}`,
-        "x-rpc-app_id": "ddxf5dufpuyo",
-        "x-rpc-client_type": "3",
-      },
-      body: { ticket },
-    },
+    { headers: getQrHeaders(body), body },
   );
   return resp.data;
 }

@@ -18,7 +18,7 @@
         />
       </div>
       <div class="tog-bottom" @click="share()">
-        <img alt="icon" src="/platforms/mhy/launcher.webp" />
+        <img alt="icon" src="/platforms/mhy/mys.webp" />
       </div>
     </div>
   </TOverlay>
@@ -137,7 +137,13 @@ async function cycleGetDataGame(): Promise<void> {
     await TGLogger.Info(`[用户登录][扫码][query] 登录状态变更：${res.data.status}`);
     lastLoggedStatus = res.data.status;
   }
-  if (res.data.status === "Created" || res.data.status === "Scanned") return;
+  if (
+    res.data.status === "Init" ||
+    res.data.status === "Created" ||
+    res.data.status === "Scanned"
+  ) {
+    return;
+  }
   if (res.data.status === "Confirmed") {
     if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
