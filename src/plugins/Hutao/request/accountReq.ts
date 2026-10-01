@@ -1,6 +1,6 @@
 /**
  * 账号相关请求
- * @since Beta v0.12.2
+ * @since Beta v0.12.5
  */
 
 import TGHttps from "@utils/TGHttps.js";
@@ -68,6 +68,56 @@ async function info(token: string): Promise<TGApp.Plugins.Hutao.Account.InfoResp
 }
 
 /**
+ * 获取注册验证码
+ * @since Beta v0.12.5
+ * @param username - 用户名
+ * @returns 验证码响应
+ */
+async function verifyRegister(username: string): Promise<TGApp.Plugins.Hutao.Base.Resp> {
+  const url = `${PassportUrl}Verify`;
+  const header = await getReqHeader();
+  const data: TGApp.Plugins.Hutao.Account.RegisterCodeParams = {
+    UserName: rsaEncrypt(username),
+    IsResetPassword: false,
+    IsResetUserName: false,
+    IsResetUserNameNew: false,
+    IsCancelRegistration: false,
+  };
+  const resp = await TGHttps.post<TGApp.Plugins.Hutao.Base.Resp>(url, {
+    headers: header,
+    body: data,
+  });
+  return resp.data;
+}
+
+/**
+ * 注册胡桃账号
+ * @since Beta v0.12.5
+ * @param username - 用户名
+ * @param password - 密码
+ * @param code - 验证码
+ * @returns 注册响应
+ */
+async function register(
+  username: string,
+  password: string,
+  code: string,
+): Promise<TGApp.Plugins.Hutao.Account.RegisterResp> {
+  const url = `${PassportUrl}Register`;
+  const header = await getReqHeader();
+  const data: TGApp.Plugins.Hutao.Account.RegisterParams = {
+    UserName: rsaEncrypt(username),
+    Password: rsaEncrypt(password),
+    VerifyCode: rsaEncrypt(code),
+  };
+  const resp = await TGHttps.post<TGApp.Plugins.Hutao.Account.RegisterResp>(url, {
+    headers: header,
+    body: data,
+  });
+  return resp.data;
+}
+
+/**
  * 获取重置密码验证码
  * @since Beta v0.10.1
  * @param username - 用户名
@@ -124,10 +174,11 @@ async function resetPwd(
 const _ = "Not Implemented";
 
 const AccountReq = {
-  register: _,
+  register,
   login,
   refresh,
   verify: {
+    register: verifyRegister,
     username: _,
     usernameNew: _,
     pwd: verifyPwd,

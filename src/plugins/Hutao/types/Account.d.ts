@@ -1,6 +1,6 @@
 /**
  * 账号请求相关类型
- * @since Beta v0.9.1
+ * @since Beta v0.12.5
  */
 
 declare namespace TGApp.Plugins.Hutao.Account {
@@ -42,6 +42,12 @@ declare namespace TGApp.Plugins.Hutao.Account {
    * @since Beta v0.9.1
    */
   type LoginResp = TGApp.Plugins.Hutao.Base.Resp<LoginRes>;
+
+  /**
+   * 注册请求响应
+   * @since Beta v0.12.5
+   */
+  type RegisterResp = TGApp.Plugins.Hutao.Base.Resp<LoginRes>;
 
   /**
    * 登录请求返回
@@ -101,13 +107,17 @@ declare namespace TGApp.Plugins.Hutao.Account {
 
   /**
    * Verify接口请求参数
-   * @since Beta v0.9.1
+   * @since Beta v0.12.5
    * @remarks
    * - 同一邮箱同一类型验证码在 60 秒内只能申请一次，请在客户端进行节流处理。
    * - 若需要重置用户名，请分别提交旧邮箱与新邮箱两次请求以获取成对验证码。
    */
   type VerifyParams =
-    ResetPwdCodeParam | ResetUserNameCodeParam | ResetUserNameNewCodeParam | CancelRegCodeParam;
+    | RegisterCodeParams
+    | ResetPwdCodeParam
+    | ResetUserNameCodeParam
+    | ResetUserNameNewCodeParam
+    | CancelRegCodeParam;
 
   /**
    * Verify接口Flag值
@@ -132,6 +142,28 @@ declare namespace TGApp.Plugins.Hutao.Account {
     /** 用户名 */
     UserName: string;
   } & VerifyFlagGen<"IsResetPassword">;
+
+  /**
+   * 注册验证码请求参数
+   * @since Beta v0.12.5
+   */
+  type RegisterCodeParams = {
+    /** 用户名 */
+    UserName: string;
+  } & VerifyFlagGen<never>;
+
+  /**
+   * 注册请求参数
+   * @since Beta v0.12.5
+   */
+  type RegisterParams = {
+    /** 用户名 */
+    UserName: string;
+    /** 密码 */
+    Password: string;
+    /** 验证码 */
+    VerifyCode: string;
+  };
 
   /**
    * 重设密码参数

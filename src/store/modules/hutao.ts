@@ -63,6 +63,22 @@ const useHutaoStore = defineStore(
       return Date.now() < accessExpire.value;
     }
 
+    /**
+     * 保存胡桃登录或注册返回的会话
+     * @since Beta v0.12.5
+     * @param username - 登录邮箱
+     * @param session - 接口返回的令牌
+     */
+    function setSession(username: string, session: TGApp.Plugins.Hutao.Account.LoginRes): void {
+      userName.value = username;
+      accessToken.value = session.AccessToken;
+      refreshToken.value = session.RefreshToken;
+      accessExpire.value = Date.now() + session.ExpiresIn * 1000;
+      userInfo.value = undefined;
+      lastUts.value = 0;
+      isLogin.value = true;
+    }
+
     async function tryLogin(): Promise<void> {
       const inputN = await showDialog.inputF({
         title: "请输入胡桃云账号",
@@ -101,11 +117,7 @@ const useHutaoStore = defineStore(
           await showLoading.end();
           return;
         }
-        isLogin.value = true;
-        userName.value = inputN;
-        accessToken.value = resp.data.AccessToken;
-        refreshToken.value = resp.data.RefreshToken;
-        accessExpire.value = Date.now() + resp.data.ExpiresIn * 1000;
+        setSession(inputN, resp.data);
         showSnackbar.success("成功登录胡桃云");
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
@@ -135,11 +147,7 @@ const useHutaoStore = defineStore(
           await showLoading.end();
           return;
         }
-        isLogin.value = true;
-        userName.value = username;
-        accessToken.value = resp.data.AccessToken;
-        refreshToken.value = resp.data.RefreshToken;
-        accessExpire.value = Date.now() + resp.data.ExpiresIn * 1000;
+        setSession(username, resp.data);
         showSnackbar.success("成功登录胡桃云");
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
@@ -259,6 +267,7 @@ const useHutaoStore = defineStore(
       checkIsValid,
       tryLogin,
       autoLogin,
+      setSession,
       tryRefreshToken,
       tryRefreshInfo,
       checkGachaExpire,

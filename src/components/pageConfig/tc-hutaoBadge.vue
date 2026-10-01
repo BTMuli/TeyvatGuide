@@ -21,6 +21,16 @@
         </div>
       </div>
       <span v-else>未获取到用户信息</span>
+      <v-btn
+        v-if="!isLogin"
+        block
+        class="tch-register-btn"
+        prependIcon="mdi-account-plus"
+        variant="outlined"
+        @click="showRegister = true"
+      >
+        注册胡桃云账号
+      </v-btn>
     </div>
     <template #actions>
       <v-spacer />
@@ -37,10 +47,12 @@
       <v-btn icon="mdi-cart" title="胡桃云祈愿记录服务" variant="outlined" @click="toDonate()" />
     </template>
   </v-card>
+  <TcoHutaoRegister v-model="showRegister" />
   <TcoHutaoVerify v-model="showVerify" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import TcoHutaoRegister from "@comp/pageConfig/tco-hutaoRegister.vue";
 import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
 import useHutaoStore from "@store/hutao.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -51,6 +63,7 @@ import { onMounted, ref } from "vue";
 const hutaoStore = useHutaoStore();
 const { userName, userInfo, isLogin } = storeToRefs(useHutaoStore());
 
+const showRegister = ref<boolean>(false);
 const showVerify = ref<boolean>(false);
 const loadInfo = ref<boolean>(false);
 
@@ -160,5 +173,10 @@ async function toDonate(): Promise<void> {
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
+}
+
+.tch-register-btn {
+  margin-top: 8px;
+  color: var(--tgc-white-1);
 }
 </style>
