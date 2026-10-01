@@ -1,6 +1,6 @@
 /**
  * 胡桃账号
- * @since Beta v0.10.2
+ * @since Beta v0.12.5
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -10,8 +10,30 @@ import hutao from "@Hutao/index.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { validEmail } from "@utils/toolFunc.js";
+import { isValid, parseISO } from "date-fns";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+
+/** 校验胡桃用户信息及资源到期时间。 */
+function isUserInfoValid(data: unknown): data is TGApp.Plugins.Hutao.Account.InfoRes {
+  if (typeof data !== "object" || data === null) return false;
+  return (
+    "CdnExpireAt" in data &&
+    typeof data.CdnExpireAt === "string" &&
+    isValid(parseISO(data.CdnExpireAt)) &&
+    "GachaLogExpireAt" in data &&
+    typeof data.GachaLogExpireAt === "string" &&
+    isValid(parseISO(data.GachaLogExpireAt)) &&
+    "IsMaintainer" in data &&
+    typeof data.IsMaintainer === "boolean" &&
+    "IsLicensedDeveloper" in data &&
+    typeof data.IsLicensedDeveloper === "boolean" &&
+    "UserName" in data &&
+    typeof data.UserName === "string" &&
+    "NormalizedUserName" in data &&
+    typeof data.NormalizedUserName === "string"
+  );
+}
 
 const useHutaoStore = defineStore(
   "hutao",
@@ -152,6 +174,11 @@ const useHutaoStore = defineStore(
           await TGLogger.Error(`[HutaoStore][tryRefreshInfo] 刷新用户信息返回数据为空`);
           return;
         }
+        if (!isUserInfoValid(resp.data)) {
+          showSnackbar.error("刷新用户信息数据格式无效");
+          await TGLogger.Error(`[HutaoStore][tryRefreshInfo] 刷新用户信息数据格式无效`);
+          return;
+        }
         userInfo.value = resp.data;
         showSnackbar.success("成功刷新用户信息");
         lastUts.value = Math.floor(Date.now() / 1000);
@@ -239,7 +266,14 @@ const useHutaoStore = defineStore(
     };
   },
   {
-    persist: true,
+    persist: {
+      afterHydrate: ({ store }) => {
+        if (isUserInfoValid(store.userInfo)) return;
+        store.userInfo = undefined;
+        store.lastUts = 0;
+        store.$persist();
+      },
+    },
   },
 );
 
