@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.10.2
+ * @since Beta v0.12.5
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -13,7 +13,7 @@ import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.j
 
 /**
  * 获取设备信息（初始化时）
- * @since Beta v0.4.1
+ * @since Beta v0.12.5
  * @returns 设备信息
  */
 export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
@@ -21,7 +21,7 @@ export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
     device_id: v4(),
     product: getRandomString(6, "upperNumber"),
     device_name: getRandomString(12, "upperNumber"),
-    seed_id: v4(),
+    seed_id: getRandomString(16, "hex"),
     seed_time: Date.now().toString(),
     device_fp: "0000000000000",
   };
