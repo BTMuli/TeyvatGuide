@@ -106,7 +106,7 @@ pub fn run() {
 
   #[cfg(debug_assertions)]
   {
-    builder = builder.plugin(tauri_plugin_mcp_bridge::init());
+    builder = builder.plugin(tauri_plugin_connector::init());
   }
 
   // 只有在正常/管理员实例下才加载单例插件；看门狗不加载

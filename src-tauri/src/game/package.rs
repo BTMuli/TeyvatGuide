@@ -1,5 +1,5 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
-//! @since Beta v0.12.4
+//! @since Beta v0.12.5
 
 use super::{
   assembler, committer, defender,
@@ -2145,10 +2145,9 @@ impl InstallPipelineMetrics {
   /// 记录唯一下载字节数并扣减 ETA 剩余量。
   fn record_unique_download(&self, bytes: u64) {
     self.unique_download_bytes.fetch_add(bytes, Ordering::Relaxed);
-    let _ =
-      self.eta_remaining_bytes.fetch_update(Ordering::AcqRel, Ordering::Acquire, |remaining| {
-        Some(remaining.saturating_sub(bytes))
-      });
+    let _ = self.eta_remaining_bytes.try_update(Ordering::AcqRel, Ordering::Acquire, |remaining| {
+      Some(remaining.saturating_sub(bytes))
+    });
   }
 
   /// 设置 ETA 计算所用的剩余字节数。

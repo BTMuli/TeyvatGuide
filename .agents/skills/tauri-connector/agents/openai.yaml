@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Only use $tauri-connector when the user explicitly requests tauri-connector screenshot recognition; reuse an already-running debug instance instead of starting another one."
+  display_name: "Tauri Connector Screenshot Recognition"
+  short_description: "Screenshot recognition on explicit request only"

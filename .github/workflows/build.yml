@@ -61,11 +61,9 @@ jobs:
         with:
           node-version: 26.1.0
       - name: setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 11.21.0
+        uses: pnpm/action-setup@v6
       - name: Install frontend dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Setup sentry-cli
         run: npm install -g @sentry/cli
 

@@ -1,6 +1,6 @@
 /**
  * 应用入口
- * @since Beta v0.10.1
+ * @since Beta v0.12.5
  */
 
 import * as Sentry from "@sentry/vue";
@@ -25,7 +25,6 @@ Sentry.init({
   app,
   dsn: "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
   release: import.meta.env.VITE_SENTRY_RELEASE,
-  enableLogs: true,
   environment: process.env.NODE_ENV,
   integrations: [
     Sentry.consoleLoggingIntegration({ levels: ["error"] }),
@@ -39,9 +38,6 @@ Sentry.init({
     }
     return event;
   },
-  // Setting this option to true will send default PII data to Sentry.
-  // For example, automatic IP address collection on events
-  sendDefaultPii: true,
 });
 
 Sentry.setTag("commitHash", import.meta.env.VITE_COMMIT_HASH);

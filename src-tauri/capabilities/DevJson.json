@@ -11,7 +11,7 @@
     "http:allow-fetch",
     "log:allow-log",
     "log:default",
-    "mcp-bridge:default",
+    "connector:default",
     "core:path:allow-resolve-directory",
     "core:path:default",
     "sql:allow-load",
