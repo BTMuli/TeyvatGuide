@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-08-30
+Update: 2026-10-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-08-30 20:11:02`
+> 更新于 `2026-10-11 16:22:15`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -166,5 +166,6 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
 - [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
 - [Yae](https://github.com/HolographicHat/Yae)
+- [MiyoQian](https://github.com/Marchen-orz/MiyoQian)
 
 [![Star History Chart](https://star-history.dera.page/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.dera.page/#BTMuli/TeyvatGuide&Timeline)

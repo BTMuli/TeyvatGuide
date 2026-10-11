@@ -2,12 +2,20 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-08-30
-Update: 2026-09-30
+Update: 2026-10-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-08-30 15:00:05`
 >
-> 更新于 `2026-09-30 18:08:12`
+> 更新于 `2026-10-11 16:21:35`
+
+## [0.12.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.5) (2026-10-11)
+
+- 🍱 更新下半卡池数据
+- ✨ 增加胡桃云账号注册支持
+- ✨ 扫码登录现已可以用于获取祈愿记录&打卡
+- 🐛 修复胡桃用户信息缓存异常
+- 🔧 修正seed_id生成算法
 
 ## [0.12.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.4) (2026-09-30)
 
