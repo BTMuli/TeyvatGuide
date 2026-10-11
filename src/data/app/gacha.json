@@ -3604,5 +3604,41 @@
     "postId": "78299708",
     "up5List": [11522, 14524],
     "up4List": [11437, 14437, 15437, 12401, 13401]
+  },
+  {
+    "name": "虚星临渡",
+    "version": "7.1",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/23/92220da84f2e0fbeb5b6ddfd09b22336_6625910379513968240_transformed.jpg",
+    "from": "2026-10-13T18:00:00+08:00",
+    "to": "2026-11-03T14:59:00+08:00",
+    "type": 301,
+    "postId": "78782589",
+    "up5List": [10000114],
+    "up4List": [10000115, 10000072, 10000080]
+  },
+  {
+    "name": "莓色香颂",
+    "version": "7.1",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/23/e19bead93ab29bcf630303ba0b444cab_1986922250942047135_transformed.jpg",
+    "from": "2026-10-13T18:00:00+08:00",
+    "to": "2026-11-03T14:59:00+08:00",
+    "type": 400,
+    "postId": "78782590",
+    "up5List": [10000112],
+    "up4List": [10000115, 10000072, 10000080]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "7.1",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/23/c4c3993da57d8a5aadd361f5258b6c81_7399065482636503040_transformed.jpg",
+    "from": "2026-10-13T18:00:00+08:00",
+    "to": "2026-11-03T14:59:00+08:00",
+    "type": 302,
+    "postId": "78782593",
+    "up5List": [11517, 13514],
+    "up4List": [11430, 12403, 13407, 14402, 15403]
   }
 ]
