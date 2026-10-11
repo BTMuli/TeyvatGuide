@@ -93,13 +93,48 @@
         </v-chip>
       </div>
 
-      <div v-if="materials.length > 0" class="ucps-material-list">
-        <UcMaterialReq
-          v-for="material in materials"
-          :key="material.id"
-          :material
-          @select="openMaterialInfo(material)"
-        />
+      <div v-if="materialGroups.length > 0" class="ucps-material-groups">
+        <section
+          v-for="(group, groupIndex) in materialGroups"
+          :key="group.key"
+          class="ucps-material-group"
+        >
+          <button
+            :id="getMaterialGroupTriggerId(groupIndex)"
+            :aria-controls="getMaterialGroupContentId(groupIndex)"
+            :aria-expanded="expandedGroupKeys.has(group.key)"
+            class="ucps-material-group-toggle"
+            type="button"
+            @click="toggleMaterialGroup(group.key)"
+          >
+            <span class="ucps-material-group-title">
+              <v-icon
+                :icon="expandedGroupKeys.has(group.key) ? 'mdi-chevron-down' : 'mdi-chevron-right'"
+                size="18"
+              />
+              <strong>{{ group.label }}</strong>
+            </span>
+            <span class="ucps-material-group-meta">
+              {{ group.materials.length }} 种 · {{ group.missingCount }} 种不足
+            </span>
+          </button>
+          <div
+            v-show="expandedGroupKeys.has(group.key)"
+            :id="getMaterialGroupContentId(groupIndex)"
+            :aria-labelledby="getMaterialGroupTriggerId(groupIndex)"
+            class="ucps-material-group-content"
+            role="region"
+          >
+            <div class="ucps-material-list">
+              <UcMaterialReq
+                v-for="material in group.materials"
+                :key="material.id"
+                :material
+                @select="openMaterialInfo(material)"
+              />
+            </div>
+          </div>
+        </section>
       </div>
       <div v-else class="ucps-empty">
         <v-icon size="48">mdi-package-variant-closed-check</v-icon>
@@ -155,7 +190,7 @@ import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, nextTick, ref, shallowRef, useTemplateRef } from "vue";
+import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -174,20 +209,49 @@ type UcPlanSummaryOverlayProps = {
   uid: number;
 };
 
+type MaterialGroup = {
+  key: string;
+  label: string;
+  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  missingCount: number;
+};
+
 const props = defineProps<UcPlanSummaryOverlayProps>();
 const visible = defineModel<boolean>({ required: true });
 const shareLoading = ref<boolean>(false);
+const expandedGroupKeys = ref<Set<string>>(new Set());
 const materialOverlayVisible = ref<boolean>(false);
 const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
+const materialGroupId = useId();
 
 const shareCaption = computed<string>(
   () => `养成计划汇总 · ${props.project.name} · UID ${props.uid}`,
 );
 const totalTargetCount = computed<number>(
   () => props.targetCounts.active + props.targetCounts.fulfilled + props.targetCounts.completed,
+);
+const materialGroups = computed<Array<MaterialGroup>>(() => {
+  const groupMap = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
+  for (const material of props.materials) {
+    const groupMaterials = groupMap.get(material.type);
+    if (groupMaterials) {
+      groupMaterials.push(material);
+    } else {
+      groupMap.set(material.type, [material]);
+    }
+  }
+  return Array.from(groupMap, ([key, materials]) => ({
+    key,
+    label: key || "其他材料",
+    materials,
+    missingCount: materials.filter((material) => material.missing > 0).length,
+  }));
+});
+const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  materialGroups.value.flatMap((group) => group.materials),
 );
 const readyMaterialCount = computed<number>(
   () => props.materials.filter((material) => material.missing === 0).length,
@@ -212,10 +276,32 @@ const emptyText = computed<string>(() =>
   totalTargetCount.value === 0 ? "添加养成目标后即可查看材料汇总" : "当前计划没有待收集材料",
 );
 
+function getMaterialGroupTriggerId(groupIndex: number): string {
+  return `${materialGroupId}-trigger-${groupIndex}`;
+}
+
+function getMaterialGroupContentId(groupIndex: number): string {
+  return `${materialGroupId}-content-${groupIndex}`;
+}
+
+function toggleMaterialGroup(groupKey: string): void {
+  const nextExpandedGroupKeys = new Set(expandedGroupKeys.value);
+  if (nextExpandedGroupKeys.has(groupKey)) {
+    nextExpandedGroupKeys.delete(groupKey);
+  } else {
+    nextExpandedGroupKeys.add(groupKey);
+  }
+  expandedGroupKeys.value = nextExpandedGroupKeys;
+}
+
+watch([visible, () => props.project.id], ([isVisible]) => {
+  if (isVisible) expandedGroupKeys.value = new Set();
+});
+
 async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Promise<void> {
   const wiki = WikiMaterialData.find((item) => item.id === material.id);
   if (!wiki) return;
-  const index = props.materials.findIndex((item) => item.id === material.id);
+  const index = displayMaterials.value.findIndex((item) => item.id === material.id);
   materialOverlayVisible.value = false;
   currentMaterialIndex.value = index >= 0 ? index : 0;
   currentMaterial.value = material;
@@ -226,8 +312,8 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 
 function switchMaterial(isNext: boolean): void {
   const nextIndex = currentMaterialIndex.value + (isNext ? 1 : -1);
-  if (nextIndex < 0 || nextIndex >= props.materials.length) return;
-  const material = props.materials[nextIndex];
+  if (nextIndex < 0 || nextIndex >= displayMaterials.value.length) return;
+  const material = displayMaterials.value[nextIndex];
   const wiki = WikiMaterialData.find((item) => item.id === material?.id);
   if (!material || !wiki) return;
   currentMaterialIndex.value = nextIndex;
@@ -245,18 +331,26 @@ async function shareSummary(): Promise<void> {
 
   const contentMaxHeight = content.style.maxHeight;
   const contentOverflowY = content.style.overflowY;
+  const previousExpandedGroupKeys = new Set(expandedGroupKeys.value);
   shareLoading.value = true;
-  await showLoading.start("正在生成分享图片", props.project.name);
-  await TGLogger.Info(`[CultivationSummary][share][${props.uid}] 开始生成计划汇总图片`);
-  content.style.maxHeight = "none";
-  content.style.overflowY = "visible";
   try {
+    await showLoading.start("正在生成分享图片", props.project.name);
+    await TGLogger.Info(`[CultivationSummary][share][${props.uid}] 开始生成计划汇总图片`);
+    expandedGroupKeys.value = new Set(materialGroups.value.map((group) => group.key));
+    await nextTick();
+    content.style.maxHeight = "none";
+    content.style.overflowY = "visible";
     await generateShareImg(`养成计划汇总_${props.project.name}_${props.uid}`, panel, 1.5, true);
   } finally {
-    content.style.maxHeight = contentMaxHeight;
-    content.style.overflowY = contentOverflowY;
-    await showLoading.end();
     shareLoading.value = false;
+    try {
+      content.style.maxHeight = contentMaxHeight;
+      content.style.overflowY = contentOverflowY;
+      expandedGroupKeys.value = previousExpandedGroupKeys;
+      await nextTick();
+    } finally {
+      await showLoading.end();
+    }
   }
 }
 </script>
@@ -412,6 +506,72 @@ async function shareSummary(): Promise<void> {
   background: var(--box-bg-1);
   color: var(--box-text-1);
   gap: 8px;
+}
+
+.ucps-material-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ucps-material-group {
+  overflow: hidden;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+}
+
+.ucps-material-group-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 0;
+  background: var(--common-shadow-t-1);
+  color: var(--box-text-1);
+  cursor: pointer;
+  font: inherit;
+  gap: 12px;
+  text-align: left;
+
+  &:hover {
+    background: var(--common-shadow-t-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: -2px;
+  }
+}
+
+.ucps-material-group-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+
+  strong {
+    overflow: hidden;
+    color: var(--common-text-title);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.ucps-material-group-meta {
+  flex-shrink: 0;
+  color: var(--common-text-sub);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.ucps-material-group-content {
+  padding: 8px;
+  border-top: 1px solid var(--common-shadow-1);
 }
 
 .ucps-section-header {

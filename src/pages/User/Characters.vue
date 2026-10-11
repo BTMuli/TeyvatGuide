@@ -87,6 +87,24 @@
             width="200px"
             @update:model-value="handleUidChange"
           />
+          <v-btn
+            v-if="batchMode"
+            :aria-pressed="isBatchAllSelected"
+            :disabled="selectedList.length === 0"
+            :prepend-icon="
+              isBatchAllSelected ? 'mdi-checkbox-marked-outline' : 'mdi-checkbox-blank-outline'
+            "
+            :title="
+              isBatchAllSelected
+                ? '取消选择当前筛选结果中的全部角色'
+                : '选择当前筛选结果中的全部角色'
+            "
+            class="uc-top-btn"
+            variant="elevated"
+            @click="toggleBatchAll"
+          >
+            {{ isBatchAllSelected ? "取消全选" : "全选" }}
+          </v-btn>
         </div>
         <div class="uc-sort">
           <v-btn
@@ -339,6 +357,11 @@ const enableShare = computed<boolean>(
   () => showOverlay.value || showSelect.value || showBatchTarget.value || loadData.value,
 );
 const isSelected = computed<boolean>(() => selectedList.value.length !== roleList.value.length);
+const isBatchAllSelected = computed<boolean>(
+  () =>
+    selectedList.value.length > 0 &&
+    selectedList.value.every((role) => batchSelectedIds.value.has(role.cid)),
+);
 const updateTimeText = computed<string>(() => {
   if (roleList.value.length === 0) return "";
   let lastUpdateTime = 0;
@@ -595,6 +618,16 @@ function toggleBatchRole(characterId: number): void {
   const next = new Set(batchSelectedIds.value);
   if (next.has(characterId)) next.delete(characterId);
   else next.add(characterId);
+  batchSelectedIds.value = next;
+}
+
+function toggleBatchAll(): void {
+  const shouldSelect = !isBatchAllSelected.value;
+  const next = new Set(batchSelectedIds.value);
+  for (const role of selectedList.value) {
+    if (shouldSelect) next.add(role.cid);
+    else next.delete(role.cid);
+  }
   batchSelectedIds.value = next;
 }
 
