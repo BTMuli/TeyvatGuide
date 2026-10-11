@@ -948,7 +948,9 @@ fn extract_sdk_zip(
     if entry.encrypted() {
       return Err("渠道 SDK 压缩包不能包含加密条目".to_string());
     }
-    let name = normalize_manifest_path(entry.name())?;
+    let entry_name =
+      entry.name().map_err(|error| format!("读取渠道 SDK 压缩条目名称失败：{error}"))?;
+    let name = normalize_manifest_path(entry_name.as_ref())?;
     let size = entry.size();
     total = total.checked_add(size).ok_or_else(|| "渠道 SDK 解压大小溢出".to_string())?;
     if total > max_decompressed {

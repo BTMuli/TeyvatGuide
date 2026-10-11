@@ -73,14 +73,13 @@ fn sync_windows_voice_language(installed: &[u32]) -> Result<(), String> {
     .create_subkey(REGISTRY_PATH)
     .map_err(|error| format!("打开游戏设置注册表失败：{error}"))?;
   let mut settings = match key.get_raw_value(GENERAL_DATA) {
-    Ok(mut raw) => {
+    Ok(raw) => {
       if raw.vtype != REG_BINARY {
         return Err("游戏设置注册表格式无效，无法同步当前配音".to_string());
       }
-      while raw.bytes.last() == Some(&0) {
-        raw.bytes.pop();
-      }
-      let text = std::str::from_utf8(&raw.bytes)
+      let bytes = raw.bytes.as_ref();
+      let trimmed_len = bytes.iter().rposition(|byte| *byte != 0).map_or(0, |index| index + 1);
+      let text = std::str::from_utf8(&bytes[..trimmed_len])
         .map_err(|error| format!("游戏设置注册表不是有效的 UTF-8：{error}"))?;
       serde_json::from_str::<Value>(text)
         .map_err(|error| format!("解析游戏设置注册表失败：{error}"))?
@@ -103,7 +102,7 @@ fn sync_windows_voice_language(installed: &[u32]) -> Result<(), String> {
     serde_json::to_vec(&settings).map_err(|error| format!("序列化游戏设置注册表失败：{error}"))?;
   bytes.push(0);
   key
-    .set_raw_value(GENERAL_DATA, &RegValue { bytes, vtype: REG_BINARY })
+    .set_raw_value(GENERAL_DATA, &RegValue { bytes: bytes.into(), vtype: REG_BINARY })
     .map_err(|error| format!("同步游戏当前配音失败：{error}"))
 }
 

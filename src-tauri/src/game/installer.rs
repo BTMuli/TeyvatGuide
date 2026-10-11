@@ -1988,7 +1988,8 @@ fn extract_and_verify_sdk(
     if entry.unix_mode().is_some_and(|mode| mode & 0o170000 == 0o120000) {
       return Err("渠道 SDK 不能包含符号链接".to_string());
     }
-    let name = normalize_manifest_path(entry.name())?;
+    let entry_name = entry.name().map_err(|error| format!("读取渠道 SDK 条目名称失败：{error}"))?;
+    let name = normalize_manifest_path(entry_name.as_ref())?;
     if name == "config.ini" || name == MARKER_FILE_NAME || files.contains_key(&name) {
       return Err("渠道 SDK 包含受保护或重复路径".to_string());
     }
