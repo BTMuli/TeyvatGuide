@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap3 uap10 rescap"
+>
+  <Identity
+    Name="27581BTMuli.tauri-genshin"
+    Publisher="CN=5FE33156-C3CE-4E71-A036-81BAA99521CB"
+    Version="0.12.5.0"
+    ProcessorArchitecture="x64"
+  />
+  <Properties>
+    <DisplayName>TeyvatGuide</DisplayName>
+    <PublisherDisplayName>BTMuli</PublisherDisplayName>
+    <Description>TeyvatGuide</Description>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <uap10:PackageIntegrity>
+      <uap10:Content Enforcement="on" />
+    </uap10:PackageIntegrity>
+  </Properties>
+  <Resources>
+    <Resource Language="zh-CN" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.17763.0"
+      MaxVersionTested="10.0.22000.1"
+    />
+    <PackageDependency
+      Name="Microsoft.WindowsAppRuntime.1.4"
+      MinVersion="4000.1010.1349.0"
+      Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    />
+  </Dependencies>
+  <Applications>
+    <Application
+      Id="TEYVATGUIDE"
+      Executable="TeyvatGuide.exe"
+      EntryPoint="Windows.FullTrustApplication"
+    >
+      <uap:VisualElements
+        BackgroundColor="transparent"
+        DisplayName="TeyvatGuide"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Description="TeyvatGuide"
+      >
+        <uap:DefaultTile
+          Wide310x150Logo="Assets\Wide310x150Logo.png"
+          Square310x310Logo="Assets\Square310x310Logo.png"
+          Square71x71Logo="Assets\Square71x71Logo.png"
+        />
+      </uap:VisualElements>
+      <Extensions>
+        <uap3:Extension Category="windows.protocol">
+          <uap3:Protocol Name="teyvatguide" Parameters="&quot;%1&quot;">
+            <uap:DisplayName>teyvatguide</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+          </uap3:Protocol>
+        </uap3:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

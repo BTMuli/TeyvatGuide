@@ -27,6 +27,9 @@ jobs:
     env:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       APP_VERSION: ${{ github.ref_name }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout
@@ -86,3 +89,15 @@ jobs:
             </a>
           releaseDraft: true
           prerelease: false
+
+      - name: Package MSIX
+        if: matrix.settings.target == 'windows'
+        shell: pwsh
+        run: pwsh -File scripts/build-msix.ps1
+      - name: Upload MSIX
+        if: matrix.settings.target == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: msix-windows
+          path: src-tauri/target/release/bundle/msix/TeyvatGuide_*_x64.msix
+          if-no-files-found: error
