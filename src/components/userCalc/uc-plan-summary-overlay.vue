@@ -201,7 +201,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { getWikiMaterialById, WikiMaterialData } from "@/data/index.js";
 
 type PlanTargetCounts = {
   active: number;
@@ -253,19 +253,22 @@ const totalTargetCount = computed<number>(
 const materialGroups = computed<Array<MaterialGroup>>(() => {
   const groupMap = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
   for (const material of props.materials) {
-    const groupMaterials = groupMap.get(material.type);
+    const groupKey = getWikiMaterialById(material.id)?.cType || "其他材料";
+    const groupMaterials = groupMap.get(groupKey);
     if (groupMaterials) {
       groupMaterials.push(material);
     } else {
-      groupMap.set(material.type, [material]);
+      groupMap.set(groupKey, [material]);
     }
   }
   return Array.from(groupMap, ([key, materials]) => ({
     key,
-    label: key || "其他材料",
+    label: key,
     materials,
     missingCount: materials.filter((material) => material.missing > 0).length,
-  }));
+  })).sort(
+    (a, b) => Number(b.key === "默认") - Number(a.key === "默认") || a.key.localeCompare(b.key),
+  );
 });
 const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   materialGroups.value.flatMap((group) => group.materials),
