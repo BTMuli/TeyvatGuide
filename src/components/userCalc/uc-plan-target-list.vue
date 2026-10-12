@@ -28,6 +28,7 @@
           :fulfilled="isEntryFulfilled(entry)"
           :has-today-material="hasTodayMaterial(entry)"
           :materials="entryMaterialResults.get(entry.id) ?? []"
+          :conversionOptions="getEntryConversionOptions(entry)"
           :priority="entryPriority(entry)"
           :progress="entryProgress(entry)"
           @edit="emits('edit', $event)"
@@ -86,8 +87,11 @@
     :entry="currentSummaryEntry"
     :entries="sortedEntries"
     :materials="entryMaterialResults.get(currentSummaryEntry.id) ?? []"
+    :conversionOptions="currentSummaryConversionOptions"
     :uid
     @select="selectSummaryEntry"
+    @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
+    @reset-conversions="emits('resetConversions', $event)"
   />
 </template>
 
@@ -99,7 +103,11 @@ import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import UcPlanTargetSummaryOverlay from "@comp/userCalc/uc-plan-target-summary-overlay.vue";
-import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
+import {
+  getCultivationEntryKey,
+  getServerDay,
+  isMaterialAvailableToday,
+} from "@utils/cultivationPlan.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
@@ -110,6 +118,7 @@ import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 type UcPlanTargetListProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   inventory: ReadonlyMap<number, number>;
   timezone: number;
@@ -121,6 +130,8 @@ type UcPlanTargetListEmits = {
   edit: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   remove: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   reorder: [entryIds: Array<string>];
+  applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];
+  resetConversions: [options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>];
   status: [
     entry: TGApp.Sqlite.Cultivation.EntryWithItems,
     status: TGApp.Sqlite.Cultivation.EntryStatus,
@@ -141,6 +152,18 @@ const currentMaterialIndex = ref<number>(0);
 const entryMaterialResults = computed<
   ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>
 >(() => props.entryMaterials);
+function getEntryConversionOptions(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): Array<TGApp.App.UserCalc.ConversionOption> {
+  const entryKey = getCultivationEntryKey(entry);
+  return (props.conversionOptions ?? []).filter((option) => option.entryKey === entryKey);
+}
+
+const currentSummaryConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() => {
+  const entry = currentSummaryEntry.value;
+  if (!entry) return [];
+  return getEntryConversionOptions(entry);
+});
 const currentMaterialResult = computed<TGApp.App.UserCalc.ResultMaterial | undefined>(() => {
   if (!currentMaterialEntryId.value || !currentMaterial.value) return undefined;
   return entryMaterialResults.value

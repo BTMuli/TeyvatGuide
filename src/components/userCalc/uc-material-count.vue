@@ -33,7 +33,7 @@ const {
 } = defineProps<UcMaterialCountProps>();
 
 const countTitle = computed<string>(() => {
-  const craftableLabel = craftable > 0 ? `，可合成量 ${fmtUtil.num(craftable)}` : "";
+  const craftableLabel = craftable > 0 ? `，合成或转换折合量 ${fmtUtil.num(craftable)}` : "";
   return `当前量 ${fmtUtil.num(current)}${craftableLabel}，需求总量 ${fmtUtil.num(required)}`;
 });
 

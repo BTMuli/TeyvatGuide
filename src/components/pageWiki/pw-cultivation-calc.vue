@@ -172,8 +172,11 @@
       :empty-text="emptyText"
       :materials="displayMaterials"
       :missingKinds
-      :show-crafting-options="hasBagData"
+      :conversionOptions
+      :show-crafting-options="hasBagData && planContextReady"
       topOffset="0px"
+      @apply-conversion="applyConversion"
+      @reset-conversions="resetConversions"
       :uid="currentUid"
     />
 
@@ -210,8 +213,15 @@ import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import useCultivationConversionStore from "@store/cultivationConversion.js";
 import useUserStore from "@store/user.js";
-import { buildCultivationResults, getUidServerTimezone } from "@utils/cultivationPlan.js";
+import {
+  allocatePlanMaterials,
+  getConversionOptions,
+  getCultivationEntryKey,
+  getUidServerTimezone,
+  mergePlanInventory,
+} from "@utils/cultivationPlan.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -262,8 +272,13 @@ const shareLoading = ref<boolean>(false);
 const planSaving = ref<boolean>(false);
 const applyingPlan = ref<boolean>(false);
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
+const conversionStore = useCultivationConversionStore();
+const currentProjectId = ref<string>();
 const planEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
+const planEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
+const planContextReady = ref<boolean>(false);
 let planLoadId = 0;
+let bagLoadId = 0;
 
 const isCharacter = computed<boolean>(() => props.character !== undefined);
 const character = computed<TGApp.App.Character.WikiItem | undefined>(() => props.character);
@@ -357,24 +372,54 @@ const requiredMaterials = computed<Array<CultivationMaterial>>(() => {
     targetAscended.value,
   );
 });
-const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  buildCultivationResults(
-    requiredMaterials.value,
-    bagMaterials.value,
-    WikiMaterialData,
-    hasBagData.value && allowCrafting.value,
-    useDust.value,
-    useSolvent.value,
-    [
-      {
-        type: isCharacter.value ? "avatar" : "weapon",
-        currentLevel: currentLevel.value,
-        targetLevel: targetLevel.value,
-        star: wikiStar.value,
-      },
-    ],
-  ),
+const calculatorEntry = computed<TGApp.Sqlite.Cultivation.EntryWithItems | undefined>(() => {
+  const input = createPlanInput();
+  if (!input) return undefined;
+  const saved = planEntry.value;
+  const id = saved?.id ?? "preview-wiki";
+  return {
+    ...input,
+    id,
+    projectId: currentProjectId.value ?? "",
+    status: "active",
+    sortOrder: saved?.sortOrder ?? Number.MAX_SAFE_INTEGER,
+    created: saved?.created ?? "",
+    updated: saved?.updated ?? "",
+    allowCrafting: planContextReady.value && input.allowCrafting,
+    items: input.items.map((item) => ({ ...item, entryId: id })),
+  };
+});
+const calculatorOtherEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
+  planEntries.value.filter((entry) => entry.id !== planEntry.value?.id),
 );
+const calculatorAllocation = computed(() => {
+  const inventory = mergePlanInventory(
+    bagMaterials.value,
+    bagMaterialDetails.value,
+    planEntries.value,
+  );
+  return allocatePlanMaterials(
+    calculatorEntry.value
+      ? [...calculatorOtherEntries.value, calculatorEntry.value]
+      : calculatorOtherEntries.value,
+    inventory,
+    WikiMaterialData,
+    conversionStore.getIntents(currentUid.value, currentProjectId.value ?? ""),
+  );
+});
+const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
+  () => calculatorAllocation.value.entries.get(calculatorEntry.value?.id ?? "") ?? [],
+);
+const conversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() => {
+  const entry = calculatorEntry.value;
+  if (!entry || !hasBagData.value || !planContextReady.value) return [];
+  return getConversionOptions(
+    [...calculatorOtherEntries.value, entry],
+    calculatorAllocation.value,
+    WikiMaterialData,
+    new Set([entry.id]),
+  );
+});
 const missingKinds = computed<number>(
   () => displayMaterials.value.filter((material) => material.missing > 0).length,
 );
@@ -406,6 +451,7 @@ watch(
 watch(
   [currentUid, wikiId],
   () => {
+    void loadBag();
     void loadPlanEntry();
   },
   { immediate: true },
@@ -491,14 +537,34 @@ function findPlanEntry(
   return matched.find((entry) => entry.instanceKey === "") ?? matched[0];
 }
 
+function applyConversion(entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent): void {
+  if (!planContextReady.value) return;
+  conversionStore.setIntent(currentUid.value, currentProjectId.value ?? "", entryKey, intent);
+}
+
+function resetConversions(options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>): void {
+  for (const option of options) {
+    conversionStore.removeIntent(
+      currentUid.value,
+      currentProjectId.value ?? "",
+      option.entryKey,
+      option.recommendation.material.id,
+    );
+  }
+}
+
 async function loadPlanEntry(): Promise<void> {
   const requestId = ++planLoadId;
+  planContextReady.value = false;
+  currentProjectId.value = undefined;
+  planEntries.value = [];
   const uid = currentUid.value;
   const id = wikiId.value;
   const type = isCharacter.value ? "avatar" : "weapon";
   if (uid <= 0 || id <= 0) {
     planEntry.value = undefined;
     inPlan.value = false;
+    planContextReady.value = true;
     return;
   }
   try {
@@ -507,12 +573,16 @@ async function loadPlanEntry(): Promise<void> {
     if (!project) {
       planEntry.value = undefined;
       inPlan.value = false;
+      planContextReady.value = true;
       if (visible.value) resetState();
       return;
     }
     const entries = await TSCultivationPlan.getEntries(project.id);
     if (requestId !== planLoadId) return;
     const matched = findPlanEntry(entries, type, id);
+    currentProjectId.value = project.id;
+    planEntries.value = entries;
+    planContextReady.value = true;
     planEntry.value = matched;
     inPlan.value = matched !== undefined;
     if (visible.value) resetState();
@@ -525,17 +595,18 @@ async function loadPlanEntry(): Promise<void> {
 }
 
 async function loadBag(): Promise<void> {
+  const requestId = ++bagLoadId;
   const uid = currentUid.value;
-  if (uid <= 0) {
-    bagMaterials.value = new Map();
-    bagMaterialDetails.value = EMPTY_BAG_MATERIAL_DETAILS;
-    return;
-  }
+  bagMaterials.value = new Map();
+  bagMaterialDetails.value = EMPTY_BAG_MATERIAL_DETAILS;
+  if (uid <= 0) return;
   try {
     const materialData = await TSUserBagMaterial.getMaterial(uid);
+    if (requestId !== bagLoadId || uid !== currentUid.value) return;
     bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
     bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
   } catch {
+    if (requestId !== bagLoadId) return;
     bagMaterials.value = new Map();
     bagMaterialDetails.value = EMPTY_BAG_MATERIAL_DETAILS;
   }
@@ -640,6 +711,9 @@ async function addToPlan(): Promise<void> {
     const existed = planEntry.value !== undefined;
     const project = await TSCultivationPlan.ensureCurrentProject(uid, getUidServerTimezone(uid));
     await TSCultivationPlan.saveEntries(project.id, [input]);
+    conversionStore.moveEntries(uid, currentProjectId.value ?? "", project.id, [
+      getCultivationEntryKey(input),
+    ]);
     await loadPlanEntry();
     if (existed) {
       showSnackbar.success(`已更新“${project.name}”中的 ${wikiName.value}`);

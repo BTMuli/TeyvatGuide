@@ -5,7 +5,7 @@
     v-model="visible"
     :shareCaption="shareCaption"
     titleId="cultivation-summary-title"
-    topOffset="132px"
+    :topOffset
   >
     <template #header>
       <div class="ucps-heading-icon">
@@ -141,7 +141,14 @@
         <span>{{ emptyText }}</span>
       </div>
     </section>
-    <UcCraftingSummary :materials />
+    <UcConversionMaterials :options="conversionOptions" />
+    <UcCraftingSummary :conversionOptions :materials />
+    <UcConversionRecommendations
+      :options="conversionOptions"
+      :topOffset
+      @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
+      @reset="emits('resetConversions', $event)"
+    />
   </TopOverlay>
 
   <UcMaterialDetail
@@ -152,7 +159,7 @@
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
     :total="materials.length"
-    topOffset="132px"
+    :topOffset
     :uid
     :wiki="currentWiki"
   >
@@ -185,6 +192,8 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
+import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
@@ -204,6 +213,8 @@ type UcPlanSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   inventoryUpdatedLabel: string;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
+  topOffset?: string;
   project: TGApp.Sqlite.Cultivation.Project;
   targetCounts: PlanTargetCounts;
   uid: number;
@@ -216,7 +227,13 @@ type MaterialGroup = {
   missingCount: number;
 };
 
-const props = defineProps<UcPlanSummaryOverlayProps>();
+const props = withDefaults(defineProps<UcPlanSummaryOverlayProps>(), {
+  topOffset: "132px",
+});
+const emits = defineEmits<{
+  applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];
+  resetConversions: [options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>];
+}>();
 const visible = defineModel<boolean>({ required: true });
 const shareLoading = ref<boolean>(false);
 const expandedGroupKeys = ref<Set<string>>(new Set());

@@ -169,10 +169,12 @@
         @select="selectMaterial(material.id)"
       />
     </div>
+    <UcConversionMaterials :options="conversionOptions" />
   </v-card>
 </template>
 
 <script lang="ts" setup>
+import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed } from "vue";
@@ -186,6 +188,7 @@ type UcPlanTargetCardProps = {
   fulfilled: boolean;
   hasTodayMaterial: boolean;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   priority: number;
   progress: number;
 };

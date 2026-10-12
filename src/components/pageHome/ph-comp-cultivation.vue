@@ -65,6 +65,7 @@ import PhCompCultivationTarget from "@comp/pageHome/ph-comp-cultivation-target.v
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import useCultivationConversionStore from "@store/cultivationConversion.js";
 import useUserStore from "@store/user.js";
 import {
   allocatePlanMaterials,
@@ -93,6 +94,7 @@ type PhCompCultivationEmits = {
 const emits = defineEmits<PhCompCultivationEmits>();
 const router = useRouter();
 const { account } = storeToRefs(useUserStore());
+const conversionStore = useCultivationConversionStore();
 const project = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const entries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const inventory = shallowRef<ReadonlyMap<number, number>>(new Map());
@@ -101,7 +103,12 @@ const planInventory = computed<ReadonlyMap<number, number>>(() =>
   mergePlanInventory(inventory.value, bagMaterials.value, entries.value),
 );
 const allocation = computed(() =>
-  allocatePlanMaterials(entries.value, planInventory.value, WikiMaterialData),
+  allocatePlanMaterials(
+    entries.value,
+    planInventory.value,
+    WikiMaterialData,
+    conversionStore.getIntents(project.value?.uid ?? 0, project.value?.id ?? ""),
+  ),
 );
 const resultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
   () => allocation.value.materials,

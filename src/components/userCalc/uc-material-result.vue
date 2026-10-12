@@ -65,29 +65,16 @@
         </div>
       </section>
 
-      <section
-        v-if="allowCrafting && craftingCosts.length > 0"
-        class="ucm-cost-summary ucm-section"
-      >
-        <div class="ucm-cost-header">
-          <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
-          <span>合成消耗</span>
-          <v-chip size="small" variant="tonal">{{ craftingCosts.length }} 种材料</v-chip>
-        </div>
-        <div class="ucm-cost-list">
-          <TMaterialStarChip
-            v-for="cost in craftingCosts"
-            :key="cost.id"
-            :id="cost.id"
-            mode="convert"
-            :name="cost.name"
-            :owned="cost.local"
-            :required="cost.count"
-            :star="cost.star"
-            :type="cost.type"
-          />
-        </div>
-      </section>
+      <UcConversionMaterials :options="conversionOptions" />
+
+      <UcCraftingSummary :conversionOptions :materials />
+      <UcConversionRecommendations
+        :showEntryName="false"
+        :options="conversionOptions"
+        :topOffset
+        @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
+        @reset="emits('resetConversions', $event)"
+      />
     </template>
 
     <section v-else class="ucm-empty ucm-section">
@@ -130,18 +117,20 @@
   </UcMaterialDetail>
 </template>
 <script lang="ts" setup>
-import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
+import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
+import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
+import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { computed, nextTick, ref, shallowRef } from "vue";
+import { nextTick, ref, shallowRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
 type UcMaterialResultProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   missingKinds: number;
   uid: number;
   loading?: boolean;
@@ -152,12 +141,17 @@ type UcMaterialResultProps = {
 };
 
 const props = withDefaults(defineProps<UcMaterialResultProps>(), {
+  conversionOptions: () => [],
   loading: false,
   showCraftingOptions: true,
   emptyText: "请选择角色或武器，并设置培养目标",
   topOffset: "132px",
   weakenReady: false,
 });
+const emits = defineEmits<{
+  applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];
+  resetConversions: [options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>];
+}>();
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });
 const useSolvent = defineModel<boolean>("useSolvent", { required: true });
@@ -165,26 +159,6 @@ const materialOverlayVisible = ref<boolean>(false);
 const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
-const craftingCosts = computed<Array<PboConvertSource>>(() => {
-  const costs = new Map<number, TGApp.App.UserCalc.CraftingCost>();
-  for (const material of props.materials) {
-    for (const cost of material.craftingCosts) {
-      const current = costs.get(cost.id);
-      if (current) current.count += cost.count;
-      else costs.set(cost.id, { ...cost });
-    }
-  }
-  return Array.from(costs.values())
-    .sort((a, b) => b.star - a.star || a.id - b.id)
-    .map((cost) => ({
-      id: String(cost.id),
-      name: cost.name,
-      type: cost.type,
-      star: cost.star,
-      count: cost.count,
-      local: cost.owned,
-    }));
-});
 
 async function openMaterialInfo(
   material: TGApp.App.UserCalc.ResultMaterial,
@@ -287,27 +261,6 @@ function switchMaterial(isNext: boolean): void {
   border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--box-text-2);
-}
-
-.ucm-cost-summary {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 8px;
-}
-
-.ucm-cost-header {
-  display: flex;
-  align-items: center;
-  font-family: var(--font-title);
-  font-weight: normal;
-  gap: 8px;
-}
-
-.ucm-cost-list {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .ucm-empty {

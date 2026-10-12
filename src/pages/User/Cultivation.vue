@@ -200,11 +200,14 @@
           <UcPlanTargetList
             :bag-materials="bagMaterialDetails"
             :entry-materials="planAllocation.entries"
+            :conversionOptions="planConversionOptions"
             :entries="planEntries"
             :inventory="planInventory"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
             @add="startAddingTarget"
+            @apply-conversion="applyConversion"
+            @reset-conversions="resetConversions"
             @edit="editPlanEntry"
             @remove="removePlanEntry"
             @reorder="updatePlanEntryOrder"
@@ -263,8 +266,11 @@
             :loading="apiLoading"
             :materials="displayResultMaterials"
             :missingKinds
-            :show-crafting-options="!useApiCalculation"
+            :conversionOptions
+            :show-crafting-options="!useApiCalculation && planContextReady"
             :uid="currentUid ?? 0"
+            @apply-conversion="applyConversion"
+            @reset-conversions="resetConversions"
           />
         </v-window-item>
       </v-window>
@@ -278,8 +284,11 @@
     :inventory-updated-label="inventoryUpdatedLabel"
     :materials="planResultMaterials"
     :project="currentProject"
+    :conversionOptions="planConversionOptions"
     :target-counts="planEntryCounts"
     :uid="currentUid ?? 0"
+    @apply-conversion="applyConversion"
+    @reset-conversions="resetConversions"
   />
 </template>
 
@@ -302,13 +311,17 @@ import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
+import useCultivationConversionStore from "@store/cultivationConversion.js";
 import useUserStore from "@store/user.js";
 import { platform } from "@tauri-apps/plugin-os";
 import { getRfAc } from "@utils/acUtils.js";
 import {
   allocatePlanMaterials,
-  buildCultivationResults,
+  getConversionOptions,
+  getCultivationEntryKey,
+  getCalculateInventory,
   getUidServerTimezone,
+  mergeCultivationResults,
   mergePlanInventory,
   sortCultivationResults,
 } from "@utils/cultivationPlan.js";
@@ -362,6 +375,7 @@ type LocalAvatarRefreshResult = {
 };
 
 const { account, cookie } = storeToRefs(useUserStore());
+const conversionStore = useCultivationConversionStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -369,6 +383,7 @@ const isWindows = platform() === "windows";
 const loading = ref<boolean>(false);
 const apiLoading = ref<boolean>(false);
 const planLoading = ref<boolean>(false);
+const planContextReady = ref<boolean>(false);
 const summaryVisible = ref<boolean>(false);
 const apiCalculated = ref<boolean>(false);
 const calculationMode = ref<CalculationMode>(isWindows ? "bag" : "api");
@@ -769,38 +784,83 @@ const weaponRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
     weaponTargetAscended.value,
   );
 });
-const requiredMaterials = computed<Array<CultivationMaterial>>(() =>
-  userCalc.merge(avatarRequiredMaterials.value, weaponRequiredMaterials.value),
+const calculatorInventory = computed<Map<number, number>>(() => {
+  const inventory = new Map(planInventory.value);
+  if (useApiCalculation.value && apiCalculationResult.value) {
+    for (const [id, count] of getCalculateInventory(apiCalculationResult.value)) {
+      inventory.set(id, platform() === "macos" ? count : Math.max(inventory.get(id) ?? 0, count));
+    }
+  }
+  return inventory;
+});
+// 以当前编辑需求替换已保存目标，一起预留全计划的直接材料和合成消耗。
+const calculatorEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
+  [createAvatarPlanInput(), createWeaponPlanInput()]
+    .filter((input) => input !== undefined)
+    .map((input, index) => {
+      const saved = planEntries.value.find((entry) => inputMatchesEntry(input, entry));
+      const id = saved?.id ?? "preview-" + input.type + "-" + index;
+      return {
+        ...input,
+        id,
+        projectId: currentProjectId.value ?? "",
+        status: "active",
+        sortOrder: saved?.sortOrder ?? Number.MAX_SAFE_INTEGER,
+        created: saved?.created ?? "",
+        updated: saved?.updated ?? "",
+        allowCrafting: planContextReady.value && (useApiCalculation.value || input.allowCrafting),
+        useDust: !useApiCalculation.value && input.useDust,
+        useSolvent: !useApiCalculation.value && input.useSolvent,
+        items: input.items.map((item) => ({ ...item, entryId: id })),
+      };
+    }),
 );
-const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  buildCultivationResults(
-    requiredMaterials.value,
-    bagMaterials.value,
+const calculatorOtherEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() => {
+  const previewIds = new Set(calculatorEntries.value.map((entry) => entry.id));
+  return planEntries.value.filter(
+    (entry) => entry.id !== editingEntry.value?.id && !previewIds.has(entry.id),
+  );
+});
+const calculatorAllocation = computed(() => {
+  return allocatePlanMaterials(
+    [...calculatorOtherEntries.value, ...calculatorEntries.value],
+    calculatorInventory.value,
     WikiMaterialData,
-    allowCrafting.value,
-    useDust.value,
-    useSolvent.value,
-    [
-      {
-        type: "avatar",
-        currentLevel: avatarCurrentLevel.value,
-        targetLevel: avatarTargetLevel.value,
-        star: avatarWiki.value ? avatarWiki.value.star : 5,
-      },
-      {
-        type: "weapon",
-        currentLevel: weaponCurrentLevel.value,
-        targetLevel: weaponTargetLevel.value,
-        star: selectedWeapon.value?.wiki.star ?? 5,
-      },
-    ],
+    conversionStore.getIntents(currentUid.value ?? 0, currentProjectId.value ?? ""),
+  );
+});
+const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  mergeCultivationResults(
+    calculatorEntries.value.flatMap(
+      (entry) => calculatorAllocation.value.entries.get(entry.id) ?? [],
+    ),
   ),
 );
+const conversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() => {
+  if (!planContextReady.value || planLoading.value || loading.value || apiLoading.value) return [];
+  if (useApiCalculation.value && !apiCalculated.value) return [];
+  return getConversionOptions(
+    [...calculatorOtherEntries.value, ...calculatorEntries.value],
+    calculatorAllocation.value,
+    WikiMaterialData,
+    new Set(calculatorEntries.value.map((entry) => entry.id)),
+  );
+});
 const planInventory = computed<Map<number, number>>(() =>
   mergePlanInventory(bagMaterials.value, bagMaterialDetails.value, planEntries.value),
 );
 const planAllocation = computed(() =>
-  allocatePlanMaterials(planEntries.value, planInventory.value, WikiMaterialData),
+  allocatePlanMaterials(
+    planEntries.value,
+    planInventory.value,
+    WikiMaterialData,
+    conversionStore.getIntents(currentUid.value ?? 0, currentProjectId.value ?? ""),
+  ),
+);
+const planConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() =>
+  planContextReady.value
+    ? getConversionOptions(planEntries.value, planAllocation.value, WikiMaterialData)
+    : [],
 );
 const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
   () => planAllocation.value.materials,
@@ -833,9 +893,14 @@ const canSaveToPlan = computed<boolean>(() => {
   }
   return avatarRequiredMaterials.value.length > 0 || weaponRequiredMaterials.value.length > 0;
 });
-const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  useApiCalculation.value ? apiResultMaterials.value : localResultMaterials.value,
-);
+const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
+  const hasExplicitConversion = calculatorEntries.value.some(
+    (entry) => (calculatorAllocation.value.appliedConversions.get(entry.id)?.length ?? 0) > 0,
+  );
+  return useApiCalculation.value && !hasExplicitConversion
+    ? apiResultMaterials.value
+    : localResultMaterials.value;
+});
 const missingKinds = computed<number>(
   () => displayResultMaterials.value.filter((material) => material.missing > 0).length,
 );
@@ -1572,6 +1637,7 @@ async function saveCalculateInventory(
 
 async function loadProjects(uid: number, preferredProjectId?: string): Promise<void> {
   planLoading.value = true;
+  planContextReady.value = false;
   try {
     const nextProjects = await TSCultivationPlan.getProjects(uid);
     const nextProject =
@@ -1583,6 +1649,7 @@ async function loadProjects(uid: number, preferredProjectId?: string): Promise<v
     currentProjectId.value = nextProject?.id ?? null;
     settingProject = false;
     planEntries.value = nextProject ? await TSCultivationPlan.getEntries(nextProject.id) : [];
+    planContextReady.value = true;
   } catch (error) {
     showSnackbar.error(`加载养成计划失败：${TGHttps.getErrMsg(error)}`);
   } finally {
@@ -1651,6 +1718,7 @@ async function removePlan(): Promise<void> {
   planLoading.value = true;
   try {
     await TSCultivationPlan.removeProject(project);
+    conversionStore.clearProject(project.uid, project.id);
     await loadProjects(project.uid);
     showSnackbar.success("养成计划已删除");
   } catch (error) {
@@ -1921,6 +1989,12 @@ async function saveToPlan(): Promise<void> {
         useSolvent: useSolvent.value,
       });
     }
+    conversionStore.moveEntries(
+      uid,
+      currentProjectId.value ?? "",
+      project.id,
+      inputs.map(getCultivationEntryKey),
+    );
     editingEntry.value = undefined;
     await loadProjects(uid, project.id);
     viewTab.value = "targets";
@@ -1929,6 +2003,25 @@ async function saveToPlan(): Promise<void> {
     showSnackbar.error(`保存养成目标失败：${TGHttps.getErrMsg(error)}`);
   } finally {
     planLoading.value = false;
+  }
+}
+
+function applyConversion(entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent): void {
+  const uid = currentUid.value;
+  if (uid === undefined || !planContextReady.value) return;
+  conversionStore.setIntent(uid, currentProjectId.value ?? "", entryKey, intent);
+}
+
+function resetConversions(options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>): void {
+  const uid = currentUid.value;
+  if (uid === undefined) return;
+  for (const option of options) {
+    conversionStore.removeIntent(
+      uid,
+      currentProjectId.value ?? "",
+      option.entryKey,
+      option.recommendation.material.id,
+    );
   }
 }
 
@@ -2097,6 +2190,11 @@ async function removePlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): 
   planLoading.value = true;
   try {
     await TSCultivationPlan.removeEntry(entry.id);
+    conversionStore.clearEntry(
+      currentUid.value ?? 0,
+      entry.projectId,
+      getCultivationEntryKey(entry),
+    );
     if (currentProject.value) {
       planEntries.value = await TSCultivationPlan.getEntries(currentProject.value.id);
     }

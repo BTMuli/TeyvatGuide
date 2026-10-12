@@ -135,7 +135,15 @@
       </div>
     </section>
 
-    <UcCraftingSummary :materials="displayMaterials" />
+    <UcConversionMaterials :options="conversionOptions" />
+    <UcCraftingSummary :conversionOptions :materials="displayMaterials" />
+    <UcConversionRecommendations
+      :showEntryName="false"
+      :options="conversionOptions"
+      topOffset="132px"
+      @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
+      @reset="emits('resetConversions', $event)"
+    />
 
     <template #right>
       <v-btn
@@ -191,6 +199,8 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
+import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
@@ -206,11 +216,14 @@ type UcPlanTargetSummaryOverlayProps = {
   entry: TGApp.Sqlite.Cultivation.EntryWithItems;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   uid: number;
 };
 
 type UcPlanTargetSummaryOverlayEmits = {
   select: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
+  applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];
+  resetConversions: [options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>];
 };
 
 const TALENT_LABELS = <const>["A", "E", "Q"];

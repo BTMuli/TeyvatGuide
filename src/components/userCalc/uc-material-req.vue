@@ -34,7 +34,7 @@
             :required="material.required"
           />
         </div>
-        <div class="ucmr-meta">{{ material.type }}</div>
+        <div class="ucmr-meta">{{ description ?? material.type }}</div>
       </div>
       <v-progress-linear
         v-if="showMetrics"
@@ -56,6 +56,8 @@ type UcMaterialReqProps = {
   /** 是否可点击打开详情；日历等只读场景传 false */
   interactive?: boolean;
   material: TGApp.App.UserCalc.ResultMaterial;
+  /** 可选的需求用途及缺口说明 */
+  description?: string;
   /** 是否展示持有/需求计数与进度条；日历普通条目可关 */
   showMetrics?: boolean;
   weakenReady?: boolean;
