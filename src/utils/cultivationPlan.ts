@@ -1,6 +1,6 @@
 /**
  * 养成计划材料聚合工具
- * @since Beta v0.12.2
+ * @since Beta v0.12.6
  */
 
 import { platform } from "@tauri-apps/plugin-os";
@@ -13,18 +13,51 @@ import userCalc, {
 
 import { WikiMaterialData } from "@/data/index.js";
 
+const DUST_OF_AZOTH_ID = 104201;
+const DREAM_SOLVENT_ID = 113021;
+const CONVERSION_MEDIA_IDS = new Set([DUST_OF_AZOTH_ID, DREAM_SOLVENT_ID]);
+
 /**
  * 养成计划的材料分配结果。
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 export type PlanMaterialAllocation = {
   /** 按目标 ID 保存的实际材料分配结果 */
   entries: Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
+  /** 按目标 ID 保存已采用的明确转换方案 */
+  appliedConversions: Map<string, Array<TGApp.App.UserCalc.AppliedConversion>>;
   /** 所有活动目标的汇总材料结果 */
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
   /** 分配完成后尚未使用的背包材料 */
   remainingInventory: Map<number, number>;
+  /** 预留活动目标普通合成来源后的转换预览库存 */
+  conversionInventory: Map<number, number>;
+  /** 当前分配完成后仍可额外考虑的媒介转换 */
+  recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation>;
 };
+
+/**
+ * 媒介转换推荐准备结果。
+ * @since Beta v0.12.6
+ */
+export type ConversionPreparation = {
+  /** 预留普通合成来源后的库存 */
+  inventory: Map<number, number>;
+  /** 各目标在普通合成后仍缺少的数量 */
+  missing: Map<number, number>;
+};
+
+/**
+ * 获取养成目标的稳定逻辑键。
+ * @since Beta v0.12.6
+ * @param entry - 目标的逻辑身份字段
+ * @returns 可用于保存转换意图的稳定键
+ */
+export function getCultivationEntryKey(
+  entry: Pick<TGApp.Sqlite.Cultivation.Entry, "type" | "itemId" | "instanceKey">,
+): string {
+  return JSON.stringify(<const>[entry.type, entry.itemId, entry.instanceKey]);
+}
 
 /**
  * 将单个目标的重复材料需求合并。
@@ -65,28 +98,171 @@ function buildCraftingCosts(
     .sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
-type EntryMaterialAllocation = {
+type MaterialMap = ReadonlyMap<number, TGApp.App.Material.WikiItem>;
+
+type EntryPlan = {
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems;
+  requirements: Map<number, number>;
+  directOwned: Map<number, number>;
+  results: Array<TGApp.App.UserCalc.ResultMaterial>;
+  explicitMaterialIds: Set<number>;
+};
+
+type MediaConversionAllocation = {
   remainingInventory: Map<number, number>;
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
 };
 
+type ExplicitConversionAllocation = {
+  remainingInventory: Map<number, number>;
+  results: Array<TGApp.App.UserCalc.ResultMaterial>;
+  explicitMaterialIds: Set<number>;
+  appliedConversions: Array<TGApp.App.UserCalc.AppliedConversion>;
+};
+
 /**
- * 按单个目标的需求从指定库存中分配材料。
- * @since Beta v0.12.2
- * @param entry - 养成目标
- * @param inventory - 可用于该目标的背包材料
- * @param materialMap - 材料 Wiki 映射
- * @param materials - 材料 Wiki 数据
- * @returns 该目标的材料结果及分配后剩余库存
+ * 复制材料结果及其嵌套消耗，避免编辑上下文共享分配结果。
+ * @since Beta v0.12.6
  */
-function allocateEntryMaterials(
+function cloneResultMaterial(
+  result: TGApp.App.UserCalc.ResultMaterial,
+): TGApp.App.UserCalc.ResultMaterial {
+  return {
+    ...result,
+    craftingCosts: result.craftingCosts.map((cost) => ({ ...cost })),
+  };
+}
+
+/**
+ * 复制转换意图及其来源上限。
+ * @since Beta v0.12.6
+ */
+function cloneConversionIntent(
+  intent: TGApp.App.UserCalc.ConversionIntent,
+): TGApp.App.UserCalc.ConversionIntent {
+  return {
+    materialId: intent.materialId,
+    count: intent.count,
+    sourceLimits: intent.sourceLimits.map((source) => ({ ...source })),
+  };
+}
+
+/**
+ * 复制转换推荐及其材料上下文。
+ * @since Beta v0.12.6
+ */
+function cloneConversionRecommendation(
+  recommendation: TGApp.App.UserCalc.ConversionRecommendation,
+): TGApp.App.UserCalc.ConversionRecommendation {
+  return {
+    material: cloneResultMaterial(recommendation.material),
+    count: recommendation.count,
+    costs: recommendation.costs.map((cost) => ({ ...cost })),
+  };
+}
+
+/**
+ * 从库存中扣除一组实际或假设的合成消耗。
+ * @since Beta v0.12.6
+ */
+function subtractCraftingCosts(
+  inventory: ReadonlyMap<number, number>,
+  costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>,
+): Map<number, number> {
+  const next = normalizeInventory(inventory);
+  for (const cost of costs) {
+    const count = Number.isFinite(cost.count) ? Math.max(cost.count, 0) : 0;
+    if (count <= 0) continue;
+    next.set(cost.id, Math.max((next.get(cost.id) ?? 0) - count, 0));
+  }
+  return next;
+}
+
+/**
+ * 按计划中稳定的目标优先级排序。
+ * @since Beta v0.12.6
+ */
+function sortCultivationEntries(
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+): Array<TGApp.Sqlite.Cultivation.EntryWithItems> {
+  return [...entries].sort(
+    (a, b) =>
+      a.sortOrder - b.sortOrder || a.created.localeCompare(b.created) || a.id.localeCompare(b.id),
+  );
+}
+
+/**
+ * 复制库存并把异常负值归零，避免中间计算将虚拟预留暴露给调用方。
+ * @since Beta v0.12.6
+ */
+function normalizeInventory(inventory: ReadonlyMap<number, number>): Map<number, number> {
+  return new Map(Array.from(inventory, ([id, count]) => <const>[id, Math.max(count, 0)]));
+}
+
+/**
+ * 从临时分配前后库存计算真实合成消耗，并应用到实际库存。
+ * @since Beta v0.12.6
+ */
+function applyInventoryConsumption(
+  inventory: ReadonlyMap<number, number>,
+  before: ReadonlyMap<number, number>,
+  after: ReadonlyMap<number, number>,
+): Map<number, number> {
+  const next = normalizeInventory(inventory);
+  const ids = new Set([...before.keys(), ...after.keys()]);
+  for (const id of ids) {
+    const consumed = Math.max((before.get(id) ?? 0) - (after.get(id) ?? 0), 0);
+    if (consumed > 0) next.set(id, Math.max((next.get(id) ?? 0) - consumed, 0));
+  }
+  return next;
+}
+
+/**
+ * 将单个材料数量加到库存映射中。
+ * @since Beta v0.12.6
+ */
+function addInventoryCount(inventory: Map<number, number>, id: number, count: number): void {
+  inventory.set(id, (inventory.get(id) ?? 0) + count);
+}
+
+/**
+ * 判断配方是否包含嬗变之尘或异梦溶媒。
+ * @since Beta v0.12.6
+ */
+function hasConversionMedia(recipe: TGApp.App.Material.Convert): boolean {
+  return recipe.source.some((source) => CONVERSION_MEDIA_IDS.has(Number(source.id)));
+}
+
+/**
+ * 判断一次递归合成是否实际消耗了转换媒介。
+ * @since Beta v0.12.6
+ */
+function usesConversionMedia(crafting: CraftableMaterial): boolean {
+  return crafting.consumed.some((source) => CONVERSION_MEDIA_IDS.has(source.id));
+}
+
+/**
+ * 构建不含媒介配方的 Wiki 快照，供普通合成阶段使用。
+ * @since Beta v0.12.6
+ */
+function buildOrdinaryMaterials(
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): Array<TGApp.App.Material.WikiItem> {
+  return materials.map((material) => {
+    const convert = material.convert.filter((recipe) => !hasConversionMedia(recipe));
+    return convert.length === material.convert.length ? material : { ...material, convert };
+  });
+}
+
+/**
+ * 按单个目标计算稳定的材料需求，不修改目标记录或输入库存。
+ * @since Beta v0.12.6
+ */
+function getEntryRequirements(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
   inventory: ReadonlyMap<number, number>,
-  materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
-  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-): EntryMaterialAllocation {
-  const remainingInventory = new Map(inventory);
-  const requirements = new Map(
+): Map<number, number> {
+  return new Map(
     allocateExperienceRequirements(
       Array.from(aggregateRequirements(entry.items), ([id, count]) => ({ id, count })),
       inventory,
@@ -98,37 +274,22 @@ function allocateEntryMaterials(
           star: entry.star,
         },
       ],
-    ).map((item) => [item.id, item.count]),
+    ).map((item) => <const>[item.id, item.count]),
   );
-  const ownedMaterials = new Map<number, number>();
-  for (const [materialId, required] of requirements) {
-    const owned = Math.min(Math.max(remainingInventory.get(materialId) ?? 0, 0), required);
-    ownedMaterials.set(materialId, owned);
-    remainingInventory.set(materialId, (remainingInventory.get(materialId) ?? 0) - owned);
-  }
+}
 
-  const unmetRequirements = Array.from(requirements, ([id, required]) => ({
-    id,
-    count: required - (ownedMaterials.get(id) ?? 0),
-  }));
-  const inventoryBeforeCrafting = remainingInventory;
-  const craftingAllocation = entry.allowCrafting
-    ? calculateCraftingAllocation(
-        unmetRequirements,
-        inventoryBeforeCrafting,
-        materials,
-        entry.useDust,
-        entry.useSolvent,
-      )
-    : undefined;
-  const afterCrafting = craftingAllocation?.remainingInventory ?? remainingInventory;
-
-  const entryMaterials = Array.from(requirements, ([id, required]) => {
+/**
+ * 创建尚未计算合成的材料展示项。
+ * @since Beta v0.12.6
+ */
+function createEntryResults(
+  requirements: ReadonlyMap<number, number>,
+  directOwned: ReadonlyMap<number, number>,
+  materialMap: MaterialMap,
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  return Array.from(requirements, ([id, required]) => {
     const material = materialMap.get(id);
-    const crafting = craftingAllocation?.materials.get(id);
-    const owned = ownedMaterials.get(id) ?? 0;
-    const craftable = crafting?.count ?? 0;
-    const available = owned + craftable;
+    const owned = directOwned.get(id) ?? 0;
     return {
       id,
       name: material?.name ?? `材料 ${id}`,
@@ -136,118 +297,990 @@ function allocateEntryMaterials(
       star: material?.star ?? 1,
       required,
       owned,
-      craftable,
-      craftingCosts: buildCraftingCosts(crafting, inventoryBeforeCrafting, materialMap),
-      missing: Math.max(required - available, 0),
-      progress: required === 0 ? 100 : Math.min((available / required) * 100, 100),
+      craftable: 0,
+      craftingCosts: [],
+      missing: Math.max(required - owned, 0),
+      progress: required === 0 ? 100 : Math.min((owned / required) * 100, 100),
     };
   });
+}
+
+/**
+ * 重新计算材料的缺口和进度，同时保持输入结果不可变。
+ * @since Beta v0.12.6
+ */
+function updateResultMaterial(
+  result: TGApp.App.UserCalc.ResultMaterial,
+  craftable: number,
+  craftingCosts: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>,
+): TGApp.App.UserCalc.ResultMaterial {
+  const available = result.owned + craftable;
+  return {
+    ...result,
+    craftable,
+    craftingCosts: [...craftingCosts],
+    missing: Math.max(result.required - available, 0),
+    progress: result.required === 0 ? 100 : Math.min((available / result.required) * 100, 100),
+  };
+}
+
+/**
+ * 将一次合成分配应用到目标结果。
+ * @since Beta v0.12.6
+ */
+function applyCraftingAllocation(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  allocation: ReadonlyMap<number, CraftableMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materialMap: MaterialMap,
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  return sortCultivationResults(
+    results.map((result) => {
+      const crafting = allocation.get(result.id);
+      if (!crafting || crafting.count <= 0) return result;
+      return updateResultMaterial(result, result.craftable + crafting.count, [
+        ...result.craftingCosts,
+        ...buildCraftingCosts(crafting, inventory, materialMap),
+      ]);
+    }),
+  );
+}
+
+/**
+ * 在已经预留直接库存的余量中执行普通合成。
+ * `calculateCraftingAllocation` 需要看到当前目标的直接持有量，因此只把这一目标的直接量作为
+ * 虚拟输入加回；全局余量中的其他目标直接量始终不会进入该函数。
+ * @since Beta v0.12.6
+ */
+function allocateOrdinaryCrafting(
+  requirements: ReadonlyMap<number, number>,
+  directOwned: ReadonlyMap<number, number>,
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materialMap: MaterialMap,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): MediaConversionAllocation {
+  const calculationInventory = normalizeInventory(inventory);
+  for (const [id, count] of directOwned) addInventoryCount(calculationInventory, id, count);
+  const requirementsList = Array.from(requirements, ([id, count]) => ({ id, count }));
+  const allocation = calculateCraftingAllocation(
+    requirementsList,
+    calculationInventory,
+    materials,
+    false,
+    false,
+  );
+  return {
+    remainingInventory: normalizeInventory(allocation.remainingInventory),
+    results: applyCraftingAllocation(results, allocation.materials, inventory, materialMap),
+  };
+}
+
+/**
+ * 按允许的媒介转换配方为当前目标补足材料。
+ * @since Beta v0.12.6
+ */
+function allocateMediaConversions(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materialMap: MaterialMap,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  useDust: boolean,
+  useSolvent: boolean,
+): MediaConversionAllocation {
+  let remainingInventory = normalizeInventory(inventory);
+  if (
+    (!useDust || (remainingInventory.get(DUST_OF_AZOTH_ID) ?? 0) <= 0) &&
+    (!useSolvent || (remainingInventory.get(DREAM_SOLVENT_ID) ?? 0) <= 0)
+  ) {
+    return { remainingInventory, results: [...results] };
+  }
+  let nextResults = [...results];
+  for (const result of sortCultivationResults(results)) {
+    const missing = Math.max(result.required - result.owned - result.craftable, 0);
+    if (missing <= 0) continue;
+    const material = materialMap.get(result.id);
+    if (!material) continue;
+    const canUseDust = useDust && (remainingInventory.get(DUST_OF_AZOTH_ID) ?? 0) > 0;
+    const canUseSolvent = useSolvent && (remainingInventory.get(DREAM_SOLVENT_ID) ?? 0) > 0;
+    if (!canUseDust && !canUseSolvent) break;
+    const beforeTarget = new Map(remainingInventory);
+    const allocation = calculateCraftingAllocation(
+      [{ id: result.id, count: missing }],
+      remainingInventory,
+      materials,
+      canUseDust,
+      canUseSolvent,
+    );
+    const crafting = allocation.materials.get(result.id);
+    if (!crafting || crafting.count <= 0) continue;
+    remainingInventory = normalizeInventory(allocation.remainingInventory);
+    const costs = buildCraftingCosts(crafting, beforeTarget, materialMap);
+    nextResults = nextResults.map((item) =>
+      item.id === result.id
+        ? updateResultMaterial(item, item.craftable + crafting.count, [
+            ...item.craftingCosts,
+            ...costs,
+          ])
+        : item,
+    );
+  }
+  return { remainingInventory, results: sortCultivationResults(nextResults) };
+}
+
+/**
+ * 按目标材料顺序应用明确的转换意图，并记录可重新打开编辑器的原始上下文。
+ * @since Beta v0.12.6
+ */
+function allocateExplicitConversions(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  intents: ReadonlyArray<TGApp.App.UserCalc.ConversionIntent>,
+): ExplicitConversionAllocation {
+  let remainingInventory = normalizeInventory(inventory);
+  let nextResults = results.map(cloneResultMaterial);
+  const orderedResults = sortCultivationResults(results);
+  const resultOrder = new Map(orderedResults.map((result, index) => [result.id, index]));
+  const orderedIntents = intents
+    .map((intent, index) => ({ intent, index, order: resultOrder.get(intent.materialId) }))
+    .filter(
+      (
+        item,
+      ): item is { intent: TGApp.App.UserCalc.ConversionIntent; index: number; order: number } =>
+        item.order !== undefined,
+    )
+    .sort((a, b) => a.order - b.order || a.index - b.index);
+  const explicitMaterialIds = new Set<number>();
+  const appliedConversions: Array<TGApp.App.UserCalc.AppliedConversion> = [];
+
+  for (const { intent } of orderedIntents) {
+    explicitMaterialIds.add(intent.materialId);
+    const result = nextResults.find((item) => item.id === intent.materialId);
+    if (!result) continue;
+    const beforeResult = cloneResultMaterial(result);
+    const beforeInventory = normalizeInventory(remainingInventory);
+    const sourceLimits = new Map(intent.sourceLimits.map((source) => [source.id, source.count]));
+    const preview = calculateConversionPreview(
+      beforeResult,
+      beforeInventory,
+      materials,
+      sourceLimits,
+      intent.count,
+    );
+    const recommendation = cloneConversionRecommendation(preview);
+    remainingInventory = subtractCraftingCosts(remainingInventory, recommendation.costs);
+    nextResults = nextResults.map((item) =>
+      item.id === result.id
+        ? updateResultMaterial(item, item.craftable + recommendation.count, [
+            ...item.craftingCosts,
+            ...recommendation.costs,
+          ])
+        : item,
+    );
+    appliedConversions.push({
+      intent: cloneConversionIntent(intent),
+      recommendation,
+      plannedCosts: calculateConversionPlan(
+        beforeResult,
+        beforeInventory,
+        materials,
+        sourceLimits,
+        intent.count,
+        recommendation,
+      ).costs,
+      inventory: new Map(beforeInventory),
+    });
+  }
 
   return {
-    remainingInventory: afterCrafting,
-    results: sortCultivationResults(entryMaterials),
+    remainingInventory,
+    results: sortCultivationResults(nextResults),
+    explicitMaterialIds,
+    appliedConversions,
   };
+}
+
+/**
+ * 合并多个目标的材料结果，并按来源 ID 合并实际合成消耗。
+ * @since Beta v0.12.6
+ * @param results - 待合并的材料结果
+ * @returns 合并后的材料结果
+ */
+export function mergeCultivationResults(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  const merged = new Map<
+    number,
+    {
+      base: TGApp.App.UserCalc.ResultMaterial;
+      required: number;
+      owned: number;
+      craftable: number;
+      costs: Map<number, TGApp.App.UserCalc.CraftingCost>;
+    }
+  >();
+  for (const result of results) {
+    const current = merged.get(result.id);
+    if (!current) {
+      const costs = new Map<number, TGApp.App.UserCalc.CraftingCost>();
+      for (const cost of result.craftingCosts) {
+        const existing = costs.get(cost.id);
+        if (existing) {
+          existing.count += cost.count;
+          existing.owned = Math.max(existing.owned, cost.owned);
+        } else {
+          costs.set(cost.id, { ...cost });
+        }
+      }
+      merged.set(result.id, {
+        base: { ...result, craftingCosts: [...result.craftingCosts] },
+        required: result.required,
+        owned: result.owned,
+        craftable: result.craftable,
+        costs,
+      });
+      continue;
+    }
+    current.required += result.required;
+    current.owned += result.owned;
+    current.craftable += result.craftable;
+    for (const cost of result.craftingCosts) {
+      const existing = current.costs.get(cost.id);
+      if (existing) {
+        existing.count += cost.count;
+        existing.owned = Math.max(existing.owned, cost.owned);
+      } else {
+        current.costs.set(cost.id, { ...cost });
+      }
+    }
+  }
+  return sortCultivationResults(
+    Array.from(merged.values(), (result) => {
+      const available = result.owned + result.craftable;
+      return {
+        ...result.base,
+        required: result.required,
+        owned: result.owned,
+        craftable: result.craftable,
+        craftingCosts: Array.from(result.costs.values()).sort(
+          (a, b) => b.star - a.star || a.id - b.id,
+        ),
+        missing: Math.max(result.required - available, 0),
+        progress: result.required === 0 ? 100 : Math.min((available / result.required) * 100, 100),
+      };
+    }),
+  );
+}
+
+/**
+ * 预留媒介转换推荐所需的普通合成来源。
+ * @since Beta v0.12.6
+ * @param results - 当前待补足的材料结果
+ * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
+ * @param materials - 材料 Wiki 数据
+ * @param protectedResults - 需优先预留普通合成来源的其他目标结果
+ * @returns 预留普通合成来源后的库存及各目标的普通合成后缺口
+ */
+export function prepareConversionRecommendations(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  remainingInventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
+): ConversionPreparation {
+  const orderedResults = sortCultivationResults(results);
+  const ordinaryMaterials = buildOrdinaryMaterials(materials);
+  let ordinaryRemaining = normalizeInventory(remainingInventory);
+
+  // 单目标编辑只展示自身建议，但仍须保护计划中其余目标尚未采用的普通合成来源。
+  if (protectedResults.length > 0) {
+    ordinaryRemaining = normalizeInventory(
+      calculateCraftingAllocation(
+        protectedResults.map((result) => ({ id: result.id, count: result.missing })),
+        ordinaryRemaining,
+        ordinaryMaterials,
+        false,
+        false,
+      ).remainingInventory,
+    );
+  }
+
+  const missing = new Map<number, number>();
+  // 先在临时库存中预留全部普通合成，避免媒介建议抢走普通合成所需的来源材料。
+  for (const result of orderedResults) {
+    const requiredMissing = Math.max(result.required - result.owned - result.craftable, 0);
+    if (requiredMissing <= 0) {
+      missing.set(result.id, 0);
+      continue;
+    }
+    const allocation = calculateCraftingAllocation(
+      [{ id: result.id, count: requiredMissing }],
+      ordinaryRemaining,
+      ordinaryMaterials,
+      false,
+      false,
+    );
+    const crafted = allocation.materials.get(result.id)?.count ?? 0;
+    ordinaryRemaining = normalizeInventory(allocation.remainingInventory);
+    missing.set(result.id, Math.max(requiredMissing - crafted, 0));
+  }
+
+  return { inventory: ordinaryRemaining, missing };
+}
+
+/**
+ * 基于当前分配后的缺口生成媒介转换建议。建议只读，不会修改目标结果或传入库存。
+ * @since Beta v0.12.6
+ * @param results - 当前直接库存和已采用合成后的结果
+ * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
+ * @param materials - 材料 Wiki 数据
+ * @param protectedResults - 需优先预留普通合成来源的其他目标结果
+ * @returns 可额外采用的媒介转换建议
+ */
+export function buildConversionRecommendations(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  remainingInventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
+): Array<TGApp.App.UserCalc.ConversionRecommendation> {
+  const orderedResults = sortCultivationResults(results);
+  const preparation = prepareConversionRecommendations(
+    results,
+    remainingInventory,
+    materials,
+    protectedResults,
+  );
+  const ordinaryMissing = preparation.missing;
+  const ordinaryRemaining = preparation.inventory;
+  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+
+  let available = new Map(ordinaryRemaining);
+  const ownedBeforeRecommendations = new Map(available);
+  const recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation> = [];
+  if ((available.get(DUST_OF_AZOTH_ID) ?? 0) <= 0 && (available.get(DREAM_SOLVENT_ID) ?? 0) <= 0) {
+    return recommendations;
+  }
+  for (const result of orderedResults) {
+    const missing = ordinaryMissing.get(result.id) ?? 0;
+    if (missing <= 0) continue;
+    const material = materialMap.get(result.id);
+    if (!material) continue;
+    const canUseDust = (available.get(DUST_OF_AZOTH_ID) ?? 0) > 0;
+    const canUseSolvent = (available.get(DREAM_SOLVENT_ID) ?? 0) > 0;
+    if (!canUseDust && !canUseSolvent) break;
+    const allocation = calculateCraftingAllocation(
+      [{ id: result.id, count: missing }],
+      available,
+      materials,
+      canUseDust,
+      canUseSolvent,
+    );
+    const crafting = allocation.materials.get(result.id);
+    if (!crafting || crafting.count <= 0 || !usesConversionMedia(crafting)) continue;
+    available = normalizeInventory(allocation.remainingInventory);
+    recommendations.push({
+      material: {
+        ...result,
+        craftingCosts: result.craftingCosts.map((cost) => ({ ...cost })),
+      },
+      count: crafting.count,
+      costs: buildCraftingCosts(crafting, ownedBeforeRecommendations, materialMap),
+    });
+  }
+  return recommendations;
+}
+
+/**
+ * 获取目标材料配方图中当前库存可用的转换来源。
+ * @since Beta v0.12.6
+ * @param targetId - 目标材料 ID
+ * @param inventory - 可用于转换预览的库存
+ * @param materials - 材料 Wiki 数据
+ * @returns 按星级降序及 ID 升序排列的来源材料
+ */
+export function getConversionSourceMaterials(
+  targetId: number,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): Array<TGApp.App.Material.WikiItem> {
+  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+  const candidates = new Map<number, TGApp.App.Material.WikiItem>();
+  const visited = new Set<number>();
+
+  const visit = (id: number): void => {
+    if (visited.has(id)) return;
+    visited.add(id);
+    const material = materialMap.get(id);
+    if (!material) return;
+    for (const recipe of material.convert) {
+      for (const source of recipe.source) {
+        const sourceId = Number(source.id);
+        if (
+          !Number.isInteger(sourceId) ||
+          sourceId === targetId ||
+          CONVERSION_MEDIA_IDS.has(sourceId)
+        ) {
+          continue;
+        }
+        const sourceMaterial = materialMap.get(sourceId);
+        if (sourceMaterial && (inventory.get(sourceId) ?? 0) > 0) {
+          candidates.set(sourceId, sourceMaterial);
+        }
+        visit(sourceId);
+      }
+    }
+  };
+
+  visit(targetId);
+  return Array.from(candidates.values()).sort((a, b) => b.star - a.star || a.id - b.id);
+}
+
+/**
+ * 计算单个媒介转换推荐的只读预览。
+ * @since Beta v0.12.6
+ * @param material - 待补足的材料结果
+ * @param inventory - 普通合成来源预留后的可用库存
+ * @param materials - 材料 Wiki 数据
+ * @param sourceLimits - 用户为非媒介来源指定的数量上限
+ * @param count - 请求转换的目标数量
+ * @returns 转换预览结果
+ */
+export function calculateConversionPreview(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  sourceLimits: ReadonlyMap<number, number>,
+  count: number,
+): TGApp.App.UserCalc.ConversionRecommendation {
+  const previewMaterial = {
+    ...material,
+    craftingCosts: material.craftingCosts.map((cost) => ({ ...cost })),
+  };
+  const empty = (): TGApp.App.UserCalc.ConversionRecommendation => ({
+    material: previewMaterial,
+    count: 0,
+    costs: [],
+  });
+  if (!Number.isFinite(count) || !Number.isInteger(count) || count <= 0) return empty();
+  if (
+    !Number.isFinite(material.missing) ||
+    !Number.isInteger(material.missing) ||
+    material.missing <= 0
+  ) {
+    return empty();
+  }
+
+  const materialInfo = materials.find((item) => item.id === material.id);
+  if (!materialInfo || materialInfo.convert.length === 0) return empty();
+
+  const dust = Math.max(inventory.get(DUST_OF_AZOTH_ID) ?? 0, 0);
+  const solvent = Math.max(inventory.get(DREAM_SOLVENT_ID) ?? 0, 0);
+  if (dust <= 0 && solvent <= 0) return empty();
+
+  const limitedInventory = new Map<number, number>();
+  limitedInventory.set(DUST_OF_AZOTH_ID, dust);
+  limitedInventory.set(DREAM_SOLVENT_ID, solvent);
+  for (const [sourceId, limit] of sourceLimits) {
+    if (
+      sourceId === material.id ||
+      CONVERSION_MEDIA_IDS.has(sourceId) ||
+      !Number.isFinite(limit) ||
+      !Number.isInteger(limit) ||
+      limit <= 0
+    ) {
+      continue;
+    }
+    const available = Math.max(inventory.get(sourceId) ?? 0, 0);
+    if (available <= 0) continue;
+    limitedInventory.set(sourceId, Math.min(limit, available));
+  }
+
+  const allocation = calculateCraftingAllocation(
+    [{ id: material.id, count: Math.min(count, material.missing) }],
+    limitedInventory,
+    materials,
+    dust > 0,
+    solvent > 0,
+  );
+  const crafting = allocation.materials.get(material.id);
+  if (!crafting || crafting.count <= 0 || !usesConversionMedia(crafting)) return empty();
+
+  const materialMap = new Map(materials.map((item) => <const>[item.id, item]));
+  return {
+    material: previewMaterial,
+    count: Math.min(crafting.count, material.missing),
+    costs: buildCraftingCosts(crafting, inventory, materialMap),
+  };
+}
+
+/**
+ * 按目标需求计算各转换来源的数量上限，不受当前库存限制。
+ * @since Beta v0.12.6
+ * @param targetId - 目标材料 ID
+ * @param count - 目标需求数量
+ * @param materials - 材料配方数据
+ * @returns 各来源通过最短配方路径满足需求所需的数量
+ */
+export function getConversionSourceLimits(
+  targetId: number,
+  count: number,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): Map<number, number> {
+  if (!Number.isSafeInteger(count) || count < 0) return new Map();
+  const materialMap = new Map(materials.map((material) => [material.id, material]));
+  const rates = new Map<number, number>([[targetId, 1]]);
+  const pending = [targetId];
+  for (let index = 0; index < pending.length; index++) {
+    const id = pending[index];
+    const rate = rates.get(id) ?? 1;
+    for (const recipe of materialMap.get(id)?.convert ?? []) {
+      for (const source of recipe.source) {
+        const sourceId = Number(source.id);
+        const nextRate = rate * source.count;
+        if (
+          sourceId === targetId ||
+          CONVERSION_MEDIA_IDS.has(sourceId) ||
+          !materialMap.has(sourceId) ||
+          !Number.isSafeInteger(nextRate) ||
+          nextRate <= 0 ||
+          nextRate >= (rates.get(sourceId) ?? Infinity)
+        ) {
+          continue;
+        }
+        rates.set(sourceId, nextRate);
+        pending.push(sourceId);
+      }
+    }
+  }
+  rates.delete(targetId);
+  return new Map(Array.from(rates, ([id, rate]) => [id, rate * count]));
+}
+
+/**
+ * 计算完整转换需求；当前可执行消耗优先，不把缺少的材料计入实际供给。
+ * @since Beta v0.12.6
+ * @param material - 转换前的目标需求
+ * @param inventory - 当前可用余量
+ * @param materials - 材料配方数据
+ * @param sourceLimits - 用户选定来源及计划数量上限
+ * @param count - 请求转换数量
+ * @param actual - 可选的已计算实际转换结果
+ * @returns 全部方案可完成的数量及所需材料
+ */
+export function calculateConversionPlan(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  sourceLimits: ReadonlyMap<number, number>,
+  count: number,
+  actual: TGApp.App.UserCalc.ConversionRecommendation = calculateConversionPreview(
+    material,
+    inventory,
+    materials,
+    sourceLimits,
+    count,
+  ),
+): TGApp.App.UserCalc.ConversionRecommendation {
+  const requested = Math.min(Math.max(count, 0), material.missing);
+  if (!Number.isSafeInteger(requested) || requested <= actual.count) {
+    return cloneConversionRecommendation(actual);
+  }
+  const spent = new Map(actual.costs.map((cost) => [cost.id, cost.count]));
+  const limits = new Map<number, number>();
+  const capacities = getConversionSourceLimits(material.id, material.missing, materials);
+  for (const [id, limit] of sourceLimits) {
+    if (!Number.isSafeInteger(limit) || limit <= 0 || !capacities.has(id)) continue;
+    limits.set(id, Math.max(Math.min(limit, capacities.get(id) ?? 0) - (spent.get(id) ?? 0), 0));
+  }
+  // 仅供需求预览使用的媒介预算；不写入真实库存，也不参与实际材料分配。
+  const mediaRate = Math.max(
+    1,
+    ...materials.flatMap((item) =>
+      item.convert.flatMap((recipe) =>
+        recipe.source
+          .filter((source) => CONVERSION_MEDIA_IDS.has(Number(source.id)))
+          .map((source) => source.count),
+      ),
+    ),
+  );
+  const mediaBudget =
+    Math.max(
+      Array.from(limits.values()).reduce((sum, value) => sum + value, 0),
+      requested,
+    ) *
+    mediaRate *
+    materials.length;
+  const virtualInventory = new Map(limits);
+  virtualInventory.set(DUST_OF_AZOTH_ID, mediaBudget);
+  virtualInventory.set(DREAM_SOLVENT_ID, mediaBudget);
+  const remaining = calculateConversionPreview(
+    { ...material, missing: requested - actual.count },
+    virtualInventory,
+    materials,
+    limits,
+    requested - actual.count,
+  );
+  const costs = new Map(actual.costs.map((cost) => [cost.id, { ...cost }]));
+  for (const cost of remaining.costs) {
+    const previous = costs.get(cost.id);
+    costs.set(cost.id, {
+      ...cost,
+      count: (previous?.count ?? 0) + cost.count,
+      owned: inventory.get(cost.id) ?? 0,
+    });
+  }
+  return {
+    material: cloneResultMaterial(material),
+    count: actual.count + remaining.count,
+    costs: Array.from(costs.values()).sort((a, b) => b.star - a.star || a.id - b.id),
+  };
+}
+
+/**
+ * 构建已采用转换方案的来源和媒介需求行，与养成目标进度分开展示。
+ * @since Beta v0.12.6
+ * @param options - 当前展示范围内的转换方案
+ * @returns 按材料合并的计划需求、可用量和缺口
+ */
+export function buildConversionDemandMaterials(
+  options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>,
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  const demands = new Map<number, TGApp.App.UserCalc.ResultMaterial>();
+  const actualCosts = new Map<number, number>();
+  const freeInventory = new Map<number, number>();
+  for (const option of options) {
+    if (!option.intent || option.intent.count === 0) continue;
+    for (const cost of option.recommendation.costs) {
+      actualCosts.set(cost.id, (actualCosts.get(cost.id) ?? 0) + cost.count);
+    }
+    for (const cost of option.plannedCosts ?? option.recommendation.costs) {
+      const previous = demands.get(cost.id);
+      demands.set(cost.id, {
+        id: cost.id,
+        name: cost.name,
+        type: cost.type,
+        star: cost.star,
+        required: (previous?.required ?? 0) + cost.count,
+        owned: 0,
+        craftable: 0,
+        craftingCosts: [],
+        missing: 0,
+        progress: 0,
+      });
+      freeInventory.set(
+        cost.id,
+        Math.max(freeInventory.get(cost.id) ?? 0, option.remainingInventory?.get(cost.id) ?? 0),
+      );
+    }
+  }
+  return sortCultivationResults(
+    Array.from(demands.values(), (demand) => {
+      const owned = (actualCosts.get(demand.id) ?? 0) + (freeInventory.get(demand.id) ?? 0);
+      return {
+        ...demand,
+        owned,
+        missing: Math.max(demand.required - owned, 0),
+        progress: demand.required === 0 ? 100 : Math.min((owned / demand.required) * 100, 100),
+      };
+    }),
+  );
+}
+
+/**
+ * 汇总额外合成消耗，扣除已在转换需求中展示的已采用方案实际用量。
+ * @since Beta v0.12.6
+ * @param materials - 当前展示范围内的材料结果
+ * @param options - 同一展示范围内的转换方案
+ * @returns 不含已采用转换用量的合成消耗，保留同材料的普通合成部分
+ */
+export function getAdditionalCraftingCosts(
+  materials: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption> = [],
+): Array<TGApp.App.UserCalc.CraftingCost> {
+  const costs = new Map<number, TGApp.App.UserCalc.CraftingCost>();
+  for (const material of materials) {
+    for (const cost of material.craftingCosts) {
+      const previous = costs.get(cost.id);
+      costs.set(cost.id, {
+        ...cost,
+        count: (previous?.count ?? 0) + cost.count,
+        owned: Math.max(previous?.owned ?? 0, cost.owned),
+      });
+    }
+  }
+  for (const option of options) {
+    if (!option.intent || option.intent.count === 0) continue;
+    for (const cost of option.recommendation.costs) {
+      const current = costs.get(cost.id);
+      if (current) current.count = Math.max(current.count - cost.count, 0);
+    }
+  }
+  return Array.from(costs.values())
+    .filter((cost) => cost.count > 0)
+    .sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
 /**
  * 按目标优先级分配计划库存并汇总材料完成情况。
  *
  * 已完成目标仍生成展示用材料列表，但不占用进行中目标的库存，也不计入计划汇总。
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  * @param entries - 养成目标列表
  * @param inventory - 计划可用背包材料
  * @param materials - 材料 Wiki 数据
+ * @param intents - 按养成目标稳定键保存的手动转换设置
  * @returns 各目标、计划汇总及剩余库存的分配结果
  */
 export function allocatePlanMaterials(
   entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  intents: ReadonlyMap<string, ReadonlyArray<TGApp.App.UserCalc.ConversionIntent>> = new Map(),
 ): PlanMaterialAllocation {
   const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
-  let remainingInventory = new Map(inventory);
+  const ordinaryMaterials = buildOrdinaryMaterials(materials);
   const allocatedEntries = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
+  const appliedConversions = new Map<string, Array<TGApp.App.UserCalc.AppliedConversion>>();
 
-  const activeEntries = entries
-    .filter((entry) => entry.status === "active")
-    .sort(
-      (a, b) =>
-        a.sortOrder - b.sortOrder || a.created.localeCompare(b.created) || a.id.localeCompare(b.id),
-    );
+  const activeEntries = sortCultivationEntries(
+    entries.filter((entry) => entry.status === "active"),
+  );
 
-  for (const entry of activeEntries) {
-    const allocated = allocateEntryMaterials(entry, remainingInventory, materialMap, materials);
-    remainingInventory = allocated.remainingInventory;
-    allocatedEntries.set(entry.id, allocated.results);
+  const activePlans: Array<EntryPlan> = activeEntries.map((entry) => ({
+    entry,
+    requirements: new Map(),
+    directOwned: new Map<number, number>(),
+    results: [],
+    explicitMaterialIds: new Set<number>(),
+  }));
+  let remainingInventory = normalizeInventory(inventory);
+
+  // 先按优先级从全体 active 目标预留直接库存，后续任何合成阶段都只能使用该余量。
+  for (const plan of activePlans) {
+    plan.requirements = getEntryRequirements(plan.entry, remainingInventory);
+    for (const [id, required] of plan.requirements) {
+      const owned = Math.min(remainingInventory.get(id) ?? 0, required);
+      plan.directOwned.set(id, owned);
+      remainingInventory.set(id, Math.max((remainingInventory.get(id) ?? 0) - owned, 0));
+    }
+    plan.results = createEntryResults(plan.requirements, plan.directOwned, materialMap);
   }
+
+  // 所有目标先完成普通合成，确保后续媒介转换不会挪用任一目标已经采用的普通来源。
+  for (const plan of activePlans) {
+    if (plan.entry.allowCrafting) {
+      const ordinary = allocateOrdinaryCrafting(
+        plan.requirements,
+        plan.directOwned,
+        plan.results,
+        remainingInventory,
+        materialMap,
+        ordinaryMaterials,
+      );
+      plan.results = ordinary.results;
+      remainingInventory = ordinary.remainingInventory;
+    }
+  }
+
+  // 媒介转换前临时预留所有仍缺目标的普通合成来源，即使目标关闭自动合成也不让高优先级转换抢走它们。
+  const ordinaryProtectionRequirements = activePlans.flatMap((plan) =>
+    plan.results
+      .filter((result) => result.missing > 0)
+      .map((result) => ({ id: result.id, count: result.missing })),
+  );
+  const conversionStartInventory = normalizeInventory(remainingInventory);
+  let conversionInventory = conversionStartInventory;
+  if (ordinaryProtectionRequirements.length > 0) {
+    conversionInventory = normalizeInventory(
+      calculateCraftingAllocation(
+        ordinaryProtectionRequirements,
+        conversionStartInventory,
+        ordinaryMaterials,
+        false,
+        false,
+      ).remainingInventory,
+    );
+  }
+  const conversionBeforeMedia = new Map(conversionInventory);
+
+  // 普通合成完成后，先按目标优先级应用明确转换，再执行没有明确意图的自动转换。
+  for (const plan of activePlans) {
+    const entryIntents = intents.get(getCultivationEntryKey(plan.entry)) ?? [];
+    const explicit = allocateExplicitConversions(
+      plan.results,
+      conversionInventory,
+      materials,
+      entryIntents,
+    );
+    plan.results = explicit.results;
+    plan.explicitMaterialIds = explicit.explicitMaterialIds;
+    appliedConversions.set(plan.entry.id, explicit.appliedConversions);
+    conversionInventory = explicit.remainingInventory;
+
+    const automaticResults = plan.results.filter(
+      (result) => !plan.explicitMaterialIds.has(result.id),
+    );
+    if (
+      plan.entry.allowCrafting &&
+      (plan.entry.useDust || plan.entry.useSolvent) &&
+      automaticResults.length > 0
+    ) {
+      const converted = allocateMediaConversions(
+        automaticResults,
+        conversionInventory,
+        materialMap,
+        materials,
+        plan.entry.useDust,
+        plan.entry.useSolvent,
+      );
+      const convertedResults = new Map(converted.results.map((result) => [result.id, result]));
+      plan.results = sortCultivationResults(
+        plan.results.map((result) => convertedResults.get(result.id) ?? result),
+      );
+      conversionInventory = converted.remainingInventory;
+    }
+    allocatedEntries.set(plan.entry.id, plan.results);
+  }
+  remainingInventory = applyInventoryConsumption(
+    conversionStartInventory,
+    conversionBeforeMedia,
+    conversionInventory,
+  );
 
   for (const entry of entries) {
     if (entry.status !== "completed") continue;
-    allocatedEntries.set(
-      entry.id,
-      allocateEntryMaterials(entry, inventory, materialMap, materials).results,
-    );
-  }
-
-  const aggregate = new Map<
-    number,
-    {
-      required: number;
-      owned: number;
-      craftable: number;
-      craftingCosts: Map<number, number>;
+    const requirements = getEntryRequirements(entry, inventory);
+    const directOwned = new Map<number, number>();
+    let completedRemaining = normalizeInventory(inventory);
+    for (const [id, required] of requirements) {
+      const owned = Math.min(completedRemaining.get(id) ?? 0, required);
+      directOwned.set(id, owned);
+      completedRemaining.set(id, Math.max((completedRemaining.get(id) ?? 0) - owned, 0));
     }
-  >();
-  for (const entry of activeEntries) {
-    for (const result of allocatedEntries.get(entry.id) ?? []) {
-      const current = aggregate.get(result.id) ?? {
-        required: 0,
-        owned: 0,
-        craftable: 0,
-        craftingCosts: new Map<number, number>(),
-      };
-      current.required += result.required;
-      current.owned += result.owned;
-      current.craftable += result.craftable;
-      for (const cost of result.craftingCosts) {
-        current.craftingCosts.set(cost.id, (current.craftingCosts.get(cost.id) ?? 0) + cost.count);
+    let results = createEntryResults(requirements, directOwned, materialMap);
+    if (entry.allowCrafting) {
+      const ordinary = allocateOrdinaryCrafting(
+        requirements,
+        directOwned,
+        results,
+        completedRemaining,
+        materialMap,
+        ordinaryMaterials,
+      );
+      results = ordinary.results;
+      completedRemaining = ordinary.remainingInventory;
+      if (entry.useDust || entry.useSolvent) {
+        results = allocateMediaConversions(
+          results,
+          completedRemaining,
+          materialMap,
+          materials,
+          entry.useDust,
+          entry.useSolvent,
+        ).results;
       }
-      aggregate.set(result.id, current);
     }
+    allocatedEntries.set(entry.id, results);
   }
 
-  const resultMaterials = Array.from(aggregate, ([id, result]) => {
-    const material = materialMap.get(id);
-    const available = result.owned + result.craftable;
-    return {
-      id,
-      name: material?.name ?? `材料 ${id}`,
-      type: material?.type ?? "未知类型",
-      star: material?.star ?? 1,
-      required: result.required,
-      owned: result.owned,
-      craftable: result.craftable,
-      craftingCosts: Array.from(result.craftingCosts, ([costId, count]) => {
-        const cost = materialMap.get(costId);
-        return {
-          id: costId,
-          name: cost?.name ?? `材料 ${costId}`,
-          type: cost?.type ?? "未知类型",
-          star: cost?.star ?? 1,
-          count,
-          owned: inventory.get(costId) ?? 0,
-        };
-      }).sort((a, b) => b.star - a.star || a.id - b.id),
-      missing: Math.max(result.required - available, 0),
-      progress: result.required === 0 ? 100 : Math.min((available / result.required) * 100, 100),
-    };
-  });
+  const resultMaterials = mergeCultivationResults(activePlans.flatMap((plan) => plan.results));
+  const conversionPreparation = prepareConversionRecommendations(
+    resultMaterials,
+    remainingInventory,
+    materials,
+  );
 
   return {
     entries: allocatedEntries,
-    materials: sortCultivationResults(resultMaterials),
+    appliedConversions,
+    materials: resultMaterials,
     remainingInventory,
+    conversionInventory: conversionPreparation.inventory,
+    recommendations: buildConversionRecommendations(resultMaterials, remainingInventory, materials),
   };
+}
+
+/**
+ * 构建按养成目标归属的转换编辑上下文。
+ *
+ * 该函数只生成展示和编辑数据，不会修改既有分配结果或采用的转换意图。
+ * @since Beta v0.12.6
+ * @param entries - 当前计划目标
+ * @param allocation - 已完成的计划材料分配
+ * @param materials - 材料 Wiki 数据
+ * @param entryIds - 可选的目标 ID 筛选，在全计划推荐分配后应用
+ * @returns 按目标优先级排列的已采用方案及剩余推荐
+ */
+export function getConversionOptions(
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  allocation: PlanMaterialAllocation,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  entryIds?: ReadonlySet<string>,
+): Array<TGApp.App.UserCalc.ConversionOption> {
+  const activeEntries = sortCultivationEntries(
+    entries.filter((entry) => entry.status === "active"),
+  );
+  let workingInventory = normalizeInventory(allocation.remainingInventory);
+  const options: Array<TGApp.App.UserCalc.ConversionOption> = [];
+
+  for (const entry of activeEntries) {
+    const entryKey = getCultivationEntryKey(entry);
+    const results = allocation.entries.get(entry.id) ?? [];
+    const applied = allocation.appliedConversions.get(entry.id) ?? [];
+    const explicitMaterialIds = new Set(applied.map((conversion) => conversion.intent.materialId));
+
+    for (const conversion of applied) {
+      options.push({
+        entryKey,
+        entryName: entry.name,
+        recommendation: cloneConversionRecommendation(conversion.recommendation),
+        inventory: new Map(conversion.inventory),
+        intent: cloneConversionIntent(conversion.intent),
+        plannedCosts: conversion.plannedCosts.map((cost) => ({ ...cost })),
+        remainingInventory: allocation.conversionInventory,
+      });
+    }
+
+    const automaticResults = results.filter((result) => !explicitMaterialIds.has(result.id));
+    if (automaticResults.length === 0) continue;
+    const protectedResults = activeEntries.flatMap((otherEntry) =>
+      (allocation.entries.get(otherEntry.id) ?? []).filter(
+        (result) => otherEntry.id !== entry.id || explicitMaterialIds.has(result.id),
+      ),
+    );
+    const preparation = prepareConversionRecommendations(
+      automaticResults,
+      workingInventory,
+      materials,
+      protectedResults,
+    );
+    const recommendations = buildConversionRecommendations(
+      automaticResults,
+      workingInventory,
+      materials,
+      protectedResults,
+    );
+    let recommendationInventory = preparation.inventory;
+    for (const recommendation of recommendations) {
+      options.push({
+        entryKey,
+        entryName: entry.name,
+        recommendation: cloneConversionRecommendation(recommendation),
+        inventory: new Map(recommendationInventory),
+      });
+      recommendationInventory = subtractCraftingCosts(
+        recommendationInventory,
+        recommendation.costs,
+      );
+      workingInventory = subtractCraftingCosts(workingInventory, recommendation.costs);
+    }
+  }
+
+  if (entryIds === undefined) return options;
+  const entryKeys = new Set(
+    activeEntries.filter((entry) => entryIds.has(entry.id)).map(getCultivationEntryKey),
+  );
+  return options.filter((option) => entryKeys.has(option.entryKey));
 }
 
 /**

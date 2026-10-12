@@ -1,7 +1,7 @@
 /**
  * 离线养成材料计算
  * @remarks 计算规则参考 Snap.Hutao Service/Cultivation/Offline
- * @since Beta v0.12.2
+ * @since Beta v0.12.6
  */
 
 /** 单项养成材料需求 */
@@ -884,7 +884,10 @@ function consumeCraftingMaterial(
   return nextContext;
 }
 
-/** 尝试使用任意一条 Wiki 配方合成一个指定材料。 */
+/**
+ * 尝试使用任意一条 Wiki 配方合成一个指定材料。
+ * @since Beta v0.12.6
+ */
 function tryCraftMaterial(
   id: number,
   context: CraftingContext,
@@ -905,6 +908,18 @@ function tryCraftMaterial(
     if (
       !context.useSolvent &&
       recipe.source.some((source) => Number(source.id) === DREAM_SOLVENT_ID)
+    ) {
+      continue;
+    }
+    // 不可合成的来源不足时直接跳过，避免媒介耗尽后枚举所有循环转换路径。
+    if (
+      recipe.source.some((source) => {
+        const sourceId = Number(source.id);
+        return (
+          (context.inventory.get(sourceId) ?? 0) < source.count &&
+          (context.materials.get(sourceId)?.convert.length ?? 0) === 0
+        );
+      })
     ) {
       continue;
     }

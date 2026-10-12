@@ -1,6 +1,6 @@
 /**
  * 用户养成计算相关类型定义文件
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.App.UserCalc {
@@ -130,6 +130,68 @@ declare namespace TGApp.App.UserCalc {
     missing: number;
     /** 持有与可合成数量的合计进度，取值范围为 0 到 100 */
     progress: number;
+  };
+
+  /**
+   * 材料转换只读推荐。
+   * @since Beta v0.12.6
+   */
+  type ConversionRecommendation = {
+    /** 待补足的目标材料及其当前完成情况 */
+    material: ResultMaterial;
+    /** 可通过该转换方案补足的数量 */
+    count: number;
+    /** 实际转换消耗的来源材料及本轮推荐前可用余量 */
+    costs: Array<CraftingCost>;
+  };
+
+  /**
+   * 材料转换手动意图。
+   * @since Beta v0.12.6
+   */
+  type ConversionIntent = {
+    /** 转换目标材料 ID */
+    materialId: number;
+    /** 请求转换数量，0 表示显式关闭该项转换 */
+    count: number;
+    /** 各来源材料本轮最多使用数量 */
+    sourceLimits: Array<{ id: number; count: number }>;
+  };
+
+  /**
+   * 已应用的材料转换结果。
+   * @since Beta v0.12.6
+   */
+  type AppliedConversion = {
+    /** 应用的手动转换意图 */
+    intent: ConversionIntent;
+    /** 根据当前库存计算出的转换推荐 */
+    recommendation: ConversionRecommendation;
+    /** 方案全部执行所需的材料，包含当前库存不足的部分 */
+    plannedCosts: Array<CraftingCost>;
+    /** 计算该转换时使用的库存快照 */
+    inventory: ReadonlyMap<number, number>;
+  };
+
+  /**
+   * 养成目标的材料转换选项。
+   * @since Beta v0.12.6
+   */
+  type ConversionOption = {
+    /** 养成目标稳定键 */
+    entryKey: string;
+    /** 养成目标名称 */
+    entryName: string;
+    /** 该目标的转换推荐 */
+    recommendation: ConversionRecommendation;
+    /** 计算该转换时使用的库存快照 */
+    inventory: ReadonlyMap<number, number>;
+    /** 该目标对应的手动转换意图 */
+    intent?: ConversionIntent;
+    /** 已采用方案的完整需求，含尚未备齐的来源及媒介 */
+    plannedCosts?: Array<CraftingCost>;
+    /** 所有已采用方案执行后仍可用于转换的公共余量 */
+    remainingInventory?: ReadonlyMap<number, number>;
   };
 
   /**
