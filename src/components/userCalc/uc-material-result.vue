@@ -65,9 +65,6 @@
         </div>
       </section>
 
-      <UcConversionMaterials :options="conversionOptions" />
-
-      <UcCraftingSummary :conversionOptions :materials />
       <UcConversionRecommendations
         :showEntryName="false"
         :options="conversionOptions"
@@ -75,6 +72,7 @@
         @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
         @reset="emits('resetConversions', $event)"
       />
+      <UcCraftingSummary :conversionOptions :materials />
     </template>
 
     <section v-else class="ucm-empty ucm-section">
@@ -118,7 +116,6 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";

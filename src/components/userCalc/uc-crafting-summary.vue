@@ -1,17 +1,14 @@
 <!-- 养成汇总-额外合成消耗 -->
 <template>
-  <UcMaterialCostList
-    icon="mdi-all-inclusive"
-    iconColor="var(--tgc-od-green)"
-    :items="costs"
-    quantityLabel="消耗"
-    :showAvailable="false"
+  <UcCraftingCostList
+    v-if="costs.length > 0"
+    :costs
     :title="hasConversion ? '合成与转换消耗' : '合成消耗'"
   />
 </template>
 
 <script lang="ts" setup>
-import UcMaterialCostList from "@comp/userCalc/uc-material-cost-list.vue";
+import UcCraftingCostList from "@comp/userCalc/uc-crafting-cost-list.vue";
 import { getAdditionalCraftingCosts } from "@utils/cultivationPlan.js";
 import { computed } from "vue";
 

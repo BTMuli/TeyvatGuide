@@ -1,6 +1,7 @@
 <!-- 养成材料列表-转换来源及媒介需求 -->
 <template>
   <UcMaterialCostList
+    :collapsible
     icon="mdi-swap-horizontal"
     iconColor="var(--tgc-od-blue)"
     :items
@@ -15,6 +16,7 @@ import { computed } from "vue";
 
 type UcConversionMaterialsProps = {
   options?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
+  collapsible?: boolean;
 };
 
 type ConversionDemandCost = TGApp.App.UserCalc.CraftingCost & {
@@ -22,7 +24,7 @@ type ConversionDemandCost = TGApp.App.UserCalc.CraftingCost & {
   missing: number;
 };
 
-const { options = [] } = defineProps<UcConversionMaterialsProps>();
+const { options = [], collapsible = false } = defineProps<UcConversionMaterialsProps>();
 const items = computed<Array<ConversionDemandCost>>(() =>
   buildConversionDemandMaterials(options).map((material) => ({
     id: material.id,

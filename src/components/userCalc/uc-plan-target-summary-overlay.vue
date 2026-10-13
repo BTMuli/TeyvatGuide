@@ -135,8 +135,6 @@
       </div>
     </section>
 
-    <UcConversionMaterials :options="conversionOptions" />
-    <UcCraftingSummary :conversionOptions :materials="displayMaterials" />
     <UcConversionRecommendations
       :showEntryName="false"
       :options="conversionOptions"
@@ -144,6 +142,7 @@
       @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
       @reset="emits('resetConversions', $event)"
     />
+    <UcCraftingSummary :conversionOptions :materials="displayMaterials" />
 
     <template #right>
       <v-btn
@@ -199,7 +198,6 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";

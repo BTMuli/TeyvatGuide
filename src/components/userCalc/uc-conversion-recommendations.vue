@@ -81,6 +81,7 @@
         </v-btn>
       </article>
     </div>
+    <UcConversionMaterials class="ucr-materials" :options />
   </section>
   <UcConversionEditor
     v-if="editingOption"
@@ -96,6 +97,7 @@
 
 <script lang="ts" setup>
 import UcConversionEditor from "@comp/userCalc/uc-conversion-editor.vue";
+import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import fmtUtil from "@utils/fmtUtil.js";
 import { computed, ref, shallowRef, watch } from "vue";
@@ -168,12 +170,24 @@ function getCostShortage(cost: ConversionCost): number {
   flex-direction: column;
   flex-shrink: 0;
   padding: 12px;
-  border: 1px solid var(--common-shadow-1);
+  border: 1px solid var(--common-shadow-2);
   border-radius: 8px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   color: var(--box-text-1);
   container-type: inline-size;
-  gap: 8px;
+  gap: 12px;
+}
+
+.ucr-panel > :deep(.ucr-materials) {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.ucr-panel > :deep(.ucr-materials .ucmcl-heading h3) {
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .ucr-header {
@@ -232,7 +246,7 @@ function getCostShortage(cost: ConversionCost): number {
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--common-shadow-t-1);
+  background: var(--box-bg-1);
   gap: 8px 16px;
   grid-template-areas: "target costs action";
   grid-template-columns: minmax(160px, max-content) minmax(0, 1fr) auto;

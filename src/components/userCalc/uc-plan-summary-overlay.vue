@@ -141,14 +141,13 @@
         <span>{{ emptyText }}</span>
       </div>
     </section>
-    <UcConversionMaterials :options="conversionOptions" />
-    <UcCraftingSummary :conversionOptions :materials />
     <UcConversionRecommendations
       :options="conversionOptions"
       :topOffset
       @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
       @reset="emits('resetConversions', $event)"
     />
+    <UcCraftingSummary :conversionOptions :materials />
   </TopOverlay>
 
   <UcMaterialDetail
@@ -192,7 +191,6 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommendations.vue";
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";

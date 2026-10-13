@@ -169,7 +169,11 @@
         @select="selectMaterial(material.id)"
       />
     </div>
-    <UcConversionMaterials :options="conversionOptions" />
+    <UcConversionMaterials
+      class="ucptc-conversion-materials"
+      collapsible
+      :options="conversionOptions"
+    />
   </v-card>
 </template>
 
@@ -435,5 +439,10 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
   > :deep(.ucmr-item) {
     flex-shrink: 0;
   }
+}
+
+.ucptc-conversion-materials {
+  width: 100%;
+  margin: 0;
 }
 </style>

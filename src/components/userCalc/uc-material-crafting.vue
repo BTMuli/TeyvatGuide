@@ -1,9 +1,7 @@
 <!-- 养成材料合成消耗与需求进度 -->
 <template>
-  <section v-if="canCraft" class="ucmc-panel">
-    <header class="ucmc-heading">
-      <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
-      <h3>合成消耗</h3>
+  <UcCraftingCostList v-if="canCraft" :costs="material.craftingCosts">
+    <template #heading>
       <div class="ucmc-progress">
         <div
           class="ucmc-track"
@@ -25,26 +23,12 @@
           :required="material.required"
         />
       </div>
-    </header>
-    <div v-if="material.craftingCosts.length > 0" class="ucmc-costs">
-      <TMaterialStarChip
-        v-for="cost in material.craftingCosts"
-        :key="cost.id"
-        :id="cost.id"
-        mode="convert"
-        :name="cost.name"
-        :owned="cost.owned"
-        :required="cost.count"
-        :star="cost.star"
-        :type="cost.type"
-      />
-    </div>
-    <span v-else class="ucmc-empty">当前计算未使用合成材料</span>
-  </section>
+    </template>
+  </UcCraftingCostList>
 </template>
 
 <script lang="ts" setup>
-import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
+import UcCraftingCostList from "@comp/userCalc/uc-crafting-cost-list.vue";
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import fmtUtil from "@utils/fmtUtil.js";
 import { computed } from "vue";
@@ -76,33 +60,6 @@ const progressText = computed<string>(() =>
 </script>
 
 <style lang="scss" scoped>
-.ucmc-panel {
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-1);
-  color: var(--box-text-1);
-  gap: 12px;
-}
-
-.ucmc-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  color: var(--common-text-title);
-  gap: 8px;
-
-  h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 22px;
-    white-space: nowrap;
-  }
-}
-
 .ucmc-progress {
   display: flex;
   align-items: center;
@@ -140,17 +97,5 @@ const progressText = computed<string>(() =>
 
 .ucmc-crafted-segment {
   background: var(--tgc-od-blue);
-}
-
-.ucmc-costs {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.ucmc-empty {
-  color: var(--common-text-sub);
-  font-size: 12px;
-  line-height: 16px;
 }
 </style>
