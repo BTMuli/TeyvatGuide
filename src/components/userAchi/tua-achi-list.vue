@@ -36,11 +36,12 @@
       :data="selectedAchi"
       @search="handleSearch"
       @updated="handleAchiUpdated"
-      @select-achievement="selectAchi"
+      @select-achievement="selectAchiFromOverlay"
       @select-series="selectSeries"
     >
       <template #left>
         <v-btn
+          :disabled="!canNavigatePrevious"
           aria-label="上一个成就"
           class="card-arrow"
           icon="mdi-chevron-left"
@@ -51,6 +52,7 @@
       </template>
       <template #right>
         <v-btn
+          :disabled="!canNavigateNext"
           aria-label="下一个成就"
           class="card-arrow"
           icon="mdi-chevron-right"
@@ -80,6 +82,7 @@ type TuaAchiListProps = {
   uid: number;
   hideFin: boolean;
   hiddenFilter: "all" | "hidden" | "visible";
+  recentAchievements: ReadonlyArray<TGApp.App.Achievement.RenderItem>;
   search?: string;
 };
 type AchievementListItem = {
@@ -107,9 +110,24 @@ const expandedStageChains = ref<Set<number>>(new Set());
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
 const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
 const selectedAchi = shallowRef<TGApp.App.Achievement.RenderItem>();
+const recentNavigation = shallowRef<ReadonlyArray<TGApp.App.Achievement.RenderItem>>();
+let dataRequestId = 0;
 
 const renderAchi = computed<Array<AchievementListItem>>(() =>
   groupAchievementStages(achievements.value),
+);
+const navigationItems = computed<Array<TGApp.App.Achievement.RenderItem>>(() =>
+  recentNavigation.value === undefined
+    ? renderAchi.value.map((item) => item.achievement)
+    : Array.from(recentNavigation.value),
+);
+const navigationIndex = computed<number>(() => {
+  if (selectedAchi.value === undefined) return -1;
+  return getNavigationIndex(navigationItems.value, selectedAchi.value);
+});
+const canNavigatePrevious = computed<boolean>(() => navigationIndex.value > 0);
+const canNavigateNext = computed<boolean>(
+  () => navigationIndex.value >= 0 && navigationIndex.value < navigationItems.value.length - 1,
 );
 
 onMounted(async () => await loadAchi());
@@ -117,11 +135,60 @@ onMounted(async () => await loadAchi());
 watch(() => [props.search, isSearch.value], searchAchi);
 watch(
   () => [series.value, props.uid],
-  async () => await loadAchi(),
+  (next, previous) => {
+    if (previous !== undefined && next[1] !== previous[1]) {
+      dataRequestId += 1;
+      achievements.value = [];
+      expandedStageChains.value = new Set();
+      recentNavigation.value = undefined;
+      selectedAchi.value = undefined;
+      showOverlay.value = false;
+      isSearch.value = false;
+    }
+    void loadAchi();
+  },
+);
+watch(
+  () => props.recentAchievements,
+  (items) => {
+    if (recentNavigation.value === undefined) return;
+    const previousItems = recentNavigation.value;
+    const previousIndex =
+      selectedAchi.value === undefined ? -1 : getNavigationIndex(previousItems, selectedAchi.value);
+    recentNavigation.value = items;
+    if (selectedAchi.value === undefined) return;
+    const selected = items.find((item) => item.id === selectedAchi.value?.id);
+    if (selected !== undefined) {
+      selectedAchi.value = selected;
+      return;
+    }
+    if (
+      !previousItems.some((item) => item.id === selectedAchi.value?.id) &&
+      getNavigationIndex(items, selectedAchi.value) !== -1
+    ) {
+      return;
+    }
+    const nextIndex = Math.min(Math.max(previousIndex, 0), items.length - 1);
+    const next = items[nextIndex];
+    if (next === undefined) {
+      selectedAchi.value = undefined;
+      showOverlay.value = false;
+      return;
+    }
+    selectedAchi.value = next;
+  },
+  { flush: "sync" },
 );
 watch(
   renderAchi,
   (items) => {
+    if (
+      recentNavigation.value !== undefined &&
+      (selectedAchi.value === undefined ||
+        getNavigationIndex(recentNavigation.value, selectedAchi.value) !== -1)
+    ) {
+      return;
+    }
     const selectedId = selectedAchi.value?.id;
     const selectedStageChainId =
       selectedId === undefined
@@ -143,8 +210,13 @@ function handleSearch(kw: string): void {
 
 async function searchAchi(): Promise<void> {
   if (!isSearch.value) return;
+  const requestId = ++dataRequestId;
+  const uid = props.uid;
   if (!props.search) {
-    achievements.value = await TSUserAchi.getAchievements(props.uid, series.value);
+    const currentSeries = series.value;
+    const nextAchievements = await TSUserAchi.getAchievements(uid, currentSeries);
+    if (requestId !== dataRequestId || uid !== props.uid || currentSeries !== series.value) return;
+    achievements.value = nextAchievements;
     showSnackbar.success("已重置");
     isSearch.value = false;
     return;
@@ -154,7 +226,8 @@ async function searchAchi(): Promise<void> {
     isSearch.value = false;
     return;
   }
-  const searchRes = await TSUserAchi.searchAchi(props.uid, props.search);
+  const searchRes = await TSUserAchi.searchAchi(uid, props.search);
+  if (requestId !== dataRequestId || uid !== props.uid) return;
   if (showOverlay.value) showOverlay.value = false;
   if (searchRes.length > 0) {
     ncData.value = undefined;
@@ -170,11 +243,24 @@ async function searchAchi(): Promise<void> {
 
 async function loadAchi(showFeedback: boolean = true): Promise<void> {
   if (isSearch.value) return;
-  achievements.value =
-    series.value === -1 && props.search
-      ? await TSUserAchi.searchAchi(props.uid, props.search)
-      : await TSUserAchi.getAchievements(props.uid, series.value);
-  const ov = await TSUserAchi.getOverview(props.uid, series.value);
+  const requestId = ++dataRequestId;
+  const uid = props.uid;
+  const currentSeries = series.value;
+  const currentSearch = props.search;
+  const nextAchievements =
+    currentSeries === -1 && currentSearch
+      ? await TSUserAchi.searchAchi(uid, currentSearch)
+      : await TSUserAchi.getAchievements(uid, currentSeries);
+  const ov = await TSUserAchi.getOverview(uid, currentSeries);
+  if (
+    requestId !== dataRequestId ||
+    uid !== props.uid ||
+    currentSeries !== series.value ||
+    currentSearch !== props.search
+  ) {
+    return;
+  }
+  achievements.value = nextAchievements;
   isFinish.value = ov.fin === ov.total;
   const seriesFind = TSUserAchi.getAchievementCategoryById(series.value);
   if (!seriesFind || seriesFind.namecardId === null) {
@@ -286,9 +372,27 @@ function toggleStageChain(stageChainId: number): void {
 }
 
 function selectAchi(data: TGApp.App.Achievement.RenderItem): void {
+  recentNavigation.value = undefined;
+  displayAchi(data);
+}
+
+function selectAchiFromOverlay(data: TGApp.App.Achievement.RenderItem): void {
+  displayAchi(data);
+}
+
+function displayAchi(data: TGApp.App.Achievement.RenderItem): void {
   selectedAchi.value = data;
   showOverlay.value = true;
 }
+
+function selectRecentAchievement(data: TGApp.App.Achievement.RenderItem): void {
+  const selected = props.recentAchievements.find((item) => item.id === data.id);
+  if (selected === undefined || selected.uid !== props.uid) return;
+  recentNavigation.value = props.recentAchievements;
+  displayAchi(selected);
+}
+
+defineExpose({ selectRecentAchievement });
 
 function selectSeries(data: number): void {
   if (series.value === data) {
@@ -303,9 +407,7 @@ function switchAchiInfo(next: boolean): void {
     showSnackbar.warn("当前未选中成就！");
     return;
   }
-  const index = renderAchi.value.findIndex(
-    (item) => item.achievement.id === selectedAchi.value?.id,
-  );
+  const index = navigationIndex.value;
   if (index === -1) {
     showSnackbar.warn(
       `未找到选中成就 ${selectedAchi.value.name}(${selectedAchi.value.id}) 的索引！`,
@@ -313,18 +415,25 @@ function switchAchiInfo(next: boolean): void {
     return;
   }
   if (next) {
-    if (index === renderAchi.value.length - 1) {
-      showSnackbar.warn("已经是最后一个了");
-      return;
-    }
-    selectedAchi.value = renderAchi.value[index + 1].achievement;
+    const nextItem = navigationItems.value[index + 1];
+    if (nextItem !== undefined) selectedAchi.value = nextItem;
     return;
   }
-  if (index === 0) {
-    showSnackbar.warn("已经是第一个了");
-    return;
-  }
-  selectedAchi.value = renderAchi.value[index - 1].achievement;
+  const previousItem = navigationItems.value[index - 1];
+  if (previousItem !== undefined) selectedAchi.value = previousItem;
+}
+
+function getNavigationIndex(
+  items: ReadonlyArray<TGApp.App.Achievement.RenderItem>,
+  achievement: TGApp.App.Achievement.RenderItem,
+): number {
+  const exactIndex = items.findIndex((item) => item.id === achievement.id);
+  if (exactIndex !== -1) return exactIndex;
+  const chainId = TSUserAchi.getAchievementStageChain(achievement.id)?.[0]?.id;
+  if (chainId === undefined) return -1;
+  return items.findIndex(
+    (item) => TSUserAchi.getAchievementStageChain(item.id)?.[0]?.id === chainId,
+  );
 }
 </script>
 <style lang="scss" scoped>

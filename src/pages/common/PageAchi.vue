@@ -68,15 +68,18 @@
           <span>隐藏已完成</span>
         </div>
       </div>
-      <v-btn
-        class="top-link top-btn"
-        prepend-icon="mdi-import"
-        title="通过Yae导入（请确保导入前游戏未启动）"
-        variant="elevated"
-        @click="toYae()"
-      >
-        YAE
-      </v-btn>
+      <div class="top-extension-actions">
+        <TuaRecentMenu :items="recentAchievements" @select="handleRecentSelect" />
+        <v-btn
+          class="top-link top-btn"
+          prepend-icon="mdi-import"
+          title="通过Yae导入（请确保导入前游戏未启动）"
+          variant="elevated"
+          @click="toYae()"
+        >
+          YAE
+        </v-btn>
+      </div>
     </template>
   </v-app-bar>
   <div class="wrap">
@@ -95,11 +98,13 @@
       />
     </div>
     <TuaAchiList
+      ref="achiList"
       v-model:isSearch="isSearch"
       v-model:search="search"
       v-model:series="selectedSeries"
       :hideFin
       :hiddenFilter="activeHiddenFilter"
+      :recentAchievements
       :uid="uidCur"
     />
   </div>
@@ -111,6 +116,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
 import TuaOverview from "@comp/userAchi/tua-overview.vue";
+import TuaRecentMenu from "@comp/userAchi/tua-recent-menu.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
@@ -128,12 +134,14 @@ import {
   verifyUiafDataClipboard,
 } from "@utils/UIAF.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { AppAchiData } from "@/data/index.js";
 
 type HiddenFilter = "all" | "hidden" | "visible";
+
+const RECENT_ACHIEVEMENT_LIMIT = 50;
 
 const categoryList = AppAchiData.categories;
 const hiddenAchievementCategoryIds = new Set<number>(
@@ -148,6 +156,8 @@ const { isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 let achiListener: UnlistenFn | null = null;
+let overviewRequestId = 0;
+let recentRequestId = 0;
 
 const search = ref<string>("");
 const showOverview = ref<boolean>(false);
@@ -158,6 +168,8 @@ const uidList = ref<Array<number>>([]);
 const uidCur = ref<number>(0);
 const selectedSeries = ref<number>(-1);
 const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 1 });
+const recentAchievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
+const achiList = useTemplateRef<InstanceType<typeof TuaAchiList>>("achiList");
 const title = computed<string>(() => {
   const percentage = ((overview.value.fin * 100) / overview.value.total).toFixed(2);
   return `${overview.value.fin}/${overview.value.total} ${percentage}%`;
@@ -174,11 +186,14 @@ onMounted(async () => {
   await reloadUid();
   await showLoading.update("正在获取成就概况");
   await refreshOverview();
+  await refreshRecent();
   await showLoading.end();
   if (route.query.app && typeof route.query.app === "string") {
     await handleImportOuter(route.query.app);
   }
-  achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
+  achiListener = await listen<void>("updateAchi", async () => {
+    await Promise.all([refreshOverview(), refreshRecent()]);
+  });
 });
 
 onUnmounted(async () => {
@@ -188,7 +203,13 @@ onUnmounted(async () => {
   }
 });
 
-watch(() => uidCur.value, refreshOverview);
+watch(
+  () => uidCur.value,
+  async () => {
+    recentAchievements.value = [];
+    await Promise.all([refreshOverview(), refreshRecent()]);
+  },
+);
 
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserAchi.getAllUid();
@@ -230,7 +251,42 @@ function switchHiddenFilter(seriesId: number): void {
 }
 
 async function refreshOverview(): Promise<void> {
-  overview.value = await TSUserAchi.getOverview(uidCur.value);
+  const uid = uidCur.value;
+  const requestId = ++overviewRequestId;
+  const nextOverview = await TSUserAchi.getOverview(uid);
+  if (requestId !== overviewRequestId || uid !== uidCur.value) return;
+  overview.value = nextOverview;
+}
+
+async function refreshRecent(): Promise<void> {
+  const uid = uidCur.value;
+  const requestId = ++recentRequestId;
+  if (uid === 0) {
+    recentAchievements.value = [];
+    return;
+  }
+  const achievements = await TSUserAchi.getAchievements(uid);
+  if (requestId !== recentRequestId || uid !== uidCur.value) return;
+  recentAchievements.value = achievements
+    .filter((item) => item.isCompleted && Number.isFinite(Date.parse(item.completedTime)))
+    .sort(compareRecentAchievements)
+    .slice(0, RECENT_ACHIEVEMENT_LIMIT);
+}
+
+function compareRecentAchievements(
+  first: TGApp.App.Achievement.RenderItem,
+  second: TGApp.App.Achievement.RenderItem,
+): number {
+  const firstTime = Date.parse(first.completedTime);
+  const secondTime = Date.parse(second.completedTime);
+  if (firstTime !== secondTime) return secondTime - firstTime;
+  if (first.categoryId !== second.categoryId) return first.categoryId - second.categoryId;
+  if (first.order !== second.order) return first.order - second.order;
+  return first.id - second.id;
+}
+
+function handleRecentSelect(achievement: TGApp.App.Achievement.RenderItem): void {
+  achiList.value?.selectRecentAchievement(achievement);
 }
 
 async function importJson(): Promise<void> {
@@ -439,6 +495,13 @@ async function toYae(): Promise<void> {
   column-gap: 8px;
 }
 
+.top-extension-actions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  column-gap: 8px;
+}
+
 .top-btn {
   height: 40px;
   background: var(--tgc-btn-1);
@@ -459,7 +522,7 @@ async function toYae(): Promise<void> {
 .top-link {
   margin-right: 16px;
   margin-bottom: 4px;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .wrap {
