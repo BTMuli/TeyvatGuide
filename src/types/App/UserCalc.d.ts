@@ -192,6 +192,16 @@ declare namespace TGApp.App.UserCalc {
     plannedCosts?: Array<CraftingCost>;
     /** 所有已采用方案执行后仍可用于转换的公共余量 */
     remainingInventory?: ReadonlyMap<number, number>;
+    /**
+     * 已计入原始材料结果的自动转换数量
+     * @since Beta v0.12.5
+     */
+    allocatedCount?: number;
+    /**
+     * 已计入原始材料结果的自动转换实际消耗
+     * @since Beta v0.12.5
+     */
+    allocatedCosts?: Array<CraftingCost>;
   };
 
   /**

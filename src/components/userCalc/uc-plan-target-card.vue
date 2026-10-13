@@ -441,8 +441,10 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
   }
 }
 
-.ucptc-conversion-materials {
+.ucptc-card > .ucptc-conversion-materials {
   width: 100%;
   margin: 0;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
 }
 </style>

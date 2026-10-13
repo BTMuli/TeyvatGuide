@@ -3,7 +3,10 @@
   <section class="ucccl-panel">
     <header class="ucccl-heading">
       <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
-      <h3>{{ title }}</h3>
+      <div class="ucccl-title">
+        <h3>{{ title }}</h3>
+        <slot name="titleActions" />
+      </div>
       <slot name="heading">
         <span>{{ costs.length }} 种</span>
       </slot>
@@ -36,6 +39,7 @@ type UcCraftingCostListProps = {
 const { costs, title = "合成消耗" } = defineProps<UcCraftingCostListProps>();
 
 defineSlots<{
+  titleActions?: () => unknown;
   heading?: () => unknown;
 }>();
 </script>
@@ -58,6 +62,13 @@ defineSlots<{
   align-items: center;
   color: var(--common-text-title);
   gap: 8px;
+
+  .ucccl-title {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 4px;
+  }
 
   h3 {
     margin: 0;

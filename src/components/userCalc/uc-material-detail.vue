@@ -75,7 +75,14 @@
       </div>
     </section>
 
-    <UcMaterialCrafting :material :canCraft="wiki.convert.length > 0" />
+    <UcMaterialCrafting
+      :active="visible"
+      :canCraft="wiki.convert.length > 0"
+      :conversionOptions
+      :material
+      :topOffset="props.topOffset"
+      @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
+    />
 
     <template #right>
       <slot name="right" />
@@ -97,6 +104,7 @@ import { computed, ref, useTemplateRef } from "vue";
 
 type UcMaterialDetailProps = {
   bag?: TGApp.Sqlite.UserBag.MaterialTable;
+  conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   footerContext?: string;
   /** 材料在列表中的序号（从 1 开始），写入分享署名 */
   idx?: number;
@@ -111,6 +119,9 @@ type UcMaterialDetailProps = {
 const props = withDefaults(defineProps<UcMaterialDetailProps>(), {
   topOffset: "0px",
 });
+const emits = defineEmits<{
+  applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];
+}>();
 const visible = defineModel<boolean>({ required: true });
 const shareLoading = ref<boolean>(false);
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");

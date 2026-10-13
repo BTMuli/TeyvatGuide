@@ -53,8 +53,12 @@
     <template #before-record>
       <UcMaterialCrafting
         v-if="currentMaterialResult"
+        :active="materialOverlayVisible"
         :material="currentMaterialResult"
         :canCraft="currentMaterial.info.convert.length > 0"
+        :conversionOptions="currentMaterialConversionOptions"
+        topOffset="132px"
+        @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
       />
     </template>
     <template #left>
@@ -164,6 +168,12 @@ const currentSummaryConversionOptions = computed<Array<TGApp.App.UserCalc.Conver
   if (!entry) return [];
   return getEntryConversionOptions(entry);
 });
+const currentMaterialConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(
+  () => {
+    const entry = props.entries.find((item) => item.id === currentMaterialEntryId.value);
+    return entry ? getEntryConversionOptions(entry) : [];
+  },
+);
 const currentMaterialResult = computed<TGApp.App.UserCalc.ResultMaterial | undefined>(() => {
   if (!currentMaterialEntryId.value || !currentMaterial.value) return undefined;
   return entryMaterialResults.value

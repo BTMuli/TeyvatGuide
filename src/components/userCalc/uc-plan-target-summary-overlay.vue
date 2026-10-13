@@ -164,10 +164,12 @@
     :footerContext="`${entry.name}养成目标`"
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
+    :conversionOptions
     :total="displayMaterials.length"
     topOffset="132px"
     :uid
     :wiki="currentWiki"
+    @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
   >
     <template #left>
       <v-btn
@@ -205,7 +207,7 @@ import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, nextTick, ref, shallowRef, useTemplateRef } from "vue";
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
 
@@ -258,6 +260,25 @@ const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
+
+watch(
+  () => props.materials,
+  () => {
+    const currentId = currentMaterial.value?.id;
+    if (currentId === undefined) return;
+    const nextIndex = displayMaterials.value.findIndex((material) => material.id === currentId);
+    const nextMaterial = displayMaterials.value[nextIndex];
+    if (nextMaterial && nextIndex >= 0) {
+      currentMaterialIndex.value = nextIndex;
+      currentMaterial.value = nextMaterial;
+      return;
+    }
+    materialOverlayVisible.value = false;
+    currentMaterial.value = undefined;
+    currentWiki.value = undefined;
+  },
+  { flush: "sync" },
+);
 
 const shareCaption = computed<string>(
   () =>

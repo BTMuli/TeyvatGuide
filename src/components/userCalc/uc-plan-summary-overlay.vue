@@ -146,7 +146,24 @@
       :topOffset
       @apply="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
       @reset="emits('resetConversions', $event)"
-    />
+    >
+      <template #entry="{ option }">
+        <template
+          v-for="entryBox in [conversionEntryBoxes.get(option.entryKey)]"
+          :key="entryBox?.innerText ?? option.entryKey"
+        >
+          <TItemBox
+            v-if="entryBox"
+            class="ucps-conversion-entry"
+            :modelValue="entryBox"
+            role="img"
+            :title="option.entryName"
+            :aria-label="option.entryName"
+          />
+          <span v-else class="ucps-conversion-entry-fallback">{{ option.entryName }}</span>
+        </template>
+      </template>
+    </UcConversionRecommendations>
     <UcCraftingSummary :conversionOptions :materials />
   </TopOverlay>
 
@@ -157,10 +174,12 @@
     footerContext="养成计划汇总"
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
+    :conversionOptions
     :total="materials.length"
     :topOffset
     :uid
     :wiki="currentWiki"
+    @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
   >
     <template #left>
       <v-btn
@@ -188,6 +207,7 @@
 </template>
 
 <script lang="ts" setup>
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -195,6 +215,7 @@ import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommenda
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
+import { getCultivationEntryKey } from "@utils/cultivationPlan.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
@@ -209,6 +230,7 @@ type PlanTargetCounts = {
 
 type UcPlanSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>;
   inventoryUpdatedLabel: string;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
   conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
@@ -241,6 +263,30 @@ const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 const materialGroupId = useId();
+
+const conversionEntryBoxes = computed<ReadonlyMap<string, TItemBoxData>>(
+  () =>
+    new Map(
+      props.entries.map(
+        (entry) =>
+          <const>[
+            getCultivationEntryKey(entry),
+            {
+              bg: `/icon/bg/${entry.star}-Star.webp`,
+              clickable: false,
+              display: "inner",
+              height: "48px",
+              icon: entry.icon,
+              innerHeight: 0,
+              innerText: entry.name,
+              lt: "",
+              ltSize: "0px",
+              size: "48px",
+            },
+          ],
+      ),
+    ),
+);
 
 const shareCaption = computed<string>(
   () => `养成计划汇总 · ${props.project.name} · UID ${props.uid}`,
@@ -315,6 +361,25 @@ function toggleMaterialGroup(groupKey: string): void {
 watch([visible, () => props.project.id], ([isVisible]) => {
   if (isVisible) expandedGroupKeys.value = new Set();
 });
+
+watch(
+  () => props.materials,
+  () => {
+    const currentId = currentMaterial.value?.id;
+    if (currentId === undefined) return;
+    const nextIndex = displayMaterials.value.findIndex((material) => material.id === currentId);
+    const nextMaterial = displayMaterials.value[nextIndex];
+    if (nextMaterial && nextIndex >= 0) {
+      currentMaterialIndex.value = nextIndex;
+      currentMaterial.value = nextMaterial;
+      return;
+    }
+    materialOverlayVisible.value = false;
+    currentMaterial.value = undefined;
+    currentWiki.value = undefined;
+  },
+  { flush: "sync" },
+);
 
 async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Promise<void> {
   const wiki = WikiMaterialData.find((item) => item.id === material.id);
@@ -629,6 +694,16 @@ async function shareSummary(): Promise<void> {
   justify-content: center;
   color: var(--common-text-sub);
   gap: 8px;
+}
+
+.ucps-conversion-entry {
+  flex-shrink: 0;
+}
+
+.ucps-conversion-entry-fallback {
+  color: var(--common-text-sub);
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .ucps-card-arrow {

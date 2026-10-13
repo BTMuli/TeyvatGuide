@@ -40,21 +40,9 @@
               }}</span>
             </div>
             <div class="ucce-field">
-              <div class="ucce-field-heading">
-                <label :for="targetCountInputId">转换数量</label>
-                <v-btn
-                  :aria-label="'将转换数量设为全部缺口 ' + fmtUtil.num(missingCount) + ' 个'"
-                  color="var(--tgc-od-blue)"
-                  density="compact"
-                  size="x-small"
-                  variant="text"
-                  @click="updateCount(missingCount)"
-                >
-                  填满缺口
-                </v-btn>
-              </div>
               <v-number-input
                 :id="targetCountInputId"
+                aria-label="转换数量"
                 :aria-describedby="targetCountHintId"
                 class="ucce-number-input"
                 color="var(--tgc-od-blue)"
@@ -71,7 +59,16 @@
                 variant="outlined"
                 @update:modelValue="updateCount"
               />
-              <span class="ucce-field-hint">可设 0–{{ fmtUtil.num(missingCount) }} 个</span>
+              <v-btn
+                :aria-label="'将转换数量设为全部缺口 ' + fmtUtil.num(missingCount) + ' 个'"
+                color="var(--tgc-od-blue)"
+                density="compact"
+                size="x-small"
+                variant="text"
+                @click="updateCount(missingCount)"
+              >
+                填满缺口
+              </v-btn>
             </div>
           </div>
           <p :id="targetCountHintId" class="ucce-note">
@@ -111,6 +108,12 @@
                 <span class="ucce-material-name" :title="source.name">{{ source.name }}</span>
               </div>
               <div class="ucce-source-limit">
+                <div class="ucce-source-hint">
+                  <span>可用 {{ fmtUtil.num(getAvailableCount(source.id)) }}</span>
+                  <span v-if="getSourceShortage(source.id) > 0" class="ucce-shortage">
+                    · 缺 {{ fmtUtil.num(getSourceShortage(source.id)) }}
+                  </span>
+                </div>
                 <v-number-input
                   :id="titleId + '-source-' + source.id"
                   :aria-label="source.name + '计划最多使用数量'"
@@ -130,31 +133,23 @@
                   variant="outlined"
                   @update:modelValue="updateSourceLimit(source.id, $event)"
                 />
-                <div class="ucce-source-hint">
-                  <span
-                    >可用 {{ fmtUtil.num(getAvailableCount(source.id))
-                    }}<span v-if="getSourceShortage(source.id) > 0" class="ucce-shortage">
-                      · 缺 {{ fmtUtil.num(getSourceShortage(source.id)) }}</span
-                    ></span
-                  >
-                  <v-btn
-                    :aria-label="'将' + source.name + '设为需求上限'"
-                    color="var(--tgc-od-blue)"
-                    density="compact"
-                    :disabled="!isSourceSelected(source.id)"
-                    size="x-small"
-                    variant="text"
-                    @click="updateSourceLimit(source.id, getSourceMax(source.id))"
-                    >填满</v-btn
-                  >
-                </div>
+                <v-btn
+                  :aria-label="'将' + source.name + '设为需求上限'"
+                  color="var(--tgc-od-blue)"
+                  density="compact"
+                  :disabled="!isSourceSelected(source.id)"
+                  size="x-small"
+                  variant="text"
+                  @click="updateSourceLimit(source.id, getSourceMax(source.id))"
+                  >填满</v-btn
+                >
               </div>
             </div>
           </div>
           <p v-else class="ucce-empty">该目标没有可用的转换配方。</p>
         </section>
 
-        <section :aria-labelledby="previewTitleId" class="ucce-section ucce-preview">
+        <section :aria-labelledby="previewTitleId" class="ucce-section">
           <div class="ucce-section-heading">
             <h3 :id="previewTitleId">实时预览</h3>
             <span>来源和媒介均显示完整计划需求</span>
@@ -578,6 +573,10 @@ function applyScheme(): void {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
   gap: 8px;
 }
 
@@ -610,10 +609,10 @@ function applyScheme(): void {
   box-sizing: border-box;
   flex-wrap: wrap;
   align-items: center;
-  padding: 8px;
+  padding: 5px 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   gap: 12px;
 }
 
@@ -639,32 +638,12 @@ function applyScheme(): void {
 
 .ucce-field {
   display: flex;
-  width: 136px;
+  width: auto;
   min-width: 0;
   max-width: 100%;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.ucce-field-heading {
-  display: flex;
-  min-height: 24px;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-
-  > label {
-    color: var(--common-text-title);
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 16px;
-  }
-}
-
-.ucce-field-hint {
-  color: var(--common-text-sub);
-  font-size: 12px;
-  line-height: 16px;
 }
 
 .ucce-number-input {
@@ -712,22 +691,21 @@ function applyScheme(): void {
   display: grid;
   min-width: 0;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .ucce-source-row {
   display: grid;
   width: 100%;
   min-width: 0;
-  max-width: 320px;
   box-sizing: border-box;
   align-items: center;
-  padding: 8px;
+  padding: 7px 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
   gap: 8px;
-  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-columns: 32px minmax(0, 1fr) minmax(0, 288px);
 
   &.is-selected {
     border-color: var(--tgc-od-blue);
@@ -742,30 +720,38 @@ function applyScheme(): void {
 }
 
 .ucce-source-limit {
-  display: grid;
+  display: flex;
   min-width: 0;
-  align-items: start;
-  gap: 8px;
-  grid-column: 1 / -1;
-  grid-template-columns: 136px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  grid-column: auto;
+
+  > .ucce-number-input {
+    flex: 0 0 136px;
+  }
+
+  > .v-btn {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
 }
 
 .ucce-source-hint {
   display: flex;
+  min-width: 0;
   min-height: 32px;
+  flex: 1;
   flex-wrap: wrap;
+  align-content: center;
   align-items: center;
-  justify-content: space-between;
   color: var(--box-text-2);
+  column-gap: 4px;
   font-size: 11px;
   line-height: 16px;
-}
 
-.ucce-preview {
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-1);
+  > span {
+    white-space: nowrap;
+  }
 }
 
 .ucce-preview-summary {
@@ -856,6 +842,15 @@ function applyScheme(): void {
 }
 
 @media (width <= 480px) {
+  .ucce-source-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .ucce-source-limit {
+    gap: 8px;
+    grid-column: 1 / -1;
+  }
+
   .ucce-cost-list {
     grid-template-columns: 1fr;
   }

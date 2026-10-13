@@ -1,10 +1,6 @@
 <!-- 养成材料来源与消耗的统一列表 -->
 <template>
-  <section
-    v-if="items.length > 0"
-    :class="{ collapsible, collapsed: collapsible && !expanded }"
-    class="ucmcl-section"
-  >
+  <section v-if="items.length > 0" :class="{ collapsible }" class="ucmcl-section">
     <header v-if="!collapsible" class="ucmcl-heading">
       <v-icon :color="iconColor" size="18">{{ icon }}</v-icon>
       <h3>{{ title }}</h3>
@@ -14,42 +10,6 @@
         >
       </span>
     </header>
-    <div
-      v-show="!collapsible || expanded"
-      :id="collapsible ? contentId : undefined"
-      class="ucmcl-content"
-    >
-      <div class="ucmcl-list">
-        <article
-          v-for="item in items"
-          :key="item.id"
-          :class="{ missing: (item.missing ?? 0) > 0 }"
-          class="ucmcl-row"
-        >
-          <UcItemIcon
-            :alt="item.name"
-            :icon="'/icon/material/' + item.id + '.webp'"
-            :size="36"
-            :star="item.star"
-          />
-          <div class="ucmcl-info">
-            <div class="ucmcl-name-row">
-              <strong :title="item.name">{{ item.name }}</strong>
-              <span v-if="item.role" class="ucmcl-role">{{ item.role }}</span>
-            </div>
-            <div class="ucmcl-stats">
-              <span :title="showAvailable ? undefined : '背包持有 ' + fmtUtil.num(item.owned)"
-                >{{ quantityLabel }} {{ fmtUtil.num(item.count) }}</span
-              >
-              <span v-if="showAvailable">可用 {{ fmtUtil.num(item.owned) }}</span>
-              <span v-if="(item.missing ?? 0) > 0" class="ucmcl-shortage">
-                缺 {{ fmtUtil.num(item.missing ?? 0) }}
-              </span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </div>
     <button
       v-if="collapsible"
       :aria-controls="contentId"
@@ -70,20 +30,42 @@
       </span>
       <v-icon :icon="expanded ? 'mdi-chevron-down' : 'mdi-chevron-up'" size="20" />
     </button>
+    <Transition name="ucmcl-content">
+      <div
+        v-show="!collapsible || expanded"
+        :id="collapsible ? contentId : undefined"
+        class="ucmcl-content"
+      >
+        <div class="ucmcl-content-viewport">
+          <div class="ucmcl-list">
+            <UcMaterialReq
+              v-for="material in displayItems"
+              :key="material.id"
+              :description="material.role"
+              :interactive="false"
+              :material
+            />
+          </div>
+        </div>
+      </div>
+    </Transition>
   </section>
 </template>
 
 <script lang="ts" setup>
-import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import fmtUtil from "@utils/fmtUtil.js";
+import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed, ref, useId } from "vue";
 
 type UcMaterialCostListItem = Pick<
   TGApp.App.UserCalc.CraftingCost,
-  "id" | "name" | "star" | "count" | "owned"
+  "id" | "name" | "type" | "star" | "count" | "owned"
 > & {
   role?: string;
   missing?: number;
+};
+
+type UcMaterialCostListDisplayItem = TGApp.App.UserCalc.ResultMaterial & {
+  role?: string;
 };
 
 type UcMaterialCostListProps = {
@@ -91,8 +73,6 @@ type UcMaterialCostListProps = {
   items: ReadonlyArray<UcMaterialCostListItem>;
   icon: string;
   iconColor: string;
-  quantityLabel?: string;
-  showAvailable?: boolean;
   collapsible?: boolean;
 };
 
@@ -101,13 +81,34 @@ const {
   items,
   icon,
   iconColor,
-  quantityLabel = "计划",
-  showAvailable = true,
   collapsible = false,
 } = defineProps<UcMaterialCostListProps>();
 const contentId = useId();
-const expanded = ref<boolean>(true);
-const missingKinds = computed<number>(() => items.filter((item) => (item.missing ?? 0) > 0).length);
+const expanded = ref<boolean>(false);
+const displayItems = computed<Array<UcMaterialCostListDisplayItem>>(() =>
+  items.map((item) => {
+    const required = item.count;
+    const owned = item.owned;
+    const missing = item.missing ?? Math.max(required - owned, 0);
+    const progress = required === 0 ? 100 : Math.min(Math.max((owned / required) * 100, 0), 100);
+    return {
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      star: item.star,
+      required,
+      owned,
+      craftable: 0,
+      craftingCosts: [],
+      missing,
+      progress,
+      role: item.role,
+    };
+  }),
+);
+const missingKinds = computed<number>(
+  () => displayItems.value.filter((item) => item.missing > 0).length,
+);
 </script>
 
 <style lang="scss" scoped>
@@ -133,16 +134,31 @@ const missingKinds = computed<number>(() => items.filter((item) => (item.missing
   gap: 0;
 }
 
-.ucmcl-section.collapsible.collapsed {
-  border-radius: 999px;
-}
-
 .ucmcl-content {
   min-width: 0;
 }
 
 .ucmcl-section.collapsible .ucmcl-content {
-  padding: 12px;
+  display: grid;
+  min-height: 0;
+  grid-template-rows: 1fr;
+}
+
+.ucmcl-section.collapsible .ucmcl-content-viewport {
+  min-height: 0;
+  max-height: min(360px, 50vh);
+  overflow-y: auto;
+}
+
+.ucmcl-section.collapsible .ucmcl-content.ucmcl-content-enter-active,
+.ucmcl-section.collapsible .ucmcl-content.ucmcl-content-leave-active {
+  overflow: hidden;
+  transition: grid-template-rows 180ms ease;
+}
+
+.ucmcl-section.collapsible .ucmcl-content.ucmcl-content-enter-from,
+.ucmcl-section.collapsible .ucmcl-content.ucmcl-content-leave-to {
+  grid-template-rows: 0fr;
 }
 
 .ucmcl-heading {
@@ -206,71 +222,7 @@ const missingKinds = computed<number>(() => items.filter((item) => (item.missing
   width: 100%;
   min-width: 0;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-}
-
-.ucmcl-row {
-  display: flex;
-  min-width: 0;
-  min-height: 44px;
-  box-sizing: border-box;
-  align-items: center;
-  padding: 2px 8px 2px 2px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-1);
-  gap: 8px;
-
-  &.missing {
-    border-color: var(--tgc-od-red);
-    box-shadow: inset 3px 0 var(--tgc-od-red);
-  }
-}
-
-.ucmcl-info {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ucmcl-name-row,
-.ucmcl-stats {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.ucmcl-name-row {
-  justify-content: space-between;
-
-  strong {
-    overflow: hidden;
-    color: var(--box-text-4);
-    font-family: var(--font-title);
-    font-size: 13px;
-    font-weight: normal;
-    line-height: 16px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.ucmcl-role {
-  flex-shrink: 0;
-  color: var(--common-text-sub);
-  font-size: 10px;
-  line-height: 14px;
-}
-
-.ucmcl-stats {
-  flex-wrap: wrap;
-  color: var(--common-text-sub);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  line-height: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
 .ucmcl-shortage {
@@ -281,6 +233,17 @@ const missingKinds = computed<number>(() => items.filter((item) => (item.missing
 @media (width <= 600px) {
   .ucmcl-list {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ucmcl-section.collapsible .ucmcl-list {
+  padding: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ucmcl-section.collapsible .ucmcl-content.ucmcl-content-enter-active,
+  .ucmcl-section.collapsible .ucmcl-content.ucmcl-content-leave-active {
+    transition-duration: 0.01ms;
   }
 }
 </style>

@@ -199,7 +199,7 @@
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
             :bag-materials="bagMaterialDetails"
-            :entry-materials="planAllocation.entries"
+            :entry-materials="planEntryMaterials"
             :conversionOptions="planConversionOptions"
             :entries="planEntries"
             :inventory="planInventory"
@@ -281,6 +281,7 @@
     v-if="currentProject"
     v-model="summaryVisible"
     :bag-materials="bagMaterialDetails"
+    :entries="planEntries"
     :inventory-updated-label="inventoryUpdatedLabel"
     :materials="planResultMaterials"
     :project="currentProject"
@@ -318,6 +319,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import {
   allocatePlanMaterials,
   getConversionOptions,
+  getConversionResultMaterials,
   getCultivationEntryKey,
   getCalculateInventory,
   getUidServerTimezone,
@@ -862,8 +864,26 @@ const planConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption
     ? getConversionOptions(planEntries.value, planAllocation.value, WikiMaterialData)
     : [],
 );
-const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
-  () => planAllocation.value.materials,
+const planEntryMaterials = computed<ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
+  () =>
+    new Map(
+      planEntries.value.map((entry) => [
+        entry.id,
+        getConversionResultMaterials(
+          planAllocation.value.entries.get(entry.id) ?? [],
+          planConversionOptions.value.filter(
+            (option) => option.entryKey === getCultivationEntryKey(entry),
+          ),
+        ),
+      ]),
+    ),
+);
+const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  mergeCultivationResults(
+    planEntries.value
+      .filter((entry) => entry.status === "active")
+      .flatMap((entry) => planEntryMaterials.value.get(entry.id) ?? []),
+  ),
 );
 const planMissingKinds = computed<number>(
   () => planResultMaterials.value.filter((material) => material.missing > 0).length,
@@ -874,7 +894,7 @@ const planEntryCounts = computed<{
   fulfilled: number;
 }>(() => {
   const fulfilled = (entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean =>
-    (planAllocation.value.entries.get(entry.id) ?? []).every((material) => material.missing <= 0);
+    (planEntryMaterials.value.get(entry.id) ?? []).every((material) => material.missing <= 0);
   return {
     active: planEntries.value.filter((entry) => entry.status === "active" && !fulfilled(entry))
       .length,
@@ -893,7 +913,7 @@ const canSaveToPlan = computed<boolean>(() => {
   }
   return avatarRequiredMaterials.value.length > 0 || weaponRequiredMaterials.value.length > 0;
 });
-const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
+const rawDisplayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
   const hasExplicitConversion = calculatorEntries.value.some(
     (entry) => (calculatorAllocation.value.appliedConversions.get(entry.id)?.length ?? 0) > 0,
   );
@@ -901,6 +921,9 @@ const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>
     ? apiResultMaterials.value
     : localResultMaterials.value;
 });
+const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  getConversionResultMaterials(rawDisplayResultMaterials.value, conversionOptions.value),
+);
 const missingKinds = computed<number>(
   () => displayResultMaterials.value.filter((material) => material.missing > 0).length,
 );

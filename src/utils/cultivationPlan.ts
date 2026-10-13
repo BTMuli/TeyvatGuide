@@ -17,6 +17,11 @@ const DUST_OF_AZOTH_ID = 104201;
 const DREAM_SOLVENT_ID = 113021;
 const CONVERSION_MEDIA_IDS = new Set([DUST_OF_AZOTH_ID, DREAM_SOLVENT_ID]);
 
+type AutomaticConversionContext = {
+  recommendation: TGApp.App.UserCalc.ConversionRecommendation;
+  inventory: ReadonlyMap<number, number>;
+};
+
 /**
  * 养成计划的材料分配结果。
  * @since Beta v0.12.6
@@ -34,6 +39,8 @@ export type PlanMaterialAllocation = {
   conversionInventory: Map<number, number>;
   /** 当前分配完成后仍可额外考虑的媒介转换 */
   recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation>;
+  /** 按目标 ID 保存已执行的自动媒介转换上下文 */
+  automaticConversions: Map<string, Array<AutomaticConversionContext>>;
 };
 
 /**
@@ -98,6 +105,24 @@ function buildCraftingCosts(
     .sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
+function mergeCraftingCosts(
+  ...costLists: ReadonlyArray<ReadonlyArray<TGApp.App.UserCalc.CraftingCost>>
+): Array<TGApp.App.UserCalc.CraftingCost> {
+  const costs = new Map<number, TGApp.App.UserCalc.CraftingCost>();
+  for (const costList of costLists) {
+    for (const cost of costList) {
+      if (!Number.isFinite(cost.count) || cost.count <= 0) continue;
+      const previous = costs.get(cost.id);
+      costs.set(cost.id, {
+        ...cost,
+        count: (previous?.count ?? 0) + cost.count,
+        owned: Math.max(previous?.owned ?? 0, cost.owned),
+      });
+    }
+  }
+  return Array.from(costs.values()).sort((a, b) => b.star - a.star || a.id - b.id);
+}
+
 type MaterialMap = ReadonlyMap<number, TGApp.App.Material.WikiItem>;
 
 type EntryPlan = {
@@ -111,6 +136,7 @@ type EntryPlan = {
 type MediaConversionAllocation = {
   remainingInventory: Map<number, number>;
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
+  automaticConversions: Array<AutomaticConversionContext>;
 };
 
 type ExplicitConversionAllocation = {
@@ -373,6 +399,7 @@ function allocateOrdinaryCrafting(
   return {
     remainingInventory: normalizeInventory(allocation.remainingInventory),
     results: applyCraftingAllocation(results, allocation.materials, inventory, materialMap),
+    automaticConversions: [],
   };
 }
 
@@ -389,11 +416,12 @@ function allocateMediaConversions(
   useSolvent: boolean,
 ): MediaConversionAllocation {
   let remainingInventory = normalizeInventory(inventory);
+  const automaticConversions: Array<AutomaticConversionContext> = [];
   if (
     (!useDust || (remainingInventory.get(DUST_OF_AZOTH_ID) ?? 0) <= 0) &&
     (!useSolvent || (remainingInventory.get(DREAM_SOLVENT_ID) ?? 0) <= 0)
   ) {
-    return { remainingInventory, results: [...results] };
+    return { remainingInventory, results: [...results], automaticConversions };
   }
   let nextResults = [...results];
   for (const result of sortCultivationResults(results)) {
@@ -416,6 +444,14 @@ function allocateMediaConversions(
     if (!crafting || crafting.count <= 0) continue;
     remainingInventory = normalizeInventory(allocation.remainingInventory);
     const costs = buildCraftingCosts(crafting, beforeTarget, materialMap);
+    automaticConversions.push({
+      recommendation: {
+        material: cloneResultMaterial(result),
+        count: crafting.count,
+        costs: costs.map((cost) => ({ ...cost })),
+      },
+      inventory: new Map(beforeTarget),
+    });
     nextResults = nextResults.map((item) =>
       item.id === result.id
         ? updateResultMaterial(item, item.craftable + crafting.count, [
@@ -425,7 +461,11 @@ function allocateMediaConversions(
         : item,
     );
   }
-  return { remainingInventory, results: sortCultivationResults(nextResults) };
+  return {
+    remainingInventory,
+    results: sortCultivationResults(nextResults),
+    automaticConversions,
+  };
 }
 
 /**
@@ -937,7 +977,7 @@ export function calculateConversionPlan(
 }
 
 /**
- * 构建已采用转换方案的来源和媒介需求行，与养成目标进度分开展示。
+ * 构建转换方案的来源和媒介需求行，与养成目标进度分开展示。
  * @since Beta v0.12.6
  * @param options - 当前展示范围内的转换方案
  * @returns 按材料合并的计划需求、可用量和缺口
@@ -948,12 +988,21 @@ export function buildConversionDemandMaterials(
   const demands = new Map<number, TGApp.App.UserCalc.ResultMaterial>();
   const actualCosts = new Map<number, number>();
   const freeInventory = new Map<number, number>();
+
   for (const option of options) {
-    if (!option.intent || option.intent.count === 0) continue;
-    for (const cost of option.recommendation.costs) {
-      actualCosts.set(cost.id, (actualCosts.get(cost.id) ?? 0) + cost.count);
-    }
-    for (const cost of option.plannedCosts ?? option.recommendation.costs) {
+    if (option.intent?.count === 0) continue;
+    const isManual = option.intent !== undefined;
+    const availableInventory = isManual
+      ? option.remainingInventory
+      : option.allocatedCosts !== undefined
+        ? (option.remainingInventory ?? option.inventory)
+        : option.inventory;
+    const costs = (
+      isManual ? (option.plannedCosts ?? option.recommendation.costs) : option.recommendation.costs
+    ).filter((cost) => Number.isFinite(cost.count) && cost.count > 0);
+    if (costs.length === 0) continue;
+
+    for (const cost of costs) {
       const previous = demands.get(cost.id);
       demands.set(cost.id, {
         id: cost.id,
@@ -967,10 +1016,14 @@ export function buildConversionDemandMaterials(
         missing: 0,
         progress: 0,
       });
-      freeInventory.set(
-        cost.id,
-        Math.max(freeInventory.get(cost.id) ?? 0, option.remainingInventory?.get(cost.id) ?? 0),
-      );
+      const available = Math.max(availableInventory?.get(cost.id) ?? 0, 0);
+      freeInventory.set(cost.id, Math.max(freeInventory.get(cost.id) ?? 0, available));
+    }
+
+    const occupiedCosts = isManual ? option.recommendation.costs : (option.allocatedCosts ?? []);
+    for (const cost of occupiedCosts) {
+      if (!Number.isFinite(cost.count) || cost.count <= 0) continue;
+      actualCosts.set(cost.id, (actualCosts.get(cost.id) ?? 0) + cost.count);
     }
   }
   return sortCultivationResults(
@@ -1009,8 +1062,10 @@ export function getAdditionalCraftingCosts(
     }
   }
   for (const option of options) {
-    if (!option.intent || option.intent.count === 0) continue;
-    for (const cost of option.recommendation.costs) {
+    if (option.intent?.count === 0) continue;
+    const allocatedCosts =
+      option.intent !== undefined ? option.recommendation.costs : (option.allocatedCosts ?? []);
+    for (const cost of allocatedCosts) {
       const current = costs.get(cost.id);
       if (current) current.count = Math.max(current.count - cost.count, 0);
     }
@@ -1018,6 +1073,88 @@ export function getAdditionalCraftingCosts(
   return Array.from(costs.values())
     .filter((cost) => cost.count > 0)
     .sort((a, b) => b.star - a.star || a.id - b.id);
+}
+
+/**
+ * 获取材料详情中的合成与转换消耗。
+ *
+ * 只读取当前材料及传入范围内的转换选项，不改变材料结果、库存或转换意图。
+ * @since Beta v0.12.5
+ * @param material - 当前展示的材料结果
+ * @param options - 当前目标范围内的转换选项
+ * @returns 按材料合并并排序的合成与转换消耗
+ */
+export function getMaterialCraftingCosts(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption> = [],
+): Array<TGApp.App.UserCalc.CraftingCost> {
+  const matchingOptions = options.filter(
+    (option) => option.recommendation.material.id === material.id && option.intent?.count !== 0,
+  );
+  const costs = new Map<number, TGApp.App.UserCalc.CraftingCost>(
+    getAdditionalCraftingCosts([material], matchingOptions)
+      .filter((cost) => Number.isFinite(cost.count) && cost.count > 0)
+      .map((cost) => [cost.id, { ...cost }]),
+  );
+
+  for (const option of matchingOptions) {
+    const optionCosts =
+      option.intent !== undefined
+        ? (option.plannedCosts ?? option.recommendation.costs)
+        : option.recommendation.costs;
+    for (const cost of optionCosts) {
+      if (!Number.isFinite(cost.count) || cost.count <= 0) continue;
+      const previous = costs.get(cost.id);
+      costs.set(cost.id, {
+        ...cost,
+        count: (previous?.count ?? 0) + cost.count,
+        owned: Math.max(previous?.owned ?? 0, cost.owned),
+      });
+    }
+  }
+
+  return Array.from(costs.values()).sort((a, b) => b.star - a.star || a.id - b.id);
+}
+
+/**
+ * 将未采用的自动转换数量投影到材料结果。
+ *
+ * 仅用于详情和统计展示，不会修改原始分配结果或转换选项；已采用的手动方案已经计入
+ * `craftable`，不在此重复计算。
+ * @since Beta v0.12.5
+ * @param materials - 原始分配或接口返回的材料结果
+ * @param options - 当前展示范围内的转换选项
+ * @returns 叠加自动转换可执行数量后的材料结果
+ */
+export function getConversionResultMaterials(
+  materials: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  options: ReadonlyArray<TGApp.App.UserCalc.ConversionOption> = [],
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  const automaticCounts = new Map<number, number>();
+  for (const option of options) {
+    if (option.intent !== undefined) continue;
+    const count = option.recommendation.count;
+    if (!Number.isFinite(count) || count <= 0) continue;
+    const allocatedCount =
+      option.allocatedCount !== undefined &&
+      Number.isFinite(option.allocatedCount) &&
+      option.allocatedCount > 0
+        ? option.allocatedCount
+        : 0;
+    const materialId = option.recommendation.material.id;
+    automaticCounts.set(
+      materialId,
+      (automaticCounts.get(materialId) ?? 0) + Math.max(count - allocatedCount, 0),
+    );
+  }
+
+  return sortCultivationResults(
+    materials.map((material) => {
+      const remaining = Math.max(material.required - material.owned - material.craftable, 0);
+      const count = Math.min(automaticCounts.get(material.id) ?? 0, remaining);
+      return updateResultMaterial(material, material.craftable + count, material.craftingCosts);
+    }),
+  );
 }
 
 /**
@@ -1041,6 +1178,7 @@ export function allocatePlanMaterials(
   const ordinaryMaterials = buildOrdinaryMaterials(materials);
   const allocatedEntries = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
   const appliedConversions = new Map<string, Array<TGApp.App.UserCalc.AppliedConversion>>();
+  const automaticConversions = new Map<string, Array<AutomaticConversionContext>>();
 
   const activeEntries = sortCultivationEntries(
     entries.filter((entry) => entry.status === "active"),
@@ -1116,6 +1254,7 @@ export function allocatePlanMaterials(
     plan.explicitMaterialIds = explicit.explicitMaterialIds;
     appliedConversions.set(plan.entry.id, explicit.appliedConversions);
     conversionInventory = explicit.remainingInventory;
+    let entryAutomaticConversions: Array<AutomaticConversionContext> = [];
 
     const automaticResults = plan.results.filter(
       (result) => !plan.explicitMaterialIds.has(result.id),
@@ -1133,12 +1272,14 @@ export function allocatePlanMaterials(
         plan.entry.useDust,
         plan.entry.useSolvent,
       );
+      entryAutomaticConversions = converted.automaticConversions;
       const convertedResults = new Map(converted.results.map((result) => [result.id, result]));
       plan.results = sortCultivationResults(
         plan.results.map((result) => convertedResults.get(result.id) ?? result),
       );
       conversionInventory = converted.remainingInventory;
     }
+    automaticConversions.set(plan.entry.id, entryAutomaticConversions);
     allocatedEntries.set(plan.entry.id, plan.results);
   }
   remainingInventory = applyInventoryConsumption(
@@ -1197,6 +1338,7 @@ export function allocatePlanMaterials(
     remainingInventory,
     conversionInventory: conversionPreparation.inventory,
     recommendations: buildConversionRecommendations(resultMaterials, remainingInventory, materials),
+    automaticConversions,
   };
 }
 
@@ -1242,7 +1384,22 @@ export function getConversionOptions(
     }
 
     const automaticResults = results.filter((result) => !explicitMaterialIds.has(result.id));
-    if (automaticResults.length === 0) continue;
+    const automaticOptions = new Map<number, TGApp.App.UserCalc.ConversionOption>();
+    for (const context of allocation.automaticConversions.get(entry.id) ?? []) {
+      automaticOptions.set(context.recommendation.material.id, {
+        entryKey,
+        entryName: entry.name,
+        recommendation: cloneConversionRecommendation(context.recommendation),
+        inventory: new Map(context.inventory),
+        allocatedCount: context.recommendation.count,
+        allocatedCosts: context.recommendation.costs.map((cost) => ({ ...cost })),
+        remainingInventory: new Map(allocation.conversionInventory),
+      });
+    }
+    if (automaticResults.length === 0) {
+      options.push(...automaticOptions.values());
+      continue;
+    }
     const protectedResults = activeEntries.flatMap((otherEntry) =>
       (allocation.entries.get(otherEntry.id) ?? []).filter(
         (result) => otherEntry.id !== entry.id || explicitMaterialIds.has(result.id),
@@ -1262,18 +1419,28 @@ export function getConversionOptions(
     );
     let recommendationInventory = preparation.inventory;
     for (const recommendation of recommendations) {
-      options.push({
-        entryKey,
-        entryName: entry.name,
-        recommendation: cloneConversionRecommendation(recommendation),
-        inventory: new Map(recommendationInventory),
-      });
+      const existing = automaticOptions.get(recommendation.material.id);
+      if (existing) {
+        existing.recommendation = {
+          ...existing.recommendation,
+          count: existing.recommendation.count + recommendation.count,
+          costs: mergeCraftingCosts(existing.recommendation.costs, recommendation.costs),
+        };
+      } else {
+        automaticOptions.set(recommendation.material.id, {
+          entryKey,
+          entryName: entry.name,
+          recommendation: cloneConversionRecommendation(recommendation),
+          inventory: new Map(recommendationInventory),
+        });
+      }
       recommendationInventory = subtractCraftingCosts(
         recommendationInventory,
         recommendation.costs,
       );
       workingInventory = subtractCraftingCosts(workingInventory, recommendation.costs);
     }
+    options.push(...automaticOptions.values());
   }
 
   if (entryIds === undefined) return options;

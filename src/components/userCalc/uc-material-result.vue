@@ -87,10 +87,12 @@
     footerContext="养成计划"
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
+    :conversionOptions
     :total="materials.length"
     :topOffset
     :uid
     :wiki="currentWiki"
+    @apply-conversion="(entryKey, intent) => emits('applyConversion', entryKey, intent)"
   >
     <template #left>
       <v-btn
@@ -120,7 +122,7 @@ import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommenda
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { nextTick, ref, shallowRef } from "vue";
+import { nextTick, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -156,6 +158,25 @@ const materialOverlayVisible = ref<boolean>(false);
 const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
+
+watch(
+  () => props.materials,
+  (materials) => {
+    const currentId = currentMaterial.value?.id;
+    if (currentId === undefined) return;
+    const nextIndex = materials.findIndex((material) => material.id === currentId);
+    const nextMaterial = materials[nextIndex];
+    if (nextMaterial && nextIndex >= 0) {
+      currentMaterialIndex.value = nextIndex;
+      currentMaterial.value = nextMaterial;
+      return;
+    }
+    materialOverlayVisible.value = false;
+    currentMaterial.value = undefined;
+    currentWiki.value = undefined;
+  },
+  { flush: "sync" },
+);
 
 async function openMaterialInfo(
   material: TGApp.App.UserCalc.ResultMaterial,

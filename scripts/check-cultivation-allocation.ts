@@ -118,6 +118,46 @@ function countCost(costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>, id: nu
   return costs.find((cost) => cost.id === id)?.count ?? 0;
 }
 
+function makeCost(id: number, count: number, owned = 0, star = 3): TGApp.App.UserCalc.CraftingCost {
+  return {
+    id,
+    name: `材料 ${id}`,
+    type: "regression",
+    star,
+    count,
+    owned,
+  };
+}
+
+function makeConversionOption(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>,
+  values: {
+    count?: number;
+    entryKey?: string;
+    intent?: TGApp.App.UserCalc.ConversionIntent;
+    plannedCosts?: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>;
+  } = {},
+): TGApp.App.UserCalc.ConversionOption {
+  return {
+    entryKey: values.entryKey ?? "regression-entry",
+    entryName: material.name,
+    recommendation: {
+      material: {
+        ...material,
+        craftingCosts: material.craftingCosts.map((cost) => ({ ...cost })),
+      },
+      count: values.count ?? 1,
+      costs: costs.map((cost) => ({ ...cost })),
+    },
+    inventory: new Map(),
+    ...(values.intent ? { intent: { ...values.intent } } : {}),
+    ...(values.plannedCosts
+      ? { plannedCosts: values.plannedCosts.map((cost) => ({ ...cost })) }
+      : {}),
+  };
+}
+
 async function runChecks(
   utils: PlanUtils,
   wikiMaterials: ReadonlyArray<TGApp.App.Material.WikiItem>,
@@ -133,6 +173,8 @@ async function runChecks(
     getConversionOptions,
     getCultivationEntryKey,
     getAdditionalCraftingCosts,
+    getMaterialCraftingCosts,
+    getConversionResultMaterials,
     mergeCultivationResults,
     prepareConversionRecommendations,
   } = utils;
@@ -229,6 +271,135 @@ async function runChecks(
   assert.equal(adoptedOptions[0]?.recommendation.material.missing, 3);
   assert.equal(adoptedOptions[0]?.inventory.get(source), 4);
   assert.equal(adoptedOptions[0]?.intent?.count, 2);
+  assert.equal(adoptedOptions[0]?.allocatedCount, undefined);
+  assert.equal(adoptedOptions[0]?.allocatedCosts, undefined);
+
+  // 未采用的自动推荐也应展示来源和媒介，多个推荐共享库存时不能重复累计可用量。
+  const automaticFirst = makeEntry("automatic-first", target, 0, { allowCrafting: false });
+  const automaticSecond = makeEntry("automatic-second", target, 1, { allowCrafting: false });
+  const automaticEntries = [automaticFirst, automaticSecond];
+  const automaticAllocation = allocatePlanMaterials(
+    automaticEntries,
+    new Map([
+      [source, 2],
+      [dust, 2],
+    ]),
+    materials,
+  );
+  const automaticOptions = getConversionOptions(automaticEntries, automaticAllocation, materials);
+  assert.equal(automaticOptions.length, 2);
+  assert.ok(automaticOptions.every((option) => option.intent === undefined));
+  const automaticDemands = buildConversionDemandMaterials(automaticOptions);
+  assert.equal(automaticDemands.find((item) => item.id === source)?.required, 2);
+  assert.equal(automaticDemands.find((item) => item.id === source)?.owned, 2);
+  assert.equal(automaticDemands.find((item) => item.id === source)?.missing, 0);
+  assert.equal(automaticDemands.find((item) => item.id === dust)?.required, 2);
+  assert.equal(automaticDemands.find((item) => item.id === dust)?.owned, 2);
+  assert.equal(automaticDemands.find((item) => item.id === dust)?.missing, 0);
+  const automaticOptionsSnapshot = structuredClone(automaticOptions);
+  const automaticInventorySnapshots = automaticOptions.map((option) => new Map(option.inventory));
+  assert.deepEqual(buildConversionDemandMaterials(automaticOptions), automaticDemands);
+  assert.deepEqual(automaticOptions, automaticOptionsSnapshot);
+  assert.deepEqual(
+    automaticOptions.map((option) => option.inventory),
+    automaticInventorySnapshots,
+  );
+
+  // 自动转换只投影到尚未由库存和普通合成满足的缺口，9 + 3 / 18 应显示为 12 / 18。
+  const projectionMaterial = makeResult(target, 18, 9);
+  const projectionOption = makeConversionOption(
+    projectionMaterial,
+    [makeCost(source, 2, 2), makeCost(dust, 2, 1, 1)],
+    { count: 3, entryKey: "projection-automatic" },
+  );
+  const projected = getConversionResultMaterials([projectionMaterial], [projectionOption]);
+  assert.equal(projected[0]?.owned, 9);
+  assert.equal(projected[0]?.required, 18);
+  assert.equal(projected[0]?.craftable, 3);
+  assert.equal(projected[0]?.missing, 6);
+  assert.equal(projected[0]?.progress, (12 / 18) * 100);
+  assert.deepEqual(projected[0]?.craftingCosts, projectionMaterial.craftingCosts);
+
+  // 已有普通合成数量与自动转换叠加；已采用 manual 方案和缺媒介方案不重复计数。
+  const ordinaryProjection = makeResult(target, 18, 9, 4);
+  const ordinaryProjected = getConversionResultMaterials([ordinaryProjection], [projectionOption]);
+  assert.equal(ordinaryProjected[0]?.craftable, 7);
+  assert.equal(ordinaryProjected[0]?.missing, 2);
+  const adoptedProjection = makeResult(target, 18, 9, 2);
+  const adoptedProjectionOption = makeConversionOption(adoptedProjection, [], {
+    count: 6,
+    intent: { materialId: target, count: 6, sourceLimits: [] },
+    plannedCosts: [makeCost(source, 6, 0), makeCost(dust, 6, 0, 1)],
+  });
+  assert.equal(
+    getConversionResultMaterials([adoptedProjection], [adoptedProjectionOption])[0]?.craftable,
+    2,
+  );
+  const missingMediaProjection = makeResult(target, 18, 9);
+  const missingMediaOption = makeConversionOption(missingMediaProjection, [], {
+    count: 6,
+    intent: { materialId: target, count: 6, sourceLimits: [] },
+    plannedCosts: [makeCost(source, 6, 0), makeCost(dust, 6, 0, 1)],
+  });
+  assert.equal(
+    getConversionResultMaterials([missingMediaProjection], [missingMediaOption])[0]?.craftable,
+    0,
+  );
+
+  const automaticProjectionSnapshot = structuredClone(automaticAllocation.materials);
+  const automaticOptionsProjectionSnapshot = structuredClone(automaticOptions);
+  const automaticProjected = getConversionResultMaterials(
+    automaticAllocation.materials,
+    automaticOptions,
+  );
+  assert.equal(automaticProjected.find((item) => item.id === target)?.craftable, 2);
+  assert.equal(automaticProjected.find((item) => item.id === target)?.missing, 0);
+  assert.deepEqual(automaticAllocation.materials, automaticProjectionSnapshot);
+  assert.deepEqual(automaticOptions, automaticOptionsProjectionSnapshot);
+  const firstScopeOptions = getConversionOptions(
+    automaticEntries,
+    automaticAllocation,
+    materials,
+    new Set([automaticFirst.id]),
+  );
+  assert.equal(firstScopeOptions.length, 1);
+  assert.equal(
+    getConversionResultMaterials(automaticAllocation.materials, firstScopeOptions).find(
+      (item) => item.id === target,
+    )?.craftable,
+    1,
+  );
+
+  // 自动推荐与手动方案共用来源时，需求累计但库存只按手动前的快照计算一次。
+  const mixedAutomatic = makeEntry("mixed-automatic", target, 0, { allowCrafting: false });
+  const mixedManual = makeEntry("mixed-manual", target, 1, { allowCrafting: false });
+  const mixedKey = getCultivationEntryKey(mixedManual);
+  const mixedIntent: TGApp.App.UserCalc.ConversionIntent = {
+    materialId: target,
+    count: 1,
+    sourceLimits: [{ id: source, count: 1 }],
+  };
+  const mixedEntries = [mixedAutomatic, mixedManual];
+  const mixedAllocation = allocatePlanMaterials(
+    mixedEntries,
+    new Map([
+      [source, 2],
+      [dust, 2],
+    ]),
+    materials,
+    new Map([[mixedKey, [mixedIntent]]]),
+  );
+  const mixedOptions = getConversionOptions(mixedEntries, mixedAllocation, materials);
+  assert.equal(mixedOptions.length, 2);
+  assert.equal(mixedOptions[0]?.intent, undefined);
+  assert.equal(mixedOptions[1]?.intent?.count, 1);
+  const mixedDemands = buildConversionDemandMaterials(mixedOptions);
+  assert.equal(mixedDemands.find((item) => item.id === source)?.required, 2);
+  assert.equal(mixedDemands.find((item) => item.id === source)?.owned, 2);
+  assert.equal(mixedDemands.find((item) => item.id === source)?.missing, 0);
+  assert.equal(mixedDemands.find((item) => item.id === dust)?.required, 2);
+  assert.equal(mixedDemands.find((item) => item.id === dust)?.owned, 2);
+  assert.equal(mixedDemands.find((item) => item.id === dust)?.missing, 0);
 
   // 转换需求已展示的消耗不再重复；同材料用于普通合成的部分仍须保留。
   const resultSnapshot = structuredClone(adopted.materials);
@@ -259,6 +430,95 @@ async function runChecks(
   );
   assert.deepEqual(adopted.materials, resultSnapshot);
   assert.deepEqual(adoptedOptions, optionsSnapshot);
+
+  // 材料详情需补齐未采用自动推荐和缺媒介手动方案的完整来源消耗。
+  const detailMaterial = makeResult(target, 3);
+  const automaticDetailOption = makeConversionOption(
+    detailMaterial,
+    [makeCost(source, 2, 2), makeCost(dust, 2, 1, 1)],
+    { entryKey: "detail-automatic" },
+  );
+  const automaticDetailCosts = getMaterialCraftingCosts(detailMaterial, [automaticDetailOption]);
+  assert.equal(countCost(automaticDetailCosts, source), 2);
+  assert.equal(countCost(automaticDetailCosts, dust), 2);
+  assert.equal(automaticDetailCosts.find((cost) => cost.id === source)?.owned, 2);
+
+  const ordinaryAndManualMaterial = makeResult(target, 3);
+  ordinaryAndManualMaterial.craftingCosts = [makeCost(source, 5, 6), makeCost(dust, 2, 1, 1)];
+  const adoptedDetailOption = makeConversionOption(
+    ordinaryAndManualMaterial,
+    [makeCost(source, 2, 2), makeCost(dust, 2, 1, 1)],
+    {
+      entryKey: "detail-manual",
+      intent: { materialId: target, count: 2, sourceLimits: [] },
+      plannedCosts: [makeCost(source, 2, 2), makeCost(dust, 2, 1, 1)],
+    },
+  );
+  const adoptedDetailCosts = getMaterialCraftingCosts(ordinaryAndManualMaterial, [
+    adoptedDetailOption,
+  ]);
+  assert.equal(countCost(adoptedDetailCosts, source), 5);
+  assert.equal(countCost(adoptedDetailCosts, dust), 2);
+  assert.equal(adoptedDetailCosts.find((cost) => cost.id === source)?.owned, 6);
+
+  const incompleteManualMaterial = makeResult(target, 3);
+  const incompleteManualOption = makeConversionOption(incompleteManualMaterial, [], {
+    entryKey: "detail-incomplete-manual",
+    intent: { materialId: target, count: 3, sourceLimits: [] },
+    plannedCosts: [makeCost(source, 3, 1), makeCost(dust, 3, 0, 1)],
+  });
+  const incompleteManualCosts = getMaterialCraftingCosts(incompleteManualMaterial, [
+    incompleteManualOption,
+  ]);
+  assert.equal(countCost(incompleteManualCosts, source), 3);
+  assert.equal(countCost(incompleteManualCosts, dust), 3);
+
+  const secondAutomaticDetailOption = makeConversionOption(
+    detailMaterial,
+    [makeCost(source, 1, 1), makeCost(dust, 1, 1, 1)],
+    { entryKey: "detail-automatic-second" },
+  );
+  assert.equal(
+    countCost(getMaterialCraftingCosts(detailMaterial, [automaticDetailOption]), source),
+    2,
+  );
+  assert.equal(
+    countCost(
+      getMaterialCraftingCosts(detailMaterial, [
+        automaticDetailOption,
+        secondAutomaticDetailOption,
+      ]),
+      source,
+    ),
+    3,
+  );
+
+  const disabledDetailOption = makeConversionOption(detailMaterial, [makeCost(source, 4)], {
+    entryKey: "detail-disabled",
+    intent: { materialId: target, count: 0, sourceLimits: [] },
+    plannedCosts: [makeCost(source, 4)],
+  });
+  const otherMaterialOption = makeConversionOption(makeResult(7003, 1), [makeCost(source, 4)], {
+    entryKey: "detail-other-material",
+  });
+  const invalidDetailOption = makeConversionOption(detailMaterial, [
+    makeCost(source, 0),
+    makeCost(dust, Number.NaN, 0, 1),
+    makeCost(7003, Number.POSITIVE_INFINITY),
+  ]);
+  assert.deepEqual(
+    getMaterialCraftingCosts(detailMaterial, [
+      disabledDetailOption,
+      otherMaterialOption,
+      invalidDetailOption,
+    ]),
+    [],
+  );
+  const detailMaterialSnapshot = structuredClone(ordinaryAndManualMaterial);
+  const detailOptionsSnapshot = structuredClone([adoptedDetailOption]);
+  getMaterialCraftingCosts(ordinaryAndManualMaterial, [adoptedDetailOption]);
+  assert.deepEqual(ordinaryAndManualMaterial, detailMaterialSnapshot);
+  assert.deepEqual([adoptedDetailOption], detailOptionsSnapshot);
 
   // 替换方案从原始背包重算，不累计旧方案消耗；材料齐备后仍可重新编辑。
   const replacement = allocatePlanMaterials(
@@ -307,7 +567,16 @@ async function runChecks(
     new Map([[manualKey, [{ ...manualIntent, count: 0 }]]]),
   );
   assert.equal(disabled.materials[0]?.craftable, 0);
-  assert.equal(getConversionOptions([automaticEntry], disabled, materials)[0]?.intent?.count, 0);
+  const disabledOptions = getConversionOptions([automaticEntry], disabled, materials);
+  assert.equal(disabledOptions[0]?.intent?.count, 0);
+  assert.equal(disabledOptions[0]?.allocatedCount, undefined);
+  assert.equal(disabledOptions[0]?.allocatedCosts, undefined);
+  assert.deepEqual(buildConversionDemandMaterials(disabledOptions), []);
+  const zeroCostAutomatic = {
+    ...automaticOptions[0],
+    recommendation: { ...automaticOptions[0].recommendation, costs: [] },
+  };
+  assert.deepEqual(buildConversionDemandMaterials([zeroCostAutomatic]), []);
   assert.equal(
     allocatePlanMaterials([automaticEntry], manualInventory, materials).materials[0]?.craftable,
     3,
@@ -348,6 +617,17 @@ async function runChecks(
   assert.equal(competingDemands.find((item) => item.id === source)?.required, 4);
   assert.equal(competingDemands.find((item) => item.id === source)?.owned, 3);
   assert.equal(competingDemands.find((item) => item.id === source)?.missing, 1);
+  const highScopeDemands = buildConversionDemandMaterials(
+    getConversionOptions(
+      [manualEntry, secondManual],
+      competing,
+      materials,
+      new Set([manualEntry.id]),
+    ),
+  );
+  assert.equal(highScopeDemands.find((item) => item.id === source)?.required, 2);
+  assert.equal(highScopeDemands.find((item) => item.id === source)?.owned, 2);
+  assert.equal(highScopeDemands.find((item) => item.id === source)?.missing, 0);
   const highAutomatic = { ...manualEntry, allowCrafting: true, useDust: true };
   const highPriority = allocatePlanMaterials(
     [highAutomatic, secondManual],
@@ -786,6 +1066,197 @@ async function runChecks(
   assert.equal(realWeeklyPreview.count, 1);
   assert.equal(countCost(realWeeklyPreview.costs, 113007), 1);
   assert.equal(countCost(realWeeklyPreview.costs, solvent), 1);
+
+  // 真实循环转换配方：计划来源上限可高于库存，完整计划需求仍保留缺口与媒介。
+  const realSilkEntry = makeEntry("real-silk-manual", 113061, 0, { allowCrafting: false });
+  realSilkEntry.items[0].required = 3;
+  const realSilkKey = getCultivationEntryKey(realSilkEntry);
+  const realSilkIntent: TGApp.App.UserCalc.ConversionIntent = {
+    materialId: 113061,
+    count: 3,
+    sourceLimits: [{ id: 113060, count: 3 }],
+  };
+  const realSilkInventory = new Map([
+    [113060, 1],
+    [solvent, 53],
+  ]);
+  const realSilkAllocation = allocatePlanMaterials(
+    [realSilkEntry],
+    realSilkInventory,
+    wikiMaterials,
+    new Map([[realSilkKey, [realSilkIntent]]]),
+  );
+  const realSilkOptions = getConversionOptions([realSilkEntry], realSilkAllocation, wikiMaterials);
+  assert.equal(realSilkOptions.length, 1);
+  assert.equal(realSilkOptions[0]?.recommendation.count, 1);
+  assert.equal(countCost(realSilkOptions[0]?.plannedCosts ?? [], 113060), 3);
+  assert.equal(countCost(realSilkOptions[0]?.plannedCosts ?? [], solvent), 3);
+  const realSilkDemand = buildConversionDemandMaterials(realSilkOptions);
+  assert.equal(realSilkDemand.find((item) => item.id === 113060)?.required, 3);
+  assert.equal(realSilkDemand.find((item) => item.id === 113060)?.owned, 1);
+  assert.equal(realSilkDemand.find((item) => item.id === 113060)?.missing, 2);
+  assert.equal(realSilkDemand.find((item) => item.id === solvent)?.required, 3);
+  assert.equal(realSilkDemand.find((item) => item.id === solvent)?.missing, 0);
+
+  const realSilkNoSolventAllocation = allocatePlanMaterials(
+    [realSilkEntry],
+    new Map([
+      [113060, 1],
+      [solvent, 0],
+    ]),
+    wikiMaterials,
+    new Map([[realSilkKey, [realSilkIntent]]]),
+  );
+  const realSilkNoSolventOptions = getConversionOptions(
+    [realSilkEntry],
+    realSilkNoSolventAllocation,
+    wikiMaterials,
+  );
+  assert.equal(realSilkNoSolventOptions.length, 1);
+  assert.equal(realSilkNoSolventOptions[0]?.recommendation.count, 0);
+  assert.equal(countCost(realSilkNoSolventOptions[0]?.plannedCosts ?? [], 113060), 3);
+  assert.equal(countCost(realSilkNoSolventOptions[0]?.plannedCosts ?? [], solvent), 3);
+  const realSilkNoSolventDemand = buildConversionDemandMaterials(realSilkNoSolventOptions);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === 113060)?.required, 3);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === 113060)?.owned, 1);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === 113060)?.missing, 2);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === solvent)?.required, 3);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === solvent)?.owned, 0);
+  assert.equal(realSilkNoSolventDemand.find((item) => item.id === solvent)?.missing, 3);
+
+  // 自动媒介转换已实际执行时仍保留可编辑上下文，展示层只能追加未执行的余量。
+  const realAutomaticEntry = makeEntry("real-automatic-silk", 113061, 0, {
+    useSolvent: true,
+  });
+  realAutomaticEntry.items[0].required = 3;
+  const realAutomaticAllocation = allocatePlanMaterials(
+    [realAutomaticEntry],
+    new Map([
+      [113060, 3],
+      [solvent, 53],
+    ]),
+    wikiMaterials,
+  );
+  const realAutomaticResult = realAutomaticAllocation.entries.get(realAutomaticEntry.id)?.[0];
+  assert.equal(realAutomaticResult?.craftable, 3);
+  assert.equal(realAutomaticResult?.missing, 0);
+  const realAutomaticOptions = getConversionOptions(
+    [realAutomaticEntry],
+    realAutomaticAllocation,
+    wikiMaterials,
+  );
+  assert.equal(realAutomaticOptions.length, 1);
+  assert.equal(realAutomaticOptions[0]?.intent, undefined);
+  assert.equal(realAutomaticOptions[0]?.recommendation.count, 3);
+  assert.equal(realAutomaticOptions[0]?.recommendation.material.missing, 3);
+  assert.equal(realAutomaticOptions[0]?.allocatedCount, 3);
+  assert.equal(countCost(realAutomaticOptions[0]?.allocatedCosts ?? [], 113060), 3);
+  assert.equal(countCost(realAutomaticOptions[0]?.allocatedCosts ?? [], solvent), 3);
+  assert.equal(countCost(realAutomaticOptions[0]?.recommendation.costs ?? [], 113060), 3);
+  assert.equal(countCost(realAutomaticOptions[0]?.recommendation.costs ?? [], solvent), 3);
+  const realAutomaticProjected = getConversionResultMaterials(
+    [realAutomaticResult ?? makeResult(113061, 3)],
+    realAutomaticOptions,
+  )[0];
+  assert.equal(realAutomaticProjected?.craftable, 3);
+  assert.equal(realAutomaticProjected?.missing, 0);
+  assert.equal(
+    countCost(
+      getAdditionalCraftingCosts(
+        [realAutomaticResult ?? makeResult(113061, 3)],
+        realAutomaticOptions,
+      ),
+      113060,
+    ),
+    0,
+  );
+  const realAutomaticDetailCosts = getMaterialCraftingCosts(
+    realAutomaticResult ?? makeResult(113061, 3),
+    realAutomaticOptions,
+  );
+  assert.equal(countCost(realAutomaticDetailCosts, 113060), 3);
+  assert.equal(countCost(realAutomaticDetailCosts, solvent), 3);
+  const realAutomaticDemand = buildConversionDemandMaterials(realAutomaticOptions);
+  assert.equal(realAutomaticDemand.find((item) => item.id === 113060)?.required, 3);
+  assert.equal(realAutomaticDemand.find((item) => item.id === 113060)?.owned, 3);
+  assert.equal(realAutomaticDemand.find((item) => item.id === 113060)?.missing, 0);
+  assert.equal(realAutomaticDemand.find((item) => item.id === solvent)?.required, 3);
+  assert.equal(realAutomaticDemand.find((item) => item.id === solvent)?.missing, 0);
+
+  // 已执行的自动转换与剩余推荐应合并为一个可编辑方案，已执行部分不能再次计入进度或消耗。
+  const realAutomaticContext = realAutomaticAllocation.automaticConversions
+    .get(realAutomaticEntry.id)
+    ?.at(0);
+  assert.ok(realAutomaticContext);
+  const partialAutomaticResult = makeResult(113061, 3, 0, 2);
+  partialAutomaticResult.craftingCosts = [makeCost(113060, 2, 2), makeCost(solvent, 2, 2, 1)];
+  const partialAutomaticContext = {
+    recommendation: {
+      ...realAutomaticContext.recommendation,
+      material: makeResult(113061, 3),
+      count: 2,
+      costs: [makeCost(113060, 2, 2), makeCost(solvent, 2, 2, 1)],
+    },
+    inventory: new Map([
+      [113060, 3],
+      [solvent, 53],
+    ]),
+  };
+  const partialAutomaticAllocation = {
+    ...realAutomaticAllocation,
+    entries: new Map(realAutomaticAllocation.entries).set(realAutomaticEntry.id, [
+      partialAutomaticResult,
+    ]),
+    remainingInventory: new Map([
+      [113060, 1],
+      [solvent, 51],
+    ]),
+    conversionInventory: new Map([
+      [113060, 1],
+      [solvent, 51],
+    ]),
+    automaticConversions: new Map(realAutomaticAllocation.automaticConversions).set(
+      realAutomaticEntry.id,
+      [partialAutomaticContext],
+    ),
+  };
+  const partialAutomaticOptions = getConversionOptions(
+    [realAutomaticEntry],
+    partialAutomaticAllocation,
+    wikiMaterials,
+  );
+  assert.equal(partialAutomaticOptions.length, 1);
+  assert.equal(partialAutomaticOptions[0]?.recommendation.count, 3);
+  assert.equal(partialAutomaticOptions[0]?.allocatedCount, 2);
+  assert.equal(partialAutomaticOptions[0]?.recommendation.material.missing, 3);
+  assert.equal(countCost(partialAutomaticOptions[0]?.recommendation.costs ?? [], 113060), 3);
+  assert.equal(countCost(partialAutomaticOptions[0]?.recommendation.costs ?? [], solvent), 3);
+  const partialAutomaticProjected = getConversionResultMaterials(
+    [partialAutomaticResult],
+    partialAutomaticOptions,
+  )[0];
+  assert.equal(partialAutomaticProjected?.craftable, 3);
+  assert.equal(partialAutomaticProjected?.missing, 0);
+  assert.equal(
+    countCost(
+      getAdditionalCraftingCosts([partialAutomaticResult], partialAutomaticOptions),
+      113060,
+    ),
+    0,
+  );
+  const partialAutomaticDetailCosts = getMaterialCraftingCosts(
+    partialAutomaticResult,
+    partialAutomaticOptions,
+  );
+  assert.equal(countCost(partialAutomaticDetailCosts, 113060), 3);
+  assert.equal(countCost(partialAutomaticDetailCosts, solvent), 3);
+  const partialAutomaticDemand = buildConversionDemandMaterials(partialAutomaticOptions);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === 113060)?.required, 3);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === 113060)?.owned, 3);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === 113060)?.missing, 0);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === solvent)?.required, 3);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === solvent)?.owned, 53);
+  assert.equal(partialAutomaticDemand.find((item) => item.id === solvent)?.missing, 0);
 
   // 使用真实元素石配方覆盖媒介递归耗尽后的推荐路径。
   const realFirst = makeEntry("real-red-first", 104112, 0, { allowCrafting: false });
