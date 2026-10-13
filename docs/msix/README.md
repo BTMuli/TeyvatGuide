@@ -30,6 +30,8 @@ src-tauri/target/release/bundle/msix/TeyvatGuide_<四段版本号>_x64.msix
 
 版本号来自 `src-tauri/tauri.conf.json`，MSIX 的 Store 版本必须是四段数字，最后一段固定为 `0`；例如 `0.12.5` 会生成 `0.12.5.0`。如果旧版本已经发布到商店，提交前需要正常递增版本号。
 
+使用 `pnpm upv 0.12.6` 会同步更新 `package.json`、`Cargo.toml`、`tauri.conf.json` 和 `AppxManifest.xml`；清单中的版本写为 `0.12.6.0`。
+
 ## 商店身份、语言和 Assets
 
 清单保留现有商店身份，后续版本不能修改以下值：

@@ -51,6 +51,22 @@ if (!version) {
   logError("缺少版本号参数\n    用法: pnpm upv <version>\n    示例: pnpm upv 0.11.0");
 }
 
+if (
+  !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version) ||
+  version.split(".").some((part) => Number(part) > 65535)
+) {
+  logError("版本号必须为三段数字，每段不超过 65535，例如 0.12.6");
+}
+
+const appxVersion = `${version}.0`;
+const appxPath = resolve(rootDir, "src-tauri/msix/AppxManifest.xml");
+const appxManifest = fs.readFileSync(appxPath, "utf-8");
+const appxIdentityPattern = /(<Identity\b[^>]*\bVersion=")([^"]+)"/;
+const appxOldVersion = appxManifest.match(appxIdentityPattern)?.[2];
+if (!appxOldVersion) {
+  logError("AppxManifest.xml 缺少 Identity.Version");
+}
+
 const startTime = performance.now();
 
 console.log();
@@ -61,11 +77,11 @@ logDetail("执行时间", new Date().toLocaleString("zh-CN", { timeZone: "Asia/S
 logDetail("工作目录", rootDir);
 logDivider();
 
-const steps: string[] = [];
+const steps: Array<string> = [];
 
 // ── Step 1: 更新 package.json ─────────────────────────────────
 steps.push("package.json");
-logStep(1, 4, "更新 package.json");
+logStep(1, 5, "更新 package.json");
 const pkgPath = resolve(rootDir, "package.json");
 const pkgJson = fs.readJsonSync(pkgPath);
 const pkgOldVersion = pkgJson.version;
@@ -77,7 +93,7 @@ logOk(
 
 // ── Step 2: 更新 Cargo.toml ───────────────────────────────────
 steps.push("Cargo.toml");
-logStep(2, 4, "更新 src-tauri/Cargo.toml");
+logStep(2, 5, "更新 src-tauri/Cargo.toml");
 const tauriDir = resolve(rootDir, "src-tauri");
 const cargoPath = resolve(tauriDir, "Cargo.toml");
 const cargoLines = fs.readFileSync(cargoPath, "utf-8").split("\n");
@@ -90,7 +106,7 @@ logOk(
 
 // ── Step 3: 更新 tauri.conf.json ──────────────────────────────
 steps.push("tauri.conf.json");
-logStep(3, 4, "更新 src-tauri/tauri.conf.json");
+logStep(3, 5, "更新 src-tauri/tauri.conf.json");
 const tauriConfPath = resolve(tauriDir, "tauri.conf.json");
 const tauriConf = fs.readJsonSync(tauriConfPath);
 const tauriOldVersion = tauriConf.version;
@@ -100,9 +116,22 @@ logOk(
   `tauri.conf.json ${color.dim}${tauriOldVersion}${color.reset} → ${color.green}${version}${color.reset}`,
 );
 
-// ── Step 4: 运行 Prettier 格式化 ─────────────────────────────
+// ── Step 4: 更新 AppxManifest.xml ────────────────────────────
+steps.push("AppxManifest.xml");
+logStep(4, 5, "更新 src-tauri/msix/AppxManifest.xml");
+fs.writeFileSync(
+  appxPath,
+  appxManifest.replace(appxIdentityPattern, (_match: string, prefix: string) => {
+    return `${prefix}${appxVersion}"`;
+  }),
+);
+logOk(
+  `AppxManifest.xml ${color.dim}${appxOldVersion}${color.reset} → ${color.green}${appxVersion}${color.reset}`,
+);
+
+// ── Step 5: 运行 Prettier 格式化 ─────────────────────────────
 steps.push("Prettier 格式化");
-logStep(4, 4, "运行 Prettier 格式化");
+logStep(5, 5, "运行 Prettier 格式化");
 const prettierStart = performance.now();
 execSync("pnpm prettier", { cwd: rootDir, stdio: "pipe" });
 const prettierCost = ((performance.now() - prettierStart) / 1000).toFixed(2);
