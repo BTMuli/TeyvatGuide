@@ -38,6 +38,7 @@
           density="compact"
           inputmode="text"
           label="验证码"
+          @input="onVerifyCodeInput"
         >
           <template #append>
             <v-btn
@@ -160,6 +161,14 @@ const confirmPasswordRules = shallowRef<VuetifyRules>([
 
 let codeTimer: ReturnType<typeof setInterval> | undefined;
 let disposed = false;
+
+function onVerifyCodeInput(event: Event): void {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement)) return;
+  const code = input.value.replace(/\s/g, "");
+  if (input.value !== code) input.value = code;
+  verifyCode.value = code;
+}
 
 function clearCodeTimer(): void {
   if (codeTimer === undefined) return;

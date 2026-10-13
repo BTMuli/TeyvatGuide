@@ -26,6 +26,7 @@
           color="var(--tgc-od-blue)"
           density="compact"
           label="验证码"
+          @input="onVerifyCodeInput"
         >
           <template #append>
             <v-btn
@@ -109,6 +110,14 @@ const showPwd = ref<boolean>(false);
 
 const codeLoad = ref<boolean>(false);
 const codeRest = ref<number>(0);
+
+function onVerifyCodeInput(event: Event): void {
+  const input = event.target;
+  if (!(input instanceof HTMLInputElement)) return;
+  const code = input.value.replace(/\s/g, "");
+  if (input.value !== code) input.value = code;
+  verifyCode.value = code;
+}
 
 async function tryGetCode(): Promise<void> {
   if (!usernameRef.value) return;
