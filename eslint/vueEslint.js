@@ -31,7 +31,7 @@ const tsConfigRules = {
 };
 
 const tsConfig = {
-  files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
+  files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts", "test/**/*.ts"],
   plugins: {
     typescript: eslintTs,
     "import-x": pluginImportX,
