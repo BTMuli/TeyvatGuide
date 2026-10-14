@@ -260,6 +260,14 @@ function hasConversionMedia(recipe: TGApp.App.Material.Convert): boolean {
 }
 
 /**
+ * 判断库存中是否仍有可用于媒介转换的材料。
+ * @since Beta v0.12.5
+ */
+function hasConversionMediaInventory(inventory: ReadonlyMap<number, number>): boolean {
+  return (inventory.get(DUST_OF_AZOTH_ID) ?? 0) > 0 || (inventory.get(DREAM_SOLVENT_ID) ?? 0) > 0;
+}
+
+/**
  * 判断一次递归合成是否实际消耗了转换媒介。
  * @since Beta v0.12.6
  */
@@ -614,22 +622,16 @@ export function mergeCultivationResults(
 }
 
 /**
- * 预留媒介转换推荐所需的普通合成来源。
- * @since Beta v0.12.6
- * @param results - 当前待补足的材料结果
- * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
- * @param materials - 材料 Wiki 数据
- * @param protectedResults - 需优先预留普通合成来源的其他目标结果
- * @returns 预留普通合成来源后的库存及各目标的普通合成后缺口
+ * 使用已构建的普通合成材料快照预留转换推荐来源。
+ * @since Beta v0.12.5
  */
-export function prepareConversionRecommendations(
+function prepareConversionRecommendationsWithMaterials(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   remainingInventory: ReadonlyMap<number, number>,
-  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  ordinaryMaterials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
 ): ConversionPreparation {
   const orderedResults = sortCultivationResults(results);
-  const ordinaryMaterials = buildOrdinaryMaterials(materials);
   let ordinaryRemaining = normalizeInventory(remainingInventory);
 
   // 单目标编辑只展示自身建议，但仍须保护计划中其余目标尚未采用的普通合成来源。
@@ -669,37 +671,45 @@ export function prepareConversionRecommendations(
 }
 
 /**
- * 基于当前分配后的缺口生成媒介转换建议。建议只读，不会修改目标结果或传入库存。
+ * 预留媒介转换推荐所需的普通合成来源。
  * @since Beta v0.12.6
- * @param results - 当前直接库存和已采用合成后的结果
+ * @param results - 当前待补足的材料结果
  * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
  * @param materials - 材料 Wiki 数据
  * @param protectedResults - 需优先预留普通合成来源的其他目标结果
- * @returns 可额外采用的媒介转换建议
+ * @returns 预留普通合成来源后的库存及各目标的普通合成后缺口
  */
-export function buildConversionRecommendations(
+export function prepareConversionRecommendations(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   remainingInventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
-): Array<TGApp.App.UserCalc.ConversionRecommendation> {
-  const orderedResults = sortCultivationResults(results);
-  const preparation = prepareConversionRecommendations(
+): ConversionPreparation {
+  return prepareConversionRecommendationsWithMaterials(
     results,
     remainingInventory,
-    materials,
+    buildOrdinaryMaterials(materials),
     protectedResults,
   );
+}
+
+/**
+ * 基于已完成的普通合成预留结果生成媒介转换建议。
+ * @since Beta v0.12.5
+ */
+function buildConversionRecommendationsFromPreparation(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  preparation: ConversionPreparation,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
+): Array<TGApp.App.UserCalc.ConversionRecommendation> {
   const ordinaryMissing = preparation.missing;
   const ordinaryRemaining = preparation.inventory;
-  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
-
+  const recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation> = [];
+  if (!hasConversionMediaInventory(ordinaryRemaining)) return recommendations;
+  const orderedResults = sortCultivationResults(results);
   let available = new Map(ordinaryRemaining);
   const ownedBeforeRecommendations = new Map(available);
-  const recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation> = [];
-  if ((available.get(DUST_OF_AZOTH_ID) ?? 0) <= 0 && (available.get(DREAM_SOLVENT_ID) ?? 0) <= 0) {
-    return recommendations;
-  }
   for (const result of orderedResults) {
     const missing = ordinaryMissing.get(result.id) ?? 0;
     if (missing <= 0) continue;
@@ -728,6 +738,37 @@ export function buildConversionRecommendations(
     });
   }
   return recommendations;
+}
+
+/**
+ * 基于当前分配后的缺口生成媒介转换建议。建议只读，不会修改目标结果或传入库存。
+ * @since Beta v0.12.6
+ * @param results - 当前直接库存和已采用合成后的结果
+ * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
+ * @param materials - 材料 Wiki 数据
+ * @param protectedResults - 需优先预留普通合成来源的其他目标结果
+ * @returns 可额外采用的媒介转换建议
+ */
+export function buildConversionRecommendations(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  remainingInventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
+): Array<TGApp.App.UserCalc.ConversionRecommendation> {
+  if (!hasConversionMediaInventory(remainingInventory)) return [];
+  const preparation = prepareConversionRecommendations(
+    results,
+    remainingInventory,
+    materials,
+    protectedResults,
+  );
+  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+  return buildConversionRecommendationsFromPreparation(
+    results,
+    preparation,
+    materials,
+    materialMap,
+  );
 }
 
 /**
@@ -1325,10 +1366,16 @@ export function allocatePlanMaterials(
   }
 
   const resultMaterials = mergeCultivationResults(activePlans.flatMap((plan) => plan.results));
-  const conversionPreparation = prepareConversionRecommendations(
+  const conversionPreparation = prepareConversionRecommendationsWithMaterials(
     resultMaterials,
     remainingInventory,
+    ordinaryMaterials,
+  );
+  const recommendations = buildConversionRecommendationsFromPreparation(
+    resultMaterials,
+    conversionPreparation,
     materials,
+    materialMap,
   );
 
   return {
@@ -1337,7 +1384,7 @@ export function allocatePlanMaterials(
     materials: resultMaterials,
     remainingInventory,
     conversionInventory: conversionPreparation.inventory,
-    recommendations: buildConversionRecommendations(resultMaterials, remainingInventory, materials),
+    recommendations,
     automaticConversions,
   };
 }
@@ -1364,6 +1411,8 @@ export function getConversionOptions(
   );
   let workingInventory = normalizeInventory(allocation.remainingInventory);
   const options: Array<TGApp.App.UserCalc.ConversionOption> = [];
+  let materialMap: Map<number, TGApp.App.Material.WikiItem> | undefined;
+  let ordinaryMaterials: Array<TGApp.App.Material.WikiItem> | undefined;
 
   for (const entry of activeEntries) {
     const entryKey = getCultivationEntryKey(entry);
@@ -1400,22 +1449,30 @@ export function getConversionOptions(
       options.push(...automaticOptions.values());
       continue;
     }
+    if (!hasConversionMediaInventory(workingInventory)) {
+      options.push(...automaticOptions.values());
+      continue;
+    }
+    if (materialMap === undefined || ordinaryMaterials === undefined) {
+      materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+      ordinaryMaterials = buildOrdinaryMaterials(materials);
+    }
     const protectedResults = activeEntries.flatMap((otherEntry) =>
       (allocation.entries.get(otherEntry.id) ?? []).filter(
         (result) => otherEntry.id !== entry.id || explicitMaterialIds.has(result.id),
       ),
     );
-    const preparation = prepareConversionRecommendations(
+    const preparation = prepareConversionRecommendationsWithMaterials(
       automaticResults,
       workingInventory,
-      materials,
+      ordinaryMaterials,
       protectedResults,
     );
-    const recommendations = buildConversionRecommendations(
+    const recommendations = buildConversionRecommendationsFromPreparation(
       automaticResults,
-      workingInventory,
+      preparation,
       materials,
-      protectedResults,
+      materialMap,
     );
     let recommendationInventory = preparation.inventory;
     for (const recommendation of recommendations) {

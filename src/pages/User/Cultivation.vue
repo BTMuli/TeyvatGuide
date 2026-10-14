@@ -392,6 +392,9 @@ const calculationMode = ref<CalculationMode>(isWindows ? "bag" : "api");
 const viewTab = ref<CultivationViewTab>("targets");
 const currentUid = ref<number>();
 const currentProjectId = ref<string | null>(null);
+const conversionIntents = computed<Map<string, Array<TGApp.App.UserCalc.ConversionIntent>>>(() =>
+  conversionStore.getIntents(currentUid.value ?? 0, currentProjectId.value ?? ""),
+);
 const selectedCharacterId = ref<number | null>(null);
 const selectedWeaponKey = ref<string | null>(null);
 const avatarCurrentLevel = ref<number>(1);
@@ -828,7 +831,7 @@ const calculatorAllocation = computed(() => {
     [...calculatorOtherEntries.value, ...calculatorEntries.value],
     calculatorInventory.value,
     WikiMaterialData,
-    conversionStore.getIntents(currentUid.value ?? 0, currentProjectId.value ?? ""),
+    conversionIntents.value,
   );
 });
 const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
@@ -856,7 +859,7 @@ const planAllocation = computed(() =>
     planEntries.value,
     planInventory.value,
     WikiMaterialData,
-    conversionStore.getIntents(currentUid.value ?? 0, currentProjectId.value ?? ""),
+    conversionIntents.value,
   ),
 );
 const planConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() =>
@@ -864,6 +867,20 @@ const planConversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption
     ? getConversionOptions(planEntries.value, planAllocation.value, WikiMaterialData)
     : [],
 );
+const planConversionOptionsByEntryKey = computed<
+  ReadonlyMap<string, Array<TGApp.App.UserCalc.ConversionOption>>
+>(() => {
+  const optionsByEntryKey = new Map<string, Array<TGApp.App.UserCalc.ConversionOption>>();
+  for (const option of planConversionOptions.value) {
+    const options = optionsByEntryKey.get(option.entryKey);
+    if (options === undefined) {
+      optionsByEntryKey.set(option.entryKey, [option]);
+    } else {
+      options.push(option);
+    }
+  }
+  return optionsByEntryKey;
+});
 const planEntryMaterials = computed<ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
   () =>
     new Map(
@@ -871,9 +888,7 @@ const planEntryMaterials = computed<ReadonlyMap<string, Array<TGApp.App.UserCalc
         entry.id,
         getConversionResultMaterials(
           planAllocation.value.entries.get(entry.id) ?? [],
-          planConversionOptions.value.filter(
-            (option) => option.entryKey === getCultivationEntryKey(entry),
-          ),
+          planConversionOptionsByEntryKey.value.get(getCultivationEntryKey(entry)) ?? [],
         ),
       ]),
     ),

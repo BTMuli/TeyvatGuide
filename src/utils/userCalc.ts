@@ -79,6 +79,13 @@ type CraftingContext = {
   useSolvent: boolean;
 };
 
+type CraftingInventoryChange = {
+  id: number;
+  previous: number | undefined;
+};
+
+type CraftingTransaction = Array<CraftingInventoryChange>;
+
 const MORA_ID = 202;
 const AVATAR_EXP_MATERIALS = <const>[
   [104003, 20000],
@@ -860,28 +867,46 @@ export function mergeCultivationMaterials(
  * @param count - 待消耗数量
  * @param context - 当前合成上下文
  * @param visiting - 当前递归链上的材料 ID
+ * @param transaction - 当前合成尝试的库存变更日志
  */
 function consumeCraftingMaterial(
   id: number,
   count: number,
   context: CraftingContext,
-  visiting: ReadonlySet<number>,
+  visiting: Set<number>,
+  transaction: CraftingTransaction,
 ): CraftingContext | undefined {
-  const nextContext: CraftingContext = {
-    ...context,
-    inventory: new Map(context.inventory),
-  };
-  const owned = Math.min(nextContext.inventory.get(id) ?? 0, count);
-  nextContext.inventory.set(id, (nextContext.inventory.get(id) ?? 0) - owned);
+  const checkpoint = transaction.length;
+  const owned = Math.min(context.inventory.get(id) ?? 0, count);
+  transaction.push({ id, previous: context.inventory.get(id) });
+  context.inventory.set(id, (context.inventory.get(id) ?? 0) - owned);
 
   let remaining = count - owned;
   while (remaining > 0) {
-    const craftedContext = tryCraftMaterial(id, nextContext, visiting);
-    if (!craftedContext) return undefined;
-    nextContext.inventory = craftedContext.inventory;
+    const craftedContext = tryCraftMaterial(id, context, visiting, transaction);
+    if (!craftedContext) {
+      rollbackCraftingTransaction(context, transaction, checkpoint);
+      return undefined;
+    }
     remaining--;
   }
-  return nextContext;
+  return context;
+}
+
+function rollbackCraftingTransaction(
+  context: CraftingContext,
+  transaction: CraftingTransaction,
+  checkpoint: number,
+): void {
+  for (let index = transaction.length - 1; index >= checkpoint; index--) {
+    const change = transaction[index];
+    if (change.previous === undefined) {
+      context.inventory.delete(change.id);
+    } else {
+      context.inventory.set(change.id, change.previous);
+    }
+  }
+  transaction.length = checkpoint;
 }
 
 /**
@@ -891,54 +916,73 @@ function consumeCraftingMaterial(
 function tryCraftMaterial(
   id: number,
   context: CraftingContext,
-  visiting: ReadonlySet<number>,
+  visiting: Set<number>,
+  transaction: CraftingTransaction,
 ): CraftingContext | undefined {
   if (visiting.has(id)) return undefined;
   const material = context.materials.get(id);
   if (!material) return undefined;
-  const nextVisiting = new Set(visiting).add(id);
+  const checkpoint = transaction.length;
+  visiting.add(id);
+  let succeeded = false;
 
-  for (const recipe of material.convert) {
-    if (
-      !context.useDust &&
-      recipe.source.some((source) => Number(source.id) === DUST_OF_AZOTH_ID)
-    ) {
-      continue;
-    }
-    if (
-      !context.useSolvent &&
-      recipe.source.some((source) => Number(source.id) === DREAM_SOLVENT_ID)
-    ) {
-      continue;
-    }
-    // 不可合成的来源不足时直接跳过，避免媒介耗尽后枚举所有循环转换路径。
-    if (
-      recipe.source.some((source) => {
-        const sourceId = Number(source.id);
-        return (
-          (context.inventory.get(sourceId) ?? 0) < source.count &&
-          (context.materials.get(sourceId)?.convert.length ?? 0) === 0
-        );
-      })
-    ) {
-      continue;
-    }
-    let recipeContext: CraftingContext | undefined = {
-      ...context,
-      inventory: new Map(context.inventory),
-    };
-    for (const source of recipe.source) {
-      const sourceId = Number(source.id);
-      if (!Number.isInteger(sourceId) || source.count <= 0) {
-        recipeContext = undefined;
-        break;
+  try {
+    for (const recipe of material.convert) {
+      const recipeCheckpoint = transaction.length;
+      if (
+        !context.useDust &&
+        recipe.source.some((source) => Number(source.id) === DUST_OF_AZOTH_ID)
+      ) {
+        continue;
       }
-      recipeContext = consumeCraftingMaterial(sourceId, source.count, recipeContext, nextVisiting);
-      if (!recipeContext) break;
+      if (
+        !context.useSolvent &&
+        recipe.source.some((source) => Number(source.id) === DREAM_SOLVENT_ID)
+      ) {
+        continue;
+      }
+      // 不可合成的来源不足时直接跳过，避免媒介耗尽后枚举所有循环转换路径。
+      if (
+        recipe.source.some((source) => {
+          const sourceId = Number(source.id);
+          return (
+            (context.inventory.get(sourceId) ?? 0) < source.count &&
+            (context.materials.get(sourceId)?.convert.length ?? 0) === 0
+          );
+        })
+      ) {
+        continue;
+      }
+      let recipeSucceeded = recipe.source.length > 0;
+      for (const source of recipe.source) {
+        const sourceId = Number(source.id);
+        if (!Number.isInteger(sourceId) || source.count <= 0) {
+          recipeSucceeded = false;
+          break;
+        }
+        const sourceContext = consumeCraftingMaterial(
+          sourceId,
+          source.count,
+          context,
+          visiting,
+          transaction,
+        );
+        if (!sourceContext) {
+          recipeSucceeded = false;
+          break;
+        }
+      }
+      if (recipeSucceeded) {
+        succeeded = true;
+        return context;
+      }
+      rollbackCraftingTransaction(context, transaction, recipeCheckpoint);
     }
-    if (recipeContext && recipe.source.length > 0) return recipeContext;
+    return undefined;
+  } finally {
+    visiting.delete(id);
+    if (!succeeded) rollbackCraftingTransaction(context, transaction, checkpoint);
   }
-  return undefined;
 }
 
 /**
@@ -976,6 +1020,7 @@ export function calculateCraftingAllocation(
   }
 
   const craftable = new Map<number, CraftableMaterial>();
+  const transaction: CraftingTransaction = [];
   const pending = Array.from(requiredCounts, ([id, required]) => ({
     id,
     count: Math.max(required - (inventory.get(id) ?? 0), 0),
@@ -986,9 +1031,13 @@ export function calculateCraftingAllocation(
     const inventoryBefore = new Map(context.inventory);
     let count = 0;
     while (count < item.count) {
-      const craftedContext = tryCraftMaterial(item.id, context, new Set());
-      if (!craftedContext) break;
-      context.inventory = craftedContext.inventory;
+      const checkpoint = transaction.length;
+      const craftedContext = tryCraftMaterial(item.id, context, new Set(), transaction);
+      if (!craftedContext) {
+        rollbackCraftingTransaction(context, transaction, checkpoint);
+        break;
+      }
+      transaction.length = checkpoint;
       count++;
     }
     if (count > 0) {
