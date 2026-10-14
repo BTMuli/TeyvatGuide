@@ -18,6 +18,8 @@ const baselineUserCalcModuleId = "/src/utils/userCalc.ts";
 
 type PlanUtils = typeof import("../src/utils/cultivationPlan.js");
 type UserCalc = typeof import("../src/utils/userCalc.js");
+type CraftingAllocation = ReturnType<UserCalc["calculateCraftingAllocation"]>;
+type CraftingCalculator = ReturnType<UserCalc["createCraftingCalculator"]>;
 
 type PlanInputs = {
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
@@ -51,7 +53,7 @@ type CraftScenario = {
   name: string;
   iterations?: number;
   create: () => CraftInputs;
-  verify?: (result: ReturnType<UserCalc["calculateCraftingAllocation"]>) => void;
+  verify?: (result: CraftingAllocation) => void;
 };
 
 type Measurement<T> = {
@@ -192,10 +194,7 @@ function runPlanScenario(utils: PlanUtils, input: PlanInputs): PlanResult {
   return { allocation, options };
 }
 
-function runCraftScenario(
-  userCalc: UserCalc,
-  input: CraftInputs,
-): ReturnType<UserCalc["calculateCraftingAllocation"]> {
+function runCraftScenario(userCalc: UserCalc, input: CraftInputs): CraftingAllocation {
   return userCalc.calculateCraftingAllocation(
     input.requirements,
     input.inventory,
@@ -203,6 +202,23 @@ function runCraftScenario(
     input.useDust,
     input.useSolvent,
   );
+}
+
+function runPreparedCraftScenario(
+  calculator: CraftingCalculator,
+  input: CraftInputs,
+): CraftingAllocation {
+  return calculator(input.requirements, input.inventory, input.useDust, input.useSolvent);
+}
+
+function createCraftingCalculator(
+  userCalc: UserCalc,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): CraftingCalculator {
+  if (!userCalc.createCraftingCalculator) {
+    throw new Error("Current userCalc module does not export createCraftingCalculator");
+  }
+  return userCalc.createCraftingCalculator(materials);
 }
 
 function preparePlanInput(scenario: PlanScenario): PlanInputs {
@@ -220,6 +236,7 @@ function prepareCraftInput(scenario: CraftScenario): CraftInputs {
   input.snapshot = structuredClone({
     requirements: input.requirements,
     inventory: input.inventory,
+    materials: input.materials,
   });
   return input;
 }
@@ -234,7 +251,7 @@ function assertPlanInputUnchanged(scenario: PlanScenario, input: PlanInputs): vo
 
 function assertCraftInputUnchanged(scenario: CraftScenario, input: CraftInputs): void {
   assert.deepStrictEqual(
-    { requirements: input.requirements, inventory: input.inventory },
+    { requirements: input.requirements, inventory: input.inventory, materials: input.materials },
     input.snapshot,
     `${scenario.name} mutated its input`,
   );
@@ -266,6 +283,58 @@ function compareResults<T>(name: string, current: Measurement<T>, baseline: Meas
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`${name} differs from the baseline: ${message}`, { cause: error });
   }
+}
+
+function assertOrderedMapEqual<K, V>(
+  name: string,
+  current: ReadonlyMap<K, V>,
+  baseline: ReadonlyMap<K, V>,
+): void {
+  assert.deepStrictEqual(
+    Array.from(current.entries()),
+    Array.from(baseline.entries()),
+    `${name} entries differ`,
+  );
+}
+
+function comparePlanResults(
+  name: string,
+  current: Measurement<PlanResult>,
+  baseline: Measurement<PlanResult>,
+): void {
+  compareResults(name, current, baseline);
+  assertOrderedMapEqual(
+    `${name}/remainingInventory`,
+    current.result.allocation.remainingInventory,
+    baseline.result.allocation.remainingInventory,
+  );
+  assertOrderedMapEqual(
+    `${name}/conversionInventory`,
+    current.result.allocation.conversionInventory,
+    baseline.result.allocation.conversionInventory,
+  );
+}
+
+function compareCraftingAllocations(
+  name: string,
+  current: CraftingAllocation,
+  baseline: CraftingAllocation,
+): void {
+  assert.deepStrictEqual(current, baseline, `${name} differs`);
+  assertOrderedMapEqual(`${name}/materials`, current.materials, baseline.materials);
+  assertOrderedMapEqual(
+    `${name}/remainingInventory`,
+    current.remainingInventory,
+    baseline.remainingInventory,
+  );
+}
+
+function compareCraftingResults(
+  name: string,
+  current: Measurement<CraftingAllocation>,
+  baseline: Measurement<CraftingAllocation>,
+): void {
+  compareCraftingAllocations(name, current.result, baseline.result);
 }
 
 function planSummary(result: PlanResult): string {
@@ -424,10 +493,22 @@ function createWikiScenarios(
   };
 
   return [
-    { name: "wiki-multi-target-complete-inventory", iterations: 1, create: multiTarget },
-    { name: "wiki-many-targets-complete-inventory", iterations: 1, create: manyTargets },
-    { name: "wiki-large-ordinary-ascension", iterations: 1, create: ordinary },
-    { name: "wiki-cyclic-media-insufficient", iterations: 1, create: cyclicMedia },
+    {
+      name: "wiki-multi-target-complete-inventory",
+      iterations: benchmarkIterations,
+      create: multiTarget,
+    },
+    {
+      name: "wiki-many-targets-complete-inventory",
+      iterations: benchmarkIterations,
+      create: manyTargets,
+    },
+    { name: "wiki-large-ordinary-ascension", iterations: benchmarkIterations, create: ordinary },
+    {
+      name: "wiki-cyclic-media-insufficient",
+      iterations: benchmarkIterations,
+      create: cyclicMedia,
+    },
   ];
 }
 
@@ -460,7 +541,12 @@ function createRollbackBundle(): RollbackBundle {
       makeRecipe("fallback-second", [[ids.fallbackSecondSource, 1]]),
     ]),
     makeMaterial(ids.fallbackFirstSource, 1),
-    makeMaterial(ids.fallbackMissingSource, 1),
+    makeMaterial(ids.fallbackMissingSource, 1, [
+      makeRecipe("fallback-missing-media", [
+        [ids.fallbackSecondSource, 1],
+        [104201, 1],
+      ]),
+    ]),
     makeMaterial(ids.fallbackSecondSource, 1),
     makeMaterial(ids.recursive, 5, [
       makeRecipe("recursive-first", [
@@ -499,6 +585,7 @@ function createRollbackBundle(): RollbackBundle {
     [ids.recursiveAlternative, 1],
     [ids.cycleAlternative, 1],
     [ids.failedZeroSource, 0],
+    [104201, 1],
   ]);
   return { materials, inventory, ids };
 }
@@ -653,7 +740,7 @@ function createLargeCraftScenario(
 ): CraftScenario {
   return {
     name: "craft-large-ordinary-ascension",
-    iterations: 1,
+    iterations: benchmarkIterations,
     create: () => ({
       requirements: [
         { id: 112004, count: 120 },
@@ -685,6 +772,202 @@ function createLargeCraftScenario(
   };
 }
 
+function makeCraftScenario(
+  bundle: RollbackBundle,
+  name: string,
+  requirements: Array<{ id: number; count: number }>,
+  inventory: ReadonlyArray<readonly [number, number]>,
+  useDust = false,
+  useSolvent = false,
+  verify?: (result: CraftingAllocation) => void,
+): CraftScenario {
+  return {
+    name,
+    create: () => ({
+      requirements,
+      inventory: new Map(inventory),
+      materials: bundle.materials,
+      useDust,
+      useSolvent,
+    }),
+    verify,
+  };
+}
+
+function createEarlyExitCraftScenarios(bundle: RollbackBundle): Array<CraftScenario> {
+  const zero = <const>[[bundle.ids.failedZeroSource, 0]];
+  const expectRemaining =
+    (entries: ReadonlyArray<readonly [number, number]>): ((result: CraftingAllocation) => void) =>
+    (result) => {
+      assert.equal(result.materials.size, 0);
+      assert.deepStrictEqual(Array.from(result.remainingInventory.entries()), entries);
+    };
+  const unknownId = 900021;
+  type EarlyCraftCase = readonly [
+    name: string,
+    requirements: Array<{ id: number; count: number }>,
+    inventory: ReadonlyArray<readonly [number, number]>,
+    remaining: ReadonlyArray<readonly [number, number]>,
+  ];
+  const cases: Array<EarlyCraftCase> = [
+    ["craft-early-empty-requirements", [], zero, zero],
+    [
+      "craft-early-directly-satisfied",
+      [{ id: bundle.ids.fallbackSecondSource, count: 1 }],
+      [
+        [bundle.ids.failedZeroSource, 0],
+        [bundle.ids.fallbackSecondSource, 2],
+      ],
+      [
+        [bundle.ids.failedZeroSource, 0],
+        [bundle.ids.fallbackSecondSource, 1],
+      ],
+    ],
+    [
+      "craft-early-unknown-material",
+      [{ id: unknownId, count: 2 }],
+      zero,
+      [
+        [bundle.ids.failedZeroSource, 0],
+        [unknownId, 0],
+      ],
+    ],
+    [
+      "craft-early-no-recipe",
+      [{ id: bundle.ids.cycleLeaf, count: 1 }],
+      zero,
+      [
+        [bundle.ids.failedZeroSource, 0],
+        [bundle.ids.cycleLeaf, 0],
+      ],
+    ],
+    [
+      "craft-early-disabled-media-recipe",
+      [{ id: bundle.ids.fallbackMissingSource, count: 1 }],
+      [
+        [104201, 1],
+        [bundle.ids.fallbackSecondSource, 1],
+      ],
+      [
+        [104201, 1],
+        [bundle.ids.fallbackSecondSource, 1],
+        [bundle.ids.fallbackMissingSource, 0],
+      ],
+    ],
+  ];
+  return cases.map(([name, requirements, inventory, remaining]) =>
+    makeCraftScenario(
+      bundle,
+      name,
+      requirements,
+      inventory,
+      false,
+      false,
+      expectRemaining(remaining),
+    ),
+  );
+}
+
+function createManySmallCraftBatch() {
+  const randomGraph = createRandomGraphScenario();
+  const template = randomGraph.craft.create();
+  const inputs = Array.from({ length: 48 }, (_, index) => {
+    const requirement = template.requirements[index % template.requirements.length];
+    return {
+      requirements: [{ id: requirement.id, count: (index % 3) + 1 }],
+      inventory: new Map(template.inventory),
+      materials: template.materials,
+      useDust: index % 2 === 0,
+      useSolvent: index % 3 === 0,
+    };
+  });
+  return {
+    name: "craft-many-small-allocations",
+    iterations: benchmarkIterations,
+    materials: template.materials,
+    inputs,
+  };
+}
+
+function assertFactoryScenario(
+  userCalc: UserCalc,
+  calculator: CraftingCalculator,
+  scenario: CraftScenario,
+): CraftingAllocation {
+  const input = prepareCraftInput(scenario);
+  const prepared = runPreparedCraftScenario(calculator, input);
+  compareCraftingAllocations(
+    `factory/${scenario.name}`,
+    prepared,
+    runCraftScenario(userCalc, input),
+  );
+  assertCraftInputUnchanged(scenario, input);
+  scenario.verify?.(prepared);
+  return prepared;
+}
+
+function assertCraftingCalculatorContract(
+  userCalc: UserCalc,
+  bundle: RollbackBundle,
+  earlyExitScenarios: ReadonlyArray<CraftScenario>,
+): void {
+  const calculator = createCraftingCalculator(userCalc, bundle.materials);
+  for (const scenario of earlyExitScenarios) {
+    assertFactoryScenario(userCalc, calculator, scenario);
+  }
+
+  const firstScenario = makeCraftScenario(
+    bundle,
+    "factory-isolated-first-call",
+    [{ id: bundle.ids.fallback, count: 1 }],
+    [
+      [bundle.ids.fallbackFirstSource, 1],
+      [bundle.ids.fallbackSecondSource, 1],
+    ],
+  );
+  const secondScenario = makeCraftScenario(
+    bundle,
+    "factory-isolated-second-call",
+    [{ id: bundle.ids.fallbackMissingSource, count: 1 }],
+    [
+      [104201, 1],
+      [bundle.ids.fallbackSecondSource, 1],
+    ],
+    true,
+  );
+  const first = assertFactoryScenario(userCalc, calculator, firstScenario);
+  const firstSnapshot = structuredClone(first);
+  assertFactoryScenario(userCalc, calculator, secondScenario);
+  assert.deepStrictEqual(first, firstSnapshot, "a later factory call mutated the first result");
+
+  const mutableMaterials = structuredClone(bundle.materials);
+  const mutableTarget = mutableMaterials.find(
+    (material) => material.id === bundle.ids.fallbackFirstSource,
+  );
+  if (!mutableTarget) throw new Error("Mutable factory fixture target is missing");
+  const mutableCalculator = createCraftingCalculator(userCalc, mutableMaterials);
+  const mutableInput: CraftInputs = {
+    requirements: [{ id: bundle.ids.fallbackFirstSource, count: 1 }],
+    inventory: new Map([[bundle.ids.fallbackSecondSource, 1]]),
+    materials: mutableMaterials,
+    useDust: false,
+    useSolvent: false,
+  };
+  const beforeMutation = runPreparedCraftScenario(mutableCalculator, mutableInput);
+  assert.equal(beforeMutation.materials.size, 0);
+  mutableTarget.convert.push(
+    makeRecipe("mutable-fallback-source", [[bundle.ids.fallbackSecondSource, 1]]),
+  );
+  const refreshedCalculator = createCraftingCalculator(userCalc, mutableMaterials);
+  const afterMutation = runPreparedCraftScenario(refreshedCalculator, mutableInput);
+  assert.equal(afterMutation.materials.get(bundle.ids.fallbackFirstSource)?.count, 1);
+  compareCraftingAllocations(
+    "factory/recreated-after-material-mutation",
+    afterMutation,
+    runCraftScenario(userCalc, mutableInput),
+  );
+}
+
 async function loadBaselineSources(baselineDir: string): Promise<BaselineSources> {
   const [userCalc, cultivationPlan] = await Promise.all([
     readFile(resolve(baselineDir, "userCalc.ts"), "utf8"),
@@ -713,6 +996,8 @@ function createBaselinePlugin(sources: BaselineSources): Plugin {
     enforce: "pre",
     resolveId(source) {
       if (source === "virtual:tg-cultivation-baseline-plan") return baselinePlanModuleId;
+      if (source === baselinePlanModuleId) return baselinePlanModuleId;
+      if (source === baselineUserCalcModuleId) return baselineUserCalcModuleId;
       if (source === "@utils/userCalc.js") return baselineUserCalcModuleId;
       return undefined;
     },
@@ -773,11 +1058,15 @@ async function main(): Promise<void> {
       rollbackScenarios.plan,
       randomGraph.plan,
     ];
+    const earlyExitScenarios = createEarlyExitCraftScenarios(rollback);
     const craftScenarios = [
       createLargeCraftScenario(data.WikiMaterialData),
+      ...earlyExitScenarios,
       ...rollbackScenarios.craft,
       randomGraph.craft,
     ];
+
+    assertCraftingCalculatorContract(currentUserCalc, rollback, earlyExitScenarios);
 
     for (const scenario of planScenarios) {
       const iterations = scenario.iterations ?? benchmarkIterations;
@@ -790,7 +1079,7 @@ async function main(): Promise<void> {
           ? measure(() => runPlanScenario(baselineUtils, baselineInput), iterations)
           : undefined;
       if (baselineInput) assertPlanInputUnchanged(scenario, baselineInput);
-      if (baseline) compareResults(`plan/${scenario.name}`, current, baseline);
+      if (baseline) comparePlanResults(`plan/${scenario.name}`, current, baseline);
       console.log(
         `[plan] ${scenario.name}: ${formatTiming(current, baseline)} (${planSummary(current.result)})`,
       );
@@ -811,12 +1100,33 @@ async function main(): Promise<void> {
         if (baselineInput === undefined) throw new Error("Baseline input was not prepared");
         assertCraftInputUnchanged(scenario, baselineInput);
         scenario.verify?.(baseline.result);
-        compareResults(`craft/${scenario.name}`, current, baseline);
+        compareCraftingResults(`craft/${scenario.name}`, current, baseline);
       }
       console.log(
         `[craft] ${scenario.name}: ${formatTiming(current, baseline)} (${craftSummary(current.result)})`,
       );
     }
+
+    const batch = createManySmallCraftBatch();
+    const calculator = createCraftingCalculator(currentUserCalc, batch.materials);
+    const standardBatch = measure(
+      () => batch.inputs.map((input) => runCraftScenario(currentUserCalc, input)),
+      batch.iterations,
+    );
+    const preparedBatch = measure(
+      () => batch.inputs.map((input) => runPreparedCraftScenario(calculator, input)),
+      batch.iterations,
+    );
+    for (const [index, prepared] of preparedBatch.result.entries()) {
+      compareCraftingAllocations(
+        `craft/${batch.name}/${index}`,
+        prepared,
+        standardBatch.result[index],
+      );
+    }
+    console.log(
+      `[craft] ${batch.name}: prepared ${formatTiming(preparedBatch)}, wrapper ${formatTiming(standardBatch)} (${batch.inputs.length} allocations)`,
+    );
     console.log(
       baselineDir
         ? `cultivation performance and baseline equivalence checks passed (${baselineDir})`

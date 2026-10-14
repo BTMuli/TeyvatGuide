@@ -46,6 +46,17 @@ export type CraftingAllocation = {
 };
 
 /**
+ * 使用同一组材料 Wiki 数据执行多次合成分配的计算器。
+ * @since Beta v0.12.5
+ */
+export type CraftingCalculator = (
+  requirements: ReadonlyArray<CultivationMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  useDust?: boolean,
+  useSolvent?: boolean,
+) => CraftingAllocation;
+
+/**
  * 战绩技能与本地 Wiki 技能的对应关系。
  * @since Beta v0.11.2
  */
@@ -67,12 +78,29 @@ export type NamedTalentLevel = {
 /** 材料 ID 偏移量与需求数量 */
 type OffsetCount = readonly [offset: number, count: number];
 
+/** 预解析的合成来源 */
+type PreparedCraftingSource = {
+  id: number;
+  count: number;
+};
+
+type PreparedCraftingRecipe = {
+  source: ReadonlyArray<PreparedCraftingSource>;
+  hasDust: boolean;
+  hasSolvent: boolean;
+};
+
+type PreparedCraftingMaterial = {
+  star: number;
+  recipes: ReadonlyArray<PreparedCraftingRecipe>;
+};
+
 /** 材料合成计算上下文 */
 type CraftingContext = {
   /** 可用于合成的剩余背包材料 */
   inventory: Map<number, number>;
   /** 材料 Wiki 索引 */
-  materials: ReadonlyMap<number, TGApp.App.Material.WikiItem>;
+  materials: ReadonlyMap<number, PreparedCraftingMaterial>;
   /** 是否允许使用含嬗变之尘的配方 */
   useDust: boolean;
   /** 是否允许使用含异梦溶媒的配方 */
@@ -860,6 +888,42 @@ export function mergeCultivationMaterials(
   return toList(items);
 }
 
+function prepareCraftingMaterials(
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): ReadonlyMap<number, PreparedCraftingMaterial> {
+  return new Map(
+    materials.map((material) => {
+      const recipes = material.convert.map((recipe) => {
+        let hasDust = false;
+        let hasSolvent = false;
+        const source = recipe.source.map((item) => {
+          const id = Number(item.id);
+          if (id === DUST_OF_AZOTH_ID) hasDust = true;
+          if (id === DREAM_SOLVENT_ID) hasSolvent = true;
+          return { id, count: item.count };
+        });
+        return { source, hasDust, hasSolvent };
+      });
+      return <const>[material.id, { star: material.star, recipes }];
+    }),
+  );
+}
+
+function hasUsableCraftingRecipe(
+  material: PreparedCraftingMaterial | undefined,
+  useDust: boolean,
+  useSolvent: boolean,
+): boolean {
+  return (
+    material?.recipes.some(
+      (recipe) =>
+        recipe.source.length > 0 &&
+        (useDust || !recipe.hasDust) &&
+        (useSolvent || !recipe.hasSolvent),
+    ) ?? false
+  );
+}
+
 /**
  * 尝试消耗指定数量的材料，不足部分递归使用 Wiki 配方合成。
  *
@@ -922,32 +986,22 @@ function tryCraftMaterial(
   if (visiting.has(id)) return undefined;
   const material = context.materials.get(id);
   if (!material) return undefined;
+  if (!hasUsableCraftingRecipe(material, context.useDust, context.useSolvent)) return undefined;
   const checkpoint = transaction.length;
   visiting.add(id);
   let succeeded = false;
 
   try {
-    for (const recipe of material.convert) {
+    for (const recipe of material.recipes) {
       const recipeCheckpoint = transaction.length;
-      if (
-        !context.useDust &&
-        recipe.source.some((source) => Number(source.id) === DUST_OF_AZOTH_ID)
-      ) {
-        continue;
-      }
-      if (
-        !context.useSolvent &&
-        recipe.source.some((source) => Number(source.id) === DREAM_SOLVENT_ID)
-      ) {
-        continue;
-      }
+      if (recipe.hasDust && !context.useDust) continue;
+      if (recipe.hasSolvent && !context.useSolvent) continue;
       // 不可合成的来源不足时直接跳过，避免媒介耗尽后枚举所有循环转换路径。
       if (
         recipe.source.some((source) => {
-          const sourceId = Number(source.id);
           return (
-            (context.inventory.get(sourceId) ?? 0) < source.count &&
-            (context.materials.get(sourceId)?.convert.length ?? 0) === 0
+            (context.inventory.get(source.id) ?? 0) < source.count &&
+            (context.materials.get(source.id)?.recipes.length ?? 0) === 0
           );
         })
       ) {
@@ -955,13 +1009,12 @@ function tryCraftMaterial(
       }
       let recipeSucceeded = recipe.source.length > 0;
       for (const source of recipe.source) {
-        const sourceId = Number(source.id);
-        if (!Number.isInteger(sourceId) || source.count <= 0) {
+        if (!Number.isInteger(source.id) || source.count <= 0) {
           recipeSucceeded = false;
           break;
         }
         const sourceContext = consumeCraftingMaterial(
-          sourceId,
+          source.id,
           source.count,
           context,
           visiting,
@@ -985,49 +1038,46 @@ function tryCraftMaterial(
   }
 }
 
-/**
- * 根据背包余量与材料 Wiki 配方计算合成分配结果。
- *
- * @remarks 已直接满足材料需求的持有量会被优先保留，剩余材料按星级从高到低分配，
- * 同一份背包材料不会被重复计入多项合成结果。
- * @param requirements - 材料需求列表
- * @param inventory - 背包材料数量
- * @param materials - 材料 Wiki 数据
- * @param useDust - 是否允许使用含嬗变之尘的配方
- * @param useSolvent - 是否允许使用含异梦溶媒的配方
- * @returns 各需求材料的合成结果及扣除预留和合成消耗后的库存
- * @since Beta v0.11.4
- */
-export function calculateCraftingAllocation(
+function calculateCraftingAllocationWithMaterials(
   requirements: ReadonlyArray<CultivationMaterial>,
   inventory: ReadonlyMap<number, number>,
-  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  getMaterials: () => ReadonlyMap<number, PreparedCraftingMaterial>,
   useDust = false,
   useSolvent = false,
 ): CraftingAllocation {
   const requiredCounts = new Map<number, number>();
   for (const requirement of requirements) add(requiredCounts, requirement.id, requirement.count);
 
+  const pendingCounts = Array.from(requiredCounts, ([id, required]) => ({
+    id,
+    count: Math.max(required - (inventory.get(id) ?? 0), 0),
+  })).filter((item) => item.count > 0);
+
+  const remainingInventory = new Map(inventory);
+  for (const [id, required] of requiredCounts) {
+    const owned = remainingInventory.get(id) ?? 0;
+    remainingInventory.set(id, Math.max(owned - required, 0));
+  }
+
+  if (pendingCounts.length === 0) {
+    return { materials: new Map(), remainingInventory };
+  }
+
   const context: CraftingContext = {
-    inventory: new Map(inventory),
-    materials: new Map(materials.map((material) => <const>[material.id, material])),
+    inventory: remainingInventory,
+    materials: getMaterials(),
     useDust,
     useSolvent,
   };
-  for (const [id, required] of requiredCounts) {
-    const owned = context.inventory.get(id) ?? 0;
-    context.inventory.set(id, Math.max(owned - required, 0));
-  }
 
   const craftable = new Map<number, CraftableMaterial>();
   const transaction: CraftingTransaction = [];
-  const pending = Array.from(requiredCounts, ([id, required]) => ({
-    id,
-    count: Math.max(required - (inventory.get(id) ?? 0), 0),
-    star: context.materials.get(id)?.star ?? 0,
-  })).sort((a, b) => b.star - a.star || a.id - b.id);
+  const pending = pendingCounts
+    .map((item) => ({ ...item, star: context.materials.get(item.id)?.star ?? 0 }))
+    .sort((a, b) => b.star - a.star || a.id - b.id);
 
   for (const item of pending) {
+    if (!hasUsableCraftingRecipe(context.materials.get(item.id), useDust, useSolvent)) continue;
     const inventoryBefore = new Map(context.inventory);
     let count = 0;
     while (count < item.count) {
@@ -1052,6 +1102,56 @@ export function calculateCraftingAllocation(
     materials: craftable,
     remainingInventory: context.inventory,
   };
+}
+
+/**
+ * 创建可复用材料索引与配方解析结果的合成计算器。
+ *
+ * @remarks 在首次需要合成时准备材料快照，适合同一轮计算内复用；材料或配方变化后应重新创建。
+ * 计算器不共享调用之间的背包状态；每次计算都会独立复制背包并创建事务日志。
+ * @param materials - 材料 Wiki 数据
+ * @returns 使用同一组材料数据执行合成分配的计算器
+ * @since Beta v0.12.5
+ */
+export function createCraftingCalculator(
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): CraftingCalculator {
+  let preparedMaterials: ReadonlyMap<number, PreparedCraftingMaterial> | undefined;
+  const getMaterials = (): ReadonlyMap<number, PreparedCraftingMaterial> => {
+    if (!preparedMaterials) preparedMaterials = prepareCraftingMaterials(materials);
+    return preparedMaterials;
+  };
+  return (requirements, inventory, useDust = false, useSolvent = false) =>
+    calculateCraftingAllocationWithMaterials(
+      requirements,
+      inventory,
+      getMaterials,
+      useDust,
+      useSolvent,
+    );
+}
+
+/**
+ * 根据背包余量与材料 Wiki 配方计算合成分配结果。
+ *
+ * @remarks 已直接满足材料需求的持有量会被优先保留，剩余材料按星级从高到低分配，
+ * 同一份背包材料不会被重复计入多项合成结果。
+ * @param requirements - 材料需求列表
+ * @param inventory - 背包材料数量
+ * @param materials - 材料 Wiki 数据
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
+ * @returns 各需求材料的合成结果及扣除预留和合成消耗后的库存
+ * @since Beta v0.11.4
+ */
+export function calculateCraftingAllocation(
+  requirements: ReadonlyArray<CultivationMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  useDust = false,
+  useSolvent = false,
+): CraftingAllocation {
+  return createCraftingCalculator(materials)(requirements, inventory, useDust, useSolvent);
 }
 
 /**
