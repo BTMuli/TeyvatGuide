@@ -5,6 +5,9 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 
 # TeyvatGuide Development
 
+Read [source metadata rules](../../rules/source-metadata-rules.md) for file headers, changed functions/types, and
+missing function comments. Use `package.json.since` for version markers and follow the stated `.vue` exceptions.
+
 1. Inspect `package.json`, the nearest implementation, and relevant configuration before editing. Treat dependency
    versions and scripts in the repository as authoritative.
 2. Read [repository map](references/repository-map.md) to locate code, aliases, and validation commands.

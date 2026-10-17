@@ -14,6 +14,8 @@
   `.agents/skills/typescript-standards/SKILL.md`。
 - Vue 组件、组合式 API 或 Vue 现代化改造：使用 `.agents/skills/vue3-standards/SKILL.md`。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
+- 跨语言源代码的文件头、函数、类型与 `@since`：读取
+  [源代码版本与注释元数据规则](.agents/rules/source-metadata-rules.md)。
 - Sentry 错误、事件、堆栈、版本回归或线上修复验证：使用
   `.agents/skills/sentry-mcp/SKILL.md`，默认只读查询；变更 issue 状态或项目配置前须取得明确授权。
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。

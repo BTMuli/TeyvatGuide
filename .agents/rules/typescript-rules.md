@@ -1,6 +1,7 @@
 # TypeScript 与 Vue 开发规则
 
 以 `eslint/vueEslint.js`、`.prettierrc.yml`、`.stylelintrc.yml` 和邻近代码为最终依据。
+源文件的版本与注释要求见[源文件元数据规则](source-metadata-rules.md)；本文件补充 TypeScript/Vue 的声明与实现约定。
 
 ## 格式与类型
 
@@ -20,6 +21,9 @@
 - 不新增 TypeScript 原生 `enum`。
 - 在 `.d.ts` 中用 `const` 对象声明值集合，并派生 union 类型。
 - 在运行时代码中导出实际常量对象；Vue 脚本和模板不得把仅存在于声明空间的名称当运行时值。
+- 需要跨文件或跨组件复用的枚举先复用已有声明和值对象；确需新增时，在对应领域的
+  `src/types/<Domain>/*.d.ts` 与 `src/enum/*.ts`（或插件已有运行时目录）成对抽离。
+  不新建大写 `Types/` 平行目录，也不重复创建相同值的对象。
 
 ```typescript
 const GameServer = <const>{
@@ -46,14 +50,17 @@ type GameServerEnum = (typeof GameServer)[keyof typeof GameServer];
 
 ## 类型与注释位置
 
-- 全局领域声明放在 `src/types/<Domain>/*.d.ts`，沿用现有 `TGApp` namespace 组织。
-- 类型应放入对应领域的 `.d.ts`，或就近拆分在实际使用它的 `.vue`/`.ts` 文件中；不要为类型单独
-  新建 `types.ts`。
+- 全局领域声明放在 `src/types/<Domain>/*.d.ts`，沿用现有 `TGApp` namespace 组织；插件已有
+  `src/plugins/<Plugin>/types/*.d.ts` 可直接沿用，目录大小写必须准确。
+- 跨文件、跨组件复用或在多处重复声明的同一类型，先检查已有声明并抽离到对应领域的 `.d.ts`；Vue
+  组件之间复用也遵循此规则。仅在单个文件内使用的局部类型可就近放在 `.vue`/`.ts` 中，不要为类型
+  单独新建 `types.ts`，也不要新建大写 `Types/` 目录。
 - 运行时枚举常量放在 `src/enum/*.ts` 或所属插件的既有目录。
-- 新增的导出类型、函数和常量按邻近代码添加 TSDoc，包含 `@since Beta v<package.json version>`。
+- 新增的导出类型、函数和常量按邻近代码添加 TSDoc；版本取 `package.json.since`，格式为
+  `@since Beta v<package.json.since>`。函数和 `type` 的更新、非 Vue 函数缺失注释补齐，以及 Vue
+  豁免范围统一遵循源文件元数据规则；具体 TSDoc 写法见
+  [TSDoc 约定](../skills/typescript-standards/references/tsdoc.md)。
 - TSDoc 语法由 `tsdoc/syntax` 检查（warn，仅 `.ts`/`.d.ts` 文件）。
-- 修改已有声明时不要无条件重写历史 `@since`；只有仓库当前约定要求记录本次契约版本时才更新
-  该声明及相关文件头。
 
 ## ESLint 强制限制
 
