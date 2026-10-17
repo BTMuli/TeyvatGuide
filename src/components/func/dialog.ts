@@ -1,6 +1,6 @@
 /**
  * dialog 组件封装，函数式调用
- * @since Beta v0.10.2
+ * @since Beta v0.12.6
  */
 
 import type { ComponentInternalInstance, VNode } from "vue";
@@ -60,6 +60,30 @@ function renderBox(props: DialogParams): VNode {
 }
 
 let dialogInstance: VNode;
+
+/**
+ * 函数式弹窗任务
+ * @since Beta v0.12.6
+ */
+type DialogTask<T> = () => Promise<T>;
+
+let dialogQueueTail: Promise<void> = Promise.resolve();
+
+/**
+ * 按调用顺序串行执行函数式弹窗任务。
+ * @since Beta v0.12.6
+ * @param task - 待执行的弹窗任务
+ * @returns 弹窗任务结果
+ */
+function enqueueDialog<T>(task: DialogTask<T>): Promise<T> {
+  const previous = dialogQueueTail;
+  const current = previous.then(task, task);
+  dialogQueueTail = current.then(
+    () => undefined,
+    () => undefined,
+  );
+  return current;
+}
 
 async function showDialogFull(
   mode: "check" | "input",
@@ -144,12 +168,88 @@ async function showDialogInputFull(
   }
 }
 
+/**
+ * 排队调用完整弹窗封装。
+ * @since Beta v0.12.6
+ * @param mode - 弹窗模式
+ * @param title - 标题
+ * @param text - 文本
+ * @param input - 默认输入值
+ * @param otcancel - 是否允许点击外部取消
+ * @returns 弹窗结果
+ */
+function queuedDialogFull(
+  mode: "check" | "input",
+  title: string,
+  text?: string,
+  input?: string,
+  otcancel?: boolean,
+): Promise<boolean | string | undefined> {
+  return enqueueDialog(() => showDialogFull(mode, title, text, input, otcancel));
+}
+
+/**
+ * 排队调用确认弹窗简易封装。
+ * @since Beta v0.12.6
+ * @param title - 标题
+ * @param text - 文本
+ * @param otcancel - 是否允许点击外部取消
+ * @returns 确认结果
+ */
+function queuedDialogCheck(
+  title: string,
+  text?: string,
+  otcancel?: boolean,
+): Promise<boolean | undefined> {
+  return enqueueDialog(() => showDialogCheck(title, text, otcancel));
+}
+
+/**
+ * 排队调用输入弹窗简易封装。
+ * @since Beta v0.12.6
+ * @param title - 标题
+ * @param text - 文本
+ * @param input - 默认输入值
+ * @param otcancel - 是否允许点击外部取消
+ * @returns 输入结果
+ */
+function queuedDialogInput(
+  title: string,
+  text?: string,
+  input?: string,
+  otcancel?: boolean,
+): Promise<string | false | undefined> {
+  return enqueueDialog(() => showDialogInput(title, text, input, otcancel));
+}
+
+/**
+ * 排队调用输入弹窗完整封装。
+ * @since Beta v0.12.6
+ * @param opts - 弹窗参数
+ * @returns 输入结果
+ */
+function queuedDialogInputFull(
+  opts: Omit<DialogInputParams, "mode">,
+): Promise<string | false | undefined> {
+  return enqueueDialog(() => showDialogInputFull(opts));
+}
+
+/**
+ * 排队调用确认弹窗完整封装。
+ * @since Beta v0.12.6
+ * @param opts - 弹窗参数
+ * @returns 确认结果
+ */
+function queuedDialogCheckFull(opts: DialogBaseParams): Promise<boolean | undefined> {
+  return enqueueDialog(() => showDialogCheckFull(opts));
+}
+
 const showDialog = {
-  _: showDialogFull,
-  check: showDialogCheck,
-  input: showDialogInput,
-  inputF: showDialogInputFull,
-  checkF: showDialogCheckFull,
+  _: queuedDialogFull,
+  check: queuedDialogCheck,
+  input: queuedDialogInput,
+  inputF: queuedDialogInputFull,
+  checkF: queuedDialogCheckFull,
 };
 
 export default showDialog;
