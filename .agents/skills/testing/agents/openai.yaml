@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $testing to choose and run focused regression tests and delivery checks for this TeyvatGuide change."
+  display_name: "TeyvatGuide 测试与验收"
+  short_description: "按变更范围选择回归测试、类型检查与交付验证，并说明验证边界"

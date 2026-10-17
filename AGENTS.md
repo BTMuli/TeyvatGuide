@@ -17,10 +17,12 @@
 - Sentry 错误、事件、堆栈、版本回归或线上修复验证：使用
   `.agents/skills/sentry-mcp/SKILL.md`，默认只读查询；变更 issue 状态或项目配置前须取得明确授权。
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。
+- 测试设计、Bug 回归、覆盖审查或交付验收：使用 `.agents/skills/testing/SKILL.md`，按改动风险
+  选择检查，不把 lint 通过当作功能验证完成。
 - Tauri 桌面 UI：除非用户明确要求截图识别，否则不主动使用 connector 调试桥；
   需要调用时遵循 `.agents/skills/tauri-connector/SKILL.md`，并优先复用已在运行的 debug 实例。
-- Git 提交：仅在用户要求提交时使用 `.agents/skills/git-workflow/SKILL.md`，并遵循
-  `.agents/rules/git-commit-rules.md`。
+- Git 提交、拆分规划、提交信息或就绪审查：使用 `.agents/skills/git-workflow/SKILL.md`，并遵循
+  `.agents/rules/git-commit-rules.md`；只有明确要求创建提交才可暂存和提交。
 
 ## 分享截图
 
@@ -31,14 +33,10 @@
 
 ## 基本验证
 
-- TypeScript/Vue 类型：`pnpm lint-vue`
-- TypeScript/Vue/配置代码：`pnpm lint:code`
-- Vue/SCSS/CSS 样式：`pnpm lint:style`
-- Rust 格式：在 `src-tauri` 下运行 `cargo fmt --check`
-- Tauri 桌面 UI：仅在用户明确要求 tauri-connector 截图识别时，按 `.agents/skills/tauri-connector/SKILL.md` 连接窗口完成截图检查；复用已启动的 debug 实例，不另外启动
-- 跨范围或交付前完整检查：`pnpm lint`
-
-根据改动范围选择最小充分验证；若无法运行，说明未验证项和原因。
+- 验证命令与适用范围统一维护在 `.agents/skills/testing/SKILL.md`，按改动选择最小充分检查。
+- `pnpm lint` 不包含类型检查、Vitest 或 Rust 检查，不能作为全部验证通过的依据。
+- 纯文档改动检查内容、链接、格式和技能有效性，不默认构建或启动应用。
+- 报告实际运行的命令、结果，以及未验证项和原因；交付或验收不等于提交授权。
 
 ## Luna-first Engineering Rules
 

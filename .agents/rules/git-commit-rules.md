@@ -2,10 +2,13 @@
 
 ## 授权边界
 
-- 只有用户明确要求创建提交时才执行 `git add`、`git commit`、`git amend` 或其他写入 Git
-  历史的操作。
+- 只有用户明确要求创建提交时才执行 `git add`、`git commit`。仅要求拆分规划、提交信息或就绪
+  审查不授予写入暂存区和历史的权限；amend、rebase、push、tag 等操作需要单独明确授权。
 - 编码任务完成不等于自动获得提交授权。
 - 提交前检查 `git status --short` 和相关 diff，只暂存本次任务文件，保留用户的其他改动。
+- 同时检查已暂存和未暂存 diff。只对本次路径执行 `git add` 仍可能让普通 `git commit` 带入原有
+  暂存内容；必须核对完整提交候选，保留无关暂存项。同文件混有其他修改时按 hunk 隔离。
+- 不用 `git add .`、`git add -A`、reset、restore 或 stash 简化提交范围；不绕过失败的 hook。
 
 ## 提交格式
 
@@ -14,11 +17,16 @@
 ```
 
 - 每条提交只用一个 Unicode emoji。
+- 标题与正文使用中文；按本次实际 diff 的主要目的选 emoji，不从历史提交推断或模仿风格。
 - 描述以动词开头，单行不超过 100 个字符。
 - 不添加 `feat:`、`fix(scope):` 等 Conventional Commits 前缀。
 - 每个提交只表达一个可独立理解的主题；按行为边界拆分，不要仅按文件机械拆分。
+- 同一行为的实现、必要配置、回归测试和文档通常放在一起。先完成并验证该单元，再提交下一单元。
 
 ## 常用 Emoji
+
+下表是常用示例，不是允许列表；选择方法与语义边界见
+`../skills/git-workflow/references/commit-conventions.md`。
 
 | Emoji | 用途     | Emoji | 用途          |
 | ----- | -------- | ----- | ------------- |

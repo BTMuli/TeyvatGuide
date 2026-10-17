@@ -1,17 +1,19 @@
 # Task completion checklist
 
-Before committing:
+Apply this checklist to a complete behavioral unit, whether reviewing readiness or preparing an authorized commit:
 
-1. Confirm the requested behavior is complete and no known error remains.
-2. Inspect the staged diff and verify it contains no secrets, generated noise, or unrelated user changes.
-3. Run checks proportional to the touched files:
-   - TypeScript/Vue types: `pnpm lint-vue`
-   - Code: `pnpm lint:code`
-   - Styles: `pnpm lint:style`
-   - Rust formatting: `cargo fmt --check` from `src-tauri`
-   - Broad change: `pnpm lint`
-4. Recheck `git status --short` after hooks run.
-5. If a check cannot run, disclose it rather than claiming success.
+1. Compare the result with the user's requested behavior. Confirm the implementation and necessary regression
+   coverage are complete, with no known task regression hidden by a weakened assertion or disabled check.
+2. Review the actual unit diff, including tests and untracked files. Exclude secrets, generated noise, unrelated
+   work, and local implementation plans. Check both staged and unstaged content for mixed ownership.
+3. Select checks from [testing](../../testing/SKILL.md). Preserve exact commands and outcomes; distinguish a task
+   failure, an existing failure, and unavailable validation. Do not claim types, tests, or Rust passed from
+   `pnpm lint` alone. Pure documentation changes do not require the application's full test suite.
+4. Run `git diff --check` and, when using the index, `git diff --cached --check` for task changes. Inspect the final
+   commit candidate before committing. Report unrelated existing diagnostics without silently fixing them.
+5. After hooks, inspect the committed diff and remaining staged/unstaged changes. Hook auto-fixes can change the
+   validated artifact; rerun only checks affected by those changes and report any outstanding failure.
 
-When several commit boundaries are reasonable and the user's intent would materially differ, present the proposed
-split before committing.
+Only explicit commit authorization permits staging or committing. A readiness review must identify blockers and
+validation gaps without modifying the index. When several boundaries would materially change the requested
+scope, clarify that scope; otherwise choose coherent units directly.

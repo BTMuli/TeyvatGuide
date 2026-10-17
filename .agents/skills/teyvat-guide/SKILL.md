@@ -13,10 +13,12 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 4. For database work, read `../../rules/sqlite-rules.md` and preserve transaction/error-handling behavior.
 5. For Rust/Tauri work, follow the patterns in `src-tauri/src`, keep platform-specific behavior guarded, and format
    with Rustfmt.
-6. For desktop UI preview, screenshots, WebView interaction, or IPC debugging, use
-   `../tauri-mcp-cli/SKILL.md` and target the debug app rather than the installed release app.
+6. Only use the desktop connector when the user explicitly requests tauri-connector screenshot recognition. Follow
+   `../tauri-connector/SKILL.md` and reuse the running debug instance.
 7. Make the smallest coherent change and avoid unrelated cleanup, bulk data rewrites, or generated artifacts.
-8. Run validation proportional to the change and report anything not run.
+8. Use [testing and delivery checks](../testing/SKILL.md) to select validation proportional to the change. Add focused
+   regression coverage when it protects changed behavior, and report the exact checks and any gaps. `pnpm lint`
+   alone does not run type checking, unit tests, or Rust checks.
 
 ## Remote GitHub access
 
