@@ -248,12 +248,53 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
-          <template #title>留影叙佳期</template>
-          <template #prepend>
-            <img alt="archive_birthday_icon" class="side-icon" src="/UI/nav/act_birthday.webp" />
+        <v-menu v-model="storyMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'旅途故事'" v-bind="props">
+              <template #title>旅途故事</template>
+              <template #prepend>
+                <span class="side-icon-wrap">
+                  <v-icon class="side-icon">mdi-book-open-page-variant-outline</v-icon>
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: storyMenuOpen }"
+                    size="12"
+                  />
+                </span>
+              </template>
+            </v-list-item>
           </template>
-        </v-list-item>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              href="/archive/birthday"
+              title="留影叙佳期"
+            >
+              <template #prepend>
+                <img
+                  alt="archive_birthday_icon"
+                  class="side-icon-menu"
+                  src="/UI/nav/act_birthday.webp"
+                />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :disabled="isOpeningTravelersTales"
+              :link="true"
+              class="side-item-menu"
+              title="游逸旅闻"
+              @click="openTravelersTales"
+            >
+              <template #prepend>
+                <v-icon class="side-icon-menu" size="20">
+                  mdi-book-open-page-variant-outline
+                </v-icon>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
       <!-- 底部菜单 -->
       <div class="bottom-menu">
@@ -447,6 +488,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { event, webviewWindow } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/TGClient.js";
@@ -467,9 +509,11 @@ const isWindows = platform() === "windows";
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);
+const isOpeningTravelersTales = ref<boolean>(false);
 const bagMenuOpen = ref<boolean>(false);
 const challengeMenuOpen = ref<boolean>(false);
 const wikiMenuOpen = ref<boolean>(false);
+const storyMenuOpen = ref<boolean>(false);
 const userMenuOpen = ref<boolean>(false);
 const addAccountMenuOpen = ref<boolean>(false);
 const switchAccountMenuOpen = ref<boolean>(false);
@@ -541,6 +585,21 @@ async function tryImportBag(): Promise<void> {
 async function openClient(func: string): Promise<void> {
   if (isLogin.value) await mhyClient.open(func);
   else showSnackbar.warn("请前往设置页面登录！");
+}
+
+async function openTravelersTales(): Promise<void> {
+  if (isOpeningTravelersTales.value) return;
+  isOpeningTravelersTales.value = true;
+  try {
+    await invoke<void>("create_travelers_tales");
+    await TGLogger.Info("[TSidebar][openTravelersTales] 打开游逸旅闻");
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`打开游逸旅闻失败：${errMsg}`);
+    await TGLogger.Error(`[TSidebar][openTravelersTales] 打开游逸旅闻失败：${errMsg}`);
+  } finally {
+    isOpeningTravelersTales.value = false;
+  }
 }
 
 async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {

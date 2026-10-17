@@ -7,6 +7,7 @@ mod game;
 #[cfg(target_os = "windows")]
 mod loopback;
 mod plugins;
+mod travelers_tales;
 mod tray;
 mod utils;
 #[cfg(target_os = "windows")]
@@ -40,10 +41,12 @@ use crate::game::commands::{
   game_package_verify_status, game_stop,
 };
 use crate::game::package::GamePackageManager;
+use crate::travelers_tales::create_travelers_tales;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
 // 子窗口 label 的数组
-pub const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
+pub const SUB_WINDOW_LABELS: [&str; 4] =
+  ["Sub_window", "Dev_JSON", "mhy_client", "travelers_tales"];
 
 /// 统一处理主窗口与子窗口的关闭请求。
 ///
@@ -162,6 +165,7 @@ pub fn run() {
       app_fs_read_text_file,
       app_fs_read_dir,
       create_mhy_client,
+      create_travelers_tales,
       is_in_admin,
       hide_main_window,
       quit_app,
