@@ -47,9 +47,9 @@ function isValidSnapshot(value: unknown): value is TGApp.BBS.Reply.AccountSnapsh
  * @param storage - 账号持久化存储
  * @returns 持久化账号是否与快照完全匹配
  */
-function matchesCurrentAccount(
+export function matchesCurrentAccount(
   snapshot: unknown,
-  storage: Pick<Storage, "getItem">,
+  storage: Pick<Storage, "getItem"> = window.localStorage,
 ): snapshot is TGApp.BBS.Reply.AccountSnapshot {
   try {
     if (!isValidSnapshot(snapshot)) return false;

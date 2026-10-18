@@ -1,6 +1,6 @@
 /**
  * 应用请求客户端封装
- * @since Beta v0.11.3
+ * @since Beta v0.12.6
  */
 
 import useAppStore from "@store/app.js";
@@ -48,7 +48,7 @@ function createHttpError(
 
 /**
  * 执行 HTTP 请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  * @param method - 请求方法
  * @param url - 请求地址
  * @param config - 请求配置
@@ -72,6 +72,15 @@ async function request<T>(
   }
 
   // 构建请求头
+  const isFormData = config.body instanceof FormData;
+  if (
+    isFormData &&
+    config.headers &&
+    Object.keys(config.headers).some((key) => key.toLowerCase() === "content-type")
+  ) {
+    throw new TypeError("FormData 请求不得显式设置 Content-Type");
+  }
+
   const httpHeaders = new Headers();
   if (config.headers) {
     for (const [key, value] of Object.entries(config.headers)) {
@@ -87,7 +96,13 @@ async function request<T>(
 
   // 添加请求体
   if (config.body !== undefined) {
-    fetchOptions.body = typeof config.body === "string" ? config.body : JSON.stringify(config.body);
+    fetchOptions.body =
+      typeof config.body === "string" || config.body instanceof FormData
+        ? config.body
+        : JSON.stringify(config.body);
+  }
+  if (config.maxRedirections !== undefined) {
+    fetchOptions.maxRedirections = config.maxRedirections;
   }
 
   // 直连模式：未开启“使用系统代理”时绕过系统代理

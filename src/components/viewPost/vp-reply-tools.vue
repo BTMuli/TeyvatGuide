@@ -17,7 +17,7 @@
         :title="replyAssetCapabilities.imageUpload ? '添加图片' : '图片暂不可用'"
         class="vprt-tool"
         type="button"
-        @click="fileInput?.click()"
+        @click="openImagePicker"
       >
         <v-icon size="18">mdi-image-outline</v-icon>
         <span>图片</span>
@@ -45,6 +45,7 @@
         accept="image/jpeg,image/png,image/gif,image/webp"
         hidden
         type="file"
+        @cancel="clearImagePicker"
         @change="selectImage"
       />
     </div>
@@ -127,7 +128,9 @@
           >查找</v-btn
         >
       </div>
-      <div v-if="mentionError" class="vprt-status" role="alert">{{ mentionError }}</div>
+      <div v-if="mentionError" class="vprt-status" role="alert">
+        {{ mentionError }}
+      </div>
       <div v-if="mentionResult" class="vprt-result">
         <span>{{ mentionResult.nickname }} · UID {{ mentionResult.uid }}</span>
         <v-btn :disabled size="small" variant="tonal" @click="insertMention">插入 @</v-btn>
@@ -140,7 +143,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import bbsReq from "@req/bbsReq.js";
 import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
-import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
 type ReplyToolsProps = {
@@ -148,6 +151,16 @@ type ReplyToolsProps = {
   contextId: number;
   gid: number;
   cookie?: Record<string, string>;
+};
+
+/**
+ * 打开图片选择器时的账号与帖子上下文
+ * @since Beta v0.12.6
+ */
+type ImagePickerContext = {
+  version: number;
+  gid: number;
+  cookie: Record<string, string>;
 };
 
 const props = defineProps<ReplyToolsProps>();
@@ -170,6 +183,7 @@ const mentionError = ref<string>("");
 const uploading = ref<boolean>(false);
 let mentionController: AbortController | undefined;
 let uploadController: AbortController | undefined;
+let imagePickerContext: ImagePickerContext | undefined;
 let contextVersion = 0;
 let mounted = true;
 
@@ -202,6 +216,7 @@ function resetContext(): void {
   contextVersion += 1;
   closePanel();
   cancelUpload();
+  clearImagePicker();
   mentionQuery.value = "";
   mentionResult.value = undefined;
   mentionError.value = "";
@@ -221,6 +236,27 @@ function cancelMention(): void {
 
 function cancelUpload(): void {
   uploadController?.abort();
+}
+
+function openImagePicker(): void {
+  if (props.disabled || !replyAssetCapabilities.imageUpload || !props.cookie) return;
+  const cookie = { ltoken: props.cookie.ltoken, ltuid: props.cookie.ltuid };
+  if (!matchesCurrentAccount({ uid: cookie.ltuid, cookie })) {
+    clearImagePicker();
+    showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
+    return;
+  }
+  imagePickerContext = {
+    version: contextVersion,
+    gid: props.gid,
+    cookie,
+  };
+  fileInput.value?.click();
+}
+
+function clearImagePicker(): void {
+  imagePickerContext = undefined;
+  if (fileInput.value) fileInput.value.value = "";
 }
 
 async function toggleEmoji(): Promise<void> {
@@ -313,9 +349,18 @@ async function selectImage(event: Event): Promise<void> {
   if (!(input instanceof HTMLInputElement)) return;
   const file = input.files?.[0];
   input.value = "";
-  if (!file || props.disabled || !replyAssetCapabilities.imageUpload || !props.cookie) return;
-  const requestCookie = { ...props.cookie };
-  const version = contextVersion;
+  const picker = imagePickerContext;
+  imagePickerContext = undefined;
+  if (
+    !file ||
+    props.disabled ||
+    !replyAssetCapabilities.imageUpload ||
+    !picker ||
+    picker.version !== contextVersion
+  )
+    return;
+  const requestCookie = picker.cookie;
+  const version = picker.version;
   const controller = new AbortController();
   await interaction.run(async () => {
     uploadController = controller;
@@ -326,17 +371,25 @@ async function selectImage(event: Event): Promise<void> {
           uid: requestCookie.ltuid,
           cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
         },
-        () => replyAssetReq.uploadImage(file, requestCookie, props.gid, controller.signal),
+        () => replyAssetReq.uploadImage(file, requestCookie, picker.gid, controller.signal),
       );
       if (!mounted || version !== contextVersion || controller.signal.aborted) return;
-      if (!execution.allowed) {
+      if (
+        !execution.allowed ||
+        !matchesCurrentAccount({
+          uid: requestCookie.ltuid,
+          cookie: requestCookie,
+        })
+      ) {
         showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
         return;
       }
       emits("image", execution.data);
-    } catch {
+    } catch (error) {
       if (mounted && version === contextVersion && !controller.signal.aborted) {
-        showSnackbar.error("图片上传失败，请重新选择图片后重试");
+        showSnackbar.error(
+          error instanceof Error ? error.message : "图片上传失败，请重新选择图片后重试",
+        );
       }
     } finally {
       if (uploadController === controller) {
