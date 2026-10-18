@@ -7,12 +7,15 @@
       :no-click-animation="true"
       :offset="[12, 0]"
       :persistent="true"
+      eager
       location="end"
       z-index="60"
     >
       <template #activator="{ props }">
         <v-btn
+          :disabled="writing"
           :loading
+          aria-label="查看回复"
           class="tpr-btn"
           size="36"
           v-bind="props"
@@ -27,20 +30,30 @@
       <div class="tpr-main-reply">
         <div class="tpr-main-filter">
           <div class="tpr-title">
-            <span title="刷新" @click="handleDebug">回复列表</span>
-            <v-btn class="tpr-btn-close" icon="mdi-close" size="32" @click="showOverlay = false" />
+            <v-btn :disabled="writing" :loading size="small" variant="text" @click="reloadReply">
+              回复列表 · 刷新
+            </v-btn>
+            <v-btn
+              :disabled="writing"
+              aria-label="关闭回复列表"
+              class="tpr-btn-close"
+              icon="mdi-close"
+              size="32"
+              @click="showOverlay = false"
+            />
           </div>
           <div class="tpr-subtitle">
-            <div class="tpr-switch" @click="switchOnlyLz()">
+            <button :disabled="writing" class="tpr-switch" type="button" @click="switchOnlyLz()">
               <v-icon v-if="onlyLz" color="var(--tgc-od-green)">
                 mdi-checkbox-marked-circle-outline
               </v-icon>
               <v-icon v-else color="var(--tgc-od-white)">mdi-circle</v-icon>
               <span>只看楼主</span>
-            </div>
+            </button>
             <div class="tpr-select">
               <v-select
                 v-model="orderType"
+                :disabled="writing"
                 :hide-details="true"
                 :items="orderList"
                 density="compact"
@@ -58,7 +71,10 @@
             :key="item.reply.reply_id"
             :modelValue="item"
             :pinId
+            :postOwnerId
             mode="main"
+            @changed="handleReplyChanged"
+            @reply="selectReply"
           />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="blue" label>没有更多了</v-chip>
@@ -67,6 +83,13 @@
             <v-btn :loading color="blue" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
+        <VpReplyComposer
+          :gid="props.gid"
+          :postId="props.postId"
+          :target="replyTarget"
+          @cancel="replyTarget = undefined"
+          @published="handlePublished"
+        />
       </div>
     </v-menu>
   </div>
@@ -74,12 +97,17 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
+import { createReplyInteraction, replyInteractionKey } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { emit } from "@tauri-apps/api/event";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { computed, ref, shallowRef, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, onBeforeUnmount, provide, ref, shallowRef, watch } from "vue";
 
+import VpReplyComposer from "./vp-reply-composer.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
 /**
@@ -103,6 +131,11 @@ type SelectItem = {
 };
 
 const props = defineProps<TprMainProps>();
+const { uid, cookie } = storeToRefs(useUserStore());
+const { incognito } = storeToRefs(useAppStore());
+const interaction = createReplyInteraction();
+provide(replyInteractionKey, interaction);
+const writing = interaction.busy;
 
 // 简单封装选项
 const genOrderItem = (order: TGApp.BBS.Reply.ReplyOrderTypeEnum): SelectItem => ({
@@ -116,6 +149,9 @@ const orderList: Array<SelectItem> = [
 ].map(genOrderItem);
 
 const pinId = ref<string>("0");
+const postOwnerId = ref<string>("");
+const replyTarget = shallowRef<TGApp.BBS.Reply.ReplyFull>();
+let requestVersion = 0;
 const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
@@ -123,6 +159,16 @@ const showOverlay = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const readCookie = computed<Record<string, string> | undefined>(() => {
+  if (
+    incognito.value ||
+    !uid.value ||
+    !cookie.value?.ltoken.trim() ||
+    cookie.value.ltuid !== uid.value
+  )
+    return undefined;
+  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+});
 const isHot = computed<boolean>(() => orderType.value === bbsEnum.post.replyOrderType.HOT);
 const replyOrder = computed<TGApp.BBS.Reply.ReplyOrderTypeEnum | undefined>(() => {
   if (orderType.value === bbsEnum.post.replyOrderType.HOT) return undefined;
@@ -136,6 +182,27 @@ watch(
     await reloadReply();
   },
 );
+
+watch(
+  () => [
+    props.postId,
+    props.gid,
+    uid.value,
+    cookie.value?.ltoken,
+    cookie.value?.ltuid,
+    incognito.value,
+  ],
+  async () => {
+    replyTarget.value = undefined;
+    resetReplies();
+    if (showOverlay.value) await loadReply();
+  },
+  { flush: "sync" },
+);
+
+onBeforeUnmount(() => {
+  requestVersion += 1;
+});
 
 function handleListScroll(e: Event): void {
   if (!(e.target instanceof HTMLElement)) return;
@@ -153,6 +220,7 @@ function handleListScroll(e: Event): void {
 }
 
 async function showReply(): Promise<void> {
+  if (loading.value) return;
   if (reply.value.length > 0) return;
   if (isLast.value) return;
   await loadReply();
@@ -164,52 +232,72 @@ async function switchOnlyLz(): Promise<void> {
 }
 
 async function reloadReply(): Promise<void> {
-  lastId.value = undefined;
-  reply.value = [];
+  resetReplies();
   await loadReply();
 }
 
+function resetReplies(): void {
+  requestVersion += 1;
+  lastId.value = undefined;
+  isLast.value = false;
+  pinId.value = "0";
+  postOwnerId.value = "";
+  reply.value = [];
+  loading.value = false;
+}
+
+function selectReply(item: TGApp.BBS.Reply.ReplyFull): void {
+  if (!writing.value) replyTarget.value = item;
+}
+
+async function handleReplyChanged(): Promise<void> {
+  replyTarget.value = undefined;
+  await reloadReply();
+}
+
+async function handlePublished(): Promise<void> {
+  replyTarget.value = undefined;
+  onlyLz.value = false;
+  if (orderType.value === bbsEnum.post.replyOrderType.LATEST) await reloadReply();
+  else orderType.value = bbsEnum.post.replyOrderType.LATEST;
+}
+
 async function loadReply(): Promise<void> {
+  if (loading.value || isLast.value) return;
+  const version = requestVersion;
   loading.value = true;
-  let resp: TGApp.BBS.Reply.MainResp | undefined;
   try {
-    resp = await postReq.reply.main(
+    const resp = await postReq.reply.main(
       props.postId,
       props.gid,
       isHot.value,
       lastId.value,
       onlyLz.value,
       replyOrder.value,
+      20,
+      readCookie.value,
     );
-    console.debug("[VpBtnReply] Load Reply Response:", resp);
+    if (version !== requestVersion) return;
     if (resp.retcode !== 0) {
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      await TGLogger.Warn(`[VpBtnReply] Load Reply Error: ${resp.retcode} - ${resp.message}`);
-      loading.value = false;
       return;
     }
+    isLast.value = resp.data.is_last;
+    lastId.value = resp.data.last_id;
+    pinId.value = resp.data.pin_reply_id;
+    postOwnerId.value = resp.data.post_owner_id;
+    const existingIds = new Set(reply.value.map((item) => item.reply.reply_id));
+    reply.value = reply.value.concat(
+      resp.data.list.filter((item) => !existingIds.has(item.reply.reply_id)),
+    );
   } catch (e) {
+    if (version !== requestVersion) return;
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取回复失败：${errMsg}`);
     await TGLogger.Error(`[VpBtnReply] 获取回复异常`);
-    await TGLogger.Error(`[VpBtnReply] ${e}`);
-    loading.value = false;
-    return;
+  } finally {
+    if (version === requestVersion) loading.value = false;
   }
-  isLast.value = resp.data.is_last;
-  lastId.value = resp.data.last_id;
-  pinId.value = resp.data.pin_reply_id;
-  reply.value = reply.value.concat(resp.data.list);
-  loading.value = false;
-  if (isLast.value) {
-    showSnackbar.warn("没有更多了");
-    return;
-  }
-  showSnackbar.success(`成功加载${resp.data.list.length}条回复`);
-}
-
-async function handleDebug(): Promise<void> {
-  await reloadReply();
 }
 </script>
 <style lang="scss" scoped>
@@ -258,7 +346,8 @@ async function handleDebug(): Promise<void> {
 .tpr-main-reply {
   position: relative;
   display: flex;
-  width: 300px;
+  overflow: hidden;
+  width: min(360px, calc(100vw - 72px));
   max-height: calc(100vh - 24px);
   box-sizing: border-box;
   flex-direction: column;
@@ -269,7 +358,6 @@ async function handleDebug(): Promise<void> {
   border-radius: 8px;
   background: var(--app-page-bg);
   box-shadow: 2px 2px 8px var(--common-shadow-4);
-  overflow-y: auto;
   row-gap: 8px;
   transition: height 0.5s ease-in-out;
 }
@@ -292,16 +380,6 @@ async function handleDebug(): Promise<void> {
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-
-  span {
-    padding: 2px 4px;
-    border-radius: 4px;
-    background: var(--tgc-od-blue);
-    color: var(--tgc-white-1);
-    cursor: pointer;
-    font-family: var(--font-title);
-    white-space: nowrap;
-  }
 }
 
 .tpr-btn-close {
@@ -328,9 +406,11 @@ async function handleDebug(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--app-page-content);
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
+  font-weight: normal;
 }
 
 .tpr-reply-list {
@@ -339,6 +419,7 @@ async function handleDebug(): Promise<void> {
   overflow: hidden auto;
   width: 100%;
   height: fit-content;
+  min-height: 0;
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;

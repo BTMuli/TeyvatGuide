@@ -1,13 +1,99 @@
 /**
  * 帖子相关的请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  */
 import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttps from "@utils/TGHttps.js";
 
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
+const apihubReplyLikeUrl: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/api/upvoteReply";
 const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
+
+/**
+ * 回复请求签名数据
+ * @since Beta v0.12.6
+ */
+type ReplyRequestData = Record<string, string | number | boolean | Array<string>>;
+
+/**
+ * 校验回复请求中的 ID
+ * @since Beta v0.12.6
+ * @param value - 待校验的 ID
+ * @param name - 错误信息中的字段名称
+ */
+function assertPositiveId(value: string, name: string): void {
+  if (!/^[1-9]\d*$/.test(value)) throw new TypeError(`${name}必须为正整数`);
+}
+
+/**
+ * 校验正整数参数
+ * @since Beta v0.12.6
+ * @param value - 待校验的数值
+ * @param name - 错误信息中的字段名称
+ */
+function assertPositiveNumber(value: number, name: string): void {
+  if (!Number.isSafeInteger(value) || value <= 0) throw new TypeError(`${name}必须为正整数`);
+}
+
+/**
+ * 提取回复请求所需的登录凭据
+ * @since Beta v0.12.6
+ * @param cookie - 完整 Cookie
+ * @returns 供请求头签名使用的最小 Cookie
+ */
+function getReplyCookie(cookie: Record<string, string>): Record<string, string> {
+  const ltoken = cookie?.ltoken?.trim();
+  const ltuid = cookie?.ltuid?.trim();
+  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
+  return { ltoken, ltuid };
+}
+
+/**
+ * 创建回复读取请求头
+ * @since Beta v0.12.6
+ * @param cookie - 完整 Cookie
+ * @param params - 请求参数
+ * @returns 带签名的请求头
+ */
+function getReplyReadHeaders(
+  cookie: Record<string, string>,
+  params: ReplyRequestData,
+): Record<string, string> {
+  return {
+    ...getRequestHeader(getReplyCookie(cookie), "GET", params, "K2", true),
+    "x-rpc-client_type": "2",
+  };
+}
+
+/**
+ * 创建回复变更请求头
+ * @since Beta v0.12.6
+ * @param cookie - 完整 Cookie
+ * @param body - 请求体
+ * @returns 带签名的 JSON 请求头
+ */
+function getReplyWriteHeaders(
+  cookie: Record<string, string>,
+  body: ReplyRequestData,
+): Record<string, string> {
+  return {
+    ...getRequestHeader(getReplyCookie(cookie), "POST", body, "K2", true),
+    "x-rpc-client_type": "2",
+    "Content-Type": "application/json",
+  };
+}
+
+/**
+ * 校验回复内容
+ * @since Beta v0.12.6
+ * @param content - 回复内容
+ */
+function assertReplyContent(content: string): void {
+  if (typeof content !== "string" || content.trim() === "") {
+    throw new TypeError("回复内容不能为空");
+  }
+}
 
 /**
  * 获取单个帖子信息
@@ -53,7 +139,7 @@ async function getPostFullInCollection(
 
 /**
  * 获取帖子回复信息
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  * @param postId - 帖子 ID
  * @param gid - 社区 ID
  * @param isHot - 是否热门
@@ -61,6 +147,7 @@ async function getPostFullInCollection(
  * @param orderType - 排序类型
  * @param lastId - 最后 ID
  * @param size - 每页大小
+ * @param cookie - 用户 Cookie，用于读取自身操作状态
  * @returns 回复信息响应数据
  */
 async function getPostReplies(
@@ -71,6 +158,7 @@ async function getPostReplies(
   onlyMaster: boolean = false,
   orderType?: TGApp.BBS.Reply.ReplyOrderTypeEnum,
   size: number = 20,
+  cookie?: Record<string, string>,
 ): Promise<TGApp.BBS.Reply.MainResp> {
   const params: TGApp.BBS.Reply.MainReplyParam = {
     post_id: postId,
@@ -86,7 +174,7 @@ async function getPostReplies(
     params.order_type = 1;
   }
   const resp = await TGHttps.get<TGApp.BBS.Reply.MainResp>(`${bapBu}getPostReplies`, {
-    headers: { referer: Referer },
+    headers: cookie === undefined ? { referer: Referer } : getReplyReadHeaders(cookie, params),
     query: params,
   });
   return resp.data;
@@ -94,12 +182,13 @@ async function getPostReplies(
 
 /**
  * 获取帖子子回复信息
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  * @param floorId - 楼层 ID
  * @param gid - 社区 ID
  * @param postId - 帖子 ID
  * @param lastId - 最后 ID
  * @param size - 每页大小
+ * @param cookie - 用户 Cookie，用于读取自身操作状态
  * @returns 子回复响应数据
  */
 async function getSubReplies(
@@ -108,6 +197,7 @@ async function getSubReplies(
   postId: string,
   lastId?: string,
   size: number = 20,
+  cookie?: Record<string, string>,
 ): Promise<TGApp.BBS.Reply.SubResp> {
   const params: TGApp.BBS.Reply.SubReplyParam = {
     floor_id: floorId,
@@ -117,8 +207,130 @@ async function getSubReplies(
   };
   if (lastId) params.last_id = lastId;
   const resp = await TGHttps.get<TGApp.BBS.Reply.SubResp>(`${bapBu}getSubReplies`, {
-    headers: { referer: Referer },
+    headers: cookie === undefined ? { referer: Referer } : getReplyReadHeaders(cookie, params),
     query: params,
+  });
+  return resp.data;
+}
+
+/**
+ * 发布回复
+ * @since Beta v0.12.6
+ * @param input - 回复参数
+ * @param cookie - 用户 Cookie
+ * @returns 回复变更响应
+ */
+async function createReply(
+  input: TGApp.BBS.Reply.CreateParams,
+  cookie: Record<string, string>,
+): Promise<TGApp.BBS.Reply.MutationResp> {
+  assertPositiveId(input.postId, "帖子 ID");
+  assertPositiveNumber(input.gid, "社区 ID");
+  assertReplyContent(input.content);
+  if (input.replyId !== undefined) assertPositiveId(input.replyId, "回复 ID");
+
+  const body: Record<string, string> = {
+    post_id: input.postId,
+    // 沿用米游社网页请求层自动注入的字符串 gids。
+    gids: String(input.gid),
+    content: input.content,
+    structured_content: JSON.stringify([{ insert: `${input.content}\n` }]),
+  };
+  if (input.replyId !== undefined) body.reply_id = input.replyId;
+  const resp = await TGHttps.post<TGApp.BBS.Reply.MutationResp>(`${bapBu}releaseReply`, {
+    headers: getReplyWriteHeaders(cookie, body),
+    body,
+  });
+  return resp.data;
+}
+
+/**
+ * 点赞或取消点赞回复
+ * @since Beta v0.12.6
+ * @param postId - 帖子 ID
+ * @param replyId - 回复 ID
+ * @param cookie - 用户 Cookie
+ * @param cancel - 是否取消点赞
+ * @param gid - 可选社区 ID
+ * @returns 回复变更响应
+ */
+async function likeReply(
+  postId: string,
+  replyId: string,
+  cookie: Record<string, string>,
+  cancel: boolean = false,
+  gid?: number,
+): Promise<TGApp.BBS.Reply.MutationResp> {
+  assertPositiveId(postId, "帖子 ID");
+  assertPositiveId(replyId, "回复 ID");
+  const body: ReplyRequestData = { is_cancel: cancel, post_id: postId, reply_id: replyId };
+  if (gid !== undefined) {
+    assertPositiveNumber(gid, "社区 ID");
+    body.gids = String(gid);
+  }
+  const resp = await TGHttps.post<TGApp.BBS.Reply.MutationResp>(apihubReplyLikeUrl, {
+    headers: getReplyWriteHeaders(cookie, body),
+    body,
+  });
+  return resp.data;
+}
+
+/**
+ * 删除回复
+ * @since Beta v0.12.6
+ * @param postId - 帖子 ID
+ * @param replyId - 回复 ID
+ * @param cookie - 用户 Cookie
+ * @param gid - 可选社区 ID
+ * @returns 回复变更响应
+ */
+async function deleteReply(
+  postId: string,
+  replyId: string,
+  cookie: Record<string, string>,
+  gid?: number,
+): Promise<TGApp.BBS.Reply.MutationResp> {
+  assertPositiveId(postId, "帖子 ID");
+  assertPositiveId(replyId, "回复 ID");
+  const body: ReplyRequestData = { post_id: postId, reply_id: replyId };
+  if (gid !== undefined) {
+    assertPositiveNumber(gid, "社区 ID");
+    body.gids = String(gid);
+  }
+  const resp = await TGHttps.post<TGApp.BBS.Reply.MutationResp>(`${bapBu}deleteReply`, {
+    headers: getReplyWriteHeaders(cookie, body),
+    body,
+  });
+  return resp.data;
+}
+
+/**
+ * 置顶或取消置顶帖子回复
+ * @since Beta v0.12.6
+ * @param postId - 帖子 ID
+ * @param replyId - 回复 ID
+ * @param cookie - 用户 Cookie
+ * @param cancel - 是否取消置顶
+ * @param gid - 可选社区 ID
+ * @returns 回复变更响应
+ */
+async function pinReply(
+  postId: string,
+  replyId: string,
+  cookie: Record<string, string>,
+  cancel: boolean = false,
+  gid?: number,
+): Promise<TGApp.BBS.Reply.MutationResp> {
+  assertPositiveId(postId, "帖子 ID");
+  assertPositiveId(replyId, "回复 ID");
+  const body: ReplyRequestData = { is_cancel: cancel, post_id: postId, reply_id: replyId };
+  if (gid !== undefined) {
+    assertPositiveNumber(gid, "社区 ID");
+    body.gids = String(gid);
+  }
+  const resp = await TGHttps.post<TGApp.BBS.Reply.MutationResp>(`${bapBu}pin/post/reply`, {
+    headers: getReplyWriteHeaders(cookie, body),
+    body,
   });
   return resp.data;
 }
@@ -225,7 +437,14 @@ const postReq = {
   collection: getPostFullInCollection,
   post: getPostFull,
   topic: getTopicPostList,
-  reply: { main: getPostReplies, sub: getSubReplies },
+  reply: {
+    main: getPostReplies,
+    sub: getSubReplies,
+    create: createReply,
+    like: likeReply,
+    delete: deleteReply,
+    pin: pinReply,
+  },
   search: searchPosts,
   user: { post: getUserPost, favorite: userFavouritePost },
 };

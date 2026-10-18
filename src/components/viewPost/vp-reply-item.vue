@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="tpr-content">
-      <TpParser :data="JSON.parse(props.modelValue.reply.struct_content)" />
+      <TpParser :data="replyContent" />
     </div>
     <div class="tpr-info">
       <div class="tpri-left">
@@ -34,15 +34,35 @@
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
       <div class="tpri-right">
-        <span class="tpr-like" title="点赞数">
-          <v-icon size="small">mdi-thumb-up</v-icon>
-          {{ props.modelValue.stat.like_num }}
-        </span>
+        <button
+          :aria-pressed="isLiked"
+          :disabled="interactionBusy || actionBusy !== null"
+          :class="{ active: isLiked, 'tpr-action-busy': actionBusy === 'like' }"
+          :title="isLiked ? '取消点赞' : '点赞'"
+          :aria-label="isLiked ? '取消点赞' : '点赞'"
+          class="tpr-action tpr-like"
+          type="button"
+          @click.stop="tryLike()"
+        >
+          <v-progress-circular v-if="actionBusy === 'like'" indeterminate size="14" width="2" />
+          <v-icon v-else size="small">mdi-thumb-up</v-icon>
+          {{ likeCount }}
+        </button>
+        <button
+          :disabled="interactionBusy || actionBusy !== null"
+          aria-label="回复"
+          class="tpr-action tpr-reply-action"
+          title="回复"
+          type="button"
+          @click.stop="handleReply()"
+        >
+          <v-icon size="small">mdi-reply</v-icon>
+        </button>
         <span
-          v-if="props.modelValue.sub_replies.length > 0"
+          v-if="props.modelValue.sub_reply_count > 0"
           class="tpr-reply"
           title="查看子回复"
-          @click="showReply()"
+          @click.stop="showReply()"
         >
           <v-icon size="small">mdi-message-text</v-icon>
           <span>{{ props.modelValue.sub_reply_count }}</span>
@@ -63,7 +83,10 @@
                 v-for="reply in subReplies"
                 :key="reply.reply.reply_id"
                 :modelValue="reply"
+                :postOwnerId="props.postOwnerId"
                 mode="sub"
+                @changed="handleChanged"
+                @reply="handleReplyFromChild"
               />
               <div v-if="isLast" class="tpr-list-item">
                 <v-chip color="blue" label>没有更多了</v-chip>
@@ -80,16 +103,63 @@
       <div class="tpr-share" data-html2canvas-ignore title="分享" @click="share">
         <v-icon size="small">mdi-share-variant</v-icon>
       </div>
-      <span
-        v-if="props.mode === 'main' && props.modelValue.reply.reply_id === props.pinId"
-        class="tpr-pin"
+      <button
+        v-if="isPinned && canPin"
+        :disabled="interactionBusy || actionBusy !== null"
+        :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
+        aria-label="取消置顶"
+        class="tpr-action tpr-pin actionable"
+        title="取消置顶"
+        type="button"
+        @click.stop="togglePin()"
       >
+        <v-progress-circular v-if="actionBusy === 'pin'" indeterminate size="14" width="2" />
+        <v-icon v-else size="small">mdi-pin</v-icon>
+        <span>取消置顶</span>
+      </button>
+      <span v-else-if="isPinned" class="tpr-pin" title="已置顶">
         <v-icon size="small">mdi-pin</v-icon>
-        <span>置顶评论</span>
+        <span>已置顶</span>
       </span>
-      <span class="tpr-debug" data-html2canvas-ignore title="导出数据" @click="exportData">
+      <button
+        v-else-if="canPin"
+        :disabled="interactionBusy || actionBusy !== null"
+        :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
+        aria-label="置顶回复"
+        class="tpr-action tpr-pin actionable"
+        title="置顶回复"
+        type="button"
+        @click.stop="togglePin()"
+      >
+        <v-progress-circular v-if="actionBusy === 'pin'" indeterminate size="14" width="2" />
+        <v-icon v-else size="small">mdi-pin-outline</v-icon>
+        <span>置顶回复</span>
+      </button>
+      <button
+        v-if="canDeleteReply"
+        :disabled="interactionBusy || actionBusy !== null"
+        :class="{ 'tpr-action-busy': actionBusy === 'delete' }"
+        aria-label="删除回复"
+        class="tpr-action tpr-delete"
+        data-html2canvas-ignore
+        title="删除回复"
+        type="button"
+        @click.stop="deleteReply()"
+      >
+        <v-progress-circular v-if="actionBusy === 'delete'" indeterminate size="14" width="2" />
+        <v-icon v-else size="small">mdi-delete-outline</v-icon>
+      </button>
+      <button
+        :disabled="interactionBusy"
+        aria-label="导出数据"
+        class="tpr-action tpr-debug"
+        data-html2canvas-ignore
+        title="导出数据"
+        type="button"
+        @click.stop="exportData()"
+      >
         <v-icon size="small">mdi-file-export</v-icon>
-      </span>
+      </button>
       <span v-if="props.modelValue.r_user" class="tpr-reply-user">
         <span>回复</span>
         <span>{{ props.modelValue.r_user.nickname }}</span>
@@ -109,16 +179,21 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
+import { storeToRefs } from "pinia";
 import {
   computed,
   onMounted,
@@ -132,19 +207,53 @@ import {
 
 import TpParser from "./tp-parser.vue";
 
+/**
+ * 回复项参数。
+ * @since Beta v0.12.6
+ */
 type TprReplyProps =
-  | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull }
-  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId?: string };
+  | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull; postOwnerId?: string }
+  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId?: string; postOwnerId?: string };
+
+/**
+ * 回复项事件。
+ * @since Beta v0.12.6
+ */
+type TprReplyEmits = {
+  reply: [item: TGApp.BBS.Reply.ReplyFull];
+  changed: [];
+};
+
+/**
+ * 回复变更的账号与上下文快照。
+ * @since Beta v0.12.6
+ */
+type WriteSnapshot = TGApp.BBS.Reply.AccountSnapshot & {
+  postId: string;
+  replyId: string;
+  gid: number;
+  contextVersion: number;
+};
 
 const props = defineProps<TprReplyProps>();
+const emits = defineEmits<TprReplyEmits>();
 const replyLabel = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
 let subListener: UnlistenFn | null = null;
 let closeSubListener: UnlistenFn | null = null;
-
-console.log("TprReply", toRaw(props.modelValue));
+let subLoadGeneration = 0;
+let actionContextVersion = 0;
+let mounted = false;
 
 const existingIds = new Set<string>();
 
+const { incognito } = storeToRefs(useAppStore());
+const { cookie, uid } = storeToRefs(useUserStore());
+const interaction = useReplyInteraction();
+const interactionBusy = interaction.busy;
+
+const actionBusy = ref<"like" | "delete" | "pin" | null>(null);
+const isLiked = ref<boolean>(isReplyLiked(props.modelValue));
+const likeCount = ref<number>(props.modelValue.stat.like_num);
 const showSub = ref<boolean>(false);
 const lastId = ref<string>();
 const isLast = ref<boolean>(false);
@@ -152,6 +261,25 @@ const loading = ref<boolean>(false);
 const subReplies = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const vpReplyEl = useTemplateRef<HTMLDivElement>("VpReplyRef");
 const avatarUrl = computed<string>(() => getUserAvatar(props.modelValue.user));
+const replyContent = computed<Array<TGApp.BBS.SctPost.Base>>(() => getReplyContent());
+const isPinned = computed<boolean>(
+  () => props.mode === "main" && props.modelValue.reply.reply_id === props.pinId,
+);
+const canDeleteReply = computed<boolean>(
+  () =>
+    props.modelValue.reply.is_deleted === 0 &&
+    uid.value !== undefined &&
+    props.modelValue.user.uid === uid.value,
+);
+const canPin = computed<boolean>(
+  () =>
+    props.mode === "main" &&
+    props.modelValue.reply.is_deleted === 0 &&
+    props.postOwnerId !== undefined &&
+    props.postOwnerId !== "" &&
+    uid.value !== undefined &&
+    uid.value === props.postOwnerId,
+);
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -161,13 +289,116 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 
+function isReplyLiked(item: TGApp.BBS.Reply.ReplyFull): boolean {
+  return item.self_operation?.attitude === 1;
+}
+
+function isSctPostBase(value: unknown): value is TGApp.BBS.SctPost.Base {
+  return typeof value === "object" && value !== null && "insert" in value;
+}
+
+function getReplyContent(): Array<TGApp.BBS.SctPost.Base> {
+  const raw =
+    typeof props.modelValue.reply.struct_content === "string"
+      ? props.modelValue.reply.struct_content.trim()
+      : "";
+  const fallback =
+    typeof props.modelValue.reply.content === "string" ? props.modelValue.reply.content : "";
+  if (raw === "") return [{ insert: fallback }];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const rows = parsed.filter(isSctPostBase);
+      if (rows.length > 0) return rows;
+    } else if (isSctPostBase(parsed)) {
+      return [parsed];
+    } else if (typeof parsed === "string") {
+      return [{ insert: parsed }];
+    }
+  } catch {
+    // Plain-text replies may not include structured content.
+  }
+  return [{ insert: fallback || raw }];
+}
+
+function getReadCookie(): Record<string, string> | undefined {
+  if (
+    incognito.value ||
+    !uid.value ||
+    !cookie.value?.ltoken.trim() ||
+    cookie.value.ltuid !== uid.value
+  )
+    return undefined;
+  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+}
+
+function getWriteSnapshot(): WriteSnapshot | undefined {
+  if (incognito.value) {
+    showSnackbar.error("无法在无痕浏览模式下操作");
+    return undefined;
+  }
+  if (
+    !uid.value ||
+    !cookie.value ||
+    cookie.value.ltuid !== uid.value ||
+    !cookie.value.ltoken.trim()
+  ) {
+    showSnackbar.error("请先登录");
+    return undefined;
+  }
+  return {
+    uid: uid.value,
+    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    postId: props.modelValue.reply.post_id,
+    replyId: props.modelValue.reply.reply_id,
+    gid: props.modelValue.reply.game_id,
+    contextVersion: actionContextVersion,
+  };
+}
+
+function isWriteSnapshotCurrent(snapshot: WriteSnapshot): boolean {
+  return (
+    mounted &&
+    actionContextVersion === snapshot.contextVersion &&
+    !incognito.value &&
+    uid.value === snapshot.uid &&
+    cookie.value?.ltuid === snapshot.cookie.ltuid &&
+    cookie.value?.ltoken === snapshot.cookie.ltoken &&
+    props.modelValue.reply.post_id === snapshot.postId &&
+    props.modelValue.reply.reply_id === snapshot.replyId &&
+    props.modelValue.reply.game_id === snapshot.gid
+  );
+}
+
+function resetSubState(): void {
+  subLoadGeneration += 1;
+  existingIds.clear();
+  lastId.value = undefined;
+  isLast.value = false;
+  loading.value = false;
+  subReplies.value = [];
+}
+
 onMounted(async () => {
+  mounted = true;
   if (props.mode === "main") {
-    subListener = await listenSub();
-    closeSubListener = await listenCloseSub();
+    const [nextSubListener, nextCloseSubListener] = await Promise.all([
+      listenSub(),
+      listenCloseSub(),
+    ]);
+    if (!mounted) {
+      nextSubListener();
+      nextCloseSubListener();
+      return;
+    }
+    subListener = nextSubListener;
+    closeSubListener = nextCloseSubListener;
   }
 });
 onUnmounted(() => {
+  mounted = false;
+  actionContextVersion += 1;
+  subLoadGeneration += 1;
   if (subListener !== null) {
     subListener();
     subListener = null;
@@ -177,6 +408,31 @@ onUnmounted(() => {
     closeSubListener = null;
   }
 });
+
+watch(
+  [
+    () => props.modelValue,
+    () => props.mode,
+    () => props.postOwnerId,
+    () => (props.mode === "main" ? props.pinId : undefined),
+  ],
+  () => {
+    actionContextVersion += 1;
+    isLiked.value = isReplyLiked(props.modelValue);
+    likeCount.value = props.modelValue.stat.like_num;
+    resetSubState();
+  },
+  { flush: "sync" },
+);
+
+watch(
+  [uid, incognito, () => cookie.value?.ltoken, () => cookie.value?.ltuid],
+  () => {
+    actionContextVersion += 1;
+    resetSubState();
+  },
+  { flush: "sync" },
+);
 
 watch(
   () => showSub.value,
@@ -219,6 +475,7 @@ async function share(): Promise<void> {
 }
 
 async function showReply(): Promise<void> {
+  if (loading.value) return;
   if (subReplies.value.length === 0 && props.modelValue.sub_replies?.length > 0) {
     subReplies.value = [...props.modelValue.sub_replies];
     // Populate existingIds with embedded sub-replies
@@ -236,55 +493,224 @@ async function showReply(): Promise<void> {
 }
 
 async function loadSub(): Promise<void> {
+  if (loading.value || isLast.value) return;
+  const generation = ++subLoadGeneration;
   loading.value = true;
-  let resp: TGApp.BBS.Reply.SubResp | undefined;
   try {
-    resp = await postReq.reply.sub(
+    const resp = await postReq.reply.sub(
       props.modelValue.reply.floor_id,
       props.modelValue.reply.game_id,
       props.modelValue.reply.post_id,
       lastId.value,
+      20,
+      getReadCookie(),
     );
+    if (generation !== subLoadGeneration) return;
     if (resp.retcode !== 0) {
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      loading.value = false;
       return;
     }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
+    isLast.value = resp.data.is_last;
+    lastId.value = resp.data.last_id;
+    const newReplies = resp.data.list.filter((r) => !existingIds.has(r.reply.reply_id));
+    newReplies.forEach((r) => existingIds.add(r.reply.reply_id));
+    subReplies.value = subReplies.value.concat(newReplies);
+    if (isLast.value) showSnackbar.warn("没有更多了");
+  } catch (error) {
+    if (generation !== subLoadGeneration) return;
+    const errMsg = TGHttps.getErrMsg(error);
     showSnackbar.error(`获取子回复失败：${errMsg}`);
-    await TGLogger.Error(`[VpReplyItem] 获取子回复异常`);
-    await TGLogger.Error(`[VpReplyItem] ${e}`);
-    loading.value = false;
-    return;
+    await TGLogger.Error("[VpReplyItem] 获取子回复异常");
+  } finally {
+    if (generation === subLoadGeneration) loading.value = false;
   }
-  isLast.value = resp.data.is_last;
-  lastId.value = resp.data.last_id;
-  const newReplies = resp.data.list.filter((r) => !existingIds.has(r.reply.reply_id));
-  newReplies.forEach((r) => existingIds.add(r.reply.reply_id));
-  subReplies.value = subReplies.value.concat(newReplies);
-  loading.value = false;
-  if (isLast.value) showSnackbar.warn("没有更多了");
+}
+
+function handleReply(): void {
+  if (interactionBusy.value || actionBusy.value !== null) return;
+  emits("reply", props.modelValue);
+}
+
+function handleReplyFromChild(item: TGApp.BBS.Reply.ReplyFull): void {
+  if (interactionBusy.value || actionBusy.value !== null) return;
+  emits("reply", item);
+}
+
+function handleChanged(): void {
+  emits("changed");
+}
+
+async function tryLike(): Promise<void> {
+  if (actionBusy.value !== null || interactionBusy.value) return;
+  await interaction.run(async () => {
+    const snapshot = getWriteSnapshot();
+    if (!snapshot) return;
+    const cancel = isLiked.value;
+    actionBusy.value = "like";
+    try {
+      if (!isWriteSnapshotCurrent(snapshot)) {
+        showSnackbar.warn("账号或回复目标已变化，请重新操作");
+        return;
+      }
+      const execution = await executeReplyForCurrentAccount(snapshot, () =>
+        postReq.reply.like(
+          snapshot.postId,
+          snapshot.replyId,
+          snapshot.cookie,
+          cancel,
+          snapshot.gid,
+        ),
+      );
+      if (!execution.allowed) {
+        showSnackbar.warn("账号状态已变化，请重新打开帖子窗口后再操作");
+        return;
+      }
+      const response = execution.data;
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      if (response.retcode !== 0) {
+        showSnackbar.error(`[${response.retcode}] ${response.message}`);
+        return;
+      }
+      isLiked.value = !cancel;
+      likeCount.value = Math.max(0, likeCount.value + (cancel ? -1 : 1));
+      showSnackbar.success(cancel ? "取消点赞成功" : "点赞成功");
+    } catch (error) {
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      const errMsg = TGHttps.getErrMsg(error);
+      showSnackbar.error(`点赞失败：${errMsg}`);
+      await TGLogger.Error("[VpReplyItem] 点赞请求异常");
+    } finally {
+      if (actionBusy.value === "like") actionBusy.value = null;
+    }
+  });
+}
+
+async function deleteReply(): Promise<void> {
+  if (actionBusy.value !== null || interactionBusy.value || !canDeleteReply.value) return;
+  await interaction.run(async () => {
+    const snapshot = getWriteSnapshot();
+    if (!snapshot) return;
+    actionBusy.value = "delete";
+    try {
+      const confirmed = await showDialog.checkF({
+        title: "删除回复？",
+        text: "删除后将无法恢复这条回复，确认继续吗？",
+        confirmLabel: "删除回复",
+        cancelLabel: "保留回复",
+      });
+      if (confirmed !== true) {
+        showSnackbar.cancel("已取消删除回复");
+        return;
+      }
+      if (!isWriteSnapshotCurrent(snapshot)) {
+        showSnackbar.warn("账号或回复目标已变化，请重新操作");
+        return;
+      }
+      const execution = await executeReplyForCurrentAccount(snapshot, () =>
+        postReq.reply.delete(snapshot.postId, snapshot.replyId, snapshot.cookie, snapshot.gid),
+      );
+      if (!execution.allowed) {
+        showSnackbar.warn("账号状态已变化，请重新打开帖子窗口后再操作");
+        return;
+      }
+      const response = execution.data;
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      if (response.retcode !== 0) {
+        showSnackbar.error(`[${response.retcode}] ${response.message}`);
+        return;
+      }
+      showSnackbar.success("删除回复成功");
+      emits("changed");
+    } catch (error) {
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      const errMsg = TGHttps.getErrMsg(error);
+      showSnackbar.error(`删除回复失败：${errMsg}`);
+      await TGLogger.Error("[VpReplyItem] 删除回复请求异常");
+    } finally {
+      if (actionBusy.value === "delete") actionBusy.value = null;
+    }
+  });
+}
+
+async function togglePin(): Promise<void> {
+  if (actionBusy.value !== null || interactionBusy.value || !canPin.value) return;
+  await interaction.run(async () => {
+    const snapshot = getWriteSnapshot();
+    if (!snapshot) return;
+    const cancel = isPinned.value;
+    const replacingPinned =
+      !cancel &&
+      props.mode === "main" &&
+      props.pinId !== undefined &&
+      props.pinId !== "" &&
+      props.pinId !== "0" &&
+      props.pinId !== snapshot.replyId;
+    actionBusy.value = "pin";
+    try {
+      const confirmed = await showDialog.checkF({
+        title: cancel ? "取消置顶回复？" : "置顶回复？",
+        text: cancel
+          ? "确认取消置顶这条回复吗？"
+          : replacingPinned
+            ? "当前已有置顶回复，确认将其替换为这条回复吗？"
+            : "确认将这条回复置顶吗？",
+        confirmLabel: cancel ? "取消置顶" : replacingPinned ? "替换置顶" : "置顶回复",
+        cancelLabel: "继续查看",
+      });
+      if (confirmed !== true) {
+        showSnackbar.cancel(cancel ? "已保留置顶状态" : "已取消置顶回复");
+        return;
+      }
+      if (!isWriteSnapshotCurrent(snapshot)) {
+        showSnackbar.warn("账号或回复目标已变化，请重新操作");
+        return;
+      }
+      const execution = await executeReplyForCurrentAccount(snapshot, () =>
+        postReq.reply.pin(snapshot.postId, snapshot.replyId, snapshot.cookie, cancel, snapshot.gid),
+      );
+      if (!execution.allowed) {
+        showSnackbar.warn("账号状态已变化，请重新打开帖子窗口后再操作");
+        return;
+      }
+      const response = execution.data;
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      if (response.retcode !== 0) {
+        showSnackbar.error(`[${response.retcode}] ${response.message}`);
+        return;
+      }
+      showSnackbar.success(cancel ? "取消置顶成功" : "置顶回复成功");
+      emits("changed");
+    } catch (error) {
+      if (!isWriteSnapshotCurrent(snapshot)) return;
+      const errMsg = TGHttps.getErrMsg(error);
+      showSnackbar.error(`${cancel ? "取消置顶" : "置顶回复"}失败：${errMsg}`);
+      await TGLogger.Error(`[VpReplyItem] ${cancel ? "取消置顶" : "置顶回复"}请求异常`);
+    } finally {
+      if (actionBusy.value === "pin") actionBusy.value = null;
+    }
+  });
 }
 
 async function exportData(): Promise<void> {
-  const exportCheck = await showDialog.check("导出数据", "是否导出回复数据？");
-  if (!exportCheck) {
-    showSnackbar.cancel("已取消导出该回复数据");
-    return;
-  }
-  const data = JSON.stringify(toRaw(props.modelValue), null, 2);
-  const savePath = await save({
-    title: "导出回复数据",
-    filters: [{ name: "JSON", extensions: ["json"] }],
-    defaultPath: `${await path.downloadDir()}${path.sep()}${replyLabel}.json`,
+  await interaction.run(async () => {
+    const exportCheck = await showDialog.check("导出数据", "是否导出回复数据？");
+    if (!exportCheck) {
+      showSnackbar.cancel("已取消导出该回复数据");
+      return;
+    }
+    const data = JSON.stringify(toRaw(props.modelValue), null, 2);
+    const savePath = await save({
+      title: "导出回复数据",
+      filters: [{ name: "JSON", extensions: ["json"] }],
+      defaultPath: `${await path.downloadDir()}${path.sep()}${replyLabel}.json`,
+    });
+    if (savePath === null) {
+      showSnackbar.cancel("已取消");
+      return;
+    }
+    await writeTextFile(savePath, data);
+    showSnackbar.success("导出成功");
   });
-  if (savePath === null) {
-    showSnackbar.cancel("已取消");
-    return;
-  }
-  await writeTextFile(savePath, data);
-  showSnackbar.success("导出成功");
 }
 
 async function handleUser(): Promise<void> {
@@ -429,7 +855,6 @@ async function handleUser(): Promise<void> {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
-  opacity: 0.5;
 }
 
 .tpri-left {
@@ -438,6 +863,7 @@ async function handleUser(): Promise<void> {
   justify-content: center;
   font-size: 12px;
   gap: 4px;
+  opacity: 0.5;
 }
 
 .tpri-right {
@@ -447,11 +873,41 @@ async function handleUser(): Promise<void> {
   gap: 4px;
 }
 
-.tpr-like {
+.tpr-action,
+.tpr-like,
+.tpr-reply-action {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   gap: 4px;
+}
+
+.tpr-action {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.tpr-action:focus-visible {
+  outline: 2px solid var(--tgc-od-blue);
+  outline-offset: 2px;
+}
+
+.tpr-action:disabled {
+  cursor: wait;
+}
+
+.tpr-like.active {
+  color: var(--tgc-od-blue);
+}
+
+.tpr-action-busy {
+  cursor: wait;
+  opacity: 0.5;
 }
 
 .tpr-reply {
@@ -476,6 +932,18 @@ async function handleUser(): Promise<void> {
   align-items: center;
   justify-content: center;
   color: var(--tgc-od-red);
+
+  &.actionable {
+    cursor: pointer;
+  }
+}
+
+.tpr-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-red);
+  cursor: pointer;
 }
 
 .tpr-debug {
