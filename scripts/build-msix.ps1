@@ -1,6 +1,7 @@
 #Requires -Version 7.0
 
 # 从 Tauri 构建产物生成用于 Microsoft Store 提交的未签名 x64 MSIX。
+# @since Beta v0.12.6
 [CmdletBinding()]
 param(
     [string]$BuildDirectory,
@@ -18,6 +19,20 @@ $tauriConfig = Join-Path $tauriRoot "tauri.conf.json"
 $windowsConfig = Join-Path $tauriRoot "tauri.windows.conf.json"
 $iconsRoot = Join-Path $tauriRoot "icons"
 $stagingRoot = Join-Path $tauriRoot "target\msix"
+<#
+.SYNOPSIS
+    将指定路径解析为有效的绝对路径。
+.PARAMETER Value
+    待解析的路径。
+.PARAMETER Base
+    相对路径使用的基准目录。
+.PARAMETER Label
+    用于错误信息的路径名称。
+.OUTPUTS
+    System.String。解析后的绝对路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Resolve-FullPath {
     param([string]$Value, [string]$Base, [string]$Label)
     if ([string]::IsNullOrWhiteSpace($Value)) { throw "$Label cannot be empty." }
@@ -26,6 +41,20 @@ function Resolve-FullPath {
         return [IO.Path]::GetFullPath((Join-Path $Base $Value))
     } catch { throw "Invalid $Label path '$Value': $($_.Exception.Message)" }
 }
+<#
+.SYNOPSIS
+    解析并校验始终位于基准目录内的相对路径。
+.PARAMETER Base
+    允许包含目标的基准目录。
+.PARAMETER RelativePath
+    不能包含越界片段的相对路径。
+.PARAMETER Label
+    用于错误信息的路径名称。
+.OUTPUTS
+    System.String。经过边界校验的绝对路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Resolve-SafeChildPath {
     param([string]$Base, [string]$RelativePath, [string]$Label)
     if ([string]::IsNullOrWhiteSpace($RelativePath) -or [IO.Path]::IsPathRooted($RelativePath)) { throw "$Label '$RelativePath' must be a non-empty relative path." }
@@ -37,6 +66,18 @@ function Resolve-SafeChildPath {
     if (-not $fullPath.StartsWith($fullBase + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "$Label '$RelativePath' resolves outside '$Base'." }
     $fullPath
 }
+<#
+.SYNOPSIS
+    将版本规范化为满足商店提交规则的四段数字。
+.PARAMETER Requested
+    可省略的目标版本。
+.PARAMETER ConfigPath
+    未指定版本时读取的 Tauri 配置路径。
+.OUTPUTS
+    System.String。第四段为零的规范化版本。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Normalize-Version {
     param([string]$Requested, [string]$ConfigPath)
     if ([string]::IsNullOrWhiteSpace($Requested)) {
@@ -59,6 +100,18 @@ function Normalize-Version {
     if ($parts[3] -ne 0) { throw "MSIX version '$Requested' is invalid for Store submission: the fourth component must be 0." }
     (($parts | ForEach-Object { $_.ToString([Globalization.CultureInfo]::InvariantCulture) }) -join ".")
 }
+<#
+.SYNOPSIS
+    读取并校验 MSIX 清单中的应用信息，可按需更新版本。
+.PARAMETER Path
+    待读取的清单文件路径。
+.PARAMETER SetVersion
+    需要写入的版本，省略时保留原值。
+.OUTPUTS
+    System.Management.Automation.PSCustomObject。可执行文件相对路径与资源语言。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Read-ManifestInfo {
     param([string]$Path, [string]$SetVersion)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "MSIX manifest was not found: $Path" }
@@ -83,6 +136,14 @@ function Read-ManifestInfo {
         Language   = $resource.GetAttribute("Language")
     }
 }
+<#
+.SYNOPSIS
+    移除 MakePri 配置中不适用于当前打包流程的 packaging 节点。
+.PARAMETER Path
+    需要清理的 MakePri 配置文件路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Remove-MakePriPackaging {
     param([string]$Path)
     try {
@@ -96,6 +157,14 @@ function Remove-MakePriPackaging {
         if ($nodes.Count -gt 0) { $document.Save($Path) }
     } catch { throw "Unable to remove MakePri packaging nodes from '$Path': $($_.Exception.Message)" }
 }
+<#
+.SYNOPSIS
+    校验构建产物是否为有效的 x64 PE 可执行文件。
+.PARAMETER Path
+    待校验的可执行文件路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Assert-X64Executable {
     param([string]$Path)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw "Built TeyvatGuide.exe was not found: $Path" }
@@ -119,6 +188,20 @@ function Assert-X64Executable {
         if ($null -ne $reader) { $reader.Dispose() }
     }
 }
+<#
+.SYNOPSIS
+    将图标缩放为指定尺寸的透明 PNG。
+.PARAMETER SourcePath
+    原始图标路径。
+.PARAMETER DestinationPath
+    输出图标路径。
+.PARAMETER Width
+    输出图标的像素宽度。
+.PARAMETER Height
+    输出图标的像素高度。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Write-ResizedPng {
     param([string]$SourcePath, [string]$DestinationPath, [int]$Width, [int]$Height)
 
@@ -138,6 +221,16 @@ function Write-ResizedPng {
         if ($null -ne $graphics) { $graphics.Dispose() }; if ($null -ne $targetBitmap) { $targetBitmap.Dispose() }; if ($null -ne $sourceBitmap) { $sourceBitmap.Dispose() }
     }
 }
+<#
+.SYNOPSIS
+    复制并生成 MSIX 清单所需的应用图标资源。
+.PARAMETER Icons
+    原始图标目录。
+.PARAMETER Destination
+    生成资源的目标目录。
+.NOTES
+    @since Beta v0.12.6
+#>
 function New-Assets {
     param([string]$Icons, [string]$Destination)
 
@@ -191,6 +284,16 @@ function New-Assets {
     }
 }
 
+<#
+.SYNOPSIS
+    查找同时包含 MakeAppx 与 MakePri 的 Windows SDK 工具目录。
+.PARAMETER Requested
+    可选的 x64 SDK 工具目录。
+.OUTPUTS
+    System.Management.Automation.PSCustomObject。MakeAppx 与 MakePri 的绝对路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Find-Sdk {
     param([string]$Requested)
 
@@ -228,6 +331,18 @@ function Find-Sdk {
     throw "Windows SDK directory '$Requested' must contain both makeappx.exe and makepri.exe."
 }
 
+<#
+.SYNOPSIS
+    执行原生打包工具并在退出失败时报告错误。
+.PARAMETER Executable
+    原生工具的可执行文件路径。
+.PARAMETER Arguments
+    传递给原生工具的参数列表。
+.PARAMETER UnicodeOutput
+    是否使用 Unicode 解码工具输出。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Invoke-Native {
     param([string]$Executable, [string[]]$Arguments, [switch]$UnicodeOutput)
 
@@ -256,6 +371,16 @@ function Invoke-Native {
     } finally { $process.Dispose() }
 }
 
+<#
+.SYNOPSIS
+    在确认目录位于生成根目录内后清理临时打包目录。
+.PARAMETER Path
+    需要清理的临时目录。
+.PARAMETER Root
+    允许清理的生成目录根路径。
+.NOTES
+    @since Beta v0.12.6
+#>
 function Remove-StagingDirectory {
     param([string]$Path, [string]$Root)
 

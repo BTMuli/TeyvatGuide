@@ -56,6 +56,10 @@
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed, ref, useId } from "vue";
 
+/**
+ * 材料消耗列表的输入项。
+ * @since Beta v0.12.6
+ */
 type UcMaterialCostListItem = Pick<
   TGApp.App.UserCalc.CraftingCost,
   "id" | "name" | "type" | "star" | "count" | "owned"
@@ -64,10 +68,18 @@ type UcMaterialCostListItem = Pick<
   missing?: number;
 };
 
+/**
+ * 材料消耗列表的渲染项。
+ * @since Beta v0.12.6
+ */
 type UcMaterialCostListDisplayItem = TGApp.App.UserCalc.ResultMaterial & {
   role?: string;
 };
 
+/**
+ * 材料消耗列表组件属性。
+ * @since Beta v0.12.6
+ */
 type UcMaterialCostListProps = {
   title: string;
   items: ReadonlyArray<UcMaterialCostListItem>;

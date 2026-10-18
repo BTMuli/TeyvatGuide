@@ -14,11 +14,19 @@ import UcMaterialCostList from "@comp/userCalc/uc-material-cost-list.vue";
 import { buildConversionDemandMaterials } from "@utils/cultivationPlan.js";
 import { computed } from "vue";
 
+/**
+ * 转换材料需求列表属性。
+ * @since Beta v0.12.6
+ */
 type UcConversionMaterialsProps = {
   options?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   collapsible?: boolean;
 };
 
+/**
+ * 标注转换来源或媒介及缺口的材料消耗。
+ * @since Beta v0.12.6
+ */
 type ConversionDemandCost = TGApp.App.UserCalc.CraftingCost & {
   role: string;
   missing: number;

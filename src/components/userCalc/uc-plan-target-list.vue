@@ -119,6 +119,10 @@ import { computed, nextTick, ref, shallowRef } from "vue";
 import { WikiMaterialData } from "@/data/index.js";
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
+/**
+ * 养成计划目标列表属性。
+ * @since Beta v0.12.6
+ */
 type UcPlanTargetListProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
@@ -129,6 +133,10 @@ type UcPlanTargetListProps = {
   uid: number;
 };
 
+/**
+ * 养成计划目标列表事件。
+ * @since Beta v0.12.6
+ */
 type UcPlanTargetListEmits = {
   add: [];
   edit: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];

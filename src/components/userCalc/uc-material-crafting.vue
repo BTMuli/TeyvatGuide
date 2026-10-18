@@ -92,6 +92,10 @@ import { computed, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
+/**
+ * 材料合成与转换详情属性。
+ * @since Beta v0.12.6
+ */
 type UcMaterialCraftingProps = {
   active?: boolean;
   material: TGApp.App.UserCalc.ResultMaterial;

@@ -45,12 +45,24 @@ import { computed, ref } from "vue";
 
 import TuaRecentItem from "./tua-recent-item.vue";
 
+/**
+ * 最近完成成就菜单属性。
+ * @since Beta v0.12.6
+ */
 type TuaRecentMenuProps = {
   items: ReadonlyArray<TGApp.App.Achievement.RenderItem>;
 };
+/**
+ * 最近完成成就菜单事件。
+ * @since Beta v0.12.6
+ */
 type TuaRecentMenuEmits = {
   select: [achievement: TGApp.App.Achievement.RenderItem];
 };
+/**
+ * 最近完成成就的菜单展示项。
+ * @since Beta v0.12.6
+ */
 type TuaRecentListItem = {
   data: TGApp.App.Achievement.RenderItem;
   completedStageCount: number;

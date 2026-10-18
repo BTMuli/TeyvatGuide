@@ -102,7 +102,7 @@ const bagMaterials = shallowRef<ReadonlyMap<number, TGApp.Sqlite.UserBag.Materia
 const planInventory = computed<ReadonlyMap<number, number>>(() =>
   mergePlanInventory(inventory.value, bagMaterials.value, entries.value),
 );
-const allocation = computed(() =>
+const allocation = computed<TGApp.App.UserCalc.PlanMaterialAllocation>(() =>
   allocatePlanMaterials(
     entries.value,
     planInventory.value,

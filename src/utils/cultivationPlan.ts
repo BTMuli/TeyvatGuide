@@ -4,12 +4,7 @@
  */
 
 import { platform } from "@tauri-apps/plugin-os";
-import type {
-  CraftableMaterial,
-  CraftingCalculator,
-  CultivationMaterial,
-  ExperienceTarget,
-} from "@utils/userCalc.js";
+import type { CraftableMaterial, CultivationMaterial, ExperienceTarget } from "@utils/userCalc.js";
 import userCalc, {
   allocateExperienceRequirements,
   calculateCraftableMaterials,
@@ -22,42 +17,23 @@ const DUST_OF_AZOTH_ID = 104201;
 const DREAM_SOLVENT_ID = 113021;
 const CONVERSION_MEDIA_IDS = new Set([DUST_OF_AZOTH_ID, DREAM_SOLVENT_ID]);
 
-type AutomaticConversionContext = {
-  recommendation: TGApp.App.UserCalc.ConversionRecommendation;
-  inventory: ReadonlyMap<number, number>;
-};
+/**
+ * 自动媒介转换的推荐及库存快照。
+ * @since Beta v0.12.6
+ */
+type AutomaticConversionContext = TGApp.App.UserCalc.AutomaticConversionContext;
 
 /**
  * 养成计划的材料分配结果。
  * @since Beta v0.12.6
  */
-export type PlanMaterialAllocation = {
-  /** 按目标 ID 保存的实际材料分配结果 */
-  entries: Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
-  /** 按目标 ID 保存已采用的明确转换方案 */
-  appliedConversions: Map<string, Array<TGApp.App.UserCalc.AppliedConversion>>;
-  /** 所有活动目标的汇总材料结果 */
-  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
-  /** 分配完成后尚未使用的背包材料 */
-  remainingInventory: Map<number, number>;
-  /** 预留活动目标普通合成来源后的转换预览库存 */
-  conversionInventory: Map<number, number>;
-  /** 当前分配完成后仍可额外考虑的媒介转换 */
-  recommendations: Array<TGApp.App.UserCalc.ConversionRecommendation>;
-  /** 按目标 ID 保存已执行的自动媒介转换上下文 */
-  automaticConversions: Map<string, Array<AutomaticConversionContext>>;
-};
+export type PlanMaterialAllocation = TGApp.App.UserCalc.PlanMaterialAllocation;
 
 /**
  * 媒介转换推荐准备结果。
  * @since Beta v0.12.6
  */
-export type ConversionPreparation = {
-  /** 预留普通合成来源后的库存 */
-  inventory: Map<number, number>;
-  /** 各目标在普通合成后仍缺少的数量 */
-  missing: Map<number, number>;
-};
+export type ConversionPreparation = TGApp.App.UserCalc.ConversionPreparation;
 
 /**
  * 获取养成目标的稳定逻辑键。
@@ -110,6 +86,12 @@ function buildCraftingCosts(
     .sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
+/**
+ * 合并多组材料消耗并按星级与 ID 排序。
+ * @since Beta v0.12.6
+ * @param costLists - 需要合并的材料消耗列表
+ * @returns 合并后的有序材料消耗
+ */
 function mergeCraftingCosts(
   ...costLists: ReadonlyArray<ReadonlyArray<TGApp.App.UserCalc.CraftingCost>>
 ): Array<TGApp.App.UserCalc.CraftingCost> {
@@ -128,13 +110,25 @@ function mergeCraftingCosts(
   return Array.from(costs.values()).sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
+/**
+ * 按材料 ID 索引的只读 Wiki 数据。
+ * @since Beta v0.12.6
+ */
 type MaterialMap = ReadonlyMap<number, TGApp.App.Material.WikiItem>;
 
+/**
+ * 普通合成与完整转换使用的计算器集合。
+ * @since Beta v0.12.6
+ */
 type CraftingCalculators = {
-  ordinary: CraftingCalculator;
-  full: CraftingCalculator;
+  ordinary: TGApp.App.UserCalc.CraftingCalculator;
+  full: TGApp.App.UserCalc.CraftingCalculator;
 };
 
+/**
+ * 单个养成目标的材料分配上下文。
+ * @since Beta v0.12.6
+ */
 type EntryPlan = {
   entry: TGApp.Sqlite.Cultivation.EntryWithItems;
   requirements: Map<number, number>;
@@ -143,12 +137,20 @@ type EntryPlan = {
   explicitMaterialIds: Set<number>;
 };
 
+/**
+ * 自动媒介转换后的材料分配结果。
+ * @since Beta v0.12.6
+ */
 type MediaConversionAllocation = {
   remainingInventory: Map<number, number>;
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
   automaticConversions: Array<AutomaticConversionContext>;
 };
 
+/**
+ * 明确采用转换方案后的材料分配结果。
+ * @since Beta v0.12.6
+ */
 type ExplicitConversionAllocation = {
   remainingInventory: Map<number, number>;
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
@@ -159,6 +161,8 @@ type ExplicitConversionAllocation = {
 /**
  * 复制材料结果及其嵌套消耗，避免编辑上下文共享分配结果。
  * @since Beta v0.12.6
+ * @param result - 需要更新或复制的材料结果
+ * @returns 不共享嵌套合成消耗的材料结果
  */
 function cloneResultMaterial(
   result: TGApp.App.UserCalc.ResultMaterial,
@@ -172,6 +176,8 @@ function cloneResultMaterial(
 /**
  * 复制转换意图及其来源上限。
  * @since Beta v0.12.6
+ * @param intent - 待复制的转换意图
+ * @returns 独立复制的转换意图及来源上限
  */
 function cloneConversionIntent(
   intent: TGApp.App.UserCalc.ConversionIntent,
@@ -186,6 +192,8 @@ function cloneConversionIntent(
 /**
  * 复制转换推荐及其材料上下文。
  * @since Beta v0.12.6
+ * @param recommendation - 待复制的转换推荐
+ * @returns 不共享材料与消耗数组的转换推荐
  */
 function cloneConversionRecommendation(
   recommendation: TGApp.App.UserCalc.ConversionRecommendation,
@@ -200,6 +208,9 @@ function cloneConversionRecommendation(
 /**
  * 从库存中扣除一组实际或假设的合成消耗。
  * @since Beta v0.12.6
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param costs - 材料消耗列表
+ * @returns 扣除消耗且数量不小于零的新库存
  */
 function subtractCraftingCosts(
   inventory: ReadonlyMap<number, number>,
@@ -217,6 +228,8 @@ function subtractCraftingCosts(
 /**
  * 按计划中稳定的目标优先级排序。
  * @since Beta v0.12.6
+ * @param entries - 需要排序的养成目标
+ * @returns 按优先级、创建时间及 ID 排序的目标副本
  */
 function sortCultivationEntries(
   entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
@@ -230,6 +243,8 @@ function sortCultivationEntries(
 /**
  * 复制库存并把异常负值归零，避免中间计算将虚拟预留暴露给调用方。
  * @since Beta v0.12.6
+ * @param inventory - 可用于本轮计算的材料库存
+ * @returns 已将负数量归零的库存副本
  */
 function normalizeInventory(inventory: ReadonlyMap<number, number>): Map<number, number> {
   const normalized = new Map<number, number>();
@@ -240,6 +255,10 @@ function normalizeInventory(inventory: ReadonlyMap<number, number>): Map<number,
 /**
  * 从临时分配前后库存计算真实合成消耗，并应用到实际库存。
  * @since Beta v0.12.6
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param before - 本轮合成前的库存快照
+ * @param after - 本轮合成后的库存快照
+ * @returns 扣除本轮实际合成消耗后的库存副本
  */
 function applyInventoryConsumption(
   inventory: ReadonlyMap<number, number>,
@@ -258,6 +277,9 @@ function applyInventoryConsumption(
 /**
  * 将单个材料数量加到库存映射中。
  * @since Beta v0.12.6
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param id - 材料 ID
+ * @param count - 材料数量
  */
 function addInventoryCount(inventory: Map<number, number>, id: number, count: number): void {
   inventory.set(id, (inventory.get(id) ?? 0) + count);
@@ -266,6 +288,8 @@ function addInventoryCount(inventory: Map<number, number>, id: number, count: nu
 /**
  * 判断配方是否包含嬗变之尘或异梦溶媒。
  * @since Beta v0.12.6
+ * @param recipe - 材料 Wiki 合成配方
+ * @returns 配方是否消耗转换媒介
  */
 function hasConversionMedia(recipe: TGApp.App.Material.Convert): boolean {
   return recipe.source.some((source) => CONVERSION_MEDIA_IDS.has(Number(source.id)));
@@ -273,7 +297,9 @@ function hasConversionMedia(recipe: TGApp.App.Material.Convert): boolean {
 
 /**
  * 判断库存中是否仍有可用于媒介转换的材料。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
+ * @param inventory - 可用于本轮计算的材料库存
+ * @returns 库存中是否存在可用转换媒介
  */
 function hasConversionMediaInventory(inventory: ReadonlyMap<number, number>): boolean {
   return (inventory.get(DUST_OF_AZOTH_ID) ?? 0) > 0 || (inventory.get(DREAM_SOLVENT_ID) ?? 0) > 0;
@@ -282,6 +308,8 @@ function hasConversionMediaInventory(inventory: ReadonlyMap<number, number>): bo
 /**
  * 判断一次递归合成是否实际消耗了转换媒介。
  * @since Beta v0.12.6
+ * @param crafting - 材料的实际合成分配结果
+ * @returns 实际合成消耗是否包含转换媒介
  */
 function usesConversionMedia(crafting: CraftableMaterial): boolean {
   return crafting.consumed.some((source) => CONVERSION_MEDIA_IDS.has(source.id));
@@ -290,6 +318,8 @@ function usesConversionMedia(crafting: CraftableMaterial): boolean {
 /**
  * 构建不含媒介配方的 Wiki 快照，供普通合成阶段使用。
  * @since Beta v0.12.6
+ * @param materials - 材料 Wiki 数据
+ * @returns 仅保留普通合成配方的材料数据
  */
 function buildOrdinaryMaterials(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
@@ -303,6 +333,9 @@ function buildOrdinaryMaterials(
 /**
  * 按单个目标计算稳定的材料需求，不修改目标记录或输入库存。
  * @since Beta v0.12.6
+ * @param entry - 养成目标及其材料需求
+ * @param inventory - 可用于本轮计算的材料库存
+ * @returns 已合并并处理经验材料替代关系的目标需求
  */
 function getEntryRequirements(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
@@ -327,6 +360,10 @@ function getEntryRequirements(
 /**
  * 创建尚未计算合成的材料展示项。
  * @since Beta v0.12.6
+ * @param requirements - 本轮需要满足的材料 ID 与数量
+ * @param directOwned - 已预留给各材料直接需求的数量
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @returns 包含直接持有量及初始缺口的材料结果
  */
 function createEntryResults(
   requirements: ReadonlyMap<number, number>,
@@ -354,6 +391,10 @@ function createEntryResults(
 /**
  * 重新计算材料的缺口和进度，同时保持输入结果不可变。
  * @since Beta v0.12.6
+ * @param result - 需要更新或复制的材料结果
+ * @param craftable - 可通过合成补足的数量
+ * @param craftingCosts - 实际发生的材料合成消耗
+ * @returns 按合成量与消耗更新后的材料结果
  */
 function updateResultMaterial(
   result: TGApp.App.UserCalc.ResultMaterial,
@@ -373,6 +414,11 @@ function updateResultMaterial(
 /**
  * 将一次合成分配应用到目标结果。
  * @since Beta v0.12.6
+ * @param results - 目标材料需求与分配结果
+ * @param allocation - 当前计算器生成的合成分配结果
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @returns 应用本轮合成结果后的材料列表
  */
 function applyCraftingAllocation(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
@@ -397,6 +443,13 @@ function applyCraftingAllocation(
  * 合成计算器需要看到当前目标的直接持有量，因此只把这一目标的直接量作为
  * 虚拟输入加回；全局余量中的其他目标直接量始终不会进入该函数。
  * @since Beta v0.12.6
+ * @param requirements - 本轮需要满足的材料 ID 与数量
+ * @param directOwned - 已预留给各材料直接需求的数量
+ * @param results - 目标材料需求与分配结果
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @param calculator - 本轮复用的材料合成计算器
+ * @returns 普通合成分配后的结果与库存
  */
 function allocateOrdinaryCrafting(
   requirements: ReadonlyMap<number, number>,
@@ -404,7 +457,7 @@ function allocateOrdinaryCrafting(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   inventory: ReadonlyMap<number, number>,
   materialMap: MaterialMap,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
 ): MediaConversionAllocation {
   const calculationInventory = new Map(inventory);
   for (const [id, count] of directOwned) addInventoryCount(calculationInventory, id, count);
@@ -420,12 +473,19 @@ function allocateOrdinaryCrafting(
 /**
  * 按允许的媒介转换配方为当前目标补足材料。
  * @since Beta v0.12.6
+ * @param results - 目标材料需求与分配结果
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @param calculator - 本轮复用的材料合成计算器
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
+ * @returns 自动媒介转换后的材料、库存及推荐上下文
  */
 function allocateMediaConversions(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   inventory: ReadonlyMap<number, number>,
   materialMap: MaterialMap,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
   useDust: boolean,
   useSolvent: boolean,
 ): MediaConversionAllocation {
@@ -484,12 +544,18 @@ function allocateMediaConversions(
 /**
  * 按目标材料顺序应用明确的转换意图，并记录可重新打开编辑器的原始上下文。
  * @since Beta v0.12.6
+ * @param results - 目标材料需求与分配结果
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param materials - 材料 Wiki 数据
+ * @param calculator - 本轮复用的材料合成计算器
+ * @param intents - 待处理的转换意图列表
+ * @returns 已采用方案应用后的材料、库存与转换记录
  */
 function allocateExplicitConversions(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
   intents: ReadonlyArray<TGApp.App.UserCalc.ConversionIntent>,
 ): ExplicitConversionAllocation {
   let remainingInventory = new Map(inventory);
@@ -631,12 +697,17 @@ export function mergeCultivationResults(
 
 /**
  * 使用已构建的普通合成计算器预留转换推荐来源。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
+ * @param results - 目标材料需求与分配结果
+ * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
+ * @param calculator - 本轮复用的材料合成计算器
+ * @param protectedResults - 需优先保护普通合成来源的其他目标结果
+ * @returns 预留普通合成来源后的库存和材料缺口
  */
 function prepareConversionRecommendationsWithCalculator(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   remainingInventory: ReadonlyMap<number, number>,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
   protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
 ): ConversionPreparation {
   const orderedResults = sortCultivationResults(results);
@@ -700,13 +771,18 @@ export function prepareConversionRecommendations(
 
 /**
  * 基于已完成的普通合成预留结果生成媒介转换建议。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
+ * @param results - 目标材料需求与分配结果
+ * @param preparation - 预留普通合成来源后的库存与缺口
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @param calculator - 本轮复用的材料合成计算器
+ * @returns 不占用受保护普通合成来源的转换推荐
  */
 function buildConversionRecommendationsFromPreparation(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   preparation: ConversionPreparation,
   materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
 ): Array<TGApp.App.UserCalc.ConversionRecommendation> {
   const ordinaryMissing = preparation.missing;
   const ordinaryRemaining = preparation.inventory;
@@ -793,6 +869,11 @@ export function getConversionSourceMaterials(
   const candidates = new Map<number, TGApp.App.Material.WikiItem>();
   const visited = new Set<number>();
 
+  /**
+   * 递归收集目标材料可使用的非媒介转换来源。
+   * @since Beta v0.12.6
+   * @param id - 材料 ID
+   */
   const visit = (id: number): void => {
     if (visited.has(id)) return;
     visited.add(id);
@@ -823,7 +904,7 @@ export function getConversionSourceMaterials(
 
 /**
  * 使用既有合成计算上下文计算单个媒介转换推荐的只读预览。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  * @param material - 待补足的材料结果
  * @param inventory - 普通合成来源预留后的可用库存
  * @param materials - 材料 Wiki 数据
@@ -838,12 +919,17 @@ function calculateConversionPreviewWithCalculator(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   sourceLimits: ReadonlyMap<number, number>,
   count: number,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
 ): TGApp.App.UserCalc.ConversionRecommendation {
   const previewMaterial = {
     ...material,
     craftingCosts: material.craftingCosts.map((cost) => ({ ...cost })),
   };
+  /**
+   * 创建未发生转换时的只读推荐结果。
+   * @since Beta v0.12.6
+   * @returns 保留目标材料且转换数量为零的推荐
+   */
   const empty = (): TGApp.App.UserCalc.ConversionRecommendation => ({
     material: previewMaterial,
     count: 0,
@@ -972,7 +1058,7 @@ export function getConversionSourceLimits(
 
 /**
  * 计算完整转换需求；当前可执行消耗优先，不把缺少的材料计入实际供给。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  * @param material - 转换前的目标需求
  * @param inventory - 当前可用余量
  * @param materials - 材料配方数据
@@ -989,7 +1075,7 @@ function calculateConversionPlanWithCalculator(
   sourceLimits: ReadonlyMap<number, number>,
   count: number,
   actual: TGApp.App.UserCalc.ConversionRecommendation,
-  calculator: CraftingCalculator,
+  calculator: TGApp.App.UserCalc.CraftingCalculator,
 ): TGApp.App.UserCalc.ConversionRecommendation {
   const requested = Math.min(Math.max(count, 0), material.missing);
   if (!Number.isSafeInteger(requested) || requested <= actual.count) {
@@ -1186,7 +1272,7 @@ export function getAdditionalCraftingCosts(
  * 获取材料详情中的合成与转换消耗。
  *
  * 只读取当前材料及传入范围内的转换选项，不改变材料结果、库存或转换意图。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  * @param material - 当前展示的材料结果
  * @param options - 当前目标范围内的转换选项
  * @returns 按材料合并并排序的合成与转换消耗
@@ -1228,7 +1314,7 @@ export function getMaterialCraftingCosts(
  *
  * 仅用于详情和统计展示，不会修改原始分配结果或转换选项；已采用的手动方案已经计入
  * `craftable`，不在此重复计算。
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  * @param materials - 原始分配或接口返回的材料结果
  * @param options - 当前展示范围内的转换选项
  * @returns 叠加自动转换可执行数量后的材料结果

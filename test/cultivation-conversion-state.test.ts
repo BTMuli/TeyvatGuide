@@ -15,6 +15,10 @@ import { computed, createSSRApp, nextTick } from "vue";
 
 import useCultivationConversionStore from "@/store/modules/cultivationConversion.js";
 
+/**
+ * 持久化回归测试使用的内存存储。
+ * @since Beta v0.12.6
+ */
 type MemoryStorage = {
   data: Map<string, string>;
   storage: {
@@ -23,6 +27,10 @@ type MemoryStorage = {
   };
 };
 
+/**
+ * 转换意图与库存同步回归测试数据。
+ * @since Beta v0.12.6
+ */
 type ConversionFixture = {
   uid: number;
   projectId: string;
@@ -38,6 +46,11 @@ type ConversionFixture = {
 
 const createdPinia: Array<ReturnType<typeof createPinia>> = [];
 
+/**
+ * 创建与持久化插件兼容的内存存储。
+ * @since Beta v0.12.6
+ * @returns 内存数据及存储读写接口
+ */
 function createMemoryStorage(): MemoryStorage {
   const data = new Map<string, string>();
   return {
@@ -51,6 +64,12 @@ function createMemoryStorage(): MemoryStorage {
   };
 }
 
+/**
+ * 在独立 Pinia 实例中创建转换意图存储。
+ * @since Beta v0.12.6
+ * @param storage - 持久化插件使用的存储接口
+ * @returns 隔离用户持久化状态的转换意图存储
+ */
 function createStore(
   storage: MemoryStorage["storage"],
 ): ReturnType<typeof useCultivationConversionStore> {
@@ -62,6 +81,11 @@ function createStore(
   return useCultivationConversionStore(pinia);
 }
 
+/**
+ * 创建转换意图保存与汇总计算共用的测试数据。
+ * @since Beta v0.12.6
+ * @returns 转换材料、目标、库存及意图测试数据
+ */
 function createFixture(): ConversionFixture {
   const uid = 100000001;
   const projectId = "saved-project";
@@ -137,6 +161,13 @@ function createFixture(): ConversionFixture {
   };
 }
 
+/**
+ * 将预览目标转换为带数据库 ID 的已保存目标。
+ * @since Beta v0.12.6
+ * @param entry - 养成目标及其材料需求
+ * @param projectId - 养成计划 ID
+ * @returns 保留逻辑键且具有数据库 ID 的养成目标
+ */
 function createSavedEntry(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
   projectId: string,

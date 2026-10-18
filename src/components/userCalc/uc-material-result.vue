@@ -126,6 +126,10 @@ import { nextTick, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
+/**
+ * 养成材料计算结果列表属性。
+ * @since Beta v0.12.6
+ */
 type UcMaterialResultProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;

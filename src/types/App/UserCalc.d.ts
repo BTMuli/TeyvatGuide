@@ -194,12 +194,10 @@ declare namespace TGApp.App.UserCalc {
     remainingInventory?: ReadonlyMap<number, number>;
     /**
      * 已计入原始材料结果的自动转换数量
-     * @since Beta v0.12.5
      */
     allocatedCount?: number;
     /**
      * 已计入原始材料结果的自动转换实际消耗
-     * @since Beta v0.12.5
      */
     allocatedCosts?: Array<CraftingCost>;
   };
@@ -219,5 +217,90 @@ declare namespace TGApp.App.UserCalc {
     name: string;
     /** 目标等级 */
     targetLevel: number;
+  };
+
+  /**
+   * 单项养成材料需求。
+   * @since Beta v0.12.6
+   */
+  type CultivationMaterial = {
+    /** 材料 ID */
+    id: number;
+    /** 所需数量 */
+    count: number;
+  };
+
+  /**
+   * 单项材料的可合成结果。
+   * @since Beta v0.12.6
+   */
+  type CraftableMaterial = {
+    /** 可用于补足需求的合成数量 */
+    count: number;
+    /** 合成方案实际消耗的背包材料 */
+    consumed: Array<CultivationMaterial>;
+  };
+
+  /**
+   * 材料合成后的分配结果。
+   * @since Beta v0.12.6
+   */
+  type CraftingAllocation = {
+    /** 各需求材料可通过合成补足的数量及实际消耗 */
+    materials: Map<number, CraftableMaterial>;
+    /** 预留直接需求并扣除合成消耗后的剩余背包材料 */
+    remainingInventory: Map<number, number>;
+  };
+
+  /**
+   * 复用同一组材料 Wiki 数据的合成计算器。
+   * @since Beta v0.12.6
+   */
+  type CraftingCalculator = (
+    requirements: ReadonlyArray<CultivationMaterial>,
+    inventory: ReadonlyMap<number, number>,
+    useDust?: boolean,
+    useSolvent?: boolean,
+  ) => CraftingAllocation;
+
+  /**
+   * 自动媒介转换的推荐及库存快照。
+   * @since Beta v0.12.6
+   */
+  type AutomaticConversionContext = {
+    recommendation: ConversionRecommendation;
+    inventory: ReadonlyMap<number, number>;
+  };
+
+  /**
+   * 养成计划的材料分配结果。
+   * @since Beta v0.12.6
+   */
+  type PlanMaterialAllocation = {
+    /** 按目标 ID 保存的实际材料分配结果 */
+    entries: Map<string, Array<ResultMaterial>>;
+    /** 按目标 ID 保存已采用的明确转换方案 */
+    appliedConversions: Map<string, Array<AppliedConversion>>;
+    /** 所有活动目标的汇总材料结果 */
+    materials: Array<ResultMaterial>;
+    /** 分配完成后尚未使用的背包材料 */
+    remainingInventory: Map<number, number>;
+    /** 预留活动目标普通合成来源后的转换预览库存 */
+    conversionInventory: Map<number, number>;
+    /** 当前分配完成后仍可额外考虑的媒介转换 */
+    recommendations: Array<ConversionRecommendation>;
+    /** 按目标 ID 保存已执行的自动媒介转换上下文 */
+    automaticConversions: Map<string, Array<AutomaticConversionContext>>;
+  };
+
+  /**
+   * 媒介转换推荐的普通合成预留结果。
+   * @since Beta v0.12.6
+   */
+  type ConversionPreparation = {
+    /** 预留普通合成来源后的库存 */
+    inventory: Map<number, number>;
+    /** 各目标在普通合成后仍缺少的数量 */
+    missing: Map<number, number>;
   };
 }

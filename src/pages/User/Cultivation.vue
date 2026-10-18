@@ -826,7 +826,7 @@ const calculatorOtherEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWith
     (entry) => entry.id !== editingEntry.value?.id && !previewIds.has(entry.id),
   );
 });
-const calculatorAllocation = computed(() => {
+const calculatorAllocation = computed<TGApp.App.UserCalc.PlanMaterialAllocation>(() => {
   return allocatePlanMaterials(
     [...calculatorOtherEntries.value, ...calculatorEntries.value],
     calculatorInventory.value,
@@ -854,7 +854,7 @@ const conversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>((
 const planInventory = computed<Map<number, number>>(() =>
   mergePlanInventory(bagMaterials.value, bagMaterialDetails.value, planEntries.value),
 );
-const planAllocation = computed(() =>
+const planAllocation = computed<TGApp.App.UserCalc.PlanMaterialAllocation>(() =>
   allocatePlanMaterials(
     planEntries.value,
     planInventory.value,

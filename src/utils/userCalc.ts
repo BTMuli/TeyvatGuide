@@ -4,13 +4,11 @@
  * @since Beta v0.12.6
  */
 
-/** 单项养成材料需求 */
-export type CultivationMaterial = {
-  /** 材料 ID */
-  id: number;
-  /** 所需数量 */
-  count: number;
-};
+/**
+ * 单项养成材料需求。
+ * @since Beta v0.12.6
+ */
+export type CultivationMaterial = TGApp.App.UserCalc.CultivationMaterial;
 
 /**
  * 用于按突破区间分配经验材料的等级目标。
@@ -25,36 +23,15 @@ export type ExperienceTarget = {
 
 /**
  * 单项材料的可合成结果
- * @since Beta v0.11.2
+ * @since Beta v0.12.6
  */
-export type CraftableMaterial = {
-  /** 可用于补足需求的合成数量 */
-  count: number;
-  /** 合成方案实际消耗的背包材料 */
-  consumed: Array<CultivationMaterial>;
-};
+export type CraftableMaterial = TGApp.App.UserCalc.CraftableMaterial;
 
 /**
  * 材料合成后的分配结果
- * @since Beta v0.11.4
+ * @since Beta v0.12.6
  */
-export type CraftingAllocation = {
-  /** 各需求材料可通过合成补足的数量及实际消耗 */
-  materials: Map<number, CraftableMaterial>;
-  /** 预留直接需求并扣除合成消耗后的剩余背包材料 */
-  remainingInventory: Map<number, number>;
-};
-
-/**
- * 使用同一组材料 Wiki 数据执行多次合成分配的计算器。
- * @since Beta v0.12.5
- */
-export type CraftingCalculator = (
-  requirements: ReadonlyArray<CultivationMaterial>,
-  inventory: ReadonlyMap<number, number>,
-  useDust?: boolean,
-  useSolvent?: boolean,
-) => CraftingAllocation;
+export type CraftingAllocation = TGApp.App.UserCalc.CraftingAllocation;
 
 /**
  * 战绩技能与本地 Wiki 技能的对应关系。
@@ -78,24 +55,38 @@ export type NamedTalentLevel = {
 /** 材料 ID 偏移量与需求数量 */
 type OffsetCount = readonly [offset: number, count: number];
 
-/** 预解析的合成来源 */
+/**
+ * 预解析的合成来源
+ * @since Beta v0.12.6
+ */
 type PreparedCraftingSource = {
   id: number;
   count: number;
 };
 
+/**
+ * 已解析来源与媒介开关的合成配方。
+ * @since Beta v0.12.6
+ */
 type PreparedCraftingRecipe = {
   source: ReadonlyArray<PreparedCraftingSource>;
   hasDust: boolean;
   hasSolvent: boolean;
 };
 
+/**
+ * 包含预解析配方的材料合成索引项。
+ * @since Beta v0.12.6
+ */
 type PreparedCraftingMaterial = {
   star: number;
   recipes: ReadonlyArray<PreparedCraftingRecipe>;
 };
 
-/** 材料合成计算上下文 */
+/**
+ * 材料合成计算上下文
+ * @since Beta v0.12.6
+ */
 type CraftingContext = {
   /** 可用于合成的剩余背包材料 */
   inventory: Map<number, number>;
@@ -107,11 +98,19 @@ type CraftingContext = {
   useSolvent: boolean;
 };
 
+/**
+ * 用于合成回滚的单项库存变更记录。
+ * @since Beta v0.12.6
+ */
 type CraftingInventoryChange = {
   id: number;
   previous: number | undefined;
 };
 
+/**
+ * 一次合成尝试的库存变更日志。
+ * @since Beta v0.12.6
+ */
 type CraftingTransaction = Array<CraftingInventoryChange>;
 
 const MORA_ID = 202;
@@ -888,6 +887,12 @@ export function mergeCultivationMaterials(
   return toList(items);
 }
 
+/**
+ * 构建材料合成索引并预解析配方与媒介标记。
+ * @since Beta v0.12.6
+ * @param materials - 材料 Wiki 数据
+ * @returns 按材料 ID 索引的预解析配方
+ */
 function prepareCraftingMaterials(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
 ): ReadonlyMap<number, PreparedCraftingMaterial> {
@@ -909,6 +914,14 @@ function prepareCraftingMaterials(
   );
 }
 
+/**
+ * 判断材料是否存在当前媒介开关允许的有效配方。
+ * @since Beta v0.12.6
+ * @param material - 待检查的预解析材料索引项
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
+ * @returns 是否存在当前设置允许使用的非空配方
+ */
 function hasUsableCraftingRecipe(
   material: PreparedCraftingMaterial | undefined,
   useDust: boolean,
@@ -932,6 +945,8 @@ function hasUsableCraftingRecipe(
  * @param context - 当前合成上下文
  * @param visiting - 当前递归链上的材料 ID
  * @param transaction - 当前合成尝试的库存变更日志
+ * @since Beta v0.12.6
+ * @returns 成功时返回更新后的上下文，失败时回滚并返回 undefined
  */
 function consumeCraftingMaterial(
   id: number,
@@ -957,6 +972,13 @@ function consumeCraftingMaterial(
   return context;
 }
 
+/**
+ * 将合成库存恢复到指定事务检查点。
+ * @since Beta v0.12.6
+ * @param context - 当前材料合成上下文
+ * @param transaction - 本次合成的库存变更日志
+ * @param checkpoint - 需要恢复的事务日志位置
+ */
 function rollbackCraftingTransaction(
   context: CraftingContext,
   transaction: CraftingTransaction,
@@ -976,6 +998,11 @@ function rollbackCraftingTransaction(
 /**
  * 尝试使用任意一条 Wiki 配方合成一个指定材料。
  * @since Beta v0.12.6
+ * @param id - 材料 ID
+ * @param context - 当前材料合成上下文
+ * @param visiting - 当前递归链中的材料 ID
+ * @param transaction - 本次合成的库存变更日志
+ * @returns 成功时返回更新后的上下文，无可用配方时为 undefined
  */
 function tryCraftMaterial(
   id: number,
@@ -1038,12 +1065,22 @@ function tryCraftMaterial(
   }
 }
 
+/**
+ * 使用延迟获取的材料索引计算合成分配。
+ * @since Beta v0.12.6
+ * @param requirements - 本轮需要满足的材料 ID 与数量
+ * @param inventory - 可用于本轮计算的材料库存
+ * @param getMaterials - 按需提供本轮预解析材料索引的函数
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
+ * @returns 合成补足结果及扣除直接需求和合成消耗后的库存
+ */
 function calculateCraftingAllocationWithMaterials(
   requirements: ReadonlyArray<CultivationMaterial>,
   inventory: ReadonlyMap<number, number>,
   getMaterials: () => ReadonlyMap<number, PreparedCraftingMaterial>,
-  useDust = false,
-  useSolvent = false,
+  useDust: boolean = false,
+  useSolvent: boolean = false,
 ): CraftingAllocation {
   const requiredCounts = new Map<number, number>();
   for (const requirement of requirements) add(requiredCounts, requirement.id, requirement.count);
@@ -1111,12 +1148,17 @@ function calculateCraftingAllocationWithMaterials(
  * 计算器不共享调用之间的背包状态；每次计算都会独立复制背包并创建事务日志。
  * @param materials - 材料 Wiki 数据
  * @returns 使用同一组材料数据执行合成分配的计算器
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  */
 export function createCraftingCalculator(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-): CraftingCalculator {
+): TGApp.App.UserCalc.CraftingCalculator {
   let preparedMaterials: ReadonlyMap<number, PreparedCraftingMaterial> | undefined;
+  /**
+   * 按需创建并复用本轮材料的预解析索引。
+   * @since Beta v0.12.6
+   * @returns 本轮复用的预解析材料索引
+   */
   const getMaterials = (): ReadonlyMap<number, PreparedCraftingMaterial> => {
     if (!preparedMaterials) preparedMaterials = prepareCraftingMaterials(materials);
     return preparedMaterials;
@@ -1142,14 +1184,14 @@ export function createCraftingCalculator(
  * @param useDust - 是否允许使用含嬗变之尘的配方
  * @param useSolvent - 是否允许使用含异梦溶媒的配方
  * @returns 各需求材料的合成结果及扣除预留和合成消耗后的库存
- * @since Beta v0.11.4
+ * @since Beta v0.12.6
  */
 export function calculateCraftingAllocation(
   requirements: ReadonlyArray<CultivationMaterial>,
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-  useDust = false,
-  useSolvent = false,
+  useDust: boolean = false,
+  useSolvent: boolean = false,
 ): CraftingAllocation {
   return createCraftingCalculator(materials)(requirements, inventory, useDust, useSolvent);
 }

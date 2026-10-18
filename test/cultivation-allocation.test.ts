@@ -23,9 +23,17 @@ import { describe, expect, it } from "vitest";
 
 import { WikiMaterialData } from "@/data/index.js";
 
+/**
+ * 创建指定星级与配方的材料 Wiki 测试数据。
+ * @since Beta v0.12.6
+ * @param id - 材料 ID
+ * @param star - 材料星级
+ * @param convert - 材料可用的合成配方
+ * @returns 材料 Wiki 测试数据
+ */
 function makeMaterial(
   id: number,
-  star = 3,
+  star: number = 3,
   convert: Array<TGApp.App.Material.Convert> = [],
 ): TGApp.App.Material.WikiItem {
   return {
@@ -40,6 +48,13 @@ function makeMaterial(
   };
 }
 
+/**
+ * 创建指定来源材料与数量的合成配方。
+ * @since Beta v0.12.6
+ * @param id - 合成配方 ID
+ * @param sources - 来源材料 ID 与需求数量
+ * @returns 包含来源材料数量的合成配方
+ */
 function makeRecipe(id: string, sources: Array<[number, number]>): TGApp.App.Material.Convert {
   return {
     id,
@@ -53,6 +68,16 @@ function makeRecipe(id: string, sources: Array<[number, number]>): TGApp.App.Mat
   };
 }
 
+/**
+ * 创建包含单项材料需求的养成目标测试数据。
+ * @since Beta v0.12.6
+ * @param id - 养成目标 ID
+ * @param materialId - 目标材料 ID
+ * @param sortOrder - 目标分配优先级
+ * @param options - 合成与媒介转换设置
+ * @param status - 养成目标状态
+ * @returns 带材料需求与指定状态的养成目标
+ */
 function makeEntry(
   id: string,
   materialId: number,
@@ -93,11 +118,20 @@ function makeEntry(
   };
 }
 
+/**
+ * 创建包含持有量、合成量与缺口的材料结果。
+ * @since Beta v0.12.6
+ * @param id - 材料 ID
+ * @param required - 材料需求数量
+ * @param owned - 背包持有数量
+ * @param craftable - 可通过合成补足的数量
+ * @returns 已计算缺口与完成进度的材料结果
+ */
 function makeResult(
   id: number,
   required: number,
-  owned = 0,
-  craftable = 0,
+  owned: number = 0,
+  craftable: number = 0,
 ): TGApp.App.UserCalc.ResultMaterial {
   return {
     id,
@@ -113,11 +147,32 @@ function makeResult(
   };
 }
 
+/**
+ * 读取指定材料在消耗列表中的数量。
+ * @since Beta v0.12.6
+ * @param costs - 材料消耗列表
+ * @param id - 材料 ID
+ * @returns 指定材料的消耗数量，不存在时为零
+ */
 function countCost(costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>, id: number): number {
   return costs.find((cost) => cost.id === id)?.count ?? 0;
 }
 
-function makeCost(id: number, count: number, owned = 0, star = 3): TGApp.App.UserCalc.CraftingCost {
+/**
+ * 创建材料消耗展示项测试数据。
+ * @since Beta v0.12.6
+ * @param id - 材料 ID
+ * @param count - 材料数量
+ * @param owned - 背包持有数量
+ * @param star - 材料星级
+ * @returns 材料消耗展示项
+ */
+function makeCost(
+  id: number,
+  count: number,
+  owned: number = 0,
+  star: number = 3,
+): TGApp.App.UserCalc.CraftingCost {
   return {
     id,
     name: `材料 ${id}`,
@@ -128,6 +183,14 @@ function makeCost(id: number, count: number, owned = 0, star = 3): TGApp.App.Use
   };
 }
 
+/**
+ * 创建可覆盖意图与消耗的材料转换选项。
+ * @since Beta v0.12.6
+ * @param material - 待转换的材料需求结果
+ * @param costs - 材料消耗列表
+ * @param values - 需要覆盖的转换选项字段
+ * @returns 独立复制材料和消耗后的转换选项
+ */
 function makeConversionOption(
   material: TGApp.App.UserCalc.ResultMaterial,
   costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>,

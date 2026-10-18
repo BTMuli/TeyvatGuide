@@ -46,12 +46,20 @@ import { UiafAchiStatEnum } from "@enum/uiaf.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { computed } from "vue";
 
+/**
+ * 最近完成成就条目属性。
+ * @since Beta v0.12.6
+ */
 type TuaRecentItemProps = {
   completedStageCount: number;
   data: TGApp.App.Achievement.RenderItem;
   stageIndex: number;
   stageCount: number;
 };
+/**
+ * 最近完成成就条目事件。
+ * @since Beta v0.12.6
+ */
 type TuaRecentItemEmits = {
   selectAchi: [data: TGApp.App.Achievement.RenderItem];
 };

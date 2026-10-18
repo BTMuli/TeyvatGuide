@@ -243,6 +243,10 @@ const DUST_OF_AZOTH_ID = 104201;
 const DREAM_SOLVENT_ID = 113021;
 const CONVERSION_MEDIA_IDS = new Set([DUST_OF_AZOTH_ID, DREAM_SOLVENT_ID]);
 
+/**
+ * 材料转换方案编辑器属性。
+ * @since Beta v0.12.6
+ */
 type UcConversionEditorProps = {
   recommendation: TGApp.App.UserCalc.ConversionRecommendation;
   inventory: ReadonlyMap<number, number>;

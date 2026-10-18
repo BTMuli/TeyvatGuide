@@ -392,7 +392,7 @@ const calculatorEntry = computed<TGApp.Sqlite.Cultivation.EntryWithItems | undef
 const calculatorOtherEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   planEntries.value.filter((entry) => entry.id !== planEntry.value?.id),
 );
-const calculatorAllocation = computed(() => {
+const calculatorAllocation = computed<TGApp.App.UserCalc.PlanMaterialAllocation>(() => {
   const inventory = mergePlanInventory(
     bagMaterials.value,
     bagMaterialDetails.value,

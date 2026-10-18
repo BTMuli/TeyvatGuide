@@ -78,6 +78,10 @@ import TuaAchi from "./tua-achi.vue";
 
 import { AppNameCardsData } from "@/data/index.js";
 
+/**
+ * 成就列表组件属性。
+ * @since Beta v0.12.6
+ */
 type TuaAchiListProps = {
   uid: number;
   hideFin: boolean;

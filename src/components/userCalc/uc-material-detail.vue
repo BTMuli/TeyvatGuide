@@ -102,6 +102,10 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, ref, useTemplateRef } from "vue";
 
+/**
+ * 养成材料详情面板属性。
+ * @since Beta v0.12.6
+ */
 type UcMaterialDetailProps = {
   bag?: TGApp.Sqlite.UserBag.MaterialTable;
   conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;

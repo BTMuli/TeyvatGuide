@@ -1,4 +1,5 @@
 //! 游逸旅闻外部 WebView 窗口。
+//! @since Beta v0.12.6
 
 use crate::commands::with_window_label_lock;
 use tauri::{AppHandle, Manager, WebviewWindowBuilder, webview::NewWindowResponse};
@@ -8,6 +9,15 @@ use url::Url;
 const TRAVELERS_TALES_LABEL: &str = "travelers_tales";
 const TRAVELERS_TALES_URL: &str = "https://www.bilibili.com/toy/genshin-travelers-tales";
 
+/// 判断导航目标是否属于允许的 HTTPS 哔哩哔哩域名。
+///
+/// @since Beta v0.12.6
+///
+/// # 参数
+/// - `url`: 待检查的导航目标。
+///
+/// # 返回值
+/// 是否允许导航到该地址。
 fn is_allowed_bilibili_url(url: &Url) -> bool {
   // WKWebView also invokes this callback for subframe navigation, so allow the canonical Toy iframe host.
   url.scheme() == "https"
@@ -18,7 +28,13 @@ fn is_allowed_bilibili_url(url: &Url) -> bool {
 
 /// 创建或复用游逸旅闻 WebView 窗口。
 ///
-/// @since Beta v0.12.5
+/// @since Beta v0.12.6
+///
+/// # 参数
+/// - `handle`: 用于查找与创建 WebView 窗口的应用句柄。
+///
+/// # 返回值
+/// 窗口显示成功时返回空结果，失败时返回错误信息。
 #[tauri::command]
 pub async fn create_travelers_tales(handle: AppHandle) -> Result<(), String> {
   let target_url: Url =
@@ -54,6 +70,8 @@ mod tests {
   use super::is_allowed_bilibili_url;
   use url::Url;
 
+  /// 验证允许的 HTTPS 哔哩哔哩及嵌套页面域名。
+  /// @since Beta v0.12.6
   #[test]
   fn allows_https_bilibili_hosts() {
     for url in [
@@ -66,6 +84,8 @@ mod tests {
     }
   }
 
+  /// 验证非受信任域名与非 HTTPS 地址被拒绝。
+  /// @since Beta v0.12.6
   #[test]
   fn rejects_non_bilibili_or_non_https_urls() {
     for url in [

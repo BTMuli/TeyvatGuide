@@ -107,7 +107,15 @@ import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import fmtUtil from "@utils/fmtUtil.js";
 import { computed, ref, shallowRef, watch } from "vue";
 
+/**
+ * 转换方案的材料消耗展示项。
+ * @since Beta v0.12.6
+ */
 type ConversionCost = TGApp.App.UserCalc.CraftingCost;
+/**
+ * 材料转换方案推荐列表属性。
+ * @since Beta v0.12.6
+ */
 type UcConversionRecommendationsProps = {
   options?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
   topOffset?: string;

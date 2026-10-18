@@ -12,6 +12,10 @@ import UcCraftingCostList from "@comp/userCalc/uc-crafting-cost-list.vue";
 import { getAdditionalCraftingCosts } from "@utils/cultivationPlan.js";
 import { computed } from "vue";
 
+/**
+ * 养成材料合成消耗汇总属性。
+ * @since Beta v0.12.6
+ */
 type UcCraftingSummaryProps = {
   materials: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>;
   conversionOptions?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;

@@ -211,6 +211,10 @@ import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue"
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
 
+/**
+ * 单个养成目标汇总浮窗属性。
+ * @since Beta v0.12.6
+ */
 type UcPlanTargetSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   entry: TGApp.Sqlite.Cultivation.EntryWithItems;
@@ -220,6 +224,10 @@ type UcPlanTargetSummaryOverlayProps = {
   uid: number;
 };
 
+/**
+ * 单个养成目标汇总浮窗事件。
+ * @since Beta v0.12.6
+ */
 type UcPlanTargetSummaryOverlayEmits = {
   select: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   applyConversion: [entryKey: string, intent: TGApp.App.UserCalc.ConversionIntent];

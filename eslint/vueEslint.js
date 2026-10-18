@@ -1,6 +1,6 @@
 /**
  * Vue & Typescript 文件的 Eslint 配置
- * @since Beta v0.11.3
+ * @since Beta v0.12.6
  */
 import pluginImportX from "eslint-plugin-import-x";
 import pluginPrettier from "eslint-plugin-prettier";
