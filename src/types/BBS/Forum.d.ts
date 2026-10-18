@@ -1,6 +1,6 @@
 /**
  * 米社版块类型
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.BBS.Forum {
@@ -60,7 +60,7 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * 版块信息
-   * @since Beta v0.6.8
+   * @since Beta v0.12.6
    */
   type GameForumItem = {
     /** 版块 ID */
@@ -77,6 +77,8 @@ declare namespace TGApp.BBS.Forum {
     visible: number;
     /** 创建类型 */
     create_type: number;
+    /** 版块支持的帖子类型，旧缓存可能缺失 */
+    view_type?: number;
     /** 发帖限制 */
     post_limit: number;
     /** 最大置顶数 */

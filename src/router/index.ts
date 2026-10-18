@@ -1,6 +1,6 @@
 /**
  * 路由入口
- * @since Beta v0.11.0
+ * @since Beta v0.12.6
  */
 
 import { createRouter, createWebHistory } from "vue-router";
@@ -12,6 +12,7 @@ const router = createRouter({ history: createWebHistory(), routes: routes });
 const ignoreRoutes: ReadonlyArray<string> = [
   "酒馆",
   "话题",
+  "编辑帖子",
   "实用脚本",
   "角色图鉴",
   "武器图鉴",

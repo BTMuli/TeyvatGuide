@@ -5,6 +5,7 @@
   <VpBtnCollect :data="postData" :model-value="postId" />
   <TShareBtn :scale="postViewWide ? 1.5 : 2" :title="shareTitle" selector=".tp-post-body" />
   <VpBtnReply v-if="postData" :gid="postData.post.game_id" :post-id="postData.post.post_id" />
+  <VpPostActions v-if="postData" :source="postData" @deleted="handlePostDeleted" />
   <div v-if="postData" class="tp-post-body">
     <div class="tp-post-info">
       <div class="tp-post-version" @click="openJson()">
@@ -152,6 +153,10 @@
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
+  <div v-else-if="postDeleted" class="tp-post-deleted">
+    <v-icon size="28">mdi-delete-outline</v-icon>
+    <span>帖子已删除</span>
+  </div>
   <VpOverlayCollection
     v-if="postData?.collection && postData"
     v-model="showCollection"
@@ -176,6 +181,7 @@ import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import VpPostActions from "@comp/viewPost/vp-post-actions.vue";
 import bbsEnum from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
 import postReq from "@req/postReq.js";
@@ -206,6 +212,7 @@ const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.BBS.Post.FullData>();
+const postDeleted = ref<boolean>(false);
 const viewWidth = computed<string>(() => (postViewWide.value ? "800px" : "400px"));
 const shareTitle = computed<string>(() =>
   postViewWide.value ? `Post_${postId}` : `Post_Thin_${postId}`,
@@ -295,6 +302,15 @@ onUnmounted(() => {
     userListener = null;
   }
 });
+
+function handlePostDeleted(): void {
+  postData.value = undefined;
+  renderPost.value = [];
+  postDeleted.value = true;
+  showCollection.value = false;
+  showUser.value = false;
+  showSnackbar.success("帖子已删除");
+}
 
 async function openJson(): Promise<void> {
   // @ts-expect-error import.meta
@@ -521,6 +537,20 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   margin: 0 auto;
   font-family: var(--font-text);
   transition: width 0.3s ease-in-out;
+}
+
+.tp-post-deleted {
+  display: flex;
+  width: min(800px, calc(100% - 100px));
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  margin: 48px auto;
+  color: var(--box-text-3);
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: normal;
+  gap: 8px;
 }
 
 .tp-post-title {
