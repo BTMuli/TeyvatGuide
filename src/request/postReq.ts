@@ -3,6 +3,11 @@
  * @since Beta v0.12.6
  */
 import bbsEnum from "@enum/bbs.js";
+import {
+  getReplyContentFromSendNodes,
+  serializeReplySendNodes,
+  validateReplySendNodes,
+} from "@utils/bbsReplyDocument.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttps from "@utils/TGHttps.js";
 
@@ -226,15 +231,27 @@ async function createReply(
 ): Promise<TGApp.BBS.Reply.MutationResp> {
   assertPositiveId(input.postId, "帖子 ID");
   assertPositiveNumber(input.gid, "社区 ID");
-  assertReplyContent(input.content);
   if (input.replyId !== undefined) assertPositiveId(input.replyId, "回复 ID");
+
+  let content = input.content;
+  let structuredContent: string;
+  if (input.structuredContent === undefined) {
+    assertReplyContent(input.content);
+    structuredContent = JSON.stringify([{ insert: `${input.content}\n` }]);
+  } else {
+    const nodes = validateReplySendNodes(input.structuredContent);
+    const generatedContent = getReplyContentFromSendNodes(nodes);
+    if (input.content !== generatedContent) throw new TypeError("回复内容与结构化内容不一致");
+    content = generatedContent;
+    structuredContent = serializeReplySendNodes(nodes);
+  }
 
   const body: Record<string, string> = {
     post_id: input.postId,
     // 沿用米游社网页请求层自动注入的字符串 gids。
     gids: String(input.gid),
-    content: input.content,
-    structured_content: JSON.stringify([{ insert: `${input.content}\n` }]),
+    content,
+    structured_content: structuredContent,
   };
   if (input.replyId !== undefined) body.reply_id = input.replyId;
   const resp = await TGHttps.post<TGApp.BBS.Reply.MutationResp>(`${bapBu}releaseReply`, {

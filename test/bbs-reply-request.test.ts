@@ -184,6 +184,85 @@ describe("postReq.reply mutation requests", () => {
     }
   });
 
+  it("sends validated structured reply content and derives its text", async () => {
+    const structuredContent: Array<TGApp.BBS.Reply.SendNode> = [
+      { insert: "hello " },
+      { insert: { mention: { uid: 100000001, nickname: "旅行者" } } },
+      { insert: "\n" },
+      {
+        insert: { image: "https://example.com/image.png" },
+        attributes: { width: 640, height: 480 },
+      },
+      { insert: "\n" },
+    ];
+
+    await postReq.reply.create(
+      { postId: "123", gid: 2, content: "hello @旅行者", structuredContent },
+      cookie,
+    );
+
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/releaseReply",
+      expect.objectContaining({
+        body: {
+          post_id: "123",
+          gids: "2",
+          content: "hello @旅行者",
+          structured_content: JSON.stringify(structuredContent),
+        },
+      }),
+    );
+  });
+
+  it("rejects mismatched structured text and malformed nodes before HTTP", async () => {
+    const structuredContent: Array<TGApp.BBS.Reply.SendNode> = [{ insert: "hello\n" }];
+
+    await expect(
+      postReq.reply.create(
+        { postId: "123", gid: 2, content: "different", structuredContent },
+        cookie,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      postReq.reply.create(
+        {
+          postId: "123",
+          gid: 2,
+          content: "",
+          structuredContent: <Array<TGApp.BBS.Reply.SendNode>>(
+            (<unknown>[{ insert: { custom_emoticon: "smile" } }])
+          ),
+        },
+        cookie,
+      ),
+    ).rejects.toThrow();
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("allows a pure image structured document with empty text", async () => {
+    const structuredContent: Array<TGApp.BBS.Reply.SendNode> = [
+      {
+        insert: { image: "https://example.com/image.png" },
+        attributes: { width: 640, height: 480 },
+      },
+      { insert: "\n" },
+    ];
+
+    await postReq.reply.create({ postId: "123", gid: 2, content: "", structuredContent }, cookie);
+
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        body: {
+          post_id: "123",
+          gids: "2",
+          content: "",
+          structured_content: JSON.stringify(structuredContent),
+        },
+      }),
+    );
+  });
+
   it.each(<const>["like", "pin"])("sends the cancellation flag for %s", async (action) => {
     await postReq.reply[action]("123", "456", cookie, true);
     expect(mocks.post).toHaveBeenLastCalledWith(

@@ -84,8 +84,64 @@ declare namespace TGApp.BBS.Reply {
     gid: number;
     /** 回复内容 */
     content: string;
+    /** 回复结构化内容 */
+    structuredContent?: Array<SendNode>;
     /** 被回复的回复 ID */
     replyId?: string;
+  };
+
+  /**
+   * 回复结构化内容中的节点
+   * @since Beta v0.12.6
+   */
+  type SendNode =
+    | {
+        /** 文本内容 */
+        insert: string;
+      }
+    | {
+        /** 提及内容 */
+        insert: {
+          mention: DocumentMention;
+        };
+      }
+    | {
+        /** 图片内容 */
+        insert: {
+          image: string;
+        };
+        /** 图片尺寸 */
+        attributes: {
+          /** 图片宽度 */
+          width: number;
+          /** 图片高度 */
+          height: number;
+        };
+      };
+
+  /**
+   * 回复文档中的提及用户
+   * @since Beta v0.12.6
+   */
+  type DocumentMention = TGApp.BBS.ReplyAsset.Mention;
+
+  /**
+   * 回复文档中的图片
+   * @since Beta v0.12.6
+   */
+  type DocumentImage = TGApp.BBS.ReplyAsset.UploadedImage;
+
+  /**
+   * 回复编辑器生成的文档
+   * @since Beta v0.12.6
+   */
+  type Document = {
+    /** 纯文本内容，图片不包含在其中 */
+    content: string;
+    /** 米游社回复结构化内容 */
+    structuredContent: Array<SendNode>;
+    /** 用于发布确认的预览文本 */
+    preview: string;
   };
 
   /**
