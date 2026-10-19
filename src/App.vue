@@ -49,8 +49,9 @@ import { listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGLogger from "@utils/TGLogger.js";
 import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useTheme } from "vuetify";
 
 const router = useRouter();
 const appStore = useAppStore();
@@ -72,6 +73,15 @@ const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
 const isMain = ref<boolean>(false);
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
+const vuetifyThemeApi = useTheme();
+
+watch(
+  vuetifyTheme,
+  (value) => {
+    vuetifyThemeApi.global.name.value = value;
+  },
+  { immediate: true },
+);
 
 let themeListener: UnlistenFn | null = null;
 let dpListener: UnlistenFn | null = null;
