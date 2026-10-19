@@ -81,6 +81,18 @@ const source = <TGApp.BBS.Post.FullData>(<unknown>{
 });
 
 const successResponse = { retcode: 0, message: "ok", data: { post_id: "123" } };
+const collectionMetadata = <TGApp.BBS.Post.Collection>(<unknown>{
+  prev_post_id: "32028631",
+  next_post_id: "0",
+  collection_id: "17723",
+  cur: 24,
+  total: 24,
+  collection_title: "记录贴",
+  prev_post_game_id: 2,
+  next_post_game_id: 0,
+  prev_post_view_type: 1,
+  next_post_view_type: 0,
+});
 
 const pictureSource = <TGApp.BBS.Post.FullData>(<unknown>{
   ...source,
@@ -491,6 +503,7 @@ describe("postEditReq source initialization and validation", () => {
       isOriginal: 1,
       republishAuthorization: 1,
       cover: imageUrl,
+      sourceCollectionId: null,
       blockReplyImg: 0,
       userAiContentChoice: "USER_AI_CONTENT_CHOICE_NOT_AI",
     });
@@ -517,6 +530,124 @@ describe("postEditReq source initialization and validation", () => {
         }),
       }),
     );
+  });
+
+  it("initializes and edits a collection post without changing its collection assignment", async () => {
+    const collectionSource = structuredClone(source);
+    collectionSource.collection = structuredClone(collectionMetadata);
+    collectionSource.post.structured_content = JSON.stringify([
+      { insert: "以后没可能赶上了" },
+      {
+        insert: { image: imageUrl },
+        attributes: { height: 1068, width: 1079, size: 876615, ext: "png" },
+      },
+      { insert: "\n" },
+    ]);
+
+    const settings = getPostEditSettings(collectionSource);
+
+    expect(settings.sourceCollectionId).toBe("17723");
+    expect(settings.nodes).toEqual([
+      { insert: "以后没可能赶上了" },
+      { insert: { image: imageUrl } },
+      { insert: "\n" },
+    ]);
+    await expect(
+      postEditReq.update(collectionSource, { ...settings, subject: "合集编辑" }, cookie),
+    ).resolves.toEqual(successResponse);
+    const body = mocks.post.mock.calls.at(-1)?.[1].body;
+    expect(body).toMatchObject({
+      post_id: "123",
+      subject: "合集编辑",
+      collection_id: "17723",
+    });
+  });
+
+  it("preserves a large collection ID as a string through settings and edit requests", async () => {
+    const largeCollectionId = "90071992547409931234567890";
+    const collectionSource = structuredClone(source);
+    collectionSource.collection = <TGApp.BBS.Post.Collection>(<unknown>{
+      ...collectionMetadata,
+      collection_id: largeCollectionId,
+    });
+    const settings = getPostEditSettings(collectionSource);
+
+    expect(settings.sourceCollectionId).toBe(largeCollectionId);
+    await expect(postEditReq.update(collectionSource, settings, cookie)).resolves.toEqual(
+      successResponse,
+    );
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(largeCollectionId);
+  });
+
+  it("rejects collection snapshot changes before edit HTTP", async () => {
+    const collectionSource = structuredClone(source);
+    collectionSource.collection = structuredClone(collectionMetadata);
+    const noCollectionSettings = getPostEditSettings(source);
+    const collectionSettings = getPostEditSettings(collectionSource);
+
+    expect(noCollectionSettings).not.toEqual(collectionSettings);
+    await expect(
+      postEditReq.update(collectionSource, noCollectionSettings, cookie),
+    ).rejects.toThrow("来源合集已变化");
+    await expect(postEditReq.update(source, collectionSettings, cookie)).rejects.toThrow(
+      "来源合集已变化",
+    );
+
+    const collectionLegacySettings = { ...collectionSettings };
+    Reflect.deleteProperty(collectionLegacySettings, "sourceCollectionId");
+    await expect(
+      postEditReq.update(collectionSource, collectionLegacySettings, cookie),
+    ).rejects.toThrow("来源合集已变化");
+
+    const sourceA = structuredClone(collectionSource);
+    sourceA.collection = <TGApp.BBS.Post.Collection>(<unknown>{
+      ...collectionMetadata,
+      collection_id: "10001",
+    });
+    const sourceB = structuredClone(collectionSource);
+    sourceB.collection = <TGApp.BBS.Post.Collection>(<unknown>{
+      ...collectionMetadata,
+      collection_id: "10002",
+    });
+    const settingsA = getPostEditSettings(sourceA);
+    const settingsB = getPostEditSettings(sourceB);
+    expect(settingsA).not.toEqual(settingsB);
+    await expect(postEditReq.update(sourceA, settingsB, cookie)).rejects.toThrow("来源合集已变化");
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("keeps no-collection edits and creates free of collection fields", async () => {
+    const settings = getPostEditSettings(source);
+    await expect(postEditReq.update(source, settings, cookie)).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).not.toHaveProperty("collection_id");
+
+    mocks.post.mockClear();
+    const legacySettings = { ...settings };
+    Reflect.deleteProperty(legacySettings, "sourceCollectionId");
+    await expect(postEditReq.update(source, legacySettings, cookie)).resolves.toEqual(
+      successResponse,
+    );
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).not.toHaveProperty("collection_id");
+
+    mocks.post.mockClear();
+    await expect(postEditReq.create(legacySettings, cookie)).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).not.toHaveProperty("collection_id");
+  });
+
+  it.each([
+    ["collection id", { collection_id: "" }],
+    ["position", { cur: 0 }],
+    ["neighbor view type", { next_post_view_type: 3 }],
+    ["missing total", { total: undefined }],
+  ])("rejects malformed collection metadata: %s", (_name, patch) => {
+    const invalid = structuredClone(source);
+    invalid.collection = <TGApp.BBS.Post.Collection>(<unknown>{
+      ...collectionMetadata,
+      ...patch,
+    });
+
+    expect(() => getPostEditSettings(invalid)).toThrow("合集");
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 
   it("initializes and updates an API-encoded picture post", async () => {
@@ -664,6 +795,7 @@ describe("postEditReq source initialization and validation", () => {
       isOriginal: 1,
       republishAuthorization: 1,
       cover: pictureImageUrls[1],
+      sourceCollectionId: null,
       blockReplyImg: 0,
       userAiContentChoice: "USER_AI_CONTENT_CHOICE_NOT_AI",
     });

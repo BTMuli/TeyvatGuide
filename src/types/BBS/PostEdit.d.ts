@@ -79,6 +79,8 @@ declare namespace TGApp.BBS.PostEdit {
     isOriginal: number;
     republishAuthorization: number;
     cover: string;
+    /** 来源帖子合集 ID，仅用于编辑冲突校验，不作为可编辑字段。 */
+    readonly sourceCollectionId?: string | null;
     /** 评论图片权限标记，米游社使用 0/1 表示。 */
     blockReplyImg?: number;
     /** 米游社 AI 内容选择标记。 */

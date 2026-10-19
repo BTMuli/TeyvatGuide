@@ -3,6 +3,7 @@
  * @since Beta v0.12.6
  */
 
+import bbsEnum from "@enum/bbs.js";
 import { assertPostDocumentContent, buildPostDocument, isPostUrl } from "@utils/bbsPostDocument.js";
 import { serializePostDocument } from "@utils/bbsPostHtml.js";
 import {
@@ -22,6 +23,10 @@ const maxContentLength: Readonly<number> = 30000;
 const maxImageCount: Readonly<number> = 50;
 const maxMentionCount: Readonly<number> = 100;
 const defaultUserAiContentChoice: Readonly<string> = "USER_AI_CONTENT_CHOICE_NOT_AI";
+const collectionViewTypes: ReadonlySet<number> = new Set([
+  0,
+  ...Object.values(bbsEnum.post.viewType),
+]);
 const userAiContentChoices: ReadonlySet<string> = new Set([
   "USER_AI_CONTENT_CHOICE_UNKNOWN",
   "USER_AI_CONTENT_CHOICE_NOT_AI",
@@ -48,6 +53,7 @@ type PostMutationBody = {
   block_reply_img: number;
   user_ai_content_choice: string;
   post_id?: string;
+  collection_id?: string;
 };
 
 type MutationDocument =
@@ -224,11 +230,48 @@ function hasSafeProfitMetadata(post: TGApp.BBS.Post.FullData["post"]): boolean {
 }
 
 /**
+ * 校验已有合集的完整来源元数据。
+ * @since Beta v0.12.6
+ * @param value - 合集来源数据
+ * @returns 已校验的合集 ID；无合集时为 null
+ */
+function assertEditableCollection(value: unknown): string | null {
+  if (value === null) return null;
+  if (!isRecord(value)) throw new TypeError("合集帖子元数据无法安全保留");
+  const collectionId = value.collection_id;
+  if (typeof collectionId !== "string" || !/^[1-9]\d*$/u.test(collectionId)) {
+    throw new TypeError("合集帖子元数据无法安全保留");
+  }
+  for (const key of ["prev_post_id", "next_post_id"]) {
+    if (typeof value[key] !== "string" || !/^(?:0|[1-9]\d*)$/u.test(value[key])) {
+      throw new TypeError("合集帖子元数据无法安全保留");
+    }
+  }
+  const current = getPositiveInteger(value.cur, "合集当前位置");
+  const total = getPositiveInteger(value.total, "合集帖子总数");
+  if (current > total || typeof value.collection_title !== "string" || !value.collection_title) {
+    throw new TypeError("合集帖子元数据无法安全保留");
+  }
+  getNonNegativeInteger(value.prev_post_game_id, "合集上一篇社区 ID");
+  getNonNegativeInteger(value.next_post_game_id, "合集下一篇社区 ID");
+  if (
+    typeof value.prev_post_view_type !== "number" ||
+    typeof value.next_post_view_type !== "number" ||
+    !collectionViewTypes.has(value.prev_post_view_type) ||
+    !collectionViewTypes.has(value.next_post_view_type)
+  ) {
+    throw new TypeError("合集帖子元数据无法安全保留");
+  }
+  return collectionId;
+}
+
+/**
  * 校验帖子来源的可编辑元数据。
  * @since Beta v0.12.6
  * @param source - 帖子完整数据
+ * @returns 已校验的来源合集 ID；无合集时为 null
  */
-function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
+function assertEditableSource(source: TGApp.BBS.Post.FullData): string | null {
   assertBasicSource(source);
   const post = source.post;
   if (typeof post.subject !== "string" || post.subject.length > maxSubjectLength) {
@@ -243,9 +286,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
   if (!hasSafeProfitMetadata(post)) {
     throw new TypeError("盈利帖子元数据无法安全保留");
   }
-  if (source.collection !== null) {
-    throw new TypeError("合集帖子元数据无法安全保留");
-  }
+  const collectionId = assertEditableCollection(source.collection);
   if (source.contribution_act !== null) {
     throw new TypeError("投稿活动元数据无法安全保留");
   }
@@ -277,6 +318,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
     source.external_link?.external_link_title !== ""
   )
     throw new TypeError("外部链接元数据无法安全保留");
+  return collectionId;
 }
 
 /**
@@ -394,7 +436,7 @@ function getSourceCover(
  * @returns 普通图文帖编辑设置
  */
 export function getPostEditSettings(source: TGApp.BBS.Post.FullData): TGApp.BBS.PostEdit.Settings {
-  assertEditableSource(source);
+  const sourceCollectionId = assertEditableSource(source);
   const post = source.post;
   const viewType = getPostViewType(post.view_type);
   let nodes: Array<TGApp.BBS.SctPost.Base>;
@@ -435,6 +477,7 @@ export function getPostEditSettings(source: TGApp.BBS.Post.FullData): TGApp.BBS.
     isOriginal,
     republishAuthorization,
     cover,
+    sourceCollectionId,
     blockReplyImg: getBlockReplyImg(post.block_reply_img),
     userAiContentChoice: getUserAiContentChoice(post.user_ai_content_choice),
   };
@@ -547,18 +590,18 @@ function getMutationHeaders(
  * @param source - 帖子完整数据
  * @param cookie - 用户 Cookie
  * @param editable - 是否应用普通图文帖编辑限制
- * @returns 已校验凭据
+ * @returns 已校验凭据及来源合集 ID
  */
 function assertOwner(
   source: TGApp.BBS.Post.FullData,
   cookie: Record<string, string>,
   editable: boolean = true,
-): Record<string, string> {
-  if (editable) assertEditableSource(source);
-  else assertDeletableSource(source);
+): { authCookie: Record<string, string>; sourceCollectionId: string | null } {
+  const sourceCollectionId = editable ? assertEditableSource(source) : null;
+  if (!editable) assertDeletableSource(source);
   const authCookie = getAuthCookie(cookie);
   if (String(source.post.uid) !== authCookie.ltuid) throw new Error("仅允许帖子作者执行此操作");
-  return authCookie;
+  return { authCookie, sourceCollectionId };
 }
 
 /**
@@ -593,7 +636,10 @@ export async function updatePost(
   settings: TGApp.BBS.PostEdit.Settings,
   cookie: Record<string, string>,
 ): Promise<TGApp.BBS.PostEdit.MutationResponse> {
-  const authCookie = assertOwner(source, cookie);
+  const { authCookie, sourceCollectionId } = assertOwner(source, cookie);
+  if ((settings.sourceCollectionId ?? null) !== sourceCollectionId) {
+    throw new TypeError("来源合集已变化，请重新载入帖子");
+  }
   const sourceViewType = getPostViewType(source.post.view_type);
   const settingsViewType = getSettingsViewType(settings.viewType);
   if (settingsViewType !== sourceViewType) {
@@ -611,6 +657,7 @@ export async function updatePost(
     throw new TypeError("编辑设置与来源帖子不一致");
   }
   const { body } = buildMutationBody(settings, postId, sourceDocument.images.length);
+  if (sourceCollectionId !== null) body.collection_id = sourceCollectionId;
   const response = await TGHttps.post<TGApp.BBS.PostEdit.MutationResponse>(
     `${postApiUrl}editPost`,
     { headers: getMutationHeaders(authCookie, body), body },
@@ -629,7 +676,7 @@ export async function deletePost(
   source: TGApp.BBS.Post.FullData,
   cookie: Record<string, string>,
 ): Promise<TGApp.BBS.PostEdit.MutationResponse> {
-  const authCookie = assertOwner(source, cookie, false);
+  const { authCookie } = assertOwner(source, cookie, false);
   const postId = source.post.post_id;
   if (!/^[1-9]\d*$/.test(postId)) throw new TypeError("帖子 ID 必须为正整数");
   const forumId = getPositiveInteger(source.forum?.id ?? source.post.f_forum_id, "版块 ID");
