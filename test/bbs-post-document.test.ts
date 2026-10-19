@@ -152,6 +152,18 @@ describe("buildPostDocument", () => {
     });
   });
 
+  it("strips official image metadata attributes while retaining the image", () => {
+    const nodes = [
+      {
+        insert: { image: imageUrl },
+        attributes: { height: 1068, width: 1079, size: 876615, ext: "png" },
+      },
+      { insert: "\n" },
+    ];
+
+    expect(parsePostNodes(nodes)).toEqual([{ insert: { image: imageUrl } }, { insert: "\n" }]);
+  });
+
   it("preserves literal text, mention names, and URL data", () => {
     const text = `<img src=x onerror='x'>&"'`;
     const nickname = `<img src=x onerror='mention'>`;

@@ -58,16 +58,44 @@ export function isPostDivider(value: unknown): value is TGApp.BBS.PostEdit.Divid
 }
 
 /**
+ * 校验官方图片节点附带的资源元数据。
+ * @since Beta v0.12.6
+ * @param key - 元数据字段名
+ * @param value - 元数据字段值
+ * @returns 是否为可安全丢弃的官方元数据
+ */
+function isOfficialImageMetadata(key: string, value: unknown): boolean {
+  switch (key) {
+    case "height":
+    case "width":
+      return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+    case "size":
+      return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+    case "ext":
+      return typeof value === "string" && /^[a-z\d]+$/iu.test(value) && value.trim() === value;
+    default:
+      return false;
+  }
+}
+
+/**
  * 校验并复制单个节点的属性。
  * @since Beta v0.12.6
  */
 function parseAttributes(value: unknown, image: boolean): TGApp.BBS.PostEdit.Attributes {
   if (!isRecord(value)) throw new TypeError("帖子格式属性无效");
   const attributes: TGApp.BBS.PostEdit.Attributes = {};
+  let hasOfficialImageMetadata = false;
   for (const [key, entry] of Object.entries(value)) {
     if (image) {
-      if (key !== "link" || !isPostUrl(entry)) throw new TypeError("帖子图片链接属性无效");
-      attributes.link = entry;
+      if (key === "link") {
+        if (!isPostUrl(entry)) throw new TypeError("帖子图片链接属性无效");
+        attributes.link = entry;
+      } else if (isOfficialImageMetadata(key, entry)) {
+        hasOfficialImageMetadata = true;
+      } else {
+        throw new TypeError("帖子图片属性无效");
+      }
       continue;
     }
     switch (key) {
@@ -99,6 +127,15 @@ function parseAttributes(value: unknown, image: boolean): TGApp.BBS.PostEdit.Att
       default:
         throw new TypeError(`暂不支持编辑帖子格式：${key}，请在米游社网页版编辑`);
     }
+  }
+  if (
+    image &&
+    hasOfficialImageMetadata &&
+    !["height", "width", "size", "ext"].every((key) =>
+      Object.prototype.hasOwnProperty.call(value, key),
+    )
+  ) {
+    throw new TypeError("帖子图片元数据不完整");
   }
   return attributes;
 }
