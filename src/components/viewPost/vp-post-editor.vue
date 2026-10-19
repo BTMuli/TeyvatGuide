@@ -747,12 +747,12 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 
 .tgpe-toolbar {
   display: flex;
-  min-height: 56px;
+  min-height: 48px;
   flex-wrap: wrap;
   align-items: center;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--common-shadow-2);
-  background: var(--box-bg-4);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-1);
   gap: 4px;
 }
 
@@ -763,11 +763,15 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
   height: 32px;
   align-items: center;
   justify-content: center;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
   color: var(--box-text-2);
   cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
 }
 
 .tgpe-color-label {
@@ -776,7 +780,8 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 }
 
 .tgpe-tool[aria-pressed="true"] {
-  background: var(--box-bg-4);
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-2);
   color: var(--common-text-title);
 }
 
@@ -794,6 +799,7 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 .tgpe-tool:hover:not(:disabled),
 .tgpe-color-label:hover {
   background: var(--box-bg-4);
+  color: var(--common-text-title);
 }
 
 .tgpe-color {
@@ -825,6 +831,7 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 .tgpe-editor.ql-container {
   min-height: 360px;
   border: 0;
+  background: var(--box-bg-1);
   color: var(--app-page-content);
   font-family: var(--font-text);
   font-size: 14px;
@@ -833,8 +840,13 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 .tgpe-editor :deep(.ql-editor) {
   min-height: 360px;
   max-height: 640px;
-  padding: 24px;
+  padding: 20px 24px;
   line-height: 24px;
+}
+
+.tgpe-editor :deep(.ql-editor:focus) {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: -2px;
 }
 
 .tgpe-editor :deep(.ql-editor.ql-blank::before) {
@@ -868,7 +880,7 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 
 .tgpe-editor :deep(.quill-mention) {
   border-radius: 4px;
-  background: var(--box-bg-4);
+  background: var(--box-bg-2);
   color: var(--common-text-title);
   cursor: text;
   text-decoration: none;
@@ -892,8 +904,19 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
     margin: 0 4px;
   }
 
+  .tgpe-history {
+    margin-left: 4px;
+  }
+
   .tgpe-editor :deep(.ql-editor) {
     padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgpe-tool,
+  .tgpe-color-label {
+    transition: none;
   }
 }
 </style>

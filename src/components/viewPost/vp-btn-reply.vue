@@ -27,23 +27,43 @@
           </template>
         </v-btn>
       </template>
-      <div class="tpr-main-reply">
+      <div aria-label="回复列表与编辑器" class="tpr-main-reply">
         <div class="tpr-main-filter">
           <div class="tpr-title">
-            <v-btn :disabled="writing" :loading size="small" variant="text" @click="reloadReply">
-              回复列表 · 刷新
-            </v-btn>
-            <v-btn
-              :disabled="writing"
-              aria-label="关闭回复列表"
-              class="tpr-btn-close"
-              icon="mdi-close"
-              size="32"
-              @click="showOverlay = false"
-            />
+            <div class="tpr-title-copy">
+              <v-icon size="18">mdi-message-text-outline</v-icon>
+              <span>回复列表</span>
+            </div>
+            <div class="tpr-title-actions">
+              <v-btn
+                :disabled="writing"
+                :loading
+                aria-label="刷新回复列表"
+                icon="mdi-refresh"
+                size="32"
+                title="刷新回复列表"
+                variant="text"
+                @click="reloadReply"
+              />
+              <v-btn
+                :disabled="writing"
+                aria-label="关闭回复列表"
+                class="tpr-btn-close"
+                icon="mdi-close"
+                size="32"
+                title="关闭回复列表"
+                @click="showOverlay = false"
+              />
+            </div>
           </div>
           <div class="tpr-subtitle">
-            <button :disabled="writing" class="tpr-switch" type="button" @click="switchOnlyLz()">
+            <button
+              :aria-pressed="onlyLz"
+              :disabled="writing"
+              class="tpr-switch"
+              type="button"
+              @click="switchOnlyLz()"
+            >
               <v-icon v-if="onlyLz" color="var(--tgc-od-green)">
                 mdi-checkbox-marked-circle-outline
               </v-icon>
@@ -65,7 +85,7 @@
             </div>
           </div>
         </div>
-        <v-list class="tpr-reply-list" @scroll="handleListScroll">
+        <v-list aria-label="回复列表" class="tpr-reply-list" @scroll="handleListScroll">
           <VpReplyItem
             v-for="item in reply"
             :key="item.reply.reply_id"
@@ -77,10 +97,10 @@
             @reply="selectReply"
           />
           <div v-if="isLast" class="tpr-list-item">
-            <v-chip color="blue" label>没有更多了</v-chip>
+            <v-chip label variant="tonal">没有更多了</v-chip>
           </div>
           <div v-else class="tpr-list-item">
-            <v-btn :loading color="blue" @click="loadReply()">加载更多</v-btn>
+            <v-btn :loading size="small" variant="tonal" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
         <VpReplyComposer
@@ -329,6 +349,11 @@ async function loadReply(): Promise<void> {
   transform: scale(0.95);
 }
 
+.tpr-main-box:focus-within {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 3px;
+}
+
 .dark .tpr-main-box {
   border: 1px solid var(--common-shadow-1);
   box-shadow: 1px 3px 6px var(--common-shadow-t-2);
@@ -348,14 +373,15 @@ async function loadReply(): Promise<void> {
   display: flex;
   overflow: hidden;
   width: min(360px, calc(100vw - 72px));
-  max-height: calc(100vh - 24px);
+  min-height: 0;
+  max-height: min(720px, calc(100vh - 24px));
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--app-page-bg);
   box-shadow: 2px 2px 8px var(--common-shadow-4);
   row-gap: 8px;
@@ -382,9 +408,26 @@ async function loadReply(): Promise<void> {
   justify-content: space-between;
 }
 
+.tpr-title-copy,
+.tpr-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tpr-title-copy {
+  color: var(--common-text-title);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tpr-title-actions {
+  margin-left: auto;
+}
+
 .tpr-btn-close {
   border: 1px solid var(--common-shadow-2);
-  margin-left: auto;
+  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -394,6 +437,7 @@ async function loadReply(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .tpr-select {
@@ -404,13 +448,29 @@ async function loadReply(): Promise<void> {
 .tpr-switch {
   position: relative;
   display: flex;
+  min-height: 32px;
   align-items: center;
   justify-content: center;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
   color: var(--app-page-content);
   cursor: pointer;
   font-family: var(--font-title);
-  font-size: 18px;
+  font-size: 12px;
   font-weight: normal;
+  gap: 4px;
+}
+
+.tpr-switch[aria-pressed="true"] {
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-4);
+}
+
+.tpr-switch:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
 }
 
 .tpr-reply-list {
@@ -418,14 +478,14 @@ async function loadReply(): Promise<void> {
   display: flex;
   overflow: hidden auto;
   width: 100%;
-  height: fit-content;
-  min-height: 0;
+  min-height: 80px;
+  max-height: min(440px, 42vh);
   box-sizing: border-box;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 0;
-  padding-right: 4px;
+  padding: 0 4px 0 0;
   background: var(--app-page-bg);
   row-gap: 8px;
   scrollbar-gutter: stable;
@@ -438,5 +498,29 @@ async function loadReply(): Promise<void> {
   height: 40px;
   align-items: center;
   justify-content: center;
+}
+
+@media (width <= 480px) {
+  .tpr-main-box {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .tpr-main-reply {
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100vh - 16px);
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .tpr-subtitle {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .tpr-select {
+    min-width: 120px;
+    flex: 1;
+  }
 }
 </style>

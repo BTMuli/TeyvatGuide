@@ -1,11 +1,13 @@
 <!-- 回复扩展工具：默认表情、图片和用户提及 -->
 <template>
   <div class="vprt-tools">
-    <div aria-label="回复扩展工具" class="vprt-toolbar">
+    <div aria-label="回复扩展工具" class="vprt-toolbar" role="group">
       <button
         :aria-expanded="panel === 'emoji'"
         :disabled
+        aria-label="插入表情"
         class="vprt-tool"
+        title="插入表情"
         type="button"
         @click="toggleEmoji"
       >
@@ -14,6 +16,7 @@
       </button>
       <button
         :disabled="disabled || !replyAssetCapabilities.imageUpload"
+        aria-label="添加图片"
         :title="replyAssetCapabilities.imageUpload ? '添加图片' : '图片暂不可用'"
         class="vprt-tool"
         type="button"
@@ -27,6 +30,7 @@
         :disabled="disabled || !replyAssetCapabilities.mention"
         aria-label="提及用户"
         class="vprt-tool"
+        title="提及用户"
         type="button"
         @click="toggleMention"
       >
@@ -35,7 +39,13 @@
       </button>
       <!-- TODO：确认 APP 发布 game_user_info 的必填字段后启用。
            角色选择和预览复用现有绑定角色接口及 tp-uid.vue，展示配置继续沿用组件。 -->
-      <button class="vprt-tool" disabled title="UID 卡片暂不可用" type="button">
+      <button
+        aria-label="插入 UID 卡片"
+        class="vprt-tool"
+        disabled
+        title="UID 卡片暂不可用"
+        type="button"
+      >
         <v-icon size="18">mdi-card-account-details-outline</v-icon>
         <span>UID 卡片</span>
       </button>
@@ -49,14 +59,20 @@
         @change="selectImage"
       />
     </div>
-    <div v-if="uploading" class="vprt-status" role="status">
+    <div v-if="uploading" aria-live="polite" class="vprt-status" role="status">
       <span>正在上传图片…</span>
       <button class="vprt-action" type="button" @click="cancelUpload">取消上传</button>
     </div>
-    <div v-if="panel === 'emoji'" class="vprt-panel">
+    <div v-if="panel === 'emoji'" aria-label="表情面板" class="vprt-panel" role="region">
       <div class="vprt-heading">
-        <span>选择表情</span>
-        <button aria-label="收起表情" class="vprt-action" type="button" @click="closePanel">
+        <span class="vprt-panel-title">选择表情</span>
+        <button
+          aria-label="收起表情"
+          class="vprt-action"
+          title="收起表情"
+          type="button"
+          @click="closePanel"
+        >
           <v-icon size="18">mdi-close</v-icon>
         </button>
       </div>
@@ -81,7 +97,9 @@
           <span>{{ series.name }}</span>
         </button>
       </div>
-      <div v-if="emojiLoading" class="vprt-status" role="status">正在加载表情…</div>
+      <div v-if="emojiLoading" aria-live="polite" class="vprt-status" role="status">
+        正在加载表情…
+      </div>
       <div v-else-if="emojiError" class="vprt-status" role="alert">
         <span>{{ emojiError }}</span>
         <button :disabled class="vprt-action" type="button" @click="loadEmoji">重试</button>
@@ -102,10 +120,16 @@
         </button>
       </div>
     </div>
-    <div v-else-if="panel === 'mention'" class="vprt-panel">
+    <div v-else-if="panel === 'mention'" aria-label="提及用户面板" class="vprt-panel" role="region">
       <div class="vprt-heading">
-        <span>提及用户</span>
-        <button aria-label="收起用户查找" class="vprt-action" type="button" @click="closePanel">
+        <span class="vprt-panel-title">提及用户</span>
+        <button
+          aria-label="收起用户查找"
+          class="vprt-action"
+          title="收起用户查找"
+          type="button"
+          @click="closePanel"
+        >
           <v-icon size="18">mdi-close</v-icon>
         </button>
       </div>
@@ -420,6 +444,10 @@ async function selectImage(event: Event): Promise<void> {
 
 .vprt-toolbar {
   flex-wrap: wrap;
+  padding: 4px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-4);
   font-size: 12px;
   gap: 4px;
   line-height: 20px;
@@ -442,18 +470,34 @@ async function selectImage(event: Event): Promise<void> {
   min-height: 32px;
   align-items: center;
   padding: 4px 8px;
+  border: 1px solid transparent;
+  color: var(--box-text-2);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
   gap: 4px;
+}
+
+.vprt-tool[aria-expanded="true"] {
+  border-color: var(--common-shadow-2);
+  background: var(--app-page-bg);
+  box-shadow: inset 0 -2px var(--tgc-btn-1);
+  color: var(--common-text-title);
 }
 
 .vprt-panel {
   display: flex;
+  overflow: auto;
   min-width: 0;
+  max-height: min(280px, 34vh);
   flex-direction: column;
   padding: 8px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 8px;
   background: var(--app-page-bg);
   gap: 8px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .vprt-heading,
@@ -461,11 +505,24 @@ async function selectImage(event: Event): Promise<void> {
   justify-content: space-between;
 }
 
+.vprt-heading {
+  min-height: 28px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--common-shadow-1);
+}
+
+.vprt-panel-title {
+  color: var(--common-text-title);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .vprt-series {
   display: flex;
   overflow: auto hidden;
   padding: 4px;
   gap: 4px;
+  scrollbar-gutter: stable;
 }
 
 .vprt-series-item {
@@ -476,10 +533,13 @@ async function selectImage(event: Event): Promise<void> {
   align-items: center;
   justify-content: center;
   padding: 4px;
+  border: 1px solid transparent;
+  color: var(--app-page-content);
   gap: 4px;
 }
 
 .vprt-series-item[aria-pressed="true"] {
+  border-color: var(--common-shadow-2);
   background: var(--box-bg-4);
   box-shadow: inset 0 -2px var(--tgc-btn-1);
 }
@@ -505,11 +565,13 @@ async function selectImage(event: Event): Promise<void> {
   padding: 4px;
   gap: 4px;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  scrollbar-gutter: stable;
 }
 
 .vprt-emoji {
   display: grid;
   min-height: 44px;
+  border: 1px solid transparent;
   place-items: center;
 }
 
@@ -520,13 +582,20 @@ async function selectImage(event: Event): Promise<void> {
 }
 
 .vprt-action {
-  padding: 4px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 4px 6px;
 }
 
 .vprt-status,
 .vprt-result {
+  min-width: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--box-bg-4);
   color: var(--app-page-content);
   font-size: 12px;
+  line-height: 16px;
   overflow-wrap: anywhere;
 }
 
@@ -539,7 +608,7 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-action:focus-visible,
 .vprt-series-item:focus-visible,
 .vprt-emoji:focus-visible {
-  outline: 2px solid var(--tgc-btn-1);
+  outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }
 
@@ -555,6 +624,7 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-action:hover:not(:disabled),
 .vprt-series-item:hover:not(:disabled),
 .vprt-emoji:hover:not(:disabled) {
+  border-color: var(--common-shadow-2);
   background: var(--box-bg-4);
 }
 </style>

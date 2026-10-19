@@ -1,42 +1,68 @@
 <!-- 个人信息下的帖子编辑页面 -->
 <template>
-  <main class="post-edit-page" aria-labelledby="postEditTitle">
-    <nav class="post-edit-breadcrumb" aria-label="面包屑">
-      <RouterLink :to="{ name: '个人信息' }">个人信息</RouterLink>
-      <v-icon aria-hidden="true" size="14">mdi-chevron-right</v-icon>
-      <span>编辑帖子</span>
-    </nav>
-    <section class="post-edit-surface">
-      <header class="post-edit-header">
-        <div>
-          <h1 id="postEditTitle">{{ source?.post.view_type === 2 ? "编辑图片帖" : "编辑帖子" }}</h1>
-          <p v-if="source">{{ source.forum?.name || "米游社" }} · {{ accountName }}</p>
+  <v-app-bar class="post-edit-app-bar">
+    <template #prepend>
+      <div class="post-edit-top">
+        <img alt="" src="/UI/nav/posts.webp" />
+        <div class="post-edit-heading">
+          <h1 id="postEditTitle">
+            {{ source?.post.view_type === 2 ? "编辑图片帖" : "编辑帖子" }}
+          </h1>
+          <span v-if="source" class="post-edit-meta">
+            {{ source.forum?.name || "米游社" }} · {{ accountName }}
+          </span>
         </div>
-        <v-btn :disabled="editorBusy" variant="text" prepend-icon="mdi-arrow-left" @click="goBack">
-          {{ fromDetail ? "返回帖子" : "返回我的发帖" }}
+      </div>
+    </template>
+    <template #append>
+      <div class="post-edit-actions">
+        <v-btn
+          :aria-label="fromDetail ? '返回帖子' : '返回我的发帖'"
+          :disabled="editorBusy"
+          class="post-edit-back"
+          prepend-icon="mdi-arrow-left"
+          variant="text"
+          @click="goBack"
+        >
+          <span class="post-edit-action-label">{{ fromDetail ? "返回帖子" : "返回我的发帖" }}</span>
         </v-btn>
-      </header>
-      <div v-if="!canEdit" class="post-edit-state" role="status">
-        <v-icon size="32">mdi-account-lock-outline</v-icon>
-        <p>{{ incognito ? "无痕模式下无法编辑帖子" : "请先登录米游社账号，再编辑自己的帖子" }}</p>
+        <v-btn
+          :disabled="editorSaveDisabled"
+          :form="formId"
+          aria-label="保存修改"
+          class="post-edit-save"
+          color="var(--tgc-btn-1)"
+          prepend-icon="mdi-content-save-outline"
+          :loading="editorPending"
+          type="submit"
+          variant="flat"
+          >保存修改</v-btn
+        >
       </div>
-      <div v-else-if="loading" class="post-edit-state" role="status">
-        <v-progress-circular indeterminate size="28" />
-        <p>正在载入帖子…</p>
-      </div>
-      <div v-else-if="loadError" class="post-edit-state" role="alert">
-        <p>{{ loadError }}</p>
-        <v-btn variant="tonal" @click="loadPost">重新载入</v-btn>
-      </div>
-      <VpPostComposer
-        v-else-if="source"
-        :key="`${uid}:${source.post.post_id}`"
-        ref="composer"
-        :gid="source.post.game_id"
-        :source
-        @saved="handleSaved"
-      />
-    </section>
+    </template>
+  </v-app-bar>
+  <main class="post-edit-page" aria-labelledby="postEditTitle">
+    <div v-if="!canEdit" class="post-edit-state" role="status">
+      <v-icon size="32">mdi-account-lock-outline</v-icon>
+      <p>{{ incognito ? "无痕模式下无法编辑帖子" : "请先登录米游社账号，再编辑自己的帖子" }}</p>
+    </div>
+    <div v-else-if="loading" class="post-edit-state" role="status">
+      <v-progress-circular indeterminate size="28" />
+      <p>正在载入帖子…</p>
+    </div>
+    <div v-else-if="loadError" class="post-edit-state" role="alert">
+      <p>{{ loadError }}</p>
+      <v-btn variant="tonal" @click="loadPost">重新载入</v-btn>
+    </div>
+    <VpPostComposer
+      v-else-if="source"
+      :key="`${uid}:${source.post.post_id}`"
+      ref="composer"
+      :form-id="formId"
+      :gid="source.post.game_id"
+      :source
+      @saved="handleSaved"
+    />
   </main>
 </template>
 <script lang="ts" setup>
@@ -47,19 +73,14 @@ import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
-import {
-  onBeforeRouteLeave,
-  onBeforeRouteUpdate,
-  RouterLink,
-  useRoute,
-  useRouter,
-} from "vue-router";
+import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
 const { incognito } = storeToRefs(useAppStore());
+const formId = useId();
 const composer = useTemplateRef<InstanceType<typeof VpPostComposer>>("composer");
 const source = shallowRef<TGApp.BBS.Post.FullData>();
 const loading = ref<boolean>(false);
@@ -69,11 +90,13 @@ let active = true;
 const postId = computed<string>(() => String(route.params.postId ?? ""));
 const fromDetail = computed<boolean>(() => route.query.from === "detail");
 const accountName = computed<string>(() => briefInfo.value.nickname || uid.value || "");
+const editorPending = computed<boolean>(() => composer.value?.pending ?? false);
 const canEdit = computed<boolean>(
   () =>
     !incognito.value && !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken,
 );
 const editorBusy = computed<boolean>(() => composer.value?.busy ?? false);
+const editorSaveDisabled = computed<boolean>(() => !(composer.value?.canSubmit ?? false));
 
 watch(
   [postId, uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid, incognito],
@@ -134,55 +157,86 @@ async function handleSaved(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
+.post-edit-app-bar {
+  :deep(.v-toolbar__content) {
+    min-width: 0;
+    height: auto !important;
+    min-height: 64px;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.post-edit-top {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  margin-left: 12px;
+  gap: 8px;
+
+  img {
+    width: 32px;
+    height: 32px;
+    filter: var(--icon-filter);
+  }
+}
+
+.post-edit-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-edit-heading h1 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 26px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-edit-meta {
+  max-width: min(52vw, 360px);
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+}
+
+.post-edit-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-edit-back,
+.post-edit-save {
+  font-family: var(--font-title);
+  font-weight: normal;
+}
+
+.post-edit-back {
+  margin-right: 8px;
+  color: var(--common-text-title);
+}
+
+.post-edit-save {
+  min-width: 128px;
+  color: var(--btn-text);
+}
+
 .post-edit-page {
   width: 100%;
   max-width: 1200px;
   box-sizing: border-box;
-  padding: 16px 24px 48px;
+  padding: 24px 24px 48px;
   margin: 0 auto;
-}
-
-.post-edit-breadcrumb {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  color: var(--box-text-4);
-  font-size: 12px;
-  gap: 8px;
-}
-
-.post-edit-breadcrumb a {
-  color: var(--common-text-title);
-  text-decoration: none;
-}
-
-.post-edit-surface {
-  overflow: hidden;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 8px;
-  background: var(--app-page-bg);
-}
-
-.post-edit-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 32px;
-  border-bottom: 1px solid var(--common-shadow-2);
-  gap: 16px;
-}
-
-.post-edit-header h1 {
-  margin: 0;
-  font-family: var(--font-title);
-  font-size: 20px;
-  font-weight: normal;
-}
-
-.post-edit-header p {
-  margin: 8px 0 0;
-  color: var(--box-text-4);
-  font-size: 12px;
 }
 
 .post-edit-state {
@@ -198,12 +252,61 @@ async function handleSaved(): Promise<void> {
 }
 
 @media (width <= 720px) {
-  .post-edit-page {
-    padding: 8px 0 24px;
+  .post-edit-app-bar :deep(.v-toolbar__content) {
+    min-height: 56px;
+    padding-inline: 4px;
   }
 
-  .post-edit-header {
-    padding: 20px 16px;
+  .post-edit-page {
+    padding: 16px 16px 24px;
+  }
+
+  .post-edit-top {
+    margin-left: 4px;
+    gap: 4px;
+  }
+
+  .post-edit-top img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .post-edit-heading h1 {
+    font-size: 18px;
+  }
+
+  .post-edit-meta {
+    max-width: 42vw;
+    font-size: 11px;
+  }
+
+  .post-edit-back {
+    margin-right: 0;
+  }
+
+  .post-edit-back .post-edit-action-label {
+    display: none;
+  }
+
+  .post-edit-back,
+  .post-edit-save {
+    min-width: 40px;
+    padding-inline: 8px;
+  }
+
+  .post-edit-back :deep(.v-btn__prepend),
+  .post-edit-save :deep(.v-btn__prepend) {
+    margin-inline-end: 0;
+  }
+
+  .post-edit-save :deep(.v-btn__content) {
+    display: none;
+  }
+}
+
+@media (width <= 420px) {
+  .post-edit-meta {
+    max-width: 34vw;
   }
 }
 </style>

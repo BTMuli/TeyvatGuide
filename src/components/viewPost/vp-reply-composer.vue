@@ -1,47 +1,61 @@
 <!-- 帖子评论与定向回复输入框 -->
 <template>
-  <form class="vpr-composer" @submit.prevent="publishReply">
-    <div v-if="target" class="vpr-target">
-      <span>回复 {{ target.user.nickname }}</span>
+  <form aria-label="回复编辑器" class="vpr-composer" @submit.prevent="publishReply">
+    <div v-if="target" aria-live="polite" class="vpr-target" role="status">
+      <div class="vpr-target-copy">
+        <v-icon size="16">mdi-reply-outline</v-icon>
+        <span
+          >回复 <strong>{{ target.user.nickname }}</strong></span
+        >
+      </div>
       <v-btn
         :disabled="busy"
         aria-label="取消定向回复"
+        class="vpr-target-cancel"
         icon="mdi-close"
         size="24"
         variant="text"
         @click="emits('cancel')"
       />
     </div>
-    <div
-      ref="editorRoot"
-      @focusout="rememberSelection"
-      @input="rememberSelection"
-      @keyup="rememberSelection"
-      @mouseup="rememberSelection"
-      @select="rememberSelection"
-    >
-      <v-textarea
-        v-model="content"
-        :disabled="busy || !canWrite"
-        :label="target ? '回复内容' : '发表评论'"
-        auto-grow
-        hide-details
-        max-rows="6"
-        rows="2"
-        variant="outlined"
-      />
+    <div class="vpr-editor">
+      <div
+        ref="editorRoot"
+        class="vpr-editor-root"
+        @focusout="rememberSelection"
+        @input="rememberSelection"
+        @keyup="rememberSelection"
+        @mouseup="rememberSelection"
+        @select="rememberSelection"
+      >
+        <v-textarea
+          v-model="content"
+          :aria-label="target ? '回复内容' : '评论内容'"
+          :disabled="busy || !canWrite"
+          :label="target ? '回复内容' : '发表评论'"
+          auto-grow
+          class="vpr-textarea"
+          hide-details
+          max-rows="6"
+          placeholder="输入内容…"
+          rows="2"
+          variant="outlined"
+        />
+      </div>
+      <div class="vpr-tools-wrap">
+        <VpReplyTools
+          :contextId="toolContext"
+          :cookie="toolCookie"
+          :disabled="busy || !canWrite"
+          :gid="props.gid"
+          @image="addImage"
+          @insert-text="insertText"
+          @mention="insertMention"
+        />
+      </div>
     </div>
-    <VpReplyTools
-      :contextId="toolContext"
-      :cookie="toolCookie"
-      :disabled="busy || !canWrite"
-      :gid="props.gid"
-      @image="addImage"
-      @insert-text="insertText"
-      @mention="insertMention"
-    />
-    <div v-if="images.length" aria-label="待发布图片" class="vpr-images">
-      <div v-for="(image, index) in images" :key="index" class="vpr-image">
+    <div v-if="images.length" aria-label="待发布图片" class="vpr-images" role="list">
+      <div v-for="(image, index) in images" :key="index" class="vpr-image" role="listitem">
         <img :alt="`待发布图片 ${index + 1}`" :src="image.url" />
         <button
           :aria-label="`移除图片 ${index + 1}`"
@@ -55,9 +69,13 @@
       </div>
     </div>
     <div class="vpr-footer">
-      <span class="vpr-account">{{ accountHint }}</span>
+      <div aria-live="polite" class="vpr-account-status" role="status">
+        <v-icon size="16">mdi-account-circle-outline</v-icon>
+        <span class="vpr-account">{{ accountHint }}</span>
+      </div>
       <v-btn
         :disabled="!canWrite || !hasContent || busy"
+        class="vpr-submit"
         :loading="publishing"
         color="var(--tgc-btn-1)"
         size="small"
@@ -283,10 +301,83 @@ async function publishReply(): Promise<void> {
   display: flex;
   overflow: hidden auto;
   width: 100%;
-  max-height: min(480px, 60vh);
+  max-height: min(360px, 44vh);
   flex-direction: column;
   flex-shrink: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.vpr-target,
+.vpr-editor,
+.vpr-footer {
+  min-width: 0;
+}
+
+.vpr-target {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-4);
+  color: var(--common-text-title);
+  font-size: 12px;
+  gap: 8px;
+}
+
+.vpr-target-copy {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.vpr-target-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vpr-target-copy strong {
+  font-weight: 600;
+}
+
+.vpr-target-cancel {
+  flex: 0 0 auto;
+}
+
+.vpr-editor {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--app-page-bg);
+  gap: 4px;
+}
+
+.vpr-editor-root {
+  min-width: 0;
+}
+
+.vpr-textarea :deep(.v-field) {
+  border-radius: 4px;
+}
+
+.vpr-textarea :deep(.v-field__input) {
+  line-height: 20px;
+}
+
+.vpr-tools-wrap {
+  padding-top: 4px;
+  border-top: 1px solid var(--common-shadow-1);
 }
 
 .vpr-images {
@@ -325,31 +416,56 @@ async function publishReply(): Promise<void> {
 }
 
 .vpr-image-remove:focus-visible {
-  outline: 2px solid var(--tgc-btn-1);
+  outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }
 
 .vpr-image-remove:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.45;
 }
 
-.vpr-target,
 .vpr-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  padding-top: 4px;
   gap: 8px;
 }
 
-.vpr-target {
-  color: var(--common-text-title);
-  font-size: 14px;
+.vpr-account-status {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  color: var(--app-page-content);
+  gap: 4px;
 }
 
 .vpr-account {
   color: var(--app-page-content);
   font-size: 12px;
+  line-height: 16px;
   overflow-wrap: anywhere;
+}
+
+.vpr-submit {
+  min-width: 92px;
+  border-radius: 4px;
+}
+
+@media (width <= 480px) {
+  .vpr-composer {
+    max-height: min(340px, 48vh);
+  }
+
+  .vpr-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vpr-submit {
+    width: 100%;
+  }
 }
 </style>

@@ -1,6 +1,6 @@
 <!-- 独立页面中的帖子编辑表单 -->
 <template>
-  <form class="post-composer" @submit.prevent="savePost">
+  <form :id="formId" class="post-composer" @submit.prevent="savePost">
     <div v-if="loading" class="post-composer-state" role="status">正在加载编辑设置…</div>
     <div v-else-if="loadError" class="post-composer-state" role="alert">
       <p>{{ loadError }}</p>
@@ -9,285 +9,311 @@
       >
     </div>
     <template v-else>
-      <div class="post-composer-row">
-        <label :for="titleId" class="post-composer-label">标题</label>
-        <v-text-field
-          :id="titleId"
-          v-model="draft.subject"
-          :disabled="busy || !canWrite"
-          :counter="30"
-          maxlength="30"
-          aria-label="帖子标题"
-          placeholder="标题（必填）"
-          variant="outlined"
-          hide-details="auto"
-        />
+      <div v-if="error || conflict" class="post-composer-feedback post-composer-feedback-top">
+        <p v-if="error" class="post-composer-error" role="alert">{{ error }}</p>
+        <v-btn v-if="conflict" :disabled="busy" variant="text" @click="reloadPost"
+          >载入最新帖子</v-btn
+        >
       </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">{{ isPicture ? "图片介绍" : "正文" }}</span>
-        <div class="post-composer-content">
-          <VpPostEditor
-            v-show="!preview"
-            ref="editor"
-            v-model="draft.nodes"
-            :mode="isPicture ? 'picture' : 'article'"
+      <section class="post-composer-section">
+        <h2 class="post-composer-section-title">内容</h2>
+        <div class="post-composer-row">
+          <label :for="titleId" class="post-composer-label">标题</label>
+          <v-text-field
+            :id="titleId"
+            v-model="draft.subject"
             :disabled="busy || !canWrite"
-            @error="handleEditorError"
-            @validity-change="editorInvalid = !$event"
-            @image-click="tools?.chooseImage()"
-            @emoticon-click="tools?.openEmoji()"
-            @mention-click="tools?.openMention()"
-          >
-            <template #insert-panel>
-              <VpPostTools
-                ref="tools"
-                :contextId="contextVersion"
-                :cookie="toolCookie"
-                :disabled="pending || !canWrite"
-                :gid="draft.gid"
-                hideToolbar
-                @image="insertImage"
-                @emoticon="insertEmoticon"
-                @mention="insertMention"
-                @upload-busy="uploading = $event"
-              />
-            </template>
-          </VpPostEditor>
-          <div
-            v-if="preview"
-            class="post-composer-preview"
-            aria-label="帖子预览"
-            @click.prevent
-            v-html="previewHtml"
+            :counter="30"
+            maxlength="30"
+            aria-label="帖子标题"
+            placeholder="标题（必填）"
+            variant="outlined"
+            hide-details="auto"
           />
-          <div class="post-composer-content-footer">
-            <v-btn
-              :disabled="busy || editorInvalid"
-              variant="text"
-              size="small"
-              :prepend-icon="preview ? 'mdi-pencil-outline' : 'mdi-eye-outline'"
-              @click="preview = !preview"
-              >{{ preview ? "继续编辑" : "预览" }}</v-btn
-            >
-            <span
-              >{{ contentLength }} / {{ isPicture ? 500 : 30000
-              }}<template v-if="!isPicture">
-                · {{ previewDocument.images.length }} / 50 张图片</template
-              ></span
-            >
-          </div>
         </div>
-      </div>
-      <div v-if="isPicture" class="post-composer-row">
-        <span class="post-composer-label">上传图片</span>
-        <div>
-          <div class="post-picture-grid" aria-label="帖子图片">
-            <figure
-              v-for="(url, index) in pictureImages"
-              :key="index + ':' + url"
-              class="post-picture-item"
+        <div class="post-composer-row">
+          <span class="post-composer-label">{{ isPicture ? "图片介绍" : "正文" }}</span>
+          <div class="post-composer-content">
+            <VpPostEditor
+              v-show="!preview"
+              ref="editor"
+              v-model="draft.nodes"
+              :mode="isPicture ? 'picture' : 'article'"
+              :disabled="busy || !canWrite"
+              @error="handleEditorError"
+              @validity-change="editorInvalid = !$event"
+              @image-click="tools?.chooseImage()"
+              @emoticon-click="tools?.openEmoji()"
+              @mention-click="tools?.openMention()"
             >
-              <img :src="url" :alt="'第 ' + (index + 1) + ' 张图片'" />
-              <figcaption>
-                <button
-                  :disabled="busy || !canWrite"
-                  :aria-pressed="draft.cover === url"
-                  :aria-label="'将第 ' + (index + 1) + ' 张图片设为封面'"
-                  type="button"
-                  @click="draft.cover = url"
-                >
-                  {{ draft.cover === url ? "封面" : "设为封面" }}
-                </button>
-                <button
-                  :disabled="busy || index === 0 || !canWrite"
-                  :aria-label="'上移第 ' + (index + 1) + ' 张图片'"
-                  title="上移图片"
-                  type="button"
-                  @click="movePicture(index, -1)"
-                >
-                  <v-icon size="16">mdi-arrow-left</v-icon>
-                </button>
-                <button
-                  :disabled="busy || index === pictureImages.length - 1 || !canWrite"
-                  :aria-label="'下移第 ' + (index + 1) + ' 张图片'"
-                  title="下移图片"
-                  type="button"
-                  @click="movePicture(index, 1)"
-                >
-                  <v-icon size="16">mdi-arrow-right</v-icon>
-                </button>
-                <button
-                  :disabled="busy || !canWrite"
-                  :aria-label="'移除第 ' + (index + 1) + ' 张图片'"
-                  title="移除图片"
-                  type="button"
-                  @click="removePicture(index)"
-                >
-                  <v-icon size="16">mdi-close</v-icon>
-                </button>
-              </figcaption>
-            </figure>
-            <button
-              v-if="pictureImages.length < maxPictureCount"
-              :disabled="busy || !canWrite || preview"
-              class="post-picture-add"
-              type="button"
-              @click="tools?.chooseImage()"
-            >
-              <v-icon size="32">mdi-plus-circle</v-icon>
-              <span>点击添加图片</span>
-              <small
-                >{{ pictureImages.length }} / {{ maxPictureCount }} 张 · JPG、PNG、GIF、WebP</small
-              >
-            </button>
-          </div>
-          <p v-if="uploading" class="post-composer-hint" role="status">正在上传图片…</p>
-        </div>
-      </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">发布版块</span>
-        <div>
-          <v-radio-group
-            v-model="draft.forumId"
-            :disabled="busy || !canWrite || !!source"
-            inline
-            hide-details
-            aria-label="发布版块"
-          >
-            <v-radio
-              v-for="forum in forums"
-              :key="forum.id"
-              :label="forum.name"
-              :value="forum.id"
-              color="var(--tgc-btn-1)"
+              <template #insert-panel>
+                <VpPostTools
+                  ref="tools"
+                  :contextId="contextVersion"
+                  :cookie="toolCookie"
+                  :disabled="pending || !canWrite"
+                  :gid="draft.gid"
+                  hideToolbar
+                  @image="insertImage"
+                  @emoticon="insertEmoticon"
+                  @mention="insertMention"
+                  @upload-busy="uploading = $event"
+                />
+              </template>
+            </VpPostEditor>
+            <div
+              v-if="preview"
+              class="post-composer-preview"
+              aria-label="帖子预览"
+              @click.prevent
+              v-html="previewHtml"
             />
-          </v-radio-group>
+            <div class="post-composer-content-footer">
+              <v-btn
+                :disabled="busy || editorInvalid"
+                variant="text"
+                size="small"
+                :prepend-icon="preview ? 'mdi-pencil-outline' : 'mdi-eye-outline'"
+                @click="preview = !preview"
+                >{{ preview ? "继续编辑" : "预览" }}</v-btn
+              >
+              <span
+                >{{ contentLength }} / {{ isPicture ? 500 : 30000
+                }}<template v-if="!isPicture">
+                  · {{ previewDocument.images.length }} / 50 张图片</template
+                ></span
+              >
+            </div>
+          </div>
+        </div>
+        <div v-if="isPicture" class="post-composer-row">
+          <span class="post-composer-label">上传图片</span>
+          <div>
+            <div class="post-picture-grid" aria-label="帖子图片">
+              <figure
+                v-for="(url, index) in pictureImages"
+                :key="index + ':' + url"
+                class="post-picture-item"
+              >
+                <img :src="url" :alt="'第 ' + (index + 1) + ' 张图片'" />
+                <figcaption>
+                  <button
+                    :disabled="busy || !canWrite"
+                    :aria-pressed="draft.cover === url"
+                    :aria-label="'将第 ' + (index + 1) + ' 张图片设为封面'"
+                    type="button"
+                    @click="draft.cover = url"
+                  >
+                    {{ draft.cover === url ? "封面" : "设为封面" }}
+                  </button>
+                  <button
+                    :disabled="busy || index === 0 || !canWrite"
+                    :aria-label="'上移第 ' + (index + 1) + ' 张图片'"
+                    title="上移图片"
+                    type="button"
+                    @click="movePicture(index, -1)"
+                  >
+                    <v-icon size="16">mdi-arrow-left</v-icon>
+                  </button>
+                  <button
+                    :disabled="busy || index === pictureImages.length - 1 || !canWrite"
+                    :aria-label="'下移第 ' + (index + 1) + ' 张图片'"
+                    title="下移图片"
+                    type="button"
+                    @click="movePicture(index, 1)"
+                  >
+                    <v-icon size="16">mdi-arrow-right</v-icon>
+                  </button>
+                  <button
+                    :disabled="busy || !canWrite"
+                    :aria-label="'移除第 ' + (index + 1) + ' 张图片'"
+                    title="移除图片"
+                    type="button"
+                    @click="removePicture(index)"
+                  >
+                    <v-icon size="16">mdi-close</v-icon>
+                  </button>
+                </figcaption>
+              </figure>
+              <button
+                v-if="pictureImages.length < maxPictureCount"
+                :disabled="busy || !canWrite || preview"
+                class="post-picture-add"
+                type="button"
+                @click="tools?.chooseImage()"
+              >
+                <v-icon size="32">mdi-plus-circle</v-icon>
+                <span>点击添加图片</span>
+                <small
+                  >{{ pictureImages.length }} / {{ maxPictureCount }} 张 ·
+                  JPG、PNG、GIF、WebP</small
+                >
+              </button>
+            </div>
+            <p v-if="uploading" class="post-composer-hint" role="status">正在上传图片…</p>
+          </div>
+        </div>
+      </section>
+      <section class="post-composer-section">
+        <h2 class="post-composer-section-title">发布设置</h2>
+        <div class="post-composer-row">
+          <span class="post-composer-label">发布版块</span>
+          <div>
+            <v-radio-group
+              v-model="draft.forumId"
+              :disabled="busy || !canWrite || !!source"
+              inline
+              hide-details
+              aria-label="发布版块"
+            >
+              <v-radio
+                v-for="forum in forums"
+                :key="forum.id"
+                :label="forum.name"
+                :value="forum.id"
+                color="var(--tgc-btn-1)"
+              />
+            </v-radio-group>
+            <v-select
+              v-if="categories.length > 1"
+              v-model="draft.cateId"
+              :disabled="busy || !canWrite"
+              :items="categories"
+              item-title="name"
+              item-value="id"
+              label="版块分类"
+              variant="outlined"
+              density="compact"
+              hide-details
+              class="post-composer-select"
+            />
+          </div>
+        </div>
+        <div class="post-composer-row">
+          <span class="post-composer-label">选择话题</span>
+          <div>
+            <p class="post-composer-hint">选择相关角色、内容分类，方便其他旅行者发现</p>
+            <div class="post-composer-topics">
+              <v-chip
+                v-for="id in draft.topicIds"
+                :key="id"
+                :closable="!busy && canWrite"
+                size="small"
+                @click:close="removeTopic(id)"
+                >{{ topicNames.get(id) || "话题 " + id }}</v-chip
+              >
+            </div>
+            <div class="post-composer-topic-input">
+              <v-text-field
+                v-model="topicLink"
+                :disabled="busy || !canWrite || topicLoading"
+                density="compact"
+                hide-details
+                label="米游社话题链接"
+                variant="outlined"
+                @keydown.enter.prevent="addTopic"
+              />
+              <v-btn
+                :disabled="busy || !canWrite || !topicLink.trim()"
+                :loading="topicLoading"
+                variant="tonal"
+                @click="addTopic"
+                >添加</v-btn
+              >
+            </div>
+          </div>
+        </div>
+        <div v-if="!isPicture && coverItems.length > 1" class="post-composer-row">
+          <span class="post-composer-label">帖子封面</span>
           <v-select
-            v-if="categories.length > 1"
-            v-model="draft.cateId"
+            v-model="draft.cover"
             :disabled="busy || !canWrite"
-            :items="categories"
-            item-title="name"
-            item-value="id"
-            label="版块分类"
+            :items="coverItems"
+            item-title="title"
+            item-value="value"
+            aria-label="帖子封面"
             variant="outlined"
             density="compact"
             hide-details
             class="post-composer-select"
           />
         </div>
-      </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">选择话题</span>
-        <div>
-          <p class="post-composer-hint">选择相关角色、内容分类，方便其他旅行者发现</p>
-          <div class="post-composer-topics">
-            <v-chip
-              v-for="id in draft.topicIds"
-              :key="id"
-              :closable="!busy && canWrite"
-              size="small"
-              @click:close="removeTopic(id)"
-              >{{ topicNames.get(id) || "话题 " + id }}</v-chip
-            >
-          </div>
-          <div class="post-composer-topic-input">
-            <v-text-field
-              v-model="topicLink"
-              :disabled="busy || !canWrite || topicLoading"
-              density="compact"
+      </section>
+      <section class="post-composer-section">
+        <h2 class="post-composer-section-title">声明与授权</h2>
+        <div class="post-composer-row">
+          <span class="post-composer-label">我的原创</span>
+          <div class="post-composer-original">
+            <v-switch
+              v-model="draft.isOriginal"
+              :disabled="busy || !canWrite"
+              :true-value="1"
+              :false-value="0"
+              aria-label="声明原创"
+              color="var(--tgc-od-blue)"
               hide-details
-              label="米游社话题链接"
-              variant="outlined"
-              @keydown.enter.prevent="addTopic"
+              density="compact"
             />
-            <v-btn
-              :disabled="busy || !canWrite || !topicLink.trim()"
-              :loading="topicLoading"
-              variant="tonal"
-              @click="addTopic"
-              >添加</v-btn
-            >
+            <span class="post-composer-hint">声明此帖由我独立创作</span>
           </div>
         </div>
-      </div>
-      <div v-if="!isPicture && coverItems.length > 1" class="post-composer-row">
-        <span class="post-composer-label">帖子封面</span>
-        <v-select
-          v-model="draft.cover"
-          :disabled="busy || !canWrite"
-          :items="coverItems"
-          item-title="title"
-          item-value="value"
-          aria-label="帖子封面"
-          variant="outlined"
-          density="compact"
-          hide-details
-          class="post-composer-select"
-        />
-      </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">我的原创</span>
-        <div class="post-composer-original">
-          <v-switch
-            v-model="draft.isOriginal"
+        <div class="post-composer-row">
+          <span class="post-composer-label">转载授权</span>
+          <v-btn-toggle
+            v-model="draft.republishAuthorization"
             :disabled="busy || !canWrite"
-            :true-value="1"
-            :false-value="0"
-            aria-label="声明原创"
-            color="var(--tgc-btn-1)"
-            hide-details
-            density="compact"
-          />
-          <span class="post-composer-hint">声明此帖由我独立创作</span>
-        </div>
-      </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">转载授权</span>
-        <v-select
-          v-model="draft.republishAuthorization"
-          :disabled="busy || !canWrite"
-          :items="authorizationItems"
-          aria-label="转载授权"
-          variant="outlined"
-          density="compact"
-          hide-details
-          class="post-composer-select"
-        />
-      </div>
-      <div class="post-composer-row">
-        <span class="post-composer-label">AI 生成内容</span>
-        <v-select
-          v-model="draft.userAiContentChoice"
-          :disabled="busy || !canWrite"
-          :items="aiContentItems"
-          aria-label="AI 内容声明"
-          variant="outlined"
-          density="compact"
-          hide-details
-          class="post-composer-select"
-        />
-      </div>
-      <div class="post-composer-row post-composer-submit-row">
-        <span aria-hidden="true" />
-        <div>
-          <p v-if="error" class="post-composer-error" role="alert">{{ error }}</p>
-          <v-btn v-if="conflict" :disabled="busy" variant="text" @click="reloadPost"
-            >载入最新帖子</v-btn
+            :mandatory="true"
+            aria-label="转载授权"
+            class="post-composer-toggle"
+            variant="outlined"
           >
-          <p class="post-composer-hint">{{ accountHint }} · 返回后保留本窗口草稿</p>
-          <v-btn
-            :disabled="busy || topicLoading || editorInvalid || !canWrite || loading || !!loadError"
-            :loading="pending"
-            color="var(--tgc-btn-1)"
-            size="large"
-            variant="flat"
-            type="submit"
-            class="post-composer-save"
-            >保存修改</v-btn
-          >
+            <v-tooltip
+              v-for="item in authorizationItems"
+              :key="item.value"
+              :text="item.title"
+              location="top"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="tooltipProps"
+                  :aria-label="item.title"
+                  :icon="item.icon"
+                  :value="item.value"
+                  size="small"
+                />
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
         </div>
-      </div>
+        <div class="post-composer-row">
+          <span class="post-composer-label">AI 生成内容</span>
+          <v-btn-toggle
+            v-model="draft.userAiContentChoice"
+            :disabled="busy || !canWrite"
+            :mandatory="true"
+            aria-label="AI 内容声明"
+            class="post-composer-toggle"
+            variant="outlined"
+          >
+            <v-tooltip
+              v-for="item in aiContentItems"
+              :key="item.value"
+              :text="item.title"
+              location="top"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="tooltipProps"
+                  :aria-label="item.title"
+                  :icon="item.icon"
+                  :value="item.value"
+                  size="small"
+                />
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
+        </div>
+      </section>
     </template>
   </form>
 </template>
@@ -301,7 +327,6 @@ import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { assertPostDocumentContent, buildPostDocument } from "@utils/bbsPostDocument.js";
-import { deletePostDraft, getPostDraft, savePostDraft } from "@utils/bbsPostDraft.js";
 import { serializePostDocument } from "@utils/bbsPostHtml.js";
 import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbsPostPicture.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
@@ -313,6 +338,7 @@ import VpPostEditor from "./vp-post-editor.vue";
 import VpPostTools from "./vp-post-tools.vue";
 
 const props = defineProps<{
+  formId: string;
   gid: number;
   source: TGApp.BBS.Post.FullData;
 }>();
@@ -339,12 +365,19 @@ const topicLoading = ref<boolean>(false);
 const topicNames = ref<Map<number, string>>(new Map());
 const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
-let draftKey = "";
-let draftUid = "";
 let seed: TGApp.BBS.Post.FullData | undefined;
 let active = true;
 
 const busy = computed<boolean>(() => pending.value || uploading.value);
+const canSubmit = computed<boolean>(
+  () =>
+    !busy.value &&
+    !topicLoading.value &&
+    !editorInvalid.value &&
+    canWrite.value &&
+    !loading.value &&
+    !loadError.value,
+);
 const isPicture = computed<boolean>(() => props.source.post.view_type === 2);
 const pictureImages = computed<Array<string>>(() => draft.value.imageUrls ?? []);
 const contentLength = computed<number>(() => {
@@ -362,13 +395,6 @@ const canWrite = computed<boolean>(
     !!uid.value &&
     cookie.value?.ltuid === uid.value &&
     !!cookie.value?.ltoken.trim(),
-);
-const accountHint = computed<string>(() =>
-  incognito.value
-    ? "无痕模式下仅可浏览"
-    : canWrite.value
-      ? `编辑账号：${briefInfo.value.nickname || uid.value}`
-      : "请先登录米游社账号",
 );
 const toolCookie = computed<Record<string, string> | undefined>(() =>
   canWrite.value && cookie.value
@@ -423,14 +449,22 @@ const coverItems = computed<Array<{ title: string; value: string }>>(() => [
   })),
 ]);
 const aiContentItems = [
-  { title: "未设置", value: "USER_AI_CONTENT_CHOICE_UNKNOWN" },
-  { title: "不含 AI 生成内容", value: "USER_AI_CONTENT_CHOICE_NOT_AI" },
-  { title: "含 AI 生成内容", value: "USER_AI_CONTENT_CHOICE_IS_AI" },
+  { title: "未设置", value: "USER_AI_CONTENT_CHOICE_UNKNOWN", icon: "mdi-help-circle-outline" },
+  {
+    title: "不含 AI 生成内容",
+    value: "USER_AI_CONTENT_CHOICE_NOT_AI",
+    icon: "mdi-robot-off-outline",
+  },
+  {
+    title: "含 AI 生成内容",
+    value: "USER_AI_CONTENT_CHOICE_IS_AI",
+    icon: "mdi-robot-outline",
+  },
 ];
 const authorizationItems = [
-  { title: "未设置转载授权", value: 0 },
-  { title: "禁止转载或摘编", value: 1 },
-  { title: "允许规范转载", value: 2 },
+  { title: "未设置转载授权", value: 0, icon: "mdi-file-document-outline" },
+  { title: "禁止转载或摘编", value: 1, icon: "mdi-share-off-outline" },
+  { title: "允许规范转载", value: 2, icon: "mdi-share-variant-outline" },
 ];
 
 watch(preview, (value) => {
@@ -452,9 +486,7 @@ watch(
     incognito.value,
   ],
   () => {
-    rememberDraft();
     contextVersion.value += 1;
-    draftKey = "";
     void initialize();
   },
   { flush: "sync", immediate: true },
@@ -473,7 +505,6 @@ watch(
   },
 );
 onBeforeUnmount(() => {
-  rememberDraft();
   active = false;
   contextVersion.value += 1;
 });
@@ -493,18 +524,7 @@ function emptyDraft(): TGApp.BBS.PostEdit.Settings {
   };
 }
 
-function rememberDraft(): void {
-  if (draftKey && draftUid && seed && !loadError.value)
-    savePostDraft(draftUid, seed.post.post_id, {
-      settings: structuredClone(toRaw(draft.value)),
-      seed,
-    });
-}
-
 async function initialize(force: boolean = false): Promise<void> {
-  const key = `${uid.value}:${props.source.post.post_id}`;
-  if (!force && key === draftKey && !loadError.value) return;
-  rememberDraft();
   const version = ++contextVersion.value;
   loading.value = true;
   loadError.value = "";
@@ -533,11 +553,7 @@ async function initialize(force: boolean = false): Promise<void> {
     }
     const initial = getPostEditSettings(seed);
     maxPictureCount.value = Math.max(18, initial.imageUrls?.length ?? 0);
-    const remembered = force ? undefined : getPostDraft(uid.value ?? "", seed.post.post_id);
-    draft.value = remembered ? structuredClone(remembered.settings) : initial;
-    if (remembered?.seed) seed = structuredClone(remembered.seed);
-    draftKey = key;
-    draftUid = uid.value ?? "";
+    draft.value = initial;
     topicNames.value = new Map((seed?.topics ?? []).map((item) => [item.id, item.name]));
   } catch (cause) {
     if (active && version === contextVersion.value) loadError.value = TGHttps.getErrMsg(cause);
@@ -553,9 +569,9 @@ async function reloadPost(): Promise<void> {
   try {
     const confirmed = await showDialog.checkF({
       title: "载入最新帖子",
-      text: "这会用服务器上的最新帖子替换当前编辑草稿。",
+      text: "这会用服务器上的最新帖子替换当前未保存的内容。",
       confirmLabel: "载入最新",
-      cancelLabel: "保留草稿",
+      cancelLabel: "继续编辑",
     });
     if (confirmed && active && version === contextVersion.value) await initialize(true);
   } finally {
@@ -702,45 +718,77 @@ async function savePost(): Promise<void> {
     const response = execution.data;
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     const postId = source.post.post_id;
-    deletePostDraft(draftUid, postId);
-    draftKey = "";
     seed = undefined;
     pending.value = false;
     showSnackbar.success(`${action}成功`);
     emits("saved", postId);
   } catch (cause) {
-    if (active && version === contextVersion.value)
-      error.value = `${TGHttps.getErrMsg(cause)}；草稿已保留`;
+    if (active && version === contextVersion.value) {
+      error.value = TGHttps.getErrMsg(cause);
+      showSnackbar.error(error.value);
+    }
   } finally {
     pending.value = false;
   }
 }
 
-defineExpose({ busy });
+defineExpose({ busy, canSubmit, pending });
 </script>
 <style lang="scss" scoped>
 .post-composer {
-  padding: 40px 48px 48px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 32px;
+  gap: 16px;
+}
+
+.post-composer-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  gap: 4px;
+}
+
+.post-composer-section-title {
+  margin: 0 0 8px;
+  color: var(--common-text-title);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
 }
 
 .post-composer-row {
   display: grid;
   align-items: start;
-  margin-bottom: 32px;
-  gap: 24px;
-  grid-template-columns: 96px minmax(0, 1fr);
+  padding: 12px 0;
+  gap: 12px;
+  grid-template-columns: 88px minmax(0, 1fr);
+
+  & + .post-composer-row {
+    border-top: 1px solid var(--common-shadow-1);
+  }
 }
 
 .post-composer-label {
-  padding-top: 12px;
-  color: var(--app-page-content);
+  padding-top: 10px;
+  color: var(--box-text-2);
   font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
 }
 
 .post-composer-content {
   overflow: hidden;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
+  border-radius: 8px;
+  background: var(--app-page-bg);
+}
+
+.post-composer-content :deep(.tgpe-editor.ql-container) {
   background: var(--app-page-bg);
 }
 
@@ -748,7 +796,9 @@ defineExpose({ busy });
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-4);
   color: var(--box-text-4);
   font-size: 12px;
   gap: 12px;
@@ -757,8 +807,10 @@ defineExpose({ busy });
 .post-composer-preview {
   min-height: 360px;
   padding: 24px;
+  background: var(--app-page-bg);
   color: var(--app-page-content);
   font-size: 14px;
+  line-height: 24px;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -805,51 +857,113 @@ defineExpose({ busy });
   flex: 0 0 auto;
 }
 
+.post-composer-toggle.v-btn-toggle {
+  display: inline-flex;
+  overflow: hidden;
+  width: max-content;
+  max-width: 100%;
+  height: 36px;
+  flex: none;
+  align-items: stretch;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  justify-self: start;
+}
+
+.post-composer-toggle :deep(.v-btn) {
+  min-width: 44px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--box-text-4);
+}
+
+.post-composer-toggle :deep(.v-btn + .v-btn) {
+  border-inline-start: 1px solid var(--common-shadow-2) !important;
+  margin-inline-start: 0;
+}
+
+.post-composer-toggle :deep(.v-btn__overlay),
+.post-composer-toggle :deep(.v-btn__underlay) {
+  opacity: 0 !important;
+}
+
+.post-composer-toggle :deep(.v-btn.v-btn--active),
+.post-composer-toggle :deep(.v-btn.v-btn--selected),
+.post-composer-toggle :deep(.v-btn[aria-pressed="true"]) {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
+
+.post-composer-toggle :deep(.v-btn:focus-visible) {
+  z-index: 1;
+  outline: 2px solid var(--tgc-od-blue);
+  outline-offset: -2px;
+}
+
+.post-composer-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.post-composer-feedback-top {
+  padding: 12px 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-4);
+}
+
 .post-composer-select {
   width: 100%;
   max-width: 440px;
 }
 
-.post-composer-submit-row {
-  margin-bottom: 0;
-}
-
-.post-composer-save {
-  min-width: 200px;
-  margin-top: 24px;
-}
-
 .post-composer-error {
-  margin: 0 0 12px;
   color: var(--tgc-od-red);
   font-size: 13px;
   overflow-wrap: anywhere;
 }
 
 .post-composer-state {
+  display: flex;
   min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   color: var(--box-text-4);
+  gap: 12px;
   text-align: center;
+
+  p {
+    margin: 0;
+  }
 }
 
 .post-picture-grid {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
 }
 
 .post-picture-item {
   overflow: hidden;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
+  border-radius: 8px;
   margin: 0;
-  background: var(--box-bg-4);
+  background: var(--box-bg-1);
 }
 
 .post-picture-item img {
   display: block;
   width: 100%;
-  height: 160px;
+  height: auto;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
@@ -858,6 +972,8 @@ defineExpose({ busy });
   min-height: 36px;
   align-items: center;
   padding: 4px;
+  border-top: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-4);
   gap: 4px;
 }
 
@@ -867,25 +983,29 @@ defineExpose({ busy });
   min-height: 28px;
   align-items: center;
   justify-content: center;
+  padding: 2px 6px;
+  border: 0;
   border-radius: 4px;
+  background: transparent;
   color: var(--box-text-2);
   cursor: pointer;
   font-size: 12px;
 }
 
 .post-picture-item button[aria-pressed="true"] {
+  background: var(--box-bg-2);
   color: var(--common-text-title);
 }
 
 .post-picture-add {
   display: flex;
-  min-height: 200px;
+  min-height: 180px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 16px;
   border: 1px dashed var(--common-shadow-2);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-4);
   color: var(--box-text-2);
   cursor: pointer;
@@ -910,24 +1030,31 @@ defineExpose({ busy });
   outline-offset: 2px;
 }
 
+.post-picture-add:hover:not(:disabled),
+.post-picture-item button:hover:not(:disabled) {
+  border-color: var(--common-text-title);
+  background: var(--box-bg-2);
+  color: var(--common-text-title);
+}
+
 @media (width <= 800px) {
   .post-composer {
-    padding: 24px;
-  }
-
-  .post-composer-row {
-    gap: 16px;
-    grid-template-columns: 80px minmax(0, 1fr);
+    padding-bottom: 24px;
   }
 }
 
 @media (width <= 600px) {
   .post-composer {
-    padding: 20px 16px;
+    padding-bottom: 16px;
+    gap: 12px;
+  }
+
+  .post-composer-section {
+    padding: 12px;
   }
 
   .post-composer-row {
-    margin-bottom: 24px;
+    padding: 10px 0;
     gap: 8px;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -938,14 +1065,6 @@ defineExpose({ busy });
 
   .post-composer-content-footer {
     flex-wrap: wrap;
-  }
-
-  .post-composer-submit-row > span {
-    display: none;
-  }
-
-  .post-composer-save {
-    width: 100%;
   }
 }
 </style>

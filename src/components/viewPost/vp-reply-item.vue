@@ -1,5 +1,11 @@
 <template>
-  <div ref="VpReplyRef" class="tpr-reply-box">
+  <div
+    ref="VpReplyRef"
+    :aria-label="`第 ${props.modelValue.reply.floor_id} 楼回复`"
+    :class="{ 'tpr-reply-box--nested': props.mode === 'sub' }"
+    class="tpr-reply-box"
+    role="article"
+  >
     <div
       v-if="props.modelValue.user.reply_bubble !== null"
       :title="props.modelValue.user.reply_bubble.name"
@@ -7,7 +13,14 @@
     >
       <TMiImg :ori="true" :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
-    <div class="tpr-user" @click="handleUser()">
+    <div
+      :aria-label="`查看 ${props.modelValue.user.nickname} 的用户信息`"
+      class="tpr-user"
+      role="button"
+      tabindex="0"
+      @click="handleUser()"
+      @keydown.enter.space.prevent="handleUser()"
+    >
       <div class="tpru-left">
         <div class="avatar">
           <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
@@ -23,10 +36,10 @@
         <span v-if="props.modelValue.is_lz" class="tpru-lz">楼主</span>
       </div>
     </div>
-    <div class="tpr-content">
+    <div aria-label="回复内容" class="tpr-content">
       <TpParser :data="replyContent" />
     </div>
-    <div class="tpr-info">
+    <div aria-label="回复互动" class="tpr-info">
       <div class="tpri-left">
         <span :title="fmtUtil.dateTime(props.modelValue.reply.created_at * 1000)">
           {{ fmtUtil.nearTime(props.modelValue.reply.created_at) }}
@@ -37,6 +50,7 @@
         <button
           :aria-pressed="isLiked"
           :disabled="interactionBusy || actionBusy !== null"
+          :aria-busy="actionBusy === 'like'"
           :class="{ active: isLiked, 'tpr-action-busy': actionBusy === 'like' }"
           :title="isLiked ? '取消点赞' : '点赞'"
           :aria-label="isLiked ? '取消点赞' : '点赞'"
@@ -60,9 +74,14 @@
         </button>
         <span
           v-if="props.modelValue.sub_reply_count > 0"
+          :aria-expanded="showSub"
+          aria-label="查看子回复"
           class="tpr-reply"
+          role="button"
+          tabindex="0"
           title="查看子回复"
           @click.stop="showReply()"
+          @keydown.enter.space.prevent.stop="showReply()"
         >
           <v-icon size="small">mdi-message-text</v-icon>
           <span>{{ props.modelValue.sub_reply_count }}</span>
@@ -89,23 +108,31 @@
                 @reply="handleReplyFromChild"
               />
               <div v-if="isLast" class="tpr-list-item">
-                <v-chip color="blue" label>没有更多了</v-chip>
+                <v-chip label variant="tonal">没有更多了</v-chip>
               </div>
               <div v-else class="tpr-list-item">
-                <v-btn :loading color="blue" @click="loadSub()">加载更多</v-btn>
+                <v-btn :loading size="small" variant="tonal" @click="loadSub()">加载更多</v-btn>
               </div>
             </v-list>
           </v-menu>
         </span>
       </div>
     </div>
-    <div :title="`ID:${props.modelValue.reply.reply_id}`" class="tpr-extra">
-      <div class="tpr-share" data-html2canvas-ignore title="分享" @click="share">
+    <div :title="`ID:${props.modelValue.reply.reply_id}`" aria-label="回复操作" class="tpr-extra">
+      <button
+        aria-label="分享回复"
+        class="tpr-action tpr-share"
+        data-html2canvas-ignore
+        title="分享"
+        type="button"
+        @click.stop="share"
+      >
         <v-icon size="small">mdi-share-variant</v-icon>
-      </div>
+      </button>
       <button
         v-if="isPinned && canPin"
         :disabled="interactionBusy || actionBusy !== null"
+        :aria-busy="actionBusy === 'pin'"
         :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
         aria-label="取消置顶"
         class="tpr-action tpr-pin actionable"
@@ -124,6 +151,7 @@
       <button
         v-else-if="canPin"
         :disabled="interactionBusy || actionBusy !== null"
+        :aria-busy="actionBusy === 'pin'"
         :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
         aria-label="置顶回复"
         class="tpr-action tpr-pin actionable"
@@ -138,6 +166,7 @@
       <button
         v-if="canDeleteReply"
         :disabled="interactionBusy || actionBusy !== null"
+        :aria-busy="actionBusy === 'delete'"
         :class="{ 'tpr-action-busy': actionBusy === 'delete' }"
         aria-label="删除回复"
         class="tpr-action tpr-delete"
@@ -151,6 +180,7 @@
       </button>
       <button
         :disabled="interactionBusy"
+        :aria-busy="interactionBusy"
         aria-label="导出数据"
         class="tpr-action tpr-debug"
         data-html2canvas-ignore
@@ -728,12 +758,18 @@ async function handleUser(): Promise<void> {
   flex-shrink: 0;
   align-items: flex-start;
   justify-content: center;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--app-page-content);
   word-break: break-all;
+}
+
+.tpr-reply-box--nested {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-4);
 }
 
 .tpr-bubble {
@@ -744,7 +780,7 @@ async function handleUser(): Promise<void> {
   border-top: 1px inset var(--common-shadow-1);
   border-right: 1px inset var(--common-shadow-1);
   background-color: v-bind("props.modelValue.user.reply_bubble?.bg_color");
-  border-top-right-radius: 4px;
+  border-top-right-radius: 8px;
   opacity: 0.5;
 }
 
@@ -758,10 +794,24 @@ async function handleUser(): Promise<void> {
   position: relative;
   display: flex;
   max-width: 100%;
-  height: 40px;
+  min-height: 40px;
   align-items: center;
   justify-content: flex-start;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
   cursor: pointer;
+  gap: 4px;
+}
+
+.tpr-user:hover {
+  border-color: var(--common-shadow-1);
+  background: var(--box-bg-4);
+}
+
+.tpr-user:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
 }
 
 .tpru-left {
@@ -769,6 +819,7 @@ async function handleUser(): Promise<void> {
   display: flex;
   width: 40px;
   height: 40px;
+  flex: 0 0 40px;
   align-items: center;
   justify-content: center;
 }
@@ -820,11 +871,13 @@ async function handleUser(): Promise<void> {
 .tpru-right {
   display: flex;
   overflow: hidden;
+  min-width: 0;
   align-items: center;
   justify-content: center;
   column-gap: 4px;
   font-family: var(--font-title);
   font-size: 16px;
+  font-weight: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 
@@ -848,6 +901,8 @@ async function handleUser(): Promise<void> {
 .tpr-content {
   position: relative;
   width: 100%;
+  padding: 4px 0 8px;
+  line-height: 20px;
 }
 
 .tpr-info {
@@ -855,19 +910,24 @@ async function handleUser(): Promise<void> {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid var(--common-shadow-1);
+  gap: 8px;
 }
 
 .tpri-left {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--box-text-4);
   font-size: 12px;
   gap: 4px;
-  opacity: 0.5;
+  opacity: 0.85;
 }
 
 .tpri-right {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 4px;
@@ -877,28 +937,32 @@ async function handleUser(): Promise<void> {
 .tpr-like,
 .tpr-reply-action {
   display: flex;
+  min-height: 28px;
   align-items: center;
   justify-content: center;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--box-text-2);
   cursor: pointer;
+  font: inherit;
   gap: 4px;
 }
 
-.tpr-action {
-  padding: 0;
-  border: 0;
-  margin: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-
 .tpr-action:focus-visible {
-  outline: 2px solid var(--tgc-od-blue);
+  outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }
 
 .tpr-action:disabled {
-  cursor: wait;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tpr-action:hover:not(:disabled) {
+  border-color: var(--common-shadow-1);
+  background: var(--box-bg-4);
 }
 
 .tpr-like.active {
@@ -912,15 +976,31 @@ async function handleUser(): Promise<void> {
 
 .tpr-reply {
   display: flex;
+  min-height: 28px;
   align-items: center;
   justify-content: center;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--box-text-2);
   cursor: pointer;
   gap: 4px;
+}
+
+.tpr-reply:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.tpr-reply:hover {
+  border-color: var(--common-shadow-1);
+  background: var(--box-bg-4);
 }
 
 .tpr-extra {
   display: flex;
   width: 100%;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   font-size: 12px;
@@ -939,31 +1019,25 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-delete {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--tgc-od-red);
-  cursor: pointer;
 }
 
 .tpr-debug {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0.3;
+  color: var(--box-text-4);
+  opacity: 0.65;
 }
 
 .tpr-reply-user {
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--box-text-4);
   gap: 4px;
-  opacity: 0.3;
+  opacity: 0.8;
 
   :last-child {
-    color: #00c3ffff;
-    text-decoration: underline solid #00c3ffff;
+    color: var(--tgc-od-blue);
+    text-decoration: underline solid var(--tgc-od-blue);
     text-underline-position: under;
   }
 }
@@ -972,7 +1046,8 @@ async function handleUser(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.3;
+  color: var(--box-text-4);
+  opacity: 0.8;
 }
 
 .tpr-reply-sub {
@@ -985,7 +1060,8 @@ async function handleUser(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   padding: 8px;
-  border-radius: 4px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
   background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 8px;
@@ -997,8 +1073,11 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-share {
-  cursor: pointer;
-  opacity: 0.3;
+  opacity: 0.7;
+}
+
+.tpr-share:hover:not(:disabled) {
+  opacity: 1;
 }
 
 .tpr-share-info {
@@ -1021,5 +1100,25 @@ async function handleUser(): Promise<void> {
 .tpr-share-info.bottom {
   bottom: 8px;
   left: 8px;
+}
+
+@media (width <= 480px) {
+  .tpr-reply-box {
+    padding: 8px;
+  }
+
+  .tpr-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tpri-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tpr-extra {
+    justify-content: flex-start;
+  }
 }
 </style>

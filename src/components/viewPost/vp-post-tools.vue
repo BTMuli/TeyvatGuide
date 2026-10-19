@@ -277,6 +277,10 @@ function insertMention(): void {
 defineExpose({ chooseImage, openEmoji, openMention });
 </script>
 <style lang="scss" scoped>
+.post-tools {
+  --post-tools-error-text: color-mix(in srgb, var(--tgc-od-red) 40%, var(--app-page-content));
+}
+
 .post-tools,
 .post-tools-panel {
   display: flex;
@@ -285,15 +289,18 @@ defineExpose({ chooseImage, openEmoji, openMention });
 }
 
 .post-tools-panel {
+  min-width: 0;
   padding: 12px;
-  border: 1px solid var(--common-shadow-2);
+  border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: var(--app-page-bg);
+  background: var(--box-bg-1);
 }
 
 .post-tools-bar,
 .post-tools-status {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -306,25 +313,36 @@ defineExpose({ chooseImage, openEmoji, openMention });
 .post-emoji-grid {
   display: grid;
   overflow: auto;
-  max-height: 160px;
+  max-height: 176px;
   gap: 4px;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
 }
 
 .post-emoji-grid button {
   display: grid;
+  min-width: 44px;
+  min-height: 44px;
   padding: 4px;
+  border: 1px solid transparent;
   border-radius: 4px;
+  background: transparent;
   cursor: pointer;
   place-items: center;
 }
 
-.post-emoji-grid button:hover {
-  background: var(--box-bg-4);
-}
-
 .post-emoji-grid button:focus-visible {
   outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.post-emoji-grid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.post-emoji-grid button:hover:not(:disabled) {
+  border-color: var(--common-shadow-1);
+  background: var(--box-bg-4);
 }
 
 .post-emoji-grid img {
@@ -335,7 +353,25 @@ defineExpose({ chooseImage, openEmoji, openMention });
 
 .post-tools-error,
 .post-tools-status {
-  color: var(--app-page-content);
+  color: var(--box-text-2);
   font-size: 12px;
+  line-height: 20px;
+}
+
+.post-tools-status {
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-4);
+}
+
+.post-tools-error {
+  padding: 8px 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-4);
+  color: var(--post-tools-error-text);
+  overflow-wrap: anywhere;
 }
 </style>

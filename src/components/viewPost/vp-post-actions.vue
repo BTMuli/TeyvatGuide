@@ -1,31 +1,36 @@
 <!-- 帖子作者操作 -->
 <template>
-  <div v-if="canManage" class="vppa" data-html2canvas-ignore>
-    <div class="vppa-actions" aria-label="帖子操作">
-      <button
-        :disabled="busy || !canEdit"
-        :title="canEdit ? '编辑帖子' : '仅支持编辑长文和图片帖'"
-        aria-label="编辑帖子"
-        class="vppa-action"
-        type="button"
-        @click="openEditor"
-      >
-        <v-icon size="16">mdi-pencil-outline</v-icon>
-        <span>编辑</span>
-      </button>
-      <button
-        :disabled="busy"
-        aria-label="删除帖子"
-        class="vppa-action vppa-delete"
-        title="删除帖子"
-        type="button"
-        @click="deletePost"
-      >
-        <v-progress-circular v-if="busy" indeterminate size="14" width="2" />
-        <v-icon v-else size="16">mdi-delete-outline</v-icon>
-        <span>删除</span>
-      </button>
-    </div>
+  <div
+    v-if="canManage"
+    :aria-busy="busy"
+    class="vppa"
+    role="group"
+    aria-label="帖子操作"
+    data-html2canvas-ignore
+  >
+    <v-btn
+      :disabled="busy || !canEdit"
+      :title="canEdit ? '编辑帖子' : '仅支持编辑长文和图片帖'"
+      aria-label="编辑帖子"
+      class="vppa-action"
+      icon="mdi-pencil-outline"
+      size="36"
+      type="button"
+      variant="flat"
+      @click="openEditor"
+    />
+    <v-btn
+      :disabled="busy"
+      :loading="busy"
+      aria-label="删除帖子"
+      class="vppa-action vppa-delete"
+      icon="mdi-delete-outline"
+      size="36"
+      title="删除帖子"
+      type="button"
+      variant="flat"
+      @click="deletePost"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -53,7 +58,7 @@ const props = defineProps<PostActionsProps>();
 const emits = defineEmits<{ deleted: [] }>();
 const router = useRouter();
 
-const { incognito, postViewWide } = storeToRefs(useAppStore());
+const { incognito } = storeToRefs(useAppStore());
 const { briefInfo, cookie, uid } = storeToRefs(useUserStore());
 const busy = ref<boolean>(false);
 let contextVersion = 0;
@@ -182,56 +187,59 @@ async function deletePost(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-.vppa {
-  display: flex;
-  width: v-bind("postViewWide ? '800px' : '400px'"); /* stylelint-disable-line value-keyword-case */
-  max-width: calc(100% - 100px);
-  box-sizing: border-box;
-  flex-direction: column;
-  align-items: flex-end;
-  margin: 8px auto 0;
-  gap: 8px;
-}
+@use "@styles/github.styles.scss" as github-styles;
 
-.vppa-actions {
+.vppa {
+  position: fixed;
+  z-index: 1;
+  top: 112px;
+  right: 16px;
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .vppa-action {
-  display: inline-flex;
-  min-height: 28px;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 8px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
-  background: var(--common-shadow-1);
-  color: var(--box-text-2);
-  cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 12px;
-  font-weight: normal;
-  gap: 4px;
+  @include github-styles.github-card;
 
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
+  border-radius: 50%;
+  color: var(--app-page-content);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  :deep(.v-icon) {
+    font-size: 20px;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
+    outline: 2px solid var(--common-text-title);
     outline-offset: 2px;
   }
 
   &:hover:not(:disabled) {
-    background: var(--common-shadow-2);
+    transform: scale(1.15);
   }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+}
+
+.dark .vppa-action {
+  @include github-styles.github-card("dark");
 }
 
 .vppa-delete {
   color: var(--tgc-od-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vppa-action {
+    transition: none;
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      transform: none;
+    }
+  }
 }
 </style>
