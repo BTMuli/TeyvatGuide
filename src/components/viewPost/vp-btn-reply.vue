@@ -30,21 +30,16 @@
       <div aria-label="回复列表与编辑器" class="tpr-main-reply">
         <div class="tpr-main-filter">
           <div class="tpr-title">
-            <div class="tpr-title-copy">
-              <v-icon size="18">mdi-message-text-outline</v-icon>
-              <span>回复列表</span>
-            </div>
+            <button
+              :disabled="writing || loading"
+              aria-label="刷新回复列表"
+              class="tpr-title-copy"
+              type="button"
+              @click="reloadReply"
+            >
+              回复列表
+            </button>
             <div class="tpr-title-actions">
-              <v-btn
-                :disabled="writing"
-                :loading
-                aria-label="刷新回复列表"
-                icon="mdi-refresh"
-                size="32"
-                title="刷新回复列表"
-                variant="text"
-                @click="reloadReply"
-              />
               <v-btn
                 :disabled="writing"
                 aria-label="关闭回复列表"
@@ -103,15 +98,30 @@
             <v-btn :loading size="small" variant="tonal" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
-        <VpReplyComposer
-          :gid="props.gid"
-          :postId="props.postId"
-          :target="replyTarget"
-          @cancel="replyTarget = undefined"
-          @published="handlePublished"
-        />
+        <button
+          ref="composerTrigger"
+          :aria-expanded="showComposer"
+          :disabled="writing"
+          aria-label="发表评论"
+          aria-haspopup="dialog"
+          class="tpr-composer-trigger"
+          type="button"
+          @click="openComment"
+        >
+          <v-icon size="20">mdi-comment-edit-outline</v-icon>
+          <span>发表评论</span>
+        </button>
       </div>
     </v-menu>
+    <VpReplyDialog
+      v-model="showComposer"
+      :ancestors="replyAncestors"
+      :gid="props.gid"
+      :postId="props.postId"
+      :target="replyTarget"
+      @closed="handleComposerClosed"
+      @published="handlePublished"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -125,9 +135,9 @@ import { emit } from "@tauri-apps/api/event";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, provide, ref, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, provide, ref, shallowRef, useTemplateRef, watch } from "vue";
 
-import VpReplyComposer from "./vp-reply-composer.vue";
+import VpReplyDialog from "./vp-reply-dialog.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
 /**
@@ -171,6 +181,10 @@ const orderList: Array<SelectItem> = [
 const pinId = ref<string>("0");
 const postOwnerId = ref<string>("");
 const replyTarget = shallowRef<TGApp.BBS.Reply.ReplyFull>();
+const replyAncestors = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const composerTrigger = useTemplateRef<HTMLButtonElement>("composerTrigger");
+const showComposer = ref<boolean>(false);
+const composerFocusOrigin = shallowRef<HTMLElement>();
 let requestVersion = 0;
 const lastId = ref<string>();
 const isLast = ref<boolean>(false);
@@ -214,11 +228,21 @@ watch(
   ],
   async () => {
     replyTarget.value = undefined;
+    replyAncestors.value = [];
+    showComposer.value = false;
     resetReplies();
     if (showOverlay.value) await loadReply();
   },
   { flush: "sync" },
 );
+
+watch(showOverlay, (visible) => {
+  if (!visible) {
+    showComposer.value = false;
+    replyTarget.value = undefined;
+    replyAncestors.value = [];
+  }
+});
 
 onBeforeUnmount(() => {
   requestVersion += 1;
@@ -266,17 +290,54 @@ function resetReplies(): void {
   loading.value = false;
 }
 
-function selectReply(item: TGApp.BBS.Reply.ReplyFull): void {
-  if (!writing.value) replyTarget.value = item;
+function openComment(): void {
+  if (writing.value || showComposer.value) return;
+  rememberComposerFocus();
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  showComposer.value = true;
+}
+
+function selectReply(
+  item: TGApp.BBS.Reply.ReplyFull,
+  ancestors: Array<TGApp.BBS.Reply.ReplyFull> = [],
+): void {
+  if (writing.value) return;
+  if (!showComposer.value) rememberComposerFocus();
+  replyTarget.value = item;
+  replyAncestors.value = ancestors;
+  showComposer.value = true;
+}
+
+function rememberComposerFocus(): void {
+  const activeElement = document.activeElement;
+  composerFocusOrigin.value = activeElement instanceof HTMLElement ? activeElement : undefined;
+}
+
+function handleComposerClosed(): void {
+  if (showComposer.value) return;
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  const origin = composerFocusOrigin.value;
+  composerFocusOrigin.value = undefined;
+  if (origin?.isConnected) {
+    origin.focus();
+    return;
+  }
+  const trigger = composerTrigger.value;
+  if (trigger?.isConnected) trigger.focus();
 }
 
 async function handleReplyChanged(): Promise<void> {
   replyTarget.value = undefined;
+  replyAncestors.value = [];
   await reloadReply();
 }
 
 async function handlePublished(): Promise<void> {
+  showComposer.value = false;
   replyTarget.value = undefined;
+  replyAncestors.value = [];
   onlyLz.value = false;
   if (orderType.value === bbsEnum.post.replyOrderType.LATEST) await reloadReply();
   else orderType.value = bbsEnum.post.replyOrderType.LATEST;
@@ -337,21 +398,15 @@ async function loadReply(): Promise<void> {
   box-shadow: 1px 3px 6px var(--common-shadow-2);
   color: var(--btn-text);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tpr-main-box:hover {
-  box-shadow: 2px 4px 12px var(--common-shadow-4);
   transform: scale(1.15);
 }
 
 .tpr-main-box:active {
   transform: scale(0.95);
-}
-
-.tpr-main-box:focus-within {
-  outline: 2px solid var(--common-text-title);
-  outline-offset: 3px;
 }
 
 .dark .tpr-main-box {
@@ -368,24 +423,29 @@ async function loadReply(): Promise<void> {
   border-radius: 50%;
 }
 
+.tpr-btn:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 3px;
+}
+
 .tpr-main-reply {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: min(360px, calc(100vw - 72px));
+  width: 300px;
   min-height: 0;
-  max-height: min(720px, calc(100vh - 24px));
+  max-height: calc(100dvh - 24px);
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--app-page-bg);
   box-shadow: 2px 2px 8px var(--common-shadow-4);
+  color: var(--app-page-content);
   row-gap: 8px;
-  transition: height 0.5s ease-in-out;
 }
 
 .tpr-main-filter {
@@ -408,7 +468,6 @@ async function loadReply(): Promise<void> {
   justify-content: space-between;
 }
 
-.tpr-title-copy,
 .tpr-title-actions {
   display: flex;
   align-items: center;
@@ -416,18 +475,67 @@ async function loadReply(): Promise<void> {
 }
 
 .tpr-title-copy {
-  color: var(--common-text-title);
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--tgc-od-blue);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+  font-family: var(--font-title);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: normal;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.tpr-title-copy:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tpr-title-copy:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
 }
 
 .tpr-title-actions {
   margin-left: auto;
 }
 
+.tpr-composer-trigger {
+  display: flex;
+  width: calc(100% + 16px);
+  min-height: 36px;
+  box-sizing: border-box;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: 0 0 7px 7px;
+  border-top: 1px solid var(--common-shadow-2);
+  margin: 0 -8px -8px;
+  background: var(--box-bg-1);
+  color: var(--app-page-content);
+  cursor: pointer;
+  font: inherit;
+  gap: 4px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: -2px;
+  }
+}
+
 .tpr-btn-close {
   border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -437,7 +545,6 @@ async function loadReply(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 }
 
 .tpr-select {
@@ -448,24 +555,16 @@ async function loadReply(): Promise<void> {
 .tpr-switch {
   position: relative;
   display: flex;
-  min-height: 32px;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  padding: 0;
+  border: 0;
   background: transparent;
   color: var(--app-page-content);
   cursor: pointer;
   font-family: var(--font-title);
-  font-size: 12px;
+  font-size: 18px;
   font-weight: normal;
-  gap: 4px;
-}
-
-.tpr-switch[aria-pressed="true"] {
-  border-color: var(--common-shadow-2);
-  background: var(--box-bg-4);
 }
 
 .tpr-switch:focus-visible {
@@ -478,14 +577,15 @@ async function loadReply(): Promise<void> {
   display: flex;
   overflow: hidden auto;
   width: 100%;
-  min-height: 80px;
-  max-height: min(440px, 42vh);
+  height: fit-content;
+  min-height: 0;
   box-sizing: border-box;
   flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 4px 0 0;
+  padding-top: 0;
+  padding-right: 4px;
   background: var(--app-page-bg);
   row-gap: 8px;
   scrollbar-gutter: stable;
@@ -508,7 +608,7 @@ async function loadReply(): Promise<void> {
 
   .tpr-main-reply {
     width: min(360px, calc(100vw - 24px));
-    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 24px);
     padding: 8px;
     border-radius: 8px;
   }
@@ -521,6 +621,17 @@ async function loadReply(): Promise<void> {
   .tpr-select {
     min-width: 120px;
     flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpr-main-box {
+    transition: none;
+  }
+
+  .tpr-main-box:hover,
+  .tpr-main-box:active {
+    transform: none;
   }
 }
 </style>

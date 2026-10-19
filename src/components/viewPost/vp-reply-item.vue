@@ -2,7 +2,6 @@
   <div
     ref="VpReplyRef"
     :aria-label="`第 ${props.modelValue.reply.floor_id} 楼回复`"
-    :class="{ 'tpr-reply-box--nested': props.mode === 'sub' }"
     class="tpr-reply-box"
     role="article"
   >
@@ -14,10 +13,10 @@
       <TMiImg :ori="true" :src="props.modelValue.user.reply_bubble.url" alt="bubble" />
     </div>
     <div
-      :aria-label="`查看 ${props.modelValue.user.nickname} 的用户信息`"
+      :aria-label="props.preview ? undefined : `查看 ${props.modelValue.user.nickname} 的用户信息`"
+      :role="props.preview ? undefined : 'button'"
+      :tabindex="props.preview ? undefined : 0"
       class="tpr-user"
-      role="button"
-      tabindex="0"
       @click="handleUser()"
       @keydown.enter.space.prevent="handleUser()"
     >
@@ -46,7 +45,7 @@
         </span>
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
-      <div class="tpri-right">
+      <div v-if="!props.preview" class="tpri-right">
         <button
           :aria-pressed="isLiked"
           :disabled="interactionBusy || actionBusy !== null"
@@ -62,24 +61,14 @@
           <v-icon v-else size="small">mdi-thumb-up</v-icon>
           {{ likeCount }}
         </button>
-        <button
-          :disabled="interactionBusy || actionBusy !== null"
-          aria-label="回复"
-          class="tpr-action tpr-reply-action"
-          title="回复"
-          type="button"
-          @click.stop="handleReply()"
-        >
-          <v-icon size="small">mdi-reply</v-icon>
-        </button>
         <span
           v-if="props.modelValue.sub_reply_count > 0"
           :aria-expanded="showSub"
-          aria-label="查看子回复"
+          aria-label="查看回复"
           class="tpr-reply"
           role="button"
           tabindex="0"
-          title="查看子回复"
+          title="查看回复"
           @click.stop="showReply()"
           @keydown.enter.space.prevent.stop="showReply()"
         >
@@ -88,6 +77,7 @@
           <v-menu
             v-model="showSub"
             :close-on-content-click="false"
+            :persistent="interactionBusy"
             activator="parent"
             location="end"
             submenu
@@ -118,7 +108,23 @@
         </span>
       </div>
     </div>
-    <div :title="`ID:${props.modelValue.reply.reply_id}`" aria-label="回复操作" class="tpr-extra">
+    <div
+      v-if="!props.preview"
+      :title="`ID:${props.modelValue.reply.reply_id}`"
+      aria-label="回复操作"
+      class="tpr-extra"
+    >
+      <button
+        :disabled="interactionBusy || actionBusy !== null"
+        aria-label="回复"
+        class="tpr-action tpr-reply-action"
+        data-html2canvas-ignore
+        title="回复"
+        type="button"
+        @click.stop="handleReply()"
+      >
+        <v-icon size="small">mdi-reply</v-icon>
+      </button>
       <button
         aria-label="分享回复"
         class="tpr-action tpr-share"
@@ -198,11 +204,13 @@
         {{ props.modelValue.reply.floor_id }}F
       </span>
     </div>
-    <div class="tpr-share-info bottom">
+    <div v-if="!props.preview" class="tpr-share-info bottom">
       <span>{{ props.modelValue.reply.post_id }}</span>
       <span v-if="props.mode === 'sub'"> | {{ props.modelValue.reply.floor_id }}F</span>
     </div>
-    <div class="tpr-share-info top">{{ props.modelValue.reply.reply_id }}</div>
+    <div v-if="!props.preview" class="tpr-share-info top">
+      {{ props.modelValue.reply.reply_id }}
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -218,6 +226,7 @@ import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { resolveReplyAncestors } from "@utils/bbsReplyChain.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -242,15 +251,26 @@ import TpParser from "./tp-parser.vue";
  * @since Beta v0.12.6
  */
 type TprReplyProps =
-  | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull; postOwnerId?: string }
-  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId?: string; postOwnerId?: string };
+  | {
+      mode: "sub";
+      modelValue: TGApp.BBS.Reply.ReplyFull;
+      postOwnerId?: string;
+      preview?: boolean;
+    }
+  | {
+      mode: "main";
+      modelValue: TGApp.BBS.Reply.ReplyFull;
+      pinId?: string;
+      postOwnerId?: string;
+      preview?: boolean;
+    };
 
 /**
  * 回复项事件。
  * @since Beta v0.12.6
  */
 type TprReplyEmits = {
-  reply: [item: TGApp.BBS.Reply.ReplyFull];
+  reply: [item: TGApp.BBS.Reply.ReplyFull, ancestors?: Array<TGApp.BBS.Reply.ReplyFull>];
   changed: [];
 };
 
@@ -411,7 +431,7 @@ function resetSubState(): void {
 
 onMounted(async () => {
   mounted = true;
-  if (props.mode === "main") {
+  if (props.mode === "main" && !props.preview) {
     const [nextSubListener, nextCloseSubListener] = await Promise.all([
       listenSub(),
       listenCloseSub(),
@@ -479,6 +499,7 @@ async function listenSub(): Promise<UnlistenFn> {
 
 async function listenCloseSub(): Promise<UnlistenFn> {
   return await event.listen<void>("closeReplySub", async () => {
+    if (interactionBusy.value) return;
     if (showSub.value) showSub.value = false;
   });
 }
@@ -549,8 +570,8 @@ async function loadSub(): Promise<void> {
   } catch (error) {
     if (generation !== subLoadGeneration) return;
     const errMsg = TGHttps.getErrMsg(error);
-    showSnackbar.error(`获取子回复失败：${errMsg}`);
-    await TGLogger.Error("[VpReplyItem] 获取子回复异常");
+    showSnackbar.error(`获取回复失败：${errMsg}`);
+    await TGLogger.Error("[VpReplyItem] 获取回复异常");
   } finally {
     if (generation === subLoadGeneration) loading.value = false;
   }
@@ -561,9 +582,21 @@ function handleReply(): void {
   emits("reply", props.modelValue);
 }
 
-function handleReplyFromChild(item: TGApp.BBS.Reply.ReplyFull): void {
+function handleReplyFromChild(
+  item: TGApp.BBS.Reply.ReplyFull,
+  ancestors: Array<TGApp.BBS.Reply.ReplyFull> = [],
+): void {
   if (interactionBusy.value || actionBusy.value !== null) return;
-  emits("reply", item);
+  emits(
+    "reply",
+    item,
+    resolveReplyAncestors(
+      props.modelValue,
+      item,
+      [...props.modelValue.sub_replies, ...subReplies.value],
+      ancestors,
+    ),
+  );
 }
 
 function handleChanged(): void {
@@ -758,18 +791,12 @@ async function handleUser(): Promise<void> {
   flex-shrink: 0;
   align-items: flex-start;
   justify-content: center;
-  padding: 12px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--app-page-content);
   word-break: break-all;
-}
-
-.tpr-reply-box--nested {
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-4);
 }
 
 .tpr-bubble {
@@ -780,7 +807,7 @@ async function handleUser(): Promise<void> {
   border-top: 1px inset var(--common-shadow-1);
   border-right: 1px inset var(--common-shadow-1);
   background-color: v-bind("props.modelValue.user.reply_bubble?.bg_color");
-  border-top-right-radius: 8px;
+  border-top-right-radius: 4px;
   opacity: 0.5;
 }
 
@@ -794,19 +821,14 @@ async function handleUser(): Promise<void> {
   position: relative;
   display: flex;
   max-width: 100%;
-  min-height: 40px;
+  height: 40px;
   align-items: center;
   justify-content: flex-start;
-  padding: 2px 4px;
-  border: 1px solid transparent;
-  border-radius: 4px;
   cursor: pointer;
-  gap: 4px;
 }
 
 .tpr-user:hover {
-  border-color: var(--common-shadow-1);
-  background: var(--box-bg-4);
+  opacity: 0.82;
 }
 
 .tpr-user:focus-visible {
@@ -819,7 +841,6 @@ async function handleUser(): Promise<void> {
   display: flex;
   width: 40px;
   height: 40px;
-  flex: 0 0 40px;
   align-items: center;
   justify-content: center;
 }
@@ -871,7 +892,6 @@ async function handleUser(): Promise<void> {
 .tpru-right {
   display: flex;
   overflow: hidden;
-  min-width: 0;
   align-items: center;
   justify-content: center;
   column-gap: 4px;
@@ -901,8 +921,6 @@ async function handleUser(): Promise<void> {
 .tpr-content {
   position: relative;
   width: 100%;
-  padding: 4px 0 8px;
-  line-height: 20px;
 }
 
 .tpr-info {
@@ -910,43 +928,41 @@ async function handleUser(): Promise<void> {
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
-  padding-top: 8px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 8px;
+  opacity: 0.5;
 }
 
 .tpri-left {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-4);
   font-size: 12px;
   gap: 4px;
-  opacity: 0.85;
 }
 
 .tpri-right {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 4px;
 }
 
 .tpr-action,
-.tpr-like,
 .tpr-reply-action {
   display: flex;
-  min-height: 28px;
   align-items: center;
   justify-content: center;
-  padding: 4px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  padding: 0;
+  border: 0;
   background: transparent;
-  color: var(--box-text-2);
+  color: inherit;
   cursor: pointer;
   font: inherit;
+}
+
+.tpr-like {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
 }
 
@@ -960,9 +976,8 @@ async function handleUser(): Promise<void> {
   opacity: 0.5;
 }
 
-.tpr-action:hover:not(:disabled) {
-  border-color: var(--common-shadow-1);
-  background: var(--box-bg-4);
+.tpr-action:hover:not(:disabled, .active, .tpr-delete) {
+  opacity: 0.82;
 }
 
 .tpr-like.active {
@@ -976,13 +991,8 @@ async function handleUser(): Promise<void> {
 
 .tpr-reply {
   display: flex;
-  min-height: 28px;
   align-items: center;
   justify-content: center;
-  padding: 4px 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: var(--box-text-2);
   cursor: pointer;
   gap: 4px;
 }
@@ -993,14 +1003,12 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-reply:hover {
-  border-color: var(--common-shadow-1);
-  background: var(--box-bg-4);
+  opacity: 0.82;
 }
 
 .tpr-extra {
   display: flex;
   width: 100%;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   font-size: 12px;
@@ -1023,21 +1031,23 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-debug {
-  color: var(--box-text-4);
-  opacity: 0.65;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.3;
 }
 
 .tpr-reply-user {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-4);
   gap: 4px;
-  opacity: 0.8;
+  opacity: 0.3;
 
   :last-child {
-    color: var(--tgc-od-blue);
-    text-decoration: underline solid var(--tgc-od-blue);
+    color: #00c3ffff;
+    text-decoration: underline solid #00c3ffff;
     text-underline-position: under;
   }
 }
@@ -1046,38 +1056,31 @@ async function handleUser(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--box-text-4);
-  opacity: 0.8;
+  opacity: 0.3;
 }
 
 .tpr-reply-sub {
   position: relative;
   display: flex;
   width: 300px;
+  max-width: calc(100vw - 24px);
   max-height: 400px;
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 8px;
   scrollbar-gutter: stable;
-
-  &.v-list {
-    box-shadow: -4px 0 8px var(--common-shadow-4);
-  }
 }
 
-.tpr-share {
-  opacity: 0.7;
-}
-
-.tpr-share:hover:not(:disabled) {
-  opacity: 1;
+.tpr-share,
+.tpr-reply-action {
+  cursor: pointer;
+  opacity: 0.3;
 }
 
 .tpr-share-info {
@@ -1100,25 +1103,5 @@ async function handleUser(): Promise<void> {
 .tpr-share-info.bottom {
   bottom: 8px;
   left: 8px;
-}
-
-@media (width <= 480px) {
-  .tpr-reply-box {
-    padding: 8px;
-  }
-
-  .tpr-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .tpri-right {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .tpr-extra {
-    justify-content: flex-start;
-  }
 }
 </style>

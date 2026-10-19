@@ -1,7 +1,12 @@
 <!-- 帖子评论与定向回复输入框 -->
 <template>
   <form aria-label="回复编辑器" class="vpr-composer" @submit.prevent="publishReply">
-    <div v-if="target" aria-live="polite" class="vpr-target" role="status">
+    <div
+      v-if="target && props.showTarget !== false"
+      aria-live="polite"
+      class="vpr-target"
+      role="status"
+    >
       <div class="vpr-target-copy">
         <v-icon size="16">mdi-reply-outline</v-icon>
         <span
@@ -32,7 +37,6 @@
           v-model="content"
           :aria-label="target ? '回复内容' : '评论内容'"
           :disabled="busy || !canWrite"
-          :label="target ? '回复内容' : '发表评论'"
           auto-grow
           class="vpr-textarea"
           hide-details
@@ -69,10 +73,6 @@
       </div>
     </div>
     <div class="vpr-footer">
-      <div aria-live="polite" class="vpr-account-status" role="status">
-        <v-icon size="16">mdi-account-circle-outline</v-icon>
-        <span class="vpr-account">{{ accountHint }}</span>
-      </div>
       <v-btn
         :disabled="!canWrite || !hasContent || busy"
         class="vpr-submit"
@@ -82,7 +82,7 @@
         type="submit"
         variant="flat"
       >
-        {{ target ? "发布回复" : "发布评论" }}
+        {{ target ? "回复" : "发布" }}
       </v-btn>
     </div>
   </form>
@@ -109,6 +109,7 @@ type ReplyComposerProps = {
   postId: string;
   gid: number;
   target?: TGApp.BBS.Reply.ReplyFull;
+  showTarget?: boolean;
 };
 
 const props = defineProps<ReplyComposerProps>();
@@ -143,7 +144,7 @@ const toolCookie = computed<Record<string, string> | undefined>(() => {
 const accountHint = computed<string>(() => {
   if (incognito.value) return "无痕模式下仅可浏览";
   if (!canWrite.value) return "请先登录米游社账号";
-  return `发布账号：${briefInfo.value.nickname || "当前账号"}`;
+  return `当前账号：${briefInfo.value.nickname || "当前账号"}`;
 });
 
 watch(
@@ -182,6 +183,13 @@ function resetDraft(): void {
   selectionStart = 0;
   selectionEnd = 0;
   toolContext.value += 1;
+}
+
+async function focusEditor(): Promise<void> {
+  if (busy.value || !canWrite.value) return;
+  await nextTick();
+  if (busy.value || !canWrite.value) return;
+  editorRoot.value?.querySelector("textarea")?.focus();
 }
 
 function rememberSelection(): void {
@@ -295,6 +303,8 @@ async function publishReply(): Promise<void> {
     }
   });
 }
+
+defineExpose({ focusEditor });
 </script>
 <style lang="scss" scoped>
 .vpr-composer {
@@ -356,10 +366,6 @@ async function publishReply(): Promise<void> {
 .vpr-editor {
   display: flex;
   flex-direction: column;
-  padding: 4px 8px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 8px;
-  background: var(--app-page-bg);
   gap: 4px;
 }
 
@@ -377,7 +383,6 @@ async function publishReply(): Promise<void> {
 
 .vpr-tools-wrap {
   padding-top: 4px;
-  border-top: 1px solid var(--common-shadow-1);
 }
 
 .vpr-images {
@@ -427,31 +432,15 @@ async function publishReply(): Promise<void> {
 
 .vpr-footer {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding-top: 4px;
-  gap: 8px;
-}
-
-.vpr-account-status {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  color: var(--app-page-content);
-  gap: 4px;
-}
-
-.vpr-account {
-  color: var(--app-page-content);
-  font-size: 12px;
-  line-height: 16px;
-  overflow-wrap: anywhere;
 }
 
 .vpr-submit {
   min-width: 92px;
   border-radius: 4px;
+  color: var(--btn-text);
 }
 
 @media (width <= 480px) {
