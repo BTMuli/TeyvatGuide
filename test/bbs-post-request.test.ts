@@ -96,6 +96,67 @@ const pictureSource = <TGApp.BBS.Post.FullData>(<unknown>{
   cover: { ...source.cover, url: pictureImageUrls[1] },
 });
 
+// Only the profit and release metadata encodings mirror observed API responses; the remaining fields stay synthetic.
+const apiEncodedSource = <TGApp.BBS.Post.FullData>(<unknown>{
+  ...source,
+  post: {
+    ...source.post,
+    profit_post_status: -2,
+  },
+  release_time_type: "ReleaseTimeTypeNone",
+  future_release_time: 0,
+});
+
+const apiEncodedPictureSource = <TGApp.BBS.Post.FullData>(<unknown>{
+  ...pictureSource,
+  post: {
+    ...pictureSource.post,
+    profit_post_status: -2,
+  },
+  release_time_type: "ReleaseTimeTypeNone",
+  future_release_time: 0,
+});
+
+const pictureNoTrailingLfText = "  合成图片介绍 \n第二行  ";
+const pictureNoTrailingLfImages = [
+  "https://example.com/images/no-trailing-lf-1.png",
+  "https://example.com/images/no-trailing-lf-2.png",
+];
+const pictureNoTrailingLfNodes: Array<TGApp.BBS.SctPost.Base> = [
+  { insert: pictureNoTrailingLfText },
+];
+const pictureNoTrailingLfSource = <TGApp.BBS.Post.FullData>(<unknown>{
+  ...apiEncodedPictureSource,
+  post: {
+    ...apiEncodedPictureSource.post,
+    cover: pictureNoTrailingLfImages[1],
+    images: ["https://example.com/images/no-trailing-lf-legacy.png"],
+    content: JSON.stringify({
+      imgs: pictureNoTrailingLfImages,
+      describe: pictureNoTrailingLfText,
+    }),
+    structured_content: JSON.stringify(pictureNoTrailingLfNodes),
+  },
+  cover: { ...apiEncodedPictureSource.cover, url: pictureNoTrailingLfImages[1] },
+});
+
+/**
+ * 构造用于图片帖介绍一致性校验的合成来源。
+ * @since Beta v0.12.6
+ * @param structuredDescription - 结构化介绍文本
+ * @param describe - 正文中的图片介绍
+ * @returns 保留测试图片顺序的来源帖子
+ */
+function makePictureDescriptionSource(
+  structuredDescription: string,
+  describe: string,
+): TGApp.BBS.Post.FullData {
+  const source = structuredClone(pictureNoTrailingLfSource);
+  source.post.structured_content = JSON.stringify([{ insert: structuredDescription }]);
+  source.post.content = JSON.stringify({ imgs: pictureNoTrailingLfImages, describe });
+  return source;
+}
+
 beforeEach(() => {
   mocks.get.mockReset();
   mocks.post.mockReset();
@@ -315,6 +376,16 @@ describe("postEditReq mutation requests", () => {
     expect(mocks.post).not.toHaveBeenCalled();
   });
 
+  it("deletes an API-encoded ordinary post with the compatible status", async () => {
+    await expect(postEditReq.delete(apiEncodedSource, cookie)).resolves.toEqual(successResponse);
+    expect(mocks.post).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/deletePost",
+      expect.objectContaining({
+        body: { gids: "2", post_id: "123", operate_type: 0, forum_id: 29 },
+      }),
+    );
+  });
+
   it("does not impose the editor title limit on deletion", async () => {
     const legacySource = structuredClone(source);
     legacySource.post.subject = "旧标题".repeat(30);
@@ -425,6 +496,159 @@ describe("postEditReq source initialization and validation", () => {
     });
   });
 
+  it("initializes and updates an API-encoded ordinary post", async () => {
+    const settings = getPostEditSettings(apiEncodedSource);
+
+    expect(settings).toMatchObject({ gid: 2, viewType: 1, subject: "old subject" });
+    await expect(
+      postEditReq.update(
+        apiEncodedSource,
+        { ...settings, subject: "edited ordinary post" },
+        cookie,
+      ),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/editPost",
+      expect.objectContaining({
+        body: expect.objectContaining({
+          post_id: "123",
+          view_type: 1,
+          subject: "edited ordinary post",
+        }),
+      }),
+    );
+  });
+
+  it("initializes and updates an API-encoded picture post", async () => {
+    const settings = getPostEditSettings(apiEncodedPictureSource);
+
+    expect(settings).toMatchObject({ gid: 2, viewType: 2, imageUrls: pictureImageUrls });
+    await expect(
+      postEditReq.update(
+        apiEncodedPictureSource,
+        { ...settings, subject: "edited picture post" },
+        cookie,
+      ),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/editPost",
+      expect.objectContaining({
+        body: expect.objectContaining({
+          post_id: "123",
+          view_type: 2,
+          content: JSON.stringify({ imgs: pictureImageUrls, describe: "说明 @旅行者 \n" }),
+        }),
+      }),
+    );
+  });
+
+  it("normalizes a picture description without a source trailing line feed", async () => {
+    const settings = getPostEditSettings(pictureNoTrailingLfSource);
+    const normalizedNodes = [...pictureNoTrailingLfNodes, { insert: "\n" }];
+
+    expect(settings.nodes).toEqual(normalizedNodes);
+    expect(settings.imageUrls).toEqual(pictureNoTrailingLfImages);
+    await expect(
+      postEditReq.update(
+        pictureNoTrailingLfSource,
+        { ...settings, subject: "编辑无尾换行图片帖" },
+        cookie,
+      ),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/editPost",
+      expect.objectContaining({
+        body: expect.objectContaining({
+          post_id: "123",
+          view_type: 2,
+          content: JSON.stringify({
+            imgs: pictureNoTrailingLfImages,
+            describe: `${pictureNoTrailingLfText}\n`,
+          }),
+          structured_content: JSON.stringify(normalizedNodes),
+        }),
+      }),
+    );
+  });
+
+  it.each([
+    ["an empty description", "\n", ""],
+    ["one trailing line feed", `${pictureNoTrailingLfText}\n`, `${pictureNoTrailingLfText}\n`],
+    [
+      "multiple trailing line feeds",
+      `${pictureNoTrailingLfText}\n\n`,
+      `${pictureNoTrailingLfText}\n\n`,
+    ],
+    [
+      "one omitted final line feed",
+      `${pictureNoTrailingLfText}\n\n`,
+      `${pictureNoTrailingLfText}\n`,
+    ],
+  ])("accepts picture descriptions with %s", (_name, structuredDescription, describe) => {
+    const source = makePictureDescriptionSource(structuredDescription, describe);
+    const settings = getPostEditSettings(source);
+
+    expect(settings.nodes).toEqual([{ insert: structuredDescription }]);
+    expect(settings.imageUrls).toEqual(pictureNoTrailingLfImages);
+  });
+
+  it("rejects omitting more than one final line feed before update HTTP", async () => {
+    const invalidSource = makePictureDescriptionSource(
+      `${pictureNoTrailingLfText}\n\n`,
+      pictureNoTrailingLfText,
+    );
+    const settings = getPostEditSettings(pictureNoTrailingLfSource);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow("介绍与结构化内容不一致");
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow(
+      "介绍与结构化内容不一致",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("does not ignore a missing mention trailing space", async () => {
+    const invalidSource = structuredClone(pictureSource);
+    invalidSource.post.content = JSON.stringify({
+      imgs: pictureImageUrls,
+      describe: "说明 @旅行者\n",
+    });
+    const settings = getPostEditSettings(pictureSource);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow("介绍与结构化内容不一致");
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow(
+      "介绍与结构化内容不一致",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["text", `${pictureNoTrailingLfText}改`],
+    ["internal spaces", pictureNoTrailingLfText.replace("介绍 ", "介绍  ")],
+    ["internal line feed", pictureNoTrailingLfText.replace("\n", "")],
+  ])("rejects %s differences before update HTTP", async (_name, describe) => {
+    const invalidSource = makePictureDescriptionSource(pictureNoTrailingLfText, describe);
+    const settings = getPostEditSettings(pictureNoTrailingLfSource);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow("介绍与结构化内容不一致");
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow(
+      "介绍与结构化内容不一致",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["malformed JSON", "{not-json"],
+    ["unsupported node", JSON.stringify([{ insert: { image: imageUrl } }])],
+  ])("rejects %s in a picture source before update HTTP", async (_name, structuredContent) => {
+    const invalidSource = structuredClone(pictureNoTrailingLfSource);
+    invalidSource.post.structured_content = structuredContent;
+    const settings = getPostEditSettings(pictureNoTrailingLfSource);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow();
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow();
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
   it("initializes picture settings from content.imgs instead of legacy image fields", () => {
     const settings = getPostEditSettings(pictureSource);
 
@@ -456,6 +680,58 @@ describe("postEditReq source initialization and validation", () => {
     expect(getPostEditSettings(automatic).cover).toBe(pictureImageUrls[1]);
     const settings = { ...getPostEditSettings(automatic), cover: "" };
     return expect(postEditReq.create(settings, cookie)).resolves.toEqual(successResponse);
+  });
+
+  it.each([1, -1, 2, Number.NaN, "-2", null, undefined])(
+    "rejects unknown profit-post status %s before update or delete HTTP",
+    async (profitPostStatus) => {
+      const invalidSource = structuredClone(source);
+      Object.assign(invalidSource.post, { profit_post_status: profitPostStatus });
+      const settings = getPostEditSettings(source);
+
+      expect(() => getPostEditSettings(invalidSource)).toThrow("盈利帖子元数据无法安全保留");
+      await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow("盈利帖子");
+      await expect(postEditReq.delete(invalidSource, cookie)).rejects.toThrow("盈利帖子");
+      expect(mocks.post).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["is_profit", "is_in_profit"])(
+    "rejects an explicitly true %s flag before update or delete HTTP",
+    async (flag) => {
+      const invalidSource = structuredClone(source);
+      Object.assign(invalidSource.post, { [flag]: true });
+      const settings = getPostEditSettings(source);
+
+      expect(() => getPostEditSettings(invalidSource)).toThrow("盈利帖子元数据无法安全保留");
+      await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow("盈利帖子");
+      await expect(postEditReq.delete(invalidSource, cookie)).rejects.toThrow("盈利帖子");
+      expect(mocks.post).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects an unknown release type before update HTTP", async () => {
+    const invalidSource = structuredClone(source);
+    invalidSource.release_time_type = "SCHEDULE";
+    const settings = getPostEditSettings(source);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow("定时发布元数据无法安全保留");
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow(
+      "定时发布元数据无法安全保留",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-zero future release timestamp before update HTTP", async () => {
+    const invalidSource = structuredClone(source);
+    invalidSource.future_release_time = 4102444800;
+    const settings = getPostEditSettings(source);
+
+    expect(() => getPostEditSettings(invalidSource)).toThrow("定时发布时间无法安全保留");
+    await expect(postEditReq.update(invalidSource, settings, cookie)).rejects.toThrow(
+      "定时发布时间无法安全保留",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 
   it("rejects inconsistent or cropped picture cover metadata", () => {

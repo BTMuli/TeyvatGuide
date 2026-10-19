@@ -209,6 +209,21 @@ function assertBasicSource(source: TGApp.BBS.Post.FullData): void {
 }
 
 /**
+ * 判断来源是否明确标记为非盈利帖子。
+ * 官方普通帖响应已观察到状态 -2，保留现有状态 0 作为兼容值；这里不宣称完整状态枚举。
+ * @since Beta v0.12.6
+ * @param post - 帖子状态
+ * @returns 是否可安全保留盈利元数据
+ */
+function hasSafeProfitMetadata(post: TGApp.BBS.Post.FullData["post"]): boolean {
+  return (
+    post.is_profit === false &&
+    post.is_in_profit === false &&
+    (post.profit_post_status === 0 || post.profit_post_status === -2)
+  );
+}
+
+/**
  * 校验帖子来源的可编辑元数据。
  * @since Beta v0.12.6
  * @param source - 帖子完整数据
@@ -225,7 +240,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
   }
   if (source.is_official_master !== false) throw new TypeError("官方帖子状态无法安全确认");
   if (post.review_id !== 0) throw new TypeError("不支持编辑审核中或审核状态未知的帖子");
-  if (post.is_profit !== false || post.is_in_profit !== false || post.profit_post_status !== 0) {
+  if (!hasSafeProfitMetadata(post)) {
     throw new TypeError("盈利帖子元数据无法安全保留");
   }
   if (source.collection !== null) {
@@ -234,7 +249,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
   if (source.contribution_act !== null) {
     throw new TypeError("投稿活动元数据无法安全保留");
   }
-  if (source.release_time_type !== "NOW") {
+  if (source.release_time_type !== "NOW" && source.release_time_type !== "ReleaseTimeTypeNone") {
     throw new TypeError("定时发布元数据无法安全保留");
   }
   if (source.future_release_time !== 0) {
@@ -272,7 +287,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): void {
 function assertDeletableSource(source: TGApp.BBS.Post.FullData): void {
   assertBasicSource(source);
   const post = source.post;
-  if (post.is_profit !== false || post.is_in_profit !== false || post.profit_post_status !== 0) {
+  if (!hasSafeProfitMetadata(post)) {
     throw new TypeError("暂不支持删除盈利帖子，请在米游社网页版操作");
   }
 }
@@ -321,7 +336,11 @@ function getSourcePictureDocument(
     throw new TypeError("图片帖结构化介绍不是有效 JSON");
   }
   const document = buildPicturePostDocument(parsed, content.imgs);
-  if (serializePicturePostDescribe(document.nodes) !== content.describe) {
+  const describe = serializePicturePostDescribe(document.nodes);
+  if (
+    content.describe !== describe &&
+    !(describe.endsWith("\n") && content.describe === describe.slice(0, -1))
+  ) {
     throw new TypeError("图片帖介绍与结构化内容不一致，无法安全编辑");
   }
   assertPicturePostDocument(document, Math.max(18, document.images.length));
