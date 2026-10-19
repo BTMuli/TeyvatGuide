@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertPostDocumentContent,
   buildPostDocument,
+  isPostDivider,
   isPostUrl,
   parsePostNodes,
 } from "../src/utils/bbsPostDocument.js";
@@ -95,6 +96,33 @@ describe("parsePostNodes", () => {
     expect(parsePostNodes([{ insert: "hello" }])).toEqual([{ insert: "hello" }, { insert: "\n" }]);
     expect(parsePostNodes([{ insert: "hello\n" }])).toEqual([{ insert: "hello\n" }]);
   });
+
+  it.each(<const>["line_1", "line_2", "line_3", "line_4"])(
+    "preserves %s divider nodes and appends one trailing newline",
+    (divider) => {
+      const nodes = [{ insert: { divider } }];
+      const before = structuredClone(nodes);
+
+      expect(parsePostNodes(nodes)).toEqual([{ insert: { divider } }, { insert: "\n" }]);
+      expect(nodes).toEqual(before);
+    },
+  );
+
+  it("preserves a divider followed by an existing trailing newline", () => {
+    expect(parsePostNodes([{ insert: { divider: "line_4" } }, { insert: "\n" }])).toEqual([
+      { insert: { divider: "line_4" } },
+      { insert: "\n" },
+    ]);
+  });
+
+  it.each(<ReadonlyArray<unknown>>[
+    [{ insert: { divider: "line_0" } }],
+    [{ insert: { divider: "line_1" }, attributes: {} }],
+    [{ insert: { divider: "line_1" }, attributes: { bold: true } }],
+    [{ insert: { divider: "line_1", image: imageUrl } }],
+  ])("rejects invalid or attributed divider nodes %j", (nodes) => {
+    expect(() => parsePostNodes(nodes)).toThrow();
+  });
 });
 
 describe("buildPostDocument", () => {
@@ -152,6 +180,14 @@ describe("buildPostDocument", () => {
 
     expect(() => assertPostDocumentContent(whitespace)).toThrow();
     expect(() => assertPostDocumentContent(imageOnly)).not.toThrow();
+  });
+
+  it("excludes dividers from text and image statistics", () => {
+    const document = buildPostDocument([{ insert: { divider: "line_2" } }]);
+
+    expect(document.text).toBe("");
+    expect(document.images).toEqual([]);
+    expect(() => assertPostDocumentContent(document)).toThrow("正文不能为空");
   });
 
   it("removes only the document's final newline from the plain-text preview", () => {
@@ -219,6 +255,19 @@ describe("post URL validation", () => {
   ])("rejects unsafe image URL %s", (url) => {
     expect(() => parsePostNodes([{ insert: { image: url } }])).toThrow();
   });
+});
+
+describe("post divider validation", () => {
+  it.each(<const>["line_1", "line_2", "line_3", "line_4"])("accepts %s", (divider) => {
+    expect(isPostDivider(divider)).toBe(true);
+  });
+
+  it.each(<const>["line_0", "line-1", "", null, 1, undefined])(
+    "rejects unsupported divider %j",
+    (divider) => {
+      expect(isPostDivider(divider)).toBe(false);
+    },
+  );
 });
 
 describe("unsupported post content", () => {

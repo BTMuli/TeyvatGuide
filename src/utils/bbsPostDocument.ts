@@ -48,6 +48,16 @@ function isPostColor(value: unknown): value is string {
 }
 
 /**
+ * 判断值是否为帖子编辑器支持的分割线样式。
+ * @since Beta v0.12.6
+ * @param value - 待校验的分割线样式
+ * @returns 是否为支持的分割线样式
+ */
+export function isPostDivider(value: unknown): value is TGApp.BBS.PostEdit.Divider {
+  return value === "line_1" || value === "line_2" || value === "line_3" || value === "line_4";
+}
+
+/**
  * 校验并复制单个节点的属性。
  * @since Beta v0.12.6
  */
@@ -126,6 +136,9 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && "image" in insert) {
       if (!isPostUrl(insert.image, true)) throw new TypeError("帖子图片必须使用 HTTPS 地址");
       node = { insert: { image: insert.image } };
+    } else if (isRecord(insert) && Object.keys(insert).length === 1 && "divider" in insert) {
+      if (!isPostDivider(insert.divider)) throw new TypeError("帖子分割线无效");
+      node = { insert: { divider: insert.divider } };
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && isRecord(insert.mention)) {
       const mention = insert.mention;
       if (
@@ -142,6 +155,13 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
       node = { insert: { mention: { uid: mention.uid, nickname: mention.nickname } } };
     } else {
       throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
+    }
+    if (
+      typeof node.insert !== "string" &&
+      "divider" in node.insert &&
+      Object.prototype.hasOwnProperty.call(value, "attributes")
+    ) {
+      throw new TypeError("帖子分割线不支持格式属性");
     }
     if (value.attributes !== undefined) {
       if (typeof insert !== "string" && isRecord(insert) && "mention" in insert) {
@@ -176,7 +196,7 @@ export function buildPostDocument(input: unknown): TGApp.BBS.PostEdit.DraftDocum
       text += node.insert;
     } else if ("mention" in node.insert) {
       text += `@${node.insert.mention.nickname}`;
-    } else {
+    } else if ("image" in node.insert) {
       images.push(node.insert.image);
     }
   }

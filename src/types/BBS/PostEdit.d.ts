@@ -17,11 +17,18 @@ declare namespace TGApp.BBS.PostEdit {
   };
 
   /**
+   * 富文本分割线样式
+   * @since Beta v0.12.6
+   */
+  type Divider = "line_1" | "line_2" | "line_3" | "line_4";
+
+  /**
    * 富文本帖子节点
    * @since Beta v0.12.6
    */
   type Node = {
-    insert: string | { image: string } | { mention: TGApp.BBS.ReplyAsset.Mention };
+    insert:
+      string | { image: string } | { mention: TGApp.BBS.ReplyAsset.Mention } | { divider: Divider };
     attributes?: Attributes;
   };
 

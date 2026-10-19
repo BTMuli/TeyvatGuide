@@ -7,6 +7,8 @@ import Quill, { Parchment } from "quill";
 import { BlockEmbed } from "quill/blots/block.js";
 import Embed from "quill/blots/embed.js";
 
+import { isPostDivider } from "./bbsPostDocument.js";
+
 /**
  * 帖子编辑器内部的用户提及值。
  * @since Beta v0.12.6
@@ -34,6 +36,7 @@ export const postEditorFormats: ReadonlyArray<string> = [
   "color",
   "link",
   "image",
+  "divider",
   "mention",
   "emoticon",
 ];
@@ -178,6 +181,50 @@ class PostImageBlot extends BlockEmbed {
   }
 }
 
+/**
+ * 帖子块级分割线节点。
+ * @since Beta v0.12.6
+ */
+class PostDividerBlot extends BlockEmbed {
+  static blotName = "divider";
+
+  static className = "ql-divider";
+
+  static tagName = "DIV";
+
+  static scope = Parchment.Scope.BLOCK_BLOT;
+
+  /** 使用帖子分割线组件的图片资源创建分割线块。 @since Beta v0.12.6 */
+  static create(value: unknown): HTMLElement {
+    if (!isPostDivider(value)) throw new TypeError("帖子分割线无效");
+    const node = super.create(value);
+    if (!(node instanceof HTMLElement)) throw new TypeError("帖子分割线节点无效");
+    node.classList.add("ql-divider");
+    node.dataset.divider = value;
+    node.setAttribute("contenteditable", "false");
+    node.setAttribute("role", "separator");
+    const image = document.createElement("img");
+    image.alt = "divider";
+    image.src = "/UI/post/divider_" + value + ".webp";
+    image.title = value;
+    image.draggable = false;
+    node.replaceChildren(image);
+    return node;
+  }
+
+  /** 读取分割线样式。 @since Beta v0.12.6 */
+  static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Divider {
+    const value = domNode.dataset.divider;
+    if (!isPostDivider(value)) throw new TypeError("帖子分割线无效");
+    return value;
+  }
+
+  /** 忽略文本和段落格式，避免分割线产生附加属性。 @since Beta v0.12.6 */
+  format(): void {
+    // 分割线只保留自身样式和数据值。
+  }
+}
+
 let formatsRegistered = false;
 
 /**
@@ -190,6 +237,7 @@ export function registerPostEditorFormats(): void {
   Quill.register(PostMentionBlot, true);
   Quill.register(PostEmoticonBlot, true);
   Quill.register(PostImageBlot, true);
+  Quill.register(PostDividerBlot, true);
   formatsRegistered = true;
 }
 

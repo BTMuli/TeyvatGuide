@@ -20,7 +20,7 @@
         title="表情"
         class="tgpe-tool"
         type="button"
-        @click="emits('emoticonClick')"
+        @click="emits('emoticonClick', $event)"
         @mousedown.prevent="rememberEditorSelection"
       >
         <v-icon size="20">mdi-emoticon-happy-outline</v-icon>
@@ -31,19 +31,61 @@
         title="提及用户"
         class="tgpe-tool"
         type="button"
-        @click="emits('mentionClick')"
+        @click="emits('mentionClick', $event)"
         @mousedown.prevent="rememberEditorSelection"
       >
         <v-icon size="20">mdi-at</v-icon>
       </button>
       <template v-if="mode === 'article'">
-        <span aria-hidden="true" class="tgpe-divider" />
+        <v-menu v-model="dividerOpen" :disabled location="bottom start" offset="8">
+          <template #activator="{ props: menuProps }">
+            <button
+              v-bind="menuProps"
+              :aria-expanded="dividerOpen"
+              :disabled
+              aria-label="选择分割线"
+              title="分割线"
+              class="tgpe-tool"
+              type="button"
+              @mousedown.prevent="rememberEditorSelection"
+            >
+              <v-icon size="20">mdi-format-page-break</v-icon>
+            </button>
+          </template>
+          <div aria-label="分割线样式" class="tgpe-divider-menu" role="menu">
+            <button
+              v-for="(divider, index) in dividerOptions"
+              :key="divider"
+              :aria-label="'插入分割线样式 ' + (index + 1)"
+              :disabled
+              class="tgpe-divider-option"
+              role="menuitem"
+              type="button"
+              @click="insertDivider(divider)"
+              @mousedown.prevent
+            >
+              <span>样式 {{ index + 1 }}</span>
+              <img :src="'/UI/post/divider_' + divider + '.webp'" alt="" />
+            </button>
+          </div>
+        </v-menu>
+        <button
+          v-for="tool in pendingTools"
+          :key="tool.label"
+          :aria-label="tool.label + '（暂不可用）'"
+          :title="tool.label + '（暂不可用）'"
+          class="tgpe-tool"
+          disabled
+          type="button"
+        >
+          <v-icon size="20">{{ tool.icon }}</v-icon>
+        </button>
         <button
           :aria-pressed="isLinkActive"
           :disabled
           aria-label="插入或编辑链接"
           title="链接"
-          class="tgpe-tool"
+          class="tgpe-tool tgpe-format-start"
           type="button"
           @click="editLink"
           @mousedown.prevent="rememberEditorSelection"
@@ -90,16 +132,17 @@
             level === 1 ? "mdi-format-header-1" : "mdi-format-header-2"
           }}</v-icon>
         </button>
-        <label
-          class="tgpe-color-label"
-          title="文字颜色"
-          :style="{ borderBottomColor: selectedColor }"
-        >
+        <label class="tgpe-color-label" :title="'文字颜色 ' + selectedColor.toUpperCase()">
           <v-icon aria-hidden="true" size="20">mdi-format-color-text</v-icon>
+          <span
+            aria-hidden="true"
+            class="tgpe-color-swatch"
+            :style="{ backgroundColor: selectedColor }"
+          />
           <input
             :disabled
             :value="selectedColor"
-            aria-label="文字颜色"
+            :aria-label="'文字颜色，当前 ' + selectedColor.toUpperCase()"
             class="tgpe-color"
             type="color"
             @change="applyColor"
@@ -153,7 +196,7 @@
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
-import { isPostUrl } from "@utils/bbsPostDocument.js";
+import { isPostDivider, isPostUrl } from "@utils/bbsPostDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
 import Quill from "quill";
 import type { Range } from "quill";
@@ -198,18 +241,30 @@ const emits = defineEmits<{
   error: [message: string];
   validityChange: [valid: boolean];
   imageClick: [];
-  emoticonClick: [];
-  mentionClick: [];
+  emoticonClick: [event: MouseEvent];
+  mentionClick: [event: MouseEvent];
 }>();
 
 const editorContainer = useTemplateRef<HTMLDivElement>("editorContainer");
 const quill = shallowRef<Quill>();
 const activeFormats = ref<Record<string, unknown>>({});
 const selectedColor = ref<string>("#000000");
+const dividerOpen = ref<boolean>(false);
+const dividerOptions: ReadonlyArray<TGApp.BBS.PostEdit.Divider> = [
+  "line_1",
+  "line_2",
+  "line_3",
+  "line_4",
+];
 const alignments: Array<AlignmentOption> = [
   { value: "left", label: "左对齐", icon: "mdi-format-align-left" },
   { value: "center", label: "居中对齐", icon: "mdi-format-align-center" },
   { value: "right", label: "右对齐", icon: "mdi-format-align-right" },
+];
+const pendingTools = [
+  { label: "视频", icon: "mdi-video-outline" },
+  { label: "投票", icon: "mdi-poll" },
+  { label: "折叠", icon: "mdi-format-list-group" },
 ];
 const selectedHeader = computed<string>(() => {
   const header = activeFormats.value.header;
@@ -241,7 +296,10 @@ watch(
   (disabled) => {
     const current = quill.value;
     if (!current) return;
-    if (disabled) rememberEditorSelection();
+    if (disabled) {
+      dividerOpen.value = false;
+      rememberEditorSelection();
+    }
     current.enable(!disabled);
     updateActiveFormats();
   },
@@ -398,6 +456,13 @@ function buildEditorDelta(nodes: Array<TGApp.BBS.SctPost.Base>): QuillDelta {
     if (!isRecord(insert) || Object.keys(insert).length !== 1) {
       throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
     }
+    if ("divider" in insert) {
+      if (!isPostDivider(insert.divider) || node.attributes !== undefined) {
+        throw new TypeError("帖子分割线无效");
+      }
+      delta.insert({ divider: insert.divider });
+      continue;
+    }
     if ("image" in insert && isPostUrl(insert.image, true)) {
       delta.insert({ image: insert.image }, normalizeAttributes(node.attributes, true));
       continue;
@@ -429,6 +494,16 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
     }
     if (!isRecord(op.insert) || Object.keys(op.insert).length !== 1) {
       throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
+    }
+    if ("divider" in op.insert) {
+      if (
+        !isPostDivider(op.insert.divider) ||
+        (op.attributes && Object.keys(op.attributes).length > 0)
+      ) {
+        throw new TypeError("帖子分割线无效");
+      }
+      nodes.push(createNode({ divider: op.insert.divider }));
+      continue;
     }
     if ("image" in op.insert && isPostUrl(op.insert.image, true)) {
       nodes.push(createNode({ image: op.insert.image }, normalizeAttributes(op.attributes, true)));
@@ -553,7 +628,7 @@ function handlePaste(event: ClipboardEvent): void {
   const selection = selectionForAction(current);
   const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert(text);
   current.updateContents(delta, "user");
-  current.setSelection(selection.index + text.length, 0, "silent");
+  setEditorCursor(current, selection.index + text.length);
 }
 
 function preventDrop(event: DragEvent): void {
@@ -589,7 +664,7 @@ function formatHeader(value: number): void {
   const current = quill.value;
   if (!current || props.disabled) return;
   const selection = selectionForAction(current);
-  const level = selectedHeader.value === String(value) ? null : value;
+  const level = current.getFormat(selection).header === value ? false : value;
   current.formatLine(selection.index, Math.max(selection.length, 1), "header", level, "user");
   current.setSelection(selection, "silent");
   updateActiveFormats(selection);
@@ -674,13 +749,18 @@ function redo(): void {
   updateActiveFormats();
 }
 
+function setEditorCursor(current: Quill, index: number): void {
+  savedSelection = clampSelection(current, { index, length: 0 });
+  current.setSelection(savedSelection, "silent");
+}
+
 function insertText(text: string): void {
   const current = quill.value;
   if (!current || props.disabled || !text) return;
   const selection = selectionForAction(current);
   const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert(text);
   current.updateContents(delta, "user");
-  current.setSelection(selection.index + text.length, 0, "silent");
+  setEditorCursor(current, selection.index + text.length);
 }
 
 function insertMention(user: TGApp.BBS.ReplyAsset.Mention): void {
@@ -699,7 +779,7 @@ function insertMention(user: TGApp.BBS.ReplyAsset.Mention): void {
     .delete(selection.length)
     .insert({ mention });
   current.updateContents(delta, "user");
-  current.setSelection(selection.index + 1, 0, "silent");
+  setEditorCursor(current, selection.index + 1);
 }
 
 function insertEmoticon(emoji: EmoticonValue): void {
@@ -718,7 +798,21 @@ function insertEmoticon(emoji: EmoticonValue): void {
     .delete(selection.length)
     .insert({ emoticon });
   current.updateContents(delta, "user");
-  current.setSelection(selection.index + 1, 0, "silent");
+  setEditorCursor(current, selection.index + 1);
+}
+
+function insertDivider(divider: TGApp.BBS.PostEdit.Divider): void {
+  const current = quill.value;
+  if (!current || props.disabled || props.mode !== "article") return;
+  const selection = selectionForAction(current);
+  const delta = new DeltaClass()
+    .retain(selection.index)
+    .delete(selection.length)
+    .insert({ divider });
+  current.updateContents(delta, "user");
+  setEditorCursor(current, selection.index + 1);
+  updateActiveFormats();
+  dividerOpen.value = false;
 }
 
 function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
@@ -734,7 +828,7 @@ function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
     .delete(selection.length)
     .insert({ image: image.url });
   current.editReadOnly(() => current.updateContents(delta, "user"));
-  current.setSelection(selection.index + 1, 0, "silent");
+  setEditorCursor(current, selection.index + 1);
 }
 
 defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
@@ -751,7 +845,6 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
   flex-wrap: wrap;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--common-shadow-1);
   background: var(--box-bg-1);
   gap: 4px;
 }
@@ -759,14 +852,15 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 .tgpe-tool,
 .tgpe-color-label {
   display: inline-flex;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  flex: none;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
   border-radius: 4px;
-  background: transparent;
-  color: var(--box-text-2);
+  background: var(--box-bg-2);
+  color: var(--app-page-content);
   cursor: pointer;
   transition:
     background-color 120ms ease,
@@ -776,12 +870,83 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 
 .tgpe-color-label {
   position: relative;
-  border-bottom: 2px solid;
+  width: 68px;
+  padding: 0 8px;
+  gap: 8px;
 }
 
-.tgpe-tool[aria-pressed="true"] {
+.tgpe-color-swatch {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 1px solid var(--app-page-content);
+  border-radius: 4px;
+}
+
+.tgpe-divider-menu {
+  display: flex;
+  overflow: auto;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: min(320px, 60vh);
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  background: var(--app-page-bg);
+  box-shadow: 0 8px 24px var(--common-shadow-2);
+  gap: 4px;
+}
+
+.tgpe-divider-option {
+  display: flex;
+  min-height: 48px;
+  flex: none;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--app-page-content);
+  cursor: pointer;
+  font: inherit;
+  gap: 12px;
+}
+
+.tgpe-divider-option span {
+  flex: none;
+  color: var(--box-text-2);
+  font-size: 12px;
+}
+
+.tgpe-divider-option img {
+  min-width: 0;
+  max-width: 100%;
+  max-height: 32px;
+  flex: 1;
+  object-fit: contain;
+}
+
+.tgpe-divider-option:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: -2px;
+}
+
+.tgpe-divider-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.tgpe-divider-option:hover:not(:disabled) {
   border-color: var(--common-shadow-2);
-  background: var(--box-bg-2);
+  background: var(--box-bg-4);
+}
+
+.tgpe-tool[aria-pressed="true"],
+.tgpe-tool[aria-expanded="true"] {
+  border-color: var(--common-text-title);
+  background: color-mix(in srgb, var(--common-text-title) 16%, var(--box-bg-2));
   color: var(--common-text-title);
 }
 
@@ -819,13 +984,11 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 .tgpe-history {
   display: inline-flex;
   margin-left: auto;
+  gap: 4px;
 }
 
-.tgpe-divider {
-  width: 1px;
-  height: 24px;
-  margin: 0 8px;
-  background: var(--common-shadow-2);
+.tgpe-format-start {
+  margin-left: 8px;
 }
 
 .tgpe-editor.ql-container {
@@ -878,6 +1041,15 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
   object-fit: contain;
 }
 
+.tgpe-editor :deep(.ql-divider) {
+  margin: 10px auto;
+}
+
+.tgpe-editor :deep(.ql-divider img) {
+  max-width: 100%;
+  height: auto;
+}
+
 .tgpe-editor :deep(.quill-mention) {
   border-radius: 4px;
   background: var(--box-bg-2);
@@ -897,11 +1069,11 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 @media (width <= 600px) {
   .tgpe-toolbar {
     padding: 8px;
-    gap: 0;
+    gap: 4px;
   }
 
-  .tgpe-divider {
-    margin: 0 4px;
+  .tgpe-format-start {
+    margin-left: 4px;
   }
 
   .tgpe-history {

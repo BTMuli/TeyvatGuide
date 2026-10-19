@@ -18,17 +18,24 @@
       <section class="post-composer-section">
         <h2 class="post-composer-section-title">内容</h2>
         <div class="post-composer-row">
-          <label :for="titleId" class="post-composer-label">标题</label>
+          <label :for="titleId" class="post-composer-label post-composer-title-label">
+            <span>标题</span>
+            <span :id="titleCounterId" aria-live="polite" class="post-composer-counter"
+              >{{ draft.subject.length }} / 30</span
+            >
+          </label>
           <v-text-field
             :id="titleId"
             v-model="draft.subject"
             :disabled="busy || !canWrite"
-            :counter="30"
             maxlength="30"
             aria-label="帖子标题"
+            :aria-describedby="titleCounterId"
+            class="post-composer-title-input"
+            density="compact"
             placeholder="标题（必填）"
             variant="outlined"
-            hide-details="auto"
+            hide-details
           />
         </div>
         <div class="post-composer-row">
@@ -43,8 +50,8 @@
               @error="handleEditorError"
               @validity-change="editorInvalid = !$event"
               @image-click="tools?.chooseImage()"
-              @emoticon-click="tools?.openEmoji()"
-              @mention-click="tools?.openMention()"
+              @emoticon-click="tools?.openEmoji($event)"
+              @mention-click="tools?.openMention($event)"
             >
               <template #insert-panel>
                 <VpPostTools
@@ -89,7 +96,7 @@
         <div v-if="isPicture" class="post-composer-row">
           <span class="post-composer-label">上传图片</span>
           <div>
-            <div class="post-picture-grid" aria-label="帖子图片">
+            <div class="post-picture-list" aria-label="帖子图片">
               <figure
                 v-for="(url, index) in pictureImages"
                 :key="index + ':' + url"
@@ -165,6 +172,7 @@
               inline
               hide-details
               aria-label="发布版块"
+              density="compact"
             >
               <v-radio
                 v-for="forum in forums"
@@ -344,6 +352,7 @@ const props = defineProps<{
 }>();
 const emits = defineEmits<{ saved: [postId: string | undefined] }>();
 const titleId = useId();
+const titleCounterId = useId();
 const editor = useTemplateRef<InstanceType<typeof VpPostEditor>>("editor");
 const tools = useTemplateRef<InstanceType<typeof VpPostTools>>("tools");
 const bbsStore = useBBSStore();
@@ -750,11 +759,11 @@ defineExpose({ busy, canSubmit, pending });
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
-  gap: 4px;
+  gap: 12px;
 }
 
 .post-composer-section-title {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: var(--common-text-title);
   font-size: 18px;
   font-weight: 600;
@@ -762,23 +771,42 @@ defineExpose({ busy, canSubmit, pending });
 }
 
 .post-composer-row {
-  display: grid;
+  display: flex;
   align-items: start;
-  padding: 12px 0;
   gap: 12px;
-  grid-template-columns: 88px minmax(0, 1fr);
+}
 
-  & + .post-composer-row {
-    border-top: 1px solid var(--common-shadow-1);
-  }
+.post-composer-row > :last-child {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .post-composer-label {
-  padding-top: 10px;
+  min-width: 0;
+  flex: 0 0 88px;
+  padding-top: 8px;
   color: var(--box-text-2);
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
+}
+
+.post-composer-title-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 0;
+  gap: 4px;
+}
+
+.post-composer-counter {
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.post-composer-title-input :deep(.v-field) {
+  background: var(--app-page-bg);
 }
 
 .post-composer-content {
@@ -797,7 +825,6 @@ defineExpose({ busy, canSubmit, pending });
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-top: 1px solid var(--common-shadow-1);
   background: var(--box-bg-4);
   color: var(--box-text-4);
   font-size: 12px;
@@ -822,6 +849,10 @@ defineExpose({ busy, canSubmit, pending });
 
 .post-composer-preview :deep(a) {
   color: var(--common-text-title);
+}
+
+.post-composer-preview :deep(.ql-divider) {
+  margin: 10px auto;
 }
 
 .post-composer-hint {
@@ -868,7 +899,6 @@ defineExpose({ busy, canSubmit, pending });
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
-  justify-self: start;
 }
 
 .post-composer-toggle :deep(.v-btn) {
@@ -945,10 +975,17 @@ defineExpose({ busy, canSubmit, pending });
   }
 }
 
-.post-picture-grid {
-  display: grid;
+.post-picture-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
+}
+
+.post-picture-item,
+.post-picture-add {
+  min-width: min(160px, 100%);
+  flex: 1 1 160px;
 }
 
 .post-picture-item {
@@ -972,7 +1009,6 @@ defineExpose({ busy, canSubmit, pending });
   min-height: 36px;
   align-items: center;
   padding: 4px;
-  border-top: 1px solid var(--common-shadow-1);
   background: var(--box-bg-4);
   gap: 4px;
 }
@@ -1054,12 +1090,16 @@ defineExpose({ busy, canSubmit, pending });
   }
 
   .post-composer-row {
-    padding: 10px 0;
+    flex-direction: column;
     gap: 8px;
-    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .post-composer-row > :last-child {
+    width: 100%;
   }
 
   .post-composer-label {
+    flex-basis: auto;
     padding-top: 0;
   }
 
