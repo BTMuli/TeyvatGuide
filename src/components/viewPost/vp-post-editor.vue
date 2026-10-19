@@ -196,8 +196,10 @@
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import bbsReq from "@req/bbsReq.js";
 import { isPostDivider, isPostUrl } from "@utils/bbsPostDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
+import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbsPostEmoticon.js";
 import Quill from "quill";
 import type { Range } from "quill";
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
@@ -205,6 +207,7 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, 
 import "quill/dist/quill.core.css";
 
 type QuillDelta = ReturnType<Quill["getContents"]>;
+type QuillOperation = QuillDelta["ops"][number];
 type DeltaConstructor = {
   new (): QuillDelta;
 };
@@ -218,6 +221,12 @@ type PostEditorProps = {
 type SelectionRange = {
   index: number;
   length: number;
+};
+
+type EmoticonCandidate = {
+  index: number;
+  length: number;
+  name: string;
 };
 
 type InlineFormat = "bold" | "italic";
@@ -256,6 +265,7 @@ const dividerOptions: ReadonlyArray<TGApp.BBS.PostEdit.Divider> = [
   "line_3",
   "line_4",
 ];
+const emoticonMap = shallowRef<Record<string, string>>({});
 const alignments: Array<AlignmentOption> = [
   { value: "left", label: "左对齐", icon: "mdi-format-align-left" },
   { value: "center", label: "居中对齐", icon: "mdi-format-align-center" },
@@ -277,6 +287,8 @@ let mounted = false;
 let applyingModel = false;
 let modelSnapshot = "";
 let editVersion = 0;
+let emoticonLoadVersion = 0;
+let emoticonCandidates: Array<EmoticonCandidate> = [];
 let savedSelection: SelectionRange = { index: 0, length: 0 };
 
 watch(
@@ -330,13 +342,18 @@ onMounted(() => {
   instance.root.addEventListener("paste", handlePaste, true);
   instance.root.addEventListener("dragover", preventDrop, true);
   instance.root.addEventListener("drop", preventDrop, true);
+  emoticonMap.value = readCachedEmoticonMap();
   applyModel(model.value);
   instance.enable(!props.disabled);
   updateActiveFormats();
+  if (emoticonCandidates.some((candidate) => emoticonMap.value[candidate.name] === undefined)) {
+    void loadEmoticonMap();
+  }
 });
 
 onBeforeUnmount(() => {
   mounted = false;
+  emoticonLoadVersion += 1;
   const current = quill.value;
   if (!current) return;
   current.off("text-change", handleTextChange);
@@ -443,14 +460,179 @@ function createNode(
   return node;
 }
 
-function buildEditorDelta(nodes: Array<TGApp.BBS.SctPost.Base>): QuillDelta {
+function readCachedEmoticonMap(): Record<string, string> {
+  try {
+    return parsePostEmoticonMap(localStorage.getItem("emojis"));
+  } catch {
+    return {};
+  }
+}
+
+function collectEmoticonCandidates(operations: ReadonlyArray<QuillOperation>): void {
+  const candidates: Array<EmoticonCandidate> = [];
+  let index = 0;
+  for (const operation of operations) {
+    if (typeof operation.insert === "string") {
+      const tokenPattern = /_\(([^()\r\n]+)\)/gu;
+      let match: RegExpExecArray | null;
+      while ((match = tokenPattern.exec(operation.insert)) !== null) {
+        candidates.push({ index: index + match.index, length: match[0].length, name: match[1] });
+      }
+      index += operation.insert.length;
+    } else {
+      index += 1;
+    }
+  }
+  emoticonCandidates = candidates;
+}
+
+function transformEmoticonCandidates(change: QuillDelta): void {
+  const candidates: Array<EmoticonCandidate> = [];
+  for (const candidate of emoticonCandidates) {
+    const end = candidate.index + candidate.length;
+    let oldIndex = 0;
+    let invalid = false;
+    for (const operation of change.ops) {
+      if (typeof operation.retain === "number") {
+        if (
+          operation.attributes !== undefined &&
+          candidate.index < oldIndex + operation.retain &&
+          end > oldIndex
+        ) {
+          invalid = true;
+        }
+        oldIndex += operation.retain;
+        continue;
+      }
+      if (typeof operation.insert !== "undefined") {
+        if (oldIndex > candidate.index && oldIndex < end) invalid = true;
+        continue;
+      }
+      if (typeof operation.delete === "number") {
+        if (candidate.index < oldIndex + operation.delete && end > oldIndex) invalid = true;
+        oldIndex += operation.delete;
+      }
+    }
+    if (invalid) continue;
+    const index = change.transformPosition(candidate.index, false);
+    const nextEnd = change.transformPosition(end, true);
+    candidates.push({ index, length: Math.max(nextEnd - index, 0), name: candidate.name });
+  }
+  emoticonCandidates = candidates;
+}
+
+function mergeEmoticonMap(next: Record<string, string>): void {
+  const merged = { ...emoticonMap.value, ...next };
+  if (JSON.stringify(merged) === JSON.stringify(emoticonMap.value)) return;
+  emoticonMap.value = merged;
+  const current = quill.value;
+  if (mounted && current && props.mode === "article") hydrateCurrentEmoticons(current, merged);
+}
+
+async function loadEmoticonMap(): Promise<void> {
+  if (props.mode !== "article") return;
+  const version = ++emoticonLoadVersion;
+  let response: TGApp.BBS.Emoji.Resp;
+  try {
+    response = await bbsReq.emojis();
+  } catch {
+    return;
+  }
+  if (!mounted || version !== emoticonLoadVersion || response.retcode !== 0) return;
+  const values: Record<string, string> = {};
+  for (const series of response.data.list) {
+    for (const emoji of series.list) values[emoji.name] = emoji.icon;
+  }
+  const next = parsePostEmoticonMap(values);
+  if (Object.keys(next).length === 0) return;
+  try {
+    localStorage.setItem("emojis", JSON.stringify({ ...emoticonMap.value, ...next }));
+  } catch {
+    // 缓存不可用时仍使用本次请求结果。
+  }
+  mergeEmoticonMap(next);
+}
+
+function hydrateCurrentEmoticons(
+  current: Quill,
+  emoticons: Readonly<Record<string, string>>,
+): void {
+  const operations = current.getContents().ops;
+  const update = new DeltaClass();
+  const convertedCandidates = new Set<EmoticonCandidate>();
+  let changed = false;
+  let sourceIndex = 0;
+  for (const operation of operations) {
+    if (typeof operation.insert !== "string") {
+      update.retain(1);
+      sourceIndex += 1;
+      continue;
+    }
+    const segments = splitPostEmoticonText(operation.insert, emoticons);
+    const attributes = normalizeAttributes(operation.attributes, false);
+    let segmentIndex = sourceIndex;
+    for (const segment of segments) {
+      const emoticon = typeof segment.insert === "string" ? undefined : segment.insert.emoticon;
+      const candidate =
+        emoticon === undefined
+          ? undefined
+          : emoticonCandidates.find(
+              (item) =>
+                item.index === segmentIndex &&
+                item.length === segment.sourceLength &&
+                item.name === emoticon.name,
+            );
+      if (typeof segment.insert === "string" || !candidate) {
+        update.retain(segment.sourceLength);
+      } else {
+        changed = true;
+        convertedCandidates.add(candidate);
+        update.delete(segment.sourceLength);
+        update.insert(segment.insert, attributes);
+      }
+      segmentIndex += segment.sourceLength;
+    }
+    sourceIndex += operation.insert.length;
+  }
+  if (!changed) return;
+  const selection = current.getSelection(false);
+  const sourceSelection = selection ?? savedSelection;
+  const mappedSelection = {
+    index: update.transformPosition(sourceSelection.index, true),
+    length:
+      update.transformPosition(sourceSelection.index + sourceSelection.length, true) -
+      update.transformPosition(sourceSelection.index, true),
+  };
+  const remainingCandidates = emoticonCandidates
+    .filter((candidate) => !convertedCandidates.has(candidate))
+    .map((candidate) => {
+      const start = update.transformPosition(candidate.index, false);
+      const end = update.transformPosition(candidate.index + candidate.length, true);
+      return { ...candidate, index: start, length: Math.max(end - start, 0) };
+    });
+  current.updateContents(update, "api");
+  emoticonCandidates = remainingCandidates;
+  const safeSelection = clampSelection(current, mappedSelection);
+  savedSelection = safeSelection;
+  if (selection) {
+    current.setSelection(safeSelection, "silent");
+  }
+}
+
+function buildEditorDelta(
+  nodes: Array<TGApp.BBS.SctPost.Base>,
+  emoticons: Readonly<Record<string, string>> = {},
+): QuillDelta {
   if (!Array.isArray(nodes)) throw new TypeError("帖子结构化节点无效");
   const delta = new DeltaClass();
   for (const node of nodes) {
     if (!isRecord(node) || !("insert" in node)) throw new TypeError("帖子结构化节点无效");
     const insert = node.insert;
     if (typeof insert === "string") {
-      delta.insert(insert, normalizeAttributes(node.attributes, false));
+      const attributes = normalizeAttributes(node.attributes, false);
+      for (const segment of splitPostEmoticonText(insert, emoticons)) {
+        delta.insert(segment.insert, attributes);
+      }
       continue;
     }
     if (!isRecord(insert) || Object.keys(insert).length !== 1) {
@@ -473,8 +655,10 @@ function buildEditorDelta(nodes: Array<TGApp.BBS.SctPost.Base>): QuillDelta {
       continue;
     }
     if ("emoticon" in insert) {
-      if (node.attributes !== undefined) throw new TypeError("暂不支持带格式的帖子表情");
-      delta.insert({ emoticon: normalizeEmoticon(insert.emoticon) });
+      delta.insert(
+        { emoticon: normalizeEmoticon(insert.emoticon) },
+        normalizeAttributes(node.attributes, false),
+      );
       continue;
     }
     throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
@@ -517,10 +701,12 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
       continue;
     }
     if ("emoticon" in op.insert) {
-      if (op.attributes && Object.keys(op.attributes).length > 0) {
-        throw new TypeError("暂不支持带格式的帖子表情");
-      }
-      nodes.push(createNode({ emoticon: normalizeEmoticon(op.insert.emoticon) }));
+      nodes.push(
+        createNode(
+          { emoticon: normalizeEmoticon(op.insert.emoticon) },
+          normalizeAttributes(op.attributes, false),
+        ),
+      );
       continue;
     }
     throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
@@ -570,7 +756,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
   if (!current) return;
   let delta: QuillDelta;
   try {
-    delta = buildEditorDelta(next);
+    delta = buildEditorDelta(next, props.mode === "article" ? emoticonMap.value : {});
   } catch (error) {
     emits("validityChange", false);
     emitEditorError(error, "帖子正文无效");
@@ -582,6 +768,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     editVersion += 1;
     current.history.clear();
     current.setContents(delta, "silent");
+    collectEmoticonCandidates(current.getContents().ops);
     savedSelection = clampSelection(current, selection);
     current.setSelection(savedSelection, "silent");
     modelSnapshot = JSON.stringify(next);
@@ -595,9 +782,10 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
   }
 }
 
-function handleTextChange(): void {
+function handleTextChange(change: QuillDelta, _oldChange: QuillDelta, source: string): void {
   const current = quill.value;
   if (!mounted || applyingModel || !current) return;
+  if (source === "user") transformEmoticonCandidates(change);
   editVersion += 1;
   try {
     const next = readEditorNodes(current);
@@ -1060,8 +1248,9 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 
 .tgpe-editor :deep(.quill-emoticon) {
   display: inline-block;
+  width: auto;
   max-width: 120px;
-  height: auto;
+  height: 32px;
   object-fit: contain;
   vertical-align: middle;
 }

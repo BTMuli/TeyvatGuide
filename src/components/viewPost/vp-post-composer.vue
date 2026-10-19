@@ -328,6 +328,7 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsReq from "@req/bbsReq.js";
 import postEditReq, { getPostEditSettings } from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
@@ -335,8 +336,14 @@ import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { assertPostDocumentContent, buildPostDocument } from "@utils/bbsPostDocument.js";
+import { parsePostEmoticonMap } from "@utils/bbsPostEmoticon.js";
 import { serializePostDocument } from "@utils/bbsPostHtml.js";
 import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbsPostPicture.js";
+import {
+  collectPostPreviewEmoticonMap,
+  getMissingPostPreviewEmoticonNames,
+  renderPostPreviewEmoticons,
+} from "@utils/bbsPostPreview.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
@@ -376,6 +383,7 @@ const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
 let seed: TGApp.BBS.Post.FullData | undefined;
 let active = true;
+let previewRenderVersion = 0;
 
 const busy = computed<boolean>(() => pending.value || uploading.value);
 const canSubmit = computed<boolean>(
@@ -477,13 +485,12 @@ const authorizationItems = [
 ];
 
 watch(preview, (value) => {
-  if (!value) return;
-  try {
-    previewHtml.value = serializePostDocument(draft.value.nodes).html;
-  } catch (cause) {
-    preview.value = false;
-    error.value = TGHttps.getErrMsg(cause);
+  const version = ++previewRenderVersion;
+  if (!value) {
+    previewHtml.value = "";
+    return;
   }
+  void renderPreview(version, contextVersion.value);
 });
 watch(
   () => [
@@ -531,6 +538,63 @@ function emptyDraft(): TGApp.BBS.PostEdit.Settings {
     cover: "",
     userAiContentChoice: "USER_AI_CONTENT_CHOICE_NOT_AI",
   };
+}
+
+function readPreviewEmoticonMap(): Record<string, string> {
+  try {
+    return parsePostEmoticonMap(localStorage.getItem("emojis"));
+  } catch {
+    return {};
+  }
+}
+
+function cachePreviewEmoticonMap(emoticons: Readonly<Record<string, string>>): void {
+  if (Object.keys(emoticons).length === 0) return;
+  try {
+    localStorage.setItem("emojis", JSON.stringify({ ...readPreviewEmoticonMap(), ...emoticons }));
+  } catch {
+    // 缓存不可用时仍使用本次请求结果。
+  }
+}
+
+function isCurrentPreview(version: number, context: number): boolean {
+  return (
+    active && preview.value && version === previewRenderVersion && context === contextVersion.value
+  );
+}
+
+async function renderPreview(version: number, context: number): Promise<void> {
+  try {
+    const serialized = serializePostDocument(draft.value.nodes);
+    let emoticons = {
+      ...readPreviewEmoticonMap(),
+      ...collectPostPreviewEmoticonMap(draft.value.nodes),
+    };
+    let html = renderPostPreviewEmoticons(serialized.html, emoticons);
+    const missing = getMissingPostPreviewEmoticonNames(draft.value.nodes, emoticons);
+    if (missing.length > 0) {
+      try {
+        const response = await bbsReq.emojis();
+        if (isCurrentPreview(version, context) && response.retcode === 0) {
+          const values: Record<string, string> = {};
+          for (const series of response.data.list)
+            for (const emoji of series.list) values[emoji.name] = emoji.icon;
+          const next = parsePostEmoticonMap(values);
+          cachePreviewEmoticonMap(next);
+          emoticons = { ...emoticons, ...next };
+          html = renderPostPreviewEmoticons(serialized.html, emoticons);
+        }
+      } catch {
+        // 目录请求失败时保留已知表情，未知令牌继续显示为文本。
+      }
+    }
+    if (isCurrentPreview(version, context)) previewHtml.value = html;
+  } catch (cause) {
+    if (isCurrentPreview(version, context)) {
+      preview.value = false;
+      error.value = TGHttps.getErrMsg(cause);
+    }
+  }
 }
 
 async function initialize(force: boolean = false): Promise<void> {
@@ -845,6 +909,16 @@ defineExpose({ busy, canSubmit, pending });
 .post-composer-preview :deep(img) {
   max-width: 100%;
   height: auto;
+}
+
+.post-composer-preview :deep(.post-preview-emoticon),
+.post-composer-preview :deep(.quill-emoticon) {
+  display: inline-block;
+  width: auto;
+  max-width: 120px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .post-composer-preview :deep(a) {
