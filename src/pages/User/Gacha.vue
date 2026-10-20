@@ -16,7 +16,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <div class="gacha-top-period">
@@ -307,7 +307,7 @@ import {
 } from "@utils/gachaVersion.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid, maskUidName, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { exportUigfData } from "@utils/UIGF.js";
 import fetchYattaJson from "@utils/Yatta.js";
 import { storeToRefs } from "pinia";
@@ -612,7 +612,7 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
   await showLoading.start("正在上传至胡桃云...", "正在刷新Token");
   await hutaoStore.tryRefreshToken();
   for (const u of uids) {
-    await showLoading.start(`正在上传UID:${maskUid(u)}`, "正在获取EndId");
+    await showLoading.start(`正在上传UID:${maskUidTail(u)}`, "正在获取EndId");
     let endIdRes: TGApp.Plugins.Hutao.Gacha.EndIdRes = {
       "100": 0,
       "200": 0,
@@ -686,7 +686,7 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   }
   await showLoading.start("正在下载胡桃云祈愿记录...", "正在刷新Token");
   for (const u of uids) {
-    await showLoading.start(`正在下载UID:${maskUid(u)}的祈愿记录`, "正在获取EndIds");
+    await showLoading.start(`正在下载UID:${maskUidTail(u)}的祈愿记录`, "正在获取EndIds");
     try {
       const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
       if (endIdResp.retcode !== 0) {
@@ -807,11 +807,11 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
       return;
     }
   }
-  const check = await showDialog.check("确定删除？", uids.map((u) => maskUid(u)).join("、"));
+  const check = await showDialog.check("确定删除？", uids.map((u) => maskUidTail(u)).join("、"));
   if (!check) return;
   await showLoading.start("正在删除胡桃云祈愿记录");
   for (const u of uids) {
-    await showLoading.update(`UID:${maskUid(u)}`);
+    await showLoading.update(`UID:${maskUidTail(u)}`);
     try {
       const deleteResp = await hutao.Gacha.delete(accessToken.value!, u);
       if (deleteResp.retcode === 0) {
@@ -879,7 +879,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${maskUid(uidCur.value)} 对应 UID，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
+        `未找到 ${maskUidTail(uidCur.value)} 对应 UID，将刷新 ${maskUidTail(rfAccount.gameUid)} 数据`,
       );
       if (!check) return;
     } else {
@@ -887,7 +887,7 @@ async function executeRefresh(force: boolean): Promise<void> {
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${maskUid(uidCur.value)} 对应 CK，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
+          `未找到 ${maskUidTail(uidCur.value)} 对应 CK，将刷新 ${maskUidTail(rfAccount.gameUid)} 数据`,
         );
         if (!check) return;
       } else {

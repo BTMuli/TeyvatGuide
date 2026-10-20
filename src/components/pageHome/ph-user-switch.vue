@@ -10,7 +10,7 @@
     <v-list>
       <v-list-item v-for="ac in users" :key="ac.uid">
         <v-list-item-title>{{ ac.brief.nickname }}</v-list-item-title>
-        <v-list-item-subtitle>{{ maskUid(ac.brief.uid) }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ maskUidTail(ac.brief.uid) }}</v-list-item-subtitle>
         <template #append>
           <div v-if="ac.uid === currentUid" title="当前登录账号">
             <v-icon color="green">mdi-account-check</v-icon>
@@ -32,7 +32,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid, maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
 

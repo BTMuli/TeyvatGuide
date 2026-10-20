@@ -17,7 +17,7 @@
           width="200px"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <v-select
@@ -174,7 +174,7 @@ import TSUserBagMaterial, {
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import {
   computed,
@@ -552,7 +552,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${maskUid(curUid.value)}对应数据`,
+    `确认则清空存档-${maskUidTail(curUid.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");

@@ -72,3 +72,16 @@ export function uidItemTitle(item: unknown): string {
 export function uidItemValue(item: unknown): unknown {
   return item;
 }
+
+/**
+ * 生成 UID 的悬停提示
+ * @since Beta v0.12.6
+ * @remarks 仅在开启隐藏时给出可区分的尾号，关闭时返回 undefined 以免与展示文本重复
+ * @param value - 待提示的 UID
+ * @returns 悬停提示文本，或 undefined
+ */
+export function uidHint(value: string | number | null | undefined): string | undefined {
+  const text = value === null || value === undefined ? "" : String(value);
+  if (text === "" || !useAppStore().hideUid) return undefined;
+  return `UID ${maskUidTail(text)}`;
+}

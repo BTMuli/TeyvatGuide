@@ -16,7 +16,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <img alt="gacha" src="/UI/nav/userGacha.webp" title="祈愿" @click="toGacha()" />
@@ -110,7 +110,7 @@ import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -210,7 +210,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${maskUid(uidCur.value)} 对应 UID，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
+        `未找到 ${maskUidTail(uidCur.value)} 对应 UID，将刷新 ${maskUidTail(rfAccount.gameUid)} 数据`,
       );
       if (!check) return;
     } else {
@@ -218,7 +218,7 @@ async function executeRefresh(force: boolean): Promise<void> {
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${maskUid(uidCur.value)} 对应 CK，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
+          `未找到 ${maskUidTail(uidCur.value)} 对应 CK，将刷新 ${maskUidTail(rfAccount.gameUid)} 数据`,
         );
         if (!check) return;
       } else {

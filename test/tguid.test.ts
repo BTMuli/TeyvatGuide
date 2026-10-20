@@ -9,6 +9,7 @@ import {
   maskUid,
   maskUidName,
   maskUidTail,
+  uidHint,
   uidItemTitle,
   uidItemValue,
 } from "../src/utils/TGUid.js";
@@ -49,6 +50,15 @@ describe("UID 掩码", () => {
     expect(maskUidName("500299765")).toBe("UID9765");
     expect(maskUidName(147991965)).toBe("UID1965");
     expect(maskUidName("500299765")).not.toContain("*");
+  });
+
+  it("悬停提示仅在开启隐藏时提供尾号", () => {
+    expect(uidHint("500299765")).toBeUndefined();
+    state.hidden = true;
+    expect(uidHint("500299765")).toBe("UID *****9765");
+    expect(uidHint(500299765)).toBe("UID *****9765");
+    expect(uidHint("")).toBeUndefined();
+    expect(uidHint(null)).toBeUndefined();
   });
 
   it("空值与 null 返回空串", () => {

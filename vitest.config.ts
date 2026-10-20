@@ -1,3 +1,8 @@
+/**
+ * Vitest 配置
+ * @since Beta v0.12.6
+ */
+
 import { fileURLToPath } from "node:url";
 
 import { defineConfig } from "vitest/config";

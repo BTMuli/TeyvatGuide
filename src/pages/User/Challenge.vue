@@ -18,7 +18,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <v-btn class="ucp-btn" rounded variant="elevated" @click="toAbyss()">
@@ -167,7 +167,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -296,7 +296,7 @@ async function shareChallenge(): Promise<void> {
     await TGLogger.Warn("[UserChallenge][shareChallenge] 未找到对应的挑战记录");
     return;
   }
-  const fileName = `【幽境危战】【${challengeFind.name}】${challengeFind.id}-${uidCur.value}.png`;
+  const fileName = `【幽境危战】【${challengeFind.name}】${challengeFind.id}-${maskUidName(uidCur.value)}.png`;
   const shareDom = document.querySelector<HTMLDivElement>(`#user-challenge-${challengeFind.id}`);
   if (shareDom === null) {
     showSnackbar.warn("未找到对应的挑战记录DOM");

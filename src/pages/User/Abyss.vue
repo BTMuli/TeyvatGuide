@@ -18,7 +18,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toCombat()">
@@ -149,7 +149,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -298,7 +298,7 @@ async function refreshAbyss(): Promise<void> {
 
 async function shareAbyss(): Promise<void> {
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片`);
-  const fileName = `【深渊数据】${userTab.value}-${account.value.gameUid}.png`;
+  const fileName = `【深渊数据】${userTab.value}-${maskUidName(account.value.gameUid)}.png`;
   const shareDom = document.querySelector<HTMLElement>(`#user-abyss-${userTab.value}`);
   if (shareDom === null) {
     showSnackbar.error("未找到深渊数据");

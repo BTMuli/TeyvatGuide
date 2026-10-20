@@ -18,7 +18,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <v-btn class="uc-btn" rounded variant="elevated" @click="toAbyss()">
@@ -157,7 +157,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -425,7 +425,7 @@ async function loadTarot(): Promise<void> {
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
-  const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}`;
+  const fileName = `【真境剧诗】${userTab.value}-${maskUidName(uidCur.value)}`;
   const shareDom = document.querySelector<HTMLElement>(`.ucw-i-ref.active`);
   if (shareDom === null) {
     showSnackbar.error("未找到分享数据");

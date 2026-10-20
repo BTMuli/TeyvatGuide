@@ -31,7 +31,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <v-select
@@ -336,7 +336,7 @@ import {
 import fmtUtil from "@utils/fmtUtil.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";

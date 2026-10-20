@@ -6,7 +6,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUidTail } from "@utils/TGUid.js";
 
 import TGLogger from "./TGLogger.js";
 
@@ -39,7 +39,7 @@ export async function getRfAc(
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${maskUid(uid)} 对应 UID，将刷新 ${maskUid(rfAc.gameUid)} 数据`,
+        `未找到 ${maskUidTail(uid)} 对应 UID，将刷新 ${maskUidTail(rfAc.gameUid)} 数据`,
       );
       if (!check) return null;
     } else {
@@ -47,7 +47,7 @@ export async function getRfAc(
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${maskUid(uid)} 对应 CK，将刷新 ${maskUid(rfAc.gameUid)} 数据`,
+          `未找到 ${maskUidTail(uid)} 对应 CK，将刷新 ${maskUidTail(rfAc.gameUid)} 数据`,
         );
         if (!check) return null;
       } else {

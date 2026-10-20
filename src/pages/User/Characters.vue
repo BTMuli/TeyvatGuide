@@ -90,7 +90,7 @@
             @update:model-value="handleUidChange"
           >
             <template #selection="{ item }">
-              <span>{{ maskUid(item) }}</span>
+              <span>{{ maskUidTail(item) }}</span>
             </template>
           </v-select>
           <v-btn
@@ -246,7 +246,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getZhElement } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
@@ -1042,7 +1042,7 @@ async function share(): Promise<void> {
       return;
     }
   }
-  const fileName = `角色列表_${uidCur.value}`;
+  const fileName = `角色列表_${maskUidName(uidCur.value)}`;
   const prevCount = renderedCount.value;
   const total = selectedList.value.length;
   let progressAt = 0;

@@ -445,7 +445,7 @@
             >
               <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
               <v-list-item-subtitle>
-                {{ maskUid(ac.gameUid) }}({{ ac.regionName }})
+                {{ maskUidTail(ac.gameUid) }}({{ ac.regionName }})
               </v-list-item-subtitle>
               <template #append>
                 <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
@@ -497,7 +497,7 @@ import mhyClient from "@utils/TGClient.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid, maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 

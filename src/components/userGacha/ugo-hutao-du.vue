@@ -18,7 +18,7 @@
               </v-btn>
             </div>
             <div class="ugo-hdi-info">
-              <span>UID:{{ maskUid(item.uid) }}</span>
+              <span>UID:{{ maskUidTail(item.uid) }}</span>
               <span>{{ item.cnt }}条</span>
             </div>
           </div>
@@ -45,7 +45,7 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import useHutaoStore from "@store/hutao.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 

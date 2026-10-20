@@ -12,7 +12,7 @@ import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUidTail } from "@utils/TGUid.js";
 
 import TGSqlite from "../index.js";
 
@@ -117,11 +117,14 @@ async function updateAllAccountCk(): Promise<void> {
   for (const account of accounts) {
     const diffTime = Date.now() - new Date(account.updated).getTime();
     if (diffTime > checkTime) {
-      await showLoading.start(`更新${maskUid(account.uid)}Cookie`, `上次更新:${account.updated}`);
+      await showLoading.start(
+        `更新${maskUidTail(account.uid)}Cookie`,
+        `上次更新:${account.updated}`,
+      );
       await TGLogger.Info(`更新${account.uid}Cookie，上次更新:${account.updated}`);
       const update = await updateAccountCk(account);
       if (update) {
-        showSnackbar.success(`成功更新${maskUid(account.uid)}的Cookie`);
+        showSnackbar.success(`成功更新${maskUidTail(account.uid)}的Cookie`);
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         cnt++;
       }

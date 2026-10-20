@@ -16,7 +16,7 @@
           variant="outlined"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
       </div>
@@ -119,7 +119,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { maskUid, maskUidName, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -285,7 +285,7 @@ async function shareRecord(): Promise<void> {
     showSnackbar.error("未找到战绩数据，请尝试刷新");
     return;
   }
-  const fileName = `【原神战绩】-${uidCur.value}.png`;
+  const fileName = `【原神战绩】-${maskUidName(uidCur.value)}.png`;
   let progressAt = 0;
 
   function reportShareProgress(progress: {

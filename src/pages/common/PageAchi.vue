@@ -17,7 +17,7 @@
           width="200px"
         >
           <template #selection="{ item }">
-            <span>{{ maskUid(item) }}</span>
+            <span>{{ maskUidTail(item) }}</span>
           </template>
         </v-select>
         <span>{{ title }}</span>
@@ -133,7 +133,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid, maskUidName, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import {
   getUiafHeader,
   readUiafData,
@@ -447,7 +447,7 @@ async function createUid(): Promise<void> {
 async function deleteUid(): Promise<void> {
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${maskUid(uidCur.value)}对应数据`,
+    `确认则清空存档-${maskUidTail(uidCur.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");
