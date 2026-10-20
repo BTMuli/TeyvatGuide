@@ -61,6 +61,7 @@ import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 
@@ -171,7 +172,7 @@ async function fetchDailyNoteAccounts(shouldVerifyCaptcha: boolean): Promise<boo
   let verified = false;
   const results: Array<DailyNoteAccount> = [];
   for (const [index, acc] of gameAccounts.value.entries()) {
-    loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${acc.gameUid}...`;
+    loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${maskUidTail(acc.gameUid)}...`;
     loadingProgress.value = (index / gameAccounts.value.length) * 100;
     let data: TGApp.Game.DailyNote.DnRes | undefined;
     try {
@@ -296,7 +297,7 @@ async function loadSignData(): Promise<void> {
   const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
   for (let i = 0; i < accounts.length; i++) {
     const acc = accounts[i];
-    loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${acc.gameUid}...`;
+    loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${maskUidTail(acc.gameUid)}...`;
     loadingProgress.value = (i / accounts.length) * 100;
     let info, stat;
     let infoResp: TGApp.BBS.Sign.HomeResp | undefined;

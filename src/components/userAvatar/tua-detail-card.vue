@@ -50,7 +50,7 @@
           :weapon
         />
         <div class="tua-dcp-share">
-          <span>UID:{{ props.avatar.uid }}</span>
+          <span>UID:{{ maskUid(props.avatar.uid) }}</span>
           <span>TeyvatGuide v{{ version }}</span>
         </div>
       </div>
@@ -127,6 +127,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import { app } from "@tauri-apps/api";
 import TGShare from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";
 

@@ -10,11 +10,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUidTail(item) }}</span>
+          </template>
+        </v-select>
         <v-btn class="uc-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/UI/nav/userAbyss.webp" />
           <span>深境螺旋</span>
@@ -151,6 +157,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -295,7 +302,7 @@ async function refreshCombat(): Promise<void> {
   if (!refreshData) return;
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Combat][refreshCombat] 更新剧诗数据");
-  await showLoading.start(`正在获取${rfAccount.gameUid}的剧诗数据`);
+  await showLoading.start(`正在获取${maskUid(rfAccount.gameUid)}的剧诗数据`);
   let resp: TGApp.Game.Combat.CombatResp | undefined;
   try {
     resp = await recordReq.combat.base(rfCk!, rfAccount);
@@ -333,16 +340,16 @@ async function refreshCombat(): Promise<void> {
 async function loadCharMaster(): Promise<void> {
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   if (!gcFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应游迹数据`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 UID，无法获取对应游迹数据`);
     return;
   }
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应游迹数据`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 CK，无法获取对应游迹数据`);
     return;
   }
   await TGLogger.Info("[Combat][loadCharMaster] 获取绘想游迹数据");
-  await showLoading.start(`正在获取${gcFind.gameUid}的绘想游迹数据`);
+  await showLoading.start(`正在获取${maskUid(gcFind.gameUid)}的绘想游迹数据`);
   let resp: TGApp.Game.Combat.CharResp | undefined;
   try {
     resp = await recordReq.combat.char(acFind.cookie!, gcFind);
@@ -367,7 +374,7 @@ async function loadCharMaster(): Promise<void> {
     return;
   }
   charMasters.value = resp.data.list;
-  showSnackbar.success(`成功获取 ${uidCur.value} 的绘想游迹数据`);
+  showSnackbar.success(`成功获取 ${maskUid(uidCur.value)} 的绘想游迹数据`);
   await hideAllOverlay();
   await showLoading.end();
   showChar.value = true;
@@ -376,16 +383,16 @@ async function loadCharMaster(): Promise<void> {
 async function loadTarot(): Promise<void> {
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   if (!gcFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应圣牌数据`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 UID，无法获取对应圣牌数据`);
     return;
   }
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应圣牌数据`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 CK，无法获取对应圣牌数据`);
     return;
   }
   await TGLogger.Info("[Combat][loadTarot] 获取月谕圣牌数据");
-  await showLoading.start(`正在获取${gcFind.gameUid}的月谕圣牌数据`);
+  await showLoading.start(`正在获取${maskUid(gcFind.gameUid)}的月谕圣牌数据`);
   let res: TGApp.Game.Combat.CombatResp | undefined;
   try {
     res = await recordReq.combat.base(acFind.cookie!, gcFind);
@@ -410,7 +417,7 @@ async function loadTarot(): Promise<void> {
     return;
   }
   tarotStat.value = res.data.tarot_card_state;
-  showSnackbar.success(`成功获取${uidCur.value}的月谕圣牌数据`);
+  showSnackbar.success(`成功获取${maskUid(uidCur.value)}的月谕圣牌数据`);
   await hideAllOverlay();
   await showLoading.end();
   showTarot.value = true;
@@ -418,7 +425,7 @@ async function loadTarot(): Promise<void> {
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
-  const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}`;
+  const fileName = `【真境剧诗】${userTab.value}-${maskUidName(uidCur.value)}`;
   const shareDom = document.querySelector<HTMLElement>(`.ucw-i-ref.active`);
   if (shareDom === null) {
     showSnackbar.error("未找到分享数据");
@@ -442,14 +449,17 @@ async function deleteCombat(): Promise<void> {
     showSnackbar.error("未找到符合条件的数据!");
     return;
   }
-  const delCheck = await showDialog.check("确定删除数据？", `将清除${uidCur.value}的所有剧诗数据`);
+  const delCheck = await showDialog.check(
+    "确定删除数据？",
+    `将清除${maskUidTail(uidCur.value)}的所有剧诗数据`,
+  );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }
-  await showLoading.start("正在删除剧诗数据", `UID: ${uidCur.value}`);
+  await showLoading.start("正在删除剧诗数据", `UID: ${maskUid(uidCur.value)}`);
   await TSUserCombat.delCombat(uidCur.value);
-  showSnackbar.success(`已清除 ${uidCur.value} 的剧诗数据`);
+  showSnackbar.success(`已清除 ${maskUid(uidCur.value)} 的剧诗数据`);
   await showLoading.update("正在加载剧诗数据");
   await reloadUid();
   await loadCombat();

@@ -8,12 +8,18 @@
         <v-select
           v-model="curUid"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="存档UID"
           variant="outlined"
           width="200px"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUidTail(item) }}</span>
+          </template>
+        </v-select>
         <v-select
           v-model="curSort"
           :clearable="true"
@@ -168,6 +174,7 @@ import TSUserBagMaterial, {
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import {
   computed,
@@ -354,13 +361,14 @@ function updateMaterialShow(data: Array<MaterialInfo> = getSelectMaterials()): v
 }
 
 /**
+ * @since Beta v0.12.6
  * 加载存档数据
  * @param {number} uid 存档UID
  * @returns {Promise<void>}
  */
 async function loadMaterialList(uid: number, requestVersion: number): Promise<void> {
   if (showOverlay.value) showOverlay.value = false;
-  await showLoading.start(`正在加载 ${uid} 的材料数据`);
+  await showLoading.start(`正在加载 ${maskUid(uid)} 的材料数据`);
   if (requestVersion !== materialLoadVersion) return;
   // 初始化
   materialTypes.value = [];
@@ -508,6 +516,7 @@ async function tryImportMaterial(): Promise<void> {
 
 /**
  * 新建存档
+ * @since Beta v0.12.6
  */
 async function createUid(): Promise<void> {
   let uidDefault: string = "";
@@ -529,11 +538,12 @@ async function createUid(): Promise<void> {
   }
   uidList.value.push(Number(uidInput));
   curUid.value = Number(uidInput);
-  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
+  showSnackbar.success(`切换到新存档 ${maskUid(Number(uidInput))}`);
 }
 
 /**
  * 删除当前存档
+ * @since Beta v0.12.6
  */
 async function deleteUid(): Promise<void> {
   if (!curUid.value) {
@@ -542,7 +552,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${curUid.value}对应数据`,
+    `确认则清空存档-${maskUidTail(curUid.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");

@@ -13,7 +13,7 @@
       <span v-else class="main">第{{ props.round.round_id }}幕</span>
       <span class="sub">{{ fmtUtil.dateTime(Number(props.round.finish_time) * 1000) }}</span>
     </div>
-    <span v-if="showInfo" class="tucr-info">UID {{ props.uid }} | 第{{ props.id }}期</span>
+    <span v-if="showInfo" class="tucr-info">UID {{ maskUid(props.uid) }} | 第{{ props.id }}期</span>
     <TucAeBox :avatars="props.round.avatars" :enemies="props.round.enemies" />
     <div class="tucr-content">
       <TucBuffBox
@@ -28,6 +28,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TucAeBox from "./tuc-ae-box.vue";

@@ -47,7 +47,7 @@
     </div>
 
     <template #share>
-      <span>UID {{ uid }}</span>
+      <span>UID {{ maskUid(uid) }}</span>
       <span> · TeyvatGuide v{{ version }}</span>
     </template>
   </TopOverlay>
@@ -59,6 +59,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, onMounted, ref, useId, useTemplateRef } from "vue";
 
 import TucOvcItem from "./tuc-ovc-item.vue";
@@ -88,7 +89,7 @@ async function share(): Promise<void> {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `绘想游迹_${uid}_${new Date().getTime()}`;
+  const fileName = `绘想游迹_${maskUidName(uid)}_${new Date().getTime()}`;
   const contentMaxHeight = content.style.maxHeight;
   const contentOverflowY = content.style.overflowY;
   shareLoading.value = true;

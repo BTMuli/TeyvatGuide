@@ -21,7 +21,7 @@
               <img :src="item.brief.avatar" alt="icon" />
               <div class="us-sm-content">
                 <span>{{ item.brief.nickname }}</span>
-                <span>UID:{{ item.uid }}</span>
+                <span>UID:{{ maskUidTail(item.uid) }}</span>
               </div>
             </div>
           </template>
@@ -35,7 +35,7 @@
               <img :src="item.brief.avatar" alt="icon" />
               <div class="us-si-content">
                 <span>{{ item.brief.nickname }}</span>
-                <span>UID:{{ item.uid }}</span>
+                <span>UID:{{ maskUidTail(item.uid) }}</span>
               </div>
             </div>
           </template>
@@ -94,6 +94,7 @@ import useUserStore from "@store/user.js";
 import { exit } from "@tauri-apps/plugin-process";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
+import { maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 import { useRoute, useRouter } from "vue-router";

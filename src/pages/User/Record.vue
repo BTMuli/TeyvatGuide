@@ -8,11 +8,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUidTail(item) }}</span>
+          </template>
+        </v-select>
       </div>
     </template>
     <template #append>
@@ -54,7 +60,7 @@
     </div>
     <PhCompCard
       id="record-overview"
-      :shareTitle="`战绩_数据总览_${uidCur}`"
+      :shareTitle="`战绩_数据总览_${maskUidName(uidCur)}`"
       modernShare
       title="数据总览"
     >
@@ -62,7 +68,7 @@
     </PhCompCard>
     <PhCompCard
       id="record-avatars"
-      :shareTitle="`战绩_角色信息_${uidCur}`"
+      :shareTitle="`战绩_角色信息_${maskUidName(uidCur)}`"
       modernShare
       shareProgress
       title="角色信息"
@@ -71,14 +77,19 @@
     </PhCompCard>
     <PhCompCard
       id="record-world"
-      :shareTitle="`战绩_世界探索_${uidCur}`"
+      :shareTitle="`战绩_世界探索_${maskUidName(uidCur)}`"
       modernShare
       shareProgress
       title="世界探索"
     >
       <TurWorldGrid :uid="uidCur ?? 0" :version :worlds="recordData.wed" />
     </PhCompCard>
-    <PhCompCard id="record-home" :shareTitle="`战绩_尘歌壶_${uidCur}`" modernShare title="尘歌壶">
+    <PhCompCard
+      id="record-home"
+      :shareTitle="`战绩_尘歌壶_${maskUidName(uidCur)}`"
+      modernShare
+      title="尘歌壶"
+    >
       <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
@@ -108,6 +119,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -189,7 +201,7 @@ async function handleLegacyRecord(uid: number, sequence: number): Promise<void> 
   if (refreshSupported) {
     const refreshCheck = await showDialog.check(
       "检测到旧版战绩数据",
-      `UID ${uid} 的战绩数据需要刷新为新版原始数据，确认后才会加载。`,
+      `UID ${maskUidTail(uid)} 的战绩数据需要刷新为新版原始数据，确认后才会加载。`,
     );
     if (!refreshCheck) {
       showSnackbar.cancel("已取消刷新旧版战绩数据");
@@ -205,7 +217,7 @@ async function handleLegacyRecord(uid: number, sequence: number): Promise<void> 
 
   const deleteCheck = await showDialog.check(
     "检测到旧版战绩数据",
-    `UID ${uid} 没有可用的刷新账号，确认后将删除旧版战绩数据。`,
+    `UID ${maskUidTail(uid)} 没有可用的刷新账号，确认后将删除旧版战绩数据。`,
   );
   if (!deleteCheck) {
     showSnackbar.cancel("已取消删除旧版战绩数据");
@@ -213,7 +225,7 @@ async function handleLegacyRecord(uid: number, sequence: number): Promise<void> 
   }
   if (sequence !== recordLoadSequence || uidCur.value !== uid) return;
   await TSUserRecord.deleteLegacyUid(uid);
-  showSnackbar.success(`成功删除${uid}的旧版战绩数据`);
+  showSnackbar.success(`成功删除${maskUid(uid)}的旧版战绩数据`);
   await loadUid();
   await loadRecord();
 }
@@ -227,7 +239,7 @@ async function refreshRecord(uidOverride?: number): Promise<boolean> {
   );
   if (!refreshData) return false;
   const { account: rfAccount, cookie: rfCk } = refreshData;
-  await showLoading.start(`正在刷新${rfAccount.gameUid}的战绩数据`);
+  await showLoading.start(`正在刷新${maskUid(rfAccount.gameUid)}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 刷新战绩数据`);
   isRefresh.value = true;
   try {
@@ -248,7 +260,7 @@ async function refreshRecord(uidOverride?: number): Promise<boolean> {
     await showLoading.update("正在加载战绩数据");
     await loadUid(rfAccount.gameUid);
     await loadRecord();
-    showSnackbar.success(`成功刷新${rfAccount.gameUid}的战绩数据`);
+    showSnackbar.success(`成功刷新${maskUid(rfAccount.gameUid)}的战绩数据`);
     return true;
   } catch (error) {
     const errMsg = TGHttps.getErrMsg(error);
@@ -273,7 +285,7 @@ async function shareRecord(): Promise<void> {
     showSnackbar.error("未找到战绩数据，请尝试刷新");
     return;
   }
-  const fileName = `【原神战绩】-${uidCur.value}.png`;
+  const fileName = `【原神战绩】-${maskUidName(uidCur.value)}.png`;
   let progressAt = 0;
 
   function reportShareProgress(progress: {
@@ -319,13 +331,16 @@ async function deleteRecord(): Promise<void> {
     showSnackbar.warn("未找到当前UID");
     return;
   }
-  const delCheck = await showDialog.check("确定删除？", `将删除${uidCur.value}对应的战绩数据`);
+  const delCheck = await showDialog.check(
+    "确定删除？",
+    `将删除${maskUidTail(uidCur.value)}对应的战绩数据`,
+  );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除战绩数据");
     return;
   }
   await TSUserRecord.deleteUid(uidCur.value);
-  showSnackbar.success(`成功删除${uidCur.value}的战绩数据`);
+  showSnackbar.success(`成功删除${maskUid(uidCur.value)}的战绩数据`);
   await loadUid();
   await loadRecord();
 }

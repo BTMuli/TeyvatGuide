@@ -1,12 +1,13 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.11.2
+ * @since Beta v0.12.6
  */
 
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { ref, type Ref } from "vue";
 
@@ -237,7 +238,7 @@ async function deleteGachaRecords(uid: string): Promise<void> {
 
 /**
  * 清理祈愿记录
- * @since Beta v0.6.4
+ * @since Beta v0.12.6
  * @param uid - UID
  * @param pool - 池子
  * @param map - 祈愿数据
@@ -259,7 +260,9 @@ async function cleanGachaRecords(
     `;
     const res = await db.execute(sql);
     if (res.rowsAffected > 0) {
-      showSnackbar.success(`[${uid}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`);
+      showSnackbar.success(
+        `[${maskUid(uid)}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`,
+      );
     }
   }
 }

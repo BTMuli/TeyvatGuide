@@ -36,7 +36,7 @@
           <div class="ugo-item" @click="toggle">
             <div class="ugo-item-left">
               <div class="ugo-item-title">
-                <span>{{ item.uid }} - {{ item.length }}条</span>
+                <span>{{ maskUidTail(item.uid) }} - {{ item.length }}条</span>
                 <span>{{ item.isUgc ? "颂愿记录" : "祈愿记录" }}</span>
               </div>
               <div class="ugo-item-sub">{{ item.time }}</div>
@@ -66,6 +66,7 @@ import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUidTail } from "@utils/TGUid.js";
 import { checkUigfData, exportUigf4Data, readUigf4Data, readUigfData } from "@utils/UIGF.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -272,11 +273,11 @@ async function handleImport(): Promise<void> {
   await showLoading.start("正在导入数据...");
   if (importRaw.value.isV4) {
     for (const item of selectedData.value) {
-      await showLoading.update(`正在导入UID: ${item.uid}`);
+      await showLoading.update(`正在导入UID: ${maskUidTail(item.uid)}`);
       if (!item.isUgc) {
         const dataFind = importRaw.value.data.hk4e?.find((i) => i.uid.toString() === item.uid);
         if (!dataFind) {
-          showSnackbar.error(`未找到UID: ${item.uid}`);
+          showSnackbar.error(`未找到UID: ${maskUidTail(item.uid)}`);
           await new Promise<void>((resolve) => setTimeout(resolve, 1000));
           continue;
         }
@@ -284,7 +285,7 @@ async function handleImport(): Promise<void> {
       } else {
         const dataFind = importRaw.value.data.hk4e_ugc?.find((i) => i.uid.toString() === item.uid);
         if (!dataFind) {
-          showSnackbar.error(`未找到UID: ${item.uid}`);
+          showSnackbar.error(`未找到UID: ${maskUidTail(item.uid)}`);
           await new Promise<void>((resolve) => setTimeout(resolve, 1000));
           continue;
         }
@@ -293,7 +294,7 @@ async function handleImport(): Promise<void> {
     }
   } else {
     const iUid = selectedData.value[0].uid;
-    await showLoading.update(`正在导入UID:${iUid}`);
+    await showLoading.update(`正在导入UID:${maskUidTail(iUid)}`);
     await TSUserGacha.mergeUIGF(iUid, importRaw.value.data.list, true);
   }
   await showLoading.end();

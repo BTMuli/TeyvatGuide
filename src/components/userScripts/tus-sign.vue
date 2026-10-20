@@ -24,7 +24,7 @@
           <div class="tuss-icon">
             <img :src="item.info.icon" alt="icon" />
           </div>
-          <span>{{ item.account.gameUid }} {{ item.account.regionName }}</span>
+          <span>{{ maskUidTail(item.account.gameUid) }} {{ item.account.regionName }}</span>
           <v-icon
             v-if="item.account.gameBiz !== 'hk4e_cn'"
             color="var(--tgc-od-red)"
@@ -66,6 +66,7 @@ import useBBSStore from "@store/bbs.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
+import { maskUid, maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -142,7 +143,7 @@ async function deleteAccount(item: SignAccount): Promise<void> {
   }
   const idx = signAccounts.value.findIndex((i) => i === item);
   if (idx === -1) return;
-  const infoStr = `${item.info.title}-${item.account.regionName}-${item.account.gameUid}`;
+  const infoStr = `${item.info.title}-${item.account.regionName}-${maskUidTail(item.account.gameUid)}`;
   const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后可通过刷新游戏账号恢复`);
   if (!check) {
     showSnackbar.cancel(`已取消删除${infoStr}`);
@@ -308,7 +309,7 @@ async function trySign(
             await TGLogger.Script("已设置跳过验证，打卡失败");
             await TGNotify.normal(
               "自动打卡触发验证",
-              `${item.account.regionName}-${item.account.gameUid}-${item.account.nickname}`,
+              `${item.account.regionName}-${maskUid(item.account.gameUid)}-${item.account.nickname}`,
             );
             break;
           }

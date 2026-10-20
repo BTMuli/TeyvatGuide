@@ -4,13 +4,25 @@
       <TMiImg :ori="true" :src="role.game_head_icon" alt="avatar" />
     </div>
     <div class="tur-ri-content">
-      <div class="tur-ri-title">{{ role.nickname }}({{ uid }})</div>
+      <div class="tur-ri-title">
+        <v-tooltip
+          :disabled="!uidHint(uid)"
+          :text="uidHint(uid)"
+          location="bottom"
+          open-delay="120"
+        >
+          <template #activator="{ props: tipProps }">
+            <span v-bind="tipProps">{{ role.nickname }}({{ maskUid(uid) }})</span>
+          </template>
+        </v-tooltip>
+      </div>
       <div class="tur-ri-subtitle">Lv.{{ role.level }} {{ role.region }}</div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { maskUid, uidHint } from "@utils/TGUid.js";
 
 type TurRoleInfoProps = { uid: number | string; role: TGApp.Game.Record.Role };
 

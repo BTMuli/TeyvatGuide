@@ -65,7 +65,7 @@
       </div>
     </div>
     <div class="tua-dcw-share">
-      <span class="tua-share-title">UID:{{ props.uid }}</span>
+      <span class="tua-share-title">UID:{{ maskUid(props.uid) }}</span>
       <span class="tua-share-sub">更新于{{ props.updated }}</span>
       <span class="tua-share-sub">Render by TeyvatGuide v{{ version }}</span>
     </div>
@@ -73,6 +73,7 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
+import { maskUid } from "@utils/TGUid.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";

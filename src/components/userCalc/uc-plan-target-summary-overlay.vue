@@ -207,6 +207,7 @@ import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
@@ -290,7 +291,7 @@ watch(
 
 const shareCaption = computed<string>(
   () =>
-    `养成目标汇总 · ${props.entry.name} · 第 ${currentPosition.value} / ${props.entries.length} 项 · UID ${props.uid}`,
+    `养成目标汇总 · ${props.entry.name} · 第 ${currentPosition.value} / ${props.entries.length} 项 · UID ${maskUid(props.uid)}`,
 );
 const currentIndex = computed<number>(() =>
   props.entries.findIndex((entry) => entry.id === props.entry.id),
@@ -425,7 +426,12 @@ async function shareSummary(): Promise<void> {
   content.style.maxHeight = "none";
   content.style.overflowY = "visible";
   try {
-    await generateShareImg(`养成目标汇总_${props.entry.name}_${props.uid}`, panel, 1.5, true);
+    await generateShareImg(
+      `养成目标汇总_${props.entry.name}_${maskUidName(props.uid)}`,
+      panel,
+      1.5,
+      true,
+    );
   } finally {
     content.style.maxHeight = contentMaxHeight;
     content.style.overflowY = contentOverflowY;

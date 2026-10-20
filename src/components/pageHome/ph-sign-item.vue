@@ -15,7 +15,7 @@
           <span class="hint">{{ signStat?.is_sign ? "已签到" : "未签到" }}</span>
         </div>
         <div class="ph-sit-sub">
-          {{ account.nickname }} - {{ account.gameUid }} ({{ account.regionName }})
+          {{ account.nickname }} - {{ maskUid(account.gameUid) }} ({{ account.regionName }})
         </div>
       </div>
       <v-btn
@@ -111,6 +111,7 @@ import useUserStore from "@store/user.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 
@@ -516,7 +517,7 @@ async function handleResign(): Promise<void> {
 }
 
 async function tryDelete(): Promise<void> {
-  const infoStr = `${gameInfo.value.title}-${props.account.regionName}-${props.account.gameUid}`;
+  const infoStr = `${gameInfo.value.title}-${props.account.regionName}-${maskUid(props.account.gameUid)}`;
   const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后可通过刷新游戏账号恢复`);
   if (!check) {
     showSnackbar.cancel(`已取消删除${infoStr}`);
@@ -527,7 +528,7 @@ async function tryDelete(): Promise<void> {
 
 async function shareItem(): Promise<void> {
   if (!signItemEl.value) return;
-  const fileName = `游戏签到_${gameInfo.value.title}_${props.account.gameUid}`;
+  const fileName = `游戏签到_${gameInfo.value.title}_${maskUidName(props.account.gameUid)}`;
   await generateShareImg(fileName, signItemEl.value, 2);
 }
 </script>

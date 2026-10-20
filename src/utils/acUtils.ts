@@ -1,17 +1,18 @@
 /**
  * 账号相关辅助函数
- * @since Beta v0.9.9
+ * @since Beta v0.12.6
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import { maskUidTail } from "@utils/TGUid.js";
 
 import TGLogger from "./TGLogger.js";
 
 /**
  * 获取刷新用的账号和Cookie
- * @since Beta v0.9.9
+ * @since Beta v0.12.6
  * @param uid - 当前选择的UID
  * @param dAc - 默认账号
  * @param dCk - 默认Cookie
@@ -38,7 +39,7 @@ export async function getRfAc(
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${uid} 对应 UID，将刷新 ${rfAc.gameUid} 数据`,
+        `未找到 ${maskUidTail(uid)} 对应 UID，将刷新 ${maskUidTail(rfAc.gameUid)} 数据`,
       );
       if (!check) return null;
     } else {
@@ -46,7 +47,7 @@ export async function getRfAc(
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${uid} 对应 CK，将刷新 ${rfAc.gameUid} 数据`,
+          `未找到 ${maskUidTail(uid)} 对应 CK，将刷新 ${maskUidTail(rfAc.gameUid)} 数据`,
         );
         if (!check) return null;
       } else {

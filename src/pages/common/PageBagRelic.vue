@@ -8,12 +8,18 @@
         <v-select
           v-model="curUid"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           class="pbr-uid-select"
           density="compact"
           label="存档UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUidTail(item) }}</span>
+          </template>
+        </v-select>
       </div>
     </template>
     <template #append>
@@ -200,6 +206,7 @@ import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { groupRelics } from "@utils/userBagGroup.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { storeToRefs } from "pinia";
@@ -410,7 +417,7 @@ function handleFilter(value: RelicFilterValue): void {
 }
 
 async function loadRelicList(uid: number): Promise<void> {
-  await showLoading.start(`正在加载 ${uid} 的圣遗物数据`);
+  await showLoading.start(`正在加载 ${maskUid(uid)} 的圣遗物数据`);
   sourceItems.value = [];
   clearPageStateForUid();
   equipAvatarMap.value = YAE_AVATAR_AVAILABLE ? await TSUserBagAvatar.getEquipMap(uid) : new Map();
@@ -464,7 +471,7 @@ async function createUid(): Promise<void> {
   }
   uidList.value.push(Number(uidInput));
   curUid.value = Number(uidInput);
-  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
+  showSnackbar.success(`切换到新存档 ${maskUid(Number(uidInput))}`);
 }
 
 async function deleteUid(): Promise<void> {
@@ -474,7 +481,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${curUid.value}对应数据`,
+    `确认则清空存档-${maskUidTail(curUid.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");
