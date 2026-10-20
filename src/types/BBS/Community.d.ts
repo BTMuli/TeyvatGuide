@@ -56,11 +56,13 @@ declare namespace TGApp.BBS.Community {
    * 个人评论条目
    * @since Beta v0.12.6
    */
-  type Comment = Omit<TGApp.BBS.Reply.ReplyFull, "r_reply" | "r_post"> & {
+  type Comment = Omit<TGApp.BBS.Reply.ReplyFull, "r_reply" | "r_post" | "stat"> & {
     /** 被回复的评论 */
     r_reply: TGApp.BBS.Reply.Reply | null;
     /** 被回复的帖子 */
     r_post: TGApp.BBS.Post.Post | null;
+    /** 点赞数据；评论已删除等情况下可能为 null */
+    stat: TGApp.BBS.Reply.Stat | null;
   };
 
   /**

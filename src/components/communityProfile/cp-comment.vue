@@ -66,7 +66,7 @@ const createdAtIso = computed<string>(() => {
     ? new Date(createdAt * 1000).toISOString()
     : "";
 });
-const likeCount = computed<number>(() => props.comment.stat.like_num ?? 0);
+const likeCount = computed<number>(() => props.comment.stat?.like_num ?? 0);
 
 function handleOpenPost(): void {
   if (!postId.value) return;
