@@ -3,7 +3,7 @@
  * @since Beta v0.12.6
  */
 
-import { getRequestHeader } from "@utils/getRequestHeader.js";
+import { getCollectionRequestHeader, getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttps from "@utils/TGHttps.js";
 
 const communityApiBaseUrl: Readonly<string> = "https://bbs-api.miyoushe.com/";
@@ -128,7 +128,7 @@ async function getCollections(
   const resp = await TGHttps.get<TGApp.BBS.Community.CollectionsResp>(
     `${communityApiBaseUrl}collection/wapi/collection/userList`,
     {
-      headers: getRequestHeader(getCommunityCookie(cookie), "GET", params, "X4", true),
+      headers: getCollectionRequestHeader(getCommunityCookie(cookie), "GET", params),
       query: params,
     },
   );
@@ -182,7 +182,7 @@ async function getFavoriteCollections(
   const resp = await TGHttps.get<TGApp.BBS.Community.FavoriteCollectionsResp>(
     `${communityApiBaseUrl}collection/wapi/collection/followingList`,
     {
-      headers: getRequestHeader(getCommunityCookie(cookie), "GET", params, "X4", true),
+      headers: getCollectionRequestHeader(getCommunityCookie(cookie), "GET", params),
       query: params,
     },
   );

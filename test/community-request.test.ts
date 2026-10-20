@@ -8,12 +8,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   getRequestHeader: vi.fn(),
+  getCollectionRequestHeader: vi.fn(),
 }));
 
 vi.mock("@utils/TGHttps.js", () => ({
   default: { get: mocks.get },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/getRequestHeader.js", () => ({
+  getRequestHeader: mocks.getRequestHeader,
+  getCollectionRequestHeader: mocks.getCollectionRequestHeader,
+}));
 
 import communityReq from "../src/request/communityReq.js";
 
@@ -27,13 +31,17 @@ const cookie = {
   stuid: "100000001",
 };
 const authCookie = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+const appHeaders = { "x-test-header": "app" };
+const collectionHeaders = { "x-test-header": "collection" };
 const successResponse = { retcode: 0, message: "ok", data: null };
 
 beforeEach(() => {
   mocks.get.mockReset();
   mocks.getRequestHeader.mockReset();
+  mocks.getCollectionRequestHeader.mockReset();
   mocks.get.mockResolvedValue({ data: successResponse });
-  mocks.getRequestHeader.mockReturnValue({ "x-test-header": "test" });
+  mocks.getRequestHeader.mockReturnValue(appHeaders);
+  mocks.getCollectionRequestHeader.mockReturnValue(collectionHeaders);
 });
 
 describe("communityReq read requests", () => {
@@ -42,24 +50,26 @@ describe("communityReq read requests", () => {
 
     const query = { size: 20 };
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "GET", query, "X4", true);
+    expect(mocks.getCollectionRequestHeader).not.toHaveBeenCalled();
     expect(mocks.get).toHaveBeenLastCalledWith("https://bbs-api.miyoushe.com/post/wapi/userReply", {
-      headers: { "x-test-header": "test" },
+      headers: appHeaders,
       query,
     });
   });
 
-  it("uses the official offset and omits self UID for the collection list", async () => {
+  it("uses the collection signature and official offset for the collection list", async () => {
     await communityReq.collections(cookie, cookie.ltuid, "collection-offset");
 
     const query = { gids: 2, size: 20, offset: "collection-offset" };
-    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(authCookie, "GET", query, "X4", true);
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(authCookie, "GET", query);
+    expect(mocks.getRequestHeader).not.toHaveBeenCalled();
     expect(mocks.get).toHaveBeenLastCalledWith(
       "https://bbs-api.miyoushe.com/collection/wapi/collection/userList",
-      { headers: { "x-test-header": "test" }, query },
+      { headers: collectionHeaders, query },
     );
   });
 
-  it("reads favorite posts and favorite collections from the website endpoints", async () => {
+  it("signs favorite posts and favorite collections with their own headers", async () => {
     await communityReq.favorites(cookie, cookie.ltuid, "favorite-offset");
     const favoritePostQuery = { size: 20, offset: "favorite-offset" };
     expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
@@ -71,7 +81,7 @@ describe("communityReq read requests", () => {
     );
     expect(mocks.get).toHaveBeenLastCalledWith(
       "https://bbs-api.miyoushe.com/post/wapi/userFavouritePost",
-      { headers: { "x-test-header": "test" }, query: favoritePostQuery },
+      { headers: appHeaders, query: favoritePostQuery },
     );
 
     await communityReq.favoriteCollections(cookie, "200000002", "favorite-collection-offset");
@@ -81,13 +91,18 @@ describe("communityReq read requests", () => {
       uid: "200000002",
       offset: "favorite-collection-offset",
     };
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "GET",
+      favoriteCollectionQuery,
+    );
     expect(mocks.get).toHaveBeenLastCalledWith(
       "https://bbs-api.miyoushe.com/collection/wapi/collection/followingList",
-      { headers: { "x-test-header": "test" }, query: favoriteCollectionQuery },
+      { headers: collectionHeaders, query: favoriteCollectionQuery },
     );
   });
 
-  it("uses the official last_id cursor for following and followers", async () => {
+  it("uses the app signature and official last_id cursor for following and followers", async () => {
     await communityReq.following(cookie, cookie.ltuid, "following-last-id");
     const followingQuery = {
       gids: 2,
@@ -102,14 +117,21 @@ describe("communityReq read requests", () => {
       true,
     );
     expect(mocks.get).toHaveBeenLastCalledWith("https://bbs-api.miyoushe.com/user/wapi/following", {
-      headers: { "x-test-header": "test" },
+      headers: appHeaders,
       query: followingQuery,
     });
 
     await communityReq.followers(cookie, cookie.ltuid);
     const followersQuery = { gids: 2, page_size: 20 };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "GET",
+      followersQuery,
+      "X4",
+      true,
+    );
     expect(mocks.get).toHaveBeenLastCalledWith("https://bbs-api.miyoushe.com/user/wapi/followers", {
-      headers: { "x-test-header": "test" },
+      headers: appHeaders,
       query: followersQuery,
     });
   });

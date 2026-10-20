@@ -8,12 +8,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   getRequestHeader: vi.fn(),
+  getCollectionRequestHeader: vi.fn(),
 }));
 
 vi.mock("@utils/TGHttps.js", () => ({
   default: { get: mocks.get },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/getRequestHeader.js", () => ({
+  getRequestHeader: mocks.getRequestHeader,
+  getCollectionRequestHeader: mocks.getCollectionRequestHeader,
+}));
 
 import communityReq from "../src/request/communityReq.js";
 
@@ -32,6 +36,7 @@ const successResponse = { retcode: 0, message: "ok", data: null };
 beforeEach(() => {
   mocks.get.mockReset();
   mocks.getRequestHeader.mockReset();
+  mocks.getCollectionRequestHeader.mockReset();
   mocks.get.mockResolvedValue({ data: successResponse });
   mocks.getRequestHeader.mockReturnValue({ "x-test-header": "test" });
 });
