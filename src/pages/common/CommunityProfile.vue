@@ -1,34 +1,5 @@
 <template>
-  <v-app-bar>
-    <div class="community-profile-toolbar">
-      <div class="community-profile-page-title">
-        <v-icon size="28" aria-hidden="true">mdi-account-circle-outline</v-icon>
-        <h1 id="community-profile-title">个人信息</h1>
-      </div>
-      <div class="community-profile-toolbar-actions">
-        <v-btn
-          :to="{ name: '个人信息', query: { section: 'favorites' } }"
-          prepend-icon="mdi-star-outline"
-          size="small"
-          variant="text"
-        >
-          我的收藏
-        </v-btn>
-        <v-btn
-          :disabled="!canViewProfile || loading"
-          :loading
-          aria-label="刷新个人中心"
-          class="community-profile-refresh"
-          icon="mdi-refresh"
-          size="small"
-          title="刷新个人中心"
-          variant="flat"
-          @click="loadProfile"
-        />
-      </div>
-    </div>
-  </v-app-bar>
-  <main aria-labelledby="community-profile-title" class="community-profile">
+  <main aria-label="个人信息" class="community-profile">
     <header v-if="profile" class="community-profile-header">
       <div class="community-profile-identity">
         <CpAvatar :user="profile" :size="80" />
@@ -66,7 +37,19 @@
 
     <section v-else class="community-profile-layout">
       <aside aria-label="个人中心导航" class="community-profile-sidebar">
-        <h2>个人中心</h2>
+        <div class="community-profile-sidebar-header">
+          <h2>个人中心</h2>
+          <v-btn
+            :disabled="!canViewProfile || loading"
+            :loading
+            aria-label="刷新个人中心"
+            icon="mdi-refresh"
+            size="small"
+            title="刷新个人中心"
+            variant="text"
+            @click="loadProfile"
+          />
+        </div>
         <nav class="community-profile-nav">
           <RouterLink
             v-for="item in navigation"
@@ -533,44 +516,12 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.community-profile-toolbar,
-.community-profile-page-title,
-.community-profile-toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.community-profile-toolbar {
-  width: 100%;
-  min-width: 0;
-  justify-content: space-between;
-  padding: 0 16px;
-  color: var(--common-text-title);
-}
-
-.community-profile-page-title {
-  flex-shrink: 0;
-
-  h1 {
-    margin: 0;
-    font-family: var(--font-title);
-    font-size: 20px;
-    font-weight: normal;
-  }
-}
-
-.community-profile-refresh {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-}
-
 .community-profile {
   display: flex;
   overflow: hidden;
   width: 100%;
   max-width: 1200px;
-  height: calc(100dvh - var(--v-layout-top, 0px) - 32px);
+  height: calc(100dvh - 32px);
   min-height: 0;
   box-sizing: border-box;
   flex-direction: column;
@@ -700,9 +651,17 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   max-height: 100%;
   align-self: start;
   overflow-y: auto;
+}
+
+.community-profile-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
 
   h2 {
-    margin: 0 0 12px;
+    margin: 0;
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 16px;
