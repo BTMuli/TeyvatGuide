@@ -41,16 +41,36 @@
       <aside aria-label="个人中心导航" class="community-profile-sidebar">
         <div class="community-profile-sidebar-header">
           <h2>{{ isOwnProfile ? "个人中心" : "用户信息" }}</h2>
-          <v-btn
-            :disabled="!canViewProfile || loading"
-            :loading
-            aria-label="刷新个人中心"
-            icon="mdi-refresh"
-            size="small"
-            title="刷新个人中心"
-            variant="text"
-            @click="loadProfile"
-          />
+          <div class="community-profile-sidebar-actions">
+            <v-btn
+              :disabled="!hasPreviousProfile"
+              aria-label="上一个主页"
+              icon="mdi-chevron-left"
+              size="small"
+              title="上一个主页"
+              variant="text"
+              @click="openTrailProfile(-1)"
+            />
+            <v-btn
+              :disabled="!hasNextProfile"
+              aria-label="下一个主页"
+              icon="mdi-chevron-right"
+              size="small"
+              title="下一个主页"
+              variant="text"
+              @click="openTrailProfile(1)"
+            />
+            <v-btn
+              :disabled="!canViewProfile || loading"
+              :loading
+              aria-label="刷新个人中心"
+              icon="mdi-refresh"
+              size="small"
+              title="刷新个人中心"
+              variant="text"
+              @click="loadProfile"
+            />
+          </div>
         </div>
         <nav class="community-profile-nav">
           <RouterLink
@@ -269,6 +289,12 @@ import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import {
+  hasNextProfile,
+  hasPreviousProfile,
+  recordProfileVisit,
+  stepProfileTrail,
+} from "@utils/communityProfile.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import { createPost } from "@utils/TGWindow.js";
@@ -445,6 +471,8 @@ watch(
   { immediate: true },
 );
 
+watch(profileUid, recordProfileVisit, { immediate: true });
+
 watch(currentSection, (section) => {
   if (section === "posts" && profile.value && !loading.value && postPages.value.length === 0) {
     void loadProfile();
@@ -455,6 +483,16 @@ onBeforeUnmount(() => {
   active = false;
   requestVersion += 1;
 });
+
+async function openTrailProfile(step: -1 | 1): Promise<void> {
+  const targetUid = stepProfileTrail(step);
+  if (targetUid === undefined) return;
+  await router.push(
+    targetUid === uid.value
+      ? { name: "个人信息" }
+      : { name: "用户信息", params: { uid: targetUid } },
+  );
+}
 
 function getSectionRoute(section: ProfileSection): RouteLocationRaw {
   return isOwnProfile.value
@@ -836,10 +874,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-sidebar-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
   margin-bottom: 12px;
-  gap: 8px;
+  gap: 4px;
 
   h2 {
     margin: 0;
@@ -847,6 +885,16 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     font-family: var(--font-title);
     font-size: 16px;
     font-weight: normal;
+  }
+}
+
+.community-profile-sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  & > :last-child {
+    margin-left: auto;
   }
 }
 
