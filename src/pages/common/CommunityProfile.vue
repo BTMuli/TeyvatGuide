@@ -6,17 +6,22 @@
         <h1 id="community-profile-title">个人信息</h1>
       </div>
       <div class="community-profile-toolbar-actions">
-        <v-btn :to="{ name: '收藏' }" prepend-icon="mdi-star-outline" size="small" variant="text">
+        <v-btn
+          :to="{ name: '个人信息', query: { section: 'favorites' } }"
+          prepend-icon="mdi-star-outline"
+          size="small"
+          variant="text"
+        >
           我的收藏
         </v-btn>
         <v-btn
           :disabled="!canViewProfile || loading"
           :loading
-          aria-label="刷新个人信息和我的发帖"
+          aria-label="刷新个人中心"
           class="community-profile-refresh"
           icon="mdi-refresh"
           size="small"
-          title="刷新个人信息和我的发帖"
+          title="刷新个人中心"
           variant="flat"
           @click="loadProfile"
         />
@@ -26,9 +31,7 @@
   <main aria-labelledby="community-profile-title" class="community-profile">
     <header v-if="profile" class="community-profile-header">
       <div class="community-profile-identity">
-        <div class="community-profile-avatar">
-          <TMiImg :src="avatarUrl" :ori="true" alt="当前账号头像" />
-        </div>
+        <CpAvatar :user="profile" :size="80" />
         <div class="community-profile-intro">
           <div class="community-profile-name">
             <h2 :title="profile.nickname">{{ profile.nickname }}</h2>
@@ -66,21 +69,21 @@
         <h2>个人中心</h2>
         <nav class="community-profile-nav">
           <RouterLink
-            aria-current="page"
-            class="community-profile-nav-item is-active"
-            :to="{ name: '个人信息' }"
+            v-for="item in navigation"
+            :key="item.label"
+            :aria-current="item.section === currentSection ? 'page' : 'false'"
+            :class="{ 'is-active': item.section === currentSection }"
+            class="community-profile-nav-item"
+            :to="{ name: '个人信息', query: { section: item.section } }"
           >
-            <v-icon size="18">mdi-post-outline</v-icon>
-            <span>我的发帖</span>
-          </RouterLink>
-          <RouterLink class="community-profile-nav-item" :to="{ name: '收藏' }">
-            <v-icon size="18">mdi-star-outline</v-icon>
-            <span>我的收藏</span>
+            <v-icon size="18" aria-hidden="true">{{ item.icon }}</v-icon>
+            <span>{{ item.label }}</span>
           </RouterLink>
         </nav>
       </aside>
 
       <section
+        v-if="currentSection === 'posts' || loading || !profile"
         :aria-busy="loading"
         aria-labelledby="community-profile-posts-title"
         class="community-profile-posts"
@@ -88,12 +91,12 @@
         <header class="community-profile-posts-header">
           <div>
             <h2 id="community-profile-posts-title">
-              <v-icon size="20" aria-hidden="true">mdi-post-outline</v-icon>
-              我的发帖
+              <v-icon size="20" aria-hidden="true">{{ activeNavigation?.icon }}</v-icon>
+              {{ activeNavigation?.label }}
             </h2>
-            <p>当前账号在米游社发布的帖子，可打开查看或编辑</p>
+            <p v-if="currentSection === 'posts'">当前账号在米游社发布的帖子，可打开查看或编辑</p>
           </div>
-          <span v-if="profile" class="community-profile-post-count">
+          <span v-if="profile && currentSection === 'posts'" class="community-profile-post-count">
             共 {{ profile.achieve.post_num }} 篇
           </span>
         </header>
@@ -212,25 +215,60 @@
           />
         </div>
       </section>
+      <CpSettings
+        v-else-if="currentSection === 'privacy' || currentSection === 'edit'"
+        :key="`${uid}:${currentSection}:${refreshVersion}`"
+        :section="currentSection"
+        :profile
+        class="community-profile-panel"
+        @saved="handleSettingsSaved"
+      />
+      <CpContent
+        v-else
+        :key="`${uid}:${currentSection}:${refreshVersion}`"
+        :section="currentSection"
+        class="community-profile-panel"
+      />
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
+import CpContent from "@comp/communityProfile/cp-content.vue";
+import CpSettings from "@comp/communityProfile/cp-settings.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import bbsReq from "@req/bbsReq.js";
-import postReq from "@req/postReq.js";
+import communityReq from "@req/communityReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
+
+type ProfileSection =
+  | "posts"
+  | "comments"
+  | "collections"
+  | "favorites"
+  | "following"
+  | "followers"
+  | "privacy"
+  | "edit";
+
+type NavigationItem = {
+  section: ProfileSection;
+  label: string;
+  icon: string;
+};
 
 type AccountSnapshot = {
   uid: string;
@@ -243,8 +281,37 @@ type ProfileStat = {
 };
 
 const router = useRouter();
+const route = useRoute();
+const navigation: Array<NavigationItem> = [
+  { section: "posts", label: "我的发帖", icon: "mdi-post-outline" },
+  { section: "comments", label: "我的评论", icon: "mdi-comment-text-outline" },
+  { section: "collections", label: "我的合集", icon: "mdi-folder-outline" },
+  { section: "favorites", label: "我的收藏", icon: "mdi-star-outline" },
+  { section: "followers", label: "我的粉丝", icon: "mdi-account-multiple-outline" },
+  { section: "following", label: "我的关注", icon: "mdi-heart-outline" },
+  { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline" },
+  { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
+];
+const currentSection = computed<ProfileSection>(() => {
+  const section = route.query.section;
+  switch (section) {
+    case "comments":
+    case "collections":
+    case "favorites":
+    case "following":
+    case "followers":
+    case "privacy":
+    case "edit":
+      return section;
+    default:
+      return "posts";
+  }
+});
+const activeNavigation = computed<NavigationItem | undefined>(() =>
+  navigation.find((item) => item.section === currentSection.value),
+);
 const { isLogin, incognito } = storeToRefs(useAppStore());
-const { cookie, uid } = storeToRefs(useUserStore());
+const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 
 const profile = shallowRef<TGApp.BBS.User.Info>();
 const postPages = shallowRef<Array<Array<TGApp.BBS.Post.FullData>>>([]);
@@ -253,9 +320,7 @@ const pageLastFlags = shallowRef<Array<boolean>>([]);
 const page = ref<number>(1);
 const loading = ref<boolean>(false);
 const loadError = ref<string>("");
-const avatarUrl = computed<string>(() =>
-  profile.value ? getUserAvatar(profile.value) : "/UI/nav/lumine.webp",
-);
+const refreshVersion = ref<number>(0);
 const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
@@ -311,6 +376,12 @@ watch(
   { immediate: true },
 );
 
+watch(currentSection, (section) => {
+  if (section === "posts" && profile.value && !loading.value && postPages.value.length === 0) {
+    void loadProfile();
+  }
+});
+
 onBeforeUnmount(() => {
   active = false;
   requestVersion += 1;
@@ -348,29 +419,38 @@ function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
 
 async function loadProfile(): Promise<void> {
   const version = ++requestVersion;
+  refreshVersion.value += 1;
   resetProfileData();
   const snapshot = getAccountSnapshot();
   if (snapshot === undefined) return;
   loading.value = true;
   try {
-    const [userResponse, postResponse] = await Promise.all([
-      bbsReq.userInfo(snapshot.cookie),
-      postReq.user.post(snapshot.uid, 2),
-    ]);
+    const userResponse = await bbsReq.userInfo(snapshot.cookie);
     if (!isCurrentRequest(version, snapshot)) return;
     if (userResponse.retcode !== 0) {
       throw new Error(`[${userResponse.retcode}] ${userResponse.message}`);
     }
+    if (userResponse.data.user_info.uid !== snapshot.uid) {
+      throw new Error("用户信息与当前账号不一致");
+    }
+    profile.value = userResponse.data.user_info;
+    if (matchesCurrentAccount(snapshot)) {
+      briefInfo.value = {
+        uid: profile.value.uid,
+        nickname: profile.value.nickname,
+        avatar: getUserAvatar(profile.value),
+        desc: profile.value.introduce,
+      };
+    }
+    if (currentSection.value !== "posts") return;
+    const postResponse = await communityReq.posts(snapshot.cookie);
+    if (!isCurrentRequest(version, snapshot)) return;
     if (postResponse.retcode !== 0) {
       throw new Error(`[${postResponse.retcode}] ${postResponse.message}`);
     }
     if (!postResponse.data.is_last && postResponse.data.next_offset.trim() === "") {
       throw new Error("帖子分页游标无效");
     }
-    if (userResponse.data.user_info.uid !== snapshot.uid) {
-      throw new Error("用户信息与当前账号不一致");
-    }
-    profile.value = userResponse.data.user_info;
     postPages.value = [postResponse.data.list];
     pageOffsets.value = [postResponse.data.next_offset];
     pageLastFlags.value = [postResponse.data.is_last];
@@ -379,6 +459,11 @@ async function loadProfile(): Promise<void> {
   } finally {
     if (isCurrentRequest(version, snapshot)) loading.value = false;
   }
+}
+
+function handleSettingsSaved(): void {
+  showSnackbar.success(currentSection.value === "privacy" ? "隐私设置已保存" : "资料已提交保存");
+  void loadProfile();
 }
 
 async function handlePageChange(nextPage: number): Promise<void> {
@@ -402,7 +487,7 @@ async function handlePageChange(nextPage: number): Promise<void> {
   loading.value = true;
   loadError.value = "";
   try {
-    const response = await postReq.user.post(snapshot.uid, 2, offset);
+    const response = await communityReq.posts(snapshot.cookie, offset);
     if (!isCurrentRequest(version, snapshot)) return;
     if (response.retcode !== 0) {
       throw new Error(`[${response.retcode}] ${response.message}`);
@@ -515,24 +600,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   gap: 16px;
 }
 
-.community-profile-avatar {
-  display: grid;
-  overflow: hidden;
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  border: 2px solid var(--common-shadow-2);
-  border-radius: 50%;
-  background: var(--box-bg-2);
-  place-items: center;
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
 .community-profile-intro {
   min-width: 0;
 }
@@ -620,7 +687,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-sidebar,
-.community-profile-posts {
+.community-profile-posts,
+.community-profile-panel {
   min-width: 0;
   padding: 16px;
   border: 1px solid var(--common-shadow-1);
@@ -629,9 +697,9 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-sidebar {
-  position: sticky;
-  top: 16px;
+  max-height: 100%;
   align-self: start;
+  overflow-y: auto;
 
   h2 {
     margin: 0 0 12px;
@@ -674,6 +742,11 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   overflow: hidden;
   min-height: 0;
   flex-direction: column;
+}
+
+.community-profile-panel {
+  overflow: auto;
+  min-height: 0;
 }
 
 .community-profile-posts-header {
@@ -928,7 +1001,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
   .community-profile-header,
   .community-profile-sidebar,
-  .community-profile-posts {
+  .community-profile-posts,
+  .community-profile-panel {
     padding: 16px;
   }
 
@@ -941,16 +1015,20 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   }
 
   .community-profile-sidebar {
-    position: static;
     flex-shrink: 0;
   }
 
   .community-profile-nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: row;
+    overflow-x: auto;
   }
 
-  .community-profile-posts {
+  .community-profile-nav-item {
+    flex-shrink: 0;
+  }
+
+  .community-profile-posts,
+  .community-profile-panel {
     flex: 1 1 auto;
   }
 
