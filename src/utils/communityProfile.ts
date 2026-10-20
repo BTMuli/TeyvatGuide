@@ -25,4 +25,16 @@ async function openCommunityProfile(userId: string): Promise<void> {
   await emit("active_deep_link", `router?path=/community/profile/${normalizedUid}`);
 }
 
-export { openCommunityProfile };
+/**
+ * 判断帖子标题或摘要是否包含关键词（忽略大小写）。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @param keyword - 已去除首尾空白的关键词
+ * @returns 是否匹配
+ */
+function matchesPostKeyword(post: TGApp.BBS.Post.FullData, keyword: string): boolean {
+  const needle = keyword.toLowerCase();
+  return [post.post.subject, post.post.content].some((text) => text.toLowerCase().includes(needle));
+}
+
+export { matchesPostKeyword, openCommunityProfile };

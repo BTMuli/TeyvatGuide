@@ -20,20 +20,71 @@
         @click="closeCollection"
         >返回合集</v-btn
       >
+      <span v-else-if="searchKeyword" class="cp-content-count">
+        {{
+          loading
+            ? `已读取 ${fmtUtil.num(scannedCount)} 篇`
+            : `找到 ${fmtUtil.num(entries.length)} 篇`
+        }}
+      </span>
       <span v-else class="cp-content-count">已加载 {{ entries.length }} 条</span>
     </header>
 
-    <v-tabs
-      v-if="section === 'favorites' && !selectedCollection"
-      v-model="favoriteTab"
-      aria-label="收藏内容类型"
-      class="cp-favorite-tabs"
-      color="var(--common-text-title)"
-      density="compact"
+    <div
+      v-if="selectedCollection && !collectionLoading && !collectionError && collectionPosts.length"
+      class="cp-content-toolbar"
     >
-      <v-tab value="posts">帖子</v-tab>
-      <v-tab value="collections">合集</v-tab>
-    </v-tabs>
+      <span class="cp-content-count">
+        {{
+          collectionKeyword
+            ? `找到 ${fmtUtil.num(filteredCollectionPosts.length)} 篇`
+            : `共 ${fmtUtil.num(collectionPosts.length)} 篇`
+        }}
+      </span>
+      <v-text-field
+        v-model="collectionSearchInput"
+        :clearable="true"
+        :hide-details="true"
+        append-inner-icon="mdi-magnify"
+        aria-label="搜索合集帖子"
+        autocomplete="off"
+        class="cp-content-search"
+        density="compact"
+        placeholder="搜索合集帖子"
+        variant="outlined"
+        @click:append-inner="searchCollection(collectionSearchInput)"
+        @click:clear="collectionKeyword = ''"
+        @keyup.enter="searchCollection(collectionSearchInput)"
+      />
+    </div>
+    <div v-else-if="section === 'favorites' && !selectedCollection" class="cp-content-toolbar">
+      <v-tabs
+        v-model="favoriteTab"
+        aria-label="收藏内容类型"
+        class="cp-favorite-tabs"
+        color="var(--common-text-title)"
+        density="compact"
+      >
+        <v-tab value="posts">帖子</v-tab>
+        <v-tab value="collections">合集</v-tab>
+      </v-tabs>
+      <v-text-field
+        v-if="favoriteTab === 'posts'"
+        v-model="searchInput"
+        :clearable="true"
+        :hide-details="true"
+        append-inner-icon="mdi-magnify"
+        aria-label="搜索收藏帖子"
+        autocomplete="off"
+        class="cp-content-search"
+        density="compact"
+        placeholder="搜索收藏帖子"
+        variant="outlined"
+        @click:append-inner="searchFavorites(searchInput)"
+        @click:clear="clearSearch"
+        @keyup.enter="searchFavorites(searchInput)"
+      />
+    </div>
 
     <div v-if="selectedCollection" class="cp-content-body">
       <div v-if="collectionLoading" class="cp-content-state" role="status" aria-live="polite">
@@ -49,9 +100,13 @@
         <v-icon size="32">mdi-folder-open-outline</v-icon>
         <p>这个合集还没有帖子</p>
       </div>
+      <div v-else-if="filteredCollectionPosts.length === 0" class="cp-content-state" role="status">
+        <v-icon size="32">mdi-text-search-variant</v-icon>
+        <p>未找到与“{{ collectionKeyword }}”相关的合集帖子</p>
+      </div>
       <div v-else class="cp-collection-posts">
         <CpPost
-          v-for="post in collectionPosts"
+          v-for="post in filteredCollectionPosts"
           :key="post.post.post_id"
           :post
           @open-post="openPost"
@@ -63,7 +118,7 @@
       <div v-if="error" class="cp-content-state cp-content-error" role="alert">
         <v-icon size="28">mdi-alert-circle-outline</v-icon>
         <p>{{ error }}</p>
-        <v-btn :disabled="loading" variant="tonal" @click="loadMore">重新加载</v-btn>
+        <v-btn :disabled="loading" variant="tonal" @click="retry">重新加载</v-btn>
       </div>
       <div v-if="entries.length" class="cp-entry-list">
         <template v-for="entry in entries" :key="`${entry.kind}:${entry.id}`">
@@ -106,15 +161,22 @@
           </button>
         </template>
       </div>
+      <div v-else-if="!loading && !error && searchKeyword" class="cp-content-state" role="status">
+        <v-icon size="32">mdi-text-search-variant</v-icon>
+        <p>未找到与“{{ searchKeyword }}”相关的收藏帖子</p>
+      </div>
       <div v-else-if="!loading && !error" class="cp-content-state" role="status">
         <v-icon size="32">{{ sectionInfo.icon }}</v-icon>
         <p>{{ sectionInfo.empty }}</p>
       </div>
       <div v-if="loading" class="cp-content-state" role="status" aria-live="polite">
         <v-progress-circular indeterminate size="28" />
-        <p>正在加载{{ sectionInfo.title }}…</p>
+        <p>{{ searchKeyword ? "正在搜索收藏帖子…" : `正在加载${sectionInfo.title}…` }}</p>
       </div>
-      <footer v-if="entries.length && !loading && !error" class="cp-content-footer">
+      <footer
+        v-if="entries.length && !loading && !error && !searchKeyword"
+        class="cp-content-footer"
+      >
         <span v-if="isLast">已全部加载</span>
         <v-btn v-else variant="tonal" @click="loadMore">加载更多</v-btn>
       </footer>
@@ -133,7 +195,8 @@ import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { openCommunityProfile } from "@utils/communityProfile.js";
+import { matchesPostKeyword, openCommunityProfile } from "@utils/communityProfile.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -228,6 +291,17 @@ const selectedCollection = shallowRef<TGApp.BBS.Collection.Collection>();
 const collectionPosts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const collectionLoading = ref<boolean>(false);
 const collectionError = ref<string>("");
+const collectionSearchInput = ref<string | null>("");
+const collectionKeyword = ref<string>("");
+const filteredCollectionPosts = computed<Array<TGApp.BBS.Post.FullData>>(() => {
+  const keyword = collectionKeyword.value;
+  if (keyword === "") return collectionPosts.value;
+  return collectionPosts.value.filter((post) => matchesPostKeyword(post, keyword));
+});
+const searchInput = ref<string | null>("");
+const searchKeyword = ref<string>("");
+const scannedCount = ref<number>(0);
+let favoriteCache: Array<TGApp.BBS.Post.FullData> | undefined;
 let generation = 0;
 let collectionGeneration = 0;
 let active = true;
@@ -247,11 +321,10 @@ watch(
   ],
   () => {
     generation += 1;
-    entries.value = [];
-    offset.value = "";
-    isLast.value = false;
-    loading.value = false;
-    error.value = "";
+    favoriteCache = undefined;
+    searchInput.value = "";
+    searchKeyword.value = "";
+    resetEntries();
     closeCollection();
     void loadMore();
   },
@@ -262,6 +335,14 @@ onBeforeUnmount(() => {
   generation += 1;
   collectionGeneration += 1;
 });
+
+function resetEntries(): void {
+  entries.value = [];
+  offset.value = "";
+  isLast.value = false;
+  loading.value = false;
+  error.value = "";
+}
 
 function getSnapshot(): AccountSnapshot | undefined {
   const loginUid = uid.value?.trim() ?? "";
@@ -321,6 +402,73 @@ async function loadMore(): Promise<void> {
   } finally {
     if (isCurrent(snapshot, version)) loading.value = false;
   }
+}
+
+async function loadAllFavorites(
+  snapshot: AccountSnapshot,
+  version: number,
+): Promise<Array<TGApp.BBS.Post.FullData> | undefined> {
+  const posts: Array<TGApp.BBS.Post.FullData> = [];
+  const ids = new Set<string>();
+  let cursor = "";
+  let last = false;
+  scannedCount.value = 0;
+  while (!last) {
+    const response = await communityReq.favorites(snapshot.cookie, snapshot.profileUid, cursor);
+    if (!isCurrent(snapshot, version)) return undefined;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    for (const post of response.data.list) {
+      if (ids.has(post.post.post_id)) continue;
+      ids.add(post.post.post_id);
+      posts.push(post);
+    }
+    scannedCount.value = posts.length;
+    const next = response.data.next_offset ?? "";
+    last = response.data.is_last;
+    if (!last && (!next.trim() || next === cursor)) throw new Error("分页游标无效，请刷新后重试。");
+    cursor = next;
+  }
+  return posts;
+}
+
+async function searchFavorites(input: string | null): Promise<void> {
+  const keyword = (input ?? "").trim();
+  if (keyword === "") {
+    clearSearch();
+    return;
+  }
+  const snapshot = getSnapshot();
+  if (!snapshot) return;
+  const version = ++generation;
+  resetEntries();
+  searchKeyword.value = keyword;
+  isLast.value = true;
+  loading.value = true;
+  try {
+    const posts = favoriteCache ?? (await loadAllFavorites(snapshot, version));
+    if (posts === undefined || !isCurrent(snapshot, version)) return;
+    favoriteCache = posts;
+    entries.value = posts
+      .filter((post) => matchesPostKeyword(post, keyword))
+      .map((post) => ({ kind: "post", id: post.post.post_id, post }));
+  } catch (cause) {
+    if (isCurrent(snapshot, version)) error.value = TGHttps.getErrMsg(cause);
+  } finally {
+    if (isCurrent(snapshot, version)) loading.value = false;
+  }
+}
+
+function clearSearch(): void {
+  if (searchKeyword.value === "") return;
+  generation += 1;
+  searchKeyword.value = "";
+  resetEntries();
+  void loadMore();
+}
+
+function retry(): void {
+  if (searchKeyword.value) void searchFavorites(searchKeyword.value);
+  else void loadMore();
 }
 
 async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<ContentPage> {
@@ -400,6 +548,16 @@ function closeCollection(): void {
   collectionPosts.value = [];
   collectionLoading.value = false;
   collectionError.value = "";
+  resetCollectionSearch();
+}
+
+function resetCollectionSearch(): void {
+  collectionSearchInput.value = "";
+  collectionKeyword.value = "";
+}
+
+function searchCollection(input: string | null): void {
+  collectionKeyword.value = (input ?? "").trim();
 }
 
 async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<void> {
@@ -411,6 +569,7 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   collectionPosts.value = [];
   collectionError.value = "";
   collectionLoading.value = true;
+  resetCollectionSearch();
   try {
     const response = await postReq.collection(String(entry.id));
     if (!isCurrent(snapshot, version) || collectionVersion !== collectionGeneration) return;
@@ -476,10 +635,26 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   scrollbar-gutter: stable;
 }
 
-.cp-favorite-tabs {
+.cp-content-toolbar {
+  display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
   border-bottom: 1px solid var(--common-shadow-1);
   margin-bottom: 12px;
+  gap: 8px 12px;
+}
+
+.cp-favorite-tabs {
+  flex-shrink: 0;
+}
+
+.cp-content-search {
+  width: 240px;
+  max-width: 100%;
+  flex: 0 1 auto;
+  margin-bottom: 4px;
+  margin-left: auto;
 }
 
 .cp-entry-list,
