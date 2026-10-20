@@ -87,14 +87,38 @@
               }}
             </p>
           </div>
-          <span v-if="profile && currentSection === 'posts'" class="community-profile-post-count">
-            共 {{ profile.achieve.post_num }} 篇
-          </span>
+          <div v-if="profile && currentSection === 'posts'" class="community-profile-posts-actions">
+            <v-text-field
+              v-model="searchInput"
+              :clearable="true"
+              :hide-details="true"
+              append-inner-icon="mdi-magnify"
+              aria-label="搜索帖子"
+              autocomplete="off"
+              class="community-profile-search"
+              density="compact"
+              placeholder="搜索帖子"
+              variant="outlined"
+              @click:append-inner="searchPosts(searchInput)"
+              @click:clear="clearSearch"
+              @keyup.enter="searchPosts(searchInput)"
+            />
+            <span v-if="!searchKeyword" class="community-profile-post-count">
+              共 {{ fmtUtil.num(Number(profile.achieve.post_num)) }} 篇
+            </span>
+            <span v-else-if="!loading" class="community-profile-post-count">
+              找到 {{ fmtUtil.num(searchTotal) }} 篇
+            </span>
+          </div>
         </header>
 
         <div v-if="loading" aria-live="polite" class="community-profile-state" role="status">
           <v-progress-circular indeterminate size="28" />
-          <p>{{ profile ? "正在加载帖子…" : "正在加载个人信息…" }}</p>
+          <p>
+            {{
+              profile ? (searchKeyword ? "正在搜索帖子…" : "正在加载帖子…") : "正在加载个人信息…"
+            }}
+          </p>
         </div>
         <div
           v-else-if="loadError"
@@ -104,7 +128,16 @@
         >
           <v-icon size="32">mdi-alert-circle-outline</v-icon>
           <p>{{ loadError }}</p>
-          <v-btn variant="tonal" @click="loadProfile">重新加载</v-btn>
+          <v-btn variant="tonal" @click="retryPosts">重新加载</v-btn>
+        </div>
+        <div
+          v-else-if="currentPosts.length === 0 && searchKeyword"
+          class="community-profile-state"
+          role="status"
+        >
+          <v-icon size="32">mdi-text-search-variant</v-icon>
+          <p>未找到与“{{ searchKeyword }}”相关的帖子</p>
+          <span>换个关键词试试</span>
         </div>
         <div v-else-if="currentPosts.length === 0" class="community-profile-state" role="status">
           <v-icon size="32">mdi-post-off</v-icon>
@@ -276,6 +309,17 @@ type ProfileStat = {
   value: string;
 };
 
+/**
+ * 归一化后的帖子分页数据。
+ * @since Beta v0.12.6
+ */
+type PostPage = {
+  list: Array<TGApp.BBS.Post.FullData>;
+  isLast: boolean;
+  nextOffset: string;
+  total: number;
+};
+
 const router = useRouter();
 const route = useRoute();
 const { isLogin, incognito } = storeToRefs(useAppStore());
@@ -334,6 +378,9 @@ const page = ref<number>(1);
 const loading = ref<boolean>(false);
 const loadError = ref<string>("");
 const refreshVersion = ref<number>(0);
+const searchInput = ref<string | null>("");
+const searchKeyword = ref<string>("");
+const searchTotal = ref<number>(0);
 const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
@@ -415,22 +462,61 @@ function getSectionRoute(section: ProfileSection): RouteLocationRaw {
     : { name: "用户信息", params: { uid: profileUid.value }, query: { section } };
 }
 
-function getProfilePosts(
+async function fetchPostPage(
   snapshot: AccountSnapshot,
+  keyword: string,
   offset?: string,
-): Promise<TGApp.BBS.Post.UserPostResp> {
-  return snapshot.profileUid === snapshot.uid
-    ? communityReq.posts(snapshot.cookie, offset)
-    : postReq.user.post(snapshot.profileUid, 0, offset);
+): Promise<PostPage> {
+  let postPage: PostPage;
+  if (keyword === "") {
+    const response =
+      snapshot.profileUid === snapshot.uid
+        ? await communityReq.posts(snapshot.cookie, offset)
+        : await postReq.user.post(snapshot.profileUid, 0, offset);
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    postPage = {
+      list: response.data.list,
+      isLast: response.data.is_last,
+      nextOffset: response.data.next_offset,
+      total: 0,
+    };
+  } else {
+    const response = await communityReq.searchPosts(snapshot.profileUid, keyword, offset);
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    postPage = {
+      list: response.data.list.filter((item) => item.entity_type === 1).map((item) => item.post),
+      isLast: response.data.is_last,
+      nextOffset: String(response.data.next_offset),
+      total: response.data.total,
+    };
+  }
+  if (!postPage.isLast && postPage.nextOffset.trim() === "") {
+    throw new Error("帖子分页游标无效");
+  }
+  return postPage;
+}
+
+function applyFirstPostPage(postPage: PostPage): void {
+  postPages.value = [postPage.list];
+  pageOffsets.value = [postPage.nextOffset];
+  pageLastFlags.value = [postPage.isLast];
+  searchTotal.value = postPage.total;
+}
+
+function resetPostPages(): void {
+  postPages.value = [];
+  pageOffsets.value = [];
+  pageLastFlags.value = [];
+  page.value = 1;
+  searchTotal.value = 0;
 }
 
 function resetProfileData(): void {
   profile.value = undefined;
   profileAudit.value = undefined;
-  postPages.value = [];
-  pageOffsets.value = [];
-  pageLastFlags.value = [];
-  page.value = 1;
+  resetPostPages();
+  searchInput.value = "";
+  searchKeyword.value = "";
   loadError.value = "";
   loading.value = false;
 }
@@ -491,21 +577,46 @@ async function loadProfile(): Promise<void> {
       };
     }
     if (currentSection.value !== "posts") return;
-    const postResponse = await getProfilePosts(snapshot);
+    const postPage = await fetchPostPage(snapshot, searchKeyword.value);
     if (!isCurrentRequest(version, snapshot)) return;
-    if (postResponse.retcode !== 0) {
-      throw new Error(`[${postResponse.retcode}] ${postResponse.message}`);
-    }
-    if (!postResponse.data.is_last && postResponse.data.next_offset.trim() === "") {
-      throw new Error("帖子分页游标无效");
-    }
-    postPages.value = [postResponse.data.list];
-    pageOffsets.value = [postResponse.data.next_offset];
-    pageLastFlags.value = [postResponse.data.is_last];
+    applyFirstPostPage(postPage);
   } catch (cause) {
     if (isCurrentRequest(version, snapshot)) loadError.value = TGHttps.getErrMsg(cause);
   } finally {
     if (isCurrentRequest(version, snapshot)) loading.value = false;
+  }
+}
+
+async function searchPosts(input: string | null): Promise<void> {
+  const keyword = (input ?? "").trim();
+  if (loading.value || !profile.value) return;
+  const snapshot = getAccountSnapshot();
+  if (snapshot === undefined) return;
+  const version = ++requestVersion;
+  searchKeyword.value = keyword;
+  resetPostPages();
+  loadError.value = "";
+  loading.value = true;
+  try {
+    const postPage = await fetchPostPage(snapshot, keyword);
+    if (!isCurrentRequest(version, snapshot)) return;
+    applyFirstPostPage(postPage);
+  } catch (cause) {
+    if (isCurrentRequest(version, snapshot)) loadError.value = TGHttps.getErrMsg(cause);
+  } finally {
+    if (isCurrentRequest(version, snapshot)) loading.value = false;
+  }
+}
+
+function clearSearch(): void {
+  if (searchKeyword.value !== "") void searchPosts("");
+}
+
+function retryPosts(): void {
+  if (profile.value && currentSection.value === "posts") {
+    void searchPosts(searchKeyword.value);
+  } else {
+    void loadProfile();
   }
 }
 
@@ -539,17 +650,11 @@ async function handlePageChange(nextPage: number): Promise<void> {
   loading.value = true;
   loadError.value = "";
   try {
-    const response = await getProfilePosts(snapshot, offset);
+    const postPage = await fetchPostPage(snapshot, searchKeyword.value, offset);
     if (!isCurrentRequest(version, snapshot)) return;
-    if (response.retcode !== 0) {
-      throw new Error(`[${response.retcode}] ${response.message}`);
-    }
-    if (!response.data.is_last && response.data.next_offset.trim() === "") {
-      throw new Error("帖子分页游标无效");
-    }
-    postPages.value = [...postPages.value, response.data.list];
-    pageOffsets.value = [...pageOffsets.value, response.data.next_offset];
-    pageLastFlags.value = [...pageLastFlags.value, response.data.is_last];
+    postPages.value = [...postPages.value, postPage.list];
+    pageOffsets.value = [...pageOffsets.value, postPage.nextOffset];
+    pageLastFlags.value = [...pageLastFlags.value, postPage.isLast];
   } catch (cause) {
     if (isCurrentRequest(version, snapshot)) {
       page.value = loadedPageCount;
@@ -787,6 +892,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-posts-header {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
@@ -808,6 +914,20 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     color: var(--box-text-4);
     font-size: 12px;
   }
+}
+
+.community-profile-posts-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  margin-left: auto;
+  gap: 12px;
+}
+
+.community-profile-search {
+  width: 240px;
+  max-width: 100%;
+  flex: 0 1 auto;
 }
 
 .community-profile-post-count {

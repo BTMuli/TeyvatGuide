@@ -247,8 +247,31 @@ async function getFollowers(
   return resp.data;
 }
 
+/**
+ * 搜索指定用户发布的帖子
+ * @since Beta v0.12.6
+ * @param uid - 用户 ID
+ * @param keyword - 搜索关键词
+ * @param offset - 下一页偏移量
+ * @returns 用户帖子搜索响应数据
+ */
+async function searchUserPosts(
+  uid: string,
+  keyword: string,
+  offset?: string,
+): Promise<TGApp.BBS.Community.PostSearchResp> {
+  const params: CommunityQuery = { keyword, uid, size: communityPageSize };
+  if (offset) params.offset = offset;
+  const resp = await TGHttps.get<TGApp.BBS.Community.PostSearchResp>(
+    `${communityApiBaseUrl}painter/api/user_instant/search/list`,
+    { headers: { referer: "https://www.miyoushe.com/" }, query: params },
+  );
+  return resp.data;
+}
+
 const communityReq = {
   posts: getPosts,
+  searchPosts: searchUserPosts,
   comments: getComments,
   collections: getCollections,
   favorites: getFavorites,

@@ -188,4 +188,48 @@ declare namespace TGApp.BBS.Community {
     /** 用户认证信息列表 */
     certifications: Array<TGApp.BBS.User.Certification>;
   };
+
+  /**
+   * 用户帖子搜索返回响应
+   * @since Beta v0.12.6
+   */
+  type PostSearchResp = BaseResp<PostSearchRes>;
+
+  /**
+   * 用户帖子搜索返回数据
+   * @since Beta v0.12.6
+   */
+  type PostSearchRes = {
+    /** 搜索结果列表 */
+    list: Array<PostSearchItem>;
+    /** 是否最后一页 */
+    is_last: boolean;
+    /** 下一页偏移量 */
+    next_offset: number;
+    /** 关键词分词列表 */
+    token_list: Array<string>;
+    /** 结果总数 */
+    total: number;
+  };
+
+  /**
+   * 用户帖子搜索结果条目
+   * @since Beta v0.12.6
+   */
+  type PostSearchItem = {
+    /** 条目 ID */
+    id: string;
+    /** 用户 ID */
+    uid: string;
+    /** 实体 ID */
+    entity_id: string;
+    /** 实体类型，1 为帖子 */
+    entity_type: number;
+    /** 发布时间（秒级时间戳） */
+    publish_at: string;
+    /** 社区 ID */
+    game_id: string;
+    /** 帖子数据 */
+    post: TGApp.BBS.Post.FullData;
+  };
 }

@@ -136,6 +136,22 @@ describe("communityReq read requests", () => {
     });
   });
 
+  it("searches a user's posts with keyword, UID and numeric offset cursor", async () => {
+    await communityReq.searchPosts("200000002", "生日");
+    const firstQuery = { keyword: "生日", uid: "200000002", size: 20 };
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/painter/api/user_instant/search/list",
+      { headers: { referer: "https://www.miyoushe.com/" }, query: firstQuery },
+    );
+
+    await communityReq.searchPosts("200000002", "生日", "20");
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/painter/api/user_instant/search/list",
+      { headers: { referer: "https://www.miyoushe.com/" }, query: { ...firstQuery, offset: "20" } },
+    );
+    expect(mocks.getRequestHeader).not.toHaveBeenCalled();
+  });
+
   it("passes through business responses and transport errors", async () => {
     const businessError = { retcode: 1001, message: "permission denied", data: null };
     mocks.get.mockResolvedValueOnce({ data: businessError });
