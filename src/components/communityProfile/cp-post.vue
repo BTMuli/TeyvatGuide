@@ -19,17 +19,11 @@
         <TpTitle :text="post.post.subject || '无标题帖子'" />
       </button>
     </h3>
-    <button
-      v-if="images.length"
-      :aria-label="`查看帖子：${post.post.subject || '无标题帖子'}`"
-      class="cp-post-images"
-      type="button"
-      @click="openPost"
-    >
+    <div v-if="images.length" class="cp-post-images">
       <span v-for="(image, index) in images" :key="`${index}:${image}`" class="cp-post-image">
-        <TMiImg :src="image" :alt="`第 ${index + 1} 张帖子图片`" :ori="true" />
+        <TMiImg :src="image" :alt="`第 ${index + 1} 张帖子图片`" />
       </span>
-    </button>
+    </div>
     <footer v-if="post.stat" aria-label="帖子统计" class="cp-post-stats">
       <span :title="`浏览 ${post.stat.view_num}`">
         <v-icon size="16" aria-hidden="true">mdi-eye-outline</v-icon>{{ post.stat.view_num }}
@@ -73,6 +67,8 @@ function openPost(): void {
 
 <style lang="scss" scoped>
 .cp-post {
+  position: relative;
+  z-index: 0;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -81,6 +77,11 @@ function openPost(): void {
   border-radius: 8px;
   background: var(--box-bg-1);
   gap: 12px;
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background: var(--box-bg-2);
+  }
 }
 
 .cp-post-meta,
@@ -99,6 +100,8 @@ function openPost(): void {
 }
 
 .cp-post-author {
+  position: relative;
+  z-index: 2;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -145,9 +148,21 @@ function openPost(): void {
     font: inherit;
     text-align: left;
 
-    &:hover {
-      text-decoration: underline;
-      text-underline-offset: 4px;
+    &::after {
+      position: absolute;
+      z-index: 1;
+      content: "";
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        border-radius: 8px;
+        outline: 2px solid var(--common-text-title);
+        outline-offset: 2px;
+      }
     }
   }
 }
@@ -191,7 +206,7 @@ function openPost(): void {
   }
 }
 
-.cp-post button:focus-visible {
+.cp-post-author:focus-visible {
   border-radius: 4px;
   outline: 2px solid var(--common-text-title);
   outline-offset: 4px;

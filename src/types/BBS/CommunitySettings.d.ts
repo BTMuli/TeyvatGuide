@@ -89,6 +89,14 @@ declare namespace TGApp.BBS.CommunitySettings {
     nickname?: string;
     /** 用户简介 */
     introduce?: string;
+    /** 用户性别 */
+    gender?: number;
+    /** 用户头像编号 */
+    avatar?: string;
+    /** 用户头像链接 */
+    avatar_url?: string;
+    /** 用户头像资源 ID */
+    avatar_assets_id?: string;
   };
 
   /**
@@ -96,4 +104,94 @@ declare namespace TGApp.BBS.CommunitySettings {
    * @since Beta v0.12.6
    */
   type ProfileUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
+
+  /**
+   * 米游社可选头像
+   * @since Beta v0.12.6
+   */
+  type Avatar = {
+    /** 头像 ID */
+    id: number;
+    /** 头像名称 */
+    name: string;
+    /** 头像链接 */
+    icon: string;
+    /** 排序 */
+    sort_order: number;
+    /** 状态 */
+    status: string;
+  };
+
+  /**
+   * 米游社可选头像分组
+   * @since Beta v0.12.6
+   */
+  type AvatarGroup = {
+    /** 分组 ID，官方当前均为 0 */
+    id: number;
+    /** 分组名称 */
+    name: string;
+    /** 头像数量 */
+    num: number;
+    /** 排序 */
+    sort_order: number;
+    /** 分组图标 */
+    icon: string;
+    /** 状态 */
+    status: string;
+    /** 头像列表 */
+    list: Array<Avatar>;
+  };
+
+  /**
+   * 可选头像列表响应
+   * @since Beta v0.12.6
+   */
+  type AvatarSetResp = TGApp.BBS.Response.BaseWithData<{ list: Array<AvatarGroup> }>;
+
+  /**
+   * 用户头像框
+   * @since Beta v0.12.6
+   */
+  type Pendant = {
+    /** 头像框 ID */
+    id: number;
+    /** 头像框图片链接 */
+    url: string;
+    /** 头像框名称 */
+    name: string;
+    /** 头像框描述 */
+    description?: string;
+    /** 绘制者 */
+    author?: string;
+    /** 剩余有效时间，单位秒 */
+    remain_time?: number;
+    /** 是否已拥有 */
+    owned: boolean;
+    /** 是否限时 */
+    expired_time?: number;
+    /** 是否正在使用 */
+    is_used: boolean;
+  };
+
+  /**
+   * 用户头像框列表响应
+   * @since Beta v0.12.6
+   */
+  type PendantListResp = TGApp.BBS.Response.BaseWithData<{ list: Array<Pendant> }>;
+
+  /**
+   * 头像框设置参数
+   * @since Beta v0.12.6
+   */
+  type PendantUpdate = {
+    /** 头像框 ID，0 表示不使用头像框 */
+    pendant_id: number;
+  };
+
+  /**
+   * 头像框设置响应
+   * @since Beta v0.12.6
+   */
+  type PendantUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
 }

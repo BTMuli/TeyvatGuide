@@ -168,10 +168,14 @@ describe("communitySettingsReq", () => {
     );
   });
 
-  it("writes only supported profile fields through the official edit endpoint", async () => {
+  it("writes supported profile and avatar fields through the official edit endpoint", async () => {
     const profile: TGApp.BBS.CommunitySettings.ProfileUpdate = {
       nickname: "新昵称",
       introduce: "新的简介",
+      avatar: "100108",
+      avatar_url: "https://upload-bbs.miyoushe.com/avatar.png",
+      avatar_assets_id: "",
+      gender: 0,
     };
 
     await communitySettingsReq.updateProfile(cookie, profile);
@@ -190,6 +194,62 @@ describe("communitySettingsReq", () => {
         body: profile,
       },
     );
+  });
+
+  it("loads preset avatars from the public endpoint without account headers", async () => {
+    await communitySettingsReq.getAvatars();
+
+    expect(mocks.getRequestHeader).not.toHaveBeenCalled();
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/misc/api/avatar_set",
+      {},
+    );
+  });
+
+  it("loads the account pendant list with a signed GET", async () => {
+    await communitySettingsReq.getPendantList(cookie);
+
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "GET", {}, "X4", true);
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/pendant/wapi/getUserPendantList",
+      { headers: { "x-test-header": "test" } },
+    );
+  });
+
+  it("sets and clears the pendant with an explicit pendant id", async () => {
+    await communitySettingsReq.setPendant(cookie, 42);
+
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify({ pendant_id: 42 }),
+      "X4",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/pendant/wapi/setUserPendant",
+      {
+        headers: { "x-test-header": "test", "Content-Type": "application/json" },
+        body: { pendant_id: 42 },
+      },
+    );
+
+    await communitySettingsReq.setPendant(cookie, 0);
+
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/pendant/wapi/setUserPendant",
+      {
+        headers: { "x-test-header": "test", "Content-Type": "application/json" },
+        body: { pendant_id: 0 },
+      },
+    );
+  });
+
+  it.each([-1, 1.5, Number.NaN])("rejects an invalid pendant id: %s", async (pendantId) => {
+    await expect(communitySettingsReq.setPendant(cookie, pendantId)).rejects.toThrow(
+      "头像框 ID 无效",
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 
   it("passes through business responses and transport errors", async () => {

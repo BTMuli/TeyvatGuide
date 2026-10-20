@@ -1,6 +1,6 @@
 /**
  * 用户类型定义文件
- * @since Beta v0.10.0
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.BBS.User {
@@ -12,7 +12,7 @@ declare namespace TGApp.BBS.User {
 
   /**
    * 用户信息返回
-   * @since Beta v0.7.2
+   * @since Beta v0.12.6
    */
   type InfoRes = {
     /** 用户信息 */
@@ -44,6 +44,10 @@ declare namespace TGApp.BBS.User {
       is_introduce_in_audit: boolean;
       /** 简介 */
       introduce: string;
+      /** 是否在审核头像 */
+      is_avatar_in_audit: boolean;
+      /** 审核中的头像链接 */
+      avatar_url: string;
       /** 昵称状态 */
       nickname_status: number;
     };

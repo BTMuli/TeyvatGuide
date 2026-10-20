@@ -108,6 +108,39 @@
       </div>
 
       <div v-else class="cp-settings-edit">
+        <div class="cp-settings-identity">
+          <CpAvatar :size="72" :user="previewUser" />
+          <div class="cp-settings-identity-copy">
+            <h3>{{ editDraft.nickname.trim() || props.profile.nickname }}</h3>
+            <p>{{ editDraft.introduce.trim() || "这个人很神秘，什么都没有留下。" }}</p>
+            <p v-if="isAvatarInAudit" class="cp-settings-identity-hint">
+              <v-icon size="14">mdi-clock-outline</v-icon>
+              当前头像正在审核中，暂不可更换。
+            </p>
+          </div>
+          <div class="cp-settings-identity-actions">
+            <v-btn
+              :disabled="saving || isAvatarInAudit"
+              prepend-icon="mdi-account-circle-outline"
+              size="small"
+              type="button"
+              variant="tonal"
+              @click="openAvatarPicker"
+            >
+              更换头像
+            </v-btn>
+            <v-btn
+              :disabled="saving"
+              prepend-icon="mdi-image-filter-frames"
+              size="small"
+              type="button"
+              variant="tonal"
+              @click="openPendantPicker"
+            >
+              选择头像框
+            </v-btn>
+          </div>
+        </div>
         <v-text-field
           v-model="editDraft.nickname"
           :disabled="saving"
@@ -126,14 +159,6 @@
           rows="4"
           variant="outlined"
         />
-        <v-btn
-          prepend-icon="mdi-open-in-new"
-          size="small"
-          variant="text"
-          @click="openAvatarSettings"
-        >
-          前往米游社修改头像
-        </v-btn>
       </div>
 
       <div v-if="saveError" aria-live="assertive" class="cp-settings-message is-error" role="alert">
@@ -161,28 +186,53 @@
         </v-btn>
       </footer>
     </form>
+    <template v-if="props.section === 'edit'">
+      <CpAvatarPicker
+        v-model="avatarPickerVisible"
+        :currentId="avatarDraft.id"
+        :error="avatarError"
+        :groups="avatarGroups"
+        :loading="avatarLoading"
+        @confirm="handleAvatarConfirm"
+        @retry="loadAvatars"
+      />
+      <CpPendantPicker
+        v-model="pendantPickerVisible"
+        :currentUrl="pendantDraft.url"
+        :error="pendantListError"
+        :loading="pendantListLoading"
+        :pendants="pendants"
+        :serverUrl="pendantOriginal.url"
+        :user="previewUser"
+        @confirm="handlePendantConfirm"
+        @retry="loadPendants"
+      />
+    </template>
   </section>
 </template>
 
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
+import CpAvatarPicker from "@comp/communityProfile/cp-avatar-picker.vue";
+import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
+import CpPendantPicker from "@comp/communityProfile/cp-pendant-picker.vue";
 import communitySettingsReq, {
   buildPrivacyUpdate,
   getPrivacyDraft,
 } from "@req/communitySettingsReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import TGHttps from "@utils/TGHttps.js";
+import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from "vue";
 
 type SettingsSection = "privacy" | "edit";
 
 type SettingsProps = {
   section: SettingsSection;
   profile: TGApp.BBS.User.Info;
+  audit?: TGApp.BBS.User.InfoRes["audit_info"];
 };
 
 type AccountSnapshot = {
@@ -191,8 +241,26 @@ type AccountSnapshot = {
   cookie: TGApp.App.Account.Cookie;
 };
 
+type AvatarSelection = {
+  /** 头像编号 */
+  id: string;
+  /** 头像链接 */
+  url: string;
+};
+
+type PendantSelection = {
+  /** 头像框 ID，0 表示不使用 */
+  id: number;
+  /** 头像框链接 */
+  url: string;
+};
+
+type ProfilePreviewUser = Pick<TGApp.BBS.User.Info, "nickname" | "avatar_url" | "pendant"> & {
+  avatar_ext: TGApp.BBS.User.AvatarExt | null;
+};
+
 const props = defineProps<SettingsProps>();
-const emit = defineEmits<{ saved: [] }>();
+const emit = defineEmits<{ saved: [warning?: string] }>();
 const { isLogin, incognito } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
 const privacyDraft = reactive({
@@ -211,6 +279,19 @@ const privacyOriginal = reactive({
 });
 const editDraft = reactive({ nickname: "", introduce: "" });
 const editOriginal = reactive({ nickname: "", introduce: "" });
+const avatarDraft = ref<AvatarSelection>({ id: "", url: "" });
+const avatarOriginal = ref<AvatarSelection>({ id: "", url: "" });
+const avatarGroups = shallowRef<Array<TGApp.BBS.CommunitySettings.AvatarGroup>>([]);
+const avatarPickerVisible = ref<boolean>(false);
+const avatarLoading = ref<boolean>(false);
+const avatarError = ref<string>("");
+const pendantDraft = ref<PendantSelection>({ id: 0, url: "" });
+const pendantOriginal = ref<PendantSelection>({ id: 0, url: "" });
+const pendants = shallowRef<Array<TGApp.BBS.CommunitySettings.Pendant>>([]);
+const pendantPickerVisible = ref<boolean>(false);
+const pendantListLoading = ref<boolean>(false);
+const pendantListError = ref<string>("");
+const pendantLoaded = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const saving = ref<boolean>(false);
 const privacyLoaded = ref<boolean>(false);
@@ -219,6 +300,8 @@ const loadError = ref<string>("");
 const saveError = ref<string>("");
 const saveMessage = ref<string>("");
 let requestVersion = 0;
+let avatarRequestVersion = 0;
+let pendantRequestVersion = 0;
 let active = true;
 
 const canViewProfile = computed<boolean>(() => {
@@ -248,10 +331,24 @@ const privacyDirty = computed<boolean>(
     privacyDraft.addWatermark !== privacyOriginal.addWatermark ||
     privacyDraft.showUserCenter !== privacyOriginal.showUserCenter,
 );
-const editDirty = computed<boolean>(
-  () =>
-    editDraft.nickname !== editOriginal.nickname || editDraft.introduce !== editOriginal.introduce,
+const isAvatarInAudit = computed<boolean>(() => props.audit?.is_avatar_in_audit === true);
+const avatarDirty = computed<boolean>(() => avatarDraft.value.id !== avatarOriginal.value.id);
+const pendantDirty = computed<boolean>(() => pendantDraft.value.url !== pendantOriginal.value.url);
+const nicknameDirty = computed<boolean>(
+  () => editDraft.nickname.trim() !== editOriginal.nickname.trim(),
 );
+const introduceDirty = computed<boolean>(
+  () => editDraft.introduce.trim() !== editOriginal.introduce.trim(),
+);
+const editDirty = computed<boolean>(
+  () => nicknameDirty.value || introduceDirty.value || avatarDirty.value || pendantDirty.value,
+);
+const previewUser = computed<ProfilePreviewUser>(() => ({
+  nickname: editDraft.nickname.trim() || props.profile.nickname,
+  avatar_url: avatarDraft.value.url,
+  pendant: pendantDraft.value.url,
+  avatar_ext: avatarDirty.value || isAvatarInAudit.value ? null : props.profile.avatar_ext,
+}));
 const canSave = computed<boolean>(() => {
   if (!canWriteProfile.value) return false;
   if (props.section === "privacy") return privacyLoaded.value && privacyDirty.value;
@@ -266,7 +363,7 @@ const sectionIcon = computed<string>(() =>
 const sectionDescription = computed<string>(() =>
   props.section === "privacy"
     ? "管理个人中心中帖子、评论、收藏和主页访问权限。"
-    : "修改当前账号在米游社展示的昵称和简介。",
+    : "修改当前账号在米游社展示的昵称、简介、头像和头像框。",
 );
 watch(
   [
@@ -281,6 +378,11 @@ watch(
     () => cookie.value?.ltoken,
     () => props.profile.nickname,
     () => props.profile.introduce,
+    () => props.profile.avatar,
+    () => props.profile.avatar_url,
+    () => props.profile.pendant,
+    () => props.audit?.is_avatar_in_audit,
+    () => props.audit?.avatar_url,
   ],
   () => void loadSection(),
   { immediate: true, flush: "sync" },
@@ -289,6 +391,8 @@ watch(
 onBeforeUnmount(() => {
   active = false;
   requestVersion += 1;
+  avatarRequestVersion += 1;
+  pendantRequestVersion += 1;
 });
 
 function getAccountSnapshot(): AccountSnapshot | undefined {
@@ -315,11 +419,9 @@ function matchesPersistedSnapshot(snapshot: AccountSnapshot): boolean {
   });
 }
 
-function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
+function matchesAccount(snapshot: AccountSnapshot): boolean {
   const currentCookie = cookie.value;
   return (
-    active &&
-    version === requestVersion &&
     canViewProfile.value &&
     uid.value === snapshot.uid &&
     props.profile.uid === snapshot.profileUid &&
@@ -330,6 +432,14 @@ function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
   );
 }
 
+function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
+  return active && version === requestVersion && matchesAccount(snapshot);
+}
+
+function isCurrentPendantRequest(version: number, snapshot: AccountSnapshot): boolean {
+  return active && version === pendantRequestVersion && matchesAccount(snapshot);
+}
+
 function isCurrentWrite(version: number, snapshot: AccountSnapshot): boolean {
   return isCurrentRequest(version, snapshot) && matchesPersistedSnapshot(snapshot);
 }
@@ -338,6 +448,8 @@ function resetMessages(): void {
   loadError.value = "";
   saveError.value = "";
   saveMessage.value = "";
+  avatarError.value = "";
+  pendantListError.value = "";
 }
 
 function initializeEditDraft(): void {
@@ -345,6 +457,14 @@ function initializeEditDraft(): void {
   editDraft.introduce = props.profile.introduce;
   editOriginal.nickname = props.profile.nickname;
   editOriginal.introduce = props.profile.introduce;
+  const avatarUrl =
+    isAvatarInAudit.value && props.audit?.avatar_url
+      ? props.audit.avatar_url
+      : getUserAvatar(props.profile);
+  avatarDraft.value = { id: props.profile.avatar, url: avatarUrl };
+  avatarOriginal.value = { id: props.profile.avatar, url: avatarUrl };
+  pendantDraft.value = { id: 0, url: props.profile.pendant };
+  pendantOriginal.value = { id: 0, url: props.profile.pendant };
   editLoaded.value = true;
 }
 
@@ -368,6 +488,12 @@ async function loadSection(): Promise<void> {
   saving.value = false;
   privacyLoaded.value = false;
   editLoaded.value = false;
+  avatarPickerVisible.value = false;
+  pendantPickerVisible.value = false;
+  pendantRequestVersion += 1;
+  pendantListLoading.value = false;
+  pendantLoaded.value = false;
+  pendants.value = [];
   resetMessages();
   if (!canViewProfile.value) return;
   if (props.section === "edit") {
@@ -397,6 +523,12 @@ function buildProfilePayload(): TGApp.BBS.CommunitySettings.ProfileUpdate {
   const introduce = editDraft.introduce.trim();
   if (nickname !== editOriginal.nickname.trim()) payload.nickname = nickname;
   if (introduce !== editOriginal.introduce.trim()) payload.introduce = introduce;
+  if (avatarDirty.value && !isAvatarInAudit.value) {
+    payload.avatar = avatarDraft.value.id;
+    payload.avatar_url = avatarDraft.value.url;
+    payload.avatar_assets_id = "";
+    payload.gender = props.profile.gender;
+  }
   return payload;
 }
 
@@ -414,7 +546,12 @@ async function handleSave(): Promise<void> {
     return;
   }
   const profilePayload = props.section === "edit" ? buildProfilePayload() : undefined;
-  if (props.section === "edit" && Object.keys(profilePayload ?? {}).length === 0) {
+  const pendantChanged = props.section === "edit" && pendantDirty.value;
+  if (
+    props.section === "edit" &&
+    Object.keys(profilePayload ?? {}).length === 0 &&
+    !pendantChanged
+  ) {
     saveError.value = "没有需要保存的修改。";
     saveMessage.value = "";
     return;
@@ -423,19 +560,51 @@ async function handleSave(): Promise<void> {
   saving.value = true;
   saveError.value = "";
   saveMessage.value = "";
+  let profileSaved = false;
   try {
-    const response =
-      props.section === "privacy"
-        ? await communitySettingsReq.setPrivacy(snapshot.cookie, buildPrivacyPayload())
-        : await communitySettingsReq.updateProfile(snapshot.cookie, profilePayload ?? {});
-    if (!isCurrentWrite(version, snapshot)) return;
-    if (response.retcode !== 0) {
-      throw new Error(`[${response.retcode}] ${response.message}`);
+    if (props.section === "privacy") {
+      const response = await communitySettingsReq.setPrivacy(
+        snapshot.cookie,
+        buildPrivacyPayload(),
+      );
+      if (!isCurrentWrite(version, snapshot)) return;
+      if (response.retcode !== 0) {
+        throw new Error(`[${response.retcode}] ${response.message}`);
+      }
+      saveMessage.value = "隐私设置已保存。";
+      emit("saved");
+      return;
     }
-    saveMessage.value = props.section === "privacy" ? "隐私设置已保存。" : "资料已提交保存。";
+    if (Object.keys(profilePayload ?? {}).length > 0) {
+      const response = await communitySettingsReq.updateProfile(
+        snapshot.cookie,
+        profilePayload ?? {},
+      );
+      if (!isCurrentWrite(version, snapshot)) return;
+      if (response.retcode !== 0) {
+        throw new Error(`[${response.retcode}] ${response.message}`);
+      }
+      profileSaved = true;
+    }
+    if (pendantChanged) {
+      const response = await communitySettingsReq.setPendant(
+        snapshot.cookie,
+        pendantDraft.value.id,
+      );
+      if (!isCurrentWrite(version, snapshot)) return;
+      if (response.retcode !== 0) {
+        throw new Error(`[${response.retcode}] ${response.message}`);
+      }
+    }
+    saveMessage.value = "资料已提交保存。";
     emit("saved");
   } catch (cause) {
-    if (isCurrentWrite(version, snapshot)) saveError.value = TGHttps.getErrMsg(cause);
+    if (!isCurrentWrite(version, snapshot)) return;
+    if (profileSaved) {
+      emit("saved", `资料已保存，但头像框设置失败：${TGHttps.getErrMsg(cause)}`);
+      return;
+    }
+    saveError.value = TGHttps.getErrMsg(cause);
   } finally {
     if (isCurrentRequest(version, snapshot)) {
       saving.value = false;
@@ -446,12 +615,79 @@ async function handleSave(): Promise<void> {
   }
 }
 
-async function openAvatarSettings(): Promise<void> {
+function openAvatarPicker(): void {
+  if (!canWriteProfile.value || isAvatarInAudit.value || saving.value) return;
+  avatarPickerVisible.value = true;
+  if (avatarGroups.value.length > 0 || avatarLoading.value) return;
+  void loadAvatars();
+}
+
+async function loadAvatars(): Promise<void> {
+  if (avatarLoading.value) return;
+  const version = ++avatarRequestVersion;
+  avatarLoading.value = true;
+  avatarError.value = "";
   try {
-    await openUrl("https://www.miyoushe.com/ys/accountCenter/edit");
+    const response = await communitySettingsReq.getAvatars();
+    if (!active || version !== avatarRequestVersion) return;
+    if (response.retcode !== 0) {
+      throw new Error(`[${response.retcode}] ${response.message}`);
+    }
+    const groups = response.data.list.filter((group) => group.list.length > 0);
+    avatarGroups.value = groups;
   } catch (cause) {
-    showSnackbar.error(`打开米游社失败：${TGHttps.getErrMsg(cause)}`);
+    if (active && version === avatarRequestVersion) {
+      avatarError.value = TGHttps.getErrMsg(cause);
+    }
+  } finally {
+    if (active && version === avatarRequestVersion) avatarLoading.value = false;
   }
+}
+
+function openPendantPicker(): void {
+  if (!canWriteProfile.value || saving.value) return;
+  pendantPickerVisible.value = true;
+  if (pendantLoaded.value || pendantListLoading.value) return;
+  void loadPendants();
+}
+
+async function loadPendants(): Promise<void> {
+  if (pendantListLoading.value) return;
+  const snapshot = getAccountSnapshot();
+  if (!snapshot) {
+    pendantListError.value = "当前账号凭据不可用，请重新登录后重试。";
+    return;
+  }
+  const version = ++pendantRequestVersion;
+  pendantListLoading.value = true;
+  pendantListError.value = "";
+  try {
+    const response = await communitySettingsReq.getPendantList(snapshot.cookie);
+    if (!isCurrentPendantRequest(version, snapshot)) return;
+    if (response.retcode !== 0) {
+      throw new Error(`[${response.retcode}] ${response.message}`);
+    }
+    pendants.value = response.data.list;
+    pendantLoaded.value = true;
+  } catch (cause) {
+    if (isCurrentPendantRequest(version, snapshot)) {
+      pendantListError.value = TGHttps.getErrMsg(cause);
+    }
+  } finally {
+    if (isCurrentPendantRequest(version, snapshot)) pendantListLoading.value = false;
+  }
+}
+
+function handleAvatarConfirm(avatar: TGApp.BBS.CommunitySettings.Avatar): void {
+  if (!canWriteProfile.value) return;
+  avatarDraft.value = { id: String(avatar.id), url: avatar.icon };
+  avatarPickerVisible.value = false;
+}
+
+function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | null): void {
+  if (!canWriteProfile.value) return;
+  pendantDraft.value = { id: pendant?.id ?? 0, url: pendant?.url ?? "" };
+  pendantPickerVisible.value = false;
 }
 </script>
 
@@ -546,6 +782,53 @@ async function openAvatarSettings(): Promise<void> {
   padding: 4px;
 }
 
+.cp-settings-identity {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  gap: 16px;
+}
+
+.cp-settings-identity-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+
+  h3 {
+    overflow: hidden;
+    margin: 0;
+    color: var(--common-text-title);
+    font-size: 16px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: var(--box-text-4);
+    font-size: 12px;
+    line-height: 18px;
+    overflow-wrap: anywhere;
+  }
+}
+
+.cp-settings-identity-copy .cp-settings-identity-hint {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-title);
+  gap: 4px;
+}
+
+.cp-settings-identity-actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .cp-settings-message,
 .cp-settings-state {
   display: flex;
@@ -598,6 +881,24 @@ async function openAvatarSettings(): Promise<void> {
 
   .cp-settings-row :deep(.v-switch) {
     flex-shrink: 0;
+  }
+
+  .cp-settings-identity {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .cp-settings-identity-copy {
+    flex: 1 1 160px;
+  }
+
+  .cp-settings-identity-actions {
+    width: 100%;
+
+    .v-btn {
+      flex: 1 1 auto;
+    }
   }
 
   .cp-settings-footer {

@@ -90,7 +90,7 @@
             @click="loadCollection(entry.collection)"
           >
             <span v-if="entry.collection.cover" class="cp-entry-image">
-              <TMiImg :src="entry.collection.cover" alt="合集封面" :ori="true" />
+              <TMiImg :src="entry.collection.cover" alt="合集封面" />
             </span>
             <span class="cp-entry-content">
               <span class="cp-entry-title"><TpTitle :text="entry.collection.title" /></span>
@@ -133,7 +133,7 @@ import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openCommunityProfile } from "@utils/communityProfile.js";
 import TGHttps from "@utils/TGHttps.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -147,45 +147,75 @@ type ContentEntry =
   | { kind: "user"; id: string; relation: TGApp.BBS.Community.UserRelation }
   | { kind: "post"; id: string; post: TGApp.BBS.Post.FullData }
   | { kind: "collection"; id: string; collection: TGApp.BBS.Collection.Collection };
-type AccountSnapshot = { uid: string; cookie: TGApp.App.Account.Cookie };
+/**
+ * 内容列表的登录账户和目标用户快照。
+ * @since Beta v0.12.6
+ */
+type AccountSnapshot = { uid: string; profileUid: string; cookie: TGApp.App.Account.Cookie };
 type ContentPage = { entries: Array<ContentEntry>; offset: string; isLast: boolean };
 
-const { section } = defineProps<{ section: ContentSection }>();
+const { section, profileUid } = defineProps<{ section: ContentSection; profileUid?: string }>();
 const favoriteTab = ref<FavoriteTab>("posts");
 const { isLogin, incognito } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
+
+function getTargetUid(loginUid: string): string {
+  return profileUid?.trim() || loginUid;
+}
+
+const isViewingOtherProfile = computed<boolean>(() => {
+  const loginUid = uid.value?.trim() ?? "";
+  return loginUid !== "" && getTargetUid(loginUid) !== loginUid;
+});
 const sectionInfo = computed<SectionInfo>(
   () =>
     ({
       comments: {
-        title: "我的评论",
-        description: "查看自己发表的评论，点击可打开原帖",
+        title: isViewingOtherProfile.value ? "TA的评论" : "我的评论",
+        description: isViewingOtherProfile.value
+          ? "查看 TA 发表的评论，点击可打开原帖"
+          : "查看自己发表的评论，点击可打开原帖",
         icon: "mdi-comment-text-outline",
-        empty: "暂未发表评论",
+        empty: isViewingOtherProfile.value ? "TA暂未发表评论" : "暂未发表评论",
       },
       collections: {
-        title: "我的合集",
-        description: "查看自己创建的合集和合集内的帖子",
+        title: isViewingOtherProfile.value ? "TA的合集" : "我的合集",
+        description: isViewingOtherProfile.value
+          ? "查看 TA 创建的合集和合集内的帖子"
+          : "查看自己创建的合集和合集内的帖子",
         icon: "mdi-folder-outline",
-        empty: "暂未创建合集",
+        empty: isViewingOtherProfile.value ? "TA暂未创建合集" : "暂未创建合集",
       },
       favorites: {
-        title: "我的收藏",
-        description: "查看你在米游社收藏的内容",
+        title: isViewingOtherProfile.value ? "TA的收藏" : "我的收藏",
+        description: isViewingOtherProfile.value
+          ? "查看 TA 在米游社收藏的内容"
+          : "查看你在米游社收藏的内容",
         icon: "mdi-star-outline",
-        empty: favoriteTab.value === "collections" ? "暂未收藏合集" : "暂未收藏帖子",
+        empty:
+          favoriteTab.value === "collections"
+            ? isViewingOtherProfile.value
+              ? "TA暂未收藏合集"
+              : "暂未收藏合集"
+            : isViewingOtherProfile.value
+              ? "TA暂未收藏帖子"
+              : "暂未收藏帖子",
       },
       following: {
-        title: "我的关注",
-        description: "你关注的用户，点击可查看米游社主页",
+        title: isViewingOtherProfile.value ? "TA的关注" : "我的关注",
+        description: isViewingOtherProfile.value
+          ? "TA 关注的用户，点击可查看用户信息"
+          : "你关注的用户，点击可查看用户信息",
         icon: "mdi-heart-outline",
-        empty: "暂未关注用户",
+        empty: isViewingOtherProfile.value ? "TA暂未关注用户" : "暂未关注用户",
       },
       followers: {
-        title: "我的粉丝",
-        description: "关注你的用户，点击可查看米游社主页",
+        title: isViewingOtherProfile.value ? "TA的粉丝" : "我的粉丝",
+        description: isViewingOtherProfile.value
+          ? "关注 TA 的用户，点击可查看用户信息"
+          : "关注你的用户，点击可查看用户信息",
         icon: "mdi-account-multiple-outline",
-        empty: "暂无粉丝",
+        empty: isViewingOtherProfile.value ? "TA暂无粉丝" : "暂无粉丝",
       },
     })[section],
 );
@@ -205,6 +235,7 @@ let active = true;
 watch(
   [
     () => section,
+    () => profileUid,
     favoriteTab,
     isLogin,
     incognito,
@@ -233,18 +264,19 @@ onBeforeUnmount(() => {
 });
 
 function getSnapshot(): AccountSnapshot | undefined {
+  const loginUid = uid.value?.trim() ?? "";
   if (
     incognito.value ||
     !isLogin.value ||
-    !uid.value?.trim() ||
+    !loginUid ||
     !cookie.value ||
-    cookie.value.ltuid !== uid.value ||
+    cookie.value.ltuid !== loginUid ||
     !cookie.value.cookie_token.trim() ||
     !cookie.value.account_id.trim() ||
     !cookie.value.ltoken.trim()
   )
     return undefined;
-  return { uid: uid.value, cookie: { ...cookie.value } };
+  return { uid: loginUid, profileUid: getTargetUid(loginUid), cookie: { ...cookie.value } };
 }
 
 function isCurrent(snapshot: AccountSnapshot, version: number): boolean {
@@ -253,6 +285,7 @@ function isCurrent(snapshot: AccountSnapshot, version: number): boolean {
     active &&
     generation === version &&
     current?.uid === snapshot.uid &&
+    current.profileUid === snapshot.profileUid &&
     current.cookie.account_id === snapshot.cookie.account_id &&
     current.cookie.cookie_token === snapshot.cookie.cookie_token &&
     current.cookie.ltuid === snapshot.cookie.ltuid &&
@@ -292,7 +325,7 @@ async function loadMore(): Promise<void> {
 
 async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<ContentPage> {
   if (section === "comments") {
-    const response = await communityReq.comments(snapshot.cookie, snapshot.uid, cursor);
+    const response = await communityReq.comments(snapshot.cookie, snapshot.profileUid, cursor);
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     return {
       entries: response.data.list.map((item) => ({
@@ -310,8 +343,8 @@ async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<C
   ) {
     const response =
       section === "collections"
-        ? await communityReq.collections(snapshot.cookie, snapshot.uid, cursor)
-        : await communityReq.favoriteCollections(snapshot.cookie, snapshot.uid, cursor);
+        ? await communityReq.collections(snapshot.cookie, snapshot.profileUid, cursor)
+        : await communityReq.favoriteCollections(snapshot.cookie, snapshot.profileUid, cursor);
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     return {
       entries: response.data.list.map((item) => ({
@@ -324,7 +357,7 @@ async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<C
     };
   }
   if (section === "favorites") {
-    const response = await communityReq.favorites(snapshot.cookie, snapshot.uid, cursor);
+    const response = await communityReq.favorites(snapshot.cookie, snapshot.profileUid, cursor);
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     return {
       entries: response.data.list.map((post) => ({ kind: "post", id: post.post.post_id, post })),
@@ -332,7 +365,7 @@ async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<C
       isLast: response.data.is_last,
     };
   }
-  const response = await communityReq[section](snapshot.cookie, snapshot.uid, cursor);
+  const response = await communityReq[section](snapshot.cookie, snapshot.profileUid, cursor);
   if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
   return {
     entries: response.data.result.map((relation) => ({
@@ -347,9 +380,7 @@ async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<C
 
 async function openProfile(userId: string): Promise<void> {
   try {
-    await openUrl(
-      `https://www.miyoushe.com/ys/accountCenter/postList?id=${encodeURIComponent(userId)}`,
-    );
+    await openCommunityProfile(userId);
   } catch (cause) {
     showSnackbar.error(`打开个人主页失败：${TGHttps.getErrMsg(cause)}`);
   }

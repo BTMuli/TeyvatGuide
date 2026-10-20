@@ -1,5 +1,5 @@
 <template>
-  <main aria-label="个人信息" class="community-profile">
+  <main :aria-label="isOwnProfile ? '个人信息' : '用户信息'" class="community-profile">
     <header v-if="profile" class="community-profile-header">
       <div class="community-profile-identity">
         <CpAvatar :user="profile" :size="80" />
@@ -7,8 +7,10 @@
           <div class="community-profile-name">
             <h2 :title="profile.nickname">{{ profile.nickname }}</h2>
             <span class="community-profile-level">Lv.{{ profile.level_exp.level }}</span>
+            <span :title="`米游社 ID：${profile.uid}`" class="community-profile-uid">
+              ID: {{ profile.uid }}
+            </span>
           </div>
-          <p class="community-profile-uid">ID: {{ profile.uid }}</p>
           <p :title="profile.introduce" class="community-profile-description">
             {{ profile.introduce || "这个人很神秘，什么都没有留下。" }}
           </p>
@@ -38,7 +40,7 @@
     <section v-else class="community-profile-layout">
       <aside aria-label="个人中心导航" class="community-profile-sidebar">
         <div class="community-profile-sidebar-header">
-          <h2>个人中心</h2>
+          <h2>{{ isOwnProfile ? "个人中心" : "用户信息" }}</h2>
           <v-btn
             :disabled="!canViewProfile || loading"
             :loading
@@ -57,7 +59,7 @@
             :aria-current="item.section === currentSection ? 'page' : 'false'"
             :class="{ 'is-active': item.section === currentSection }"
             class="community-profile-nav-item"
-            :to="{ name: '个人信息', query: { section: item.section } }"
+            :to="getSectionRoute(item.section)"
           >
             <v-icon size="18" aria-hidden="true">{{ item.icon }}</v-icon>
             <span>{{ item.label }}</span>
@@ -77,7 +79,13 @@
               <v-icon size="20" aria-hidden="true">{{ activeNavigation?.icon }}</v-icon>
               {{ activeNavigation?.label }}
             </h2>
-            <p v-if="currentSection === 'posts'">当前账号在米游社发布的帖子，可打开查看或编辑</p>
+            <p v-if="currentSection === 'posts'">
+              {{
+                isOwnProfile
+                  ? "当前账号在米游社发布的帖子，可打开查看或编辑"
+                  : "TA 在米游社发布的帖子，点击可打开查看"
+              }}
+            </p>
           </div>
           <span v-if="profile && currentSection === 'posts'" class="community-profile-post-count">
             共 {{ profile.achieve.post_num }} 篇
@@ -100,8 +108,10 @@
         </div>
         <div v-else-if="currentPosts.length === 0" class="community-profile-state" role="status">
           <v-icon size="32">mdi-post-off</v-icon>
-          <p>暂未发布帖子</p>
-          <span>发布后可在这里查看和编辑</span>
+          <p>{{ isOwnProfile ? "暂未发布帖子" : "暂无公开帖子" }}</p>
+          <span>{{
+            isOwnProfile ? "发布后可在这里查看和编辑" : "用户的公开帖子会在这里展示"
+          }}</span>
         </div>
         <div v-else :key="page" class="community-profile-post-list">
           <article
@@ -132,21 +142,15 @@
                 <TpTitle :text="post.post.subject || '无标题帖子'" />
               </button>
             </h3>
-            <button
-              v-if="getPostImages(post).length"
-              :aria-label="`查看帖子：${post.post.subject}`"
-              class="community-profile-post-images"
-              type="button"
-              @click="openPost(post)"
-            >
+            <div v-if="getPostImages(post).length" class="community-profile-post-images">
               <span
                 v-for="(image, index) in getPostImages(post)"
                 :key="`${index}:${image}`"
                 class="community-profile-post-image"
               >
-                <TMiImg :alt="`第 ${index + 1} 张帖子图片`" :ori="true" :src="image" />
+                <TMiImg :alt="`第 ${index + 1} 张帖子图片`" :src="image" />
               </span>
-            </button>
+            </div>
             <div v-if="post.topics.length" class="community-profile-post-topics">
               <RouterLink
                 v-for="topic in post.topics"
@@ -199,16 +203,18 @@
         </div>
       </section>
       <CpSettings
-        v-else-if="currentSection === 'privacy' || currentSection === 'edit'"
-        :key="`${uid}:${currentSection}:${refreshVersion}`"
+        v-else-if="isOwnProfile && (currentSection === 'privacy' || currentSection === 'edit')"
+        :key="`${profileUid}:${currentSection}:${refreshVersion}`"
+        :audit="profileAudit"
         :section="currentSection"
         :profile
         class="community-profile-panel"
         @saved="handleSettingsSaved"
       />
       <CpContent
-        v-else
-        :key="`${uid}:${currentSection}:${refreshVersion}`"
+        v-else-if="currentSection !== 'privacy' && currentSection !== 'edit'"
+        :key="`${profileUid}:${currentSection}:${refreshVersion}`"
+        :profileUid
         :section="currentSection"
         class="community-profile-panel"
       />
@@ -226,6 +232,7 @@ import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
+import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
@@ -236,6 +243,7 @@ import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
+import type { RouteLocationRaw } from "vue-router";
 
 type ProfileSection =
   | "posts"
@@ -253,8 +261,13 @@ type NavigationItem = {
   icon: string;
 };
 
+/**
+ * 查看用户资料时的账户与目标用户快照。
+ * @since Beta v0.12.6
+ */
 type AccountSnapshot = {
   uid: string;
+  profileUid: string;
   cookie: TGApp.App.Account.Cookie;
 };
 
@@ -265,16 +278,33 @@ type ProfileStat = {
 
 const router = useRouter();
 const route = useRoute();
-const navigation: Array<NavigationItem> = [
-  { section: "posts", label: "我的发帖", icon: "mdi-post-outline" },
-  { section: "comments", label: "我的评论", icon: "mdi-comment-text-outline" },
-  { section: "collections", label: "我的合集", icon: "mdi-folder-outline" },
-  { section: "favorites", label: "我的收藏", icon: "mdi-star-outline" },
-  { section: "followers", label: "我的粉丝", icon: "mdi-account-multiple-outline" },
-  { section: "following", label: "我的关注", icon: "mdi-heart-outline" },
-  { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline" },
-  { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
-];
+const { isLogin, incognito } = storeToRefs(useAppStore());
+const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
+const profileUid = computed<string>(() => {
+  const targetUid = route.params.uid;
+  return typeof targetUid === "string" ? targetUid.trim() : (uid.value ?? "");
+});
+const isOwnProfile = computed<boolean>(
+  () => profileUid.value !== "" && profileUid.value === uid.value,
+);
+const navigation = computed<Array<NavigationItem>>(() => {
+  const prefix = isOwnProfile.value ? "我的" : "TA 的";
+  const items: Array<NavigationItem> = [
+    { section: "posts", label: `${prefix}发帖`, icon: "mdi-post-outline" },
+    { section: "comments", label: `${prefix}评论`, icon: "mdi-comment-text-outline" },
+    { section: "collections", label: `${prefix}合集`, icon: "mdi-folder-outline" },
+    { section: "favorites", label: `${prefix}收藏`, icon: "mdi-star-outline" },
+    { section: "followers", label: `${prefix}粉丝`, icon: "mdi-account-multiple-outline" },
+    { section: "following", label: `${prefix}关注`, icon: "mdi-heart-outline" },
+  ];
+  if (isOwnProfile.value) {
+    items.push(
+      { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline" },
+      { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
+    );
+  }
+  return items;
+});
 const currentSection = computed<ProfileSection>(() => {
   const section = route.query.section;
   switch (section) {
@@ -283,20 +313,20 @@ const currentSection = computed<ProfileSection>(() => {
     case "favorites":
     case "following":
     case "followers":
+      return section;
     case "privacy":
     case "edit":
-      return section;
+      return isOwnProfile.value ? section : "posts";
     default:
       return "posts";
   }
 });
 const activeNavigation = computed<NavigationItem | undefined>(() =>
-  navigation.find((item) => item.section === currentSection.value),
+  navigation.value.find((item) => item.section === currentSection.value),
 );
-const { isLogin, incognito } = storeToRefs(useAppStore());
-const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 
 const profile = shallowRef<TGApp.BBS.User.Info>();
+const profileAudit = shallowRef<TGApp.BBS.User.InfoRes["audit_info"]>();
 const postPages = shallowRef<Array<Array<TGApp.BBS.Post.FullData>>>([]);
 const pageOffsets = shallowRef<Array<string>>([]);
 const pageLastFlags = shallowRef<Array<boolean>>([]);
@@ -333,6 +363,14 @@ const profileStats = computed<Array<ProfileStat>>(() => {
     { label: "粉丝", value: profile.value.achieve.followed_cnt },
   ];
 });
+const levelColor = computed<string>(() => {
+  if (!profile.value) return "var(--tgc-od-green)";
+  const level = profile.value.level_exp.level;
+  if (level < 5) return "var(--tgc-od-green)";
+  if (level < 9) return "var(--tgc-od-blue)";
+  if (level < 13) return "var(--tgc-od-purple)";
+  return "var(--tgc-od-orange)";
+});
 const currentPosts = computed<Array<TGApp.BBS.Post.FullData>>(
   () => postPages.value[page.value - 1] ?? [],
 );
@@ -350,6 +388,7 @@ watch(
     isLogin,
     incognito,
     uid,
+    profileUid,
     () => cookie.value?.account_id,
     () => cookie.value?.cookie_token,
     () => cookie.value?.ltuid,
@@ -370,8 +409,24 @@ onBeforeUnmount(() => {
   requestVersion += 1;
 });
 
+function getSectionRoute(section: ProfileSection): RouteLocationRaw {
+  return isOwnProfile.value
+    ? { name: "个人信息", query: { section } }
+    : { name: "用户信息", params: { uid: profileUid.value }, query: { section } };
+}
+
+function getProfilePosts(
+  snapshot: AccountSnapshot,
+  offset?: string,
+): Promise<TGApp.BBS.Post.UserPostResp> {
+  return snapshot.profileUid === snapshot.uid
+    ? communityReq.posts(snapshot.cookie, offset)
+    : postReq.user.post(snapshot.profileUid, 0, offset);
+}
+
 function resetProfileData(): void {
   profile.value = undefined;
+  profileAudit.value = undefined;
   postPages.value = [];
   pageOffsets.value = [];
   pageLastFlags.value = [];
@@ -383,7 +438,7 @@ function resetProfileData(): void {
 function getAccountSnapshot(): AccountSnapshot | undefined {
   if (!canViewProfile.value || uid.value === undefined || cookie.value === undefined)
     return undefined;
-  return { uid: uid.value, cookie: { ...cookie.value } };
+  return { uid: uid.value, profileUid: profileUid.value, cookie: { ...cookie.value } };
 }
 
 function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
@@ -393,6 +448,7 @@ function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
     version === requestVersion &&
     canViewProfile.value &&
     uid.value === snapshot.uid &&
+    profileUid.value === snapshot.profileUid &&
     currentCookie?.account_id === snapshot.cookie.account_id &&
     currentCookie?.cookie_token === snapshot.cookie.cookie_token &&
     currentCookie?.ltuid === snapshot.cookie.ltuid &&
@@ -406,18 +462,27 @@ async function loadProfile(): Promise<void> {
   resetProfileData();
   const snapshot = getAccountSnapshot();
   if (snapshot === undefined) return;
+  if (!/^[1-9]\d*$/.test(snapshot.profileUid)) {
+    loadError.value = "用户 ID 无效。";
+    return;
+  }
   loading.value = true;
   try {
-    const userResponse = await bbsReq.userInfo(snapshot.cookie);
+    const userResponse =
+      snapshot.profileUid === snapshot.uid
+        ? await bbsReq.userInfo(snapshot.cookie)
+        : await bbsReq.otherUserInfo("2", snapshot.profileUid);
     if (!isCurrentRequest(version, snapshot)) return;
     if (userResponse.retcode !== 0) {
       throw new Error(`[${userResponse.retcode}] ${userResponse.message}`);
     }
-    if (userResponse.data.user_info.uid !== snapshot.uid) {
-      throw new Error("用户信息与当前账号不一致");
+    if (userResponse.data.user_info.uid !== snapshot.profileUid) {
+      throw new Error("用户信息与当前查看的用户不一致");
     }
     profile.value = userResponse.data.user_info;
-    if (matchesCurrentAccount(snapshot)) {
+    profileAudit.value =
+      snapshot.profileUid === snapshot.uid ? userResponse.data.audit_info : undefined;
+    if (snapshot.profileUid === snapshot.uid && matchesCurrentAccount(snapshot)) {
       briefInfo.value = {
         uid: profile.value.uid,
         nickname: profile.value.nickname,
@@ -426,7 +491,7 @@ async function loadProfile(): Promise<void> {
       };
     }
     if (currentSection.value !== "posts") return;
-    const postResponse = await communityReq.posts(snapshot.cookie);
+    const postResponse = await getProfilePosts(snapshot);
     if (!isCurrentRequest(version, snapshot)) return;
     if (postResponse.retcode !== 0) {
       throw new Error(`[${postResponse.retcode}] ${postResponse.message}`);
@@ -444,8 +509,12 @@ async function loadProfile(): Promise<void> {
   }
 }
 
-function handleSettingsSaved(): void {
-  showSnackbar.success(currentSection.value === "privacy" ? "隐私设置已保存" : "资料已提交保存");
+function handleSettingsSaved(warning?: string): void {
+  if (warning) {
+    showSnackbar.warn(warning);
+  } else {
+    showSnackbar.success(currentSection.value === "privacy" ? "隐私设置已保存" : "资料已提交保存");
+  }
   void loadProfile();
 }
 
@@ -470,7 +539,7 @@ async function handlePageChange(nextPage: number): Promise<void> {
   loading.value = true;
   loadError.value = "";
   try {
-    const response = await communityReq.posts(snapshot.cookie, offset);
+    const response = await getProfilePosts(snapshot, offset);
     if (!isCurrentRequest(version, snapshot)) return;
     if (response.retcode !== 0) {
       throw new Error(`[${response.retcode}] ${response.message}`);
@@ -493,6 +562,7 @@ async function handlePageChange(nextPage: number): Promise<void> {
 
 function isEditablePost(post: TGApp.BBS.Post.FullData): boolean {
   return (
+    isOwnProfile.value &&
     canViewProfile.value &&
     post.post.uid === uid.value &&
     (post.post.view_type === 1 || post.post.view_type === 2)
@@ -557,11 +627,15 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-name {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 
   h2 {
     overflow: hidden;
+    min-width: 0;
+    flex: 0 1 auto;
     margin: 0;
     color: var(--common-text-title);
     font-family: var(--font-title);
@@ -574,31 +648,33 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-level {
   flex-shrink: 0;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  background: var(--box-bg-3);
-  color: var(--common-text-title);
+  background: v-bind(levelColor); /* stylelint-disable-line value-keyword-case */
+  color: var(--tgc-white-1);
   font-size: 12px;
   line-height: 16px;
   white-space: nowrap;
 }
 
-.community-profile-uid,
-.community-profile-description {
-  overflow: hidden;
-  margin: 8px 0 0;
+.community-profile-uid {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
   color: var(--box-text-4);
   font-size: 12px;
-  text-overflow: ellipsis;
+  line-height: 16px;
   white-space: nowrap;
 }
 
 .community-profile-description {
+  overflow: hidden;
   max-width: 560px;
+  margin: 8px 0 0;
   color: var(--app-page-content);
   font-size: 14px;
   overflow-wrap: anywhere;
-  white-space: normal;
 }
 
 .community-profile-stats {
@@ -752,6 +828,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post {
+  position: relative;
+  z-index: 0;
   display: flex;
   min-width: 0;
   flex: 0 0 auto;
@@ -760,6 +838,11 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background: var(--box-bg-2);
+  }
 }
 
 .community-profile-post-meta {
@@ -772,6 +855,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post-forum {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   padding: 2px 6px;
@@ -815,9 +900,21 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     font: inherit;
     text-align: left;
 
-    &:hover {
-      text-decoration: underline;
-      text-underline-offset: 4px;
+    &::after {
+      position: absolute;
+      z-index: 1;
+      content: "";
+      inset: 0;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::after {
+        border-radius: 8px;
+        outline: 2px solid var(--common-text-title);
+        outline-offset: 2px;
+      }
     }
   }
 }
@@ -861,6 +958,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post-topic {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   border-radius: 12px;
   text-decoration: none;
@@ -894,16 +993,11 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-edit-button {
+  position: relative;
+  z-index: 2;
   flex-shrink: 0;
   margin-left: auto;
   color: var(--common-text-title);
-}
-
-.community-profile-post-title button:focus-visible,
-.community-profile-post-images:focus-visible {
-  border-radius: 4px;
-  outline: 2px solid var(--common-text-title);
-  outline-offset: 4px;
 }
 
 .community-profile-state {

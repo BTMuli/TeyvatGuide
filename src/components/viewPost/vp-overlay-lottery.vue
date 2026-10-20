@@ -41,7 +41,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
 import { emit } from "@tauri-apps/api/event";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openCommunityProfile } from "@utils/communityProfile.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -171,9 +171,7 @@ async function shareLottery(): Promise<void> {
 }
 
 async function toUserProfile(uid: string): Promise<void> {
-  // TODO: 专门的个人页面
-  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${uid}`;
-  await openUrl(profileUrl);
+  await openCommunityProfile(uid);
 }
 
 onUnmounted(() => {

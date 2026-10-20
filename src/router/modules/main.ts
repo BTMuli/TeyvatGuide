@@ -37,6 +37,11 @@ const mainRoutes = (<const>[
     component: async () => await import("@/pages/common/CommunityProfile.vue"),
   },
   {
+    path: "/community/profile/:uid",
+    name: "用户信息",
+    component: async () => await import("@/pages/common/CommunityProfile.vue"),
+  },
+  {
     path: "/community/profile/posts/:postId/edit",
     name: "编辑帖子",
     component: async () => await import("@/pages/common/PostEdit.vue"),

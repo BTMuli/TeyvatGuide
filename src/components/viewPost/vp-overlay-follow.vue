@@ -30,7 +30,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useUserStore from "@store/user.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openCommunityProfile } from "@utils/communityProfile.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -111,11 +111,8 @@ async function loadMore(refresh: boolean = false): Promise<void> {
   }
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
-  // TODO: 专门的个人页面
-  console.log(user, gid);
-  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${user.uid}`;
-  await openUrl(profileUrl);
+async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
+  await openCommunityProfile(user.uid);
 }
 </script>
 <style lang="scss" scoped>

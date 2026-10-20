@@ -27,7 +27,10 @@ function getCommunityCookie(cookie: TGApp.App.Account.Cookie): Record<string, st
  */
 function getSettingsWriteHeaders(
   cookie: TGApp.App.Account.Cookie,
-  body: TGApp.BBS.CommunitySettings.PrivacyUpdate | TGApp.BBS.CommunitySettings.ProfileUpdate,
+  body:
+    | TGApp.BBS.CommunitySettings.PrivacyUpdate
+    | TGApp.BBS.CommunitySettings.ProfileUpdate
+    | TGApp.BBS.CommunitySettings.PendantUpdate,
 ): Record<string, string> {
   return {
     ...getRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body), "X4", true),
@@ -173,11 +176,68 @@ async function updateProfile(
   return resp.data;
 }
 
+/**
+ * 获取米游社可选头像列表
+ * @since Beta v0.12.6
+ * @returns 可选头像分组响应数据
+ */
+async function getAvatars(): Promise<TGApp.BBS.CommunitySettings.AvatarSetResp> {
+  const resp = await TGHttps.get<TGApp.BBS.CommunitySettings.AvatarSetResp>(
+    `${communityApiBaseUrl}misc/api/avatar_set`,
+    {},
+  );
+  return resp.data;
+}
+
+/**
+ * 获取当前账户拥有的头像框列表
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @returns 头像框列表响应数据
+ */
+async function getPendantList(
+  cookie: TGApp.App.Account.Cookie,
+): Promise<TGApp.BBS.CommunitySettings.PendantListResp> {
+  const resp = await TGHttps.get<TGApp.BBS.CommunitySettings.PendantListResp>(
+    `${communityApiBaseUrl}pendant/wapi/getUserPendantList`,
+    {
+      headers: getRequestHeader(getCommunityCookie(cookie), "GET", {}, "X4", true),
+    },
+  );
+  return resp.data;
+}
+
+/**
+ * 设置当前账户使用的头像框
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param pendantId - 头像框 ID，0 表示不使用头像框
+ * @returns 头像框设置响应数据
+ */
+async function setPendant(
+  cookie: TGApp.App.Account.Cookie,
+  pendantId: number,
+): Promise<TGApp.BBS.CommunitySettings.PendantUpdateResp> {
+  if (!Number.isInteger(pendantId) || pendantId < 0) throw new TypeError("头像框 ID 无效");
+  const body: TGApp.BBS.CommunitySettings.PendantUpdate = { pendant_id: pendantId };
+  const resp = await TGHttps.post<TGApp.BBS.CommunitySettings.PendantUpdateResp>(
+    `${communityApiBaseUrl}pendant/wapi/setUserPendant`,
+    {
+      headers: getSettingsWriteHeaders(cookie, body),
+      body,
+    },
+  );
+  return resp.data;
+}
+
 const communitySettingsReq = {
   getPrivacy,
   setPrivacy,
   updateProfile,
+  getAvatars,
+  getPendantList,
+  setPendant,
 };
 
-export { getPrivacy, setPrivacy, updateProfile };
+export { getAvatars, getPendantList, getPrivacy, setPendant, setPrivacy, updateProfile };
 export default communitySettingsReq;
