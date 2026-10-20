@@ -17,6 +17,7 @@ const ignoreRoutes: ReadonlyArray<string> = [
   "角色图鉴",
   "武器图鉴",
   "圣遗物图鉴",
+  "个人信息",
 ];
 
 // TODO:路由重构 解决路由重复问题
