@@ -129,7 +129,6 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
 import { createReplyInteraction, replyInteractionKey } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { emit } from "@tauri-apps/api/event";
 import TGHttps from "@utils/TGHttps.js";
@@ -162,7 +161,6 @@ type SelectItem = {
 
 const props = defineProps<TprMainProps>();
 const { uid, cookie } = storeToRefs(useUserStore());
-const { incognito } = storeToRefs(useAppStore());
 const interaction = createReplyInteraction();
 provide(replyInteractionKey, interaction);
 const writing = interaction.busy;
@@ -194,12 +192,7 @@ const onlyLz = ref<boolean>(false);
 const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const readCookie = computed<Record<string, string> | undefined>(() => {
-  if (
-    incognito.value ||
-    !uid.value ||
-    !cookie.value?.ltoken.trim() ||
-    cookie.value.ltuid !== uid.value
-  )
+  if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
     return undefined;
   return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
 });
@@ -218,14 +211,7 @@ watch(
 );
 
 watch(
-  () => [
-    props.postId,
-    props.gid,
-    uid.value,
-    cookie.value?.ltoken,
-    cookie.value?.ltuid,
-    incognito.value,
-  ],
+  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken, cookie.value?.ltuid],
   async () => {
     replyTarget.value = undefined;
     replyAncestors.value = [];

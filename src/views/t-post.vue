@@ -470,10 +470,6 @@ async function tryLike(): Promise<void> {
     showSnackbar.error("数据未加载");
     return;
   }
-  if (incognito.value) {
-    showSnackbar.error("无法在无痕浏览模式下操作");
-    return;
-  }
   const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   try {
     const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);

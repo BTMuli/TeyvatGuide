@@ -219,7 +219,7 @@ type ContentPage = { entries: Array<ContentEntry>; offset: string; isLast: boole
 
 const { section, profileUid } = defineProps<{ section: ContentSection; profileUid?: string }>();
 const favoriteTab = ref<FavoriteTab>("posts");
-const { isLogin, incognito } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
 
 function getTargetUid(loginUid: string): string {
@@ -312,7 +312,6 @@ watch(
     () => profileUid,
     favoriteTab,
     isLogin,
-    incognito,
     uid,
     () => cookie.value?.account_id,
     () => cookie.value?.cookie_token,
@@ -347,7 +346,6 @@ function resetEntries(): void {
 function getSnapshot(): AccountSnapshot | undefined {
   const loginUid = uid.value?.trim() ?? "";
   if (
-    incognito.value ||
     !isLogin.value ||
     !loginUid ||
     !cookie.value ||

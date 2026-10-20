@@ -39,7 +39,6 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
 import postEditReq from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { storeToRefs } from "pinia";
@@ -58,18 +57,13 @@ const props = defineProps<PostActionsProps>();
 const emits = defineEmits<{ deleted: [] }>();
 const router = useRouter();
 
-const { incognito } = storeToRefs(useAppStore());
 const { briefInfo, cookie, uid } = storeToRefs(useUserStore());
 const busy = ref<boolean>(false);
 let contextVersion = 0;
 let active = true;
 
 const hasCurrentAccount = computed<boolean>(
-  () =>
-    !incognito.value &&
-    !!uid.value &&
-    !!cookie.value?.ltoken.trim() &&
-    cookie.value?.ltuid === uid.value,
+  () => !!uid.value && !!cookie.value?.ltoken.trim() && cookie.value?.ltuid === uid.value,
 );
 const canManage = computed<boolean>(
   () => hasCurrentAccount.value && props.source.post.uid === uid.value,
@@ -91,7 +85,6 @@ watch(
     () => uid.value,
     () => cookie.value?.ltuid,
     () => cookie.value?.ltoken,
-    () => incognito.value,
   ],
   () => {
     contextVersion += 1;

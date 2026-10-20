@@ -261,7 +261,7 @@ type ProfilePreviewUser = Pick<TGApp.BBS.User.Info, "nickname" | "avatar_url" | 
 
 const props = defineProps<SettingsProps>();
 const emit = defineEmits<{ saved: [warning?: string] }>();
-const { isLogin, incognito } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
 const privacyDraft = reactive({
   showPosts: true,
@@ -308,7 +308,6 @@ const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
   return (
-    !incognito.value &&
     isLogin.value &&
     currentUid !== undefined &&
     currentUid.trim() !== "" &&
@@ -370,7 +369,6 @@ watch(
     () => props.section,
     () => props.profile.uid,
     isLogin,
-    incognito,
     uid,
     () => cookie.value?.account_id,
     () => cookie.value?.cookie_token,

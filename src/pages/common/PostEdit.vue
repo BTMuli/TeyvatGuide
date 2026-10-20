@@ -44,7 +44,7 @@
   <main class="post-edit-page" aria-labelledby="postEditTitle">
     <div v-if="!canEdit" class="post-edit-state" role="status">
       <v-icon size="32">mdi-account-lock-outline</v-icon>
-      <p>{{ incognito ? "无痕模式下无法编辑帖子" : "请先登录米游社账号，再编辑自己的帖子" }}</p>
+      <p>请先登录米游社账号，再编辑自己的帖子</p>
     </div>
     <div v-else-if="loading" class="post-edit-state" role="status">
       <v-progress-circular indeterminate size="28" />
@@ -68,7 +68,6 @@
 <script lang="ts" setup>
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import TGHttps from "@utils/TGHttps.js";
@@ -79,7 +78,6 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vu
 const route = useRoute();
 const router = useRouter();
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
-const { incognito } = storeToRefs(useAppStore());
 const formId = useId();
 const composer = useTemplateRef<InstanceType<typeof VpPostComposer>>("composer");
 const source = shallowRef<TGApp.BBS.Post.FullData>();
@@ -92,17 +90,14 @@ const fromDetail = computed<boolean>(() => route.query.from === "detail");
 const accountName = computed<string>(() => briefInfo.value.nickname || uid.value || "");
 const editorPending = computed<boolean>(() => composer.value?.pending ?? false);
 const canEdit = computed<boolean>(
-  () =>
-    !incognito.value && !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken,
+  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken,
 );
 const editorBusy = computed<boolean>(() => composer.value?.busy ?? false);
 const editorSaveDisabled = computed<boolean>(() => !(composer.value?.canSubmit ?? false));
 
-watch(
-  [postId, uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid, incognito],
-  () => void loadPost(),
-  { immediate: true },
-);
+watch([postId, uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid], () => void loadPost(), {
+  immediate: true,
+});
 onBeforeRouteLeave(() => !editorBusy.value);
 onBeforeRouteUpdate(() => !editorBusy.value);
 onBeforeUnmount(() => {

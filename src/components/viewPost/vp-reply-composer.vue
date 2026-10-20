@@ -92,7 +92,6 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { buildReplyDocument } from "@utils/bbsReplyDocument.js";
@@ -117,7 +116,6 @@ const emits = defineEmits<{ cancel: []; published: [] }>();
 const interaction = useReplyInteraction();
 const busy = interaction.busy;
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
-const { incognito } = storeToRefs(useAppStore());
 const content = ref<string>("");
 const mentions = ref<Array<TGApp.BBS.ReplyAsset.Mention>>([]);
 const images = ref<Array<TGApp.BBS.ReplyAsset.UploadedImage>>([]);
@@ -131,31 +129,19 @@ let mounted = true;
 
 const hasContent = computed<boolean>(() => !!content.value.trim() || images.value.length > 0);
 const canWrite = computed<boolean>(
-  () =>
-    !incognito.value &&
-    !!uid.value &&
-    cookie.value?.ltuid === uid.value &&
-    !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
 );
 const toolCookie = computed<Record<string, string> | undefined>(() => {
   if (!canWrite.value || !cookie.value) return undefined;
   return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
 });
 const accountHint = computed<string>(() => {
-  if (incognito.value) return "无痕模式下仅可浏览";
   if (!canWrite.value) return "请先登录米游社账号";
   return `当前账号：${briefInfo.value.nickname || "当前账号"}`;
 });
 
 watch(
-  () => [
-    props.postId,
-    props.gid,
-    uid.value,
-    cookie.value?.ltoken,
-    cookie.value?.ltuid,
-    incognito.value,
-  ],
+  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken, cookie.value?.ltuid],
   () => {
     contextVersion += 1;
     resetDraft();

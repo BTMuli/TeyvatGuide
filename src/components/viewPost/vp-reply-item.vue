@@ -219,7 +219,6 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
@@ -296,7 +295,6 @@ let mounted = false;
 
 const existingIds = new Set<string>();
 
-const { incognito } = storeToRefs(useAppStore());
 const { cookie, uid } = storeToRefs(useUserStore());
 const interaction = useReplyInteraction();
 const interactionBusy = interaction.busy;
@@ -372,21 +370,12 @@ function getReplyContent(): Array<TGApp.BBS.SctPost.Base> {
 }
 
 function getReadCookie(): Record<string, string> | undefined {
-  if (
-    incognito.value ||
-    !uid.value ||
-    !cookie.value?.ltoken.trim() ||
-    cookie.value.ltuid !== uid.value
-  )
+  if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
     return undefined;
   return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
 }
 
 function getWriteSnapshot(): WriteSnapshot | undefined {
-  if (incognito.value) {
-    showSnackbar.error("无法在无痕浏览模式下操作");
-    return undefined;
-  }
   if (
     !uid.value ||
     !cookie.value ||
@@ -410,7 +399,6 @@ function isWriteSnapshotCurrent(snapshot: WriteSnapshot): boolean {
   return (
     mounted &&
     actionContextVersion === snapshot.contextVersion &&
-    !incognito.value &&
     uid.value === snapshot.uid &&
     cookie.value?.ltuid === snapshot.cookie.ltuid &&
     cookie.value?.ltoken === snapshot.cookie.ltoken &&
@@ -476,7 +464,7 @@ watch(
 );
 
 watch(
-  [uid, incognito, () => cookie.value?.ltoken, () => cookie.value?.ltuid],
+  [uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid],
   () => {
     actionContextVersion += 1;
     resetSubState();

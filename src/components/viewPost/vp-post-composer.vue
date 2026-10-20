@@ -332,7 +332,6 @@ import bbsReq from "@req/bbsReq.js";
 import postEditReq, { getPostEditSettings } from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
-import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { assertPostDocumentContent, buildPostDocument } from "@utils/bbsPostDocument.js";
@@ -365,7 +364,6 @@ const tools = useTemplateRef<InstanceType<typeof VpPostTools>>("tools");
 const bbsStore = useBBSStore();
 const { forumList } = storeToRefs(bbsStore);
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
-const { incognito } = storeToRefs(useAppStore());
 const loading = ref<boolean>(false);
 const pending = ref<boolean>(false);
 const uploading = ref<boolean>(false);
@@ -407,11 +405,7 @@ const contentLength = computed<number>(() => {
   }
 });
 const canWrite = computed<boolean>(
-  () =>
-    !incognito.value &&
-    !!uid.value &&
-    cookie.value?.ltuid === uid.value &&
-    !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
 );
 const toolCookie = computed<Record<string, string> | undefined>(() =>
   canWrite.value && cookie.value
@@ -499,7 +493,6 @@ watch(
     uid.value,
     cookie.value?.ltoken,
     cookie.value?.ltuid,
-    incognito.value,
   ],
   () => {
     contextVersion.value += 1;

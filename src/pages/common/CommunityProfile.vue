@@ -35,7 +35,7 @@
       class="community-profile-state"
       role="status"
     >
-      <v-icon size="36">{{ incognito ? "mdi-incognito" : "mdi-account-lock-outline" }}</v-icon>
+      <v-icon size="36">mdi-account-lock-outline</v-icon>
       <p>{{ profileAccessMessage }}</p>
       <v-btn :to="{ name: '设置' }" prepend-icon="mdi-cog-outline" variant="tonal">
         前往设置
@@ -391,7 +391,7 @@ type PostPage = {
 
 const router = useRouter();
 const route = useRoute();
-const { isLogin, incognito } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const profileUid = computed<string>(() => {
   const targetUid = route.params.uid;
@@ -472,7 +472,6 @@ const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
   return (
-    !incognito.value &&
     isLogin.value &&
     currentUid !== undefined &&
     currentUid.trim() !== "" &&
@@ -484,7 +483,6 @@ const canViewProfile = computed<boolean>(() => {
   );
 });
 const profileAccessMessage = computed<string>(() => {
-  if (incognito.value) return "无痕浏览已开启，关闭后才能查看个人信息。";
   if (!isLogin.value || !uid.value) return "请先登录米游社账号。";
   return "当前账号凭据不可用，请重新登录米游社账号。";
 });
@@ -524,7 +522,6 @@ let active = true;
 watch(
   [
     isLogin,
-    incognito,
     uid,
     profileUid,
     () => cookie.value?.account_id,
