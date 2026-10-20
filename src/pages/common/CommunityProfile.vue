@@ -1,18 +1,23 @@
 <template>
   <main :aria-label="isOwnProfile ? '个人信息' : '用户信息'" class="community-profile">
-    <header v-if="profile" class="community-profile-header">
+    <header v-if="profile || loading" :aria-busy="!profile" class="community-profile-header">
       <div class="community-profile-identity">
-        <CpAvatar :user="profile" :size="80" />
+        <CpAvatar v-if="profile" :user="profile" :size="80" />
+        <span v-else aria-hidden="true" class="community-profile-avatar-placeholder" />
         <div class="community-profile-intro">
           <div class="community-profile-name">
-            <h2 :title="profile.nickname">{{ profile.nickname }}</h2>
-            <span class="community-profile-level">Lv.{{ profile.level_exp.level }}</span>
-            <span :title="`米游社 ID：${profile.uid}`" class="community-profile-uid">
-              ID: {{ profile.uid }}
+            <h2 :title="profile?.nickname">{{ profile?.nickname ?? "加载中…" }}</h2>
+            <span v-if="profile" class="community-profile-level">
+              Lv.{{ profile.level_exp.level }}
+            </span>
+            <span :title="`米游社 ID：${profileUid}`" class="community-profile-uid">
+              ID: {{ profileUid }}
             </span>
           </div>
-          <p :title="profile.introduce" class="community-profile-description">
-            {{ profile.introduce || "这个人很神秘，什么都没有留下。" }}
+          <p :title="profile?.introduce" class="community-profile-description">
+            {{
+              profile ? profile.introduce || "这个人很神秘，什么都没有留下。" : "正在加载个人信息…"
+            }}
           </p>
         </div>
       </div>
@@ -428,12 +433,14 @@ const profileAccessMessage = computed<string>(() => {
   return "当前账号凭据不可用，请重新登录米游社账号。";
 });
 const profileStats = computed<Array<ProfileStat>>(() => {
-  if (!profile.value) return [];
+  const achieve = profile.value?.achieve;
+  const format = (value: string | undefined): string =>
+    value === undefined ? "-" : fmtUtil.num(Number(value));
   return [
-    { label: "获赞", value: fmtUtil.num(Number(profile.value.achieve.like_num)) },
-    { label: "发帖", value: fmtUtil.num(Number(profile.value.achieve.post_num)) },
-    { label: "回帖", value: fmtUtil.num(Number(profile.value.achieve.replypost_num)) },
-    { label: "粉丝", value: fmtUtil.num(Number(profile.value.achieve.followed_cnt)) },
+    { label: "获赞", value: format(achieve?.like_num) },
+    { label: "发帖", value: format(achieve?.post_num) },
+    { label: "回帖", value: format(achieve?.replypost_num) },
+    { label: "粉丝", value: format(achieve?.followed_cnt) },
   ];
 });
 const levelColor = computed<string>(() => {
@@ -766,6 +773,23 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-intro {
   min-width: 0;
+}
+
+.community-profile-avatar-placeholder {
+  display: inline-flex;
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--box-bg-3);
+    content: "";
+  }
 }
 
 .community-profile-name {
