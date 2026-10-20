@@ -1,34 +1,32 @@
 <template>
-  <article class="cp-comment">
-    <header class="cp-comment-header">
-      <button
-        v-if="postId"
-        :aria-label="`打开原帖：${postTitle}`"
-        :title="`打开原帖：${postTitle}`"
-        class="cp-comment-source"
-        type="button"
-        @click="handleOpenPost"
-      >
-        <v-icon size="16" aria-hidden="true">mdi-link-variant</v-icon>
-        <span class="cp-comment-source-title">
-          <TpTitle :singleLine="true" :text="postTitle" />
-        </span>
-      </button>
-      <span v-else class="cp-comment-source-title">{{ postTitle }}</span>
-      <time v-if="createdAtLabel" :datetime="createdAtIso" class="cp-comment-date">
-        {{ createdAtLabel }}
-      </time>
-    </header>
-
+  <article
+    :aria-label="postId ? `打开原帖：${postTitle}` : undefined"
+    :class="{ 'is-clickable': postId }"
+    class="cp-comment"
+    :role="postId ? 'button' : undefined"
+    :tabindex="postId ? 0 : undefined"
+    :title="postId ? `打开原帖：${postTitle}` : undefined"
+    @click="handleCardClick"
+    @keydown.enter.space="handleCardKeydown"
+  >
     <div aria-label="评论内容" class="cp-comment-content">
       <TpParser v-if="contentNodes.length" :data="contentNodes" />
       <span v-else class="cp-comment-empty">[无文字内容]</span>
     </div>
 
-    <footer aria-label="评论统计" class="cp-comment-meta">
-      <span title="点赞数">
-        <v-icon size="14" aria-hidden="true">mdi-thumb-up-outline</v-icon>
-        {{ likeCount }}
+    <footer aria-label="评论信息" class="cp-comment-footer">
+      <span class="cp-comment-meta">
+        <time v-if="createdAtLabel" :datetime="createdAtIso">{{ createdAtLabel }}</time>
+        <span title="点赞数">
+          <v-icon size="14" aria-hidden="true">mdi-thumb-up-outline</v-icon>
+          {{ likeCount }}
+        </span>
+      </span>
+      <span :title="`原帖：${postTitle}`" class="cp-comment-source">
+        <v-icon size="14" aria-hidden="true">mdi-post-outline</v-icon>
+        <span class="cp-comment-source-title">
+          <TpTitle :singleLine="true" :text="postTitle" />
+        </span>
       </span>
     </footer>
   </article>
@@ -68,6 +66,23 @@ const createdAtIso = computed<string>(() => {
 });
 const likeCount = computed<number>(() => props.comment.stat?.like_num ?? 0);
 
+function handleCardClick(event: MouseEvent): void {
+  if (!(event.target instanceof Element)) return;
+  if (
+    event.target.closest(
+      ".cp-comment-content a, .cp-comment-content button, .cp-comment-content summary, .cp-comment-content [role='button'], .cp-comment-content [role='link'], .cp-comment-content .tp-text-link, .cp-comment-content .tp-mention-box, .cp-comment-content .tp-image-box, .cp-comment-content .tp-emo-box, .cp-comment-content .tp-lc-box, .cp-comment-content .tp-backup-lottery",
+    ) !== null
+  )
+    return;
+  handleOpenPost();
+}
+
+function handleCardKeydown(event: KeyboardEvent): void {
+  if (event.target !== event.currentTarget) return;
+  event.preventDefault();
+  handleOpenPost();
+}
+
 function handleOpenPost(): void {
   if (!postId.value) return;
   emit("openPost", postId.value, postTitle.value);
@@ -84,9 +99,26 @@ function handleOpenPost(): void {
   border-radius: 8px;
   background: var(--box-bg-1);
   gap: 12px;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+
+  &.is-clickable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--common-shadow-2);
+      background: var(--box-bg-4);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--common-text-title);
+      outline-offset: 2px;
+    }
+  }
 }
 
-.cp-comment-header,
+.cp-comment-footer,
 .cp-comment-source,
 .cp-comment-meta,
 .cp-comment-meta span {
@@ -94,42 +126,44 @@ function handleOpenPost(): void {
   align-items: center;
 }
 
-.cp-comment-header {
+.cp-comment-footer {
+  min-width: 0;
   justify-content: space-between;
+  color: var(--box-text-4);
+  font-size: 12px;
   gap: 12px;
 }
 
 .cp-comment-source {
+  overflow: hidden;
   min-width: 0;
-  color: var(--common-text-title);
-  cursor: pointer;
-  font: inherit;
-  gap: 8px;
-  text-align: left;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  gap: 4px;
+  line-height: 16px;
 
-  &:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
+  > .v-icon {
+    flex: 0 0 auto;
   }
 }
 
 .cp-comment-source-title {
   overflow: hidden;
   min-width: 0;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 14px;
-  font-weight: normal;
-  line-height: 20px;
+  flex: 0 1 auto;
+  line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cp-comment-date,
 .cp-comment-meta {
-  flex-shrink: 0;
-  color: var(--box-text-4);
-  font-size: 12px;
+  flex: 0 0 auto;
+  gap: 12px;
+
+  span {
+    gap: 4px;
+    white-space: nowrap;
+  }
 }
 
 .cp-comment-content {
@@ -138,6 +172,21 @@ function handleOpenPost(): void {
   font-size: 14px;
   line-height: 20px;
   overflow-wrap: anywhere;
+
+  :deep(.tp-image-box) {
+    width: fit-content;
+    max-width: min(100%, 320px);
+    justify-content: flex-start;
+    margin: 8px 0;
+  }
+
+  :deep(.tp-image-box img) {
+    width: auto;
+    max-width: min(100%, 320px);
+    max-height: 240px;
+    margin: 0;
+    object-fit: contain;
+  }
 }
 
 .cp-comment-empty {
@@ -145,29 +194,15 @@ function handleOpenPost(): void {
   font-style: italic;
 }
 
-.cp-comment-meta {
-  gap: 12px;
-
-  span {
-    gap: 4px;
+@media (prefers-reduced-motion: reduce) {
+  .cp-comment {
+    transition: none;
   }
-}
-
-.cp-comment button:focus-visible {
-  border-radius: 4px;
-  outline: 2px solid var(--common-text-title);
-  outline-offset: 4px;
 }
 
 @media (width <= 640px) {
   .cp-comment {
     padding: 12px;
-  }
-
-  .cp-comment-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
   }
 }
 </style>

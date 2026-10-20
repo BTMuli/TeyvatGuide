@@ -48,6 +48,7 @@ const avatarStyle = computed<Record<string, string>>(() => ({
 
 .cp-avatar-image {
   position: relative;
+  z-index: 0;
   display: flex;
   overflow: hidden;
   width: var(--cp-avatar-inner-size);
@@ -73,10 +74,13 @@ const avatarStyle = computed<Record<string, string>>(() => ({
 .cp-avatar-pendant {
   position: absolute;
   z-index: 1;
+  top: 0;
+  left: 0;
   display: flex;
+  width: var(--cp-avatar-size);
+  height: var(--cp-avatar-size);
   align-items: center;
   justify-content: center;
-  inset: 0;
   pointer-events: none;
 
   img {

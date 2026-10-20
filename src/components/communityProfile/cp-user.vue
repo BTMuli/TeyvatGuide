@@ -11,11 +11,19 @@
         <span :title="relation.user.nickname" class="cp-user-name">
           {{ relation.user.nickname }}
         </span>
-        <span v-if="relationLabel" class="cp-user-relation">{{ relationLabel }}</span>
+        <span class="cp-user-id">ID: {{ relation.user.uid }}</span>
+        <span
+          v-if="relationState"
+          :aria-label="relationState.label"
+          :title="relationState.label"
+          class="cp-user-relation"
+          role="img"
+        >
+          <v-icon aria-hidden="true" size="14">{{ relationState.icon }}</v-icon>
+        </span>
         <span v-if="relation.is_new" class="cp-user-new">新</span>
       </span>
       <span :title="introduction" class="cp-user-introduction">{{ introduction }}</span>
-      <span class="cp-user-id">ID: {{ relation.user.uid }}</span>
     </span>
     <v-icon aria-hidden="true" class="cp-user-arrow" size="20">mdi-chevron-right</v-icon>
   </button>
@@ -28,13 +36,16 @@ import { computed } from "vue";
 type CpUserProps = {
   relation: TGApp.BBS.Community.UserRelation;
 };
+type RelationState = { icon: string; label: string };
 
 const props = defineProps<CpUserProps>();
 const emit = defineEmits<{ openProfile: [uid: string] }>();
-const relationLabel = computed<string | undefined>(() => {
-  if (props.relation.is_follow && props.relation.is_followed) return "互相关注";
-  if (props.relation.is_follow || props.relation.is_following) return "已关注";
-  if (props.relation.is_followed) return "关注你";
+const relationState = computed<RelationState | undefined>(() => {
+  if (props.relation.is_follow && props.relation.is_followed)
+    return { icon: "mdi-account-multiple-check-outline", label: "互相关注" };
+  if (props.relation.is_follow || props.relation.is_following)
+    return { icon: "mdi-account-check-outline", label: "已关注" };
+  if (props.relation.is_followed) return { icon: "mdi-account-heart-outline", label: "关注你" };
   return undefined;
 });
 const introduction = computed<string>(() => {
@@ -94,6 +105,7 @@ function handleOpenProfile(): void {
 .cp-user-name {
   overflow: hidden;
   min-width: 0;
+  flex: 0 1 auto;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 16px;
@@ -102,7 +114,24 @@ function handleOpenProfile(): void {
   white-space: nowrap;
 }
 
-.cp-user-relation,
+.cp-user-id {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.cp-user-relation {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  color: var(--box-text-4);
+}
+
 .cp-user-new {
   flex: 0 0 auto;
   padding: 2px 6px;
@@ -114,14 +143,6 @@ function handleOpenProfile(): void {
   white-space: nowrap;
 }
 
-.cp-user-relation {
-  background: var(--box-bg-2);
-}
-
-.cp-user-new {
-  background: var(--box-bg-3);
-}
-
 .cp-user-introduction {
   display: -webkit-box;
   overflow: hidden;
@@ -131,15 +152,6 @@ function handleOpenProfile(): void {
   -webkit-line-clamp: 2;
   line-height: 20px;
   overflow-wrap: anywhere;
-}
-
-.cp-user-id {
-  overflow: hidden;
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .cp-user-arrow {

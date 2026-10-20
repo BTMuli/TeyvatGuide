@@ -100,9 +100,18 @@ function openPost(): void {
 
 .cp-post-author {
   min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--app-page-content);
   cursor: pointer;
-  font-size: 12px;
+  font: inherit;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 
   span {
     overflow: hidden;
@@ -128,6 +137,9 @@ function openPost(): void {
   overflow-wrap: anywhere;
 
   button {
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: inherit;
     cursor: pointer;
     font: inherit;
@@ -144,6 +156,9 @@ function openPost(): void {
   display: flex;
   width: fit-content;
   max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
   gap: 8px;
 }
