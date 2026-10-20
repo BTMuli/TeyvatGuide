@@ -193,7 +193,8 @@ import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
-const { incognito, postViewWide } = storeToRefs(useAppStore());
+const appStore = useAppStore();
+const { incognito, postViewWide } = storeToRefs(appStore);
 const { gameList } = storeToRefs(useBBSStore());
 const { cookie } = storeToRefs(useUserStore());
 
@@ -214,6 +215,7 @@ const shareTitle = computed<string>(() =>
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
 let incognitoListener: UnlistenFn | null = null;
+let hideUidListener: UnlistenFn | null = null;
 let userListener: UnlistenFn | null = null;
 
 function getGameIcon(gameId: number): string {
@@ -224,6 +226,9 @@ function getGameIcon(gameId: number): string {
 
 onBeforeMount(async () => {
   incognitoListener = await listen<void>("switchIncognito", () => window.location.reload());
+  hideUidListener = await listen<boolean>("switchHideUid", (e: Event<boolean>) => {
+    appStore.setHideUid(e.payload);
+  });
   userListener = await listen<string>("userMention", (e: Event<string>) => {
     if (e.payload !== curUid.value) curUid.value = e.payload;
     if (showCollection.value) showCollection.value = false;
@@ -289,6 +294,10 @@ onUnmounted(() => {
   if (incognitoListener !== null) {
     incognitoListener();
     incognitoListener = null;
+  }
+  if (hideUidListener !== null) {
+    hideUidListener();
+    hideUidListener = null;
   }
   if (userListener !== null) {
     userListener();

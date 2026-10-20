@@ -169,8 +169,14 @@ async function switchIncognito(): Promise<void> {
   showSnackbar.success("已关闭无痕浏览!");
 }
 
-function switchHideUid(): void {
-  hideUid.value = !hideUid.value;
+/**
+ * 切换隐藏 UID
+ * @since Beta v0.12.6
+ * @returns 无返回值
+ */
+async function switchHideUid(): Promise<void> {
+  appStore.setHideUid(!hideUid.value);
+  await event.emitTo("Sub_window", "switchHideUid", hideUid.value);
   showSnackbar.success(hideUid.value ? "已隐藏 UID" : "已显示 UID");
 }
 

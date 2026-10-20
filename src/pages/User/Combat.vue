@@ -451,7 +451,7 @@ async function deleteCombat(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除数据？",
-    `将清除${maskUid(uidCur.value)}的所有剧诗数据`,
+    `将清除${maskUidTail(uidCur.value)}的所有剧诗数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");

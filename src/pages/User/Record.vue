@@ -201,7 +201,7 @@ async function handleLegacyRecord(uid: number, sequence: number): Promise<void> 
   if (refreshSupported) {
     const refreshCheck = await showDialog.check(
       "检测到旧版战绩数据",
-      `UID ${maskUid(uid)} 的战绩数据需要刷新为新版原始数据，确认后才会加载。`,
+      `UID ${maskUidTail(uid)} 的战绩数据需要刷新为新版原始数据，确认后才会加载。`,
     );
     if (!refreshCheck) {
       showSnackbar.cancel("已取消刷新旧版战绩数据");
@@ -217,7 +217,7 @@ async function handleLegacyRecord(uid: number, sequence: number): Promise<void> 
 
   const deleteCheck = await showDialog.check(
     "检测到旧版战绩数据",
-    `UID ${maskUid(uid)} 没有可用的刷新账号，确认后将删除旧版战绩数据。`,
+    `UID ${maskUidTail(uid)} 没有可用的刷新账号，确认后将删除旧版战绩数据。`,
   );
   if (!deleteCheck) {
     showSnackbar.cancel("已取消删除旧版战绩数据");
@@ -333,7 +333,7 @@ async function deleteRecord(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除？",
-    `将删除${maskUid(uidCur.value)}对应的战绩数据`,
+    `将删除${maskUidTail(uidCur.value)}对应的战绩数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除战绩数据");

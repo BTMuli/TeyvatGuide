@@ -1110,7 +1110,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除？",
-    `将删除${maskUid(uidCur.value)}对应的角色数据`,
+    `将删除${maskUidTail(uidCur.value)}对应的角色数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");

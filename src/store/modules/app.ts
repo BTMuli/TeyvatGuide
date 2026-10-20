@@ -129,6 +129,16 @@ const useAppStore = defineStore(
     }
 
     /**
+     * 设置隐藏 UID 状态（供跨窗口同步使用）
+     * @since Beta v0.12.6
+     * @param value - 是否隐藏 UID
+     * @returns 无返回值
+     */
+    function setHideUid(value: boolean): void {
+      hideUid.value = value;
+    }
+
+    /**
      * 切换应用主题
      * @since Beta v0.9.1
      * @returns 无返回值
@@ -190,6 +200,7 @@ const useAppStore = defineStore(
       initializePaths,
       init,
       changeTheme,
+      setHideUid,
       getImageUrl,
     };
   },

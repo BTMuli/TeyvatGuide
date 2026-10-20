@@ -1167,7 +1167,7 @@ async function deleteGacha(): Promise<void> {
   await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
   const delCheck = await showDialog.check(
     "确定删除祈愿数据？",
-    `UID：${maskUid(uidCur.value)}，共 ${gachaListCur.value.length} 条数据`,
+    `UID：${maskUidTail(uidCur.value)}，共 ${gachaListCur.value.length} 条数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消祈愿数据删除");
