@@ -1,13 +1,13 @@
 <template>
   <div class="tpu-box">
     <div class="tpu-top">
-      <span v-if="!hideUid" data-html2canvas-ignore @click="copyUid()">
+      <span data-html2canvas-ignore @click="copyUid()">
         <v-icon size="12">mdi-content-copy</v-icon>
         <span>复制</span>
       </span>
       <span class="tpu-game">{{ gameInfo?.name ?? "未知游戏" }}</span>
     </div>
-    <div class="tpu-main">UID {{ maskUid(props.data.insert.game_user_info.game_uid) }}</div>
+    <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
     <div class="tpu-sub">
       <span>{{ nickname }}</span>
       <span>|</span>
@@ -19,9 +19,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
-import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef } from "vue";
 
@@ -40,7 +38,6 @@ type TpUid = {
 type TpUidProps = { data: TpUid };
 
 const { gameUidCards, gameList } = storeToRefs(useBBSStore());
-const { hideUid } = storeToRefs(useAppStore());
 
 const defaultCard: TGApp.BBS.AppConfig.GameUidCardConf = {
   main_text_color: "#a17a58ff",
