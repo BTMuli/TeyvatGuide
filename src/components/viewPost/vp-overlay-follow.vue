@@ -112,6 +112,7 @@ async function loadMore(refresh: boolean = false): Promise<void> {
 }
 
 async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
+  visible.value = false;
   await openCommunityProfile(user.uid);
 }
 </script>
