@@ -5,6 +5,7 @@
 
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import { maskUid } from "@utils/TGUid.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -52,7 +53,7 @@ const useUserStore = defineStore(
       }
       account.value = accountFind;
       await TSUserAccount.game.switchAccount(uid.value, uidG);
-      showSnackbar.success(`成功切换游戏账户为${uidG}`);
+      showSnackbar.success(`成功切换游戏账户为${maskUid(uidG)}`);
       return true;
     }
 

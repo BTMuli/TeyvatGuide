@@ -489,7 +489,7 @@ async function loadAccount(ac: string): Promise<void> {
   }
   const accountGet = await TSUserAccount.account.getAccount(ac);
   if (!accountGet) {
-    showSnackbar.warn(`未找到${maskUid(uid.value)}的账号信息，请重新登录`);
+    showSnackbar.warn(`未找到${maskUid(ac)}的账号信息，请重新登录`);
     return;
   }
   uid.value = ac;

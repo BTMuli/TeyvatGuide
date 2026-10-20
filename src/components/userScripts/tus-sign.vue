@@ -309,7 +309,7 @@ async function trySign(
             await TGLogger.Script("已设置跳过验证，打卡失败");
             await TGNotify.normal(
               "自动打卡触发验证",
-              `${item.account.regionName}-${item.account.gameUid}-${item.account.nickname}`,
+              `${item.account.regionName}-${maskUid(item.account.gameUid)}-${item.account.nickname}`,
             );
             break;
           }

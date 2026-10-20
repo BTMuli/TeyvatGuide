@@ -361,6 +361,7 @@ function updateMaterialShow(data: Array<MaterialInfo> = getSelectMaterials()): v
 }
 
 /**
+ * @since Beta v0.12.6
  * 加载存档数据
  * @param {number} uid 存档UID
  * @returns {Promise<void>}
@@ -515,6 +516,7 @@ async function tryImportMaterial(): Promise<void> {
 
 /**
  * 新建存档
+ * @since Beta v0.12.6
  */
 async function createUid(): Promise<void> {
   let uidDefault: string = "";
@@ -541,6 +543,7 @@ async function createUid(): Promise<void> {
 
 /**
  * 删除当前存档
+ * @since Beta v0.12.6
  */
 async function deleteUid(): Promise<void> {
   if (!curUid.value) {

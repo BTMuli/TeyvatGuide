@@ -950,7 +950,7 @@ async function refresh(): Promise<void> {
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
   loadData.value = true;
   try {
-    await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
+    await showLoading.start(`正在更新${maskUid(rfAccount.gameUid)}的角色数据`);
     await showLoading.update("正在获取首页与角色列表", { timeout: 0 });
     const [indexResp, listResp] = await Promise.all([
       recordReq.index(rfCk!, rfAccount, 1),
@@ -1108,13 +1108,16 @@ async function deleteUid(): Promise<void> {
     showSnackbar.warn("未找到当前UID");
     return;
   }
-  const delCheck = await showDialog.check("确定删除？", `将删除${uidCur.value}对应的角色数据`);
+  const delCheck = await showDialog.check(
+    "确定删除？",
+    `将删除${maskUid(uidCur.value)}对应的角色数据`,
+  );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }
   await TSUserAvatar.deleteUid(uidCur.value);
-  showSnackbar.success(`成功删除${uidCur.value}的角色数据`);
+  showSnackbar.success(`成功删除${maskUid(uidCur.value)}的角色数据`);
   await loadUid();
 }
 

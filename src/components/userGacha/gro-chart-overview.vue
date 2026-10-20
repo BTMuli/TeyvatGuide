@@ -71,6 +71,7 @@ const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? 
 const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
 
 /**
+ * @since Beta v0.12.6
  * @description 获取整体祈愿图表配置
  * @returns {EChartsOption}
  */

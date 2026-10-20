@@ -275,6 +275,7 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
 }
 
 /**
+ * @since Beta v0.12.6
  * 导入成就
  * @param {string} uid - 存档UID
  * @param {TGApp.Plugins.Yae.AchiListRes} data - 成就数据
@@ -296,6 +297,7 @@ async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Pr
 
 /**
  * 导入背包数据
+ * @since Beta v0.12.6
  * @param {string} uid - 存档UID
  * @param {TGApp.Plugins.Yae.BagListRes} data - 背包数据
  * @returns {Promise<void>}
@@ -386,6 +388,7 @@ async function loadYaeProp(uid: string, data: TGApp.Plugins.Yae.PropRes): Promis
 
 /**
  * 处理角色数据
+ * @since Beta v0.12.6
  * @param uid - 用户UID
  * @param data - 角色数据
  * @returns 无返回值

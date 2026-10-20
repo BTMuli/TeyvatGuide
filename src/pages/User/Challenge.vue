@@ -325,7 +325,7 @@ async function refreshChallenge(): Promise<void> {
   if (!refreshData) return;
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Challenge][refreshChallenge] 开始刷新挑战数据");
-  await showLoading.start(`正在获取${rfAccount.gameUid}的幽境危战数据`);
+  await showLoading.start(`正在获取${maskUid(rfAccount.gameUid)}的幽境危战数据`);
   isRefresh.value = true;
   let resp: TGApp.Game.Challenge.ChallengeResp | undefined;
   try {
@@ -375,9 +375,9 @@ async function deleteChallenge(): Promise<void> {
     showSnackbar.cancel("已取消幽境危战数据删除");
     return;
   }
-  await showLoading.start("正在删除幽境危战数据", `UID: ${uidCur.value}`);
+  await showLoading.start("正在删除幽境危战数据", `UID: ${maskUid(uidCur.value)}`);
   await TSUserChallenge.delChallenge(uidCur.value);
-  showSnackbar.success(`已清除 ${uidCur.value} 的幽境危战数据`);
+  showSnackbar.success(`已清除 ${maskUid(uidCur.value)} 的幽境危战数据`);
   await reloadUid();
   await loadChallenge();
   await showLoading.end();

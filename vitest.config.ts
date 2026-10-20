@@ -7,6 +7,7 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
+      "@store": fileURLToPath(new URL("./src/store/modules", import.meta.url)),
     },
   },
   test: {

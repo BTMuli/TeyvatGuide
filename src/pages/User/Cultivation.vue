@@ -1586,7 +1586,7 @@ async function resolveApiAccount(
   const refreshAccount = await getRfAc(String(uid), account.value, cookie.value, logPrefix);
   if (!refreshAccount) return null;
   if (Number(refreshAccount.account.gameUid) !== uid) {
-    showSnackbar.warn(`未找到 UID ${uid} 对应的账号与 CK，已取消接口计算`);
+    showSnackbar.warn(`未找到 UID ${maskUid(uid)} 对应的账号与 CK，已取消接口计算`);
     return null;
   }
   return refreshAccount;
@@ -2478,7 +2478,7 @@ async function refreshPlanEntries(): Promise<void> {
   let refreshedCount = 0;
   let changedMaterials = 0;
   try {
-    await showLoading.start(`正在刷新养成计划“${project.name}”`, `UID：${project.uid}`);
+    await showLoading.start(`正在刷新养成计划“${project.name}”`, `UID：${maskUid(project.uid)}`);
     const localEntries = planEntries.value.filter((entry) => entry.calculationMode === "bag");
     const localAvatarEntries = localEntries.filter((entry) => entry.type === "avatar");
     const apiEntries = planEntries.value.filter((entry) => entry.calculationMode === "api");

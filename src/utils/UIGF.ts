@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -9,7 +9,7 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { app, path } from "@tauri-apps/api";
 import appFs from "@utils/appFs.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid } from "@utils/TGUid.js";
 import Ajv, { type ErrorObject } from "ajv";
 
 import fmtUtil from "./fmtUtil.js";
@@ -261,14 +261,13 @@ export async function exportUigfData(
     list: convertHk4e2Uigf(gachaList, timezone),
   };
   const filePath =
-    savePath ??
-    `${await path.appLocalDataDir()}${path.sep()}userData${path.sep()}UIGF_${maskUidName(uid)}.json`;
+    savePath ?? `${await path.appLocalDataDir()}${path.sep()}userData${path.sep()}UIGF_${uid}.json`;
   await appFs.writeTextFile(filePath, JSON.stringify(UigfData));
 }
 
 /**
  * 导出UIGF4数据
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  * @param usg - 祈愿UID列表
  * @param usb - 颂愿UID列表
  * @param savePath - 保存路径
@@ -321,7 +320,7 @@ export async function backUpUigf(dir: string): Promise<void> {
 
 /**
  * 恢复祈愿数据-旧版
- * @since Beta v0.9.5
+ * @since Beta v0.12.6
  * @param dir - 目录
  * @param file - 文件名称
  * @returns 是否恢复成功
@@ -350,7 +349,7 @@ async function restoreUigfByLegacyFile(dir: string, file: string): Promise<boole
 
 /**
  * 恢复祈愿数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.6
  * @param filePath - 文件路径
  * @returns 是否恢复成功
  */

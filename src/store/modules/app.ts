@@ -100,7 +100,7 @@ const useAppStore = defineStore(
 
     /**
      * 初始化应用状态
-     * @since Beta v0.10.5
+     * @since Beta v0.12.6
      * @remarks 用于首次运行或重置应用状态
      * @returns 无返回值
      */

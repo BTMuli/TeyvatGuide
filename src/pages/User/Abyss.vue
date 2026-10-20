@@ -190,7 +190,7 @@ onMounted(async () => {
   await showLoading.update("正在获取UID列表");
   await reloadUid();
   await showLoading.end();
-  showSnackbar.success(`已加载${uidCur.value}的${localAbyss.value.length}条深渊数据`);
+  showSnackbar.success(`已加载${maskUid(uidCur.value)}的${localAbyss.value.length}条深渊数据`);
 });
 
 watch(() => uidCur.value, loadAbyss);
@@ -245,7 +245,7 @@ async function refreshAbyss(): Promise<void> {
   if (!refreshData) return;
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Abyss][refreshAbyss] 更新深渊数据");
-  await showLoading.start(`正在获取 ${rfAccount.gameUid} 的深渊数据`, "正在获取上期数据");
+  await showLoading.start(`正在获取 ${maskUid(rfAccount.gameUid)} 的深渊数据`, "正在获取上期数据");
   let resP: TGApp.Game.Abyss.Response | undefined;
   try {
     resP = await recordReq.spiralAbyss(rfCk!, rfAccount, "2");
@@ -293,7 +293,7 @@ async function refreshAbyss(): Promise<void> {
   await reloadUid(uidCur.value);
   await loadAbyss();
   await showLoading.end();
-  showSnackbar.success(`已加载${rfAccount.gameUid}的${localAbyss.value.length}条深渊数据`);
+  showSnackbar.success(`已加载${maskUid(rfAccount.gameUid)}的${localAbyss.value.length}条深渊数据`);
 }
 
 async function shareAbyss(): Promise<void> {
@@ -316,15 +316,18 @@ async function deleteAbyss(): Promise<void> {
     showSnackbar.warn("未选择游戏UID");
     return;
   }
-  const delCheck = await showDialog.check("确定删除数据？", `将清除${uidCur.value}的所有深渊数据`);
+  const delCheck = await showDialog.check(
+    "确定删除数据？",
+    `将清除${maskUid(uidCur.value)}的所有深渊数据`,
+  );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }
-  await showLoading.start("正在删除深渊数据", `UID: ${uidCur.value}`);
+  await showLoading.start("正在删除深渊数据", `UID: ${maskUid(uidCur.value)}`);
   await TSUserAbyss.delAbyss(uidCur.value);
   await showLoading.end();
-  showSnackbar.success(`已清除 ${uidCur.value} 的深渊数据`);
+  showSnackbar.success(`已清除 ${maskUid(uidCur.value)} 的深渊数据`);
   await reloadUid();
   await loadAbyss();
 }
@@ -358,15 +361,18 @@ async function uploadAbyss(): Promise<void> {
   }
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   if (!gcFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法刷新角色数据进行上传`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 UID，无法刷新角色数据进行上传`);
     return;
   }
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
-    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法刷新角色数据进行上传`);
+    showSnackbar.warn(`未找到 ${maskUid(uidCur.value)} 对应 CK，无法刷新角色数据进行上传`);
     return;
   }
-  await showLoading.start(`正在上传 ${gcFind.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
+  await showLoading.start(
+    `正在上传 ${maskUid(gcFind.gameUid)} 的深渊数据`,
+    `期数：${abyssData.id}`,
+  );
   const transAbyss = Hutao.Abyss.utils.transData(abyssData);
   if (userName.value) transAbyss.ReservedUserName = userName.value;
   const check = await refreshAvatars(acFind.cookie!, gcFind);

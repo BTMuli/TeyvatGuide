@@ -389,6 +389,7 @@ async function refreshGachaPool(
 }
 
 /**
+ * @since Beta v0.12.6
  * 删除当前UID的祈愿数据
  * @return {Promise<void>} void
  */

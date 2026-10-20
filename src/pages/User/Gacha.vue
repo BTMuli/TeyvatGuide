@@ -807,7 +807,7 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
       return;
     }
   }
-  const check = await showDialog.check("确定删除？", uids.join("、"));
+  const check = await showDialog.check("确定删除？", uids.map((u) => maskUid(u)).join("、"));
   if (!check) return;
   await showLoading.start("正在删除胡桃云祈愿记录");
   for (const u of uids) {

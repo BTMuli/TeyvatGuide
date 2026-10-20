@@ -91,7 +91,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 浅色/深色主题切换
   - [x] 系统代理配置（支持商店版回环限制处理）
   - [x] 数据备份、恢复与缓存管理
-  - [x] 隐藏 UID（界面、分享图与导出文件名）
+  - [x] 隐藏 UID（仅界面、分享图与导出文件名；日志与数据文件不受影响）
   - [x] 米游社 JSBridge
   - [x] 终端命令行调用
   - [x] 支持胡桃云

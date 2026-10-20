@@ -38,7 +38,7 @@
     <TcConfigSwitch
       :model-value="hideUid"
       icon="mdi-eye-off-outline"
-      subtitle="隐藏界面、分享图与导出文件名中的 UID"
+      subtitle="仅隐藏界面、分享图与导出文件名，日志和数据文件不受影响"
       title="隐藏 UID"
       @toggle="switchHideUid"
     />

@@ -38,15 +38,16 @@ export function maskUidTail(value: string | number | null | undefined): string {
 }
 
 /**
- * 按设置隐藏文件名中的 UID
+ * 按设置隐藏文件名中的 UID，保留尾号以区分账号
  * @since Beta v0.12.6
+ * @remarks 星号在 Windows 文件名中非法，因此这里用文件名安全的 `UID` 前缀加尾号
  * @param value - 待写入文件名的 UID
- * @returns 未开启隐藏时原样返回，否则返回文件名安全的占位符
+ * @returns 未开启隐藏时原样返回，否则返回 `UID` 加尾号
  */
 export function maskUidName(value: string | number | null | undefined): string {
   const text = value === null || value === undefined ? "" : String(value);
   if (text === "" || !useAppStore().hideUid) return text;
-  return UID_NAME;
+  return `${UID_NAME}${text.slice(-UID_TAIL_KEEP)}`;
 }
 
 /**
