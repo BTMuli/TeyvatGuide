@@ -23,7 +23,7 @@
       </div>
       <div class="vp-ou-mid">
         <div v-if="userInfo" class="vp-ouu-extra">
-          <span>ID:{{ maskUid(userInfo.uid) }}</span>
+          <span>ID:{{ userInfo.uid }}</span>
           <span>IP:{{ userInfo.ip_region }}</span>
         </div>
       </div>
@@ -51,7 +51,6 @@ import postReq from "@req/postReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
