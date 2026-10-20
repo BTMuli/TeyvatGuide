@@ -269,6 +269,124 @@ async function searchUserPosts(
   return resp.data;
 }
 
+/**
+ * 获取当前账户的消息通知
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param category - 通知分类
+ * @param lastId - 下一页最后 ID
+ * @returns 消息通知响应数据
+ */
+async function getNotifications(
+  cookie: TGApp.App.Account.Cookie,
+  category: TGApp.BBS.Notification.Category,
+  lastId?: string,
+): Promise<TGApp.BBS.Notification.ListResp> {
+  const params: CommunityQuery = { category, gids: communityGameId, page_size: communityPageSize };
+  if (category !== "system") params.only_focus = "false";
+  if (lastId) params.last_id = lastId;
+  const resp = await TGHttps.get<TGApp.BBS.Notification.ListResp>(
+    `${communityApiBaseUrl}notification/wapi/getUserGameNotifications`,
+    {
+      headers: getRequestHeader(getCommunityCookie(cookie), "GET", params, "X4", true),
+      query: params,
+    },
+  );
+  return resp.data;
+}
+
+/**
+ * 获取当前账户的未读消息数
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @returns 未读消息数响应数据
+ */
+async function getNotificationUnread(
+  cookie: TGApp.App.Account.Cookie,
+): Promise<TGApp.BBS.Notification.UnreadResp> {
+  const params: CommunityQuery = { gids: communityGameId };
+  const resp = await TGHttps.get<TGApp.BBS.Notification.UnreadResp>(
+    `${communityApiBaseUrl}notification/wapi/getUserGameUnreadCount`,
+    {
+      headers: getRequestHeader(getCommunityCookie(cookie), "GET", params, "X4", true),
+      query: params,
+    },
+  );
+  return resp.data;
+}
+
+/**
+ * 清除当前账户指定分类的未读消息
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param category - 通知分类
+ * @returns 清除未读响应数据
+ */
+async function clearNotificationUnread(
+  cookie: TGApp.App.Account.Cookie,
+  category: TGApp.BBS.Notification.Category,
+): Promise<TGApp.BBS.Notification.ClearUnreadResp> {
+  const body: TGApp.BBS.Notification.ClearUnreadParams = { category, only_focus: false };
+  const resp = await TGHttps.post<TGApp.BBS.Notification.ClearUnreadResp>(
+    `${communityApiBaseUrl}notification/wapi/clearUserGameUnread`,
+    {
+      headers: {
+        ...getRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body), "X4", true),
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
+/**
+ * 获取当前账户的消息设置
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param uid - 当前用户 ID
+ * @returns 消息设置响应数据
+ */
+async function getNotificationSettings(
+  cookie: TGApp.App.Account.Cookie,
+  uid: string,
+): Promise<TGApp.BBS.Notification.SettingsResp> {
+  const params: CommunityQuery = { gids: communityGameId, uid };
+  const resp = await TGHttps.get<TGApp.BBS.Notification.SettingsResp>(
+    `${communityApiBaseUrl}user/wapi/notify/settings`,
+    {
+      headers: getRequestHeader(getCommunityCookie(cookie), "GET", params, "X4", true),
+      query: params,
+    },
+  );
+  return resp.data;
+}
+
+/**
+ * 更新当前账户的消息设置
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param settings - 完整消息设置
+ * @returns 更新消息设置响应数据
+ */
+async function updateNotificationSettings(
+  cookie: TGApp.App.Account.Cookie,
+  settings: TGApp.BBS.Notification.Settings,
+): Promise<TGApp.BBS.Notification.SettingsUpdateResp> {
+  const body: TGApp.BBS.Notification.SettingsUpdateParams = { settings };
+  const resp = await TGHttps.post<TGApp.BBS.Notification.SettingsUpdateResp>(
+    `${communityApiBaseUrl}user/wapi/notify/settings/update`,
+    {
+      headers: {
+        ...getRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body), "X4", true),
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
 const communityReq = {
   posts: getPosts,
   searchPosts: searchUserPosts,
@@ -278,6 +396,11 @@ const communityReq = {
   favoriteCollections: getFavoriteCollections,
   following: getFollowing,
   followers: getFollowers,
+  notifications: getNotifications,
+  notificationUnread: getNotificationUnread,
+  clearNotificationUnread,
+  notificationSettings: getNotificationSettings,
+  updateNotificationSettings,
 };
 
 export default communityReq;

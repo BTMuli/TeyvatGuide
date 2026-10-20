@@ -78,17 +78,25 @@
           </div>
         </div>
         <nav class="community-profile-nav">
-          <RouterLink
-            v-for="item in navigation"
-            :key="item.label"
-            :aria-current="item.section === currentSection ? 'page' : 'false'"
-            :class="{ 'is-active': item.section === currentSection }"
-            class="community-profile-nav-item"
-            :to="getSectionRoute(item.section)"
-          >
-            <v-icon size="18" aria-hidden="true">{{ item.icon }}</v-icon>
-            <span>{{ item.label }}</span>
-          </RouterLink>
+          <template v-for="item in navigation" :key="item.section">
+            <v-divider v-if="item.divided" class="community-profile-nav-divider" />
+            <RouterLink
+              :aria-current="item.section === currentSection ? 'page' : 'false'"
+              :class="{ 'is-active': item.section === currentSection }"
+              class="community-profile-nav-item"
+              :to="getSectionRoute(item.section)"
+            >
+              <v-icon size="18" aria-hidden="true">{{ item.icon }}</v-icon>
+              <span>{{ item.label }}</span>
+              <span
+                v-if="item.badge"
+                :title="`${item.badge} 条未读`"
+                class="community-profile-nav-badge"
+              >
+                {{ item.badge > 99 ? "99+" : item.badge }}
+              </span>
+            </RouterLink>
+          </template>
         </nav>
       </aside>
 
@@ -269,8 +277,25 @@
         class="community-profile-panel"
         @saved="handleSettingsSaved"
       />
+      <CpNotifications
+        v-else-if="isOwnProfile && isNotificationSection(currentSection)"
+        :key="`${profileUid}:${currentSection}:${refreshVersion}`"
+        :category="notificationCategories[currentSection]"
+        class="community-profile-panel"
+        @read="handleNotificationRead"
+      />
+      <CpNotifySettings
+        v-else-if="isOwnProfile && currentSection === 'notifySettings'"
+        :key="`${profileUid}:${currentSection}:${refreshVersion}`"
+        class="community-profile-panel"
+      />
       <CpContent
-        v-else-if="currentSection !== 'privacy' && currentSection !== 'edit'"
+        v-else-if="
+          currentSection !== 'privacy' &&
+          currentSection !== 'edit' &&
+          currentSection !== 'notifySettings' &&
+          !isNotificationSection(currentSection)
+        "
         :key="`${profileUid}:${currentSection}:${refreshVersion}`"
         :profileUid
         :section="currentSection"
@@ -284,6 +309,8 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
 import CpContent from "@comp/communityProfile/cp-content.vue";
+import CpNotifications from "@comp/communityProfile/cp-notifications.vue";
+import CpNotifySettings from "@comp/communityProfile/cp-notify-settings.vue";
 import CpSettings from "@comp/communityProfile/cp-settings.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
@@ -302,12 +329,15 @@ import {
 } from "@utils/communityProfile.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
+
+type NotificationSection = "reply" | "mention" | "system" | "likes";
 
 type ProfileSection =
   | "posts"
@@ -317,13 +347,21 @@ type ProfileSection =
   | "following"
   | "followers"
   | "privacy"
-  | "edit";
+  | "edit"
+  | NotificationSection
+  | "notifySettings";
 
 type NavigationItem = {
   section: ProfileSection;
   label: string;
   icon: string;
+  divided?: boolean;
+  badge?: number;
 };
+
+const notificationCategories: Readonly<
+  Record<NotificationSection, TGApp.BBS.Notification.Category>
+> = { reply: "reply", mention: "active_mention", system: "system", likes: "comment" };
 
 /**
  * 查看用户资料时的账户与目标用户快照。
@@ -362,6 +400,7 @@ const profileUid = computed<string>(() => {
 const isOwnProfile = computed<boolean>(
   () => profileUid.value !== "" && profileUid.value === uid.value,
 );
+const unreadCounts = shallowRef<Partial<Record<TGApp.BBS.Notification.Category, number>>>({});
 const navigation = computed<Array<NavigationItem>>(() => {
   const prefix = isOwnProfile.value ? "我的" : "TA 的";
   const items: Array<NavigationItem> = [
@@ -373,9 +412,21 @@ const navigation = computed<Array<NavigationItem>>(() => {
     { section: "following", label: `${prefix}关注`, icon: "mdi-heart-outline" },
   ];
   if (isOwnProfile.value) {
+    const unread = unreadCounts.value;
     items.push(
       { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline" },
       { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
+      {
+        section: "reply",
+        label: "回复我的",
+        icon: "mdi-comment-processing-outline",
+        divided: true,
+        badge: unread.reply,
+      },
+      { section: "mention", label: "主动@我", icon: "mdi-at", badge: unread.active_mention },
+      { section: "system", label: "系统通知", icon: "mdi-bell-outline", badge: unread.system },
+      { section: "likes", label: "收到的赞", icon: "mdi-thumb-up-outline", badge: unread.comment },
+      { section: "notifySettings", label: "消息设置", icon: "mdi-bell-cog-outline", divided: true },
     );
   }
   return items;
@@ -391,6 +442,11 @@ const currentSection = computed<ProfileSection>(() => {
       return section;
     case "privacy":
     case "edit":
+    case "reply":
+    case "mention":
+    case "system":
+    case "likes":
+    case "notifySettings":
       return isOwnProfile.value ? section : "posts";
     default:
       return "posts";
@@ -461,6 +517,8 @@ const pageCount = computed<number>(() => {
 });
 
 let requestVersion = 0;
+let unreadVersion = 0;
+const readCategories = new Set<TGApp.BBS.Notification.Category>();
 let active = true;
 
 watch(
@@ -489,7 +547,12 @@ watch(currentSection, (section) => {
 onBeforeUnmount(() => {
   active = false;
   requestVersion += 1;
+  unreadVersion += 1;
 });
+
+function isNotificationSection(section: ProfileSection): section is NotificationSection {
+  return Object.hasOwn(notificationCategories, section);
+}
 
 async function openTrailProfile(step: -1 | 1): Promise<void> {
   const targetUid = stepProfileTrail(step);
@@ -564,6 +627,8 @@ function resetProfileData(): void {
   searchKeyword.value = "";
   loadError.value = "";
   loading.value = false;
+  unreadVersion += 1;
+  unreadCounts.value = {};
 }
 
 function getAccountSnapshot(): AccountSnapshot | undefined {
@@ -572,11 +637,10 @@ function getAccountSnapshot(): AccountSnapshot | undefined {
   return { uid: uid.value, profileUid: profileUid.value, cookie: { ...cookie.value } };
 }
 
-function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
+function isCurrentAccount(snapshot: AccountSnapshot): boolean {
   const currentCookie = cookie.value;
   return (
     active &&
-    version === requestVersion &&
     canViewProfile.value &&
     uid.value === snapshot.uid &&
     profileUid.value === snapshot.profileUid &&
@@ -585,6 +649,37 @@ function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
     currentCookie?.ltuid === snapshot.cookie.ltuid &&
     currentCookie?.ltoken === snapshot.cookie.ltoken
   );
+}
+
+function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
+  return version === requestVersion && isCurrentAccount(snapshot);
+}
+
+async function loadUnreadCounts(snapshot: AccountSnapshot): Promise<void> {
+  if (snapshot.profileUid !== snapshot.uid) return;
+  const version = ++unreadVersion;
+  readCategories.clear();
+  try {
+    const response = await communityReq.notificationUnread(snapshot.cookie);
+    if (version !== unreadVersion || !isCurrentAccount(snapshot)) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    const count = response.data.count;
+    const getCount = (category: TGApp.BBS.Notification.Category): number =>
+      readCategories.has(category) ? 0 : (count[category] ?? 0);
+    unreadCounts.value = {
+      reply: getCount("reply"),
+      active_mention: getCount("active_mention"),
+      system: getCount("system"),
+      comment: getCount("comment"),
+    };
+  } catch (cause) {
+    await TGLogger.Warn(`[CommunityProfile] 获取未读消息数失败：${TGHttps.getErrMsg(cause)}`);
+  }
+}
+
+function handleNotificationRead(category: TGApp.BBS.Notification.Category): void {
+  readCategories.add(category);
+  unreadCounts.value = { ...unreadCounts.value, [category]: 0 };
 }
 
 async function loadProfile(): Promise<void> {
@@ -597,6 +692,7 @@ async function loadProfile(): Promise<void> {
     loadError.value = "用户 ID 无效。";
     return;
   }
+  void loadUnreadCounts(snapshot);
   loading.value = true;
   try {
     const userResponse =
@@ -949,6 +1045,26 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   }
 }
 
+.community-profile-nav-divider {
+  flex: 0 0 auto;
+  margin: 4px 0;
+}
+
+.community-profile-nav-badge {
+  min-width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 0 5px;
+  border-radius: 9px;
+  margin-left: auto;
+  background: var(--tgc-od-red);
+  color: var(--tgc-white-1);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+
 .community-profile-posts {
   display: flex;
   overflow: hidden;
@@ -1270,6 +1386,16 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
   .community-profile-nav-item {
     flex-shrink: 0;
+  }
+
+  .community-profile-nav-divider {
+    width: 0;
+    max-width: 0;
+    height: auto;
+    max-height: none;
+    align-self: stretch;
+    border-width: 0 thin 0 0;
+    margin: 4px 2px;
   }
 
   .community-profile-posts,

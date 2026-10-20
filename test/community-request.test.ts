@@ -7,12 +7,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
+  post: vi.fn(),
   getRequestHeader: vi.fn(),
   getCollectionRequestHeader: vi.fn(),
 }));
 
 vi.mock("@utils/TGHttps.js", () => ({
-  default: { get: mocks.get },
+  default: { get: mocks.get, post: mocks.post },
 }));
 vi.mock("@utils/getRequestHeader.js", () => ({
   getRequestHeader: mocks.getRequestHeader,
@@ -37,9 +38,11 @@ const successResponse = { retcode: 0, message: "ok", data: null };
 
 beforeEach(() => {
   mocks.get.mockReset();
+  mocks.post.mockReset();
   mocks.getRequestHeader.mockReset();
   mocks.getCollectionRequestHeader.mockReset();
   mocks.get.mockResolvedValue({ data: successResponse });
+  mocks.post.mockResolvedValue({ data: successResponse });
   mocks.getRequestHeader.mockReturnValue(appHeaders);
   mocks.getCollectionRequestHeader.mockReturnValue(collectionHeaders);
 });
@@ -160,5 +163,96 @@ describe("communityReq read requests", () => {
     const transportError = new Error("network failure");
     mocks.get.mockRejectedValueOnce(transportError);
     await expect(communityReq.followers(cookie, cookie.ltuid)).rejects.toBe(transportError);
+  });
+});
+
+describe("communityReq notification requests", () => {
+  it("requests notifications by category with the official cursor and focus flag", async () => {
+    await communityReq.notifications(cookie, "reply");
+    const replyQuery = { category: "reply", gids: 2, page_size: 20, only_focus: "false" };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "GET",
+      replyQuery,
+      "X4",
+      true,
+    );
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/notification/wapi/getUserGameNotifications",
+      { headers: appHeaders, query: replyQuery },
+    );
+
+    await communityReq.notifications(cookie, "system", "last-id");
+    const systemQuery = { category: "system", gids: 2, page_size: 20, last_id: "last-id" };
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/notification/wapi/getUserGameNotifications",
+      { headers: appHeaders, query: systemQuery },
+    );
+  });
+
+  it("reads unread counts for the Genshin community", async () => {
+    await communityReq.notificationUnread(cookie);
+    const query = { gids: 2 };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(authCookie, "GET", query, "X4", true);
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/notification/wapi/getUserGameUnreadCount",
+      { headers: appHeaders, query },
+    );
+  });
+
+  it("clears unread notifications with a signed JSON body", async () => {
+    await communityReq.clearNotificationUnread(cookie, "comment");
+    const body = { category: "comment", only_focus: false };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+      "X4",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/notification/wapi/clearUserGameUnread",
+      { headers: { ...appHeaders, "Content-Type": "application/json" }, body },
+    );
+  });
+
+  it("reads notification settings for the current user", async () => {
+    await communityReq.notificationSettings(cookie, "10001");
+    const query = { gids: 2, uid: "10001" };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(authCookie, "GET", query, "X4", true);
+    expect(mocks.get).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/user/wapi/notify/settings",
+      { headers: appHeaders, query },
+    );
+  });
+
+  it("updates notification settings with the full settings object", async () => {
+    const settings: TGApp.BBS.Notification.Settings = {
+      reply: "Follow",
+      mention: "All",
+      active_mention: "All",
+      upvote: "Never",
+      follow: "All",
+      system: true,
+      chat: true,
+      push_reply_and_mention: "ON",
+      push_follow: "ON",
+      push_upvote: "ON",
+      push_system_v2: "OPTION_ONLY_IMPORTANT",
+      low_freq_notify_at_ts: "0",
+    };
+    await communityReq.updateNotificationSettings(cookie, settings);
+    const body = { settings };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+      "X4",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/user/wapi/notify/settings/update",
+      { headers: { ...appHeaders, "Content-Type": "application/json" }, body },
+    );
   });
 });

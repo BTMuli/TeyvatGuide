@@ -177,6 +177,22 @@ function appendCommentImages(
 }
 
 /**
+ * 解析结构化内容字符串，失败时回退为纯文本。
+ * @since Beta v0.12.6
+ * @param raw - 结构化内容 JSON 字符串
+ * @param fallback - 纯文本内容
+ * @returns 可交给 TpParser 渲染的节点
+ */
+export function getStructuredContent(raw: unknown, fallback: unknown): Array<ReplyNode> {
+  const text = typeof raw === "string" ? raw.trim() : "";
+  if (text !== "") {
+    const content = parseReplyContent(text);
+    if (content.nodes.length) return content.nodes;
+  }
+  return typeof fallback === "string" && fallback.trim() !== "" ? [{ insert: fallback }] : [];
+}
+
+/**
  * 获取个人中心评论的安全结构化正文。
  * @since Beta v0.12.6
  * @param comment - 个人中心评论条目
