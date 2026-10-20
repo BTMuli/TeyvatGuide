@@ -78,6 +78,8 @@
           />
           <v-select
             :hide-details="true"
+            :item-title="uidItemTitle"
+            :item-value="uidItemValue"
             :items="uidList"
             :model-value="uidCur"
             class="uc-select-btn"
@@ -86,7 +88,11 @@
             variant="outlined"
             width="200px"
             @update:model-value="handleUidChange"
-          />
+          >
+            <template #selection="{ item }">
+              <span>{{ maskUidTail(item) }}</span>
+            </template>
+          </v-select>
           <v-btn
             v-if="batchMode"
             :aria-pressed="isBatchAllSelected"
@@ -149,7 +155,7 @@
     <div class="uc-box-top">
       <div class="uc-box-title">
         <TurRoleInfo v-if="roleRecord && uidCur" :role="roleRecord" :uid="uidCur" />
-        <span v-else class="uc-box-uid">UID：{{ uidCur }}</span>
+        <span v-else class="uc-box-uid">UID：{{ maskUid(uidCur) }}</span>
         <span
           v-for="item in roleOverview"
           :key="item.element"
@@ -240,6 +246,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getZhElement } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
@@ -943,7 +950,7 @@ async function refresh(): Promise<void> {
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
   loadData.value = true;
   try {
-    await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
+    await showLoading.start(`正在更新${maskUid(rfAccount.gameUid)}的角色数据`);
     await showLoading.update("正在获取首页与角色列表", { timeout: 0 });
     const [indexResp, listResp] = await Promise.all([
       recordReq.index(rfCk!, rfAccount, 1),
@@ -1035,7 +1042,7 @@ async function share(): Promise<void> {
       return;
     }
   }
-  const fileName = `角色列表_${uidCur.value}`;
+  const fileName = `角色列表_${maskUidName(uidCur.value)}`;
   const prevCount = renderedCount.value;
   const total = selectedList.value.length;
   let progressAt = 0;
@@ -1101,13 +1108,16 @@ async function deleteUid(): Promise<void> {
     showSnackbar.warn("未找到当前UID");
     return;
   }
-  const delCheck = await showDialog.check("确定删除？", `将删除${uidCur.value}对应的角色数据`);
+  const delCheck = await showDialog.check(
+    "确定删除？",
+    `将删除${maskUidTail(uidCur.value)}对应的角色数据`,
+  );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除");
     return;
   }
   await TSUserAvatar.deleteUid(uidCur.value);
-  showSnackbar.success(`成功删除${uidCur.value}的角色数据`);
+  showSnackbar.success(`成功删除${maskUid(uidCur.value)}的角色数据`);
   await loadUid();
 }
 

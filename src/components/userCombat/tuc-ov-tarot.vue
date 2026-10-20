@@ -47,7 +47,7 @@
     </div>
 
     <template #share>
-      <span>UID {{ uid }}</span>
+      <span>UID {{ maskUid(uid) }}</span>
       <span> · TeyvatGuide v{{ version }}</span>
     </template>
   </TopOverlay>
@@ -59,6 +59,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TucOvtItem from "@comp/userCombat/tuc-ovt-item.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, onMounted, ref, useId, useTemplateRef } from "vue";
 
 type TucOvTarotProps = { data: TGApp.Game.Combat.TarotState | undefined; uid: string | undefined };
@@ -84,7 +85,7 @@ async function share(): Promise<void> {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `月谕圣牌_${uid}_${new Date().getTime()}`;
+  const fileName = `月谕圣牌_${maskUidName(uid)}_${new Date().getTime()}`;
   const contentMaxHeight = content.style.maxHeight;
   const contentOverflowY = content.style.overflowY;
   shareLoading.value = true;

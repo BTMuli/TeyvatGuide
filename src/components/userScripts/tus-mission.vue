@@ -56,6 +56,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { createPost } from "@utils/TGWindow.js";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -267,7 +268,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
     }
     if (skip) {
       await TGLogger.Script("已设置跳过验证，打卡失败");
-      await TGNotify.normal("自动打卡触发验证", `UID:${ck.stuid}`);
+      await TGNotify.normal("自动打卡触发验证", `UID:${maskUid(ck.stuid)}`);
       return;
     }
     await TGLogger.Script(`[米游币任务]社区签到触发验证码，正在尝试验证`);
@@ -284,7 +285,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
 
 async function genShare(): Promise<void> {
   if (!tusmEl.value) return;
-  await generateShareImg(`MiTasks_${props.acCur?.uid ?? "unknown"}`, tusmEl.value, 2);
+  await generateShareImg(`MiTasks_${maskUidName(props.acCur?.uid ?? "unknown")}`, tusmEl.value, 2);
 }
 
 async function toInfoPost(): Promise<void> {

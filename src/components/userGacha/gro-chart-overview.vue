@@ -12,6 +12,7 @@
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
 import { saveImgFile } from "@utils/TGShare.js";
+import { maskUidName } from "@utils/TGUid.js";
 import type { PieSeriesOption } from "echarts/charts.js";
 import { BarChart, PieChart } from "echarts/charts.js";
 import type {
@@ -70,6 +71,7 @@ const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? 
 const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
 
 /**
+ * @since Beta v0.12.6
  * @description 获取整体祈愿图表配置
  * @returns {EChartsOption}
  */
@@ -103,7 +105,7 @@ function getOverviewOptions(): EChartsOption {
               backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
               excludeComponents: ["toolbox"],
             });
-            await saveImgFile(dataUrl, `gacha-overview-${props.uid}`);
+            await saveImgFile(dataUrl, `gacha-overview-${maskUidName(props.uid)}`);
           },
         },
       },

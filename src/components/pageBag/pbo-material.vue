@@ -77,6 +77,7 @@ import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { computed, shallowRef, useSlots, watch } from "vue";
 
 import PbMaterialRecordChart from "./pb-material-record-chart.vue";
@@ -115,7 +116,7 @@ defineSlots<{
   right?: () => unknown;
 }>();
 const shareCaption = computed<string>(
-  () => props.shareCaption ?? `Material ${props.data.info.id} · UID ${props.uid}`,
+  () => props.shareCaption ?? `Material ${props.data.info.id} · UID ${maskUid(props.uid)}`,
 );
 const shareFileName = computed<string>(
   () => `materialBag_${props.data.info.id}_${dbInfo.value.count}`,

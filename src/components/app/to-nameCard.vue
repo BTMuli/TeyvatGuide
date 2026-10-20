@@ -21,7 +21,7 @@
           </div>
           <div class="ton-sign">
             {{ props.achievementSeries ? "UID" : "ID" }}:{{
-              props.achievementSeries?.uid ?? props.data.id
+              props.achievementSeries ? maskUid(props.achievementSeries.uid) : props.data.id
             }}
             | TeyvatGuide v{{ version }}
           </div>
@@ -92,6 +92,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGShare from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
 import TOverlay from "./t-overlay.vue";

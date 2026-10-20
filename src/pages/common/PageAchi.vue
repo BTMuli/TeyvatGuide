@@ -8,12 +8,18 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="存档UID"
           variant="outlined"
           width="200px"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUidTail(item) }}</span>
+          </template>
+        </v-select>
         <span>{{ title }}</span>
       </div>
     </template>
@@ -127,6 +133,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import {
   getUiafHeader,
   readUiafData,
@@ -320,7 +327,7 @@ async function importJson(): Promise<void> {
     showSnackbar.warn("请输入合法数字");
     return;
   }
-  await showLoading.start("正在导入数据", `存档UID：${uidInput}`);
+  await showLoading.start("正在导入数据", `存档UID：${maskUid(uidInput)}`);
   const remoteRaw = await readUiafData(selectedFile);
   await TSUserAchi.mergeUiaf(remoteRaw.list, Number(uidInput));
   await showLoading.end();
@@ -340,7 +347,7 @@ async function exportJson(): Promise<void> {
     info: await getUiafHeader(),
     list: await TSUserAchi.getUiafData(uidCur.value),
   };
-  const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${uidCur.value}`;
+  const fileName = `UIAF_${UiafData.info.export_app}_${UiafData.info.export_app_version}_${maskUidName(uidCur.value)}`;
   const isSave = await save({
     title: "导出 UIAF 数据",
     filters: [{ name: "UIAF JSON", extensions: ["json"] }],
@@ -393,7 +400,7 @@ async function handleImportOuter(app: string): Promise<void> {
     return;
   }
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
-  await showLoading.start("正在导入数据", `存档UID：${uidInput}`);
+  await showLoading.start("正在导入数据", `存档UID：${maskUid(uidInput)}`);
   try {
     await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
   } catch (error) {
@@ -434,13 +441,13 @@ async function createUid(): Promise<void> {
   }
   uidList.value.push(Number(uidInput));
   uidCur.value = Number(uidInput);
-  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
+  showSnackbar.success(`切换到新存档 ${maskUid(Number(uidInput))}`);
 }
 
 async function deleteUid(): Promise<void> {
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${uidCur.value}对应数据`,
+    `确认则清空存档-${maskUidTail(uidCur.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");

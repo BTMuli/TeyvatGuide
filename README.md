@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-10-11
+Update: 2026-10-20
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-10-11 16:22:15`
+> 更新于 `2026-10-20 20:05:00`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -91,6 +91,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 浅色/深色主题切换
   - [x] 系统代理配置（支持商店版回环限制处理）
   - [x] 数据备份、恢复与缓存管理
+  - [x] 隐藏 UID（仅界面、分享图与导出文件名；日志与数据文件不受影响）
   - [x] 米游社 JSBridge
   - [x] 终端命令行调用
   - [x] 支持胡桃云
@@ -167,5 +168,6 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
 - [Yae](https://github.com/HolographicHat/Yae)
 - [MiyoQian](https://github.com/Marchen-orz/MiyoQian)
+- [genshin-travelers-tales](https://www.bilibili.com/toy/genshin-travelers-tales)
 
 [![Star History Chart](https://star-history.dera.page/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.dera.page/#BTMuli/TeyvatGuide&Timeline)

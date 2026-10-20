@@ -1,10 +1,11 @@
 /**
  * 用户信息模块
- * @since Beta v0.11.2
+ * @since Beta v0.12.6
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import { maskUid } from "@utils/TGUid.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -35,6 +36,12 @@ const useUserStore = defineStore(
     const uid = ref<string>();
     const cookie = ref<TGApp.App.Account.Cookie>();
 
+    /**
+     * 切换当前账号的游戏账户
+     * @since Beta v0.12.6
+     * @param uidG - 目标游戏 UID
+     * @returns 是否切换成功
+     */
     async function switchGameAccount(uidG: string): Promise<boolean> {
       if (!uid.value) {
         showSnackbar.warn("未找到登录用户");
@@ -52,7 +59,7 @@ const useUserStore = defineStore(
       }
       account.value = accountFind;
       await TSUserAccount.game.switchAccount(uid.value, uidG);
-      showSnackbar.success(`成功切换游戏账户为${uidG}`);
+      showSnackbar.success(`成功切换游戏账户为${maskUid(uidG)}`);
       return true;
     }
 

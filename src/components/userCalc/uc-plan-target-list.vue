@@ -112,6 +112,7 @@ import {
   getServerDay,
   isMaterialAvailableToday,
 } from "@utils/cultivationPlan.js";
+import { maskUid } from "@utils/TGUid.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
@@ -195,7 +196,7 @@ const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>((
 const materialShareCaption = computed<string>(() => {
   const material = currentMaterial.value;
   if (!material) return "";
-  return `${material.info.name} · 第 ${currentMaterialIndex.value + 1} / ${overlayMaterials.value.length} 项 · UID ${props.uid}`;
+  return `${material.info.name} · 第 ${currentMaterialIndex.value + 1} / ${overlayMaterials.value.length} 项 · UID ${maskUid(props.uid)}`;
 });
 
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {

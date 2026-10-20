@@ -477,7 +477,9 @@
               @click="trySwitchGameAccount(ac)"
             >
               <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
-              <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }})</v-list-item-subtitle>
+              <v-list-item-subtitle>
+                {{ maskUidTail(ac.gameUid) }}({{ ac.regionName }})
+              </v-list-item-subtitle>
               <template #append>
                 <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
                   <v-icon color="green">mdi-check</v-icon>
@@ -528,6 +530,7 @@ import mhyClient from "@utils/TGClient.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid, maskUidTail } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
@@ -596,7 +599,7 @@ async function loadAllGameAc(): Promise<void> {
 async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void> {
   const acM = await TSUserAccount.account.getAccount(ac.uid);
   if (!acM) {
-    showSnackbar.warn(`未找到米社用户${ac.uid}的用户信息`);
+    showSnackbar.warn(`未找到米社用户${maskUid(ac.uid)}的用户信息`);
     return;
   }
   uid.value = ac.uid;
@@ -604,7 +607,7 @@ async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void
   cookie.value = acM.cookie;
   const res = await userStore.switchGameAccount(ac.gameUid);
   if (!res) return;
-  showSnackbar.success(`成功切换游戏UID-${ac.gameUid}`);
+  showSnackbar.success(`成功切换游戏UID-${maskUid(ac.gameUid)}`);
   await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${ac.gameUid}成功`);
 }
 

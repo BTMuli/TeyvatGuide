@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="tuad-mid">
-      <div v-if="show" class="tuad-share">UID {{ props.uid }} | 第{{ props.id }}期</div>
+      <div v-if="show" class="tuad-share">UID {{ maskUid(props.uid) }} | 第{{ props.id }}期</div>
       <div class="tuad-buff">
         <span>地脉异常:</span>
         <template v-if="props.floor.buff === undefined">
@@ -32,6 +32,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TuaDetailLevel from "./tua-detail-level.vue";
@@ -49,7 +50,7 @@ async function shareFloor(): Promise<void> {
   }
   show.value = true;
   await nextTick();
-  const fileName = `深境螺旋_第${props.id}期_${props?.uid ?? ""}_${props.floor.id}`;
+  const fileName = `深境螺旋_第${props.id}期_${maskUidName(props?.uid ?? "")}_${props.floor.id}`;
   await generateShareImg(fileName, floorRef.value);
   show.value = false;
 }

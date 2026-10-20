@@ -22,7 +22,7 @@
         </span>
       </div>
       <div class="dni-header-append">
-        <span>{{ props.account.gameUid }}</span>
+        <span>{{ maskUid(props.account.gameUid) }}</span>
         <span>{{ props.account.regionName }}</span>
       </div>
     </div>
@@ -62,6 +62,7 @@
 <script lang="ts" setup>
 import dnEnum from "@enum/dailyNote.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, useTemplateRef } from "vue";
 
 import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
@@ -110,7 +111,11 @@ function handleRefresh(): void {
 
 async function handleShare(): Promise<void> {
   if (!dniEl.value) return;
-  await TGShare.modern(`便笺-${props.account.nickname}-${props.account.gameUid}`, dniEl.value, 2.5);
+  await TGShare.modern(
+    `便笺-${props.account.nickname}-${maskUidName(props.account.gameUid)}`,
+    dniEl.value,
+    2.5,
+  );
 }
 </script>
 <style lang="scss" scoped>

@@ -146,6 +146,7 @@ import { event } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
@@ -397,7 +398,7 @@ async function freshUser(uid?: string): Promise<void> {
     return;
   }
   const uidReal = uid || briefInfo.value.uid;
-  await showLoading.start(`[${uidReal}]获取用户收藏`);
+  await showLoading.start(`[${maskUid(uidReal)}]获取用户收藏`);
   let res: TGApp.BBS.Collection.UserPostResp | undefined;
   try {
     res = await postReq.user.favorite(cookie.value, uidReal);

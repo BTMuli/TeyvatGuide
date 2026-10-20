@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -12,6 +12,7 @@ import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUidTail } from "@utils/TGUid.js";
 
 import TGSqlite from "../index.js";
 
@@ -106,7 +107,7 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
 
 /**
  * 检测并更新
- * @since Beta v0.9.5
+ * @since Beta v0.12.6
  * @returns 无返回值
  */
 async function updateAllAccountCk(): Promise<void> {
@@ -116,11 +117,14 @@ async function updateAllAccountCk(): Promise<void> {
   for (const account of accounts) {
     const diffTime = Date.now() - new Date(account.updated).getTime();
     if (diffTime > checkTime) {
-      await showLoading.start(`更新${account.uid}Cookie`, `上次更新:${account.updated}`);
+      await showLoading.start(
+        `更新${maskUidTail(account.uid)}Cookie`,
+        `上次更新:${account.updated}`,
+      );
       await TGLogger.Info(`更新${account.uid}Cookie，上次更新:${account.updated}`);
       const update = await updateAccountCk(account);
       if (update) {
-        showSnackbar.success(`成功更新${account.uid}的Cookie`);
+        showSnackbar.success(`成功更新${maskUidTail(account.uid)}的Cookie`);
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         cnt++;
       }

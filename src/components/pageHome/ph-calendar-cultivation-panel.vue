@@ -18,7 +18,7 @@
           </v-chip>
           <v-chip v-if="project" size="small" variant="tonal">
             <v-icon size="15" start>mdi-clipboard-text-outline</v-icon>
-            {{ project.name }} · UID {{ project.uid }}
+            {{ project.name }} · UID {{ maskUid(project.uid) }}
           </v-chip>
         </div>
         <div class="phco-attributes">
@@ -181,6 +181,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { computed, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 

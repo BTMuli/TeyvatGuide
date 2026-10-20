@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -9,6 +9,7 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { app, path } from "@tauri-apps/api";
 import appFs from "@utils/appFs.js";
+import { maskUidTail } from "@utils/TGUid.js";
 import Ajv, { type ErrorObject } from "ajv";
 
 import fmtUtil from "./fmtUtil.js";
@@ -266,7 +267,7 @@ export async function exportUigfData(
 
 /**
  * 导出UIGF4数据
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  * @param usg - 祈愿UID列表
  * @param usb - 颂愿UID列表
  * @param savePath - 保存路径
@@ -284,13 +285,13 @@ export async function exportUigf4Data(
   const dataUgc: Array<TGApp.Plugins.UIGF.GachaUgc> = [];
   for (const uid of usg) {
     const gachaList = await TSUserGacha.record.all(uid);
-    await showLoading.update(`正在导出${uid}的${gachaList.length}条祈愿记录`);
+    await showLoading.update(`正在导出${maskUidTail(uid)}的${gachaList.length}条祈愿记录`);
     const timezone = getUigfTimeZone(uid);
     dataHk4e.push({ uid: uid, timezone: timezone, list: convertHk4e2Uigf(gachaList, timezone) });
   }
   for (const uid of usb) {
     const gachaList = await TSUserGachaB.getGachaRecords(uid);
-    await showLoading.update(`正在导出${uid}的${gachaList.length}条颂愿记录`);
+    await showLoading.update(`正在导出${maskUidTail(uid)}的${gachaList.length}条颂愿记录`);
     const timezone = getUigfTimeZone(uid);
     dataUgc.push({ uid: uid, timezone: timezone, list: convertUgc2Uigf(gachaList, timezone) });
   }
@@ -319,7 +320,7 @@ export async function backUpUigf(dir: string): Promise<void> {
 
 /**
  * 恢复祈愿数据-旧版
- * @since Beta v0.9.5
+ * @since Beta v0.12.6
  * @param dir - 目录
  * @param file - 文件名称
  * @returns 是否恢复成功
@@ -336,7 +337,9 @@ async function restoreUigfByLegacyFile(dir: string, file: string): Promise<boole
     }
     const data = await readUigfData(filePath);
     const uid = data.info.uid;
-    await showLoading.update(`正在导入${data.info.uid}的${data.list.length}条祈愿数据`);
+    await showLoading.update(
+      `正在导入${maskUidTail(data.info.uid)}的${data.list.length}条祈愿数据`,
+    );
     await TSUserGacha.mergeUIGF(uid, data.list, true);
   } catch (e) {
     await TGLogger.Error(`恢复祈愿数据失败${dir}`);
@@ -348,7 +351,7 @@ async function restoreUigfByLegacyFile(dir: string, file: string): Promise<boole
 
 /**
  * 恢复祈愿数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.6
  * @param filePath - 文件路径
  * @returns 是否恢复成功
  */
@@ -361,11 +364,11 @@ async function restoreUigfByFile(filePath: string): Promise<boolean> {
     }
     const read = await readUigf4Data(filePath);
     for (const data of read?.hk4e ?? []) {
-      await showLoading.update(`正在导入${data.uid}的${data.list.length}条祈愿记录`);
+      await showLoading.update(`正在导入${maskUidTail(data.uid)}的${data.list.length}条祈愿记录`);
       await TSUserGacha.mergeUIGF4(data, true);
     }
     for (const data of read?.hk4e_ugc ?? []) {
-      await showLoading.update(`正在导入${data.uid}的${data.list.length}条颂愿记录`);
+      await showLoading.update(`正在导入${maskUidTail(data.uid)}的${data.list.length}条颂愿记录`);
       await TSUserGachaB.mergeUIGF4(data, true);
     }
   } catch (e) {

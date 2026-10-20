@@ -14,7 +14,7 @@
       <div class="tuco-meta">
         <span>{{ props.data.updated }} 更新</span>
         <span v-if="props.showShareInfo" class="tuco-share">
-          真境剧诗 | UID {{ props.data.uid }} | TeyvatGuide v{{ props.version }}
+          真境剧诗 | UID {{ maskUid(props.data.uid) }} | TeyvatGuide v{{ props.version }}
         </span>
       </div>
     </div>
@@ -53,6 +53,7 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
+import { maskUid } from "@utils/TGUid.js";
 
 import TucFight from "./tuc-fight.vue";
 import TucTile from "./tuc-tile.vue";
