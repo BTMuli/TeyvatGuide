@@ -869,6 +869,10 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
   display: flex;
   justify-content: flex-end;
   padding-top: 4px;
+
+  .v-btn:not(.v-btn--disabled) {
+    color: var(--btn-text);
+  }
 }
 
 @media (width <= 640px) {
