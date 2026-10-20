@@ -357,10 +357,10 @@ const profileAccessMessage = computed<string>(() => {
 const profileStats = computed<Array<ProfileStat>>(() => {
   if (!profile.value) return [];
   return [
-    { label: "获赞", value: profile.value.achieve.like_num },
-    { label: "发帖", value: profile.value.achieve.post_num },
-    { label: "回帖", value: profile.value.achieve.replypost_num },
-    { label: "粉丝", value: profile.value.achieve.followed_cnt },
+    { label: "获赞", value: fmtUtil.num(Number(profile.value.achieve.like_num)) },
+    { label: "发帖", value: fmtUtil.num(Number(profile.value.achieve.post_num)) },
+    { label: "回帖", value: fmtUtil.num(Number(profile.value.achieve.replypost_num)) },
+    { label: "粉丝", value: fmtUtil.num(Number(profile.value.achieve.followed_cnt)) },
   ];
 });
 const levelColor = computed<string>(() => {
