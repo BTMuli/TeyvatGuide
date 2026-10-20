@@ -77,7 +77,7 @@ function getParsedData(data: SctPostDataArr): SctPostDataArr {
       child = [];
     }
   }
-  if (res.length === 0 && child.length > 0) res.push(...child);
+  if (child.length > 0) res.push(...child);
   return res;
 }
 
