@@ -156,7 +156,7 @@
         <footer class="tua-ao-footer">
           <div class="tua-ao-metadata">
             <span>
-              ID {{ props.data.id }} UID {{ props.data.uid }} | TeyvatGuide v{{
+              ID {{ props.data.id }} UID {{ maskUid(props.data.uid) }} | TeyvatGuide v{{
                 appVersion ?? "..."
               }}
             </span>
@@ -198,6 +198,7 @@ import { event } from "@tauri-apps/api";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppNameCardsData } from "@/data/index.js";

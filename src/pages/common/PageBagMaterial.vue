@@ -8,12 +8,18 @@
         <v-select
           v-model="curUid"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="存档UID"
           variant="outlined"
           width="200px"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <v-select
           v-model="curSort"
           :clearable="true"
@@ -168,6 +174,7 @@ import TSUserBagMaterial, {
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import {
   computed,
@@ -360,7 +367,7 @@ function updateMaterialShow(data: Array<MaterialInfo> = getSelectMaterials()): v
  */
 async function loadMaterialList(uid: number, requestVersion: number): Promise<void> {
   if (showOverlay.value) showOverlay.value = false;
-  await showLoading.start(`正在加载 ${uid} 的材料数据`);
+  await showLoading.start(`正在加载 ${maskUid(uid)} 的材料数据`);
   if (requestVersion !== materialLoadVersion) return;
   // 初始化
   materialTypes.value = [];
@@ -529,7 +536,7 @@ async function createUid(): Promise<void> {
   }
   uidList.value.push(Number(uidInput));
   curUid.value = Number(uidInput);
-  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
+  showSnackbar.success(`切换到新存档 ${maskUid(Number(uidInput))}`);
 }
 
 /**
@@ -542,7 +549,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${curUid.value}对应数据`,
+    `确认则清空存档-${maskUid(curUid.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");

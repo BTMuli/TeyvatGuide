@@ -3,14 +3,14 @@
   <v-menu location="bottom">
     <template v-slot:activator="{ props: menuProps }">
       <div class="sign-user-switch" v-bind="menuProps">
-        <span>{{ nickname }}({{ currentUid }})</span>
+        <span>{{ nickname }}({{ maskUid(currentUid) }})</span>
         <v-icon size="small">mdi-chevron-down</v-icon>
       </div>
     </template>
     <v-list>
       <v-list-item v-for="ac in users" :key="ac.uid">
         <v-list-item-title>{{ ac.brief.nickname }}</v-list-item-title>
-        <v-list-item-subtitle>{{ ac.brief.uid }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ maskUid(ac.brief.uid) }}</v-list-item-subtitle>
         <template #append>
           <div v-if="ac.uid === currentUid" title="当前登录账号">
             <v-icon color="green">mdi-account-check</v-icon>
@@ -32,6 +32,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
 
@@ -64,7 +65,7 @@ async function switchUser(targetUid: string): Promise<void> {
 
   const accountGet = await TSUserAccount.account.getAccount(targetUid);
   if (!accountGet) {
-    showSnackbar.warn(`未找到${targetUid}的账号信息，请重新登录`);
+    showSnackbar.warn(`未找到${maskUid(targetUid)}的账号信息，请重新登录`);
     return;
   }
 
@@ -74,12 +75,12 @@ async function switchUser(targetUid: string): Promise<void> {
 
   const gameAccount = await TSUserAccount.game.getCurAccount(targetUid);
   if (!gameAccount) {
-    showSnackbar.warn(`未找到${targetUid}的游戏账号信息，请尝试刷新`);
+    showSnackbar.warn(`未找到${maskUid(targetUid)}的游戏账号信息，请尝试刷新`);
     return;
   }
 
   account.value = gameAccount;
-  showSnackbar.success(`成功切换到用户${targetUid}`);
+  showSnackbar.success(`成功切换到用户${maskUid(targetUid)}`);
 
   emits("switch-user", targetUid);
 }

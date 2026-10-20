@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.12.0
+ * @since Beta v0.12.6
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -52,6 +52,8 @@ const useAppStore = defineStore(
     const imageQualityPercent = ref<number>(80);
     /** 无痕浏览 */
     const incognito = ref<boolean>(true);
+    /** 隐藏 UID */
+    const hideUid = ref<boolean>(false);
     /** 帖子宽窄视图 */
     const postViewWide = ref<boolean>(true);
     /** 帖子网格/列表视图 */
@@ -115,6 +117,7 @@ const useAppStore = defineStore(
       shareDefaultFile.value = 10;
       imageQualityPercent.value = 10;
       incognito.value = true;
+      hideUid.value = false;
       postViewWide.value = true;
       postGridMode.value = true;
       cancelLike.value = true;
@@ -176,6 +179,7 @@ const useAppStore = defineStore(
       shareDefaultFile,
       imageQualityPercent,
       incognito,
+      hideUid,
       postViewWide,
       postGridMode,
       cancelLike,
@@ -208,6 +212,7 @@ const useAppStore = defineStore(
           "shareDefaultFile",
           "imageQualityPercent",
           "incognito",
+          "hideUid",
           "sidebar",
           "postViewWide",
           "postGridMode",

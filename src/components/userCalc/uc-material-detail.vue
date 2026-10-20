@@ -99,6 +99,7 @@ import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, ref, useTemplateRef } from "vue";
 
@@ -138,7 +139,7 @@ const shareCaption = computed<string>(() => {
   } else if (props.idx !== undefined) {
     parts.push(`#${props.idx}`);
   }
-  parts.push(props.wiki.name, `UID ${props.uid}`);
+  parts.push(props.wiki.name, `UID ${maskUid(props.uid)}`);
   return parts.join(" · ");
 });
 
@@ -158,7 +159,12 @@ async function shareMaterial(): Promise<void> {
   content.style.maxHeight = "none";
   content.style.overflowY = "visible";
   try {
-    await generateShareImg(`养成材料详情_${props.wiki.name}_${props.uid}`, panel, 1.5, true);
+    await generateShareImg(
+      `养成材料详情_${props.wiki.name}_${maskUidName(props.uid)}`,
+      panel,
+      1.5,
+      true,
+    );
   } finally {
     content.style.maxHeight = contentMaxHeight;
     content.style.overflowY = contentOverflowY;

@@ -225,6 +225,7 @@ import {
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import userCalc, { ASCENSION_LEVELS } from "@utils/userCalc.js";
 import type { CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
@@ -302,7 +303,7 @@ const currentUid = computed<number>(() => {
 });
 const shareCaption = computed<string>(() => {
   const base = `养成计算 · ${wikiName.value}`;
-  return currentUid.value > 0 ? `${base} · UID ${currentUid.value}` : base;
+  return currentUid.value > 0 ? `${base} · UID ${maskUid(currentUid.value)}` : base;
 });
 const hasBagData = computed<boolean>(
   () => currentUid.value > 0 && bagMaterialDetails.value.size > 0,
@@ -685,7 +686,7 @@ async function shareCalc(): Promise<void> {
   panel.style.maxHeight = "none";
   panel.style.overflow = "visible";
   try {
-    const uidLabel = currentUid.value > 0 ? `_${currentUid.value}` : "";
+    const uidLabel = currentUid.value > 0 ? `_${maskUidName(currentUid.value)}` : "";
     await generateShareImg(`养成计算_${wikiName.value}${uidLabel}`, panel, 1.5, true);
   } finally {
     panel.classList.remove("is-sharing");

@@ -218,6 +218,7 @@ import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { getCultivationEntryKey } from "@utils/cultivationPlan.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 import { getWikiMaterialById, WikiMaterialData } from "@/data/index.js";
@@ -297,7 +298,7 @@ const conversionEntryBoxes = computed<ReadonlyMap<string, TItemBoxData>>(
 );
 
 const shareCaption = computed<string>(
-  () => `养成计划汇总 · ${props.project.name} · UID ${props.uid}`,
+  () => `养成计划汇总 · ${props.project.name} · UID ${maskUid(props.uid)}`,
 );
 const totalTargetCount = computed<number>(
   () => props.targetCounts.active + props.targetCounts.fulfilled + props.targetCounts.completed,
@@ -431,7 +432,12 @@ async function shareSummary(): Promise<void> {
     await nextTick();
     content.style.maxHeight = "none";
     content.style.overflowY = "visible";
-    await generateShareImg(`养成计划汇总_${props.project.name}_${props.uid}`, panel, 1.5, true);
+    await generateShareImg(
+      `养成计划汇总_${props.project.name}_${maskUidName(props.uid)}`,
+      panel,
+      1.5,
+      true,
+    );
   } finally {
     shareLoading.value = false;
     try {

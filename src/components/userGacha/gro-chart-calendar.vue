@@ -14,6 +14,7 @@
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
 import { saveImgFile } from "@utils/TGShare.js";
+import { maskUidName } from "@utils/TGUid.js";
 import type { HeatmapSeriesOption } from "echarts/charts.js";
 import { HeatmapChart } from "echarts/charts.js";
 import type {
@@ -135,7 +136,7 @@ function getCalendarOptions(): EChartsOption {
               backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
               excludeComponents: ["toolbox"],
             });
-            await saveImgFile(dataUrl, `gacha-chart-calendar-${props.uid}`);
+            await saveImgFile(dataUrl, `gacha-chart-calendar-${maskUidName(props.uid)}`);
           },
         },
       },

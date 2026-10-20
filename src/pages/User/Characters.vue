@@ -78,6 +78,8 @@
           />
           <v-select
             :hide-details="true"
+            :item-title="uidItemTitle"
+            :item-value="uidItemValue"
             :items="uidList"
             :model-value="uidCur"
             class="uc-select-btn"
@@ -86,7 +88,11 @@
             variant="outlined"
             width="200px"
             @update:model-value="handleUidChange"
-          />
+          >
+            <template #selection="{ item }">
+              <span>{{ maskUid(item) }}</span>
+            </template>
+          </v-select>
           <v-btn
             v-if="batchMode"
             :aria-pressed="isBatchAllSelected"
@@ -149,7 +155,7 @@
     <div class="uc-box-top">
       <div class="uc-box-title">
         <TurRoleInfo v-if="roleRecord && uidCur" :role="roleRecord" :uid="uidCur" />
-        <span v-else class="uc-box-uid">UID：{{ uidCur }}</span>
+        <span v-else class="uc-box-uid">UID：{{ maskUid(uidCur) }}</span>
         <span
           v-for="item in roleOverview"
           :key="item.element"
@@ -240,6 +246,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getZhElement } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";

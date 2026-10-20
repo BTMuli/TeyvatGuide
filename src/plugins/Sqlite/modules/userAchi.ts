@@ -8,6 +8,7 @@ import { path } from "@tauri-apps/api";
 import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUidName } from "@utils/TGUid.js";
 import { compareVersions } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
@@ -605,7 +606,7 @@ async function backupUiaf(dir: string, uid?: number): Promise<void> {
   }
   for (const uidItem of uidList) {
     const data = await getUiafData(uidItem);
-    const fileName = `UIAF_${uidItem}`;
+    const fileName = `UIAF_${maskUidName(uidItem)}`;
     await appFs.writeTextFile(`${dir}${path.sep()}${fileName}.json`, JSON.stringify(data, null, 2));
     await TGLogger.Info(`成功备份${uidItem}的成就存档`);
   }

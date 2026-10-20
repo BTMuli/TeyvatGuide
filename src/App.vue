@@ -47,6 +47,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { launchInstallation, migrateLegacyGameInstallation } from "@utils/TGGame.js";
 import { listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
@@ -281,11 +282,11 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
  */
 async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
   console.warn("成就数据", data);
-  await showLoading.start("正在导入成就数据", `UID:${uid},数量:${data.length}`);
+  await showLoading.start("正在导入成就数据", `UID:${maskUid(uid)},数量:${data.length}`);
   await TGLogger.Info(`[App][loadYaeAchi] 开始处理 ${uid} 的 ${data.length} 条成就数据`);
   try {
     await TSUserAchi.mergeUiaf(data, Number(uid));
-    showSnackbar.success(`成功导入 ${uid} 的 ${data.length}条成就数据`);
+    showSnackbar.success(`成功导入 ${maskUid(uid)} 的 ${data.length}条成就数据`);
     await TGLogger.Info(`[App][loadYaeAchi] 成功导入 ${uid} 的 ${data.length} 条成就数据`);
   } catch (e) {
     console.error(e);
@@ -307,13 +308,13 @@ async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Prom
   await TGLogger.Info(
     `[App][loadYaeBag] 材料：${listM.length},武器：${listW.length},圣遗物：${listR.length}`,
   );
-  await showLoading.start("正在导入背包数据", `UID:${uid}`);
+  await showLoading.start("正在导入背包数据", `UID:${maskUid(uid)}`);
   try {
-    await showLoading.update(`导入${uid}的${listM.length}条材料数据`);
+    await showLoading.update(`导入${maskUid(uid)}的${listM.length}条材料数据`);
     await loadYaeBagMaterial(uid, listM);
-    await showLoading.update(`导入${uid}的${listW.length}条武器数据`);
+    await showLoading.update(`导入${maskUid(uid)}的${listW.length}条武器数据`);
     await loadYaeBagWeapon(uid, listW);
-    await showLoading.update(`导入${uid}的${listR.length}条圣遗物数据`);
+    await showLoading.update(`导入${maskUid(uid)}的${listR.length}条圣遗物数据`);
     await loadYaeBagRelic(uid, listR);
   } catch (e) {
     console.error(e);
@@ -391,11 +392,11 @@ async function loadYaeProp(uid: string, data: TGApp.Plugins.Yae.PropRes): Promis
  */
 async function loadYaeAvatar(uid: string, data: TGApp.Plugins.Yae.AvatarListRes): Promise<void> {
   console.warn("角色数据", data);
-  await showLoading.start("正在导入角色数据", `UID:${uid},数量:${data.length}`);
+  await showLoading.start("正在导入角色数据", `UID:${maskUid(uid)},数量:${data.length}`);
   await TGLogger.Info(`[App][loadYaeAvatar] 开始处理 ${uid} 的 ${data.length} 个角色`);
   try {
     await TSUserBagAvatar.saveYaeData(Number(uid), data);
-    showSnackbar.success(`成功导入 ${uid} 的 ${data.length} 个角色`);
+    showSnackbar.success(`成功导入 ${maskUid(uid)} 的 ${data.length} 个角色`);
     await TGLogger.Info(`[App][loadYaeAvatar] 成功导入 ${uid} 的 ${data.length} 个角色`);
   } catch (error) {
     console.error(error);
@@ -512,7 +513,7 @@ async function checkUserLoad(): Promise<void> {
   }
   const curAccount = await TSUserAccount.account.getAccount(uid.value);
   if (curAccount === false) {
-    showSnackbar.error(`未获取到${uid.value}的账号数据！`);
+    showSnackbar.error(`未获取到${maskUid(uid.value)}的账号数据！`);
     await TGLogger.Error(`[App][listenOnInit] 获取${uid.value}账号数据失败`);
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   } else {
@@ -524,7 +525,7 @@ async function checkUserLoad(): Promise<void> {
     account.value = curGameAccount;
     return;
   }
-  showSnackbar.error(`未获取到${uid.value}的游戏数据！`);
+  showSnackbar.error(`未获取到${maskUid(uid.value)}的游戏数据！`);
   await TGLogger.Error(`[App][listenOnInit] 获取${uid.value}游戏数据失败`);
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 }

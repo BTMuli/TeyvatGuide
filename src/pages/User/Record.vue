@@ -8,11 +8,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
       </div>
     </template>
     <template #append>
@@ -54,7 +60,7 @@
     </div>
     <PhCompCard
       id="record-overview"
-      :shareTitle="`战绩_数据总览_${uidCur}`"
+      :shareTitle="`战绩_数据总览_${maskUidName(uidCur)}`"
       modernShare
       title="数据总览"
     >
@@ -62,7 +68,7 @@
     </PhCompCard>
     <PhCompCard
       id="record-avatars"
-      :shareTitle="`战绩_角色信息_${uidCur}`"
+      :shareTitle="`战绩_角色信息_${maskUidName(uidCur)}`"
       modernShare
       shareProgress
       title="角色信息"
@@ -71,14 +77,19 @@
     </PhCompCard>
     <PhCompCard
       id="record-world"
-      :shareTitle="`战绩_世界探索_${uidCur}`"
+      :shareTitle="`战绩_世界探索_${maskUidName(uidCur)}`"
       modernShare
       shareProgress
       title="世界探索"
     >
       <TurWorldGrid :uid="uidCur ?? 0" :version :worlds="recordData.wed" />
     </PhCompCard>
-    <PhCompCard id="record-home" :shareTitle="`战绩_尘歌壶_${uidCur}`" modernShare title="尘歌壶">
+    <PhCompCard
+      id="record-home"
+      :shareTitle="`战绩_尘歌壶_${maskUidName(uidCur)}`"
+      modernShare
+      title="尘歌壶"
+    >
       <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
@@ -108,6 +119,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 

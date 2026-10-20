@@ -36,6 +36,13 @@
       @toggle="switchIncognito"
     />
     <TcConfigSwitch
+      :model-value="hideUid"
+      icon="mdi-eye-off-outline"
+      subtitle="隐藏界面、分享图与导出文件名中的 UID"
+      title="隐藏 UID"
+      @toggle="switchHideUid"
+    />
+    <TcConfigSwitch
       :model-value="useProxy"
       icon="mdi-lan-connect"
       subtitle="关闭时请求直连，不经过系统代理；商店版开启后需解除回环限制"
@@ -94,6 +101,7 @@ const {
   shareDefaultFile,
   imageQualityPercent,
   incognito,
+  hideUid,
   closeToTray,
   showFeedback,
   useProxy,
@@ -159,6 +167,11 @@ async function switchIncognito(): Promise<void> {
     return;
   }
   showSnackbar.success("已关闭无痕浏览!");
+}
+
+function switchHideUid(): void {
+  hideUid.value = !hideUid.value;
+  showSnackbar.success(hideUid.value ? "已隐藏 UID" : "已显示 UID");
 }
 
 async function switchUseProxy(): Promise<void> {

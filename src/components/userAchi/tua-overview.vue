@@ -35,7 +35,7 @@
             </div>
           </div>
           <div class="overview-meta">
-            <span>存档 {{ uid }}</span>
+            <span>存档 {{ maskUid(uid) }}</span>
             <span>版本 {{ gameVersion }}</span>
           </div>
           <template v-if="!loading && !failed">
@@ -135,6 +135,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, maskUidName } from "@utils/TGUid.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppAchiData } from "@/data/index.js";
@@ -245,7 +246,7 @@ async function share(): Promise<void> {
       track.append(fill);
       progress.replaceWith(track);
     }
-    await TGShare.modern(`成就概览_${uid}`, target, 2);
+    await TGShare.modern(`成就概览_${maskUidName(uid)}`, target, 2);
   } catch {
     showSnackbar.error("分享失败，请重试");
   } finally {

@@ -22,12 +22,18 @@
           v-model="currentUid"
           :disabled="isTargetEditor"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           class="cultivation-nav-select uid-select"
           density="compact"
           label="数据 UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <v-select
           v-if="currentUid !== undefined"
           v-model="currentProjectId"
@@ -330,6 +336,7 @@ import {
 import fmtUtil from "@utils/fmtUtil.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";

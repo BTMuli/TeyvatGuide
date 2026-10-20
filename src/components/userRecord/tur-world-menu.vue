@@ -167,7 +167,7 @@
         <div v-if="!hasMenuDetails" class="tur-wm-menu-empty">暂无额外探索信息</div>
       </div>
       <footer class="tur-wm-menu-footer">
-        <span>UID {{ uid }}</span>
+        <span>UID {{ maskUid(uid) }}</span>
         <span>TeyvatGuide v{{ version ?? "-" }}</span>
       </footer>
     </div>
@@ -179,6 +179,7 @@ import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, ref, useTemplateRef } from "vue";
 

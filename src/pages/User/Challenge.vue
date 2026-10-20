@@ -10,11 +10,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <v-btn class="ucp-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/UI/nav/userAbyss.webp" />
           <span>深境螺旋</span>
@@ -106,7 +112,9 @@
                 <span>更新于 {{ item.updated }}</span>
               </div>
             </div>
-            <div class="ucw-share">幽境危战 | UID-{{ item.uid }} | TeyvatGuide v{{ version }}</div>
+            <div class="ucw-share">
+              幽境危战 | UID-{{ maskUid(item.uid) }} | TeyvatGuide v{{ version }}
+            </div>
           </div>
           <TucBlings
             v-if="item.blings.length > 0"
@@ -159,6 +167,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";

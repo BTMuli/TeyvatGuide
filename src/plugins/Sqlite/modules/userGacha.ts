@@ -7,6 +7,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { ref, type Ref } from "vue";
 
@@ -259,7 +260,9 @@ async function cleanGachaRecords(
     `;
     const res = await db.execute(sql);
     if (res.rowsAffected > 0) {
-      showSnackbar.success(`[${uid}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`);
+      showSnackbar.success(
+        `[${maskUid(uid)}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`,
+      );
     }
   }
 }

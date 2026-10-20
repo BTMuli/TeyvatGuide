@@ -8,11 +8,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <img alt="gacha" src="/UI/nav/userGacha.webp" title="祈愿" @click="toGacha()" />
       </div>
     </template>
@@ -104,6 +110,7 @@ import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -153,7 +160,9 @@ async function toGacha(): Promise<void> {
 async function loadGachaBList(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   gachaListCur.value = await TSUserGachaB.getGachaRecords(uidCur.value);
-  showSnackbar.success(`成功获取 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`);
+  showSnackbar.success(
+    `成功获取 ${maskUid(uidCur.value)} 的 ${gachaListCur.value.length} 条祈愿数据`,
+  );
   await TGLogger.Info(
     `[GachaB][loadGachaBList] 成功获取 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
   );
@@ -201,7 +210,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+        `未找到 ${maskUid(uidCur.value)} 对应 UID，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
       );
       if (!check) return;
     } else {
@@ -209,7 +218,7 @@ async function executeRefresh(force: boolean): Promise<void> {
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+          `未找到 ${maskUid(uidCur.value)} 对应 CK，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
         );
         if (!check) return;
       } else {
@@ -219,7 +228,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     }
   }
   await TGLogger.Info(`[GachaB][${rfAccount.gameUid}] 开始刷新千星奇域祈愿数据`);
-  await showLoading.start(`正在刷新祈愿数据`, `UID:${rfAccount.gameUid},正在获取 authkey`);
+  await showLoading.start(`正在刷新祈愿数据`, `UID:${maskUid(rfAccount.gameUid)},正在获取 authkey`);
   let authkeyRes: TGApp.Game.Gacha.AuthKeyResp | undefined;
   try {
     authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
@@ -391,7 +400,7 @@ async function deleteGacha(): Promise<void> {
   await TGLogger.Info(`[GachaB][${uidCur.value}][deleteGacha] 删除祈愿数据`);
   const delCheck = await showDialog.check(
     "确定删除祈愿数据？",
-    `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+    `UID：${maskUid(uidCur.value)}，共 ${gachaListCur.value.length} 条数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消祈愿数据删除");
@@ -406,8 +415,8 @@ async function deleteGacha(): Promise<void> {
       return;
     }
   }
-  await showLoading.start("正在删除祈愿数据", `UID:${uidCur.value}`);
-  const label = `已成功删除 ${uidCur.value} 的颂愿数据，即将刷新页面`;
+  await showLoading.start("正在删除祈愿数据", `UID:${maskUid(uidCur.value)}`);
+  const label = `已成功删除 ${maskUid(uidCur.value)} 的颂愿数据，即将刷新页面`;
   await TSUserGachaB.deleteRecords(uidCur.value);
   await TGLogger.Info(
     `[UserGachaB][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
@@ -464,7 +473,7 @@ async function checkData(): Promise<void> {
   let fail = 0;
   await showLoading.start(
     "正在检测数据",
-    `UID:${uidCur.value}，共${gachaListCur.value.length}条颂愿数据`,
+    `UID:${maskUid(uidCur.value)}，共${gachaListCur.value.length}条颂愿数据`,
   );
   for (const data of gachaListCur.value) {
     const find = AppGachaBData.find((i) => i.id === data.itemId);

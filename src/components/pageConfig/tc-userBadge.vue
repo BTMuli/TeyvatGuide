@@ -4,7 +4,7 @@
       <v-avatar :image="userInfo.avatar" />
     </template>
     <template #title>{{ userInfo.nickname }}</template>
-    <template #subtitle>{{ userInfo.uid }}</template>
+    <template #subtitle>{{ maskUid(userInfo.uid) }}</template>
     <template #text>{{ userInfo.desc }}</template>
     <template #append>
       <v-menu location="start">
@@ -24,7 +24,9 @@
             @click="handleSwitchGameAccount(ac.gameUid)"
           >
             <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
-            <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }})</v-list-item-subtitle>
+            <v-list-item-subtitle>
+              {{ maskUid(ac.gameUid) }}({{ ac.regionName }})</v-list-item-subtitle
+            >
             <template #append>
               <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
                 <v-icon color="green">mdi-check</v-icon>
@@ -68,7 +70,7 @@
               </v-avatar>
             </template>
             <v-list-item-title>{{ ac.brief.nickname }}</v-list-item-title>
-            <v-list-item-subtitle>{{ ac.brief.uid }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ maskUid(ac.brief.uid) }}</v-list-item-subtitle>
             <template #append>
               <div v-if="ac.uid === uid" title="当前登录账号">
                 <v-icon color="green">mdi-account-check</v-icon>
@@ -132,6 +134,7 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
@@ -358,7 +361,7 @@ async function tryCodeLogin(): Promise<void> {
 async function refreshUser(uid: string, full: boolean) {
   let account = await TSUserAccount.account.getAccount(uid);
   if (!account) {
-    showSnackbar.warn(`未获取到${uid}账号数据，请重新登录!`);
+    showSnackbar.warn(`未获取到${maskUid(uid)}账号数据，请重新登录!`);
     return;
   }
   let ck = account.cookie;
@@ -486,7 +489,7 @@ async function loadAccount(ac: string): Promise<void> {
   }
   const accountGet = await TSUserAccount.account.getAccount(ac);
   if (!accountGet) {
-    showSnackbar.warn(`未找到${uid}的账号信息，请重新登录`);
+    showSnackbar.warn(`未找到${maskUid(uid.value)}的账号信息，请重新登录`);
     return;
   }
   uid.value = ac;
@@ -494,12 +497,12 @@ async function loadAccount(ac: string): Promise<void> {
   cookie.value = accountGet.cookie;
   const gameAccount = await TSUserAccount.game.getCurAccount(ac);
   if (!gameAccount) {
-    showSnackbar.warn(`未找到${uid}的游戏账号信息，请尝试刷新`);
+    showSnackbar.warn(`未找到${maskUid(uid.value)}的游戏账号信息，请尝试刷新`);
     return;
   }
   account.value = gameAccount;
   isLogin.value = true;
-  showSnackbar.success(`成功切换到用户${uid.value}`);
+  showSnackbar.success(`成功切换到用户${maskUid(uid.value)}`);
 }
 
 async function confirmRefreshUser(ac: string): Promise<void> {
@@ -808,7 +811,7 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
     showSnackbar.cancel(isCurrent ? "已取消退出" : "已取消删除米社账号");
     return;
   }
-  await showLoading.start("正在清除米社账号", `正在清除米社账号${user.uid}`);
+  await showLoading.start("正在清除米社账号", `正在清除米社账号${maskUid(user.uid)}`);
   const hasFallbackAccount = await userStore.removeAccount(user.uid);
   accounts.value = accounts.value.filter((accountItem) => accountItem.uid !== user.uid);
   if (isCurrent) {

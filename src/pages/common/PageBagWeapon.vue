@@ -8,12 +8,18 @@
         <v-select
           v-model="curUid"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           class="pbw-uid-select"
           density="compact"
           label="存档UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
       </div>
     </template>
     <template #append>
@@ -178,6 +184,7 @@ import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { getWeaponRefineLevel, groupWeapons } from "@utils/userBagGroup.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
@@ -332,7 +339,7 @@ function sortWeapons(
 }
 
 async function loadWeaponList(uid: number): Promise<void> {
-  await showLoading.start(`正在加载 ${uid} 的武器数据`);
+  await showLoading.start(`正在加载 ${maskUid(uid)} 的武器数据`);
   sourceItems.value = [];
   clearPageStateForUid();
   equipAvatarMap.value = YAE_AVATAR_AVAILABLE ? await TSUserBagAvatar.getEquipMap(uid) : new Map();
@@ -392,7 +399,7 @@ async function createUid(): Promise<void> {
   }
   uidList.value.push(Number(uidInput));
   curUid.value = Number(uidInput);
-  showSnackbar.success(`切换到新存档 ${Number(uidInput)}`);
+  showSnackbar.success(`切换到新存档 ${maskUid(Number(uidInput))}`);
 }
 
 async function deleteUid(): Promise<void> {
@@ -402,7 +409,7 @@ async function deleteUid(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确定删除该存档?",
-    `确认则清空存档-${curUid.value}对应数据`,
+    `确认则清空存档-${maskUid(curUid.value)}对应数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消删除存档");

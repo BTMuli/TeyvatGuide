@@ -4,13 +4,14 @@
       <TMiImg :ori="true" :src="role.game_head_icon" alt="avatar" />
     </div>
     <div class="tur-ri-content">
-      <div class="tur-ri-title">{{ role.nickname }}({{ uid }})</div>
+      <div class="tur-ri-title">{{ role.nickname }}({{ maskUid(uid) }})</div>
       <div class="tur-ri-subtitle">Lv.{{ role.level }} {{ role.region }}</div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { maskUid } from "@utils/TGUid.js";
 
 type TurRoleInfoProps = { uid: number | string; role: TGApp.Game.Record.Role };
 

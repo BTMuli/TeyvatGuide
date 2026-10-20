@@ -30,7 +30,7 @@
 
     <div class="tust-account">
       <span>当前账号</span>
-      <strong v-if="account">{{ account.brief.nickname }} · UID {{ account.uid }}</strong>
+      <strong v-if="account">{{ account.brief.nickname }} · UID {{ maskUid(account.uid) }}</strong>
       <strong v-else>未选择账号</strong>
     </div>
     <fieldset class="tust-choices">
@@ -107,6 +107,7 @@ import miscReq from "@req/miscReq.js";
 import useBBSStore from "@store/bbs.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 

@@ -8,11 +8,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <div class="gacha-top-period">
           <GroPeriodDates
             :end="periodRange.end"
@@ -301,6 +307,7 @@ import {
 } from "@utils/gachaVersion.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid, maskUidName, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { exportUigfData } from "@utils/UIGF.js";
 import fetchYattaJson from "@utils/Yatta.js";
 import { storeToRefs } from "pinia";
@@ -605,7 +612,7 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
   await showLoading.start("正在上传至胡桃云...", "正在刷新Token");
   await hutaoStore.tryRefreshToken();
   for (const u of uids) {
-    await showLoading.start(`正在上传UID:${u}`, "正在获取EndId");
+    await showLoading.start(`正在上传UID:${maskUid(u)}`, "正在获取EndId");
     let endIdRes: TGApp.Plugins.Hutao.Gacha.EndIdRes = {
       "100": 0,
       "200": 0,
@@ -679,7 +686,7 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   }
   await showLoading.start("正在下载胡桃云祈愿记录...", "正在刷新Token");
   for (const u of uids) {
-    await showLoading.start(`正在下载UID:${u}的祈愿记录`, "正在获取EndIds");
+    await showLoading.start(`正在下载UID:${maskUid(u)}的祈愿记录`, "正在获取EndIds");
     try {
       const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
       if (endIdResp.retcode !== 0) {
@@ -804,7 +811,7 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
   if (!check) return;
   await showLoading.start("正在删除胡桃云祈愿记录");
   for (const u of uids) {
-    await showLoading.update(`UID:${u}`);
+    await showLoading.update(`UID:${maskUid(u)}`);
     try {
       const deleteResp = await hutao.Gacha.delete(accessToken.value!, u);
       if (deleteResp.retcode === 0) {
@@ -827,7 +834,9 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
 async function loadGachaList(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   gachaListCur.value = await TSUserGacha.record.all(uidCur.value);
-  showSnackbar.success(`成功获取 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`);
+  showSnackbar.success(
+    `成功获取 ${maskUid(uidCur.value)} 的 ${gachaListCur.value.length} 条祈愿数据`,
+  );
   await TGLogger.Info(
     `[UserGacha][loadGachaList] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
   );
@@ -870,7 +879,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,
-        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+        `未找到 ${maskUid(uidCur.value)} 对应 UID，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
       );
       if (!check) return;
     } else {
@@ -878,7 +887,7 @@ async function executeRefresh(force: boolean): Promise<void> {
       if (!acFind) {
         const check = await showDialog.check(
           `确定刷新？`,
-          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+          `未找到 ${maskUid(uidCur.value)} 对应 CK，将刷新 ${maskUid(rfAccount.gameUid)} 数据`,
         );
         if (!check) return;
       } else {
@@ -888,7 +897,7 @@ async function executeRefresh(force: boolean): Promise<void> {
     }
   }
   await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据`);
-  await showLoading.start(`正在刷新祈愿数据`, `UID:${rfAccount.gameUid},正在获取 authkey`);
+  await showLoading.start(`正在刷新祈愿数据`, `UID:${maskUid(rfAccount.gameUid)},正在获取 authkey`);
   let authkeyRes: TGApp.Game.Gacha.AuthKeyResp | undefined;
   try {
     authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
@@ -1105,13 +1114,13 @@ async function exportUigf(): Promise<void> {
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据`);
   const gachaList = await TSUserGacha.record.all(uidCur.value);
   if (gachaList.length === 0) {
-    showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
+    showSnackbar.error(`UID ${maskUid(uidCur.value)} 暂无祈愿数据`);
     return;
   }
   const file = await save({
     title: "导出祈愿数据",
     filters: [{ name: "UIGF JSON", extensions: ["json"] }],
-    defaultPath: `${await path.downloadDir()}${path.sep()}UIGF_${uidCur.value}.json`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}UIGF_${maskUidName(uidCur.value)}.json`,
   });
   if (!file) {
     showSnackbar.cancel("已取消文件保存");
@@ -1120,10 +1129,10 @@ async function exportUigf(): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][exportUigf] 导出${gachaList.length} 条祈愿数据到 ${file}`,
   );
-  await showLoading.start("正在导出祈愿数据", `UID:${uidCur.value}`);
+  await showLoading.start("正在导出祈愿数据", `UID:${maskUid(uidCur.value)}`);
   await exportUigfData(uidCur.value, gachaList, file);
   await showLoading.end();
-  showSnackbar.success(`成功导出 ${uidCur.value} 的祈愿数据`);
+  showSnackbar.success(`成功导出 ${maskUid(uidCur.value)} 的祈愿数据`);
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据完成`);
 }
 
@@ -1158,7 +1167,7 @@ async function deleteGacha(): Promise<void> {
   await TGLogger.Info(`[UserGacha][${uidCur.value}][deleteGacha] 删除祈愿数据`);
   const delCheck = await showDialog.check(
     "确定删除祈愿数据？",
-    `UID：${uidCur.value}，共 ${gachaListCur.value.length} 条数据`,
+    `UID：${maskUid(uidCur.value)}，共 ${gachaListCur.value.length} 条数据`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消祈愿数据删除");
@@ -1173,8 +1182,8 @@ async function deleteGacha(): Promise<void> {
       return;
     }
   }
-  await showLoading.start("正在删除祈愿数据", `UID:${uidCur.value}`);
-  const label = `已成功删除 ${uidCur.value} 的祈愿数据，即将刷新页面`;
+  await showLoading.start("正在删除祈愿数据", `UID:${maskUid(uidCur.value)}`);
+  const label = `已成功删除 ${maskUid(uidCur.value)} 的祈愿数据，即将刷新页面`;
   await TSUserGacha.deleteGachaRecords(uidCur.value);
   await reloadUid();
   await loadGachaList();
@@ -1189,7 +1198,7 @@ async function checkData(): Promise<void> {
   let fail = 0;
   await showLoading.start(
     "正在检测数据",
-    `UID:${uidCur.value}，共${gachaListCur.value.length}条祈愿数据`,
+    `UID:${maskUid(uidCur.value)}，共${gachaListCur.value.length}条祈愿数据`,
   );
   for (const data of gachaListCur.value) {
     if (data.itemId === "") {

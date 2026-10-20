@@ -10,11 +10,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toCombat()">
           <img alt="combat" src="/UI/nav/userCombat.webp" />
           <span>真境剧诗</span>
@@ -84,7 +90,7 @@
               <span>第</span>
               <span>{{ item.id }}</span>
               <span>期 UID</span>
-              <span>{{ uidCur }}</span>
+              <span>{{ maskUid(uidCur) }}</span>
               <span>更新于</span>
               <span>{{ item.updated }}</span>
             </div>
@@ -143,6 +149,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";

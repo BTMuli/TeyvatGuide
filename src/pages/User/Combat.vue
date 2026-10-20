@@ -10,11 +10,17 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
+          :item-title="uidItemTitle"
+          :item-value="uidItemValue"
           :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
-        />
+        >
+          <template #selection="{ item }">
+            <span>{{ maskUid(item) }}</span>
+          </template>
+        </v-select>
         <v-btn class="uc-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/UI/nav/userAbyss.webp" />
           <span>深境螺旋</span>
@@ -151,6 +157,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
+import { maskUid, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";

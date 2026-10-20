@@ -107,7 +107,7 @@
       <div class="phio-section-title">
         <div>
           <v-icon color="var(--tgc-od-orange)" size="18">mdi-chart-box-outline</v-icon>
-          <strong>抽数统计{{ account.gameUid ? ` · UID ${account.gameUid}` : "" }}</strong>
+          <strong>抽数统计{{ account.gameUid ? ` · UID ${maskUid(account.gameUid)}` : "" }}</strong>
         </div>
         <span v-if="statsLoading">正在加载祈愿数据...</span>
       </div>
@@ -303,6 +303,7 @@ import useUserStore from "@store/user.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { maskUid } from "@utils/TGUid.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";

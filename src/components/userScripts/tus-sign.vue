@@ -24,7 +24,7 @@
           <div class="tuss-icon">
             <img :src="item.info.icon" alt="icon" />
           </div>
-          <span>{{ item.account.gameUid }} {{ item.account.regionName }}</span>
+          <span>{{ maskUid(item.account.gameUid) }} {{ item.account.regionName }}</span>
           <v-icon
             v-if="item.account.gameBiz !== 'hk4e_cn'"
             color="var(--tgc-od-red)"
@@ -66,6 +66,7 @@ import useBBSStore from "@store/bbs.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
+import { maskUid } from "@utils/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
