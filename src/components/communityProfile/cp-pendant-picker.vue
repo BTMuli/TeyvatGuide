@@ -12,7 +12,7 @@
   >
     <section class="cppp-panel">
       <header class="cppp-header">
-        <div>
+        <div class="cppp-heading">
           <h2 :id="titleId">选择头像框</h2>
           <p>头像框会显示在个人中心与帖子头像外圈，保存资料后生效。</p>
         </div>
@@ -336,10 +336,17 @@ function handleConfirm(): void {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
+}
+
+.cppp-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cppp-body {
@@ -351,6 +358,7 @@ function handleConfirm(): void {
   flex: 1 1 auto;
   flex-direction: column;
   padding: 16px;
+  gap: 16px;
 }
 
 .cppp-preview {
@@ -365,10 +373,13 @@ function handleConfirm(): void {
 }
 
 .cppp-preview-copy {
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
     line-height: 18px;
@@ -414,22 +425,26 @@ function handleConfirm(): void {
 }
 
 .cppp-list {
+  display: flex;
   min-height: 0;
   flex: 1 1 auto;
-  margin-top: 16px;
+  flex-direction: column;
+  gap: 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
-.cppp-group + .cppp-group {
-  margin-top: 16px;
+.cppp-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .cppp-group-title {
   display: flex;
   align-items: center;
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--common-text-title);
   font-size: 14px;
   font-weight: 600;
@@ -557,7 +572,7 @@ function handleConfirm(): void {
 }
 
 .cppp-empty {
-  margin: 16px 0 0;
+  margin: 0;
   color: var(--box-text-4);
   font-size: 12px;
   text-align: center;

@@ -12,7 +12,7 @@
   >
     <section class="cpap-panel">
       <header class="cpap-header">
-        <div>
+        <div class="cpap-heading">
           <h2 :id="titleId">选择头像</h2>
           <p>从米游社预设头像中选择，保存资料后生效。</p>
         </div>
@@ -197,10 +197,17 @@ function handleConfirm(): void {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
+}
+
+.cpap-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cpap-tabs {

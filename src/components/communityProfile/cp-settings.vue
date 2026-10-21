@@ -1,7 +1,7 @@
 <template>
   <section :aria-busy="loading || saving" aria-labelledby="cp-settings-title" class="cp-settings">
     <header class="cp-settings-header">
-      <div>
+      <div class="cp-settings-heading">
         <h2 id="cp-settings-title">
           <v-icon size="20" aria-hidden="true">{{ sectionIcon }}</v-icon>
           {{ sectionTitle }}
@@ -695,13 +695,13 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
   min-width: 0;
   flex-direction: column;
   color: var(--app-page-content);
+  gap: 16px;
 }
 
 .cp-settings-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
   gap: 16px;
 
   h2 {
@@ -716,10 +716,17 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
+}
+
+.cp-settings-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cp-settings-form {
@@ -749,7 +756,10 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
 }
 
 .cp-settings-row-copy {
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 
   h3 {
     margin: 0;
@@ -760,7 +770,7 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
     overflow-wrap: anywhere;
@@ -791,8 +801,11 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
 }
 
 .cp-settings-identity-copy {
+  display: flex;
   min-width: 0;
   flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
 
   h3 {
     overflow: hidden;
@@ -805,7 +818,7 @@ function handlePendantConfirm(pendant: TGApp.BBS.CommunitySettings.Pendant | nul
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
     line-height: 18px;

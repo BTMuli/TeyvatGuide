@@ -293,10 +293,13 @@ async function handleSave(): Promise<void> {
   min-width: 0;
   flex-direction: column;
   color: var(--app-page-content);
+  gap: 16px;
 }
 
 .cp-notify-settings-header {
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 
   h2 {
     display: flex;
@@ -310,7 +313,7 @@ async function handleSave(): Promise<void> {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
@@ -342,7 +345,10 @@ async function handleSave(): Promise<void> {
 }
 
 .cp-notify-settings-row-copy {
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 
   h3 {
     margin: 0;
@@ -353,7 +359,7 @@ async function handleSave(): Promise<void> {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
     overflow-wrap: anywhere;

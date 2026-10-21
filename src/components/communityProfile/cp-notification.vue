@@ -276,8 +276,8 @@ function handleCardKeydown(event: KeyboardEvent): void {
 }
 
 .cp-notification-time {
-  flex-shrink: 0;
-  margin-left: auto;
+  flex: 1 0 auto;
+  text-align: right;
   white-space: nowrap;
 }
 
