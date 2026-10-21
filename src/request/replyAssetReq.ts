@@ -35,43 +35,15 @@ const reservedFormFields: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * 昵称解析响应
- * @since Beta v0.12.6
- */
-type MentionResponse = {
-  retcode: number;
-  message: string;
-  data: unknown;
-};
-
-/**
- * 图片上传参数响应
- * @since Beta v0.12.6
- */
-type UploadParamsResponse = {
-  retcode: number;
-  data: unknown;
-};
-
-/**
- * OSS 回调字段
- * @since Beta v0.12.6
- */
-type CallbackField = {
-  key: string;
-  value: string;
-};
-
-/**
  * OSS 图片上传参数
  * @since Beta v0.12.6
  */
 type OssUploadParams = {
   accessid: string;
   callback: string;
-  callbackVar: Array<CallbackField>;
+  callbackVar: Array<TGApp.BBS.ReplyAsset.FormField>;
   contentDisposition?: string;
-  extraFormData: Array<CallbackField>;
+  extraFormData: Array<TGApp.BBS.ReplyAsset.FormField>;
   key: string;
   name: string;
   objectAcl?: string;
@@ -287,7 +259,7 @@ function validateOssHost(value: unknown): void {
  * @param value - 回调字段对象
  * @returns 保留官方顺序的回调字段
  */
-function parseCallbackFields(value: unknown): Array<CallbackField> {
+function parseCallbackFields(value: unknown): Array<TGApp.BBS.ReplyAsset.FormField> {
   if (value === undefined) return [];
   if (!isRecord(value)) throw new Error(uploadContractMessage);
   return Object.entries(value).map(([key, fieldValue]) => {
@@ -310,7 +282,10 @@ function parseCallbackFields(value: unknown): Array<CallbackField> {
  * @param objectAcl - 已声明的对象 ACL
  * @returns 保留官方顺序与重复键的字段
  */
-function parseExtraFormData(value: unknown, objectAcl: string | undefined): Array<CallbackField> {
+function parseExtraFormData(
+  value: unknown,
+  objectAcl: string | undefined,
+): Array<TGApp.BBS.ReplyAsset.FormField> {
   if (value === undefined) return [];
   if (!Array.isArray(value)) throw new Error(uploadContractMessage);
   return value.map((entry) => {
@@ -577,7 +552,7 @@ export async function resolveMention(
   };
   if (signal !== undefined) config.signal = signal;
 
-  const response = await TGHttps.post<MentionResponse>(mentionUrl, config);
+  const response = await TGHttps.post<TGApp.BBS.ReplyAsset.MentionResp>(mentionUrl, config);
   if (!isRecord(response.data) || typeof response.data.retcode !== "number") {
     throw new Error("米游社昵称解析响应无效");
   }
@@ -651,7 +626,7 @@ export async function uploadImage(
       signal: requestSignal,
     };
     assertUploadActive(snapshot, storage, requestSignal);
-    const signedData = await postJson<UploadParamsResponse>(
+    const signedData = await postJson<TGApp.BBS.ReplyAsset.UploadParamsResp>(
       uploadParamsUrl,
       signConfig,
       snapshot,
@@ -674,7 +649,7 @@ export async function uploadImage(
       signal: requestSignal,
     };
     assertUploadActive(snapshot, storage, requestSignal);
-    const ossData = await postJson<unknown>(
+    const ossData = await postJson<TGApp.BBS.ReplyAsset.UploadResp>(
       ossUploadEndpoint,
       ossConfig,
       snapshot,

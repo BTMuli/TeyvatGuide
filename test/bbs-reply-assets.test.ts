@@ -124,7 +124,7 @@ function signedResponse(overrides: Record<string, unknown> = {}): {
     typeof overrides.oss === "object" && overrides.oss !== null && !Array.isArray(overrides.oss)
       ? overrides.oss
       : {};
-  const baseOss = {
+  const baseOss: TGApp.BBS.ReplyAsset.OssConfig = {
     host: "https://plat-sh-community-prod-upload-ugc.oss-cn-shanghai.aliyuncs.com/",
     name: "avatar.gif",
     dir: "upload/",
@@ -142,11 +142,12 @@ function signedResponse(overrides: Record<string, unknown> = {}): {
     object_acl: "default",
     content_disposition: "",
   };
+  const signedData: TGApp.BBS.ReplyAsset.UploadParamsRes = { type: "oss", oss: baseOss };
   return {
     data: {
       retcode: 0,
       data: {
-        type: "oss",
+        ...signedData,
         file_name: "ignored-top-level-file-name",
         max_file_size: 20480,
         expire: 30,
@@ -169,7 +170,9 @@ function ossResponse(
   url: string = "https://upload-bbs.miyoushe.com/upload/avatar.gif",
   object: string = "upload/avatar.gif",
 ): { data: Record<string, unknown> } {
-  return { data: { retcode: 0, msg: "success", data: { object, url, secret_url: "" } } };
+  const result: TGApp.BBS.ReplyAsset.UploadRes = { object, url };
+  const response: TGApp.BBS.ReplyAsset.UploadResp = { retcode: 0, data: result };
+  return { data: { ...response, msg: "success", data: { ...result, secret_url: "" } } };
 }
 
 /**
@@ -229,13 +232,12 @@ describe("replyAssetReq capabilities", () => {
 
 describe("resolveMention", () => {
   it("sends the official lookup body and minimal authenticated cookie", async () => {
-    mocks.post.mockResolvedValueOnce({
-      data: {
-        retcode: 0,
-        message: "ok",
-        data: { nickname_uid_info: { Alice: 123456789 } },
-      },
-    });
+    const response: TGApp.BBS.ReplyAsset.MentionResp = {
+      retcode: 0,
+      message: "ok",
+      data: { nickname_uid_info: { Alice: 123456789 } },
+    };
+    mocks.post.mockResolvedValueOnce({ data: response });
     const controller = new AbortController();
 
     await expect(resolveMention(" Alice ", cookie, 2, controller.signal)).resolves.toEqual({
