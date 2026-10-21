@@ -19,7 +19,7 @@
         <time v-if="createdAtLabel" :datetime="createdAtIso">{{ createdAtLabel }}</time>
         <span title="点赞数">
           <v-icon size="14" aria-hidden="true">mdi-thumb-up-outline</v-icon>
-          {{ likeCount }}
+          {{ fmtUtil.num(likeCount) }}
         </span>
       </span>
       <span :title="`原帖：${postTitle}`" class="cp-comment-source">

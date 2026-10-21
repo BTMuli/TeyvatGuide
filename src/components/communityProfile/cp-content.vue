@@ -5,7 +5,7 @@
     class="cp-content"
   >
     <header class="cp-content-header">
-      <div>
+      <div class="cp-content-heading">
         <h2 id="cp-content-title">
           <v-icon size="20" aria-hidden="true">{{ sectionInfo.icon }}</v-icon>
           {{ selectedCollection?.title || sectionInfo.title }}
@@ -135,6 +135,7 @@
           <CpPost
             v-else-if="entry.kind === 'post'"
             :post="entry.post"
+            :viewedAt="entry.viewedAt"
             @open-post="openPost"
             @open-profile="openProfile"
           />
@@ -153,8 +154,8 @@
                 entry.collection.desc
               }}</span>
               <span class="cp-entry-meta"
-                >{{ entry.collection.post_num }} 篇帖子 ·
-                {{ entry.collection.view_num }} 次浏览</span
+                >{{ fmtUtil.num(entry.collection.post_num) }} 篇帖子 ·
+                {{ fmtUtil.num(entry.collection.view_num) }} 次浏览</span
               >
             </span>
             <v-icon size="18" aria-hidden="true">mdi-chevron-right</v-icon>
@@ -202,13 +203,14 @@ import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 
-type ContentSection = "comments" | "collections" | "favorites" | "following" | "followers";
+type ContentSection =
+  "comments" | "collections" | "favorites" | "following" | "followers" | "history";
 type FavoriteTab = "posts" | "collections";
 type SectionInfo = { title: string; description: string; icon: string; empty: string };
 type ContentEntry =
   | { kind: "comment"; id: string; comment: TGApp.BBS.Community.Comment }
   | { kind: "user"; id: string; relation: TGApp.BBS.Community.UserRelation }
-  | { kind: "post"; id: string; post: TGApp.BBS.Post.FullData }
+  | { kind: "post"; id: string; post: TGApp.BBS.Post.FullData; viewedAt?: number }
   | { kind: "collection"; id: string; collection: TGApp.BBS.Collection.Collection };
 /**
  * 内容列表的登录账户和目标用户快照。
@@ -280,6 +282,12 @@ const sectionInfo = computed<SectionInfo>(
         icon: "mdi-account-multiple-outline",
         empty: isViewingOtherProfile.value ? "TA暂无粉丝" : "暂无粉丝",
       },
+      history: {
+        title: "浏览历史",
+        description: "查看你在米游社浏览过的帖子，点击可打开原帖",
+        icon: "mdi-history",
+        empty: "暂无浏览记录",
+      },
     })[section],
 );
 const entries = shallowRef<Array<ContentEntry>>([]);
@@ -317,6 +325,7 @@ watch(
     () => cookie.value?.cookie_token,
     () => cookie.value?.ltuid,
     () => cookie.value?.ltoken,
+    () => cookie.value?.stoken,
   ],
   () => {
     generation += 1;
@@ -511,6 +520,28 @@ async function loadEntries(snapshot: AccountSnapshot, cursor: string): Promise<C
       isLast: response.data.is_last,
     };
   }
+  if (section === "history") {
+    if (!snapshot.cookie.stoken.trim() || !snapshot.cookie.mid.trim())
+      throw new Error("当前账号缺少 SToken，请重新登录后再查看浏览历史。");
+    const response = await communityReq.history(snapshot.cookie, cursor);
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    return {
+      entries: response.data.list.flatMap<ContentEntry>((item) =>
+        item.post && !item.is_deleted
+          ? [
+              {
+                kind: "post",
+                id: item.post.post.post_id,
+                post: item.post,
+                viewedAt: Number(item.view_at) || undefined,
+              },
+            ]
+          : [],
+      ),
+      offset: String(response.data.next_offset ?? ""),
+      isLast: response.data.is_last,
+    };
+  }
   const response = await communityReq[section](snapshot.cookie, snapshot.profileUid, cursor);
   if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
   return {
@@ -588,6 +619,7 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   display: flex;
   flex-direction: column;
   color: var(--app-page-content);
+  gap: 16px;
 }
 
 .cp-content-header {
@@ -595,7 +627,6 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   flex-shrink: 0;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
   gap: 16px;
 
   h2 {
@@ -611,11 +642,18 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
     overflow-wrap: anywhere;
   }
+}
+
+.cp-content-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cp-content-count,
@@ -637,9 +675,9 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   display: flex;
   flex-shrink: 0;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: space-between;
   border-bottom: 1px solid var(--common-shadow-1);
-  margin-bottom: 12px;
   gap: 8px 12px;
 }
 
@@ -651,8 +689,7 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   width: 240px;
   max-width: 100%;
   flex: 0 1 auto;
-  margin-bottom: 4px;
-  margin-left: auto;
+  padding-bottom: 4px;
 }
 
 .cp-entry-list,

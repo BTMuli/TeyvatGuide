@@ -1,30 +1,88 @@
 <template>
   <main :aria-label="isOwnProfile ? '个人信息' : '用户信息'" class="community-profile">
-    <header v-if="profile || loading" :aria-busy="!profile" class="community-profile-header">
-      <div class="community-profile-identity">
-        <CpAvatar v-if="profile" :user="profile" :size="80" />
-        <span v-else aria-hidden="true" class="community-profile-avatar-placeholder" />
-        <div class="community-profile-intro">
-          <div class="community-profile-name">
-            <h2 :title="profile?.nickname">{{ profile?.nickname ?? "加载中…" }}</h2>
-            <span v-if="profile" class="community-profile-level">
-              Lv.{{ profile.level_exp.level }}
-            </span>
-            <span :title="`米游社 ID：${profileUid}`" class="community-profile-uid">
-              ID: {{ profileUid }}
-            </span>
+    <header
+      v-if="profile || loading"
+      :aria-busy="!profile || headerLevelLoading"
+      class="community-profile-header"
+    >
+      <div class="community-profile-header-content">
+        <div class="community-profile-identity">
+          <CpAvatar v-if="profile" :user="profile" :size="80" />
+          <span v-else aria-hidden="true" class="community-profile-avatar-placeholder" />
+          <div class="community-profile-intro">
+            <div class="community-profile-name">
+              <h2 :title="profile?.nickname">{{ profile?.nickname ?? "加载中…" }}</h2>
+              <v-menu
+                v-model="gameMenuVisible"
+                :close-on-content-click="false"
+                location="bottom start"
+                offset="4"
+              >
+                <template #activator="{ props: menuProps }">
+                  <button
+                    :aria-label="`当前分区：${currentGame.name}，${levelLabel}，点击切换分区`"
+                    :title="headerLevelError || `当前分区：${currentGame.name}，点击切换分区`"
+                    class="community-profile-level"
+                    type="button"
+                    v-bind="menuProps"
+                  >
+                    <img v-if="currentGame.icon" :src="currentGame.icon" alt="" />
+                    <span
+                      :class="{
+                        'community-profile-level-tag':
+                          headerLevel && !headerLevelLoading && !headerLevelError,
+                      }"
+                      class="community-profile-level-label"
+                    >
+                      <span aria-live="polite">{{ levelLabel }}</span>
+                      <v-icon aria-hidden="true" size="14">mdi-chevron-down</v-icon>
+                    </span>
+                  </button>
+                </template>
+                <div aria-label="选择分区" class="community-profile-game-menu" role="group">
+                  <button
+                    v-for="game in gameOptions"
+                    :key="game.id"
+                    :aria-label="`选择分区：${game.name}`"
+                    :aria-pressed="selectedGid === game.id"
+                    :class="{ dimmed: selectedGid !== game.id }"
+                    :disabled="headerLevelLoading"
+                    :title.attr="game.name"
+                    class="community-profile-game-choice"
+                    type="button"
+                    @click="selectGame(game.id)"
+                  >
+                    <img v-if="game.icon" :alt="`${game.name}图标`" :src="game.icon" />
+                    <v-icon v-else aria-hidden="true" size="24">mdi-gamepad-variant-outline</v-icon>
+                  </button>
+                  <div
+                    v-if="!headerLevelLoading && headerLevelError"
+                    class="community-profile-game-error"
+                    role="alert"
+                  >
+                    <span :title="headerLevelError">{{ headerLevelError }}</span>
+                    <button type="button" @click="retryHeaderLevel">重试</button>
+                  </div>
+                </div>
+              </v-menu>
+              <span :title="`米游社 ID：${profileUid}`" class="community-profile-uid">
+                ID: {{ profileUid }}
+              </span>
+            </div>
+            <p :title="profile?.introduce" class="community-profile-description">
+              {{
+                profile
+                  ? profile.introduce || "这个人很神秘，什么都没有留下。"
+                  : "正在加载个人信息…"
+              }}
+            </p>
           </div>
-          <p :title="profile?.introduce" class="community-profile-description">
-            {{
-              profile ? profile.introduce || "这个人很神秘，什么都没有留下。" : "正在加载个人信息…"
-            }}
-          </p>
         </div>
-      </div>
-      <div aria-label="个人统计" class="community-profile-stats">
-        <div v-for="stat in profileStats" :key="stat.label" class="community-profile-stat">
-          <strong>{{ stat.value }}</strong>
-          <span>{{ stat.label }}</span>
+        <div aria-label="个人统计" class="community-profile-stats">
+          <div v-for="stat in profileStats" :key="stat.label" class="community-profile-stat">
+            <strong>{{ stat.value }}</strong>
+            <span>{{ stat.label }}</span>
+          </div>
         </div>
       </div>
     </header>
@@ -47,33 +105,35 @@
         <div class="community-profile-sidebar-header">
           <h2>{{ isOwnProfile ? "个人中心" : "用户信息" }}</h2>
           <div class="community-profile-sidebar-actions">
-            <v-btn
-              :disabled="!hasPreviousProfile"
-              aria-label="上一个主页"
-              icon="mdi-chevron-left"
-              size="small"
-              title="上一个主页"
-              variant="text"
-              @click="openTrailProfile(-1)"
-            />
-            <v-btn
-              :disabled="!hasNextProfile"
-              aria-label="下一个主页"
-              icon="mdi-chevron-right"
-              size="small"
-              title="下一个主页"
-              variant="text"
-              @click="openTrailProfile(1)"
-            />
+            <div class="community-profile-sidebar-trail">
+              <v-btn
+                :disabled="!hasPreviousProfile"
+                aria-label="上一个主页"
+                icon="mdi-chevron-left"
+                size="x-small"
+                title="上一个主页"
+                variant="text"
+                @click="openTrailProfile(-1)"
+              />
+              <v-btn
+                :disabled="!hasNextProfile"
+                aria-label="下一个主页"
+                icon="mdi-chevron-right"
+                size="x-small"
+                title="下一个主页"
+                variant="text"
+                @click="openTrailProfile(1)"
+              />
+            </div>
             <v-btn
               :disabled="!canViewProfile || loading"
               :loading
               aria-label="刷新个人中心"
               icon="mdi-refresh"
-              size="small"
+              size="x-small"
               title="刷新个人中心"
               variant="text"
-              @click="loadProfile"
+              @click="loadProfile(true)"
             />
           </div>
         </div>
@@ -107,7 +167,7 @@
         class="community-profile-posts"
       >
         <header class="community-profile-posts-header">
-          <div>
+          <div class="community-profile-posts-heading">
             <h2 id="community-profile-posts-title">
               <v-icon size="20" aria-hidden="true">{{ activeNavigation?.icon }}</v-icon>
               {{ activeNavigation?.label }}
@@ -229,17 +289,17 @@
             </div>
             <footer class="community-profile-post-footer">
               <div v-if="post.stat" aria-label="帖子统计" class="community-profile-post-stats">
-                <span :title="`浏览 ${post.stat.view_num}`">
+                <span :title="`浏览 ${fmtUtil.num(post.stat.view_num)}`">
                   <v-icon size="16" aria-hidden="true">mdi-eye-outline</v-icon>
-                  {{ post.stat.view_num }}
+                  {{ fmtUtil.num(post.stat.view_num) }}
                 </span>
-                <span :title="`回复 ${post.stat.reply_num}`">
+                <span :title="`回复 ${fmtUtil.num(post.stat.reply_num)}`">
                   <v-icon size="16" aria-hidden="true">mdi-comment-outline</v-icon>
-                  {{ post.stat.reply_num }}
+                  {{ fmtUtil.num(post.stat.reply_num) }}
                 </span>
-                <span :title="`点赞 ${post.stat.like_num}`">
+                <span :title="`点赞 ${fmtUtil.num(post.stat.like_num)}`">
                   <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
-                  {{ post.stat.like_num }}
+                  {{ fmtUtil.num(post.stat.like_num) }}
                 </span>
               </div>
               <v-btn
@@ -319,6 +379,7 @@ import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
+import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import {
@@ -327,6 +388,10 @@ import {
   recordProfileVisit,
   stepProfileTrail,
 } from "@utils/communityProfile.js";
+import {
+  getCommunityProfileLevel,
+  getCommunityProfileLevelColor,
+} from "@utils/communityProfileLevel.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -346,6 +411,7 @@ type ProfileSection =
   | "favorites"
   | "following"
   | "followers"
+  | "history"
   | "privacy"
   | "edit"
   | NotificationSection
@@ -378,6 +444,16 @@ type ProfileStat = {
   value: string;
 };
 
+type ProfileGameOption = Pick<TGApp.BBS.Game.Item, "id" | "name"> & {
+  icon?: string;
+};
+
+const defaultProfileGame: ProfileGameOption = {
+  id: 2,
+  name: "原神",
+  icon: "/UI/nav/paimon.webp",
+};
+
 /**
  * 归一化后的帖子分页数据。
  * @since Beta v0.12.6
@@ -392,6 +468,8 @@ type PostPage = {
 const router = useRouter();
 const route = useRoute();
 const { isLogin } = storeToRefs(useAppStore());
+const bbsStore = useBBSStore();
+const { gameList } = storeToRefs(bbsStore);
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const profileUid = computed<string>(() => {
   const targetUid = route.params.uid;
@@ -399,6 +477,21 @@ const profileUid = computed<string>(() => {
 });
 const isOwnProfile = computed<boolean>(
   () => profileUid.value !== "" && profileUid.value === uid.value,
+);
+const selectedGid = ref<number>(defaultProfileGame.id);
+const gameOptions = computed<Array<ProfileGameOption>>(() => {
+  const options = gameList.value.map<ProfileGameOption>(({ id, name, app_icon, icon }) => ({
+    id,
+    name,
+    icon: app_icon || icon,
+  }));
+  if (!options.some((item) => item.id === defaultProfileGame.id)) {
+    options.unshift(defaultProfileGame);
+  }
+  return options;
+});
+const currentGame = computed<ProfileGameOption>(
+  () => gameOptions.value.find((item) => item.id === selectedGid.value) ?? defaultProfileGame,
 );
 const unreadCounts = shallowRef<Partial<Record<TGApp.BBS.Notification.Category, number>>>({});
 const navigation = computed<Array<NavigationItem>>(() => {
@@ -413,9 +506,8 @@ const navigation = computed<Array<NavigationItem>>(() => {
   ];
   if (isOwnProfile.value) {
     const unread = unreadCounts.value;
+    items.splice(1, 0, { section: "history", label: "浏览历史", icon: "mdi-history" });
     items.push(
-      { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline" },
-      { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
       {
         section: "reply",
         label: "回复我的",
@@ -426,7 +518,9 @@ const navigation = computed<Array<NavigationItem>>(() => {
       { section: "mention", label: "主动@我", icon: "mdi-at", badge: unread.active_mention },
       { section: "system", label: "系统通知", icon: "mdi-bell-outline", badge: unread.system },
       { section: "likes", label: "收到的赞", icon: "mdi-thumb-up-outline", badge: unread.comment },
-      { section: "notifySettings", label: "消息设置", icon: "mdi-bell-cog-outline", divided: true },
+      { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline", divided: true },
+      { section: "notifySettings", label: "消息设置", icon: "mdi-bell-cog-outline" },
+      { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
     );
   }
   return items;
@@ -440,6 +534,7 @@ const currentSection = computed<ProfileSection>(() => {
     case "following":
     case "followers":
       return section;
+    case "history":
     case "privacy":
     case "edit":
     case "reply":
@@ -457,6 +552,7 @@ const activeNavigation = computed<NavigationItem | undefined>(() =>
 );
 
 const profile = shallowRef<TGApp.BBS.User.Info>();
+const headerUserInfo = shallowRef<TGApp.BBS.User.Info>();
 const profileAudit = shallowRef<TGApp.BBS.User.InfoRes["audit_info"]>();
 const postPages = shallowRef<Array<Array<TGApp.BBS.Post.FullData>>>([]);
 const pageOffsets = shallowRef<Array<string>>([]);
@@ -468,6 +564,8 @@ const refreshVersion = ref<number>(0);
 const searchInput = ref<string | null>("");
 const searchKeyword = ref<string>("");
 const searchTotal = ref<number>(0);
+const headerLevelLoading = ref<boolean>(false);
+const headerLevelError = ref<string>("");
 const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
@@ -497,14 +595,19 @@ const profileStats = computed<Array<ProfileStat>>(() => {
     { label: "粉丝", value: format(achieve?.followed_cnt) },
   ];
 });
-const levelColor = computed<string>(() => {
-  if (!profile.value) return "var(--tgc-od-green)";
-  const level = profile.value.level_exp.level;
-  if (level < 5) return "var(--tgc-od-green)";
-  if (level < 9) return "var(--tgc-od-blue)";
-  if (level < 13) return "var(--tgc-od-purple)";
-  return "var(--tgc-od-orange)";
+const headerLevel = computed<TGApp.BBS.User.LevelExp | undefined>(() =>
+  headerUserInfo.value === undefined
+    ? undefined
+    : getCommunityProfileLevel(headerUserInfo.value, selectedGid.value, selectedGid.value),
+);
+const levelColor = computed<string>(() => getCommunityProfileLevelColor(headerLevel.value?.level));
+const levelLabel = computed<string>(() => {
+  if (headerLevelLoading.value) return "加载中…";
+  if (headerLevelError.value) return "加载失败";
+  if (headerUserInfo.value === undefined) return "Lv.-";
+  return headerLevel.value ? `Lv.${headerLevel.value.level}` : "暂无等级";
 });
+const gameMenuVisible = ref<boolean>(false);
 const currentPosts = computed<Array<TGApp.BBS.Post.FullData>>(
   () => postPages.value[page.value - 1] ?? [],
 );
@@ -516,6 +619,8 @@ const pageCount = computed<number>(() => {
 
 let requestVersion = 0;
 let unreadVersion = 0;
+let headerRequestVersion = 0;
+let headerContextKey = "";
 const readCategories = new Set<TGApp.BBS.Notification.Category>();
 let active = true;
 
@@ -533,6 +638,52 @@ watch(
   { immediate: true },
 );
 
+watch(
+  [
+    isLogin,
+    uid,
+    profileUid,
+    () => cookie.value?.account_id,
+    () => cookie.value?.cookie_token,
+    () => cookie.value?.ltuid,
+    () => cookie.value?.ltoken,
+    selectedGid,
+  ],
+  () => {
+    const nextContextKey = [
+      isLogin.value ? "1" : "0",
+      uid.value ?? "",
+      profileUid.value,
+      cookie.value?.account_id ?? "",
+      cookie.value?.cookie_token ?? "",
+      cookie.value?.ltuid ?? "",
+      cookie.value?.ltoken ?? "",
+    ].join("\u001f");
+    if (nextContextKey !== headerContextKey) {
+      headerContextKey = nextContextKey;
+      headerRequestVersion += 1;
+      headerUserInfo.value = undefined;
+      headerLevelError.value = "";
+      headerLevelLoading.value = false;
+    }
+    if (selectedGid.value === defaultProfileGame.id) {
+      if (profile.value !== undefined) syncHeaderProfile();
+      return;
+    }
+    void loadHeaderLevel();
+  },
+  { immediate: true },
+);
+
+watch(
+  profile,
+  () => {
+    if (selectedGid.value !== defaultProfileGame.id || profile.value === undefined) return;
+    syncHeaderProfile();
+  },
+  { immediate: true },
+);
+
 watch(profileUid, recordProfileVisit, { immediate: true });
 
 watch(currentSection, (section) => {
@@ -541,10 +692,13 @@ watch(currentSection, (section) => {
   }
 });
 
+void ensureGameList();
+
 onBeforeUnmount(() => {
   active = false;
   requestVersion += 1;
   unreadVersion += 1;
+  headerRequestVersion += 1;
 });
 
 function isNotificationSection(section: ProfileSection): section is NotificationSection {
@@ -652,6 +806,64 @@ function isCurrentRequest(version: number, snapshot: AccountSnapshot): boolean {
   return version === requestVersion && isCurrentAccount(snapshot);
 }
 
+function isCurrentHeaderRequest(version: number, snapshot: AccountSnapshot, gid: number): boolean {
+  return (
+    version === headerRequestVersion && selectedGid.value === gid && isCurrentAccount(snapshot)
+  );
+}
+
+function syncHeaderProfile(): void {
+  if (profile.value === undefined) return;
+  headerRequestVersion += 1;
+  headerUserInfo.value = profile.value;
+  headerLevelError.value = "";
+  headerLevelLoading.value = false;
+}
+
+async function ensureGameList(): Promise<void> {
+  if (gameList.value.length > 0) return;
+  await bbsStore.refreshGameList();
+}
+
+async function loadHeaderLevel(): Promise<void> {
+  const version = ++headerRequestVersion;
+  const gid = selectedGid.value;
+  if (gid === defaultProfileGame.id && profile.value !== undefined) {
+    syncHeaderProfile();
+    return;
+  }
+  headerUserInfo.value = undefined;
+  headerLevelError.value = "";
+  headerLevelLoading.value = false;
+  const snapshot = getAccountSnapshot();
+  if (snapshot === undefined) return;
+  if (!/^[1-9]\d*$/.test(snapshot.profileUid)) {
+    headerLevelError.value = "用户 ID 无效。";
+    return;
+  }
+  headerLevelLoading.value = true;
+  try {
+    const userResponse =
+      snapshot.profileUid === snapshot.uid
+        ? await bbsReq.userInfo(snapshot.cookie, gid.toString())
+        : await bbsReq.otherUserInfo(gid.toString(), snapshot.profileUid);
+    if (!isCurrentHeaderRequest(version, snapshot, gid)) return;
+    if (userResponse.retcode !== 0) {
+      throw new Error(`[${userResponse.retcode}] ${userResponse.message}`);
+    }
+    if (userResponse.data.user_info.uid !== snapshot.profileUid) {
+      throw new Error("用户信息与当前查看的用户不一致");
+    }
+    headerUserInfo.value = userResponse.data.user_info;
+  } catch (cause) {
+    if (isCurrentHeaderRequest(version, snapshot, gid)) {
+      headerLevelError.value = TGHttps.getErrMsg(cause);
+    }
+  } finally {
+    if (isCurrentHeaderRequest(version, snapshot, gid)) headerLevelLoading.value = false;
+  }
+}
+
 async function loadUnreadCounts(snapshot: AccountSnapshot): Promise<void> {
   if (snapshot.profileUid !== snapshot.uid) return;
   const version = ++unreadVersion;
@@ -679,12 +891,19 @@ function handleNotificationRead(category: TGApp.BBS.Notification.Category): void
   unreadCounts.value = { ...unreadCounts.value, [category]: 0 };
 }
 
-async function loadProfile(): Promise<void> {
+async function loadProfile(refreshHeader: boolean = false): Promise<void> {
   const version = ++requestVersion;
   refreshVersion.value += 1;
   resetProfileData();
   const snapshot = getAccountSnapshot();
   if (snapshot === undefined) return;
+  if (refreshHeader) {
+    headerRequestVersion += 1;
+    headerUserInfo.value = undefined;
+    headerLevelError.value = "";
+    headerLevelLoading.value = false;
+    if (selectedGid.value !== defaultProfileGame.id) void loadHeaderLevel();
+  }
   if (!/^[1-9]\d*$/.test(snapshot.profileUid)) {
     loadError.value = "用户 ID 无效。";
     return;
@@ -754,8 +973,17 @@ function retryPosts(): void {
   if (profile.value && currentSection.value === "posts") {
     void searchPosts(searchKeyword.value);
   } else {
-    void loadProfile();
+    void loadProfile(true);
   }
+}
+
+function retryHeaderLevel(): void {
+  void loadHeaderLevel();
+}
+
+function selectGame(gid: number): void {
+  selectedGid.value = gid;
+  gameMenuVisible.value = false;
 }
 
 function handleSettingsSaved(warning?: string): void {
@@ -764,7 +992,7 @@ function handleSettingsSaved(warning?: string): void {
   } else {
     showSnackbar.success(currentSection.value === "privacy" ? "隐私设置已保存" : "资料已提交保存");
   }
-  void loadProfile();
+  void loadProfile(true);
 }
 
 async function handlePageChange(nextPage: number): Promise<void> {
@@ -838,22 +1066,33 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   min-height: 0;
   box-sizing: border-box;
   flex-direction: column;
-  padding: 16px 24px 32px;
+  padding: 16px 24px 0;
   margin: 0 auto;
   color: var(--app-page-content);
   font-size: 14px;
+  gap: 16px;
   line-height: 20px;
 }
 
 .community-profile-header {
   display: flex;
+  min-width: 0;
+  flex-direction: column;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
+  align-items: stretch;
   padding: 24px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
+  gap: 16px;
+}
+
+.community-profile-header-content {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
   gap: 24px;
 }
 
@@ -865,7 +1104,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-intro {
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .community-profile-avatar-placeholder {
@@ -907,14 +1149,48 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-level {
+  display: inline-flex;
   flex-shrink: 0;
-  padding: 2px 6px;
+  align-items: center;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--box-text-4);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  gap: 4px;
+  line-height: 16px;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--box-bg-2);
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--tgc-od-orange);
+    outline-offset: 1px;
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
+}
+
+.community-profile-level-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.community-profile-level-tag {
+  padding: 2px 4px 2px 6px;
   border-radius: 4px;
   background: v-bind(levelColor); /* stylelint-disable-line value-keyword-case */
   color: var(--tgc-white-1);
-  font-size: 12px;
-  line-height: 16px;
-  white-space: nowrap;
 }
 
 .community-profile-uid {
@@ -931,10 +1207,93 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-description {
   overflow: hidden;
   max-width: 560px;
-  margin: 8px 0 0;
+  margin: 0;
   color: var(--app-page-content);
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+
+.community-profile-game-menu {
+  display: flex;
+  width: fit-content;
+  max-width: min(320px, calc(100vw - 32px));
+  box-sizing: border-box;
+  flex-wrap: wrap;
+  padding: 4px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  box-shadow: 0 4px 12px var(--common-shadow-4);
+  gap: 4px;
+}
+
+.community-profile-game-choice {
+  display: flex;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--box-text-1);
+  cursor: pointer;
+
+  &.dimmed {
+    opacity: 0.3;
+  }
+
+  &.dimmed:not(:disabled):hover {
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--tgc-od-orange);
+    outline-offset: 1px;
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+}
+
+.community-profile-game-error {
+  display: flex;
+  min-width: 0;
+  flex: 1 0 100%;
+  align-items: center;
+  color: var(--tgc-od-red);
+  font-size: 12px;
+  gap: 4px;
+  line-height: 16px;
+
+  span {
+    overflow: hidden;
+    min-width: 0;
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  button {
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--tgc-od-orange);
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 .community-profile-stats {
@@ -968,9 +1327,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   min-height: 0;
   flex: 1 1 auto;
   align-items: stretch;
-  margin-top: 16px;
   gap: 16px;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
 }
 
 .community-profile-sidebar,
@@ -984,19 +1342,22 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-sidebar {
-  max-height: 100%;
-  align-self: start;
-  overflow-y: auto;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  padding: 12px 4px;
+  gap: 8px;
 }
 
 .community-profile-sidebar-header {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: stretch;
-  margin-bottom: 12px;
   gap: 4px;
 
   h2 {
+    padding: 0 6px;
     margin: 0;
     color: var(--common-text-title);
     font-family: var(--font-title);
@@ -1008,27 +1369,45 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-sidebar-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+}
 
-  & > :last-child {
-    margin-left: auto;
-  }
+.community-profile-sidebar-trail {
+  display: flex;
+  align-items: center;
 }
 
 .community-profile-nav {
   display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    min-width: 0;
+    min-height: 0;
+    border: 0;
+    border-radius: 3px;
+    background: var(--common-shadow-2);
+  }
 }
 
 .community-profile-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 8px;
+  padding: 8px 6px;
   border-radius: 4px;
   color: var(--box-text-2);
-  gap: 8px;
+  gap: 6px;
   text-decoration: none;
+  white-space: nowrap;
 
   &:hover,
   &.is-active {
@@ -1038,27 +1417,28 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
   &:focus-visible {
     outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
+    outline-offset: -2px;
   }
 }
 
 .community-profile-nav-divider {
   flex: 0 0 auto;
-  margin: 4px 0;
 }
 
 .community-profile-nav-badge {
-  min-width: 18px;
-  height: 18px;
+  position: absolute;
+  top: 2px;
+  left: 16px;
+  min-width: 14px;
+  height: 14px;
   box-sizing: border-box;
-  flex-shrink: 0;
-  padding: 0 5px;
-  border-radius: 9px;
-  margin-left: auto;
+  padding: 0 3px;
+  border-radius: 7px;
   background: var(--tgc-od-red);
+  box-shadow: 0 0 0 1px var(--app-page-bg);
   color: var(--tgc-white-1);
-  font-size: 11px;
-  line-height: 18px;
+  font-size: 10px;
+  line-height: 14px;
   text-align: center;
 }
 
@@ -1067,6 +1447,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   overflow: hidden;
   min-height: 0;
   flex-direction: column;
+  gap: 16px;
 }
 
 .community-profile-panel {
@@ -1080,7 +1461,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
   gap: 16px;
 
   h2 {
@@ -1095,17 +1475,24 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
 }
 
+.community-profile-posts-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .community-profile-posts-actions {
   display: flex;
   min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
-  margin-left: auto;
+  justify-content: flex-end;
   gap: 12px;
 }
 
@@ -1143,6 +1530,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
+  gap: 12px;
   transition: background-color 120ms ease;
 
   &:hover {
@@ -1188,7 +1576,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post-title {
-  margin: 12px 0 0;
+  margin: 0;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 18px;
@@ -1230,7 +1618,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   max-width: 520px;
   padding: 0;
   border: 0;
-  margin-top: 12px;
   background: transparent;
   cursor: pointer;
   gap: 8px;
@@ -1257,7 +1644,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-post-topics {
   display: flex;
   flex-wrap: wrap;
-  margin-top: 12px;
   font-size: 12px;
   gap: 8px 16px;
 }
@@ -1278,13 +1664,14 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-post-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 16px;
+  justify-content: flex-end;
   gap: 16px;
 }
 
 .community-profile-post-stats {
   display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   color: var(--box-text-4);
   font-size: 12px;
@@ -1301,7 +1688,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   position: relative;
   z-index: 2;
   flex-shrink: 0;
-  margin-left: auto;
   color: var(--common-text-title);
 }
 
@@ -1337,11 +1723,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   display: flex;
   flex-shrink: 0;
   justify-content: center;
-  padding-top: 16px;
 }
 
 @media (width <= 900px) {
-  .community-profile-header {
+  .community-profile-header-content {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1354,11 +1739,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 @media (width <= 640px) {
   .community-profile {
-    padding: 8px 0 16px;
+    padding: 8px 0 0;
   }
 
   .community-profile-header,
-  .community-profile-sidebar,
   .community-profile-posts,
   .community-profile-panel {
     padding: 16px;
@@ -1377,8 +1761,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   }
 
   .community-profile-nav {
+    overflow: auto hidden;
     flex-direction: row;
-    overflow-x: auto;
   }
 
   .community-profile-nav-item {
@@ -1388,11 +1772,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   .community-profile-nav-divider {
     width: 0;
     max-width: 0;
-    height: auto;
+    height: 20px;
     max-height: none;
-    align-self: stretch;
+    align-self: center;
     border-width: 0 thin 0 0;
-    margin: 4px 2px;
   }
 
   .community-profile-posts,
