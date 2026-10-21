@@ -98,7 +98,7 @@
                   :title="emoji.name"
                   class="vprt-emoji"
                   type="button"
-                  @click="emits('insertText', `_(${emoji.name})`)"
+                  @click="emits('emoticon', emoji)"
                 >
                   <img :alt="emoji.name" :src="emoji.icon" loading="lazy" />
                 </button>
@@ -238,7 +238,7 @@ type ImagePickerContext = {
 
 const props = defineProps<ReplyToolsProps>();
 const emits = defineEmits<{
-  insertText: [text: string];
+  emoticon: [emoji: TGApp.BBS.Emoji.Item];
   mention: [user: TGApp.BBS.ReplyAsset.Mention];
   image: [image: TGApp.BBS.ReplyAsset.UploadedImage];
 }>();
@@ -650,8 +650,10 @@ async function selectImage(event: Event): Promise<void> {
   min-height: 0;
   max-height: 300px;
   flex: 1 1 auto;
+  align-content: start;
   padding: 4px;
   gap: 4px;
+  grid-auto-rows: 44px;
   grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
   scrollbar-width: thin;
 

@@ -24,28 +24,14 @@
       />
     </div>
     <div class="vpr-editor">
-      <div
-        ref="editorRoot"
-        class="vpr-editor-root"
-        @focusout="rememberSelection"
-        @input="rememberSelection"
-        @keyup="rememberSelection"
-        @mouseup="rememberSelection"
-        @select="rememberSelection"
-      >
-        <v-textarea
-          v-model="content"
-          :aria-label="target ? '回复内容' : '评论内容'"
-          :disabled="busy || !canWrite"
-          auto-grow
-          class="vpr-textarea"
-          hide-details
-          max-rows="6"
-          placeholder="输入内容…"
-          rows="2"
-          variant="outlined"
-        />
-      </div>
+      <VpReplyEditor
+        :key="toolContext"
+        ref="replyEditor"
+        v-model="content"
+        :disabled="busy || !canWrite"
+        :label="target ? '回复内容' : '评论内容'"
+        @error="handleEditorError"
+      />
       <div class="vpr-tools-wrap">
         <VpReplyTools
           :contextId="toolContext"
@@ -53,7 +39,7 @@
           :disabled="busy || !canWrite"
           :gid="props.gid"
           @image="addImage"
-          @insert-text="insertText"
+          @emoticon="insertEmoticon"
           @mention="insertMention"
         />
       </div>
@@ -98,6 +84,7 @@ import { buildReplyDocument } from "@utils/bbsReplyDocument.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
+import VpReplyEditor from "./vp-reply-editor.vue";
 import VpReplyTools from "./vp-reply-tools.vue";
 
 /**
@@ -119,11 +106,9 @@ const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
 const content = ref<string>("");
 const mentions = ref<Array<TGApp.BBS.ReplyAsset.Mention>>([]);
 const images = ref<Array<TGApp.BBS.ReplyAsset.UploadedImage>>([]);
-const editorRoot = useTemplateRef<HTMLDivElement>("editorRoot");
+const replyEditor = useTemplateRef<InstanceType<typeof VpReplyEditor>>("replyEditor");
 const toolContext = ref<number>(0);
 const publishing = ref<boolean>(false);
-let selectionStart = 0;
-let selectionEnd = 0;
 let contextVersion = 0;
 let mounted = true;
 
@@ -166,8 +151,6 @@ function resetDraft(): void {
   content.value = "";
   mentions.value = [];
   images.value = [];
-  selectionStart = 0;
-  selectionEnd = 0;
   toolContext.value += 1;
 }
 
@@ -175,27 +158,21 @@ async function focusEditor(): Promise<void> {
   if (busy.value || !canWrite.value) return;
   await nextTick();
   if (busy.value || !canWrite.value) return;
-  editorRoot.value?.querySelector("textarea")?.focus();
-}
-
-function rememberSelection(): void {
-  const textarea = editorRoot.value?.querySelector("textarea");
-  if (!textarea) return;
-  selectionStart = textarea.selectionStart;
-  selectionEnd = textarea.selectionEnd;
+  await replyEditor.value?.focusEditor();
 }
 
 async function insertText(text: string): Promise<void> {
   if (busy.value || !canWrite.value) return;
-  const start = Math.min(selectionStart, content.value.length);
-  const end = Math.max(start, Math.min(selectionEnd, content.value.length));
-  content.value = content.value.slice(0, start) + text + content.value.slice(end);
-  selectionStart = start + text.length;
-  selectionEnd = selectionStart;
-  await nextTick();
-  const textarea = editorRoot.value?.querySelector("textarea");
-  textarea?.focus();
-  textarea?.setSelectionRange(selectionStart, selectionEnd);
+  await replyEditor.value?.insertText(text);
+}
+
+async function insertEmoticon(emoji: TGApp.BBS.Emoji.Item): Promise<void> {
+  if (busy.value || !canWrite.value) return;
+  await replyEditor.value?.insertEmoticon(emoji);
+}
+
+function handleEditorError(message: string): void {
+  showSnackbar.error(message);
 }
 
 async function insertMention(user: TGApp.BBS.ReplyAsset.Mention): Promise<void> {
@@ -353,18 +330,6 @@ defineExpose({ focusEditor });
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.vpr-editor-root {
-  min-width: 0;
-}
-
-.vpr-textarea :deep(.v-field) {
-  border-radius: 4px;
-}
-
-.vpr-textarea :deep(.v-field__input) {
-  line-height: 20px;
 }
 
 .vpr-tools-wrap {
