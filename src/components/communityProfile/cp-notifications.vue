@@ -1,7 +1,7 @@
 <template>
   <section :aria-busy="loading" aria-labelledby="cp-notifications-title" class="cp-notifications">
     <header class="cp-notifications-header">
-      <div>
+      <div class="cp-notifications-heading">
         <h2 id="cp-notifications-title">
           <v-icon size="20" aria-hidden="true">{{ categoryInfo.icon }}</v-icon>
           {{ categoryInfo.title }}
@@ -47,6 +47,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import communityReq from "@req/communityReq.js";
+import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -242,7 +243,7 @@ async function openNotification(item: TGApp.BBS.Notification.Item): Promise<void
   try {
     const postId = getPostId(item);
     if (postId) {
-      await createPost(postId, item.subject.trim() || undefined);
+      await openNotificationPost(item, postId, item.subject.trim() || undefined);
       return;
     }
     const link = getWebLink(item);
@@ -255,12 +256,48 @@ async function openNotification(item: TGApp.BBS.Notification.Item): Promise<void
     }
     if (result === "post") {
       const linkPostId = await parsePost(link);
-      if (linkPostId !== false) await createPost(linkPostId);
+      if (linkPostId !== false) await openNotificationPost(item, linkPostId);
       return;
     }
     await openUrl(result);
   } catch (cause) {
     showSnackbar.error(`打开通知失败：${TGHttps.getErrMsg(cause)}`);
+  }
+}
+
+async function openNotificationPost(
+  item: TGApp.BBS.Notification.Item,
+  postId: string,
+  title?: string,
+): Promise<void> {
+  await createPost(postId, title);
+  if (!item.is_read) await markNotificationRead(item.notification_id, postId);
+}
+
+// 米游社在带登录态请求帖子详情时会将关联通知标记为已读
+async function markNotificationRead(notificationId: string, postId: string): Promise<void> {
+  const snapshot = getSnapshot();
+  if (!snapshot) return;
+  const version = generation;
+  try {
+    const response = await postReq.post(postId, {
+      ltoken: snapshot.cookie.ltoken,
+      ltuid: snapshot.cookie.ltuid,
+    });
+    if (!isCurrent(snapshot, version)) return;
+    if (response.retcode !== 0) {
+      await TGLogger.Warn(
+        `[CpNotifications] 标记通知已读失败：[${response.retcode}] ${response.message}`,
+      );
+      return;
+    }
+    notifications.value = notifications.value.map((notification) =>
+      notification.notification_id === notificationId
+        ? { ...notification, is_read: true }
+        : notification,
+    );
+  } catch (cause) {
+    await TGLogger.Warn(`[CpNotifications] 标记通知已读失败：${TGHttps.getErrMsg(cause)}`);
   }
 }
 
@@ -278,6 +315,7 @@ async function openProfile(userId: string): Promise<void> {
   display: flex;
   flex-direction: column;
   color: var(--app-page-content);
+  gap: 16px;
 }
 
 .cp-notifications-header {
@@ -285,7 +323,6 @@ async function openProfile(userId: string): Promise<void> {
   flex-shrink: 0;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
   gap: 16px;
 
   h2 {
@@ -300,10 +337,17 @@ async function openProfile(userId: string): Promise<void> {
   }
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     color: var(--box-text-4);
     font-size: 12px;
   }
+}
+
+.cp-notifications-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cp-notifications-count {
