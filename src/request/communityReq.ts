@@ -248,6 +248,29 @@ async function getFollowers(
 }
 
 /**
+ * 获取当前账户的帖子浏览历史
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param offset - 下一页偏移量
+ * @returns 浏览历史响应数据
+ * @remarks 该接口只识别 SToken 登录态，使用 cookie_token 会返回空列表
+ */
+async function getHistory(
+  cookie: TGApp.App.Account.Cookie,
+  offset?: string,
+): Promise<TGApp.BBS.Community.HistoryResp> {
+  const params: CommunityQuery = { offset: offset ?? "" };
+  const ck = { mid: cookie.mid, stoken: cookie.stoken, stuid: cookie.stuid };
+  const headers = getRequestHeader(ck, "GET", params, "X4", true);
+  headers["x-rpc-client_type"] = "2";
+  const resp = await TGHttps.get<TGApp.BBS.Community.HistoryResp>(
+    `${communityApiBaseUrl}painter/api/history/list`,
+    { headers, query: params },
+  );
+  return resp.data;
+}
+
+/**
  * 搜索指定用户发布的帖子
  * @since Beta v0.12.6
  * @param uid - 用户 ID
@@ -396,6 +419,7 @@ const communityReq = {
   favoriteCollections: getFavoriteCollections,
   following: getFollowing,
   followers: getFollowers,
+  history: getHistory,
   notifications: getNotifications,
   notificationUnread: getNotificationUnread,
   clearNotificationUnread,

@@ -232,4 +232,47 @@ declare namespace TGApp.BBS.Community {
     /** 帖子数据 */
     post: TGApp.BBS.Post.FullData;
   };
+
+  /**
+   * 浏览历史返回响应
+   * @since Beta v0.12.6
+   */
+  type HistoryResp = BaseResp<HistoryRes>;
+
+  /**
+   * 浏览历史返回数据
+   * @since Beta v0.12.6
+   */
+  type HistoryRes = {
+    /** 历史记录总数 */
+    total: number;
+    /** 是否开启浏览历史记录 */
+    status: boolean;
+    /** 是否最后一页 */
+    is_last: boolean;
+    /** 下一页偏移量 */
+    next_offset: number;
+    /** 历史记录列表 */
+    list: Array<HistoryItem>;
+  };
+
+  /**
+   * 浏览历史条目
+   * @since Beta v0.12.6
+   */
+  type HistoryItem = {
+    /** 条目标识 */
+    id: {
+      /** 条目类型，帖子为 HISTORY_ITEM_TYPE_POST */
+      item_type: string;
+      /** 条目 ID */
+      item_id: string;
+    };
+    /** 浏览时间（秒级时间戳） */
+    view_at: string;
+    /** 是否已删除 */
+    is_deleted: boolean;
+    /** 帖子数据；非帖子条目或帖子不可用时可能为 null */
+    post: TGApp.BBS.Post.FullData | null;
+  };
 }
