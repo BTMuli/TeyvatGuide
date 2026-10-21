@@ -1,6 +1,6 @@
 /**
  * BBS 请求模块
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -21,13 +21,17 @@ async function getEmoticonSet(): Promise<TGApp.BBS.Emoji.Resp> {
 
 /**
  * 根据 cookie 获取用户信息
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  * @param cookie - 账户 cookie
+ * @param gid - 分区 ID，默认原神分区
  * @returns 用户信息响应数据
  */
-async function getUserFullInfo(cookie: TGApp.App.Account.Cookie): Promise<TGApp.BBS.User.InfoResp> {
+async function getUserFullInfo(
+  cookie: TGApp.App.Account.Cookie,
+  gid: string = "2",
+): Promise<TGApp.BBS.User.InfoResp> {
   const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
-  const params = { gids: "2" };
+  const params = { gids: gid };
   const resp = await TGHttps.get<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
     headers: getRequestHeader(ck, "GET", params, "X4", true),
     query: params,
