@@ -15,6 +15,13 @@ import {
 
 const imageUrl = "https://example.com/images/post.png";
 const mention = { uid: 100000001, nickname: "旅行者" };
+const customEmoticon = {
+  id: "custom-one",
+  url: "https://example.com/emoticons/custom-one.webp",
+  size: { width: 96, height: 64, file_size: 2048 },
+  is_available: true,
+  hash: "custom-one-hash",
+};
 
 describe("parsePostNodes", () => {
   it("preserves inline and line attributes while copying the document", () => {
@@ -90,6 +97,49 @@ describe("parsePostNodes", () => {
     expect(nodes).toEqual(before);
     expect(parsed).not.toBe(nodes);
     expect(parsed[0]).not.toBe(nodes[0]);
+  });
+
+  it("normalizes and deep copies custom emoticon nodes", () => {
+    const nodes = [
+      {
+        insert: {
+          custom_emoticon: customEmoticon,
+          backup_text: <const>"[自定义表情]",
+        },
+      },
+    ];
+    const before = structuredClone(nodes);
+
+    const parsed = parsePostNodes(nodes);
+    expect(parsed[0]).toEqual({
+      insert: {
+        custom_emoticon: customEmoticon,
+        backup_text: "[自定义表情]",
+      },
+    });
+    const insert = parsed[0]?.insert;
+    if (typeof insert === "string" || !("custom_emoticon" in insert)) {
+      throw new Error("自定义表情节点未保留");
+    }
+    insert.custom_emoticon.size.width = 128;
+
+    expect(nodes).toEqual(before);
+    expect(insert.custom_emoticon).not.toBe(customEmoticon);
+    expect(insert.custom_emoticon.size).not.toBe(customEmoticon.size);
+  });
+
+  it("keeps an unavailable existing custom emoticon for safe editing", () => {
+    const unavailable = { ...customEmoticon, is_available: false };
+
+    expect(parsePostNodes([{ insert: { custom_emoticon: unavailable } }])).toEqual([
+      {
+        insert: {
+          custom_emoticon: unavailable,
+          backup_text: "[自定义表情]",
+        },
+      },
+      { insert: "\n" },
+    ]);
   });
 
   it("adds one trailing newline and does not duplicate an existing one", () => {
@@ -194,6 +244,23 @@ describe("buildPostDocument", () => {
     expect(() => assertPostDocumentContent(imageOnly)).not.toThrow();
   });
 
+  it("counts a custom emoticon placeholder as content without treating it as an image", () => {
+    const document = buildPostDocument([{ insert: { custom_emoticon: customEmoticon } }]);
+
+    expect(document.text).toBe("[自定义表情]");
+    expect(document.images).toEqual([]);
+    expect(() => assertPostDocumentContent(document)).not.toThrow();
+  });
+
+  it("rejects more than one custom emoticon instead of dropping content", () => {
+    expect(() =>
+      parsePostNodes([
+        { insert: { custom_emoticon: customEmoticon } },
+        { insert: { custom_emoticon: { ...customEmoticon, id: "custom-two" } } },
+      ]),
+    ).toThrow("一个自定义表情");
+  });
+
   it("excludes dividers from text and image statistics", () => {
     const document = buildPostDocument([{ insert: { divider: "line_2" } }]);
 
@@ -287,6 +354,10 @@ describe("unsupported post content", () => {
     [{ insert: { emoticon: { src: "http://example.com/smile.png", name: "smile" } } }],
     [{ insert: { emoticon: { src: imageUrl, name: "smile()" } } }],
     [{ insert: { custom_emoticon: "smile" } }],
+    [{ insert: { custom_emoticon: { ...customEmoticon, url: "http://example.com/bad.webp" } } }],
+    [{ insert: { custom_emoticon: { ...customEmoticon, size: { width: 0, height: 64 } } } }],
+    [{ insert: { custom_emoticon: customEmoticon }, attributes: {} }],
+    [{ insert: { custom_emoticon: customEmoticon, backup_text: "[表情]" } }],
     [{ insert: { video: "https://example.com/video" } }],
     [{ insert: { link_card: "card-id" } }],
     [{ insert: { game_user_info: { uid: 100000001 } } }],

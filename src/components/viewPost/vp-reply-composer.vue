@@ -14,13 +14,13 @@
         >
       </div>
       <v-btn
-        :disabled="busy"
+        :disabled="busy || !canWrite"
         aria-label="取消定向回复"
         class="vpr-target-cancel"
         icon="mdi-close"
         size="24"
         variant="text"
-        @click="emits('cancel')"
+        @click="cancelReply"
       />
     </div>
     <div class="vpr-editor">
@@ -38,18 +38,36 @@
           :cookie="toolCookie"
           :disabled="busy || !canWrite"
           :gid="props.gid"
+          @custom-emoticon="addCustomEmoticon"
           @image="addImage"
           @emoticon="insertEmoticon"
           @mention="insertMention"
         />
       </div>
     </div>
-    <div v-if="images.length" aria-label="待发布图片" class="vpr-images" role="list">
+    <div
+      v-if="customEmoticon || images.length"
+      aria-label="待发布附件"
+      class="vpr-images"
+      role="list"
+    >
+      <div v-if="customEmoticon" class="vpr-image vpr-custom-emoticon" role="listitem">
+        <img alt="待发布收藏表情" :src="customEmoticon.url" />
+        <button
+          aria-label="移除收藏表情"
+          :disabled="busy || !canWrite"
+          class="vpr-image-remove"
+          type="button"
+          @click="removeCustomEmoticon"
+        >
+          <v-icon size="16">mdi-close</v-icon>
+        </button>
+      </div>
       <div v-for="(image, index) in images" :key="index" class="vpr-image" role="listitem">
         <img :alt="`待发布图片 ${index + 1}`" :src="image.url" />
         <button
           :aria-label="`移除图片 ${index + 1}`"
-          :disabled="busy"
+          :disabled="busy || !canWrite"
           class="vpr-image-remove"
           type="button"
           @click="images.splice(index, 1)"
@@ -79,6 +97,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
+import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
 import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { buildReplyDocument } from "@utils/bbsReplyDocument.js";
 import { storeToRefs } from "pinia";
@@ -106,19 +125,28 @@ const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
 const content = ref<string>("");
 const mentions = ref<Array<TGApp.BBS.ReplyAsset.Mention>>([]);
 const images = ref<Array<TGApp.BBS.ReplyAsset.UploadedImage>>([]);
+const customEmoticon = ref<TGApp.BBS.CustomEmoticon.Value>();
 const replyEditor = useTemplateRef<InstanceType<typeof VpReplyEditor>>("replyEditor");
 const toolContext = ref<number>(0);
 const publishing = ref<boolean>(false);
 let contextVersion = 0;
 let mounted = true;
 
-const hasContent = computed<boolean>(() => !!content.value.trim() || images.value.length > 0);
+const hasContent = computed<boolean>(
+  () => !!content.value.trim() || images.value.length > 0 || customEmoticon.value !== undefined,
+);
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
 );
 const toolCookie = computed<Record<string, string> | undefined>(() => {
   if (!canWrite.value || !cookie.value) return undefined;
-  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  return {
+    ltoken: cookie.value.ltoken,
+    ltuid: cookie.value.ltuid,
+    stoken: cookie.value.stoken,
+    stuid: cookie.value.stuid,
+    mid: cookie.value.mid,
+  };
 });
 const accountHint = computed<string>(() => {
   if (!canWrite.value) return "请先登录米游社账号";
@@ -138,6 +166,7 @@ watch(
   () => props.target?.reply.reply_id,
   () => {
     contextVersion += 1;
+    resetDraft();
   },
   { flush: "sync" },
 );
@@ -151,7 +180,14 @@ function resetDraft(): void {
   content.value = "";
   mentions.value = [];
   images.value = [];
+  customEmoticon.value = undefined;
   toolContext.value += 1;
+}
+
+function cancelReply(): void {
+  if (busy.value) return;
+  resetDraft();
+  emits("cancel");
 }
 
 async function focusEditor(): Promise<void> {
@@ -190,8 +226,24 @@ async function insertMention(user: TGApp.BBS.ReplyAsset.Mention): Promise<void> 
 }
 
 function addImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
-  if (!canWrite.value) return;
+  if (busy.value || !canWrite.value) return;
   images.value.push({ ...image });
+}
+
+function addCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
+  if (busy.value || !canWrite.value) return;
+  try {
+    const parsed = parseCustomEmoticon(value);
+    if (parsed.is_available === false) throw new TypeError("自定义表情已失效");
+    customEmoticon.value = parsed;
+  } catch {
+    showSnackbar.warn("该收藏表情不可用，请重新选择");
+  }
+}
+
+function removeCustomEmoticon(): void {
+  if (busy.value || !canWrite.value) return;
+  customEmoticon.value = undefined;
 }
 
 async function publishReply(): Promise<void> {
@@ -210,7 +262,12 @@ async function publishReply(): Promise<void> {
   }
   let document: ReturnType<typeof buildReplyDocument>;
   try {
-    document = buildReplyDocument(content.value, mentions.value, images.value);
+    document = buildReplyDocument(
+      content.value,
+      mentions.value,
+      images.value,
+      customEmoticon.value,
+    );
   } catch {
     showSnackbar.warn("回复内容无效，请检查后重试");
     return;
@@ -354,6 +411,11 @@ defineExpose({ focusEditor });
   border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
   object-fit: cover;
+}
+
+.vpr-custom-emoticon img {
+  background: var(--box-bg-4);
+  object-fit: contain;
 }
 
 .vpr-image-remove {

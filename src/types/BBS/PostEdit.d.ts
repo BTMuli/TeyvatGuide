@@ -28,7 +28,11 @@ declare namespace TGApp.BBS.PostEdit {
    */
   type Node = {
     insert:
-      string | { image: string } | { mention: TGApp.BBS.ReplyAsset.Mention } | { divider: Divider };
+      | string
+      | { image: string }
+      | { mention: TGApp.BBS.ReplyAsset.Mention }
+      | { divider: Divider }
+      | TGApp.BBS.CustomEmoticon.Insert;
     attributes?: Attributes;
   };
 

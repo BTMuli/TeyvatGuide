@@ -117,6 +117,10 @@ declare namespace TGApp.BBS.Reply {
           /** 图片高度 */
           height: number;
         };
+      }
+    | {
+        /** 收藏表情内容 */
+        insert: TGApp.BBS.CustomEmoticon.Insert;
       };
 
   /**

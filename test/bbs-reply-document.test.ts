@@ -15,6 +15,13 @@ import {
 const mention = { uid: 100000001, nickname: "旅行者" };
 const firstImage = { url: "https://example.com/first.png", width: 640, height: 480 };
 const secondImage = { url: "https://example.com/second.png", width: 320, height: 240 };
+const customEmoticon = {
+  id: "custom-1",
+  url: "https://example.com/custom.webp",
+  size: { width: 128, height: 128, file_size: 1024 },
+  is_available: true,
+  hash: "custom-hash",
+};
 
 describe("buildReplyDocument", () => {
   it("keeps text and mentions in order before appending images", () => {
@@ -111,6 +118,60 @@ describe("buildReplyDocument", () => {
     });
   });
 
+  it("places one custom emoticon after text and mentions before images", () => {
+    const document = buildReplyDocument("hello @旅行者", [mention], [firstImage], customEmoticon);
+
+    expect(document.content).toBe("hello @旅行者\n[自定义表情]");
+    expect(document.structuredContent).toEqual([
+      { insert: "hello " },
+      { insert: { mention } },
+      { insert: "\n" },
+      {
+        insert: {
+          custom_emoticon: customEmoticon,
+          backup_text: "[自定义表情]",
+        },
+      },
+      { insert: "\n" },
+      {
+        insert: { image: firstImage.url },
+        attributes: { width: firstImage.width, height: firstImage.height },
+      },
+      { insert: "\n" },
+    ]);
+    expect(document.preview).toBe("hello @旅行者 · [自定义表情] · 图片 1 张");
+  });
+
+  it("allows a pure custom emoticon document and copies its nested metadata", () => {
+    const before = structuredClone(customEmoticon);
+    const document = buildReplyDocument("", [], [], customEmoticon);
+
+    expect(document.content).toBe("[自定义表情]");
+    expect(document.structuredContent).toEqual([
+      {
+        insert: {
+          custom_emoticon: customEmoticon,
+          backup_text: "[自定义表情]",
+        },
+      },
+      { insert: "\n" },
+    ]);
+    expect(document.preview).toBe("[自定义表情]");
+    expect(customEmoticon).toEqual(before);
+    const node = document.structuredContent[0];
+    if (typeof node.insert === "string" || !("custom_emoticon" in node.insert)) {
+      throw new Error("expected custom emoticon node");
+    }
+    expect(node.insert.custom_emoticon).not.toBe(customEmoticon);
+    expect(node.insert.custom_emoticon.size).not.toBe(customEmoticon.size);
+  });
+
+  it("rejects unavailable custom emoticons", () => {
+    expect(() =>
+      buildReplyDocument("", [], [], { ...customEmoticon, is_available: false }),
+    ).toThrow();
+  });
+
   it("does not mutate mentions or images", () => {
     const mentions = [mention];
     const images = [firstImage];
@@ -127,6 +188,47 @@ describe("buildReplyDocument", () => {
 describe("reply send node validation", () => {
   it.each([
     [{ insert: { custom_emoticon: "smile" } }],
+    [
+      {
+        insert: {
+          custom_emoticon: {
+            id: "custom-1",
+            url: "http://example.com/custom.webp",
+            size: { width: 128, height: 128 },
+          },
+        },
+      },
+    ],
+    [
+      {
+        insert: {
+          custom_emoticon: {
+            id: "custom-1",
+            url: "https://user:pass@example.com/custom.webp",
+            size: { width: 128, height: 128 },
+          },
+        },
+      },
+    ],
+    [
+      {
+        insert: {
+          custom_emoticon: {
+            id: "custom-1",
+            url: "https://example.com/custom.webp",
+            size: { width: 0, height: 128 },
+          },
+        },
+      },
+    ],
+    [
+      {
+        insert: {
+          custom_emoticon: customEmoticon,
+          backup_text: "wrong",
+        },
+      },
+    ],
     [{ insert: { game_user_info: { uid: 1 } } }],
     [{ insert: { image: "http://example.com/image.png" }, attributes: { width: 1, height: 1 } }],
     [{ insert: { image: "data:image/png;base64,abc" }, attributes: { width: 1, height: 1 } }],
@@ -166,5 +268,19 @@ describe("reply send node validation", () => {
     expect(JSON.parse(serializeReplySendNodes(nodes))).toEqual(nodes);
     expect(getReplyContentFromSendNodes(nodes)).toBe("hello @旅行者");
     expect(nodes).toEqual(before);
+  });
+
+  it("normalizes custom emoticon backup text and rejects duplicates", () => {
+    const node = { insert: { custom_emoticon: customEmoticon } };
+    expect(validateReplySendNodes([node])).toEqual([
+      {
+        insert: {
+          custom_emoticon: customEmoticon,
+          backup_text: "[自定义表情]",
+        },
+      },
+    ]);
+    expect(() => validateReplySendNodes([node, node])).toThrow();
+    expect(getReplyContentFromSendNodes(validateReplySendNodes([node]))).toBe("[自定义表情]");
   });
 });

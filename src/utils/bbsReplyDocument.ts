@@ -3,6 +3,8 @@
  * @since Beta v0.12.6
  */
 
+import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
+
 /**
  * 回复节点校验使用的对象记录
  * @since Beta v0.12.6
@@ -17,6 +19,12 @@ type MentionCandidate = {
   mention: TGApp.BBS.Reply.DocumentMention;
   token: string;
 };
+
+/**
+ * 自定义表情在回复文档中的确定性文本占位。
+ * @since Beta v0.12.6
+ */
+const customEmoticonBackupText = "[自定义表情]";
 
 /**
  * 判断值是否为对象记录
@@ -94,6 +102,18 @@ function isReplyImageUrl(value: unknown): value is string {
 }
 
 /**
+ * 判断回复节点是否为自定义表情节点。
+ * @since Beta v0.12.6
+ * @param node - 回复结构化节点
+ * @returns 是否为自定义表情节点
+ */
+function isCustomEmoticonNode(
+  node: TGApp.BBS.Reply.SendNode,
+): node is { insert: TGApp.BBS.CustomEmoticon.Insert } {
+  return typeof node.insert !== "string" && "custom_emoticon" in node.insert;
+}
+
+/**
  * 创建回复提及节点
  * @since Beta v0.12.6
  * @param mention - 提及用户
@@ -119,6 +139,23 @@ function createImageNode(image: TGApp.BBS.Reply.DocumentImage): TGApp.BBS.Reply.
   return {
     insert: { image: image.url },
     attributes: { width: image.width, height: image.height },
+  };
+}
+
+/**
+ * 创建回复自定义表情节点。
+ * @since Beta v0.12.6
+ * @param value - 自定义表情值
+ * @returns 自定义表情节点
+ */
+function createCustomEmoticonNode(value: TGApp.BBS.CustomEmoticon.Value): TGApp.BBS.Reply.SendNode {
+  const customEmoticon = parseCustomEmoticon(value);
+  if (customEmoticon.is_available === false) throw new TypeError("自定义表情已失效");
+  return {
+    insert: {
+      custom_emoticon: customEmoticon,
+      backup_text: customEmoticonBackupText,
+    },
   };
 }
 
@@ -166,6 +203,36 @@ function parseReplySendNode(value: unknown, index: number): TGApp.BBS.Reply.Send
     };
   }
 
+  if (Object.hasOwn(value.insert, "custom_emoticon")) {
+    if (
+      !hasExactKeys(value.insert, ["custom_emoticon"]) &&
+      !hasExactKeys(value.insert, ["custom_emoticon", "backup_text"])
+    ) {
+      throw new TypeError(`回复结构化节点 ${index} 自定义表情信息无效`);
+    }
+    if (
+      Object.hasOwn(value.insert, "backup_text") &&
+      value.insert.backup_text !== customEmoticonBackupText
+    ) {
+      throw new TypeError(`回复结构化节点 ${index} 自定义表情占位无效`);
+    }
+    let customEmoticon: TGApp.BBS.CustomEmoticon.Value;
+    try {
+      customEmoticon = parseCustomEmoticon(value.insert.custom_emoticon);
+    } catch {
+      throw new TypeError(`回复结构化节点 ${index} 自定义表情无效`);
+    }
+    if (customEmoticon.is_available === false) {
+      throw new TypeError(`回复结构化节点 ${index} 自定义表情已失效`);
+    }
+    return {
+      insert: {
+        custom_emoticon: customEmoticon,
+        backup_text: customEmoticonBackupText,
+      },
+    };
+  }
+
   if (!hasExactKeys(value.insert, ["mention"]) || !isReplyRecord(value.insert.mention)) {
     throw new TypeError(`回复结构化节点 ${index} 类型无效`);
   }
@@ -202,6 +269,20 @@ function hasReplySendContent(nodes: Array<TGApp.BBS.Reply.SendNode>): boolean {
 }
 
 /**
+ * 校验回复中最多存在一个自定义表情。
+ * @since Beta v0.12.6
+ * @param nodes - 已校验的回复节点
+ */
+function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.Reply.SendNode>): void {
+  let count = 0;
+  for (const node of nodes) {
+    if (!isCustomEmoticonNode(node)) continue;
+    count += 1;
+    if (count > 1) throw new TypeError("回复最多添加一个自定义表情");
+  }
+}
+
+/**
  * 校验并复制米游社回复结构化节点
  * @since Beta v0.12.6
  * @param nodes - 待校验的结构化节点
@@ -212,6 +293,7 @@ export function validateReplySendNodes(nodes: unknown): Array<TGApp.BBS.Reply.Se
     throw new TypeError("回复结构化内容不能为空");
   }
   const validated = nodes.map((node, index) => parseReplySendNode(node, index));
+  assertSingleCustomEmoticon(validated);
   if (!hasReplySendContent(validated)) throw new TypeError("回复结构化内容没有实际内容");
   return validated;
 }
@@ -227,6 +309,7 @@ export function getReplyContentFromSendNodes(nodes: Array<TGApp.BBS.Reply.SendNo
   for (const node of nodes) {
     if (typeof node.insert === "string") content += node.insert;
     else if ("mention" in node.insert) content += `@${node.insert.mention.nickname}`;
+    else if ("custom_emoticon" in node.insert) content += customEmoticonBackupText;
   }
   return content.replace(/\n+$/u, "");
 }
@@ -272,12 +355,14 @@ function getMentionCandidates(
  * @param text - 回复文本
  * @param mentions - 已选提及用户
  * @param images - 待附加图片
+ * @param customEmoticon - 待附加收藏表情
  * @returns 回复文档及发布预览
  */
 export function buildReplyDocument(
   text: string,
   mentions: Array<TGApp.BBS.Reply.DocumentMention>,
   images: Array<TGApp.BBS.Reply.DocumentImage>,
+  customEmoticon?: TGApp.BBS.CustomEmoticon.Value,
 ): TGApp.BBS.Reply.Document {
   if (typeof text !== "string") throw new TypeError("回复文本无效");
   const content = text.trim();
@@ -306,6 +391,8 @@ export function buildReplyDocument(
   if (textStart < content.length) nodes.push({ insert: content.slice(textStart) });
 
   const imageNodes = images.map((image) => createImageNode({ ...image }));
+  const customEmoticonNode =
+    customEmoticon === undefined ? undefined : createCustomEmoticonNode(customEmoticon);
   if (content !== "") {
     const lastNode = nodes[nodes.length - 1];
     if (lastNode !== undefined && typeof lastNode.insert === "string") {
@@ -314,13 +401,17 @@ export function buildReplyDocument(
       nodes.push({ insert: "\n" });
     }
   }
+  if (customEmoticonNode !== undefined) nodes.push(customEmoticonNode, { insert: "\n" });
   for (const imageNode of imageNodes) {
     nodes.push(imageNode, { insert: "\n" });
   }
 
   const structuredContent = nodes.length === 0 ? [] : validateReplySendNodes(nodes);
+  const documentContent =
+    structuredContent.length === 0 ? "" : getReplyContentFromSendNodes(structuredContent);
   const previewParts = [];
   if (content !== "") previewParts.push(content);
+  if (customEmoticonNode !== undefined) previewParts.push(customEmoticonBackupText);
   if (imageNodes.length > 0) previewParts.push(`图片 ${imageNodes.length} 张`);
-  return { content, structuredContent, preview: previewParts.join(" · ") };
+  return { content: documentContent, structuredContent, preview: previewParts.join(" · ") };
 }

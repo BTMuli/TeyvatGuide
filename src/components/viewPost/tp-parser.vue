@@ -101,11 +101,9 @@ function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   // 判断特殊backup_text
   if ("game_user_info" in tp.insert) return TpUid;
   if ("ugc_master_tag" in tp.insert) return TpUgcTag;
+  if ("custom_emoticon" in tp.insert) return TpEmoticon;
   if ("backup_text" in tp.insert) {
     if (tp.insert.backup_text === "[游戏卡片]" && "reception_card" in tp.insert) return TpGameCard;
-    if (tp.insert.backup_text === "[自定义表情]" && "custom_emoticon" in tp.insert) {
-      return TpEmoticon;
-    }
     return TpBackupText;
   }
   if ("divider" in tp.insert) return TpDivider;

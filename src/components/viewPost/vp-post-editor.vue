@@ -197,6 +197,7 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import bbsReq from "@req/bbsReq.js";
+import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
 import { isPostDivider, isPostUrl } from "@utils/bbsPostDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
 import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbsPostEmoticon.js";
@@ -237,6 +238,8 @@ type EmoticonValue = {
   src: string;
   name: string;
 };
+
+type CustomEmoticonValue = TGApp.BBS.CustomEmoticon.Value;
 
 type AlignmentOption = {
   value: AlignFormat;
@@ -403,6 +406,19 @@ function normalizeEmoticon(value: unknown): EmoticonValue {
     throw new TypeError("帖子表情无效");
   }
   return { src: value.src, name: value.name };
+}
+
+function normalizeCustomEmoticon(value: unknown, allowUnavailable: boolean): CustomEmoticonValue {
+  let customEmoticon: CustomEmoticonValue;
+  try {
+    customEmoticon = parseCustomEmoticon(value);
+  } catch {
+    throw new TypeError("帖子自定义表情无效");
+  }
+  if (!allowUnavailable && customEmoticon.is_available === false) {
+    throw new TypeError("帖子自定义表情已失效");
+  }
+  return customEmoticon;
 }
 
 function normalizeAttributes(value: unknown, image: boolean): Record<string, unknown> | undefined {
@@ -625,6 +641,7 @@ function buildEditorDelta(
 ): QuillDelta {
   if (!Array.isArray(nodes)) throw new TypeError("帖子结构化节点无效");
   const delta = new DeltaClass();
+  let customEmoticonCount = 0;
   for (const node of nodes) {
     if (!isRecord(node) || !("insert" in node)) throw new TypeError("帖子结构化节点无效");
     const insert = node.insert;
@@ -643,6 +660,17 @@ function buildEditorDelta(
         throw new TypeError("帖子分割线无效");
       }
       delta.insert({ divider: insert.divider });
+      continue;
+    }
+    if ("custom_emoticon" in insert) {
+      if (props.mode === "picture") throw new TypeError("图片帖暂不支持收藏表情");
+      if (node.attributes !== undefined) {
+        throw new TypeError("帖子自定义表情不支持格式属性");
+      }
+      customEmoticonCount += 1;
+      if (customEmoticonCount > 1) throw new TypeError("帖子最多添加一个自定义表情");
+      const customEmoticon = normalizeCustomEmoticon(insert.custom_emoticon, true);
+      delta.insert({ custom_emoticon: customEmoticon });
       continue;
     }
     if ("image" in insert && isPostUrl(insert.image, true)) {
@@ -670,6 +698,7 @@ function buildEditorDelta(
 
 function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
   const nodes: Array<TGApp.BBS.SctPost.Base> = [];
+  let customEmoticonCount = 0;
   for (const op of current.getContents().ops) {
     if (op.insert === undefined) continue;
     if (typeof op.insert === "string") {
@@ -687,6 +716,22 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
         throw new TypeError("帖子分割线无效");
       }
       nodes.push(createNode({ divider: op.insert.divider }));
+      continue;
+    }
+    if ("custom_emoticon" in op.insert) {
+      if (props.mode === "picture") throw new TypeError("图片帖暂不支持收藏表情");
+      if (op.attributes !== undefined) {
+        throw new TypeError("帖子自定义表情不支持格式属性");
+      }
+      customEmoticonCount += 1;
+      if (customEmoticonCount > 1) throw new TypeError("帖子最多添加一个自定义表情");
+      const customEmoticon = normalizeCustomEmoticon(op.insert.custom_emoticon, true);
+      nodes.push(
+        createNode({
+          custom_emoticon: customEmoticon,
+          backup_text: "[自定义表情]",
+        }),
+      );
       continue;
     }
     if ("image" in op.insert && isPostUrl(op.insert.image, true)) {
@@ -989,6 +1034,42 @@ function insertEmoticon(emoji: EmoticonValue): void {
   setEditorCursor(current, selection.index + 1);
 }
 
+function insertCustomEmoticon(value: CustomEmoticonValue): void {
+  const current = quill.value;
+  if (!current || props.disabled) return;
+  if (props.mode === "picture") {
+    emits("error", "图片帖暂不支持收藏表情");
+    return;
+  }
+  let customEmoticon: CustomEmoticonValue;
+  try {
+    customEmoticon = normalizeCustomEmoticon(value, false);
+  } catch (error) {
+    emitEditorError(error, "帖子自定义表情无效");
+    return;
+  }
+  const hasCustomEmoticon = current
+    .getContents()
+    .ops.some(
+      (operation: QuillOperation) =>
+        typeof operation.insert === "object" &&
+        operation.insert !== null &&
+        !Array.isArray(operation.insert) &&
+        "custom_emoticon" in operation.insert,
+    );
+  if (hasCustomEmoticon) {
+    emits("error", "帖子最多添加一个自定义表情");
+    return;
+  }
+  const selection = selectionForAction(current);
+  const delta = new DeltaClass()
+    .retain(selection.index)
+    .delete(selection.length)
+    .insert({ custom_emoticon: customEmoticon });
+  current.updateContents(delta, "user");
+  setEditorCursor(current, selection.index + 1);
+}
+
 function insertDivider(divider: TGApp.BBS.PostEdit.Divider): void {
   const current = quill.value;
   if (!current || props.disabled || props.mode !== "article") return;
@@ -1019,7 +1100,7 @@ function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
   setEditorCursor(current, selection.index + 1);
 }
 
-defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
+defineExpose({ insertCustomEmoticon, insertEmoticon, insertImage, insertMention, insertText });
 </script>
 
 <style lang="scss" scoped>
@@ -1247,6 +1328,15 @@ defineExpose({ insertEmoticon, insertImage, insertMention, insertText });
 }
 
 .tgpe-editor :deep(.quill-emoticon) {
+  display: inline-block;
+  width: auto;
+  max-width: 120px;
+  height: 32px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.tgpe-editor :deep(.quill-custom-emoticon) {
   display: inline-block;
   width: auto;
   max-width: 120px;

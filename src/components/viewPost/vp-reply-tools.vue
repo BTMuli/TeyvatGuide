@@ -40,15 +40,15 @@
             </button>
           </div>
           <div class="vprt-body">
-            <div v-if="emojiSeries.length > 0" aria-label="表情系列" class="vprt-series">
-              <!-- TODO：用户收藏表情使用独立的 custom_emoticon 节点。
-                   待确认 APP 收藏列表接口、登录凭据和分页契约后接入，不能用默认系列代替。 -->
+            <div aria-label="表情系列" class="vprt-series">
               <button
-                aria-label="收藏表情暂不可用"
+                :aria-pressed="favoriteSelected"
+                :disabled="disabled"
+                aria-label="收藏表情"
                 class="vprt-series-item"
-                disabled
-                title="收藏表情暂不可用"
+                title="收藏表情"
                 type="button"
+                @click="favoriteSelected = true"
               >
                 <v-icon size="24">mdi-star-outline</v-icon>
               </button>
@@ -62,11 +62,11 @@
                   <button
                     v-bind="tooltipProps"
                     :aria-label="series.name"
-                    :aria-pressed="selectedSeries === series.id"
+                    :aria-pressed="!favoriteSelected && selectedSeries === series.id"
                     :disabled="disabled"
                     class="vprt-series-item"
                     type="button"
-                    @click="selectedSeries = series.id"
+                    @click="selectSeries(series.id)"
                   >
                     <img :alt="series.name" :src="series.icon" loading="lazy" />
                   </button>
@@ -74,7 +74,14 @@
               </v-tooltip>
             </div>
             <div class="vprt-content">
-              <div v-if="emojiLoading" aria-live="polite" class="vprt-status" role="status">
+              <VpCustomEmoticons
+                v-if="favoriteSelected && emojiOpen"
+                :contextId="props.contextId"
+                :cookie="props.cookie"
+                :disabled
+                @select="insertCustomEmoticon"
+              />
+              <div v-else-if="emojiLoading" aria-live="polite" class="vprt-status" role="status">
                 正在加载表情…
               </div>
               <div v-else-if="emojiError" class="vprt-status" role="alert">
@@ -219,6 +226,8 @@ import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
+import VpCustomEmoticons from "./vp-custom-emoticons.vue";
+
 type ReplyToolsProps = {
   disabled: boolean;
   contextId: number;
@@ -238,6 +247,7 @@ type ImagePickerContext = {
 
 const props = defineProps<ReplyToolsProps>();
 const emits = defineEmits<{
+  customEmoticon: [value: TGApp.BBS.CustomEmoticon.Value];
   emoticon: [emoji: TGApp.BBS.Emoji.Item];
   mention: [user: TGApp.BBS.ReplyAsset.Mention];
   image: [image: TGApp.BBS.ReplyAsset.UploadedImage];
@@ -248,6 +258,7 @@ const emojiOpen = ref<boolean>(false);
 const mentionOpen = ref<boolean>(false);
 const emojiSeries = ref<Array<TGApp.BBS.Emoji.Series>>([]);
 const selectedSeries = ref<number>();
+const favoriteSelected = ref<boolean>(false);
 const emojiLoading = ref<boolean>(false);
 const emojiError = ref<string>("");
 const mentionQuery = ref<string>("");
@@ -273,7 +284,9 @@ watch(mentionQuery, () => {
   mentionError.value = "";
 });
 
-watch(() => props.contextId, resetContext, { flush: "sync" });
+watch(() => [props.contextId, props.gid, props.cookie?.ltuid, props.cookie?.ltoken], resetContext, {
+  flush: "sync",
+});
 watch(
   () => props.disabled,
   (disabled) => {
@@ -288,6 +301,7 @@ onBeforeUnmount(() => {
 
 function resetContext(): void {
   contextVersion += 1;
+  favoriteSelected.value = false;
   closePanel();
   cancelUpload();
   clearImagePicker();
@@ -307,6 +321,17 @@ function cancelMention(): void {
   mentionController?.abort();
   mentionController = undefined;
   mentionLoading.value = false;
+}
+
+function selectSeries(id: number): void {
+  favoriteSelected.value = false;
+  selectedSeries.value = id;
+}
+
+function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
+  if (props.disabled) return;
+  emits("customEmoticon", value);
+  closePanel();
 }
 
 function cancelUpload(): void {

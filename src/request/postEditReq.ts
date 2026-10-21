@@ -199,6 +199,31 @@ function countMentions(nodes: Array<TGApp.BBS.SctPost.Base>): number {
 }
 
 /**
+ * 判断帖子节点是否为自定义表情。
+ * @since Beta v0.12.6
+ * @param node - 帖子正文节点
+ * @returns 是否为自定义表情节点
+ */
+function isCustomEmoticonNode(
+  node: TGApp.BBS.PostEdit.Node,
+): node is TGApp.BBS.PostEdit.Node & { insert: TGApp.BBS.CustomEmoticon.Insert } {
+  return typeof node.insert !== "string" && "custom_emoticon" in node.insert;
+}
+
+/**
+ * 拒绝新帖使用已失效的收藏表情。
+ * @since Beta v0.12.6
+ * @param nodes - 已规范化的帖子正文节点
+ */
+function assertNewPostCustomEmoticons(nodes: Array<TGApp.BBS.PostEdit.Node>): void {
+  for (const node of nodes) {
+    if (isCustomEmoticonNode(node) && node.insert.custom_emoticon.is_available === false) {
+      throw new TypeError("新帖不能使用已失效的自定义表情");
+    }
+  }
+}
+
+/**
  * 校验帖子来源的基础元数据。
  * @since Beta v0.12.6
  * @param source - 帖子完整数据
@@ -524,6 +549,7 @@ function buildMutationBody(
     });
   } else {
     const textDocument = serializePostDocument(settings.nodes);
+    if (postId === undefined) assertNewPostCustomEmoticons(textDocument.nodes);
     assertPostDocumentContent(textDocument);
     if (textDocument.text.length + textDocument.images.length > maxContentLength) {
       throw new TypeError("帖子正文不能超过 30000 字");

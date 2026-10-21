@@ -240,6 +240,96 @@ describe("postEditReq mutation requests", () => {
     );
   });
 
+  it("rejects an unavailable custom emoticon on new-post creation", async () => {
+    const settings = {
+      ...getPostEditSettings(source),
+      cover: "",
+      nodes: [
+        {
+          insert: {
+            custom_emoticon: {
+              id: "unavailable",
+              url: "https://example.com/emoticons/unavailable.webp",
+              size: { width: 96, height: 64 },
+              is_available: false,
+            },
+          },
+        },
+        { insert: "\n" },
+      ],
+    };
+
+    await expect(postEditReq.create(settings, cookie)).rejects.toThrow("已失效");
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("publishes a custom-emoticon-only post without adding an image", async () => {
+    const settings = {
+      ...getPostEditSettings(source),
+      cover: "",
+      nodes: [
+        {
+          insert: {
+            custom_emoticon: {
+              id: "custom-only",
+              url: "https://example.com/emoticons/custom-only.webp",
+              size: { width: 96, height: 64 },
+              is_available: true,
+            },
+          },
+        },
+        { insert: "\n" },
+      ],
+    };
+
+    await expect(postEditReq.create(settings, cookie)).resolves.toEqual(successResponse);
+    const body = mocks.post.mock.calls[0][1].body;
+    expect(body.cover).toBe("");
+    expect(body.structured_content).toContain('"backup_text":"[自定义表情]"');
+    expect(body.structured_content).not.toContain('"image"');
+  });
+
+  it("keeps an unavailable source custom emoticon during an edit", async () => {
+    const sourceWithUnavailable = structuredClone(source);
+    sourceWithUnavailable.post.cover = "";
+    sourceWithUnavailable.post.images = [];
+    sourceWithUnavailable.post.structured_content = JSON.stringify([
+      {
+        insert: {
+          custom_emoticon: {
+            id: "unavailable",
+            url: "https://example.com/emoticons/unavailable.webp",
+            size: { width: 96, height: 64 },
+            is_available: false,
+          },
+        },
+      },
+      { insert: "\n" },
+    ]);
+
+    const settings = getPostEditSettings(sourceWithUnavailable);
+    expect(settings.nodes[0]).toEqual({
+      insert: {
+        custom_emoticon: {
+          id: "unavailable",
+          url: "https://example.com/emoticons/unavailable.webp",
+          size: { width: 96, height: 64 },
+          is_available: false,
+        },
+        backup_text: "[自定义表情]",
+      },
+    });
+    await expect(
+      postEditReq.update(sourceWithUnavailable, { ...settings, subject: "kept" }, cookie),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/editPost",
+      expect.objectContaining({
+        body: expect.objectContaining({ structured_content: JSON.stringify(settings.nodes) }),
+      }),
+    );
+  });
+
   it("sends the picture-post content wrapper and independent image order", async () => {
     const settings = getPostEditSettings(pictureSource);
 

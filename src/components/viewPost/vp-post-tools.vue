@@ -62,15 +62,15 @@
           </button>
         </div>
         <div class="post-tools-body">
-          <div v-if="emojiSeries.length > 0" aria-label="表情系列" class="post-tools-series">
-            <!-- TODO：用户收藏表情使用独立的 custom_emoticon 节点。
-                 待确认 APP 收藏列表接口、登录凭据和分页契约后接入，不能用默认系列代替。 -->
+          <div aria-label="表情系列" class="post-tools-series">
             <button
-              aria-label="收藏表情暂不可用"
+              :aria-pressed="favoriteSelected"
+              :disabled="disabled || uploading || !allowCustomEmoticon"
+              :title="allowCustomEmoticon ? '收藏表情' : '图片帖暂不支持收藏表情'"
+              aria-label="收藏表情"
               class="post-tools-series-item"
-              disabled
-              title="收藏表情暂不可用"
               type="button"
+              @click="favoriteSelected = true"
             >
               <v-icon size="24">mdi-star-outline</v-icon>
             </button>
@@ -79,11 +79,11 @@
                 <button
                   v-bind="tooltipProps"
                   :aria-label="item.name"
-                  :aria-pressed="selectedSeries === item.id"
+                  :aria-pressed="!favoriteSelected && selectedSeries === item.id"
                   :disabled="disabled"
                   class="post-tools-series-item"
                   type="button"
-                  @click="selectedSeries = item.id"
+                  @click="selectSeries(item.id)"
                 >
                   <img :alt="item.name" :src="item.icon" loading="lazy" />
                 </button>
@@ -91,7 +91,19 @@
             </v-tooltip>
           </div>
           <div class="post-tools-content">
-            <div v-if="emojiLoading" aria-live="polite" class="post-tools-status" role="status">
+            <VpCustomEmoticons
+              v-if="favoriteSelected && emojiOpen && allowCustomEmoticon"
+              :contextId
+              :cookie
+              :disabled="disabled || uploading"
+              @select="insertCustomEmoticon"
+            />
+            <div
+              v-else-if="emojiLoading"
+              aria-live="polite"
+              class="post-tools-status"
+              role="status"
+            >
               正在加载表情…
             </div>
             <div v-else-if="emojiError" class="post-tools-status" role="alert">
@@ -213,15 +225,26 @@ import replyAssetReq from "@req/replyAssetReq.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
-const { disabled, cookie, gid, contextId, hideToolbar } = defineProps<{
+import VpCustomEmoticons from "./vp-custom-emoticons.vue";
+
+const {
+  disabled,
+  cookie,
+  gid,
+  contextId,
+  hideToolbar,
+  allowCustomEmoticon = true,
+} = defineProps<{
   disabled: boolean;
   cookie?: Record<string, string>;
   gid: number;
   contextId: number;
   hideToolbar?: boolean;
+  allowCustomEmoticon?: boolean;
 }>();
 const emits = defineEmits<{
   emoticon: [emoticon: { src: string; name: string }];
+  customEmoticon: [value: TGApp.BBS.CustomEmoticon.Value];
   mention: [user: TGApp.BBS.ReplyAsset.Mention];
   image: [image: TGApp.BBS.ReplyAsset.UploadedImage];
   uploadBusy: [value: boolean];
@@ -233,6 +256,7 @@ const emojiActivator = ref<HTMLElement>();
 const mentionActivator = ref<HTMLElement>();
 const emojiSeries = ref<Array<TGApp.BBS.Emoji.Series>>([]);
 const selectedSeries = ref<number>();
+const favoriteSelected = ref<boolean>(false);
 const emojiLoading = ref<boolean>(false);
 const emojiError = ref<string>("");
 const uploading = ref<boolean>(false);
@@ -254,6 +278,12 @@ const emojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
 
 watch(() => [contextId, gid, cookie?.ltuid, cookie?.ltoken], reset, { flush: "sync" });
 watch(
+  () => allowCustomEmoticon,
+  (allowed) => {
+    if (!allowed) favoriteSelected.value = false;
+  },
+);
+watch(
   () => disabled,
   (isDisabled) => {
     if (isDisabled) closePanel();
@@ -268,6 +298,7 @@ onBeforeUnmount(reset);
 
 function reset(): void {
   version += 1;
+  favoriteSelected.value = false;
   controller?.abort();
   mentionController?.abort();
   picker = undefined;
@@ -294,6 +325,22 @@ function closePanel(): void {
 
 function cancelUpload(): void {
   controller?.abort();
+}
+
+function selectSeries(id: number): void {
+  favoriteSelected.value = false;
+  selectedSeries.value = id;
+}
+
+function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
+  if (disabled || uploading.value || !allowCustomEmoticon) return;
+  try {
+    getCookie();
+    emits("customEmoticon", value);
+    closePanel();
+  } catch (cause) {
+    error.value = cause instanceof Error ? cause.message : "无法插入收藏表情";
+  }
 }
 
 function clearImagePicker(): void {

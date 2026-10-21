@@ -11,6 +11,7 @@ import {
 } from "../src/utils/bbsPostPreview.js";
 
 const smileUrl = "https://example.com/emoticons/smile.png";
+const customUrl = "https://example.com/emoticons/custom.webp";
 
 describe("collectPostPreviewEmoticonMap", () => {
   it("collects only safe emoticons from current draft embeds", () => {
@@ -38,6 +39,33 @@ describe("collectPostPreviewEmoticonMap", () => {
       { insert: { emoticon: { name: "bad name ", src: smileUrl } } },
       { insert: { emoticon: { name: "missing source" } } },
     ]);
+  });
+
+  it("keeps custom emoticon embeds out of the ordinary emoticon token map", () => {
+    const nodes: Array<TGApp.BBS.SctPost.Base> = [
+      {
+        insert: {
+          custom_emoticon: {
+            id: "custom-one",
+            url: customUrl,
+            size: { width: 96, height: 64 },
+            is_available: true,
+          },
+          backup_text: "[自定义表情]",
+        },
+      },
+    ];
+
+    expect(collectPostPreviewEmoticonMap(nodes)).toEqual({});
+    expect(nodes[0]?.insert).toEqual({
+      custom_emoticon: {
+        id: "custom-one",
+        url: customUrl,
+        size: { width: 96, height: 64 },
+        is_available: true,
+      },
+      backup_text: "[自定义表情]",
+    });
   });
 });
 

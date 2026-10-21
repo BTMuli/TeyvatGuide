@@ -3,7 +3,7 @@
   <div v-if="localUrl !== undefined" class="tp-emo-box" title="自定义表情">
     <img
       ref="emoticonRef"
-      :alt="props.data.insert.custom_emoticon.hash"
+      :alt="props.data.insert.custom_emoticon.hash ?? '自定义表情'"
       :src="localUrl"
       @click="handleEmoticonClick"
       @error="handleEmoticonError"
@@ -32,33 +32,10 @@ import VpOverlayImage from "./vp-overlay-image.vue";
 
 /**
  * 自定义表情组件数据
+ * @since Beta v0.12.6
  */
 type TpCustomEmoticon = {
-  /* 插入内容 */
-  insert: {
-    /* 自定义表情 */
-    backup_text: "[自定义表情]";
-    /* 自定义表情信息 */
-    custom_emoticon: {
-      /* 表情ID */
-      id: string;
-      /* 表情链接 */
-      url: string;
-      /* 表情尺寸 */
-      size: {
-        /* 宽度 */
-        width: number;
-        /* 高度 */
-        height: number;
-        /* 文件大小 */
-        file_size?: number;
-      };
-      /* 是否可用 */
-      is_available: boolean;
-      /* 哈希值 */
-      hash: string;
-    };
-  };
+  insert: TGApp.BBS.CustomEmoticon.Insert;
 };
 /**
  * 自定义表情组件属性

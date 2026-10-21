@@ -26,6 +26,13 @@ const cookie = {
 };
 const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
 const successResponse = { retcode: 0, message: "ok", data: null };
+const customEmoticon = {
+  id: "custom-1",
+  url: "https://example.com/custom.webp",
+  size: { width: 128, height: 128, file_size: 1024 },
+  is_available: true,
+  hash: "custom-hash",
+};
 
 beforeEach(() => {
   mocks.get.mockReset();
@@ -258,6 +265,38 @@ describe("postReq.reply mutation requests", () => {
           gids: "2",
           content: "",
           structured_content: JSON.stringify(structuredContent),
+        },
+      }),
+    );
+  });
+
+  it("sends a pure custom emoticon with a deterministic text placeholder", async () => {
+    const structuredContent: Array<TGApp.BBS.Reply.SendNode> = [
+      { insert: { custom_emoticon: customEmoticon } },
+      { insert: "\n" },
+    ];
+
+    await postReq.reply.create(
+      { postId: "123", gid: 2, content: "[自定义表情]", structuredContent },
+      cookie,
+    );
+
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        body: {
+          post_id: "123",
+          gids: "2",
+          content: "[自定义表情]",
+          structured_content: JSON.stringify([
+            {
+              insert: {
+                custom_emoticon: customEmoticon,
+                backup_text: "[自定义表情]",
+              },
+            },
+            { insert: "\n" },
+          ]),
         },
       }),
     );

@@ -3,12 +3,70 @@
  * @since Beta v0.12.6
  */
 
+import { parseCustomEmoticon } from "./bbsCustomEmoticon.js";
+
+const customEmoticonBackupText: Readonly<"[自定义表情]"> = "[自定义表情]";
+
 /**
  * 判断值是否为普通记录。
  * @since Beta v0.12.6
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * 规范化帖子中的自定义表情节点。
+ * @since Beta v0.12.6
+ * @param value - 未知的自定义表情节点内容
+ * @returns 已校验并补齐占位文本的自定义表情节点
+ */
+function parseCustomEmoticonInsert(
+  value: Record<string, unknown>,
+): TGApp.BBS.CustomEmoticon.Insert {
+  const keys = Object.keys(value);
+  if (
+    !Object.hasOwn(value, "custom_emoticon") ||
+    keys.some((key) => key !== "custom_emoticon" && key !== "backup_text")
+  ) {
+    throw new TypeError("帖子自定义表情信息无效");
+  }
+  if (Object.hasOwn(value, "backup_text") && value.backup_text !== customEmoticonBackupText) {
+    throw new TypeError("帖子自定义表情占位无效");
+  }
+  let customEmoticon: TGApp.BBS.CustomEmoticon.Value;
+  try {
+    customEmoticon = parseCustomEmoticon(value.custom_emoticon);
+  } catch {
+    throw new TypeError("帖子自定义表情无效");
+  }
+  return { custom_emoticon: customEmoticon, backup_text: customEmoticonBackupText };
+}
+
+/**
+ * 判断帖子节点是否为自定义表情。
+ * @since Beta v0.12.6
+ * @param node - 待判断的帖子节点
+ * @returns 是否为自定义表情节点
+ */
+function isCustomEmoticonNode(
+  node: TGApp.BBS.PostEdit.Node,
+): node is TGApp.BBS.PostEdit.Node & { insert: TGApp.BBS.CustomEmoticon.Insert } {
+  return typeof node.insert !== "string" && "custom_emoticon" in node.insert;
+}
+
+/**
+ * 校验帖子中自定义表情的数量。
+ * @since Beta v0.12.6
+ * @param nodes - 已规范化的帖子节点
+ */
+function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.PostEdit.Node>): void {
+  let count = 0;
+  for (const node of nodes) {
+    if (!isCustomEmoticonNode(node)) continue;
+    count += 1;
+    if (count > 1) throw new TypeError("帖子最多添加一个自定义表情");
+  }
 }
 
 /**
@@ -170,6 +228,8 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
       )
         throw new TypeError("帖子表情无效");
       node = { insert: `_(${emoticon.name})` };
+    } else if (isRecord(insert) && Object.hasOwn(insert, "custom_emoticon")) {
+      node = { insert: parseCustomEmoticonInsert(insert) };
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && "image" in insert) {
       if (!isPostUrl(insert.image, true)) throw new TypeError("帖子图片必须使用 HTTPS 地址");
       node = { insert: { image: insert.image } };
@@ -200,6 +260,9 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     ) {
       throw new TypeError("帖子分割线不支持格式属性");
     }
+    if (isCustomEmoticonNode(node) && Object.prototype.hasOwnProperty.call(value, "attributes")) {
+      throw new TypeError("帖子自定义表情不支持格式属性");
+    }
     if (value.attributes !== undefined) {
       if (typeof insert !== "string" && isRecord(insert) && "mention" in insert) {
         throw new TypeError("暂不支持带格式的用户提及，请在米游社网页版编辑");
@@ -211,6 +274,7 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     }
     return node;
   });
+  assertSingleCustomEmoticon(nodes);
   const last = nodes.at(-1);
   if (!last || typeof last.insert !== "string" || !last.insert.endsWith("\n")) {
     nodes.push({ insert: "\n" });
@@ -233,6 +297,8 @@ export function buildPostDocument(input: unknown): TGApp.BBS.PostEdit.DraftDocum
       text += node.insert;
     } else if ("mention" in node.insert) {
       text += `@${node.insert.mention.nickname}`;
+    } else if ("custom_emoticon" in node.insert) {
+      text += node.insert.backup_text ?? customEmoticonBackupText;
     } else if ("image" in node.insert) {
       images.push(node.insert.image);
     }
@@ -257,4 +323,5 @@ export function assertPostDocumentContent(document: TGApp.BBS.PostEdit.DraftDocu
     (node) => typeof node.insert !== "string" && "mention" in node.insert,
   ).length;
   if (mentions > 100) throw new TypeError("帖子最多提及 100 位用户");
+  assertSingleCustomEmoticon(document.nodes);
 }

@@ -60,9 +60,11 @@
                   :cookie="toolCookie"
                   :disabled="pending || !canWrite"
                   :gid="draft.gid"
+                  :allowCustomEmoticon="!isPicture"
                   hideToolbar
                   @image="insertImage"
                   @emoticon="insertEmoticon"
+                  @custom-emoticon="insertCustomEmoticon"
                   @mention="insertMention"
                   @upload-busy="uploading = $event"
                 />
@@ -409,7 +411,13 @@ const canWrite = computed<boolean>(
 );
 const toolCookie = computed<Record<string, string> | undefined>(() =>
   canWrite.value && cookie.value
-    ? { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid }
+    ? {
+        ltoken: cookie.value.ltoken,
+        ltuid: cookie.value.ltuid,
+        stoken: cookie.value.stoken,
+        stuid: cookie.value.stuid,
+        mid: cookie.value.mid,
+      }
     : undefined,
 );
 const forums = computed<Array<{ id: number; name: string }>>(() => {
@@ -650,6 +658,9 @@ function handleEditorError(message: string): void {
 }
 function insertEmoticon(emoticon: { src: string; name: string }): void {
   if (canWrite.value && !busy.value) editor.value?.insertEmoticon(emoticon);
+}
+function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
+  if (canWrite.value && !busy.value && !isPicture.value) editor.value?.insertCustomEmoticon(value);
 }
 function insertMention(user: TGApp.BBS.ReplyAsset.Mention): void {
   if (canWrite.value && !busy.value) editor.value?.insertMention(user);
@@ -905,7 +916,8 @@ defineExpose({ busy, canSubmit, pending });
 }
 
 .post-composer-preview :deep(.post-preview-emoticon),
-.post-composer-preview :deep(.quill-emoticon) {
+.post-composer-preview :deep(.quill-emoticon),
+.post-composer-preview :deep(.quill-custom-emoticon) {
   display: inline-block;
   width: auto;
   max-width: 120px;
