@@ -372,7 +372,6 @@
         v-else-if="isOwnProfile && isNotificationSection(currentSection)"
         :key="`${profileUid}:${currentSection}:${refreshVersion}`"
         :category="notificationCategories[currentSection]"
-        :unreadCount="currentUnreadCount"
         class="community-profile-panel"
         @item-read="handleNotificationItemRead"
         @read="handleNotificationRead"
@@ -599,12 +598,6 @@ const currentSection = computed<ProfileSection>(() => {
 const activeNavigation = computed<NavigationItem | undefined>(() =>
   navigation.value.find((item) => item.section === currentSection.value),
 );
-const currentUnreadCount = computed<number>(() => {
-  const section = currentSection.value;
-  return isNotificationSection(section)
-    ? (unreadCounts.value[notificationCategories[section]] ?? 0)
-    : 0;
-});
 
 const profile = shallowRef<TGApp.BBS.User.Info>();
 const headerUserInfo = shallowRef<TGApp.BBS.User.Info>();

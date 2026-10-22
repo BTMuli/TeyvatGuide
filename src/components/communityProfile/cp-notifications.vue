@@ -330,13 +330,6 @@ async function openProfile(userId: string): Promise<void> {
   gap: 4px;
 }
 
-.cp-notifications-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 12px;
-}
-
 .cp-notifications-count {
   flex-shrink: 0;
   color: var(--box-text-4);
