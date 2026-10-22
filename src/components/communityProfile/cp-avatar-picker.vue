@@ -60,27 +60,17 @@
                     @pointerup="handleCropPointerUp"
                   >
                     <img
-                      alt=""
-                      aria-hidden="true"
-                      class="cpap-crop-full"
+                      :alt="`${customSourceFile.name} 裁切预览`"
+                      class="cpap-crop-image"
                       decoding="async"
                       draggable="false"
                       :src="customPreviewUrl"
+                      @load="handleCropImageLoad"
                     />
-                    <div ref="cropWindow" class="cpap-crop-window">
-                      <img
-                        :alt="`${customSourceFile.name} 裁切预览`"
-                        class="cpap-crop-image"
-                        decoding="async"
-                        draggable="false"
-                        :src="customPreviewUrl"
-                        :style="cropImageStyle"
-                        @load="handleCropImageLoad"
-                      />
-                    </div>
+                    <div aria-hidden="true" class="cpap-crop-window" :style="cropWindowStyle" />
                   </div>
                   <p :id="cropHintId" class="cpap-crop-hint">
-                    拖动图片调整裁切位置，方向键可微调。
+                    拖动圆形选框调整裁切位置，方向键可微调。
                   </p>
                 </div>
                 <button
@@ -287,7 +277,16 @@
 import { prepareCustomAvatar } from "@utils/bbsAvatarImage.js";
 import { prepareReplyImage } from "@utils/bbsReplyImage.js";
 import type { CSSProperties } from "vue";
-import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useId,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 /**
  * 头像选择对话框参数。
@@ -336,7 +335,6 @@ const titleId = useId();
 const cropHintId = useId();
 const customInput = useTemplateRef<HTMLInputElement>("customInput");
 const cropStage = useTemplateRef<HTMLElement>("cropStage");
-const cropWindow = useTemplateRef<HTMLElement>("cropWindow");
 const activeTab = ref<AvatarPickerTab>("preset");
 const activeGroupName = ref<string>("");
 const selectedId = ref<string>("");
@@ -346,6 +344,7 @@ const customPreviewUrl = ref<string>("");
 const customSourceWidth = ref<number>(0);
 const customSourceHeight = ref<number>(0);
 const customCrop = ref<TGApp.BBS.CommunitySettings.AvatarCrop>({ x: 0.5, y: 0.5 });
+const cropStageSize = ref<{ width: number; height: number }>({ width: 0, height: 0 });
 const customError = ref<string>("");
 const customLoading = ref<boolean>(false);
 const customPreparing = ref<boolean>(false);
@@ -373,9 +372,22 @@ const selectedAvatar = computed<TGApp.BBS.CommunitySettings.Avatar | undefined>(
 const selectedDynamic = computed<TGApp.BBS.CommunitySettings.DynamicAvatar | undefined>(() => {
   return props.dynamicAvatars.find((avatar) => avatar.id === selectedDynamicId.value);
 });
-const cropImageStyle = computed<CSSProperties>(() => {
+const cropWindowStyle = computed<CSSProperties>(() => {
+  const stage = cropStageSize.value;
+  const sourceWidth = customSourceWidth.value;
+  const sourceHeight = customSourceHeight.value;
+  if (stage.width <= 0 || stage.height <= 0 || sourceWidth <= 0 || sourceHeight <= 0) {
+    return { display: "none" };
+  }
+  const scale = Math.min(stage.width / sourceWidth, stage.height / sourceHeight);
+  const imageWidth = sourceWidth * scale;
+  const imageHeight = sourceHeight * scale;
+  const square = Math.min(imageWidth, imageHeight);
   return {
-    objectPosition: `${customCrop.value.x * 100}% ${customCrop.value.y * 100}%`,
+    width: `${square}px`,
+    height: `${square}px`,
+    left: `${(stage.width - imageWidth) / 2 + (imageWidth - square) * customCrop.value.x}px`,
+    top: `${(stage.height - imageHeight) / 2 + (imageHeight - square) * customCrop.value.y}px`,
   };
 });
 const canConfirm = computed<boolean>(() => {
@@ -421,7 +433,12 @@ watch(
   },
 );
 
+onMounted(() => {
+  window.addEventListener("resize", updateCropStageSize);
+});
+
 onBeforeUnmount(() => {
+  window.removeEventListener("resize", updateCropStageSize);
   mounted = false;
   clearCustomSelection();
 });
@@ -506,6 +523,20 @@ function handleCropImageLoad(event: Event): void {
   if (image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
   customSourceWidth.value = image.naturalWidth;
   customSourceHeight.value = image.naturalHeight;
+  updateCropStageSize();
+}
+
+/**
+ * 记录裁切舞台尺寸，供圆形选框定位使用。
+ * @since Beta v0.12.6
+ */
+function updateCropStageSize(): void {
+  const stage = cropStage.value;
+  if (!stage) return;
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  if (width === cropStageSize.value.width && height === cropStageSize.value.height) return;
+  cropStageSize.value = { width, height };
 }
 
 function handleCropKeydown(event: KeyboardEvent): void {
@@ -515,16 +546,16 @@ function handleCropKeydown(event: KeyboardEvent): void {
   let y = customCrop.value.y;
   switch (event.key) {
     case "ArrowLeft":
-      x += step;
-      break;
-    case "ArrowRight":
       x -= step;
       break;
+    case "ArrowRight":
+      x += step;
+      break;
     case "ArrowUp":
-      y += step;
+      y -= step;
       break;
     case "ArrowDown":
-      y -= step;
+      y += step;
       break;
     case "Home":
       x = 0.5;
@@ -544,6 +575,7 @@ function handleCropPointerDown(event: PointerEvent): void {
   if (props.disabled || customPreparing.value || event.button !== 0 || !event.isPrimary) return;
   const stage = cropStage.value;
   if (!stage) return;
+  updateCropStageSize();
   cropDragging.value = true;
   cropPointerId = event.pointerId;
   cropStartX = event.clientX;
@@ -555,19 +587,30 @@ function handleCropPointerDown(event: PointerEvent): void {
 
 function handleCropPointerMove(event: PointerEvent): void {
   if (!cropDragging.value || event.pointerId !== cropPointerId) return;
-  const crop = cropWindow.value;
-  if (!crop || customSourceWidth.value <= 0 || customSourceHeight.value <= 0) return;
-  const cropSize = Math.min(crop.clientWidth, crop.clientHeight);
-  const sourceSide = Math.min(customSourceWidth.value, customSourceHeight.value);
-  if (cropSize <= 0 || sourceSide <= 0) return;
-  const scale = cropSize / sourceSide;
-  const overflowX = customSourceWidth.value * scale - cropSize;
-  const overflowY = customSourceHeight.value * scale - cropSize;
+  updateCropStageSize();
+  const stage = cropStageSize.value;
+  if (
+    stage.width <= 0 ||
+    stage.height <= 0 ||
+    customSourceWidth.value <= 0 ||
+    customSourceHeight.value <= 0
+  ) {
+    return;
+  }
+  const scale = Math.min(
+    stage.width / customSourceWidth.value,
+    stage.height / customSourceHeight.value,
+  );
+  const imageWidth = customSourceWidth.value * scale;
+  const imageHeight = customSourceHeight.value * scale;
+  const square = Math.min(imageWidth, imageHeight);
+  const overflowX = imageWidth - square;
+  const overflowY = imageHeight - square;
   const deltaX = event.clientX - cropStartX;
   const deltaY = event.clientY - cropStartY;
   customCrop.value = {
-    x: overflowX > 0 ? normalizeCropPosition(cropStartPosition.x - deltaX / overflowX) : 0.5,
-    y: overflowY > 0 ? normalizeCropPosition(cropStartPosition.y - deltaY / overflowY) : 0.5,
+    x: overflowX > 0 ? normalizeCropPosition(cropStartPosition.x + deltaX / overflowX) : 0.5,
+    y: overflowY > 0 ? normalizeCropPosition(cropStartPosition.y + deltaY / overflowY) : 0.5,
   };
 }
 
@@ -825,9 +868,9 @@ async function handleConfirm(): Promise<void> {
 .cpap-crop-stage {
   position: relative;
   overflow: hidden;
-  width: 260px;
+  width: 190px;
   max-width: 100%;
-  height: 180px;
+  height: 190px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 12px;
   background: var(--box-bg-1);
@@ -845,38 +888,20 @@ async function handleConfirm(): Promise<void> {
   }
 }
 
-.cpap-crop-full {
-  position: absolute;
-  display: block;
-  width: 100%;
-  height: 100%;
-  inset: 0;
-  object-fit: contain;
-  opacity: 0.55;
-  pointer-events: none;
-  user-select: none;
-}
-
 .cpap-crop-window {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  overflow: hidden;
-  width: 160px;
-  height: 160px;
   border: 2px solid var(--common-text-title);
   border-radius: 50%;
-  background: var(--box-bg-2);
+  background: transparent;
   box-shadow: 0 0 0 9999px rgb(0 0 0 / 35%);
   pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 
 .cpap-crop-image {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   pointer-events: none;
   user-select: none;
 }
