@@ -4,6 +4,11 @@
  */
 
 import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
+import {
+  createGameUidNode,
+  getGameUidPreviewText,
+  validateGameUidInfo,
+} from "@utils/bbsGameUid.js";
 
 /**
  * 回复节点校验使用的对象记录
@@ -233,6 +238,23 @@ function parseReplySendNode(value: unknown, index: number): TGApp.BBS.Reply.Send
     };
   }
 
+  if (Object.hasOwn(value.insert, "game_user_info")) {
+    if (!hasExactKeys(value.insert, ["game_user_info"])) {
+      throw new TypeError(`回复结构化节点 ${index} UID 卡片信息无效`);
+    }
+    let gameUidInfo: TGApp.BBS.GameUid.Info;
+    try {
+      gameUidInfo = validateGameUidInfo(value.insert.game_user_info);
+    } catch {
+      throw new TypeError(`回复结构化节点 ${index} UID 卡片信息无效`);
+    }
+    return {
+      insert: {
+        game_user_info: gameUidInfo,
+      },
+    };
+  }
+
   if (!hasExactKeys(value.insert, ["mention"]) || !isReplyRecord(value.insert.mention)) {
     throw new TypeError(`回复结构化节点 ${index} 类型无效`);
   }
@@ -302,14 +324,28 @@ export function validateReplySendNodes(nodes: unknown): Array<TGApp.BBS.Reply.Se
  * 从结构化节点提取回复纯文本
  * @since Beta v0.12.6
  * @param nodes - 回复结构化节点
- * @returns 回复纯文本，图片不包含在其中
+ * @returns 回复纯文本，图片和 UID 卡片不包含在其中
  */
 export function getReplyContentFromSendNodes(nodes: Array<TGApp.BBS.Reply.SendNode>): string {
   let content = "";
+  let skipNextLineBreak = false;
   for (const node of nodes) {
-    if (typeof node.insert === "string") content += node.insert;
-    else if ("mention" in node.insert) content += `@${node.insert.mention.nickname}`;
-    else if ("custom_emoticon" in node.insert) content += customEmoticonBackupText;
+    if (typeof node.insert === "string") {
+      if (skipNextLineBreak && node.insert === "\n") {
+        skipNextLineBreak = false;
+        continue;
+      }
+      content += node.insert;
+      skipNextLineBreak = false;
+    } else if ("mention" in node.insert) {
+      content += `@${node.insert.mention.nickname}`;
+      skipNextLineBreak = false;
+    } else if ("custom_emoticon" in node.insert) {
+      content += customEmoticonBackupText;
+      skipNextLineBreak = false;
+    } else {
+      skipNextLineBreak = true;
+    }
   }
   return content.replace(/\n+$/u, "");
 }
@@ -356,6 +392,7 @@ function getMentionCandidates(
  * @param mentions - 已选提及用户
  * @param images - 待附加图片
  * @param customEmoticon - 待附加收藏表情
+ * @param gameUid - 待附加游戏 UID 卡片
  * @returns 回复文档及发布预览
  */
 export function buildReplyDocument(
@@ -363,6 +400,7 @@ export function buildReplyDocument(
   mentions: Array<TGApp.BBS.Reply.DocumentMention>,
   images: Array<TGApp.BBS.Reply.DocumentImage>,
   customEmoticon?: TGApp.BBS.CustomEmoticon.Value,
+  gameUid?: TGApp.BBS.GameUid.Info,
 ): TGApp.BBS.Reply.Document {
   if (typeof text !== "string") throw new TypeError("回复文本无效");
   const content = text.trim();
@@ -393,6 +431,7 @@ export function buildReplyDocument(
   const imageNodes = images.map((image) => createImageNode({ ...image }));
   const customEmoticonNode =
     customEmoticon === undefined ? undefined : createCustomEmoticonNode(customEmoticon);
+  const gameUidNode = gameUid === undefined ? undefined : createGameUidNode(gameUid);
   if (content !== "") {
     const lastNode = nodes[nodes.length - 1];
     if (lastNode !== undefined && typeof lastNode.insert === "string") {
@@ -401,6 +440,7 @@ export function buildReplyDocument(
       nodes.push({ insert: "\n" });
     }
   }
+  if (gameUidNode !== undefined) nodes.push(gameUidNode, { insert: "\n" });
   if (customEmoticonNode !== undefined) nodes.push(customEmoticonNode, { insert: "\n" });
   for (const imageNode of imageNodes) {
     nodes.push(imageNode, { insert: "\n" });
@@ -411,6 +451,7 @@ export function buildReplyDocument(
     structuredContent.length === 0 ? "" : getReplyContentFromSendNodes(structuredContent);
   const previewParts = [];
   if (content !== "") previewParts.push(content);
+  if (gameUid !== undefined) previewParts.push(getGameUidPreviewText(gameUid));
   if (customEmoticonNode !== undefined) previewParts.push(customEmoticonBackupText);
   if (imageNodes.length > 0) previewParts.push(`图片 ${imageNodes.length} 张`);
   return { content: documentContent, structuredContent, preview: previewParts.join(" · ") };

@@ -191,17 +191,68 @@
           </div>
         </div>
       </v-menu>
-      <!-- TODO：确认 APP 发布 game_user_info 的必填字段后启用。
-           角色选择和预览复用现有绑定角色接口及 tp-uid.vue，展示配置继续沿用组件。 -->
-      <button
-        aria-label="插入 UID 卡片"
-        class="vprt-tool"
-        disabled
-        title="UID 卡片暂不可用"
-        type="button"
+      <v-menu
+        v-model="gameUidOpen"
+        :close-on-content-click="false"
+        :disabled="disabled || !props.cookie"
+        location="start top"
+        offset="8"
+        open-on-click
+        origin="end top"
+        @update:model-value="handleGameUidOpen"
       >
-        <v-icon size="20">mdi-card-account-details-outline</v-icon>
-      </button>
+        <template #activator="{ props: menuProps }">
+          <button
+            v-bind="menuProps"
+            :aria-expanded="gameUidOpen"
+            :disabled="disabled || !props.cookie"
+            aria-haspopup="true"
+            aria-label="插入 UID 卡片"
+            class="vprt-tool"
+            :title="props.cookie ? '插入 UID 卡片' : '请先登录米游社账号'"
+            type="button"
+          >
+            <v-icon size="20">mdi-card-account-details-outline</v-icon>
+          </button>
+        </template>
+        <div aria-label="UID 卡片面板" class="vprt-panel vprt-panel--uid" role="region">
+          <div class="vprt-heading">
+            <span class="vprt-panel-title">选择游戏账号</span>
+            <button
+              aria-label="收起 UID 卡片"
+              class="vprt-action"
+              title="收起 UID 卡片"
+              type="button"
+              @click="closePanel"
+            >
+              <v-icon size="18">mdi-close</v-icon>
+            </button>
+          </div>
+          <div v-if="gameUidLoading" aria-live="polite" class="vprt-status" role="status">
+            正在加载绑定游戏账号…
+          </div>
+          <div v-else-if="gameUidError" class="vprt-status" role="alert">
+            <span>{{ gameUidError }}</span>
+            <button class="vprt-action" type="button" @click="loadGameUidAccounts">重试</button>
+          </div>
+          <div v-else-if="gameUidInfos.length === 0" class="vprt-status">
+            当前分区暂无可用的绑定游戏账号
+          </div>
+          <div v-else aria-label="当前分区绑定游戏账号列表" class="vprt-game-list">
+            <button
+              v-for="card in gameUidInfos"
+              :key="`${card.game_biz}:${card.game_uid}`"
+              :aria-label="`${card.game_name}，UID ${card.game_uid}，${card.nickname}，${card.region_name}`"
+              :disabled="disabled"
+              class="vprt-game-item"
+              type="button"
+              @click="insertGameUid(card)"
+            >
+              <TpUid :copyable="false" :data="{ insert: { game_user_info: card } }" />
+            </button>
+          </div>
+        </div>
+      </v-menu>
       <input
         ref="fileInput"
         :disabled="disabled || !replyAssetCapabilities.imageUpload"
@@ -223,9 +274,14 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import bbsReq from "@req/bbsReq.js";
 import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
+import takumiReq from "@req/takumiReq.js";
+import useBBSStore from "@store/bbs.js";
+import { getGameUidInfos, validateGameUidCookie } from "@utils/bbsGameUid.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
+import TpUid from "./tp-uid.vue";
 import VpCustomEmoticons from "./vp-custom-emoticons.vue";
 
 type ReplyToolsProps = {
@@ -245,17 +301,26 @@ type ImagePickerContext = {
   cookie: Record<string, string>;
 };
 
+/**
+ * UID 卡片请求所需的账号上下文
+ * @since Beta v0.12.6
+ */
+type GameUidCookie = TGApp.App.Account.Cookie;
+
 const props = defineProps<ReplyToolsProps>();
 const emits = defineEmits<{
   customEmoticon: [value: TGApp.BBS.CustomEmoticon.Value];
   emoticon: [emoji: TGApp.BBS.Emoji.Item];
+  gameUid: [value: TGApp.BBS.GameUid.Info];
   mention: [user: TGApp.BBS.ReplyAsset.Mention];
   image: [image: TGApp.BBS.ReplyAsset.UploadedImage];
 }>();
 const interaction = useReplyInteraction();
+const { gameList } = storeToRefs(useBBSStore());
 const fileInput = useTemplateRef<HTMLInputElement>("fileInput");
 const emojiOpen = ref<boolean>(false);
 const mentionOpen = ref<boolean>(false);
+const gameUidOpen = ref<boolean>(false);
 const emojiSeries = ref<Array<TGApp.BBS.Emoji.Series>>([]);
 const selectedSeries = ref<number>();
 const favoriteSelected = ref<boolean>(false);
@@ -265,6 +330,9 @@ const mentionQuery = ref<string>("");
 const mentionResult = ref<TGApp.BBS.ReplyAsset.Mention>();
 const mentionLoading = ref<boolean>(false);
 const mentionError = ref<string>("");
+const gameUidAccounts = ref<Array<TGApp.BBS.Game.Account>>([]);
+const gameUidLoading = ref<boolean>(false);
+const gameUidError = ref<string>("");
 const uploading = ref<boolean>(false);
 let mentionController: AbortController | undefined;
 let uploadController: AbortController | undefined;
@@ -278,15 +346,28 @@ const emojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
     .toSorted((a, b) => a.sort_order - b.sort_order),
 );
 
+const gameUidInfos = computed<Array<TGApp.BBS.GameUid.Info>>(() =>
+  getGameUidInfos(gameUidAccounts.value, gameList.value, props.gid),
+);
+
 watch(mentionQuery, () => {
   cancelMention();
   mentionResult.value = undefined;
   mentionError.value = "";
 });
 
-watch(() => [props.contextId, props.gid, props.cookie?.ltuid, props.cookie?.ltoken], resetContext, {
-  flush: "sync",
-});
+watch(
+  () => [
+    props.contextId,
+    props.gid,
+    props.cookie?.ltuid,
+    props.cookie?.ltoken,
+    props.cookie?.account_id,
+    props.cookie?.cookie_token,
+  ],
+  resetContext,
+  { flush: "sync" },
+);
 watch(
   () => props.disabled,
   (disabled) => {
@@ -308,12 +389,16 @@ function resetContext(): void {
   mentionQuery.value = "";
   mentionResult.value = undefined;
   mentionError.value = "";
+  gameUidAccounts.value = [];
+  gameUidError.value = "";
+  gameUidLoading.value = false;
   emojiLoading.value = false;
 }
 
 function closePanel(): void {
   emojiOpen.value = false;
   mentionOpen.value = false;
+  gameUidOpen.value = false;
   cancelMention();
 }
 
@@ -367,6 +452,74 @@ function handleEmojiOpen(open: boolean): void {
 
 function handleMentionOpen(open: boolean): void {
   if (open) emojiOpen.value = false;
+}
+
+function handleGameUidOpen(open: boolean): void {
+  if (!open) return;
+  emojiOpen.value = false;
+  mentionOpen.value = false;
+  if (gameUidAccounts.value.length === 0 && !gameUidLoading.value) {
+    void loadGameUidAccounts();
+  }
+}
+
+function getGameUidCookie(cookie: Record<string, string>): GameUidCookie {
+  return validateGameUidCookie(cookie);
+}
+
+async function loadGameUidAccounts(): Promise<void> {
+  if (props.disabled || gameUidLoading.value || !props.cookie) return;
+  const version = contextVersion;
+  let requestCookie: GameUidCookie;
+  try {
+    requestCookie = getGameUidCookie(props.cookie);
+  } catch {
+    gameUidError.value = "当前账号缺少绑定游戏账号所需凭据";
+    return;
+  }
+  gameUidLoading.value = true;
+  gameUidError.value = "";
+  try {
+    const execution = await executeReplyForCurrentAccount(
+      {
+        uid: requestCookie.ltuid,
+        cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+      },
+      () => takumiReq.bind.gameRoles(requestCookie),
+    );
+    if (!mounted || version !== contextVersion) return;
+    if (
+      !execution.allowed ||
+      !matchesCurrentAccount({
+        uid: requestCookie.ltuid,
+        cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+      })
+    ) {
+      gameUidAccounts.value = [];
+      gameUidError.value = "账号状态已变化，请重新打开帖子窗口";
+      return;
+    }
+    if (execution.data.retcode !== 0 || !Array.isArray(execution.data.data?.list)) {
+      throw new Error("绑定游戏账号响应无效");
+    }
+    gameUidAccounts.value = execution.data.data.list;
+  } catch {
+    if (mounted && version === contextVersion) {
+      gameUidError.value = "绑定游戏账号加载失败，请重试";
+    }
+  } finally {
+    if (mounted && version === contextVersion) gameUidLoading.value = false;
+  }
+}
+
+function insertGameUid(info: TGApp.BBS.GameUid.Info): void {
+  if (props.disabled) return;
+  const current = gameUidInfos.value.find(
+    (card) => card.game_biz === info.game_biz && card.game_uid === info.game_uid,
+  );
+  if (!current) return;
+  emits("gameUid", { ...current });
+  closePanel();
 }
 
 async function loadEmoji(): Promise<void> {
@@ -577,6 +730,11 @@ async function selectImage(event: Event): Promise<void> {
   max-height: min(320px, 50vh);
 }
 
+.vprt-panel--uid {
+  overflow: auto;
+  max-height: min(360px, 52vh);
+}
+
 .dark .vprt-panel {
   box-shadow: 0 8px 24px var(--common-shadow-t-4);
 }
@@ -747,10 +905,36 @@ async function selectImage(event: Event): Promise<void> {
   white-space: nowrap;
 }
 
+.vprt-game-list {
+  display: flex;
+  overflow: auto;
+  min-height: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vprt-game-item {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.vprt-game-item :deep(.tpu-box) {
+  min-height: 72px;
+}
+
 .vprt-tool:focus-visible,
 .vprt-action:focus-visible,
 .vprt-series-item:focus-visible,
-.vprt-emoji:focus-visible {
+.vprt-emoji:focus-visible,
+.vprt-game-item:focus-visible {
   outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }
@@ -758,9 +942,15 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-tool:disabled,
 .vprt-action:disabled,
 .vprt-series-item:disabled,
-.vprt-emoji:disabled {
+.vprt-emoji:disabled,
+.vprt-game-item:disabled {
   cursor: default;
   opacity: 0.45;
+}
+
+.vprt-game-item:hover:not(:disabled) {
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-3);
 }
 
 .vprt-tool:hover:not(:disabled, [aria-expanded="true"]),

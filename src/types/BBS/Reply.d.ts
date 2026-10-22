@@ -121,6 +121,10 @@ declare namespace TGApp.BBS.Reply {
     | {
         /** 收藏表情内容 */
         insert: TGApp.BBS.CustomEmoticon.Insert;
+      }
+    | {
+        /** 游戏 UID 卡片内容 */
+        insert: TGApp.BBS.GameUid.Insert;
       };
 
   /**

@@ -33,6 +33,14 @@ const customEmoticon = {
   is_available: true,
   hash: "custom-hash",
 };
+const gameUidInfo: TGApp.BBS.GameUid.Info = {
+  game_biz: "hk4e_cn",
+  game_name: "原神",
+  game_uid: "100000001",
+  level: 60,
+  nickname: "旅行者",
+  region_name: "天空岛",
+};
 
 beforeEach(() => {
   mocks.get.mockReset();
@@ -300,6 +308,54 @@ describe("postReq.reply mutation requests", () => {
         },
       }),
     );
+  });
+
+  it("sends a UID-only reply with the APK game info fields and no invented backup text", async () => {
+    const structuredContent: Array<TGApp.BBS.Reply.SendNode> = [
+      { insert: { game_user_info: gameUidInfo } },
+      { insert: "\n" },
+    ];
+
+    await postReq.reply.create({ postId: "123", gid: 2, content: "", structuredContent }, cookie);
+
+    const body = {
+      post_id: "123",
+      gids: "2",
+      content: "",
+      structured_content: JSON.stringify([
+        { insert: { game_user_info: gameUidInfo } },
+        { insert: "\n" },
+      ]),
+    };
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/releaseReply",
+      expect.objectContaining({ body }),
+    );
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "POST", body, "K2", true);
+  });
+
+  it("rejects malformed UID card fields or unknown backup fields before making a request", async () => {
+    const invalidNodes = [
+      { insert: { game_user_info: { ...gameUidInfo, level: "60" } } },
+      { insert: { game_user_info: { ...gameUidInfo, game_uid: " 100000001" } } },
+      { insert: { game_user_info: gameUidInfo, backup_text: "其他内容" } },
+    ];
+
+    for (const node of invalidNodes) {
+      await expect(
+        postReq.reply.create(
+          {
+            postId: "123",
+            gid: 2,
+            content: "",
+            structuredContent: <Array<TGApp.BBS.Reply.SendNode>>(<unknown>[node, { insert: "\n" }]),
+          },
+          cookie,
+        ),
+      ).rejects.toThrow();
+    }
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.getRequestHeader).not.toHaveBeenCalled();
   });
 
   it.each(<const>["like", "pin"])("sends the cancellation flag for %s", async (action) => {

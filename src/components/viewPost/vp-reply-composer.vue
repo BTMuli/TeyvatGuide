@@ -39,6 +39,7 @@
           :disabled="busy || !canWrite"
           :gid="props.gid"
           @custom-emoticon="addCustomEmoticon"
+          @game-uid="addGameUid"
           @image="addImage"
           @emoticon="insertEmoticon"
           @mention="insertMention"
@@ -46,11 +47,23 @@
       </div>
     </div>
     <div
-      v-if="customEmoticon || images.length"
+      v-if="gameUid || customEmoticon || images.length"
       aria-label="待发布附件"
       class="vpr-images"
       role="list"
     >
+      <div v-if="gameUid" class="vpr-uid-card" role="listitem">
+        <TpUid :key="gameUid.game_uid" :data="getGameUidPreview()" />
+        <button
+          aria-label="移除 UID 卡片"
+          :disabled="busy || !canWrite"
+          class="vpr-image-remove"
+          type="button"
+          @click="removeGameUid"
+        >
+          <v-icon size="16">mdi-close</v-icon>
+        </button>
+      </div>
       <div v-if="customEmoticon" class="vpr-image vpr-custom-emoticon" role="listitem">
         <img alt="待发布收藏表情" :src="customEmoticon.url" />
         <button
@@ -98,11 +111,13 @@ import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
 import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
+import { validateGameUidInfo } from "@utils/bbsGameUid.js";
 import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { buildReplyDocument } from "@utils/bbsReplyDocument.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
+import TpUid from "./tp-uid.vue";
 import VpReplyEditor from "./vp-reply-editor.vue";
 import VpReplyTools from "./vp-reply-tools.vue";
 
@@ -126,6 +141,7 @@ const content = ref<string>("");
 const mentions = ref<Array<TGApp.BBS.ReplyAsset.Mention>>([]);
 const images = ref<Array<TGApp.BBS.ReplyAsset.UploadedImage>>([]);
 const customEmoticon = ref<TGApp.BBS.CustomEmoticon.Value>();
+const gameUid = ref<TGApp.BBS.GameUid.Info>();
 const replyEditor = useTemplateRef<InstanceType<typeof VpReplyEditor>>("replyEditor");
 const toolContext = ref<number>(0);
 const publishing = ref<boolean>(false);
@@ -133,7 +149,11 @@ let contextVersion = 0;
 let mounted = true;
 
 const hasContent = computed<boolean>(
-  () => !!content.value.trim() || images.value.length > 0 || customEmoticon.value !== undefined,
+  () =>
+    !!content.value.trim() ||
+    images.value.length > 0 ||
+    customEmoticon.value !== undefined ||
+    gameUid.value !== undefined,
 );
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
@@ -143,6 +163,8 @@ const toolCookie = computed<Record<string, string> | undefined>(() => {
   return {
     ltoken: cookie.value.ltoken,
     ltuid: cookie.value.ltuid,
+    account_id: cookie.value.account_id,
+    cookie_token: cookie.value.cookie_token,
     stoken: cookie.value.stoken,
     stuid: cookie.value.stuid,
     mid: cookie.value.mid,
@@ -152,9 +174,21 @@ const accountHint = computed<string>(() => {
   if (!canWrite.value) return "请先登录米游社账号";
   return `当前账号：${briefInfo.value.nickname || "当前账号"}`;
 });
+const gameUidPreview = computed<TGApp.BBS.GameUid.Node | undefined>(() => {
+  if (gameUid.value === undefined) return undefined;
+  return { insert: { game_user_info: gameUid.value } };
+});
 
 watch(
-  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken, cookie.value?.ltuid],
+  () => [
+    props.postId,
+    props.gid,
+    uid.value,
+    cookie.value?.ltoken,
+    cookie.value?.ltuid,
+    cookie.value?.account_id,
+    cookie.value?.cookie_token,
+  ],
   () => {
     contextVersion += 1;
     resetDraft();
@@ -181,6 +215,7 @@ function resetDraft(): void {
   mentions.value = [];
   images.value = [];
   customEmoticon.value = undefined;
+  gameUid.value = undefined;
   toolContext.value += 1;
 }
 
@@ -241,6 +276,30 @@ function addCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
   }
 }
 
+function addGameUid(value: TGApp.BBS.GameUid.Info): void {
+  if (busy.value || !canWrite.value) return;
+  try {
+    gameUid.value = validateGameUidInfo(value);
+  } catch {
+    showSnackbar.warn("该 UID 卡片不可用，请重新选择游戏账号");
+  }
+}
+
+/**
+ * 获取 UID 卡片预览节点
+ * @since Beta v0.12.6
+ * @returns UID 卡片节点
+ */
+function getGameUidPreview(): TGApp.BBS.GameUid.Node {
+  if (gameUidPreview.value === undefined) throw new Error("UID 卡片预览不可用");
+  return gameUidPreview.value;
+}
+
+function removeGameUid(): void {
+  if (busy.value || !canWrite.value) return;
+  gameUid.value = undefined;
+}
+
 function removeCustomEmoticon(): void {
   if (busy.value || !canWrite.value) return;
   customEmoticon.value = undefined;
@@ -267,6 +326,7 @@ async function publishReply(): Promise<void> {
       mentions.value,
       images.value,
       customEmoticon.value,
+      gameUid.value,
     );
   } catch {
     showSnackbar.warn("回复内容无效，请检查后重试");
@@ -405,6 +465,20 @@ defineExpose({ focusEditor });
   height: 72px;
 }
 
+.vpr-uid-card {
+  position: relative;
+  overflow: hidden;
+  width: min(260px, 100%);
+  min-height: 72px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-4);
+}
+
+.vpr-uid-card :deep(.tpu-box) {
+  min-height: 72px;
+}
+
 .vpr-image img {
   width: 100%;
   height: 100%;
@@ -431,6 +505,11 @@ defineExpose({ focusEditor });
   color: var(--common-text-title);
   cursor: pointer;
   place-items: center;
+}
+
+.vpr-uid-card > .vpr-image-remove {
+  right: auto;
+  left: 0;
 }
 
 .vpr-image-remove:focus-visible {

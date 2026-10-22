@@ -1,11 +1,13 @@
 <template>
   <div class="tpu-box">
     <div class="tpu-top">
-      <span data-html2canvas-ignore @click="copyUid()">
+      <span v-if="props.copyable !== false" data-html2canvas-ignore @click="copyUid()">
         <v-icon size="12">mdi-content-copy</v-icon>
         <span>复制</span>
       </span>
-      <span class="tpu-game">{{ gameInfo?.name ?? "未知游戏" }}</span>
+      <span class="tpu-game">{{
+        props.data.insert.game_user_info.game_name || gameInfo?.name || "未知游戏"
+      }}</span>
     </div>
     <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
     <div class="tpu-sub">
@@ -21,21 +23,9 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 
-type TpUid = {
-  insert: {
-    backup_text: string;
-    game_user_info: {
-      game_uid: string;
-      game_biz: string;
-      nickname: string;
-      region_name: string;
-      level: string;
-    };
-  };
-};
-type TpUidProps = { data: TpUid };
+type TpUidProps = { data: TGApp.BBS.GameUid.Node; copyable?: boolean };
 
 const { gameUidCards, gameList } = storeToRefs(useBBSStore());
 
@@ -47,29 +37,37 @@ const defaultCard: TGApp.BBS.AppConfig.GameUidCardConf = {
 };
 
 const props = defineProps<TpUidProps>();
-const nickname = ref<string>();
+const nickname = ref<string>("");
 const gameInfo = shallowRef<TGApp.BBS.Game.Item>();
 const cardInfo = shallowRef<TGApp.BBS.AppConfig.GameUidCardConf>(defaultCard);
 
-console.log("tpUid", props.data.insert.game_user_info);
-
 const bgImage = computed<string>(() => `url('${cardInfo.value.image_url}')`);
 
-onMounted(async () => {
-  nickname.value = decodeURIComponent(props.data.insert.game_user_info.nickname);
-  gameInfo.value = getGameInfo();
-  if (gameInfo.value) cardInfo.value = gameUidCards.value[gameInfo.value.id] ?? defaultCard;
-});
+watch(
+  [() => props.data.insert.game_user_info, gameList, gameUidCards],
+  ([gameUserInfo]) => {
+    try {
+      nickname.value = decodeURIComponent(gameUserInfo.nickname);
+    } catch {
+      nickname.value = gameUserInfo.nickname;
+    }
+    gameInfo.value = getGameInfo(gameUserInfo);
+    cardInfo.value = gameInfo.value
+      ? (gameUidCards.value[gameInfo.value.id] ?? defaultCard)
+      : defaultCard;
+  },
+  { immediate: true, deep: true },
+);
 
 async function copyUid(): Promise<void> {
   await navigator.clipboard.writeText(props.data.insert.game_user_info.game_uid);
   showSnackbar.success("已复制UID");
 }
 
-function getGameInfo(): TGApp.BBS.Game.Item | undefined {
-  const enName = props.data.insert.game_user_info.game_biz.split("_")[0];
+function getGameInfo(info: TGApp.BBS.GameUid.Info): TGApp.BBS.Game.Item | undefined {
+  const enName = info.game_biz.split("_")[0];
   if (!enName) return undefined;
-  return gameList.value.find((g) => g.op_name === enName);
+  return gameList.value.find((g) => g.op_name === enName || g.en_name === enName);
 }
 </script>
 <style lang="scss" scoped>
@@ -110,6 +108,7 @@ function getGameInfo(): TGApp.BBS.Game.Item | undefined {
   justify-content: center;
   font-family: var(--font-title);
   font-size: 16px;
+  font-weight: normal;
 }
 
 .tpu-sub {
