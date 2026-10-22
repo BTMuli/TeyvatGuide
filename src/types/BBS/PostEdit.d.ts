@@ -36,6 +36,26 @@ declare namespace TGApp.BBS.PostEdit {
   };
 
   /**
+   * 帖子视频嵌入值。
+   *
+   * 编辑时完整保留官方 `structured_content` 中的视频元数据，仅对编辑器
+   * 实际使用的字段做校验；服务端会依据视频节点重新生成 `vod_list`。
+   * @since Beta v0.12.6
+   */
+  type Vod = {
+    /** 视频 ID */
+    id: string;
+    /** 视频时长，单位毫秒 */
+    duration: number;
+    /** 视频封面 URL */
+    cover?: string;
+    /** 观看数 */
+    view_num?: number;
+    /** 官方返回的分辨率、转码状态等其余元数据 */
+    [key: string]: unknown;
+  };
+
+  /**
    * 米游社帖子折叠嵌入值。
    *
    * `title` 和 `content` 是 JSON 编码的 Quill Delta；`id` 与 `size` 为 APK
@@ -70,6 +90,7 @@ declare namespace TGApp.BBS.PostEdit {
       | { mention: TGApp.BBS.ReplyAsset.Mention }
       | { divider: Divider }
       | { vote: Vote }
+      | { vod: Vod }
       | FoldInsert
       | TGApp.BBS.CustomEmoticon.Insert;
     attributes?: Attributes;
@@ -131,13 +152,27 @@ declare namespace TGApp.BBS.PostEdit {
   };
 
   /**
+   * 版块发布限制信息。
+   * @since Beta v0.12.6
+   */
+  type ReleaseConfig = {
+    /** 当前账号是否可在该版块发帖 */
+    can_release?: boolean;
+    /** 无法发帖时的服务端说明 */
+    msg?: string;
+  };
+
+  /**
    * 帖子写接口响应，保留服务端业务错误。
    * @since Beta v0.12.6
    */
   type MutationResponse = {
     retcode: number;
     message: string;
-    data: { post_id?: string | number } | null;
+    data: {
+      post_id?: string | number;
+      release_check_result?: ReleaseConfig | null;
+    } | null;
   };
 
   /**
@@ -147,6 +182,6 @@ declare namespace TGApp.BBS.PostEdit {
   type ReleaseConfigResponse = {
     retcode: number;
     message: string;
-    data: unknown;
+    data: ReleaseConfig | null;
   };
 }

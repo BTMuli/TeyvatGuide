@@ -5,6 +5,30 @@
       <div class="posts-top">
         <img alt="posts" src="/UI/nav/posts.webp" />
         <span>帖子</span>
+        <v-menu v-if="topPosts.length > 0" location="bottom start" offset="4">
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              aria-label="置顶帖子"
+              class="posts-pinned-trigger"
+              icon="mdi-pin"
+              size="small"
+              title="置顶帖子"
+              variant="flat"
+            />
+          </template>
+          <v-list aria-label="置顶帖子" class="posts-pinned-menu" density="compact">
+            <v-list-item v-for="post in topPosts" :key="post.post_id" @click="openTopPost(post)">
+              <template #title>
+                <TpTitle
+                  :single-line="true"
+                  :text="post.subject || '无标题帖子'"
+                  :title="post.subject || '无标题帖子'"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </template>
     <div class="posts-switch">
@@ -93,7 +117,7 @@
         @click:append-inner="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-menu v-if="publishTypes.length > 0" location="bottom end">
+      <v-menu v-if="publishTypes.length > 0" location="bottom start" offset="4">
         <template #activator="{ props: menuProps }">
           <v-btn
             v-bind="menuProps"
@@ -156,33 +180,9 @@
       </div>
     </template>
   </v-app-bar>
-  <div class="posts-body">
-    <div
-      v-if="topPosts.length > 0"
-      ref="postsPinnedEl"
-      :class="{ 'is-stuck': isPinnedStuck }"
-      class="posts-pinned"
-    >
-      <div
-        v-for="post in topPosts"
-        :key="post.post_id"
-        :title="post.subject"
-        class="posts-pinned-item"
-        @click="openTopPost(post)"
-      >
-        <span class="posts-pinned-tag">
-          <v-icon size="14">mdi-pin</v-icon>
-          <span>置顶</span>
-        </span>
-        <span class="posts-pinned-title">
-          <TpTitle :single-line="true" :text="post.subject || '无标题帖子'" />
-        </span>
-      </div>
-    </div>
-    <div :class="{ grid: postGridMode }" class="posts-grid">
-      <div v-for="post in posts" :key="post.post.post_id">
-        <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
-      </div>
+  <div :class="{ grid: postGridMode }" class="posts-grid">
+    <div v-for="post in posts" :key="post.post.post_id">
+      <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />
@@ -208,16 +208,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import {
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  shallowRef,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
@@ -270,10 +261,7 @@ const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const topPosts = shallowRef<Array<TGApp.BBS.Forum.TopPost>>([]);
-const postsPinnedEl = useTemplateRef<HTMLElement>("postsPinnedEl");
-const isPinnedStuck = ref<boolean>(false);
 let topPostRequestId = 0;
-let pinnedStuckFrame = 0;
 const curGame = computed<SortSelectGame | undefined>(() => {
   return sortGameList.value.find((item) => item.gid === curGid.value);
 });
@@ -318,28 +306,7 @@ const reqCk = computed<TGApp.App.Account.Cookie | undefined>(() => {
   return cookie.value;
 });
 
-function updatePinnedStuck(): void {
-  const pinned = postsPinnedEl.value;
-  if (!pinned) {
-    isPinnedStuck.value = false;
-    return;
-  }
-  const stickyTop = Number.parseFloat(getComputedStyle(pinned).top) || 0;
-  const offset = pinned.getBoundingClientRect().top;
-  isPinnedStuck.value = Math.abs(offset - stickyTop) <= 1;
-}
-
-function schedulePinnedStuckUpdate(): void {
-  if (pinnedStuckFrame !== 0) return;
-  pinnedStuckFrame = requestAnimationFrame(() => {
-    pinnedStuckFrame = 0;
-    updatePinnedStuck();
-  });
-}
-
 onMounted(async () => {
-  window.addEventListener("scroll", schedulePinnedStuckUpdate, { passive: true });
-  window.addEventListener("resize", schedulePinnedStuckUpdate);
   await showLoading.start("正在加载帖子数据");
   await loadForums();
   await nextTick();
@@ -358,12 +325,6 @@ onMounted(async () => {
   );
   await freshPostData();
   firstLoad.value = true;
-});
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", schedulePinnedStuckUpdate);
-  window.removeEventListener("resize", schedulePinnedStuckUpdate);
-  if (pinnedStuckFrame !== 0) cancelAnimationFrame(pinnedStuckFrame);
 });
 
 watch(
@@ -432,14 +393,6 @@ watch(
     }
   },
 );
-watch(
-  () => topPosts.value,
-  async () => {
-    await nextTick();
-    updatePinnedStuck();
-  },
-);
-
 // 初始化
 async function loadForums(): Promise<void> {
   await bbsStore.refreshForumList();
@@ -665,8 +618,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 }
 </script>
 <style lang="scss" scoped>
-@use "@styles/github.styles.scss" as github-styles;
-
 .posts-top {
   display: flex;
   align-items: center;
@@ -679,10 +630,34 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
     height: 32px;
   }
 
-  span {
+  > span {
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
+  }
+}
+
+.posts-pinned-trigger {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
+
+.posts-pinned-menu {
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  max-height: 360px;
+  padding-block: 4px;
+
+  :deep(.v-list-item-title) {
+    overflow: hidden;
+    font-family: var(--font-title);
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -756,82 +731,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   &.grid {
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   }
-}
-
-.posts-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.posts-pinned {
-  @include github-styles.github-card;
-
-  position: sticky;
-  z-index: 2;
-  top: var(--v-layout-top, 0);
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  padding: 4px;
-  border-radius: 4px;
-  gap: 2px;
-}
-
-.dark .posts-pinned {
-  @include github-styles.github-card("dark");
-}
-
-.posts-pinned.is-stuck {
-  padding-right: 21px;
-  padding-left: 21px;
-  border-radius: 0;
-  border-right: none;
-  border-left: none;
-  margin-right: -16px;
-  margin-left: -16px;
-}
-
-.posts-pinned-item {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  padding: 8px;
-  border-radius: 4px;
-  color: var(--common-text-title);
-  cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 15px;
-  font-weight: normal;
-  gap: 8px;
-  transition: background-color 0.15s ease;
-
-  &:hover {
-    background: var(--common-shadow-1);
-  }
-}
-
-.posts-pinned-tag {
-  display: flex;
-  height: 20px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--tgc-od-blue) 14%, transparent);
-  color: var(--tgc-od-blue);
-  font-size: 12px;
-  gap: 2px;
-  line-height: 1;
-  user-select: none;
-}
-
-.posts-pinned-title {
-  display: flex;
-  overflow: hidden;
-  min-width: 0;
-  align-items: center;
 }
 
 .select-item {

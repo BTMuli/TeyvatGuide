@@ -1,6 +1,6 @@
 /**
  * apiHub下的请求
- * @since Beta v0.12.4
+ * @since Beta v0.12.6
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -19,6 +19,22 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 async function getAllGamesForums(): Promise<TGApp.BBS.Forum.GameForumResp> {
   const resp = await TGHttps.get<TGApp.BBS.Forum.GameForumResp>(`${Mahbu}wapi/getAllGamesForums`, {
     headers: { "Content-Type": "application/json", referer: Referer },
+  });
+  return resp.data;
+}
+
+/**
+ * 获取版块主页信息
+ * @since Beta v0.12.6
+ * @param forumId - 版块 ID
+ * @param gid - 社区 ID
+ * @returns 版块主页信息响应数据
+ */
+async function getForumMain(forumId: number, gid: number): Promise<TGApp.BBS.Forum.MainResp> {
+  const params = { forum_id: forumId, gids: gid };
+  const resp = await TGHttps.get<TGApp.BBS.Forum.MainResp>(`${Mahbu}api/forumMain`, {
+    headers: { "Content-Type": "application/json", referer: Referer },
+    query: params,
   });
   return resp.data;
 }
@@ -212,6 +228,7 @@ const apiHubReq = {
   appConfig: getAppConfig,
   home: homeNew,
   forum: getAllGamesForums,
+  forumMain: getForumMain,
   game: getGameList,
   mission: { list: getMissions, state: getUserMissionsState },
   sign: signIn,

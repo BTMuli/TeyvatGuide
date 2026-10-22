@@ -156,4 +156,42 @@ declare namespace TGApp.BBS.Forum {
     /** 帖子列表 */
     list: Array<TGApp.BBS.Post.FullData>;
   };
+
+  /**
+   * 获取版块主页信息返回响应
+   * @since Beta v0.12.6
+   */
+  type MainResp = TGApp.BBS.Response.BaseWithData<MainRes>;
+
+  /**
+   * 获取版块主页信息返回数据
+   * @since Beta v0.12.6
+   */
+  type MainRes = GameForumItem & {
+    /** 置顶帖子列表 */
+    top_posts: Array<TopPost>;
+  };
+
+  /**
+   * 版块置顶帖子
+   * @since Beta v0.12.6
+   */
+  type TopPost = {
+    /** 帖子 ID */
+    post_id: string;
+    /** 游戏 ID */
+    game_id: number;
+    /** 所属版块 ID */
+    f_forum_id: number;
+    /** 帖子标题 */
+    subject: string;
+    /** 帖子封面 */
+    cover: string;
+    /** 浏览类型 */
+    view_type: number;
+    /** 回复时间 */
+    reply_time: string;
+    /** 创建时间 */
+    created_at: string;
+  };
 }
