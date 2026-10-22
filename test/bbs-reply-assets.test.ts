@@ -6,18 +6,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  get: vi.fn(),
   post: vi.fn(),
   getRequestHeader: vi.fn(),
   prepareReplyImage: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { post: mocks.post } }));
+vi.mock("@utils/TGHttps.js", () => ({ default: { get: mocks.get, post: mocks.post } }));
 vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
 vi.mock("@utils/bbsReplyImage.js", () => ({ prepareReplyImage: mocks.prepareReplyImage }));
 
 import replyAssetReq, {
   replyAssetCapabilities,
   resolveMention,
+  uploadCustomAvatarImage,
   uploadImage,
 } from "../src/request/replyAssetReq.js";
 
@@ -26,8 +28,12 @@ const cookie = {
   cookie_token: "cookie-token-must-not-be-sent",
   ltoken: "ltoken-value",
   ltuid: "100000001",
+  mid: "mid-value",
+  stoken: "stoken-value",
+  stuid: "100000001",
 };
 const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+const customAuthCookie = { stuid: cookie.stuid, stoken: cookie.stoken, mid: cookie.mid };
 const imageBytes = Uint8Array.from([1, 2, 3, 4]);
 const preparedImage: TGApp.BBS.ReplyAsset.PreparedImage = {
   bytes: imageBytes.buffer,
@@ -82,7 +88,16 @@ function serializedAccount(
   ltoken: string = cookie.ltoken,
   ltuid: string = cookie.ltuid,
 ): string {
-  return JSON.stringify({ uid, cookie: { ltoken, ltuid } });
+  return JSON.stringify({
+    uid,
+    cookie: {
+      ltoken,
+      ltuid,
+      mid: cookie.mid,
+      stoken: cookie.stoken,
+      stuid: cookie.stuid,
+    },
+  });
 }
 
 /**
@@ -160,6 +175,34 @@ function signedResponse(overrides: Record<string, unknown> = {}): {
 }
 
 /**
+ * 创建官方头像签名接口响应
+ * @since Beta v0.12.6
+ * @returns 官方 UploadPreBean 形状的响应
+ */
+function customAvatarSignedResponse(): { data: Record<string, unknown> } {
+  const legacy = <Record<string, unknown>>signedResponse().data.data;
+  const oss = <Record<string, unknown>>legacy.oss;
+  const callbackVar = <Record<string, unknown>>oss.callback_var;
+  return {
+    data: {
+      retcode: 0,
+      message: "ok",
+      data: {
+        type: "oss",
+        file_name: "avatar.gif",
+        params: {
+          ...oss,
+          callback_var: { extra: callbackVar["x:extra"] },
+          extra_form_data: (<Array<Record<string, unknown>>>oss.extra_form_data).filter(
+            (entry) => entry.key !== "x-oss-object-acl",
+          ),
+        },
+      },
+    },
+  };
+}
+
+/**
  * 创建 OSS 成功响应
  * @since Beta v0.12.6
  * @param url - 返回 URL
@@ -211,6 +254,7 @@ function installEnvironment(): TestEnvironment {
 let environment: TestEnvironment;
 
 beforeEach(() => {
+  mocks.get.mockReset();
   mocks.post.mockReset();
   mocks.getRequestHeader.mockReset();
   mocks.prepareReplyImage.mockReset();
@@ -299,6 +343,105 @@ describe("resolveMention", () => {
 
     await expect(resolveMention("Alice", cookie, 2, controller.signal)).rejects.toBe(cancellation);
     expect(mocks.post.mock.calls[0]?.[1].signal).toBe(controller.signal);
+  });
+});
+
+describe("uploadCustomAvatarImage", () => {
+  it("uses the official USER_AVATAR upload source key", async () => {
+    mocks.get.mockResolvedValueOnce(customAvatarSignedResponse());
+    mocks.post.mockResolvedValueOnce(ossResponse());
+    const file = new File([imageBytes], "selected-name.gif", { type: "image/gif" });
+    const expectedQuery = {
+      md5: preparedImage.md5,
+      ext: "gif",
+      support_content_type: 1,
+      upload_source: "8",
+    };
+
+    await expect(uploadCustomAvatarImage(file, cookie)).resolves.toEqual({
+      url: "https://upload-bbs.miyoushe.com/upload/avatar.gif",
+      width: 320,
+      height: 240,
+    });
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(
+      customAuthCookie,
+      "GET",
+      expectedQuery,
+      "K2",
+      true,
+    );
+    expect(mocks.get).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/apihub/sapi/getUploadParams",
+      {
+        headers: { "x-test-header": "test", "x-rpc-client_type": "2" },
+        query: expectedQuery,
+        maxRedirections: 0,
+        signal: expect.any(AbortSignal),
+      },
+    );
+    expect(mocks.post.mock.calls[0]?.[1]).toMatchObject({
+      headers: { Cookie: "" },
+      maxRedirections: 0,
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it("keeps generic upload errors free of reply-specific wording", async () => {
+    mocks.get.mockRejectedValueOnce({ status: 503, message: "secret response" });
+    const file = new File([imageBytes], "avatar.gif", { type: "image/gif" });
+
+    await expect(uploadCustomAvatarImage(file, cookie)).rejects.toMatchObject({
+      message: "米游社图片上传参数获取失败",
+      cause: { status: 503 },
+    });
+  });
+
+  it.each([
+    { field: "host", value: "https://example.com/" },
+    { field: "dir", value: "upload/../private/" },
+    { field: "x_oss_content_type", value: "image/png" },
+  ])("rejects invalid avatar upload parameters before OSS: $field", async ({ field, value }) => {
+    const response = customAvatarSignedResponse();
+    const data = <Record<string, unknown>>response.data.data;
+    const params = <Record<string, unknown>>data.params;
+    params[field] = value;
+    mocks.get.mockResolvedValueOnce(response);
+
+    await expect(
+      uploadCustomAvatarImage(new File([imageBytes], "avatar.gif", { type: "image/gif" }), cookie),
+    ).rejects.toThrow();
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it("aborts when native avatar credentials change during preparation", async () => {
+    let resolvePrepare: (value: TGApp.BBS.ReplyAsset.PreparedImage) => void = () => undefined;
+    mocks.prepareReplyImage.mockReturnValueOnce(
+      new Promise<TGApp.BBS.ReplyAsset.PreparedImage>((resolve) => {
+        resolvePrepare = resolve;
+      }),
+    );
+    const pending = uploadCustomAvatarImage(
+      new File([imageBytes], "avatar.gif", { type: "image/gif" }),
+      cookie,
+    );
+    environment.storage.setStored(
+      JSON.stringify({
+        uid: cookie.ltuid,
+        cookie: {
+          ltoken: cookie.ltoken,
+          ltuid: cookie.ltuid,
+          mid: "different-mid",
+          stoken: cookie.stoken,
+          stuid: cookie.stuid,
+        },
+      }),
+    );
+    environment.emitStorage();
+    resolvePrepare(preparedImage);
+
+    await expect(pending).rejects.toThrow("当前账号已切换");
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 });
 
@@ -479,7 +622,7 @@ describe("uploadImage", () => {
     });
     const pending = uploadImage(file, cookie, 2);
     await expect(pending).rejects.toMatchObject({
-      message: "米游社回复图片上传参数获取失败",
+      message: "米游社图片上传参数获取失败",
       cause: { status: 503 },
     });
     await expect(pending).rejects.not.toThrow("raw signature secret");

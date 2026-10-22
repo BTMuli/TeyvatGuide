@@ -1,4 +1,4 @@
-<!-- 米游社头像框选择对话框 -->
+<!-- 米游社挂件选择对话框 -->
 <template>
   <v-dialog
     v-model="visible"
@@ -13,11 +13,11 @@
     <section class="cppp-panel">
       <header class="cppp-header">
         <div class="cppp-heading">
-          <h2 :id="titleId">选择头像框</h2>
-          <p>头像框会显示在个人中心与帖子头像外圈，保存资料后生效。</p>
+          <h2 :id="titleId">选择挂件</h2>
+          <p>选择头像框或评论装扮，保存资料后生效。</p>
         </div>
         <v-btn
-          aria-label="关闭头像框选择"
+          aria-label="关闭挂件选择"
           icon="mdi-close"
           size="32"
           title="关闭"
@@ -27,16 +27,38 @@
         />
       </header>
 
-      <div v-if="loading" aria-live="polite" class="cppp-state" role="status">
+      <v-tabs
+        v-model="activeTab"
+        aria-label="挂件类型"
+        class="cppp-tabs"
+        color="var(--common-text-title)"
+        density="compact"
+        show-arrows
+      >
+        <v-tab value="pendant">头像框</v-tab>
+        <v-tab value="comment">评论装扮</v-tab>
+      </v-tabs>
+
+      <div
+        v-if="activeTab === 'pendant' && loading"
+        aria-live="polite"
+        class="cppp-state"
+        role="status"
+      >
         <v-progress-circular indeterminate size="28" />
         <p>正在加载头像框列表…</p>
       </div>
-      <div v-else-if="error" aria-live="assertive" class="cppp-state" role="alert">
+      <div
+        v-else-if="activeTab === 'pendant' && error"
+        aria-live="assertive"
+        class="cppp-state"
+        role="alert"
+      >
         <v-icon size="32">mdi-alert-circle-outline</v-icon>
         <p>{{ error }}</p>
         <v-btn type="button" variant="tonal" @click="emits('retry')">重新加载</v-btn>
       </div>
-      <div v-else class="cppp-body">
+      <div v-else-if="activeTab === 'pendant'" class="cppp-body">
         <div class="cppp-preview">
           <CpAvatar :size="96" :user="previewUser" />
           <div class="cppp-preview-copy">
@@ -100,47 +122,202 @@
                 </span>
                 <span class="cppp-item-name">不使用</span>
               </button>
-              <button
+              <v-tooltip
                 v-for="pendant in group.pendants"
                 :key="pendant.id"
-                :aria-label="`选择头像框 ${pendant.name}${pendant.owned ? '' : '（未拥有）'}`"
-                :aria-pressed="selectedId === pendant.id"
-                :class="{
-                  'is-locked': !pendant.owned,
-                  'is-selected': selectedId === pendant.id,
-                }"
-                class="cppp-item"
-                :title="pendant.owned ? pendant.name : `${pendant.name}（未拥有，仅可预览）`"
-                type="button"
-                @click="selectedId = pendant.id"
+                location="top"
+                open-delay="120"
               >
-                <span class="cppp-item-preview">
-                  <img
-                    alt=""
-                    class="cppp-item-avatar"
-                    decoding="async"
-                    loading="lazy"
-                    :src="avatarUrl"
-                  />
-                  <img
-                    alt=""
-                    class="cppp-item-pendant"
-                    decoding="async"
-                    loading="lazy"
-                    :src="pendant.url"
-                  />
-                  <span v-if="!pendant.owned" aria-hidden="true" class="cppp-lock">
-                    <v-icon size="12">mdi-lock</v-icon>
-                  </span>
-                  <span v-if="isLimited(pendant)" class="cppp-item-limit">限时</span>
-                </span>
-                <span :class="{ 'is-locked': !pendant.owned }" class="cppp-item-name">
-                  {{ pendant.name }}
-                </span>
-              </button>
+                <template #activator="{ props: tooltipProps }">
+                  <button
+                    v-bind="tooltipProps"
+                    :aria-label="`选择头像框 ${pendant.name}${pendant.owned ? '' : '（未拥有）'}`"
+                    :aria-pressed="selectedId === pendant.id"
+                    :class="{
+                      'is-locked': !pendant.owned,
+                      'is-selected': selectedId === pendant.id,
+                    }"
+                    class="cppp-item"
+                    type="button"
+                    @click="selectedId = pendant.id"
+                  >
+                    <span class="cppp-item-preview">
+                      <img
+                        alt=""
+                        class="cppp-item-avatar"
+                        decoding="async"
+                        loading="lazy"
+                        :src="avatarUrl"
+                      />
+                      <img
+                        alt=""
+                        class="cppp-item-pendant"
+                        decoding="async"
+                        loading="lazy"
+                        :src="pendant.url"
+                      />
+                      <span v-if="!pendant.owned" aria-hidden="true" class="cppp-lock">
+                        <v-icon size="12">mdi-lock</v-icon>
+                      </span>
+                      <span v-if="isLimited(pendant)" class="cppp-item-limit">限时</span>
+                    </span>
+                    <span :class="{ 'is-locked': !pendant.owned }" class="cppp-item-name">
+                      {{ pendant.name }}
+                    </span>
+                  </button>
+                </template>
+                <div class="cppp-tooltip">
+                  <div class="cppp-tooltip-name">{{ pendant.name }}</div>
+                  <div class="cppp-tooltip-method">{{ getObtainMethod(pendant) }}</div>
+                </div>
+              </v-tooltip>
             </div>
           </section>
           <p v-if="pendants.length === 0" class="cppp-empty">暂无可选头像框</p>
+        </div>
+      </div>
+
+      <div v-else class="cppp-body">
+        <div
+          :class="{ 'has-bubble': Boolean(selectedCommentDecoration?.url) }"
+          class="cppp-comment-preview"
+        >
+          <div v-if="selectedCommentDecoration?.url" aria-hidden="true" class="cppp-comment-bubble">
+            <img alt="" decoding="async" loading="lazy" :src="selectedCommentDecoration.url" />
+          </div>
+          <div class="cppp-preview-copy">
+            <div class="cppp-preview-title">
+              <h3>
+                {{
+                  selectedCommentDecoration?.name ??
+                  (selectedCommentId === null ? "当前评论装扮" : "不使用评论装扮")
+                }}
+              </h3>
+              <span
+                v-if="selectedCommentDecoration && isLimited(selectedCommentDecoration)"
+                class="cppp-badge"
+              >
+                限时
+              </span>
+              <span
+                v-if="selectedCommentDecoration && !selectedCommentDecoration.owned"
+                class="cppp-badge is-locked"
+              >
+                未拥有
+              </span>
+            </div>
+            <p v-if="selectedCommentDecoration?.description">
+              {{ selectedCommentDecoration.description }}
+            </p>
+            <p v-else class="cppp-preview-placeholder">
+              {{ selectedCommentDecoration ? "该评论装扮暂无描述。" : "评论将以默认样式展示。" }}
+            </p>
+            <p v-if="selectedCommentDecoration?.author" class="cppp-preview-author">
+              绘制者：{{ selectedCommentDecoration.author }}
+            </p>
+            <p
+              v-if="selectedCommentDecoration && isLimited(selectedCommentDecoration)"
+              class="cppp-preview-limit"
+            >
+              {{ getCommentLimit(selectedCommentDecoration) }}
+            </p>
+            <p v-if="currentCommentId === null" class="cppp-preview-warning">
+              正在读取当前评论装扮，确认按钮暂不可用。
+            </p>
+            <p v-else-if="selectedCommentId === null" class="cppp-preview-warning">
+              当前评论装扮暂不在可选列表，请选择其他评论装扮或“不使用”。
+            </p>
+          </div>
+        </div>
+
+        <div class="cppp-list">
+          <div v-if="commentLoading" aria-live="polite" class="cppp-state" role="status">
+            <v-progress-circular indeterminate size="28" />
+            <p>正在加载评论装扮列表…</p>
+          </div>
+          <div v-else-if="commentError" aria-live="assertive" class="cppp-state" role="alert">
+            <v-icon size="32">mdi-alert-circle-outline</v-icon>
+            <p>{{ commentError }}</p>
+            <v-btn type="button" variant="tonal" @click="emits('retryComment')"> 重新加载 </v-btn>
+          </div>
+          <template v-else>
+            <div aria-label="评论装扮使用选项" class="cppp-grid cppp-comment-grid" role="group">
+              <button
+                aria-label="不使用评论装扮"
+                :aria-pressed="selectedCommentId === ''"
+                :class="{ 'is-selected': selectedCommentId === '' }"
+                class="cppp-item cppp-none-item"
+                type="button"
+                @click="selectedCommentId = ''"
+              >
+                <span class="cppp-comment-item-preview">默认</span>
+                <span class="cppp-item-name">不使用</span>
+              </button>
+            </div>
+            <template v-if="commentDecorations.length > 0">
+              <section
+                v-for="group in commentDecorationGroups"
+                :key="group.title"
+                class="cppp-group"
+              >
+                <h3 class="cppp-group-title">
+                  {{ group.title }}
+                  <span>{{ group.decorations.length }}</span>
+                </h3>
+                <div :aria-label="group.title" class="cppp-grid cppp-comment-grid" role="group">
+                  <v-tooltip
+                    v-for="decoration in group.decorations"
+                    :key="decoration.id"
+                    location="top"
+                    open-delay="120"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <button
+                        v-bind="tooltipProps"
+                        :aria-label="
+                          '选择评论装扮 ' + decoration.name + (decoration.owned ? '' : '（未拥有）')
+                        "
+                        :aria-pressed="selectedCommentId === decoration.id"
+                        :class="{
+                          'is-locked': !decoration.owned,
+                          'is-selected': selectedCommentId === decoration.id,
+                        }"
+                        class="cppp-item"
+                        type="button"
+                        @click="selectedCommentId = decoration.id"
+                      >
+                        <span
+                          class="cppp-comment-item-preview"
+                          :style="{ backgroundColor: getCommentBackground(decoration.bg_color) }"
+                        >
+                          <img
+                            v-if="decoration.url"
+                            :alt="decoration.name"
+                            decoding="async"
+                            loading="lazy"
+                            :src="decoration.url"
+                          />
+                          <span v-else>{{ decoration.name }}</span>
+                          <span v-if="!decoration.owned" aria-hidden="true" class="cppp-lock">
+                            <v-icon size="12">mdi-lock</v-icon>
+                          </span>
+                          <span v-if="isLimited(decoration)" class="cppp-item-limit">限时</span>
+                        </span>
+                        <span :class="{ 'is-locked': !decoration.owned }" class="cppp-item-name">
+                          {{ decoration.name }}
+                        </span>
+                      </button>
+                    </template>
+                    <div class="cppp-tooltip">
+                      <div class="cppp-tooltip-name">{{ decoration.name }}</div>
+                      <div class="cppp-tooltip-method">{{ getObtainMethod(decoration) }}</div>
+                    </div>
+                  </v-tooltip>
+                </div>
+              </section>
+            </template>
+            <p v-else class="cppp-empty">暂无可选评论装扮</p>
+          </template>
         </div>
       </div>
 
@@ -153,7 +330,7 @@
           variant="flat"
           @click="handleConfirm"
         >
-          {{ selectedId === 0 ? "不使用头像框" : "使用该头像框" }}
+          {{ confirmLabel }}
         </v-btn>
       </footer>
     </section>
@@ -174,7 +351,7 @@ type PendantPickerUser = Pick<TGApp.BBS.User.Info, "nickname" | "avatar_url"> & 
 };
 
 /**
- * 头像框选择对话框参数。
+ * 挂件选择对话框参数。
  * @since Beta v0.12.6
  */
 type PendantPickerProps = {
@@ -190,6 +367,14 @@ type PendantPickerProps = {
   loading: boolean;
   /** 加载错误 */
   error: string;
+  /** 可选评论装扮列表 */
+  commentDecorations: Array<TGApp.BBS.CommunitySettings.CommentDecoration>;
+  /** 当前评论装扮 ID，null 表示尚未加载，空串表示未使用 */
+  currentCommentId: string | null;
+  /** 是否正在加载评论装扮 */
+  commentLoading: boolean;
+  /** 评论装扮加载错误 */
+  commentError: string;
 };
 
 /**
@@ -202,16 +387,32 @@ type PendantGroup = {
   pendants: Array<TGApp.BBS.CommunitySettings.Pendant>;
 };
 
+/**
+ * 按可用状态组织的评论装扮分组。
+ * @since Beta v0.12.6
+ */
+type CommentDecorationGroup = {
+  title: string;
+  decorations: Array<TGApp.BBS.CommunitySettings.CommentDecoration>;
+};
+
+type PendantPickerTab = "pendant" | "comment";
+
 const props = defineProps<PendantPickerProps>();
 const visible = defineModel<boolean>({ required: true });
 const emits = defineEmits<{
   confirm: [pendant: TGApp.BBS.CommunitySettings.Pendant | null];
   retry: [];
+  confirmComment: [decoration: TGApp.BBS.CommunitySettings.CommentDecoration | null];
+  retryComment: [];
 }>();
 
 const titleId = useId();
 const unavailablePendantId = -1;
+
+const activeTab = ref<PendantPickerTab>("pendant");
 const selectedId = ref<number>(0);
+const selectedCommentId = ref<string | null>("");
 const pendantGroups = computed<Array<PendantGroup>>(() => {
   const available = props.pendants.filter((pendant) => pendant.owned);
   const unavailable = props.pendants.filter((pendant) => !pendant.owned);
@@ -223,10 +424,30 @@ const pendantGroups = computed<Array<PendantGroup>>(() => {
   }
   return groups;
 });
+const commentDecorationGroups = computed<Array<CommentDecorationGroup>>(() => {
+  const available = props.commentDecorations.filter((decoration) => decoration.owned);
+  const unavailable = props.commentDecorations.filter((decoration) => !decoration.owned);
+  const groups: Array<CommentDecorationGroup> = [];
+  if (available.length > 0) {
+    groups.push({ title: "已拥有评论装扮", decorations: available });
+  }
+  if (unavailable.length > 0) {
+    groups.push({ title: "未拥有评论装扮", decorations: unavailable });
+  }
+  return groups;
+});
 const avatarUrl = computed<string>(() => getUserAvatar(props.user) || "/UI/nav/lumine.webp");
 const selectedPendant = computed<TGApp.BBS.CommunitySettings.Pendant | null>(() => {
   return props.pendants.find((pendant) => pendant.id === selectedId.value) ?? null;
 });
+const selectedCommentDecoration = computed<TGApp.BBS.CommunitySettings.CommentDecoration | null>(
+  () => {
+    return (
+      props.commentDecorations.find((decoration) => decoration.id === selectedCommentId.value) ??
+      null
+    );
+  },
+);
 const previewUser = computed<PendantPickerUser & { pendant: string }>(() => ({
   nickname: props.user.nickname,
   avatar_url: props.user.avatar_url,
@@ -235,18 +456,41 @@ const previewUser = computed<PendantPickerUser & { pendant: string }>(() => ({
     (selectedId.value === unavailablePendantId ? props.currentUrl : ""),
   avatar_ext: props.user.avatar_ext,
 }));
-const canConfirm = computed<boolean>(() => {
+const canConfirmPendant = computed<boolean>(() => {
   if (props.loading || props.error) return false;
   if (selectedId.value === unavailablePendantId) return false;
   if (selectedId.value === 0) return props.currentUrl !== "";
   if (!selectedPendant.value) return false;
   return selectedPendant.value.owned && selectedPendant.value.url !== props.currentUrl;
 });
+const canConfirmComment = computed<boolean>(() => {
+  if (props.commentLoading || props.commentError || props.currentCommentId === null) return false;
+  if (selectedCommentId.value === null) return false;
+  if (selectedCommentId.value === "") return props.currentCommentId !== "";
+  if (!selectedCommentDecoration.value) return false;
+  return (
+    selectedCommentDecoration.value.owned &&
+    selectedCommentDecoration.value.id !== props.currentCommentId
+  );
+});
+const canConfirm = computed<boolean>(() => {
+  return activeTab.value === "pendant" ? canConfirmPendant.value : canConfirmComment.value;
+});
+const confirmLabel = computed<string>(() => {
+  if (activeTab.value === "pendant") {
+    return selectedId.value === 0 ? "不使用头像框" : "使用该头像框";
+  }
+  return selectedCommentId.value === "" ? "不使用评论装扮" : "使用该评论装扮";
+});
 
 watch(
   visible,
   (isOpen) => {
-    if (isOpen) initializeSelection();
+    if (isOpen) {
+      activeTab.value = "pendant";
+      initializePendantSelection();
+      initializeCommentSelection();
+    }
   },
   { immediate: true },
 );
@@ -254,11 +498,25 @@ watch(
 watch(
   () => props.pendants,
   () => {
-    if (visible.value) initializeSelection();
+    if (visible.value) initializePendantSelection();
   },
 );
 
-function initializeSelection(): void {
+watch(
+  () => props.commentDecorations,
+  () => {
+    if (visible.value) initializeCommentSelection();
+  },
+);
+
+watch(
+  () => props.currentCommentId,
+  () => {
+    if (visible.value) initializeCommentSelection();
+  },
+);
+
+function initializePendantSelection(): void {
   const currentPendant = props.currentUrl
     ? props.pendants.find((pendant) => pendant.url === props.currentUrl)
     : undefined;
@@ -269,6 +527,17 @@ function initializeSelection(): void {
   const used = props.pendants.find((pendant) => pendant.is_used);
   selectedId.value =
     used?.id ?? currentPendant?.id ?? (props.currentUrl ? unavailablePendantId : 0);
+}
+
+function initializeCommentSelection(): void {
+  if (props.currentCommentId === null) {
+    selectedCommentId.value = null;
+    return;
+  }
+  const currentDecoration = props.commentDecorations.find(
+    (decoration) => decoration.id === props.currentCommentId,
+  );
+  selectedCommentId.value = currentDecoration?.id ?? (props.currentCommentId !== "" ? null : "");
 }
 
 /**
@@ -287,7 +556,9 @@ function formatRemainTime(seconds: number): string {
   return "小于1分钟";
 }
 
-function isLimited(pendant: TGApp.BBS.CommunitySettings.Pendant): boolean {
+function isLimited(
+  pendant: TGApp.BBS.CommunitySettings.Pendant | TGApp.BBS.CommunitySettings.CommentDecoration,
+): boolean {
   return Boolean(pendant.expired_time);
 }
 
@@ -298,9 +569,53 @@ function getPendantLimit(pendant: TGApp.BBS.CommunitySettings.Pendant): string {
   return "限时头像框";
 }
 
+function getCommentLimit(decoration: TGApp.BBS.CommunitySettings.CommentDecoration): string {
+  if (decoration.remain_time !== undefined && decoration.remain_time > 0) {
+    return "剩余 " + formatRemainTime(decoration.remain_time);
+  }
+  return "限时评论装扮";
+}
+
+/**
+ * 将接口返回的评论气泡背景色转换为 CSS 颜色。
+ * @since Beta v0.12.6
+ * @param color - 十六进制颜色，接口不带 #
+ * @returns CSS 颜色，格式无效时返回 undefined
+ */
+function getCommentBackground(color?: string): string | undefined {
+  if (typeof color !== "string") return undefined;
+  const normalized = color.trim();
+  return /^(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(normalized)
+    ? `#${normalized}`
+    : undefined;
+}
+
+/**
+ * 生成挂件项的获取方法提示。
+ * @since Beta v0.12.6
+ * @param item - 头像框或评论装扮
+ * @returns 用于悬停提示的获取方法文本
+ * @remarks 优先使用扩展获取方法字段；官方描述只在包含获取语义时作为获取方法展示
+ */
+function getObtainMethod(
+  item: TGApp.BBS.CommunitySettings.Pendant | TGApp.BBS.CommunitySettings.CommentDecoration,
+): string {
+  const obtainMethod = item.obtainMethod?.trim();
+  if (obtainMethod) return "获取方法：" + obtainMethod;
+  const description = item.description?.trim();
+  if (description && /(获得|获取|参与|参加|领取|购买|兑换|赠送|活动|任务|签到)/.test(description)) {
+    return "获取方法：" + description;
+  }
+  return "暂无获取方法";
+}
+
 function handleConfirm(): void {
   if (!canConfirm.value) return;
-  emits("confirm", selectedPendant.value);
+  if (activeTab.value === "pendant") {
+    emits("confirm", selectedPendant.value);
+    return;
+  }
+  emits("confirmComment", selectedCommentDecoration.value);
 }
 </script>
 
@@ -349,6 +664,12 @@ function handleConfirm(): void {
   gap: 4px;
 }
 
+.cppp-tabs {
+  flex: none;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--common-shadow-1);
+}
+
 .cppp-body {
   display: flex;
   overflow: hidden;
@@ -372,6 +693,39 @@ function handleConfirm(): void {
   gap: 16px;
 }
 
+.cppp-comment-preview {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  flex: none;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-2);
+  gap: 16px;
+}
+
+.cppp-comment-bubble {
+  position: absolute;
+  top: 0;
+  right: 0;
+  overflow: hidden;
+  max-width: 45%;
+  border-top: 1px inset var(--common-shadow-1);
+  border-right: 1px inset var(--common-shadow-1);
+  border-top-right-radius: 4px;
+  opacity: 0.5;
+  pointer-events: none;
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: 40px;
+    object-fit: contain;
+  }
+}
+
 .cppp-preview-copy {
   display: flex;
   min-width: 0;
@@ -387,6 +741,10 @@ function handleConfirm(): void {
   }
 }
 
+.cppp-comment-preview.has-bubble .cppp-preview-copy {
+  max-width: 55%;
+}
+
 .cppp-preview-title {
   display: flex;
   flex-wrap: wrap;
@@ -400,6 +758,23 @@ function handleConfirm(): void {
     font-weight: 500;
     overflow-wrap: anywhere;
   }
+}
+
+.cppp-tooltip {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 2px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.cppp-tooltip-name {
+  font-weight: 600;
+}
+
+.cppp-tooltip-method {
+  opacity: 0.8;
 }
 
 .cppp-badge {
@@ -464,6 +839,10 @@ function handleConfirm(): void {
   grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
 }
 
+.cppp-comment-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
 .cppp-item {
   display: flex;
   overflow: hidden;
@@ -509,6 +888,55 @@ function handleConfirm(): void {
   .cppp-item.is-locked & {
     opacity: 0.45;
   }
+}
+
+.cppp-comment-item-preview {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  aspect-ratio: 4 / 1;
+  background: var(--box-bg-2);
+  color: var(--common-text-title);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  text-align: center;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.cppp-none-item {
+  &:hover:where(:enabled),
+  &.is-selected {
+    background: transparent;
+  }
+
+  .cppp-comment-item-preview {
+    border: 1px dashed var(--common-shadow-2);
+    background: var(--box-bg-1);
+  }
+
+  &:hover:where(:enabled) .cppp-comment-item-preview {
+    border-color: var(--common-text-title);
+    background: var(--box-bg-3);
+  }
+
+  &.is-selected .cppp-comment-item-preview {
+    border-color: var(--common-text-title);
+  }
+}
+
+.cppp-item.is-locked .cppp-comment-item-preview {
+  opacity: 0.45;
 }
 
 .cppp-item-avatar {
@@ -608,7 +1036,6 @@ function handleConfirm(): void {
   border-radius: 4px;
   background: var(--box-bg-3);
   color: var(--box-text-4);
-  font-weight: 600;
 
   &:enabled {
     background: var(--common-text-title);
@@ -618,6 +1045,7 @@ function handleConfirm(): void {
 
 @media (width <= 640px) {
   .cppp-header,
+  .cppp-tabs,
   .cppp-body,
   .cppp-footer {
     padding: 12px;
@@ -628,9 +1056,31 @@ function handleConfirm(): void {
     padding: 12px;
   }
 
+  .cppp-comment-preview {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .cppp-comment-preview.has-bubble .cppp-preview-copy {
+    max-width: 60%;
+  }
+
+  .cppp-comment-bubble {
+    max-width: 40%;
+    height: 32px;
+
+    img {
+      height: 32px;
+    }
+  }
+
   .cppp-grid {
     gap: 6px;
     grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  }
+
+  .cppp-comment-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
 </style>

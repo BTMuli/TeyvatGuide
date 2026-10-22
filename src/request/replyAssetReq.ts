@@ -11,14 +11,17 @@ import TGHttps from "@utils/TGHttps.js";
 const replyApiBase: Readonly<string> = "https://bbs-api.miyoushe.com/";
 const mentionUrl: Readonly<string> = `${replyApiBase}user/wapi/getUIDByNickname`;
 const uploadParamsUrl: Readonly<string> = `${replyApiBase}apihub/wapi/getUploadParams`;
+const customAvatarUploadParamsUrl: Readonly<string> = `${replyApiBase}apihub/sapi/getUploadParams`;
 const ossUploadEndpoint: Readonly<string> =
   "https://plat-sh-community-prod-upload-ugc.oss-cn-shanghai.aliyuncs.com/";
 const ossResponseHost: Readonly<string> = "upload-bbs.miyoushe.com";
 const accountChangedMessage: Readonly<string> = "米游社当前账号已切换，请重试";
-const uploadParamsFailedMessage: Readonly<string> = "米游社回复图片上传参数获取失败";
-const ossUploadFailedMessage: Readonly<string> = "米游社回复图片上传失败";
-const uploadContractMessage: Readonly<string> = "米游社回复图片上传参数无效";
-const uploadPolicyMessage: Readonly<string> = "米游社回复图片上传策略无效";
+const uploadParamsFailedMessage: Readonly<string> = "米游社图片上传参数获取失败";
+const ossUploadFailedMessage: Readonly<string> = "米游社图片上传失败";
+const uploadContractMessage: Readonly<string> = "米游社图片上传参数无效";
+const uploadPolicyMessage: Readonly<string> = "米游社图片上传策略无效";
+// 官方上传 SDK 的 USER_AVATAR 枚举值；这里使用其线上的 key，而非展示名称。
+const customAvatarUploadSource: Readonly<string> = "8";
 
 const reservedFormFields: ReadonlySet<string> = new Set([
   "name",
@@ -44,11 +47,23 @@ type OssUploadParams = {
   callbackVar: Array<TGApp.BBS.ReplyAsset.FormField>;
   contentDisposition?: string;
   extraFormData: Array<TGApp.BBS.ReplyAsset.FormField>;
+  formName?: string;
+  host: string;
   key: string;
   name: string;
   objectAcl?: string;
   policy: string;
   signature: string;
+};
+
+/**
+ * 官方头像上传预签名响应
+ * @since Beta v0.12.6
+ */
+type CustomUploadParamsResp = {
+  retcode: number;
+  message: string;
+  data: unknown;
 };
 
 /**
@@ -247,7 +262,7 @@ function assertSafePathPart(value: unknown, name: string): asserts value is stri
  * @since Beta v0.12.6
  * @param value - 服务端返回的 host
  */
-function validateOssHost(value: unknown): void {
+function validateOssHost(value: unknown): asserts value is string {
   if (value !== ossUploadEndpoint && value !== ossUploadEndpoint.slice(0, -1)) {
     throw new Error(uploadContractMessage);
   }
@@ -347,11 +362,66 @@ function parseOssUploadParams(
     callbackVar: parseCallbackFields(oss.callback_var),
     contentDisposition: oss.content_disposition || undefined,
     extraFormData: parseExtraFormData(oss.extra_form_data, objectAcl),
+    host: oss.host,
     key: `${oss.dir}${oss.name}`,
     name: oss.name,
     objectAcl,
     policy: oss.policy,
     signature: oss.signature,
+  };
+}
+
+/**
+ * 解析官方头像上传器返回的 OSS 参数。
+ * @since Beta v0.12.6
+ * @param data - `apihub/sapi/getUploadParams` 的 data 字段
+ * @param prepared - 已准备的图片
+ * @returns 可安全发送的 OSS 参数与官方表单文件名
+ */
+function parseCustomAvatarUploadParams(
+  data: unknown,
+  prepared: TGApp.BBS.ReplyAsset.PreparedImage,
+): OssUploadParams {
+  if (!isRecord(data) || data.type !== "oss" || !isRecord(data.params)) {
+    throw new Error(uploadContractMessage);
+  }
+  if (!isNonBlankString(data.file_name)) throw new Error(uploadContractMessage);
+  const params = data.params;
+  validateOssHost(params.host);
+  assertSafePathPart(params.name, "图片名称");
+  assertSafePathPart(params.dir, "图片目录");
+  assertSafePathPart(data.file_name, "图片文件名");
+  if (!params.dir.startsWith("upload/") || !params.dir.endsWith("/") || params.name.includes("/")) {
+    throw new Error(uploadContractMessage);
+  }
+  if (!isNonBlankString(params.callback)) throw new Error(uploadContractMessage);
+  if (!isNonBlankString(params.accessid)) throw new Error(uploadContractMessage);
+  if (!isNonBlankString(params.policy)) throw new Error(uploadContractMessage);
+  if (!isNonBlankString(params.signature)) throw new Error(uploadContractMessage);
+  if (params.x_oss_content_type !== prepared.contentType) {
+    throw new Error(uploadContractMessage);
+  }
+  if (params.content_disposition !== undefined && typeof params.content_disposition !== "string") {
+    throw new Error(uploadContractMessage);
+  }
+
+  const callbackVar = params.callback_var;
+  if (!isRecord(callbackVar) || typeof callbackVar.extra !== "string") {
+    throw new Error(uploadContractMessage);
+  }
+
+  return {
+    accessid: params.accessid,
+    callback: params.callback,
+    callbackVar: parseCallbackFields({ "x:extra": callbackVar.extra }),
+    contentDisposition: params.content_disposition || undefined,
+    extraFormData: parseExtraFormData(params.extra_form_data, undefined),
+    formName: data.file_name,
+    host: params.host,
+    key: `${params.dir}${params.name}`,
+    name: params.name,
+    policy: params.policy,
+    signature: params.signature,
   };
 }
 
@@ -371,6 +441,56 @@ function assertUploadActive(
     throw new Error(accountChangedMessage);
   }
   if (signal.aborted) throwCancellation(signal.reason, signal);
+}
+
+/**
+ * 校验自定义头像上传阶段使用的 App Cookie 是否仍为当前账号。
+ * @since Beta v0.12.6
+ * @param snapshot - 回复账号快照
+ * @param cookie - 自定义头像签名使用的 App Cookie
+ * @param storage - 当前账号存储
+ * @param signal - 合并取消信号
+ */
+function assertCustomAvatarUploadActive(
+  snapshot: TGApp.BBS.Reply.AccountSnapshot,
+  cookie: TGApp.App.Account.EditorCookie,
+  storage: Pick<Storage, "getItem">,
+  signal: AbortSignal,
+): void {
+  if (!matchesCustomAvatarAccount(snapshot, cookie, storage)) {
+    throw new Error(accountChangedMessage);
+  }
+  if (signal.aborted) throwCancellation(signal.reason, signal);
+}
+
+/**
+ * 判断自定义头像上传期间的网页登录账号与 App 凭据是否仍一致。
+ * @since Beta v0.12.6
+ * @param snapshot - 回复账号快照
+ * @param cookie - 自定义头像签名使用的 App Cookie
+ * @param storage - 当前账号存储
+ * @returns 是否仍为同一账号与凭据
+ */
+function matchesCustomAvatarAccount(
+  snapshot: TGApp.BBS.Reply.AccountSnapshot,
+  cookie: TGApp.App.Account.EditorCookie,
+  storage: Pick<Storage, "getItem">,
+): boolean {
+  if (!matchesCurrentAccount(snapshot, storage)) return false;
+  try {
+    const serialized = storage.getItem("curAccount");
+    if (serialized === null) return false;
+    const persisted: unknown = JSON.parse(serialized);
+    return (
+      isRecord(persisted) &&
+      isRecord(persisted.cookie) &&
+      persisted.cookie.stuid === cookie.stuid &&
+      persisted.cookie.stoken === cookie.stoken &&
+      persisted.cookie.mid === cookie.mid
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -419,6 +539,37 @@ async function postJson<T>(
       url === uploadParamsUrl ? uploadParamsFailedMessage : ossUploadFailedMessage,
       error,
     );
+  }
+}
+
+/**
+ * 发出受控 JSON GET 请求
+ * @since Beta v0.12.6
+ * @param url - 请求地址
+ * @param config - 请求配置
+ * @param snapshot - 回复账号快照
+ * @param storage - 当前账号存储
+ * @param signal - 合并取消信号
+ * @returns 响应数据
+ */
+async function getJson<T>(
+  url: string,
+  config: TGApp.App.Response.ReqConfParams,
+  snapshot: TGApp.BBS.Reply.AccountSnapshot,
+  storage: Pick<Storage, "getItem">,
+  signal: AbortSignal,
+): Promise<T> {
+  try {
+    const response = await TGHttps.get<T>(url, config);
+    return response.data;
+  } catch (error) {
+    if (isAbortError(error, signal)) {
+      if (!matchesCurrentAccount(snapshot, storage)) {
+        throw createUploadRequestError(accountChangedMessage, error);
+      }
+      throwCancellation(error, signal);
+    }
+    throw createUploadRequestError(uploadParamsFailedMessage, error);
   }
 }
 
@@ -494,7 +645,7 @@ function createOssForm(
   prepared: TGApp.BBS.ReplyAsset.PreparedImage,
 ): FormData {
   const form = new FormData();
-  form.append("name", params.name);
+  form.append("name", params.formName ?? params.name);
   form.append("key", params.key);
   form.append("callback", params.callback);
   form.append("success_action_status", "200");
@@ -567,6 +718,130 @@ export async function resolveMention(
 }
 
 /**
+ * 校验图片文件
+ * @since Beta v0.12.6
+ * @param file - 待上传的图片文件
+ */
+function assertImageFile(file: File): void {
+  if (typeof File === "undefined" || !(file instanceof File) || !isNonBlankString(file.name)) {
+    throw new TypeError("图片文件无效");
+  }
+}
+
+/**
+ * 提取自定义头像上传所需的 App Cookie
+ * @since Beta v0.12.6
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
+ * @returns 用于 API_BBS K2 签名的 Cookie
+ */
+function getCustomAvatarUploadCookie(
+  cookie: TGApp.App.Account.EditorCookie,
+): TGApp.App.Account.SignCookie {
+  if (!isRecord(cookie)) throw new TypeError("登录凭据无效");
+  const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
+  const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
+  const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
+  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
+  if (!stuid || !stoken || !mid || !ltuid) {
+    throw new Error("登录凭据不完整，请刷新登录凭据");
+  }
+  if (stuid !== ltuid) throw new Error("登录凭据 UID 不一致，请刷新登录凭据");
+  return { stuid, stoken, mid };
+}
+
+/**
+ * 上传自定义头像图片
+ * @since Beta v0.12.6
+ * @param file - 待上传的图片
+ * @param cookie - 用户 App Cookie
+ * @param signal - 可选的取消信号
+ * @returns 已上传图片的信息
+ * @remarks 官方 USER_AVATAR 上传使用 `apihub/sapi/getUploadParams` 的 GET 协议，上传源 key 为 8。
+ */
+export async function uploadCustomAvatarImage(
+  file: File,
+  cookie: TGApp.App.Account.EditorCookie,
+  signal?: AbortSignal,
+): Promise<TGApp.BBS.ReplyAsset.UploadedImage> {
+  assertImageFile(file);
+  const authCookie = getCustomAvatarUploadCookie(cookie);
+  if (signal?.aborted) throwCancellation(signal.reason, signal);
+
+  if (typeof window === "undefined") throw new Error("当前账号状态不可用");
+  const storage = window.localStorage;
+  const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+    uid: cookie.ltuid,
+    cookie: { ltoken: cookie.ltoken, ltuid: cookie.ltuid },
+  };
+  const accountAbortController = new AbortController();
+  const requestSignal = combineSignals(signal, accountAbortController.signal);
+  const onStorageChange = (): void => {
+    if (!matchesCustomAvatarAccount(snapshot, cookie, storage)) {
+      accountAbortController.abort(createAbortError());
+    }
+  };
+  window.addEventListener("storage", onStorageChange);
+
+  try {
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    const prepared = await prepareReplyImage(file, requestSignal);
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    const query = {
+      md5: prepared.md5,
+      ext: prepared.ext,
+      support_content_type: 1,
+      upload_source: customAvatarUploadSource,
+    };
+    const signConfig: TGApp.App.Response.ReqConfParams = {
+      headers: {
+        ...getRequestHeader(authCookie, "GET", query, "K2", true),
+        "x-rpc-client_type": "2",
+      },
+      query,
+      maxRedirections: 0,
+      signal: requestSignal,
+    };
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    const signedData = await getJson<CustomUploadParamsResp>(
+      customAvatarUploadParamsUrl,
+      signConfig,
+      snapshot,
+      storage,
+      requestSignal,
+    );
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    if (!isRecord(signedData) || signedData.retcode !== 0) {
+      throw new Error(uploadParamsFailedMessage);
+    }
+    const params = parseCustomAvatarUploadParams(signedData.data, prepared);
+    validatePolicy(params.policy, prepared.size);
+    const form = createOssForm(params, file, prepared);
+    const ossConfig: TGApp.App.Response.ReqConfParams = {
+      headers: { Cookie: "" },
+      body: form,
+      maxRedirections: 0,
+      signal: requestSignal,
+    };
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    const ossData = await postJson<TGApp.BBS.ReplyAsset.UploadResp>(
+      params.host,
+      ossConfig,
+      snapshot,
+      storage,
+      requestSignal,
+    );
+    assertCustomAvatarUploadActive(snapshot, cookie, storage, requestSignal);
+    return {
+      url: parseOssResponse(ossData, params.key),
+      width: prepared.width,
+      height: prepared.height,
+    };
+  } finally {
+    window.removeEventListener("storage", onStorageChange);
+  }
+}
+
+/**
  * 上传回复图片
  * @since Beta v0.12.6
  * @param file - 待上传的图片文件
@@ -581,9 +856,7 @@ export async function uploadImage(
   gid: number,
   signal?: AbortSignal,
 ): Promise<TGApp.BBS.ReplyAsset.UploadedImage> {
-  if (typeof File === "undefined" || !(file instanceof File) || !isNonBlankString(file.name)) {
-    throw new TypeError("图片文件无效");
-  }
+  assertImageFile(file);
   const authCookie = getReplyCookie(cookie);
   assertPositiveNumber(gid, "社区 ID");
   if (signal?.aborted) throwCancellation(signal.reason, signal);
