@@ -184,6 +184,7 @@ import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import VpPostActions from "@comp/viewPost/vp-post-actions.vue";
 import bbsEnum from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
+import miscReq from "@req/miscReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
@@ -258,7 +259,23 @@ onMounted(async () => {
     ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   }
   try {
-    const resp = await postReq.post(postId, ck);
+    let resp = await postReq.post(postId, ck);
+    if (<number>resp.retcode === 1034) {
+      await TGLogger.Info(`[t-post][${postId}][onMounted] 触发 1034 验证`);
+      await showLoading.update("需要完成极验验证");
+      const signCookie: Record<string, string> = cookie.value
+        ? { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid }
+        : {};
+      const challenge = await miscReq.challenge(signCookie);
+      if (challenge === false) {
+        await showLoading.empty("数据加载失败", "[1034] 验证未完成");
+        showSnackbar.error("验证未完成，无法加载帖子");
+        await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} 验证未完成`);
+        return;
+      }
+      await showLoading.update("验证成功，正在重新加载帖子");
+      resp = await postReq.post(postId, ck, challenge);
+    }
     if (resp.retcode !== 0) {
       await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);

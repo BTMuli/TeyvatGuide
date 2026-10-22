@@ -102,20 +102,23 @@ function assertReplyContent(content: string): void {
 
 /**
  * 获取单个帖子信息
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  * @param postId - 帖子 ID
  * @param cookie - Cookie
+ * @param challenge - 极验验证参数
  * @returns 帖子信息响应数据
  */
 async function getPostFull(
   postId: number | string,
   cookie?: Record<string, string>,
+  challenge?: string,
 ): Promise<TGApp.BBS.Post.FullResp> {
   const param = { post_id: postId, read: 1 };
-  const header = {
+  const header: Record<string, string> = {
     ...getRequestHeader(cookie ?? {}, "GET", param, "K2", true),
     "x-rpc-client_type": "2",
   };
+  if (challenge) header["x-rpc-challenge"] = challenge;
   const resp = await TGHttps.get<TGApp.BBS.Post.FullResp>(`${bapBu}getPostFull`, {
     headers: header,
     query: param,
