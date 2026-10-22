@@ -9,6 +9,10 @@
     @click="handleCardClick"
     @keydown.enter.space="handleCardKeydown"
   >
+    <header v-if="createdAtLabel" class="cp-comment-header">
+      <time :datetime="createdAtIso">{{ createdAtLabel }}</time>
+    </header>
+
     <div aria-label="评论内容" class="cp-comment-content">
       <TpParser v-if="contentNodes.length" :data="contentNodes" />
       <span v-else class="cp-comment-empty">[无文字内容]</span>
@@ -16,7 +20,6 @@
 
     <footer aria-label="评论信息" class="cp-comment-footer">
       <span class="cp-comment-meta">
-        <time v-if="createdAtLabel" :datetime="createdAtIso">{{ createdAtLabel }}</time>
         <span title="点赞数">
           <v-icon size="14" aria-hidden="true">mdi-thumb-up-outline</v-icon>
           {{ fmtUtil.num(likeCount) }}
@@ -116,6 +119,14 @@ function handleOpenPost(): void {
       outline-offset: 2px;
     }
   }
+}
+
+.cp-comment-header {
+  display: flex;
+  justify-content: flex-end;
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .cp-comment-footer,

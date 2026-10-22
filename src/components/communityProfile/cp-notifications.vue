@@ -8,7 +8,20 @@
         </h2>
         <p>{{ categoryInfo.description }}</p>
       </div>
-      <span class="cp-notifications-count">已加载 {{ notifications.length }} 条</span>
+      <div class="cp-notifications-actions">
+        <span class="cp-notifications-count">已加载 {{ notifications.length }} 条</span>
+        <v-btn
+          :disabled="loading || clearing || !hasUnread"
+          :loading="clearing"
+          prepend-icon="mdi-bell-off-outline"
+          size="small"
+          title="清除当前分类的所有未读通知"
+          variant="tonal"
+          @click="clearAllUnread"
+        >
+          一键清除
+        </v-btn>
+      </div>
     </header>
 
     <div class="cp-notifications-body">
@@ -62,14 +75,21 @@ import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
 import CpNotification from "./cp-notification.vue";
 
 type CategoryInfo = { title: string; description: string; icon: string; empty: string };
+type CpNotificationsProps = {
+  category: TGApp.BBS.Notification.Category;
+  unreadCount: number;
+};
 /**
  * 通知列表的登录账户快照。
  * @since Beta v0.12.6
  */
 type AccountSnapshot = { uid: string; cookie: TGApp.App.Account.Cookie };
 
-const { category } = defineProps<{ category: TGApp.BBS.Notification.Category }>();
-const emit = defineEmits<{ read: [category: TGApp.BBS.Notification.Category] }>();
+const { category, unreadCount } = defineProps<CpNotificationsProps>();
+const emit = defineEmits<{
+  read: [category: TGApp.BBS.Notification.Category];
+  itemRead: [category: TGApp.BBS.Notification.Category];
+}>();
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
 
@@ -104,11 +124,14 @@ const categoryInfo = computed<CategoryInfo>(
 );
 const notifications = shallowRef<Array<TGApp.BBS.Notification.Item>>([]);
 const loading = ref<boolean>(false);
+const clearing = ref<boolean>(false);
 const error = ref<string>("");
 const lastId = ref<string>("");
 const isLast = ref<boolean>(false);
+const hasUnread = computed<boolean>(
+  () => unreadCount > 0 || notifications.value.some((item) => !item.is_read),
+);
 let generation = 0;
-let cleared = false;
 let active = true;
 
 watch(
@@ -123,11 +146,11 @@ watch(
   ],
   () => {
     generation += 1;
-    cleared = false;
     notifications.value = [];
     lastId.value = "";
     isLast.value = false;
     loading.value = false;
+    clearing.value = false;
     error.value = "";
     void loadMore();
   },
@@ -191,10 +214,6 @@ async function loadMore(): Promise<void> {
     ];
     lastId.value = next;
     isLast.value = response.data.is_last;
-    if (!cleared) {
-      cleared = true;
-      void clearUnread(snapshot, version);
-    }
   } catch (cause) {
     if (isCurrent(snapshot, version)) error.value = TGHttps.getErrMsg(cause);
   } finally {
@@ -202,19 +221,26 @@ async function loadMore(): Promise<void> {
   }
 }
 
-async function clearUnread(snapshot: AccountSnapshot, version: number): Promise<void> {
+async function clearAllUnread(): Promise<void> {
+  if (clearing.value) return;
+  const snapshot = getSnapshot();
+  if (!snapshot) return;
+  const version = generation;
+  clearing.value = true;
   try {
     const response = await communityReq.clearNotificationUnread(snapshot.cookie, category);
     if (!isCurrent(snapshot, version)) return;
-    if (response.retcode !== 0) {
-      await TGLogger.Warn(
-        `[CpNotifications] 清除未读失败：[${response.retcode}] ${response.message}`,
-      );
-      return;
-    }
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    notifications.value = notifications.value.map((notification) => ({
+      ...notification,
+      is_read: true,
+    }));
     emit("read", category);
+    showSnackbar.success("已清除未读");
   } catch (cause) {
-    await TGLogger.Warn(`[CpNotifications] 清除未读失败：${TGHttps.getErrMsg(cause)}`);
+    showSnackbar.error(`清除未读失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    if (isCurrent(snapshot, version)) clearing.value = false;
   }
 }
 
@@ -291,11 +317,16 @@ async function markNotificationRead(notificationId: string, postId: string): Pro
       );
       return;
     }
+    const target = notifications.value.find(
+      (notification) => notification.notification_id === notificationId,
+    );
+    if (target === undefined || target.is_read) return;
     notifications.value = notifications.value.map((notification) =>
       notification.notification_id === notificationId
         ? { ...notification, is_read: true }
         : notification,
     );
+    emit("itemRead", category);
   } catch (cause) {
     await TGLogger.Warn(`[CpNotifications] 标记通知已读失败：${TGHttps.getErrMsg(cause)}`);
   }
@@ -348,6 +379,13 @@ async function openProfile(userId: string): Promise<void> {
   min-width: 0;
   flex-direction: column;
   gap: 4px;
+}
+
+.cp-notifications-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
 }
 
 .cp-notifications-count {

@@ -115,7 +115,7 @@
       </div>
     </div>
     <div v-else class="cp-content-body">
-      <div v-if="error" class="cp-content-state cp-content-error" role="alert">
+      <div v-if="error && !entries.length" class="cp-content-state cp-content-error" role="alert">
         <v-icon size="28">mdi-alert-circle-outline</v-icon>
         <p>{{ error }}</p>
         <v-btn :disabled="loading" variant="tonal" @click="retry">重新加载</v-btn>
@@ -170,16 +170,26 @@
         <v-icon size="32">{{ sectionInfo.icon }}</v-icon>
         <p>{{ sectionInfo.empty }}</p>
       </div>
-      <div v-if="loading" class="cp-content-state" role="status" aria-live="polite">
+      <div
+        v-if="loading && !entries.length"
+        class="cp-content-state"
+        role="status"
+        aria-live="polite"
+      >
         <v-progress-circular indeterminate size="28" />
         <p>{{ searchKeyword ? "正在搜索收藏帖子…" : `正在加载${sectionInfo.title}…` }}</p>
       </div>
-      <footer
-        v-if="entries.length && !loading && !error && !searchKeyword"
-        class="cp-content-footer"
-      >
-        <span v-if="isLast">已全部加载</span>
-        <v-btn v-else variant="tonal" @click="loadMore">加载更多</v-btn>
+      <footer v-if="entries.length && !searchKeyword" class="cp-content-footer">
+        <template v-if="error">
+          <span :title="error">加载失败</span>
+          <v-btn :disabled="loading" size="small" variant="tonal" @click="retry">重试</v-btn>
+        </template>
+        <template v-else-if="loading">
+          <v-progress-circular indeterminate size="18" />
+          <span>正在加载更多…</span>
+        </template>
+        <span v-else-if="isLast">已全部加载</span>
+        <span v-else ref="loadMoreRef" aria-hidden="true" class="cp-content-load-more-trigger" />
       </footer>
     </div>
   </section>
@@ -201,7 +211,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ContentSection =
   "comments" | "collections" | "favorites" | "following" | "followers" | "history";
@@ -309,6 +319,8 @@ const filteredCollectionPosts = computed<Array<TGApp.BBS.Post.FullData>>(() => {
 const searchInput = ref<string | null>("");
 const searchKeyword = ref<string>("");
 const scannedCount = ref<number>(0);
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
+let loadMoreObserver: IntersectionObserver | undefined;
 let favoriteCache: Array<TGApp.BBS.Post.FullData> | undefined;
 let generation = 0;
 let collectionGeneration = 0;
@@ -338,10 +350,18 @@ watch(
   },
   { immediate: true },
 );
+
+watch([loading, isLast, () => entries.value.length, searchKeyword, error], () => {
+  loadMoreObserver?.disconnect();
+  if (loading.value || isLast.value || searchKeyword.value !== "" || error.value !== "") return;
+  void nextTick(observeLoadMore);
+});
+
 onBeforeUnmount(() => {
   active = false;
   generation += 1;
   collectionGeneration += 1;
+  loadMoreObserver?.disconnect();
 });
 
 function resetEntries(): void {
@@ -409,6 +429,28 @@ async function loadMore(): Promise<void> {
   } finally {
     if (isCurrent(snapshot, version)) loading.value = false;
   }
+}
+
+function observeLoadMore(): void {
+  const target = loadMoreRef.value;
+  if (
+    target === null ||
+    loading.value ||
+    isLast.value ||
+    error.value !== "" ||
+    searchKeyword.value !== ""
+  )
+    return;
+  loadMoreObserver ??= new IntersectionObserver(
+    (records) => {
+      const entry = records.find((record) => record.isIntersecting);
+      if (entry === undefined) return;
+      loadMoreObserver?.unobserve(entry.target);
+      void loadMore();
+    },
+    { rootMargin: "240px 0px" },
+  );
+  loadMoreObserver.observe(target);
 }
 
 async function loadAllFavorites(
@@ -785,10 +827,17 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
 
 .cp-content-footer {
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 16px 0 4px;
   color: var(--box-text-4);
   font-size: 12px;
+  gap: 8px;
+}
+
+.cp-content-load-more-trigger {
+  width: 100%;
+  height: 1px;
 }
 
 @media (width <= 640px) {
