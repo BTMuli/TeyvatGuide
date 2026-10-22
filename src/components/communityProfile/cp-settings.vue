@@ -769,6 +769,7 @@ async function handleSave(): Promise<void> {
       if (response.retcode !== 0) {
         throw new Error(`[${response.retcode}] ${response.message}`);
       }
+      pendantOriginal.value = { id: pendantDraft.value.id, url: pendantDraft.value.url };
       partiallySaved = true;
     }
     if (commentChanged && commentId !== null) {

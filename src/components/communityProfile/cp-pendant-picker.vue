@@ -69,6 +69,9 @@
                   (selectedId === unavailablePendantId ? "当前头像框" : "不使用头像框")
                 }}
               </h3>
+              <span v-if="isPendantInUse(selectedPendant)" class="cppp-badge is-in-use">
+                使用中
+              </span>
               <span v-if="selectedPendant && isLimited(selectedPendant)" class="cppp-badge">
                 限时
               </span>
@@ -156,6 +159,7 @@
                         loading="lazy"
                         :src="pendant.url"
                       />
+                      <span v-if="isPendantInUse(pendant)" class="cppp-in-use">使用中</span>
                       <span v-if="!pendant.owned" aria-hidden="true" class="cppp-lock">
                         <v-icon size="12">mdi-lock</v-icon>
                       </span>
@@ -623,6 +627,16 @@ function getObtainMethod(
  */
 function isCommentInUse(decoration: TGApp.BBS.CommunitySettings.CommentDecoration | null): boolean {
   return decoration !== null && decoration.id === props.serverCommentId;
+}
+
+/**
+ * 判断头像框是否为当前使用中的头像框。
+ * @since Beta v0.12.6
+ * @param pendant - 头像框
+ * @returns 是否为使用中的头像框
+ */
+function isPendantInUse(pendant: TGApp.BBS.CommunitySettings.Pendant | null): boolean {
+  return pendant !== null && props.serverUrl !== "" && pendant.url === props.serverUrl;
 }
 
 function handleConfirm(): void {
