@@ -207,6 +207,10 @@ describe("communitySettingsReq", () => {
   });
 
   it("loads the account pendant list with a signed GET", async () => {
+    mocks.get.mockResolvedValueOnce({
+      data: { retcode: 0, message: "ok", data: { list: [] } },
+    });
+
     await communitySettingsReq.getPendantList(cookie);
 
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "GET", {}, "X4", true);
@@ -215,6 +219,47 @@ describe("communitySettingsReq", () => {
       { headers: { "x-test-header": "test" } },
     );
   });
+
+  it("normalizes numeric-string pendant ids from the list response", async () => {
+    mocks.get.mockResolvedValueOnce({
+      data: {
+        retcode: 0,
+        message: "ok",
+        data: {
+          list: [
+            {
+              id: "42",
+              url: "https://example.com/pendant.png",
+              name: "测试头像框",
+              owned: true,
+              is_used: true,
+            },
+          ],
+        },
+      },
+    });
+
+    const response = await communitySettingsReq.getPendantList(cookie);
+
+    expect(response.data.list[0]?.id).toBe(42);
+  });
+
+  it.each(["abc", "-1", "1.5", null])(
+    "rejects an invalid pendant id from the list response: %s",
+    async (id) => {
+      mocks.get.mockResolvedValueOnce({
+        data: {
+          retcode: 0,
+          message: "ok",
+          data: {
+            list: [{ id, url: "", name: "无效头像框", owned: true, is_used: false }],
+          },
+        },
+      });
+
+      await expect(communitySettingsReq.getPendantList(cookie)).rejects.toThrow("头像框数据无效");
+    },
+  );
 
   it("sets and clears the pendant with an explicit pendant id", async () => {
     await communitySettingsReq.setPendant(cookie, 42);

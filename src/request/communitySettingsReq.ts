@@ -190,6 +190,21 @@ async function getAvatars(): Promise<TGApp.BBS.CommunitySettings.AvatarSetResp> 
 }
 
 /**
+ * 将接口返回的头像框 ID 归一为数字
+ * @since Beta v0.12.6
+ * @param value - 接口返回的头像框 ID，官方接口可能以字符串返回
+ * @returns 头像框数字 ID
+ * @remarks ID 缺失、非整数或为负数时抛出错误
+ */
+function getPendantId(value: unknown): number {
+  const id = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 0) {
+    throw new TypeError("头像框数据无效，请重新加载。");
+  }
+  return id;
+}
+
+/**
  * 获取当前账户拥有的头像框列表
  * @since Beta v0.12.6
  * @param cookie - 账户 Cookie
@@ -204,6 +219,12 @@ async function getPendantList(
       headers: getRequestHeader(getCommunityCookie(cookie), "GET", {}, "X4", true),
     },
   );
+  if (resp.data.retcode === 0) {
+    resp.data.data.list = resp.data.data.list.map((pendant) => ({
+      ...pendant,
+      id: getPendantId(pendant.id),
+    }));
+  }
   return resp.data;
 }
 
