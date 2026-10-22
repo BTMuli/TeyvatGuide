@@ -4,7 +4,12 @@
  */
 
 import bbsEnum from "@enum/bbs.js";
-import { assertPostDocumentContent, buildPostDocument, isPostUrl } from "@utils/bbsPostDocument.js";
+import {
+  assertPostDocumentContent,
+  buildPostDocument,
+  isPostUrl,
+  parsePostNodes,
+} from "@utils/bbsPostDocument.js";
 import { serializePostDocument } from "@utils/bbsPostHtml.js";
 import {
   assertPicturePostDocument,
@@ -194,8 +199,51 @@ function countMentions(nodes: Array<TGApp.BBS.SctPost.Base>): number {
   return nodes.reduce((count, node) => {
     const insert = node.insert;
     if (!isRecord(insert)) return count;
-    return count + (isRecord(insert.mention) ? 1 : 0);
+    let total = count + (isRecord(insert.mention) ? 1 : 0);
+    if (isRecord(insert.fold)) {
+      for (const key of ["title", "content"]) {
+        if (typeof insert.fold[key] !== "string") continue;
+        const nested = <Array<TGApp.BBS.SctPost.Base>>JSON.parse(insert.fold[key]);
+        total += countMentions(nested);
+      }
+    }
+    return total;
   }, 0);
+}
+
+/**
+ * 移除米游社原生投票规范化时不会保留的 URL 字段。
+ * @since Beta v0.12.6
+ * @param nodes - 已规范化的帖子节点
+ * @returns 可发送的帖子节点
+ */
+function stripPostVoteUrls(nodes: Array<TGApp.BBS.PostEdit.Node>): Array<TGApp.BBS.PostEdit.Node> {
+  return nodes.map((node) => {
+    if (typeof node.insert === "string") return node;
+    if ("vote" in node.insert) {
+      if (node.insert.vote.url === undefined) return node;
+      return { ...node, insert: { vote: { id: node.insert.vote.id, uid: node.insert.vote.uid } } };
+    }
+    if ("fold" in node.insert) {
+      const stripNested = (value: string): string =>
+        JSON.stringify(stripPostVoteUrls(parsePostNodes(JSON.parse(value))));
+      const fold = node.insert.fold;
+      return {
+        ...node,
+        insert: {
+          fold: {
+            ...fold,
+            title: stripNested(fold.title),
+            content: stripNested(fold.content),
+          },
+          ...(node.insert.backup_text === undefined
+            ? {}
+            : { backup_text: node.insert.backup_text }),
+        },
+      };
+    }
+    return node;
+  });
 }
 
 /**
@@ -217,8 +265,17 @@ function isCustomEmoticonNode(
  */
 function assertNewPostCustomEmoticons(nodes: Array<TGApp.BBS.PostEdit.Node>): void {
   for (const node of nodes) {
-    if (isCustomEmoticonNode(node) && node.insert.custom_emoticon.is_available === false) {
-      throw new TypeError("新帖不能使用已失效的自定义表情");
+    if (isCustomEmoticonNode(node)) {
+      if (node.insert.custom_emoticon.is_available === false) {
+        throw new TypeError("新帖不能使用已失效的自定义表情");
+      }
+      continue;
+    }
+    if (typeof node.insert !== "string" && "fold" in node.insert) {
+      for (const value of [node.insert.fold.title, node.insert.fold.content]) {
+        const nested = <Array<TGApp.BBS.PostEdit.Node>>JSON.parse(value);
+        assertNewPostCustomEmoticons(nested);
+      }
     }
   }
 }
@@ -291,6 +348,40 @@ function assertEditableCollection(value: unknown): string | null {
 }
 
 /**
+ * 判断来源帖子的结构化正文是否包含投票节点，包括折叠内的嵌套 Delta。
+ * @since Beta v0.12.6
+ * @param value - 未知的结构化正文
+ * @returns 是否存在投票嵌入
+ */
+function containsVoteNode(value: unknown): boolean {
+  if (typeof value === "string") {
+    try {
+      return containsVoteNode(JSON.parse(value));
+    } catch {
+      return false;
+    }
+  }
+  if (Array.isArray(value)) return value.some((entry) => containsVoteNode(entry));
+  if (!isRecord(value)) return false;
+  const insert = value.insert;
+  if (isRecord(insert)) {
+    if (Object.hasOwn(insert, "vote")) return true;
+    const fold = insert.fold;
+    if (isRecord(fold)) {
+      for (const key of ["title", "content"]) {
+        if (typeof fold[key] !== "string") continue;
+        try {
+          if (containsVoteNode(JSON.parse(fold[key]))) return true;
+        } catch {
+          // 正文完整校验会报告具体的折叠 JSON 错误。
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * 校验帖子来源的可编辑元数据。
  * @since Beta v0.12.6
  * @param source - 帖子完整数据
@@ -327,7 +418,12 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): string | null {
   }
   if (!Array.isArray(source.vod_list) || source.vod_list.length)
     throw new TypeError("视频附件元数据无法安全保留");
-  if (source.is_has_vote !== false) throw new TypeError("投票元数据无法安全保留");
+  if (typeof source.is_has_vote !== "boolean") {
+    throw new TypeError("投票元数据状态未知，无法安全编辑");
+  }
+  if (source.is_has_vote && !containsVoteNode(source.post.structured_content)) {
+    throw new TypeError("投票元数据无法安全保留");
+  }
   if (source.is_has_lottery !== false) throw new TypeError("抽奖元数据无法安全保留");
   if (!Array.isArray(source.link_card_list) || source.link_card_list.length)
     throw new TypeError("链接卡片元数据无法安全保留");
@@ -558,7 +654,7 @@ function buildMutationBody(
     if (countMentions(settings.nodes) > maxMentionCount) {
       throw new TypeError("帖子提及不能超过 100 个");
     }
-    document = textDocument;
+    document = { ...textDocument, nodes: stripPostVoteUrls(textDocument.nodes) };
     content = textDocument.html;
   }
   if (cover && !document.images.includes(cover)) {

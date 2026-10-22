@@ -69,17 +69,21 @@
             </button>
           </div>
         </v-menu>
-        <button
-          v-for="tool in pendingTools"
-          :key="tool.label"
-          :aria-label="tool.label + '（暂不可用）'"
-          :title="tool.label + '（暂不可用）'"
-          class="tgpe-tool"
-          disabled
-          type="button"
-        >
-          <v-icon size="20">{{ tool.icon }}</v-icon>
-        </button>
+        <template v-if="allowComponents">
+          <button
+            v-for="tool in pendingTools"
+            :key="tool.label"
+            :aria-label="tool.available ? tool.label : tool.label + '（暂不可用）'"
+            :title="tool.available ? tool.label : tool.label + '（暂不可用）'"
+            :disabled="disabled || !tool.available"
+            class="tgpe-tool"
+            type="button"
+            @click="handlePendingTool(tool.label, $event)"
+            @mousedown.prevent="rememberEditorSelection"
+          >
+            <v-icon size="20">{{ tool.icon }}</v-icon>
+          </button>
+        </template>
         <button
           :aria-pressed="isLinkActive"
           :disabled
@@ -198,7 +202,14 @@
 import showDialog from "@comp/func/dialog.js";
 import bbsReq from "@req/bbsReq.js";
 import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
-import { isPostDivider, isPostUrl } from "@utils/bbsPostDocument.js";
+import {
+  assertPostDocumentContent,
+  buildPostDocument,
+  isPostDivider,
+  isPostUrl,
+  parsePostFold,
+  parsePostVote,
+} from "@utils/bbsPostDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
 import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbsPostEmoticon.js";
 import Quill from "quill";
@@ -217,6 +228,8 @@ const DeltaClass = <DeltaConstructor>(<unknown>Quill.import("delta"));
 type PostEditorProps = {
   disabled: boolean;
   mode?: "article" | "picture";
+  /** 是否显示投票与折叠工具；折叠子编辑器应关闭以避免递归入口。 */
+  allowComponents?: boolean;
 };
 
 type SelectionRange = {
@@ -247,7 +260,10 @@ type AlignmentOption = {
   icon: string;
 };
 
-const props = withDefaults(defineProps<PostEditorProps>(), { mode: "article" });
+const props = withDefaults(defineProps<PostEditorProps>(), {
+  mode: "article",
+  allowComponents: true,
+});
 const model = defineModel<Array<TGApp.BBS.SctPost.Base>>({ required: true });
 const emits = defineEmits<{
   error: [message: string];
@@ -255,6 +271,10 @@ const emits = defineEmits<{
   imageClick: [];
   emoticonClick: [event: MouseEvent];
   mentionClick: [event: MouseEvent];
+  voteClick: [event: MouseEvent];
+  foldClick: [event: MouseEvent];
+  voteEdit: [value: TGApp.BBS.PostEdit.Vote];
+  foldEdit: [value: TGApp.BBS.PostEdit.Fold];
 }>();
 
 const editorContainer = useTemplateRef<HTMLDivElement>("editorContainer");
@@ -275,9 +295,9 @@ const alignments: Array<AlignmentOption> = [
   { value: "right", label: "右对齐", icon: "mdi-format-align-right" },
 ];
 const pendingTools = [
-  { label: "视频", icon: "mdi-video-outline" },
-  { label: "投票", icon: "mdi-poll" },
-  { label: "折叠", icon: "mdi-format-list-group" },
+  { label: "视频", icon: "mdi-video-outline", available: false },
+  { label: "投票", icon: "mdi-poll", available: true },
+  { label: "折叠", icon: "mdi-format-list-group", available: true },
 ];
 const selectedHeader = computed<string>(() => {
   const header = activeFormats.value.header;
@@ -345,6 +365,8 @@ onMounted(() => {
   instance.root.addEventListener("paste", handlePaste, true);
   instance.root.addEventListener("dragover", preventDrop, true);
   instance.root.addEventListener("drop", preventDrop, true);
+  instance.root.addEventListener("dblclick", handleComponentDoubleClick, true);
+  instance.root.addEventListener("keydown", handleComponentKeydown, true);
   emoticonMap.value = readCachedEmoticonMap();
   applyModel(model.value);
   instance.enable(!props.disabled);
@@ -364,6 +386,8 @@ onBeforeUnmount(() => {
   current.root.removeEventListener("paste", handlePaste, true);
   current.root.removeEventListener("dragover", preventDrop, true);
   current.root.removeEventListener("drop", preventDrop, true);
+  current.root.removeEventListener("dblclick", handleComponentDoubleClick, true);
+  current.root.removeEventListener("keydown", handleComponentKeydown, true);
   current.disable();
   quill.value = undefined;
 });
@@ -374,6 +398,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function emitEditorError(error: unknown, fallback: string): void {
   emits("error", error instanceof Error ? error.message : fallback);
+}
+
+function handlePendingTool(label: string, event: MouseEvent): void {
+  if (label === "投票") emits("voteClick", event);
+  else if (label === "折叠") emits("foldClick", event);
 }
 
 function normalizeMention(value: unknown): TGApp.BBS.ReplyAsset.Mention {
@@ -652,7 +681,15 @@ function buildEditorDelta(
       }
       continue;
     }
-    if (!isRecord(insert) || Object.keys(insert).length !== 1) {
+    if (
+      !isRecord(insert) ||
+      (Object.keys(insert).length !== 1 &&
+        !(
+          Object.keys(insert).length === 2 &&
+          Object.hasOwn(insert, "fold") &&
+          Object.hasOwn(insert, "backup_text")
+        ))
+    ) {
       throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
     }
     if ("divider" in insert) {
@@ -660,6 +697,24 @@ function buildEditorDelta(
         throw new TypeError("帖子分割线无效");
       }
       delta.insert({ divider: insert.divider });
+      continue;
+    }
+    if ("vote" in insert) {
+      if (props.mode === "picture" || node.attributes !== undefined) {
+        throw new TypeError("图片帖或带格式的帖子投票无效");
+      }
+      delta.insert({ vote: parsePostVote(insert.vote) });
+      continue;
+    }
+    if ("fold" in insert) {
+      if (
+        props.mode === "picture" ||
+        node.attributes !== undefined ||
+        (Object.hasOwn(insert, "backup_text") && typeof insert.backup_text !== "string")
+      ) {
+        throw new TypeError("图片帖或带格式的帖子折叠无效");
+      }
+      delta.insert({ fold: parsePostFold(insert.fold) });
       continue;
     }
     if ("custom_emoticon" in insert) {
@@ -716,6 +771,20 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
         throw new TypeError("帖子分割线无效");
       }
       nodes.push(createNode({ divider: op.insert.divider }));
+      continue;
+    }
+    if ("vote" in op.insert) {
+      if (props.mode === "picture" || (op.attributes && Object.keys(op.attributes).length > 0)) {
+        throw new TypeError("图片帖或带格式的帖子投票无效");
+      }
+      nodes.push(createNode({ vote: parsePostVote(op.insert.vote) }));
+      continue;
+    }
+    if ("fold" in op.insert) {
+      if (props.mode === "picture" || (op.attributes && Object.keys(op.attributes).length > 0)) {
+        throw new TypeError("图片帖或带格式的帖子折叠无效");
+      }
+      nodes.push(createNode({ fold: parsePostFold(op.insert.fold) }));
       continue;
     }
     if ("custom_emoticon" in op.insert) {
@@ -867,6 +936,116 @@ function handlePaste(event: ClipboardEvent): void {
 function preventDrop(event: DragEvent): void {
   event.preventDefault();
   event.stopImmediatePropagation();
+}
+
+/**
+ * 从组件 DOM 读取投票或折叠值并通知外层编辑弹窗。
+ * @since Beta v0.12.6
+ * @param element - 组件根元素
+ * @returns 是否识别到可编辑组件
+ */
+function emitComponentEdit(element: HTMLElement): boolean {
+  const current = quill.value;
+  const blot = current ? Quill.find(element, true) : null;
+  if (current && blot && !(blot instanceof Quill)) {
+    const index = current.getIndex(blot);
+    savedSelection = { index, length: 1 };
+    current.setSelection(savedSelection, "silent");
+  }
+  try {
+    if (element.classList.contains("ql-vote")) {
+      const value = parsePostVote({
+        id: element.dataset.voteId ?? "",
+        uid: element.dataset.voteUid ?? "",
+        ...(element.dataset.voteUrl === undefined ? {} : { url: element.dataset.voteUrl }),
+      });
+      emits("voteEdit", value);
+      return true;
+    }
+    if (element.classList.contains("ql-fold")) {
+      const value = parsePostFold({
+        title: element.dataset.title ?? "",
+        content: element.dataset.content ?? "",
+        ...(element.dataset.id === undefined ? {} : { id: element.dataset.id }),
+        ...(element.dataset.size === undefined ? {} : { size: element.dataset.size }),
+      });
+      emits("foldEdit", value);
+      return true;
+    }
+  } catch (error) {
+    emitEditorError(error, "帖子组件数据无效");
+  }
+  return false;
+}
+
+/**
+ * 双击帖子组件时打开其编辑弹窗。
+ * @since Beta v0.12.6
+ * @param event - 鼠标事件
+ */
+function handleComponentDoubleClick(event: MouseEvent): void {
+  if (props.disabled || !props.allowComponents || !(event.target instanceof HTMLElement)) return;
+  const element = event.target.closest<HTMLElement>(".ql-vote, .ql-fold");
+  if (!element || !quill.value?.root.contains(element)) return;
+  if (emitComponentEdit(element)) event.preventDefault();
+}
+
+/**
+ * 在选中帖子组件时用 Enter、空格或 F2 打开编辑弹窗。
+ * @since Beta v0.12.6
+ * @param event - 键盘事件
+ */
+function handleComponentKeydown(event: KeyboardEvent): void {
+  if (
+    props.disabled ||
+    !props.allowComponents ||
+    (event.key !== "Enter" && event.key !== " " && event.key !== "F2")
+  )
+    return;
+  const current = quill.value;
+  const selection = current?.getSelection(false);
+  if (!current || !selection || selection.length > 0) return;
+  for (const index of [selection.index, selection.index - 1]) {
+    if (index < 0 || index >= current.getLength()) continue;
+    const operation = current.getContents(index, 1).ops[0];
+    if (!operation || !isRecord(operation.insert)) continue;
+    const componentSelection = { index, length: 1 };
+    if (
+      ("vote" in operation.insert &&
+        emitComponentEditAtValue(operation.insert.vote, "vote", componentSelection)) ||
+      ("fold" in operation.insert &&
+        emitComponentEditAtValue(operation.insert.fold, "fold", componentSelection))
+    ) {
+      event.preventDefault();
+      return;
+    }
+  }
+}
+
+/**
+ * 从 Quill 嵌入值通知外层编辑弹窗。
+ * @since Beta v0.12.6
+ * @param value - 嵌入值
+ * @param kind - 嵌入类型
+ * @returns 是否成功发出编辑事件
+ */
+function emitComponentEditAtValue(
+  value: unknown,
+  kind: "vote" | "fold",
+  selection?: SelectionRange,
+): boolean {
+  try {
+    if (selection && quill.value) {
+      savedSelection = selection;
+      quill.value.setSelection(selection, "silent");
+    }
+    if (kind === "vote") emits("voteEdit", parsePostVote(value));
+    else emits("foldEdit", parsePostFold(value));
+    return true;
+  } catch (error) {
+    emitEditorError(error, "帖子组件数据无效");
+    return false;
+  }
 }
 
 function isInlineActive(format: InlineFormat): boolean {
@@ -1084,9 +1263,86 @@ function insertDivider(divider: TGApp.BBS.PostEdit.Divider): void {
   dividerOpen.value = false;
 }
 
+function insertVote(value: TGApp.BBS.PostEdit.Vote): boolean {
+  const current = quill.value;
+  if (!current || props.disabled || props.mode !== "article") return false;
+  let vote: TGApp.BBS.PostEdit.Vote;
+  try {
+    vote = parsePostVote(value);
+  } catch (error) {
+    emitEditorError(error, "帖子投票信息无效");
+    return false;
+  }
+  const selection = selectionForAction(current);
+  const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert({ vote });
+  try {
+    assertPostDocumentContent(buildPostDocument(current.getContents().compose(delta).ops));
+  } catch (error) {
+    emitEditorError(error, "帖子正文无效");
+    return false;
+  }
+  current.updateContents(delta, "user");
+  setEditorCursor(current, selection.index + 1);
+  updateActiveFormats();
+  return true;
+}
+
+function insertFold(value: TGApp.BBS.PostEdit.Fold): boolean {
+  const current = quill.value;
+  if (!current || props.disabled || props.mode !== "article") return false;
+  let fold: TGApp.BBS.PostEdit.Fold;
+  try {
+    fold = parsePostFold(value);
+  } catch (error) {
+    emitEditorError(error, "帖子折叠信息无效");
+    return false;
+  }
+  const selection = selectionForAction(current);
+  const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert({ fold });
+  try {
+    assertPostDocumentContent(buildPostDocument(current.getContents().compose(delta).ops));
+  } catch (error) {
+    emitEditorError(error, "帖子正文无效");
+    return false;
+  }
+  current.updateContents(delta, "user");
+  setEditorCursor(current, selection.index + 1);
+  updateActiveFormats();
+  return true;
+}
+
+function removeComponent(): boolean {
+  const current = quill.value;
+  if (!current || props.disabled || props.mode !== "article") return false;
+  const selection = selectionForAction(current);
+  let componentIndex = selection.index;
+  let operation = current.getContents(componentIndex, 1).ops[0];
+  if (
+    (!operation ||
+      !isRecord(operation.insert) ||
+      (!("vote" in operation.insert) && !("fold" in operation.insert))) &&
+    componentIndex > 0
+  ) {
+    componentIndex -= 1;
+    operation = current.getContents(componentIndex, 1).ops[0];
+  }
+  if (
+    !operation ||
+    !isRecord(operation.insert) ||
+    (!("vote" in operation.insert) && !("fold" in operation.insert))
+  ) {
+    emits("error", "请选择要移除的投票或折叠组件");
+    return false;
+  }
+  current.deleteText(componentIndex, 1, "user");
+  setEditorCursor(current, componentIndex);
+  return true;
+}
+
 function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
   const current = quill.value;
   if (!current) return;
+
   if (!isPostUrl(image.url, true)) {
     emits("error", "帖子图片地址无效");
     return;
@@ -1100,7 +1356,16 @@ function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
   setEditorCursor(current, selection.index + 1);
 }
 
-defineExpose({ insertCustomEmoticon, insertEmoticon, insertImage, insertMention, insertText });
+defineExpose({
+  insertCustomEmoticon,
+  insertEmoticon,
+  insertFold,
+  insertImage,
+  insertMention,
+  removeComponent,
+  insertText,
+  insertVote,
+});
 </script>
 
 <style lang="scss" scoped>
@@ -1317,6 +1582,66 @@ defineExpose({ insertCustomEmoticon, insertEmoticon, insertImage, insertMention,
 .tgpe-editor :deep(.ql-divider img) {
   max-width: 100%;
   height: auto;
+}
+
+.tgpe-editor :deep(.ql-vote),
+.tgpe-editor :deep(.ql-fold) {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  margin: 10px 0;
+  background: var(--box-bg-2);
+  color: var(--app-page-content);
+}
+
+.tgpe-editor :deep(.ql-vote) {
+  color: var(--common-text-title);
+  font-weight: 600;
+}
+
+.tgpe-editor :deep(.ql-fold-title) {
+  color: var(--common-text-title);
+  font-weight: 600;
+}
+
+.tgpe-editor :deep(.ql-fold-content) {
+  margin-top: 4px;
+  color: var(--box-text-2);
+}
+
+.tgpe-editor :deep(.ql-fold-rich) {
+  white-space: pre-wrap;
+}
+
+.tgpe-editor :deep(.ql-fold-rich h1),
+.tgpe-editor :deep(.ql-fold-rich h2) {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.tgpe-editor :deep(.ql-fold-image) {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.tgpe-editor :deep(.ql-fold-image img),
+.tgpe-editor :deep(.ql-fold-emoticon) {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.tgpe-editor :deep(.ql-fold-mention),
+.tgpe-editor :deep(.ql-fold-vote) {
+  color: var(--common-text-title);
+}
+
+.tgpe-editor :deep(.ql-fold-divider) {
+  border: 0;
+  border-top: 1px solid var(--common-shadow-2);
 }
 
 .tgpe-editor :deep(.quill-mention) {

@@ -10,7 +10,9 @@ import {
   buildPostDocument,
   isPostDivider,
   isPostUrl,
+  parsePostFold,
   parsePostNodes,
+  parsePostVote,
 } from "../src/utils/bbsPostDocument.js";
 
 const imageUrl = "https://example.com/images/post.png";
@@ -165,6 +167,27 @@ describe("parsePostNodes", () => {
     ]);
   });
 
+  it("preserves APK vote values and legacy fold backup text", () => {
+    const title = JSON.stringify([{ insert: "标题" }, { insert: "\n" }]);
+    const content = JSON.stringify([{ insert: "正文" }, { insert: "\n" }]);
+    const vote = { id: "vote-1", uid: "100000001", url: "https://example.com/vote" };
+    const fold = { title, content, id: "fold-1", size: "2" };
+    const nodes = [{ insert: { vote } }, { insert: { backup_text: "", fold } }];
+
+    expect(parsePostVote(vote)).toEqual({
+      id: "vote-1",
+      uid: "100000001",
+      url: "https://example.com/vote",
+    });
+    expect(parsePostFold(fold)).toEqual({
+      title,
+      content,
+      id: "fold-1",
+      size: "2",
+    });
+    expect(parsePostNodes(nodes)).toEqual([nodes[0], nodes[1], { insert: "\n" }]);
+  });
+
   it.each(<ReadonlyArray<unknown>>[
     [{ insert: { divider: "line_0" } }],
     [{ insert: { divider: "line_1" }, attributes: {} }],
@@ -234,6 +257,57 @@ describe("buildPostDocument", () => {
     expect(linkedText.nodes[0]?.attributes?.link).toBe("https://example.com/a'b");
     expect(mentionDocument.text).toBe(`@${nickname}`);
     expect(imageDocument.images).toEqual(["https://example.com/a'b.png"]);
+  });
+
+  it("collects fold images and text recursively", () => {
+    const document = buildPostDocument([
+      {
+        insert: {
+          fold: {
+            title: JSON.stringify([{ insert: "标题" }, { insert: "\n" }]),
+            content: JSON.stringify([
+              { insert: "正文 " },
+              { insert: { mention } },
+              { insert: { image: imageUrl } },
+              { insert: "\n" },
+            ]),
+          },
+        },
+      },
+    ]);
+
+    expect(document.text).toBe("标题正文 @旅行者");
+    expect(document.images).toEqual([imageUrl]);
+    expect(() => assertPostDocumentContent(document)).not.toThrow();
+  });
+
+  it("applies mention and custom emoticon limits inside folds", () => {
+    const nestedMentions = Array.from({ length: 101 }, () => ({ insert: { mention } }));
+    const mentionDocument = buildPostDocument([
+      {
+        insert: {
+          fold: {
+            title: JSON.stringify(nestedMentions),
+            content: JSON.stringify([{ insert: "正文" }]),
+          },
+        },
+      },
+    ]);
+    expect(() => assertPostDocumentContent(mentionDocument)).toThrow("100 位用户");
+
+    const customDocument = buildPostDocument([
+      {
+        insert: {
+          fold: {
+            title: JSON.stringify([{ insert: { custom_emoticon: customEmoticon } }]),
+            content: JSON.stringify([
+              { insert: { custom_emoticon: { ...customEmoticon, id: "two" } } },
+            ]),
+          },
+        },
+      },
+    ]);
+    expect(() => assertPostDocumentContent(customDocument)).toThrow("一个自定义表情");
   });
 
   it("rejects whitespace-only content but allows an image-only document", () => {

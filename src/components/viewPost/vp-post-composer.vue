@@ -52,6 +52,10 @@
               @image-click="tools?.chooseImage()"
               @emoticon-click="tools?.openEmoji($event)"
               @mention-click="tools?.openMention($event)"
+              @vote-click="openVoteDialog"
+              @fold-click="openFoldDialog"
+              @vote-edit="editVote"
+              @fold-edit="editFold"
             >
               <template #insert-panel>
                 <VpPostTools
@@ -325,6 +329,23 @@
         </div>
       </section>
     </template>
+    <VpPostComponentDialog
+      v-model="componentDialog.visible"
+      :contextId="contextVersion"
+      :cookie="toolCookie"
+      :disabled="busy || !canWrite"
+      :errorMessage="componentDialog.error"
+      :fold="componentDialog.fold"
+      :gid="draft.gid"
+      :kind="componentDialog.kind"
+      :loading="componentDialog.loading"
+      :vote="componentDialog.vote"
+      :voteCreated="componentDialog.pendingVote !== undefined"
+      @error="componentDialog.error = $event"
+      @remove="removeComponent"
+      @save-fold="saveFold"
+      @save-vote="saveVote"
+    />
   </form>
 </template>
 <script lang="ts" setup>
@@ -333,6 +354,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import postEditReq, { getPostEditSettings } from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
+import postVoteReq from "@req/postVoteReq.js";
 import topicReq from "@req/topicReq.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
@@ -350,6 +372,7 @@ import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, toRaw, useId, useTemplateRef, watch } from "vue";
 
+import VpPostComponentDialog from "./vp-post-component-dialog.vue";
 import VpPostEditor from "./vp-post-editor.vue";
 import VpPostTools from "./vp-post-tools.vue";
 
@@ -381,6 +404,21 @@ const topicLoading = ref<boolean>(false);
 const topicNames = ref<Map<number, string>>(new Map());
 const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
+type ComponentDialogState = {
+  visible: boolean;
+  kind: "vote" | "fold";
+  loading: boolean;
+  error: string;
+  vote?: TGApp.BBS.PostEdit.Vote;
+  pendingVote?: TGApp.BBS.PostEdit.Vote;
+  fold?: TGApp.BBS.PostEdit.Fold;
+};
+const componentDialog = ref<ComponentDialogState>({
+  visible: false,
+  kind: "fold",
+  loading: false,
+  error: "",
+});
 let seed: TGApp.BBS.Post.FullData | undefined;
 let active = true;
 let previewRenderVersion = 0;
@@ -389,6 +427,8 @@ const busy = computed<boolean>(() => pending.value || uploading.value);
 const canSubmit = computed<boolean>(
   () =>
     !busy.value &&
+    !componentDialog.value.visible &&
+    !componentDialog.value.loading &&
     !topicLoading.value &&
     !editorInvalid.value &&
     canWrite.value &&
@@ -503,6 +543,7 @@ watch(
     cookie.value?.ltuid,
   ],
   () => {
+    closeComponentDialog();
     contextVersion.value += 1;
     void initialize();
   },
@@ -523,6 +564,7 @@ watch(
 );
 onBeforeUnmount(() => {
   active = false;
+  closeComponentDialog();
   contextVersion.value += 1;
 });
 
@@ -653,8 +695,148 @@ async function reloadPost(): Promise<void> {
   }
 }
 
+function closeComponentDialog(): void {
+  componentDialog.value = {
+    visible: false,
+    kind: "fold",
+    loading: false,
+    error: "",
+  };
+}
+
+function openVoteDialog(): void {
+  if (busy.value || preview.value || !canWrite.value) return;
+  componentDialog.value = {
+    visible: true,
+    kind: "vote",
+    loading: false,
+    error: "",
+  };
+}
+
+function openFoldDialog(): void {
+  if (busy.value || preview.value || !canWrite.value) return;
+  componentDialog.value = {
+    visible: true,
+    kind: "fold",
+    loading: false,
+    error: "",
+  };
+}
+
+function editVote(value: TGApp.BBS.PostEdit.Vote): void {
+  if (busy.value || preview.value || !canWrite.value) return;
+  componentDialog.value = {
+    visible: true,
+    kind: "vote",
+    loading: false,
+    error: "",
+    vote: value,
+  };
+}
+
+function editFold(value: TGApp.BBS.PostEdit.Fold): void {
+  if (busy.value || preview.value || !canWrite.value) return;
+  componentDialog.value = {
+    visible: true,
+    kind: "fold",
+    loading: false,
+    error: "",
+    fold: value,
+  };
+}
+
 function handleEditorError(message: string): void {
   error.value = message;
+  if (componentDialog.value.visible) componentDialog.value.error = message;
+}
+
+async function saveVote(request: TGApp.BBS.Vote.CreateRequest): Promise<void> {
+  const pendingVote = componentDialog.value.pendingVote;
+  if (
+    componentDialog.value.loading ||
+    !componentDialog.value.visible ||
+    componentDialog.value.kind !== "vote" ||
+    componentDialog.value.vote ||
+    busy.value ||
+    preview.value ||
+    !canWrite.value
+  )
+    return;
+  if (pendingVote) {
+    componentDialog.value.error = "";
+    if (editor.value?.insertVote(pendingVote)) closeComponentDialog();
+    return;
+  }
+  const requestCookie = toolCookie.value;
+  const snapshotUid = uid.value;
+  if (!requestCookie || !snapshotUid) {
+    componentDialog.value.error = "账号状态已变化，请重新登录后重试";
+    return;
+  }
+  const version = contextVersion.value;
+  const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+    uid: snapshotUid,
+    cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+  };
+  componentDialog.value.loading = true;
+  componentDialog.value.error = "";
+  try {
+    const execution = await executeReplyForCurrentAccount(snapshot, () =>
+      postVoteReq.create(request, requestCookie, snapshotUid),
+    );
+    if (!active || version !== contextVersion.value) return;
+    if (
+      !execution.allowed ||
+      !matchesCurrentAccount(snapshot) ||
+      !canWrite.value ||
+      uid.value !== snapshotUid
+    )
+      throw new Error("账号状态已变化，请重新打开编辑器");
+    const response = execution.data;
+    if (!response || response.retcode !== 0)
+      throw new Error(`[${response?.retcode ?? "unknown"}] ${response?.message ?? "创建投票失败"}`);
+    const voteId = response.data?.vote_id;
+    if (typeof voteId !== "string" || !voteId.trim()) throw new Error("创建投票响应缺少投票 ID");
+    const createdVote = { id: voteId, uid: snapshotUid };
+    componentDialog.value.pendingVote = createdVote;
+    const inserted = editor.value?.insertVote(createdVote) ?? false;
+    if (!inserted) return;
+    closeComponentDialog();
+  } catch (cause) {
+    if (active && version === contextVersion.value)
+      componentDialog.value.error = `创建投票失败：${TGHttps.getErrMsg(cause)}。若请求结果不明确，请先核对米游社投票状态，再决定是否重试。`;
+  } finally {
+    if (active && version === contextVersion.value) componentDialog.value.loading = false;
+  }
+}
+
+function saveFold(value: TGApp.BBS.PostEdit.Fold): void {
+  if (
+    componentDialog.value.loading ||
+    !componentDialog.value.visible ||
+    componentDialog.value.kind !== "fold" ||
+    busy.value ||
+    preview.value ||
+    !canWrite.value
+  )
+    return;
+  const inserted = editor.value?.insertFold(value) ?? false;
+  if (!inserted) return;
+  closeComponentDialog();
+}
+
+function removeComponent(): void {
+  if (
+    componentDialog.value.loading ||
+    !componentDialog.value.visible ||
+    busy.value ||
+    preview.value ||
+    !canWrite.value
+  )
+    return;
+  const removed = editor.value?.removeComponent() ?? false;
+  if (removed) closeComponentDialog();
 }
 function insertEmoticon(emoticon: { src: string; name: string }): void {
   if (canWrite.value && !busy.value) editor.value?.insertEmoticon(emoticon);
@@ -665,6 +847,7 @@ function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
 function insertMention(user: TGApp.BBS.ReplyAsset.Mention): void {
   if (canWrite.value && !busy.value) editor.value?.insertMention(user);
 }
+
 function insertImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
   if (!canWrite.value || pending.value) return;
   if (!isPicture.value) {
@@ -722,6 +905,8 @@ async function addTopic(): Promise<void> {
 async function savePost(): Promise<void> {
   if (
     busy.value ||
+    componentDialog.value.visible ||
+    componentDialog.value.loading ||
     editorInvalid.value ||
     topicLoading.value ||
     !canWrite.value ||

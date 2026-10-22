@@ -8,7 +8,7 @@ import { BlockEmbed } from "quill/blots/block.js";
 import Embed from "quill/blots/embed.js";
 
 import { parseCustomEmoticon } from "./bbsCustomEmoticon.js";
-import { isPostDivider } from "./bbsPostDocument.js";
+import { isPostDivider, parsePostFold, parsePostNodes, parsePostVote } from "./bbsPostDocument.js";
 
 /**
  * 帖子编辑器内部的用户提及值。
@@ -47,6 +47,8 @@ export const postEditorFormats: ReadonlyArray<string> = [
   "mention",
   "emoticon",
   "custom_emoticon",
+  "vote",
+  "fold",
 ];
 
 const PostAlignAttributor = new Parchment.StyleAttributor("align", "text-align", {
@@ -275,6 +277,103 @@ class PostDividerBlot extends BlockEmbed {
   }
 }
 
+/**
+ * 帖子投票节点。
+ * @since Beta v0.12.6
+ */
+class PostVoteBlot extends BlockEmbed {
+  static blotName = "vote";
+
+  static className = "ql-vote";
+
+  static tagName = "DIV";
+
+  static scope = Parchment.Scope.BLOCK_BLOT;
+
+  /** 创建保留投票 ID 和发布者 UID 的投票块。 @since Beta v0.12.6 */
+  static create(value: unknown): HTMLElement {
+    const vote = parsePostVote(value);
+    const node = super.create(value);
+    if (!(node instanceof HTMLElement)) throw new TypeError("帖子投票节点无效");
+    node.classList.add("mhy-vote-frame");
+    node.dataset.voteId = vote.id;
+    node.dataset.voteUid = vote.uid;
+    if (vote.url !== undefined) node.dataset.voteUrl = vote.url;
+    node.textContent = `投票 ${vote.id}`;
+    node.setAttribute("contenteditable", "false");
+    node.setAttribute("role", "button");
+    return node;
+  }
+
+  /** 从投票块读取完整嵌入值。 @since Beta v0.12.6 */
+  static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Vote {
+    const value: Record<string, string> = {
+      id: domNode.dataset.voteId ?? "",
+      uid: domNode.dataset.voteUid ?? "",
+    };
+    if (domNode.dataset.voteUrl !== undefined) value.url = domNode.dataset.voteUrl;
+    return parsePostVote(value);
+  }
+
+  /** 投票块不接受段落或文字格式。 @since Beta v0.12.6 */
+  format(): void {
+    // 投票块只保留自身的结构化值。
+  }
+}
+
+/**
+ * 帖子折叠节点。
+ * @since Beta v0.12.6
+ */
+class PostFoldBlot extends BlockEmbed {
+  static blotName = "fold";
+
+  static className = "ql-fold";
+
+  static tagName = "DIV";
+
+  static scope = Parchment.Scope.BLOCK_BLOT;
+
+  /** 创建保留嵌套 Delta 的折叠块。 @since Beta v0.12.6 */
+  static create(value: unknown): HTMLElement {
+    const fold = parsePostFold(value);
+    const node = super.create(value);
+    if (!(node instanceof HTMLElement)) throw new TypeError("帖子折叠节点无效");
+    node.classList.add("ql-fold");
+    node.dataset.title = fold.title;
+    node.dataset.content = fold.content;
+    if (fold.id !== undefined) node.dataset.id = fold.id;
+    if (fold.size !== undefined) node.dataset.size = String(fold.size);
+    node.setAttribute("contenteditable", "false");
+    const title = document.createElement("div");
+    title.className = "ql-fold-title";
+    appendFoldDeltaMarkup(title, fold.title);
+    if (!title.hasChildNodes()) title.textContent = "折叠标题";
+    const content = document.createElement("div");
+    content.className = "ql-fold-content";
+    appendFoldDeltaMarkup(content, fold.content);
+    if (!content.hasChildNodes()) content.textContent = "折叠内容";
+    node.replaceChildren(title, content);
+    return node;
+  }
+
+  /** 从折叠块读取完整嵌套 Delta。 @since Beta v0.12.6 */
+  static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Fold {
+    const value: Record<string, string> = {
+      title: domNode.dataset.title ?? "",
+      content: domNode.dataset.content ?? "",
+    };
+    if (domNode.dataset.id !== undefined) value.id = domNode.dataset.id;
+    if (domNode.dataset.size !== undefined) value.size = domNode.dataset.size;
+    return parsePostFold(value);
+  }
+
+  /** 折叠块不接受段落或文字格式。 @since Beta v0.12.6 */
+  format(): void {
+    // 折叠块只保留自身的结构化值。
+  }
+}
+
 let formatsRegistered = false;
 
 /**
@@ -299,6 +398,8 @@ export function registerPostEditorFormats(): void {
   Quill.register(PostCustomEmoticonBlot, true);
   Quill.register(PostImageBlot, true);
   Quill.register(PostDividerBlot, true);
+  Quill.register(PostVoteBlot, true);
+  Quill.register(PostFoldBlot, true);
   formatsRegistered = true;
 }
 
@@ -404,6 +505,133 @@ function isPostLink(value: unknown): value is string {
   } catch {
     return false;
   }
+}
+
+/**
+ * 将折叠内的 Delta 安全转换为富文本 DOM，供编辑器 HTML 预览使用。
+ * @since Beta v0.12.6
+ * @param parent - 目标容器
+ * @param value - JSON 编码的 Delta
+ */
+function appendFoldDeltaMarkup(parent: HTMLElement, value: string): void {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return;
+  }
+  let nodes: Array<TGApp.BBS.PostEdit.Node>;
+  try {
+    nodes = parsePostNodes(parsed);
+  } catch {
+    return;
+  }
+  parent.classList.add("ql-fold-rich");
+  for (const node of nodes) appendFoldNodeMarkup(parent, node);
+}
+
+/**
+ * 将一个已校验的折叠内节点转换为 DOM。
+ * @since Beta v0.12.6
+ * @param parent - 目标容器
+ * @param node - 折叠内节点
+ */
+function appendFoldNodeMarkup(parent: HTMLElement, node: TGApp.BBS.PostEdit.Node): void {
+  if (typeof node.insert === "string") {
+    const attributes = node.attributes ?? {};
+    const tag = attributes.header === 1 ? "h1" : attributes.header === 2 ? "h2" : "span";
+    const text = document.createElement(tag);
+    text.textContent = node.insert;
+    applyFoldTextAttributes(text, attributes);
+    appendFoldLink(parent, text, attributes.link);
+    return;
+  }
+  if ("image" in node.insert) {
+    const image = document.createElement("img");
+    image.alt = "";
+    image.draggable = false;
+    image.src = node.insert.image;
+    const imageBox = document.createElement("span");
+    imageBox.className = "ql-fold-image";
+    imageBox.append(image);
+    appendFoldLink(parent, imageBox, node.attributes?.link);
+    return;
+  }
+  if ("mention" in node.insert) {
+    const mention = document.createElement("span");
+    mention.className = "ql-fold-mention";
+    mention.textContent = `@${node.insert.mention.nickname} `;
+    parent.append(mention);
+    return;
+  }
+  if ("custom_emoticon" in node.insert) {
+    const image = document.createElement("img");
+    image.className = "ql-fold-emoticon";
+    image.alt = node.insert.custom_emoticon.hash ?? node.insert.custom_emoticon.id;
+    image.src = node.insert.custom_emoticon.url;
+    image.width = node.insert.custom_emoticon.size.width;
+    image.height = node.insert.custom_emoticon.size.height;
+    parent.append(image);
+    return;
+  }
+  if ("divider" in node.insert) {
+    const divider = document.createElement("hr");
+    divider.className = "ql-fold-divider";
+    parent.append(divider);
+    return;
+  }
+  if ("vote" in node.insert) {
+    const vote = document.createElement("span");
+    vote.className = "ql-fold-vote";
+    vote.textContent = `投票 ${node.insert.vote.id}`;
+    parent.append(vote);
+    return;
+  }
+  if ("fold" in node.insert) {
+    const details = document.createElement("details");
+    const summary = document.createElement("summary");
+    const content = document.createElement("div");
+    appendFoldDeltaMarkup(summary, node.insert.fold.title);
+    appendFoldDeltaMarkup(content, node.insert.fold.content);
+    details.append(summary, content);
+    parent.append(details);
+  }
+}
+
+/**
+ * 应用折叠内文字格式。
+ * @since Beta v0.12.6
+ * @param element - 文字元素
+ * @param attributes - 已校验的文字属性
+ */
+function applyFoldTextAttributes(
+  element: HTMLElement,
+  attributes: TGApp.BBS.PostEdit.Attributes,
+): void {
+  if (attributes.bold) element.style.fontWeight = "700";
+  if (attributes.italic) element.style.fontStyle = "italic";
+  if (attributes.color) element.style.color = attributes.color;
+  if (attributes.align) element.style.textAlign = attributes.align;
+}
+
+/**
+ * 在折叠内安全添加超链接。
+ * @since Beta v0.12.6
+ * @param parent - 目标容器
+ * @param element - 待添加元素
+ * @param link - 可选链接
+ */
+function appendFoldLink(parent: HTMLElement, element: HTMLElement, link?: string): void {
+  if (link === undefined) {
+    parent.append(element);
+    return;
+  }
+  const anchor = document.createElement("a");
+  anchor.href = link;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.append(element);
+  parent.append(anchor);
 }
 
 /**

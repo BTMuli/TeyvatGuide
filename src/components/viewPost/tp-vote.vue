@@ -111,7 +111,10 @@ onMounted(async () => {
     data: voteInfo.vote_option_indexes.map((item, index) => ({
       title: item,
       count: voteResult!.option_stats[index] ?? 0,
-      percent: ((voteResult!.option_stats[index] ?? 0) / voteResult!.user_cnt) * 100,
+      percent:
+        voteResult!.user_cnt === 0
+          ? 0
+          : ((voteResult!.option_stats[index] ?? 0) / voteResult!.user_cnt) * 100,
     })),
     endTime: fmtUtil.dateTime(voteInfo.end_time * 1000),
   };

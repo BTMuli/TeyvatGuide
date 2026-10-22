@@ -70,6 +70,45 @@ function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.PostEdit.Node>): void
 }
 
 /**
+ * 帖子正文递归统计结果。
+ * @since Beta v0.12.6
+ */
+type PostNodeStats = {
+  customEmoticons: number;
+  emoticons: number;
+  mentions: number;
+};
+
+/**
+ * 递归统计帖子节点，避免折叠内的内容绕过表情和提及数量限制。
+ * @since Beta v0.12.6
+ * @param nodes - 已规范化的帖子节点
+ * @param stats - 累计统计结果
+ */
+function collectPostNodeStats(nodes: Array<TGApp.BBS.PostEdit.Node>, stats: PostNodeStats): void {
+  for (const node of nodes) {
+    if (typeof node.insert === "string") {
+      stats.emoticons += (node.insert.match(/_\([^()\r\n]+\)/gu) ?? []).length;
+      continue;
+    }
+    if ("mention" in node.insert) {
+      stats.mentions += 1;
+      continue;
+    }
+    if ("custom_emoticon" in node.insert) {
+      stats.customEmoticons += 1;
+      continue;
+    }
+    if ("fold" in node.insert) {
+      for (const value of [node.insert.fold.title, node.insert.fold.content]) {
+        const parsed = <unknown>JSON.parse(value);
+        collectPostNodeStats(parsePostNodes(parsed), stats);
+      }
+    }
+  }
+}
+
+/**
  * 校验 HTTP 链接，拒绝脚本、凭据和控制字符。
  * @since Beta v0.12.6
  * @param value - 待校验的地址
@@ -113,6 +152,98 @@ function isPostColor(value: unknown): value is string {
  */
 export function isPostDivider(value: unknown): value is TGApp.BBS.PostEdit.Divider {
   return value === "line_1" || value === "line_2" || value === "line_3" || value === "line_4";
+}
+
+/**
+ * 校验帖子投票嵌入值。
+ * @since Beta v0.12.6
+ * @param value - 未知的投票嵌入值
+ * @returns 已校验的投票嵌入值
+ */
+export function parsePostVote(value: unknown): TGApp.BBS.PostEdit.Vote {
+  if (!isRecord(value)) throw new TypeError("帖子投票信息无效");
+  const keys = Object.keys(value);
+  if (keys.some((key) => key !== "id" && key !== "uid" && key !== "url")) {
+    throw new TypeError("帖子投票信息无效");
+  }
+  if (
+    typeof value.id !== "string" ||
+    !value.id.trim() ||
+    /[\r\n]/u.test(value.id) ||
+    typeof value.uid !== "string" ||
+    !value.uid.trim() ||
+    /[\r\n]/u.test(value.uid)
+  ) {
+    throw new TypeError("帖子投票信息无效");
+  }
+  const vote: TGApp.BBS.PostEdit.Vote = { id: value.id, uid: value.uid };
+  if (Object.hasOwn(value, "url")) {
+    if (!isPostUrl(value.url)) throw new TypeError("帖子投票链接无效");
+    vote.url = value.url;
+  }
+  return vote;
+}
+
+/**
+ * 解析并校验折叠块内的 Delta，确保嵌套富文本在编辑往返时不会被当作纯文本丢弃。
+ * @since Beta v0.12.6
+ * @param value - JSON 编码的 Delta
+ * @param label - 内容位置名称
+ */
+function assertFoldDelta(value: string, label: string): void {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new TypeError(`帖子折叠${label}不是有效 JSON`);
+  }
+  try {
+    parsePostNodes(parsed);
+  } catch {
+    throw new TypeError(`帖子折叠${label}无效`);
+  }
+}
+
+/**
+ * 校验帖子折叠嵌入值。
+ * @since Beta v0.12.6
+ * @param value - 未知的折叠嵌入值
+ * @returns 已校验的折叠嵌入值
+ */
+export function parsePostFold(value: unknown): TGApp.BBS.PostEdit.Fold {
+  if (!isRecord(value)) throw new TypeError("帖子折叠信息无效");
+  const keys = Object.keys(value);
+  if (keys.some((key) => !["title", "content", "size", "id"].includes(key))) {
+    throw new TypeError("帖子折叠信息无效");
+  }
+  if (
+    typeof value.title !== "string" ||
+    !value.title.trim() ||
+    typeof value.content !== "string" ||
+    !value.content.trim()
+  ) {
+    throw new TypeError("帖子折叠内容无效");
+  }
+  assertFoldDelta(value.title, "标题");
+  assertFoldDelta(value.content, "正文");
+  const fold: TGApp.BBS.PostEdit.Fold = { title: value.title, content: value.content };
+  if (Object.hasOwn(value, "size")) {
+    if (
+      (typeof value.size !== "number" && typeof value.size !== "string") ||
+      (typeof value.size === "number" && (!Number.isSafeInteger(value.size) || value.size < 0)) ||
+      (typeof value.size === "string" && !/^(?:0|[1-9]\d*)$/u.test(value.size))
+    ) {
+      throw new TypeError("帖子折叠长度无效");
+    }
+    fold.size = value.size;
+  }
+  if (Object.hasOwn(value, "id")) {
+    if (typeof value.id !== "string" || !value.id.trim() || /[\r\n]/u.test(value.id)) {
+      throw new TypeError("帖子折叠 ID 无效");
+    }
+    fold.id = value.id;
+  }
+  return fold;
 }
 
 /**
@@ -236,6 +367,18 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && "divider" in insert) {
       if (!isPostDivider(insert.divider)) throw new TypeError("帖子分割线无效");
       node = { insert: { divider: insert.divider } };
+    } else if (isRecord(insert) && Object.keys(insert).length === 1 && "vote" in insert) {
+      node = { insert: { vote: parsePostVote(insert.vote) } };
+    } else if (isRecord(insert) && "fold" in insert) {
+      if (
+        Object.keys(insert).some((key) => key !== "fold" && key !== "backup_text") ||
+        (Object.hasOwn(insert, "backup_text") && typeof insert.backup_text !== "string")
+      ) {
+        throw new TypeError("帖子折叠回退文本无效");
+      }
+      const fold: TGApp.BBS.PostEdit.FoldInsert = { fold: parsePostFold(insert.fold) };
+      if (typeof insert.backup_text === "string") fold.backup_text = insert.backup_text;
+      node = { insert: fold };
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && isRecord(insert.mention)) {
       const mention = insert.mention;
       if (
@@ -255,10 +398,10 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     }
     if (
       typeof node.insert !== "string" &&
-      "divider" in node.insert &&
+      ("divider" in node.insert || "vote" in node.insert || "fold" in node.insert) &&
       Object.prototype.hasOwnProperty.call(value, "attributes")
     ) {
-      throw new TypeError("帖子分割线不支持格式属性");
+      throw new TypeError("帖子卡片不支持格式属性");
     }
     if (isCustomEmoticonNode(node) && Object.prototype.hasOwnProperty.call(value, "attributes")) {
       throw new TypeError("帖子自定义表情不支持格式属性");
@@ -301,6 +444,15 @@ export function buildPostDocument(input: unknown): TGApp.BBS.PostEdit.DraftDocum
       text += node.insert.backup_text ?? customEmoticonBackupText;
     } else if ("image" in node.insert) {
       images.push(node.insert.image);
+    } else if ("vote" in node.insert) {
+      text += "[投票]";
+    } else if ("fold" in node.insert) {
+      const title = <unknown>JSON.parse(node.insert.fold.title);
+      const content = <unknown>JSON.parse(node.insert.fold.content);
+      const titleDocument = buildPostDocument(title);
+      const contentDocument = buildPostDocument(content);
+      text += titleDocument.text + contentDocument.text;
+      images.push(...titleDocument.images, ...contentDocument.images);
     }
   }
   return { nodes, text: text.replace(/\n$/u, ""), images };
@@ -317,11 +469,9 @@ export function assertPostDocumentContent(document: TGApp.BBS.PostEdit.DraftDocu
   if (document.text.length + document.images.length > 30000)
     throw new TypeError("帖子正文最多 30000 字");
   if (document.images.length > 50) throw new TypeError("帖子最多添加 50 张图片");
-  const emoticons = (document.text.match(/_\([^()\r\n]+\)/gu) ?? []).length;
-  if (emoticons > 50) throw new TypeError("帖子最多添加 50 个表情");
-  const mentions = document.nodes.filter(
-    (node) => typeof node.insert !== "string" && "mention" in node.insert,
-  ).length;
-  if (mentions > 100) throw new TypeError("帖子最多提及 100 位用户");
-  assertSingleCustomEmoticon(document.nodes);
+  const stats: PostNodeStats = { customEmoticons: 0, emoticons: 0, mentions: 0 };
+  collectPostNodeStats(document.nodes, stats);
+  if (stats.emoticons > 50) throw new TypeError("帖子最多添加 50 个表情");
+  if (stats.mentions > 100) throw new TypeError("帖子最多提及 100 位用户");
+  if (stats.customEmoticons > 1) throw new TypeError("帖子最多添加一个自定义表情");
 }

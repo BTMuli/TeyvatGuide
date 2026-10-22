@@ -240,6 +240,44 @@ describe("postEditReq mutation requests", () => {
     );
   });
 
+  it("strips vote URLs from the structured payload, including nested folds", async () => {
+    const title = JSON.stringify([{ insert: "标题" }, { insert: "\n" }]);
+    const content = JSON.stringify([
+      {
+        insert: {
+          vote: { id: "nested-vote", uid: "100000001", url: "https://example.com/vote" },
+        },
+      },
+      { insert: "\n" },
+    ]);
+    const nodes = [
+      { insert: { vote: { id: "vote-1", uid: "100000001", url: "https://example.com/vote" } } },
+      { insert: { fold: { title, content } } },
+      { insert: "\n" },
+    ];
+    const settings = { ...getPostEditSettings(source), cover: "", nodes };
+
+    await expect(postEditReq.create(settings, cookie)).resolves.toEqual(successResponse);
+
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.structured_content).toBe(
+      JSON.stringify([
+        { insert: { vote: { id: "vote-1", uid: "100000001" } } },
+        {
+          insert: {
+            fold: {
+              title,
+              content: JSON.stringify([
+                { insert: { vote: { id: "nested-vote", uid: "100000001" } } },
+                { insert: "\n" },
+              ]),
+            },
+          },
+        },
+        { insert: "\n" },
+      ]),
+    );
+  });
+
   it("rejects an unavailable custom emoticon on new-post creation", async () => {
     const settings = {
       ...getPostEditSettings(source),
@@ -596,6 +634,28 @@ describe("postEditReq source initialization and validation", () => {
       sourceCollectionId: null,
       blockReplyImg: 0,
       userAiContentChoice: "USER_AI_CONTENT_CHOICE_NOT_AI",
+    });
+  });
+
+  it("reads and updates an existing APK vote node from string structured content", async () => {
+    const voteSource = structuredClone(source);
+    const voteNodes = [
+      { insert: { vote: { id: "vote-1", uid: "100000001" } } },
+      { insert: { image: imageUrl } },
+      { insert: "\n" },
+    ];
+    voteSource.post.structured_content = JSON.stringify(voteNodes);
+    voteSource.is_has_vote = true;
+
+    const settings = getPostEditSettings(voteSource);
+
+    expect(settings.nodes).toEqual(voteNodes);
+    await expect(
+      postEditReq.update(voteSource, { ...settings, subject: "编辑投票帖子" }, cookie),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).toMatchObject({
+      post_id: "123",
+      structured_content: JSON.stringify(voteNodes),
     });
   });
 

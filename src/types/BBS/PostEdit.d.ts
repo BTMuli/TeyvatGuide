@@ -23,6 +23,43 @@ declare namespace TGApp.BBS.PostEdit {
   type Divider = "line_1" | "line_2" | "line_3" | "line_4";
 
   /**
+   * 米游社帖子投票嵌入值。
+   * @since Beta v0.12.6
+   */
+  type Vote = {
+    /** 投票 ID */
+    id: string;
+    /** 投票发布者 UID */
+    uid: string;
+    /** APK 创建投票时附带的访问地址；读取 Delta 时可能不存在。 */
+    url?: string;
+  };
+
+  /**
+   * 米游社帖子折叠嵌入值。
+   *
+   * `title` 和 `content` 是 JSON 编码的 Quill Delta；`id` 与 `size` 为 APK
+   * 折叠 Blot 的可选 DOM 数据属性，旧帖子可能不包含它们。
+   * @since Beta v0.12.6
+   */
+  type Fold = {
+    /** JSON 编码的折叠标题 Delta */
+    title: string;
+    /** JSON 编码的折叠正文 Delta */
+    content: string;
+    /** 折叠块的长度提示 */
+    size?: number | string;
+    /** 折叠块 ID */
+    id?: string;
+  };
+
+  /** 旧帖子结构中用于折叠回退显示的兼容封装。 @since Beta v0.12.6 */
+  type FoldInsert = {
+    fold: Fold;
+    backup_text?: string;
+  };
+
+  /**
    * 富文本帖子节点
    * @since Beta v0.12.6
    */
@@ -32,6 +69,8 @@ declare namespace TGApp.BBS.PostEdit {
       | { image: string }
       | { mention: TGApp.BBS.ReplyAsset.Mention }
       | { divider: Divider }
+      | { vote: Vote }
+      | FoldInsert
       | TGApp.BBS.CustomEmoticon.Insert;
     attributes?: Attributes;
   };
