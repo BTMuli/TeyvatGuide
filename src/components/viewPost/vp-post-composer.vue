@@ -227,7 +227,7 @@
                   v-for="id in draft.topicIds"
                   :key="id"
                   :class="{ 'has-close': !busy && canWrite }"
-                  :title="topicNames.get(id) || '话题 ' + id"
+                  :title="topicDescs.get(id) || topicNames.get(id) || '话题 ' + id"
                   class="post-composer-topic-option post-composer-selected-topic"
                 >
                   <TMiImg
@@ -268,6 +268,9 @@
                 @update:model-value="handleTopicSearch"
               />
             </div>
+            <p v-if="topicLimitReached" class="post-composer-hint" role="status">
+              最多选择 {{ maxTopicCount }} 个话题
+            </p>
             <div
               v-if="topicOptions.length > 0"
               :aria-label="topicQuery.trim() ? '搜索结果' : '推荐话题'"
@@ -277,8 +280,10 @@
               <button
                 v-for="topic in topicOptions"
                 :key="topic.id"
-                :disabled="busy || !canWrite"
-                :title="topic.desc || topic.name"
+                :disabled="busy || !canWrite || topicLimitReached"
+                :title="
+                  topicLimitReached ? `最多选择 ${maxTopicCount} 个话题` : topic.desc || topic.name
+                "
                 class="post-composer-topic-option"
                 type="button"
                 @click="selectTopic(topic.id)"
@@ -466,6 +471,7 @@ const error = ref<string>("");
 const editorInvalid = ref<boolean>(false);
 const conflict = ref<boolean>(false);
 const maxPictureCount = ref<number>(18);
+const maxTopicCount: Readonly<number> = 6;
 const topicQuery = ref<string>("");
 const topicRecommendations = ref<Array<TopicOption>>([]);
 const topicSearchResults = ref<Array<TopicOption>>([]);
@@ -474,6 +480,7 @@ const topicSearchLoading = ref<boolean>(false);
 const topicError = ref<string>("");
 const topicNames = ref<Map<number, string>>(new Map());
 const topicCovers = ref<Map<number, string>>(new Map());
+const topicDescs = ref<Map<number, string>>(new Map());
 const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
 type TopicOption = {
@@ -607,6 +614,7 @@ const topicOptions = computed<Array<TopicOption>>(() => {
   const items = topicQuery.value.trim() ? topicSearchResults.value : topicRecommendations.value;
   return items.filter((item) => !draft.value.topicIds.includes(item.id));
 });
+const topicLimitReached = computed<boolean>(() => draft.value.topicIds.length >= maxTopicCount);
 const topicEmptyText = computed<string>(() => {
   if (topicLoading.value) return "正在加载话题…";
   if (topicError.value) return topicError.value;
@@ -838,12 +846,14 @@ async function initialize(force: boolean = false): Promise<void> {
       topicCovers.value = new Map(
         (seed.topics ?? []).filter((item) => item.cover).map((item) => [item.id, item.cover]),
       );
+      topicDescs.value = new Map();
     } else {
       seed = undefined;
       maxPictureCount.value = 18;
       draft.value = emptyDraft();
       topicNames.value = new Map();
       topicCovers.value = new Map();
+      topicDescs.value = new Map();
       if (props.initialTopic) topicNames.value.set(props.initialTopic.id, props.initialTopic.name);
       normalizeForumId();
     }
@@ -852,8 +862,10 @@ async function initialize(force: boolean = false): Promise<void> {
   } finally {
     if (version === contextVersion.value) loading.value = false;
   }
-  if (active && version === contextVersion.value && !loadError.value)
+  if (active && version === contextVersion.value && !loadError.value) {
+    void loadTopicDescriptions(version);
     void loadTopicRecommendations();
+  }
 }
 
 async function reloadPost(): Promise<void> {
@@ -1082,6 +1094,26 @@ function readTopicOptions(items: Array<TGApp.BBS.Topic.Summary> | undefined): Ar
   return options;
 }
 
+async function loadTopicDescriptions(version: number): Promise<void> {
+  const gid = String(draft.value.gid);
+  const ids = draft.value.topicIds.filter((id) => !topicDescs.value.has(id));
+  await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const response = await topicReq.info(gid, String(id));
+        if (!active || version !== contextVersion.value || response.retcode !== 0) return;
+        const topic = response.data?.topic;
+        const desc = readTopicText(topic?.desc);
+        if (desc) topicDescs.value.set(id, desc);
+        const cover = readTopicText(topic?.cover);
+        if (cover && !topicCovers.value.has(id)) topicCovers.value.set(id, cover);
+      } catch {
+        // 简介仅用于悬停提示，获取失败时回退到话题名称。
+      }
+    }),
+  );
+}
+
 async function loadTopicRecommendations(force: boolean = false): Promise<void> {
   if (!active) return;
   const key = topicRecommendationKey.value;
@@ -1153,9 +1185,10 @@ function selectTopic(value: number): void {
   const topic = [...topicRecommendations.value, ...topicSearchResults.value].find(
     (item) => item.id === value,
   );
-  if (!topic) return;
+  if (!topic || draft.value.topicIds.length >= maxTopicCount) return;
   if (!draft.value.topicIds.includes(value)) draft.value.topicIds.push(value);
   topicNames.value.set(value, topic.name);
+  if (topic.desc) topicDescs.value.set(value, topic.desc);
   if (topic.cover) topicCovers.value.set(value, topic.cover);
   topicError.value = "";
   void nextTick(() => {
@@ -1492,16 +1525,14 @@ defineExpose({ busy, canSubmit, pending });
 .post-composer-topic-head {
   display: flex;
   width: 100%;
-  flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 12px;
 }
 
 .post-composer-selected-topics {
   display: flex;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
@@ -1509,6 +1540,7 @@ defineExpose({ busy, canSubmit, pending });
 
 .post-composer-selected-topic {
   position: relative;
+  min-width: 0;
 }
 
 .post-composer-topic-close {
@@ -1623,8 +1655,9 @@ defineExpose({ busy, canSubmit, pending });
 
 .post-composer-topic-search {
   width: 280px;
-  max-width: 100%;
-  flex: 0 0 280px;
+  min-width: 0;
+  max-width: 45%;
+  flex: none;
   margin-left: auto;
 }
 
@@ -1845,11 +1878,6 @@ defineExpose({ busy, canSubmit, pending });
   .post-composer-label {
     flex-basis: auto;
     padding-top: 0;
-  }
-
-  .post-composer-topic-search {
-    width: 100%;
-    flex-basis: 100%;
   }
 
   .post-composer-content-footer {
