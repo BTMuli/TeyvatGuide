@@ -48,6 +48,21 @@ declare namespace TGApp.BBS.Forum {
   type PostForumResp = TGApp.BBS.Response.BaseWithData<PostForumRes>;
 
   /**
+   * APK 发现推荐流响应
+   * @since Beta v0.12.6
+   */
+  type DiscoverResp = TGApp.BBS.Response.BaseWithData<DiscoverRes>;
+
+  /**
+   * APK 发现推荐流数据
+   * @since Beta v0.12.6
+   */
+  type DiscoverRes = Pick<PostForumRes, "list" | "last_id"> & {
+    /** 是否最后一页；原生推荐流可能省略此字段 */
+    is_last?: boolean;
+  };
+
+  /**
    * 分区版块信息
    * @since Beta v0.6.8
    */

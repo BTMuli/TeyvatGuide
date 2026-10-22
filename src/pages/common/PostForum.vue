@@ -72,11 +72,13 @@
         density="compact"
         hide-details
         item-title="text"
+        return-object
         variant="outlined"
       >
         <template #selection="{ item }">
           <div class="select-item main">
-            <img :alt="item.text" :src="item.icon" :title="item.text" class="icon" />
+            <v-icon v-if="item.value === discoverForumId" class="icon">mdi-compass-outline</v-icon>
+            <img v-else :alt="item.text" :src="item.icon" :title="item.text" class="icon" />
             <span>{{ item.text }}</span>
           </div>
         </template>
@@ -85,14 +87,15 @@
             :class="{ selected: item.value === selectedForum?.value }"
             class="select-item sub"
             v-bind="props"
-            @click="selectedForum = item"
           >
-            <img :alt="item.text" :src="item.icon" class="icon" />
+            <v-icon v-if="item.value === discoverForumId" class="icon">mdi-compass-outline</v-icon>
+            <img v-else :alt="item.text" :src="item.icon" class="icon" />
             <span>{{ item.text }}</span>
           </div>
         </template>
       </v-select>
       <v-select
+        v-if="!isDiscover"
         v-model="curSortType"
         :disabled="isReq"
         :items="sortOrderList"
@@ -180,7 +183,7 @@
       </div>
     </template>
   </v-app-bar>
-  <div :class="{ grid: postGridMode }" class="posts-grid">
+  <div ref="postsGridEl" :class="{ grid: postGridMode }" class="posts-grid">
     <div v-for="post in posts" :key="post.post.post_id">
       <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
     </div>
@@ -208,7 +211,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
@@ -216,6 +219,13 @@ type SortSelectForum = Omit<SortSelect<TGApp.BBS.Post.ForumSortTypeEnum>, "icon"
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };
 type PublishType = { value: 1 | 2; title: string; desc: string; icon: string };
 type PostRaw = { isLast: boolean; lastId: string; total: number };
+
+type PostListResp = TGApp.BBS.Forum.PostForumResp | TGApp.BBS.Forum.DiscoverResp;
+
+const discoverForumId = 0;
+// 推荐流每页仅返回少量帖子，首屏未铺满时最多自动续页次数
+const DISCOVER_FILL_PAGE_LIMIT = 12;
+const initializedDiscoverGids = new Set<number>();
 
 // 简单封装选项生成
 const genSortOrderItem = (order: TGApp.BBS.Post.ForumSortTypeEnum): SortSelectForum => ({
@@ -250,6 +260,7 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
+const postsGridEl = useTemplateRef<HTMLElement>("postsGridEl");
 
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
@@ -266,8 +277,10 @@ const curGame = computed<SortSelectGame | undefined>(() => {
   return sortGameList.value.find((item) => item.gid === curGid.value);
 });
 const curForums = computed<Array<SortSelect>>(() => {
-  return curGame.value?.forum ?? [];
+  if (!curGame.value) return [];
+  return [...curGame.value.forum, { text: "发现", value: discoverForumId, icon: "" }];
 });
+const isDiscover = computed<boolean>(() => selectedForum.value?.value === discoverForumId);
 const currentForumInfo = computed<TGApp.BBS.Forum.GameForumItem | undefined>(() => {
   const forumId = selectedForum.value?.value;
   if (forumId === undefined) return undefined;
@@ -356,7 +369,7 @@ watch(
 watch(
   () => selectedForum.value,
   async () => {
-    if (!selectedForum.value) return;
+    if (!firstLoad.value || !selectedForum.value) return;
     if (syncRefresh.value) {
       await freshPostData();
       showSnackbar.success(`已将版块切换到 ${selectedForum.value.text}`);
@@ -383,7 +396,7 @@ watch(
     if (!syncRefresh.value) {
       gidLabel.value = `分区-${curGame.value?.text ?? ""}`;
       forumLabel.value = `版块-${selectedForum.value?.text ?? ""}`;
-      sortLabel.value = `排序-${getSortLabel(curSortType.value)}`;
+      sortLabel.value = `排序-${isDiscover.value ? "推荐" : getSortLabel(curSortType.value)}`;
     }
     if (syncRefresh.value) {
       refreshSelect();
@@ -436,10 +449,18 @@ async function newPost(viewType: 1 | 2): Promise<void> {
   });
 }
 
-async function getCurrentPosts(
-  loadMore: boolean = false,
-  forum: number,
-): Promise<TGApp.BBS.Forum.PostForumResp> {
+async function getCurrentPosts(loadMore: boolean = false, forum: number): Promise<PostListResp> {
+  if (forum === discoverForumId) {
+    const gid = curGid.value;
+    const resp = await painterReq.discover(
+      gid,
+      loadMore ? postRaw.value.lastId : "",
+      !initializedDiscoverGids.has(gid),
+      reqCk.value,
+    );
+    if (resp.retcode === 0) initializedDiscoverGids.add(gid);
+    return resp;
+  }
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   if (curSortType.value === 3) {
@@ -470,6 +491,8 @@ function refreshSelect(): void {
 
 async function loadTopPosts(forumId: number, gid: number): Promise<void> {
   const requestId = ++topPostRequestId;
+  topPosts.value = [];
+  if (forumId === discoverForumId) return;
   try {
     const resp = await apiHubReq.forumMain(forumId, gid);
     if (requestId !== topPostRequestId) return;
@@ -488,6 +511,40 @@ async function loadTopPosts(forumId: number, gid: number): Promise<void> {
   }
 }
 
+// 判断帖子列表是否已延伸到首屏之外
+function isPostListFilled(): boolean {
+  const grid = postsGridEl.value;
+  if (!grid) return true;
+  return grid.getBoundingClientRect().bottom > window.innerHeight;
+}
+
+// 推荐流单页只返回少量帖子，首屏未铺满时自动续页，避免无法触发触底加载
+async function fillDiscoverPosts(maxPages: number = DISCOVER_FILL_PAGE_LIMIT): Promise<void> {
+  if (!isDiscover.value || posts.value.length === 0) return;
+  for (let page = 0; page < maxPages; page++) {
+    await nextTick();
+    if (postRaw.value.isLast || isPostListFilled()) return;
+    try {
+      const resp = await getCurrentPosts(true, discoverForumId);
+      if (resp.retcode !== 0) {
+        await TGLogger.Warn(`[PostForum][fillDiscoverPosts] ${resp.retcode}-${resp.message}`);
+        return;
+      }
+      if (resp.data.list.length === 0) return;
+      posts.value = posts.value.concat(resp.data.list);
+      postRaw.value = {
+        isLast: resp.data.is_last ?? !resp.data.last_id,
+        lastId: resp.data.last_id,
+        total: postRaw.value.total + resp.data.list.length,
+      };
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Warn(`[PostForum][fillDiscoverPosts] 自动续页异常：${errMsg}`);
+      return;
+    }
+  }
+}
+
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value || isReq.value) return;
   hasPendingChange.value = false;
@@ -503,7 +560,7 @@ async function freshPostData(): Promise<void> {
   const gameLabel = curGame.value?.text ?? "";
   await showLoading.start(`正在刷新${gameLabel}帖子`);
   const forumLabel = getForum(selectedForum.value.value).text;
-  const sortLabel = getSortLabel(curSortType.value);
+  const sortLabel = isDiscover.value ? "推荐" : getSortLabel(curSortType.value);
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,
   );
@@ -511,7 +568,7 @@ async function freshPostData(): Promise<void> {
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   // 获取置顶帖子与帖子列表
   const topPostTask = loadTopPosts(selectedForum.value.value, curGid.value);
-  let postsResp: TGApp.BBS.Forum.PostForumResp | undefined;
+  let postsResp: PostListResp | undefined;
   try {
     postsResp = await getCurrentPosts(false, selectedForum.value.value);
     if (postsResp.retcode !== 0) {
@@ -520,6 +577,7 @@ async function freshPostData(): Promise<void> {
       await TGLogger.Warn(`[PostForum][freshPostData] ${postsResp.retcode}-${postsResp.message}`);
       await showLoading.end();
       isReq.value = false;
+      return;
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
@@ -534,11 +592,12 @@ async function freshPostData(): Promise<void> {
   // 处理帖子列表数据
   posts.value = postsResp.data.list;
   postRaw.value = {
-    isLast: postsResp.data.is_last,
+    isLast: postsResp.data.is_last ?? !postsResp.data.last_id,
     lastId: postsResp.data.last_id,
     total: postsResp.data.list.length,
   };
-  showSnackbar.success(`刷新成功，共加载 ${postsResp.data.list.length} 条帖子`);
+  await fillDiscoverPosts();
+  showSnackbar.success(`刷新成功，共加载 ${posts.value.length} 条帖子`);
   await showLoading.end();
   isReq.value = false;
 }
@@ -557,7 +616,7 @@ async function loadMore(): Promise<void> {
   await showLoading.start("正在加载更多帖子数据", `游戏：${curGame.value?.text}`);
 
   // 获取帖子列表
-  let postsResp: TGApp.BBS.Forum.PostForumResp | undefined;
+  let postsResp: PostListResp | undefined;
   try {
     postsResp = await getCurrentPosts(true, selectedForum.value.value);
     if (postsResp.retcode !== 0) {
@@ -566,9 +625,10 @@ async function loadMore(): Promise<void> {
       await TGLogger.Warn(`[PostForum][loadMore] ${postsResp.retcode}-${postsResp.message}`);
       await showLoading.end();
       isReq.value = false;
+      return;
     }
     await showLoading.update(
-      `版块：${selectedForum.value.text}，排序：${getSortLabel(curSortType.value)}，数量：${postsResp.data.list.length}`,
+      `版块：${selectedForum.value.text}，排序：${isDiscover.value ? "推荐" : getSortLabel(curSortType.value)}，数量：${postsResp.data.list.length}`,
     );
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
@@ -582,7 +642,7 @@ async function loadMore(): Promise<void> {
   // 处理帖子列表数据
   posts.value = posts.value.concat(postsResp.data.list);
   postRaw.value = {
-    isLast: postsResp.data.is_last,
+    isLast: postsResp.data.is_last ?? !postsResp.data.last_id,
     lastId: postsResp.data.last_id,
     total: postRaw.value.total + postsResp.data.list.length,
   };
