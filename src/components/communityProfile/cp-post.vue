@@ -283,7 +283,7 @@ function openPost(): void {
   flex: 0 1 160px;
   border-radius: 4px;
   aspect-ratio: 1;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   place-items: center;
 
   :deep(img) {
@@ -291,6 +291,10 @@ function openPost(): void {
     height: 100%;
     object-fit: cover;
   }
+}
+
+.cp-post:hover .cp-post-image {
+  background: var(--box-bg-1);
 }
 
 .cp-post-image-more {

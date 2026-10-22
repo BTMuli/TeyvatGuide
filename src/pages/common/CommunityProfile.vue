@@ -1687,7 +1687,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   flex: 0 1 160px;
   border-radius: 4px;
   aspect-ratio: 1;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   place-items: center;
 
   :deep(img) {
@@ -1695,6 +1695,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     height: 100%;
     object-fit: cover;
   }
+}
+
+.community-profile-post:hover .community-profile-post-image {
+  background: var(--box-bg-1);
 }
 
 .community-profile-post-image-more {
