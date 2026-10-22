@@ -64,30 +64,38 @@
         <TpcTag :tag="topic.name" />
       </RouterLink>
     </div>
-    <footer v-if="post.stat" aria-label="帖子统计" class="cp-post-stats">
-      <span :title="`浏览 ${fmtUtil.num(post.stat.view_num)}`">
-        <v-icon size="16" aria-hidden="true">mdi-eye-outline</v-icon>
-        {{ fmtUtil.num(post.stat.view_num) }}
-      </span>
-      <span :title="`回复 ${fmtUtil.num(post.stat.reply_num)}`">
-        <v-icon size="16" aria-hidden="true">mdi-comment-outline</v-icon>
-        {{ fmtUtil.num(post.stat.reply_num) }}
-      </span>
-      <span :title="`点赞 ${fmtUtil.num(post.stat.like_num)}`">
-        <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
-        {{ fmtUtil.num(post.stat.like_num) }}
-      </span>
-      <span
-        v-if="post.stat.bookmark_num > 0"
-        :title="`收藏 ${fmtUtil.num(post.stat.bookmark_num)}`"
-      >
-        <v-icon size="16" aria-hidden="true">mdi-star-outline</v-icon>
-        {{ fmtUtil.num(post.stat.bookmark_num) }}
-      </span>
-      <span v-if="post.stat.forward_num > 0" :title="`转发 ${fmtUtil.num(post.stat.forward_num)}`">
-        <v-icon size="16" aria-hidden="true">mdi-share-variant-outline</v-icon>
-        {{ fmtUtil.num(post.stat.forward_num) }}
-      </span>
+    <footer v-if="post.stat || $slots.actions" class="cp-post-footer">
+      <div v-if="post.stat" aria-label="帖子统计" class="cp-post-stats">
+        <span :title="`浏览 ${fmtUtil.num(post.stat.view_num)}`">
+          <v-icon size="16" aria-hidden="true">mdi-eye-outline</v-icon>
+          {{ fmtUtil.num(post.stat.view_num) }}
+        </span>
+        <span :title="`回复 ${fmtUtil.num(post.stat.reply_num)}`">
+          <v-icon size="16" aria-hidden="true">mdi-comment-outline</v-icon>
+          {{ fmtUtil.num(post.stat.reply_num) }}
+        </span>
+        <span :title="`点赞 ${fmtUtil.num(post.stat.like_num)}`">
+          <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
+          {{ fmtUtil.num(post.stat.like_num) }}
+        </span>
+        <span
+          v-if="post.stat.bookmark_num > 0"
+          :title="`收藏 ${fmtUtil.num(post.stat.bookmark_num)}`"
+        >
+          <v-icon size="16" aria-hidden="true">mdi-star-outline</v-icon>
+          {{ fmtUtil.num(post.stat.bookmark_num) }}
+        </span>
+        <span
+          v-if="post.stat.forward_num > 0"
+          :title="`转发 ${fmtUtil.num(post.stat.forward_num)}`"
+        >
+          <v-icon size="16" aria-hidden="true">mdi-share-variant-outline</v-icon>
+          {{ fmtUtil.num(post.stat.forward_num) }}
+        </span>
+      </div>
+      <div v-if="$slots.actions" class="cp-post-actions">
+        <slot name="actions" />
+      </div>
     </footer>
   </article>
 </template>
@@ -335,6 +343,15 @@ function openPost(): void {
   }
 }
 
+.cp-post-footer {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
 .cp-post-stats {
   display: flex;
   min-width: 0;
@@ -348,5 +365,13 @@ function openPost(): void {
     align-items: center;
     gap: 4px;
   }
+}
+
+.cp-post-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  margin-left: auto;
+  gap: 8px;
 }
 </style>

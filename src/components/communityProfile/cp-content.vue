@@ -145,7 +145,22 @@
             :viewedAt="entry.viewedAt"
             @open-post="openPost"
             @open-profile="openProfile"
-          />
+          >
+            <template v-if="canUnfavoritePosts" #actions>
+              <v-btn
+                :disabled="unfavoritingId !== ''"
+                :loading="unfavoritingId === entry.post.post.post_id"
+                class="cp-post-unfavorite"
+                prepend-icon="mdi-star-off-outline"
+                size="small"
+                title="取消收藏这篇帖子"
+                variant="tonal"
+                @click.stop="unfavoritePost(entry.post)"
+              >
+                取消收藏
+              </v-btn>
+            </template>
+          </CpPost>
           <button
             v-else
             class="cp-entry cp-entry-button"
@@ -255,6 +270,10 @@ const isViewingOtherProfile = computed<boolean>(() => {
   const loginUid = uid.value?.trim() ?? "";
   return loginUid !== "" && getTargetUid(loginUid) !== loginUid;
 });
+const canUnfavoritePosts = computed<boolean>(
+  () => section === "favorites" && favoriteTab.value === "posts" && !isViewingOtherProfile.value,
+);
+const unfavoritingId = ref<string>("");
 const sectionInfo = computed<SectionInfo>(
   () =>
     ({
@@ -528,6 +547,38 @@ function clearSearch(): void {
   void loadMore();
 }
 
+function removeFavorite(postId: string): void {
+  entries.value = entries.value.filter((entry) => entry.kind !== "post" || entry.id !== postId);
+  if (favoriteCache !== undefined) {
+    favoriteCache = favoriteCache.filter((item) => item.post.post_id !== postId);
+  }
+  if (!searchKeyword.value && entries.value.length === 0 && !isLast.value) void loadMore();
+}
+
+async function unfavoritePost(post: TGApp.BBS.Post.FullData): Promise<void> {
+  if (!canUnfavoritePosts.value || unfavoritingId.value !== "") return;
+  const snapshot = getSnapshot();
+  if (snapshot === undefined) {
+    showSnackbar.warn("当前账号凭据不可用，请重新登录米游社账号。");
+    return;
+  }
+  const postId = post.post.post_id;
+  const version = generation;
+  unfavoritingId.value = postId;
+  try {
+    const response = await communityReq.unfavoritePost(snapshot.cookie, postId);
+    if (!isCurrent(snapshot, version)) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    removeFavorite(postId);
+    showSnackbar.success("已取消收藏");
+  } catch (cause) {
+    if (!isCurrent(snapshot, version)) return;
+    showSnackbar.error(`取消收藏失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    unfavoritingId.value = "";
+  }
+}
+
 function retry(): void {
   if (searchKeyword.value) void searchFavorites(searchKeyword.value);
   else void loadMore();
@@ -782,6 +833,13 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
 
 .cp-favorite-tabs {
   flex-shrink: 0;
+}
+
+.cp-post-unfavorite {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  color: var(--tgc-od-red);
 }
 
 .cp-content-search {

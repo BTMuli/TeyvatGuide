@@ -161,6 +161,33 @@ async function getFavorites(
 }
 
 /**
+ * 取消收藏帖子
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param postId - 帖子 ID
+ * @returns 取消收藏响应数据
+ */
+async function unfavoritePost(
+  cookie: TGApp.App.Account.Cookie,
+  postId: string,
+): Promise<TGApp.BBS.Response.Base> {
+  const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  const body = { post_id: postId, is_cancel: 1 };
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
+    `${communityApiBaseUrl}post/wapi/collectPost`,
+    {
+      headers: {
+        ...getRequestHeader(authCookie, "POST", JSON.stringify(body), "K2", true),
+        "x-rpc-client_type": "2",
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
+/**
  * 获取收藏的合集
  * @since Beta v0.12.6
  * @param cookie - 账户 Cookie
@@ -416,6 +443,7 @@ const communityReq = {
   comments: getComments,
   collections: getCollections,
   favorites: getFavorites,
+  unfavoritePost,
   favoriteCollections: getFavoriteCollections,
   following: getFollowing,
   followers: getFollowers,

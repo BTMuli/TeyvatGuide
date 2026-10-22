@@ -166,6 +166,33 @@ describe("communityReq read requests", () => {
   });
 });
 
+describe("communityReq favorite write requests", () => {
+  it("cancels a favorite with a signed JSON body", async () => {
+    await communityReq.unfavoritePost(cookie, "79040314");
+
+    const body = { post_id: "79040314", is_cancel: 1 };
+    const favoriteCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      favoriteCookie,
+      "POST",
+      JSON.stringify(body),
+      "K2",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/collectPost",
+      {
+        headers: {
+          ...appHeaders,
+          "x-rpc-client_type": "2",
+          "Content-Type": "application/json",
+        },
+        body,
+      },
+    );
+  });
+});
+
 describe("communityReq notification requests", () => {
   it("requests notifications by category with the official cursor and focus flag", async () => {
     await communityReq.notifications(cookie, "reply");
