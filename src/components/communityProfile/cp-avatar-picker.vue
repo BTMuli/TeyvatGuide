@@ -43,80 +43,111 @@
         <template v-if="activeTab === 'custom'">
           <div class="cpap-scroll">
             <section aria-label="自定义头像" class="cpap-custom" role="group">
-              <div v-if="customSourceFile && customPreviewUrl" class="cpap-crop">
-                <div
-                  ref="cropStage"
-                  :aria-describedby="cropHintId"
-                  :aria-label="`自定义头像裁切预览：${customSourceFile.name}`"
-                  :class="{ 'is-dragging': cropDragging }"
-                  class="cpap-crop-stage"
-                  role="group"
-                  :tabindex="props.disabled || customPreparing ? -1 : 0"
-                  @keydown="handleCropKeydown"
-                  @pointercancel="handleCropPointerUp"
-                  @pointerdown="handleCropPointerDown"
-                  @pointermove="handleCropPointerMove"
-                  @pointerup="handleCropPointerUp"
-                >
-                  <img
-                    :alt="`${customSourceFile.name} 裁切预览`"
-                    class="cpap-crop-image"
-                    decoding="async"
-                    draggable="false"
-                    :src="customPreviewUrl"
-                    :style="cropImageStyle"
-                    @load="handleCropImageLoad"
-                  />
+              <div class="cpap-custom-visual">
+                <div v-if="customSourceFile && customPreviewUrl" class="cpap-crop">
+                  <div
+                    ref="cropStage"
+                    :aria-describedby="cropHintId"
+                    :aria-label="`自定义头像裁切预览：${customSourceFile.name}`"
+                    :class="{ 'is-dragging': cropDragging }"
+                    class="cpap-crop-stage"
+                    role="group"
+                    :tabindex="props.disabled || customPreparing ? -1 : 0"
+                    @keydown="handleCropKeydown"
+                    @pointercancel="handleCropPointerUp"
+                    @pointerdown="handleCropPointerDown"
+                    @pointermove="handleCropPointerMove"
+                    @pointerup="handleCropPointerUp"
+                  >
+                    <img
+                      alt=""
+                      aria-hidden="true"
+                      class="cpap-crop-full"
+                      decoding="async"
+                      draggable="false"
+                      :src="customPreviewUrl"
+                    />
+                    <div ref="cropWindow" class="cpap-crop-window">
+                      <img
+                        :alt="`${customSourceFile.name} 裁切预览`"
+                        class="cpap-crop-image"
+                        decoding="async"
+                        draggable="false"
+                        :src="customPreviewUrl"
+                        :style="cropImageStyle"
+                        @load="handleCropImageLoad"
+                      />
+                    </div>
+                  </div>
+                  <p :id="cropHintId" class="cpap-crop-hint">
+                    拖动图片调整裁切位置，方向键可微调。
+                  </p>
                 </div>
-                <p :id="cropHintId" class="cpap-crop-hint">拖动图片调整裁切位置，方向键可微调。</p>
-              </div>
-              <div v-else aria-live="polite" class="cpap-custom-preview">
-                <v-icon size="48">mdi-image-plus-outline</v-icon>
-              </div>
-              <div class="cpap-custom-copy">
-                <h3>{{ customSourceFile?.name || "上传自定义头像" }}</h3>
-                <p>支持原始 PNG、JPEG、GIF、WebP，文件大小不超过 20 MiB。</p>
-                <p>图片会保存为静态头像，并随资料提交米游社审核。</p>
-              </div>
-              <div class="cpap-custom-actions">
-                <v-btn
+                <button
+                  v-else
                   :disabled="props.disabled || customLoading || customPreparing"
-                  prepend-icon="mdi-upload"
+                  aria-label="上传自定义头像"
+                  class="cpap-custom-preview"
+                  title="选择图片"
                   type="button"
-                  variant="tonal"
                   @click="chooseCustomFile"
                 >
-                  {{ customSourceFile ? "重新选择图片" : "选择图片" }}
-                </v-btn>
-                <v-btn
-                  v-if="customSourceFile"
-                  :disabled="props.disabled || customPreparing"
-                  prepend-icon="mdi-image-filter-center-focus"
-                  type="button"
-                  variant="text"
-                  @click="resetCrop"
+                  <v-icon size="48">mdi-image-plus-outline</v-icon>
+                </button>
+              </div>
+              <div class="cpap-custom-info">
+                <div class="cpap-custom-copy">
+                  <h3 :title="customSourceFile?.name">
+                    {{ customSourceFile?.name || "上传自定义头像" }}
+                  </h3>
+                  <p>支持原始 PNG、JPEG、GIF、WebP，文件大小不超过 20 MiB。</p>
+                  <p>图片会保存为静态头像，并随资料提交米游社审核。</p>
+                </div>
+                <div class="cpap-custom-actions">
+                  <v-btn
+                    :disabled="props.disabled || customLoading || customPreparing"
+                    prepend-icon="mdi-upload"
+                    type="button"
+                    variant="tonal"
+                    @click="chooseCustomFile"
+                  >
+                    {{ customSourceFile ? "重新选择图片" : "选择图片" }}
+                  </v-btn>
+                  <v-btn
+                    v-if="customSourceFile"
+                    :disabled="props.disabled || customPreparing"
+                    prepend-icon="mdi-image-filter-center-focus"
+                    type="button"
+                    variant="text"
+                    @click="resetCrop"
+                  >
+                    居中
+                  </v-btn>
+                </div>
+                <div
+                  v-if="customLoading"
+                  aria-live="polite"
+                  class="cpap-custom-state"
+                  role="status"
                 >
-                  居中
-                </v-btn>
-              </div>
-              <div v-if="customLoading" aria-live="polite" class="cpap-custom-state" role="status">
-                正在读取图片…
-              </div>
-              <div
-                v-else-if="customPreparing"
-                aria-live="polite"
-                class="cpap-custom-state"
-                role="status"
-              >
-                正在生成头像…
-              </div>
-              <div
-                v-if="customError"
-                aria-live="assertive"
-                class="cpap-custom-state is-error"
-                role="alert"
-              >
-                {{ customError }}
+                  正在读取图片…
+                </div>
+                <div
+                  v-else-if="customPreparing"
+                  aria-live="polite"
+                  class="cpap-custom-state"
+                  role="status"
+                >
+                  正在生成头像…
+                </div>
+                <div
+                  v-if="customError"
+                  aria-live="assertive"
+                  class="cpap-custom-state is-error"
+                  role="alert"
+                >
+                  {{ customError }}
+                </div>
               </div>
             </section>
           </div>
@@ -305,6 +336,7 @@ const titleId = useId();
 const cropHintId = useId();
 const customInput = useTemplateRef<HTMLInputElement>("customInput");
 const cropStage = useTemplateRef<HTMLElement>("cropStage");
+const cropWindow = useTemplateRef<HTMLElement>("cropWindow");
 const activeTab = ref<AvatarPickerTab>("preset");
 const activeGroupName = ref<string>("");
 const selectedId = ref<string>("");
@@ -523,15 +555,14 @@ function handleCropPointerDown(event: PointerEvent): void {
 
 function handleCropPointerMove(event: PointerEvent): void {
   if (!cropDragging.value || event.pointerId !== cropPointerId) return;
-  const stage = cropStage.value;
-  if (!stage || customSourceWidth.value <= 0 || customSourceHeight.value <= 0) return;
-  const rect = stage.getBoundingClientRect();
-  const stageSize = Math.min(rect.width, rect.height);
+  const crop = cropWindow.value;
+  if (!crop || customSourceWidth.value <= 0 || customSourceHeight.value <= 0) return;
+  const cropSize = Math.min(crop.clientWidth, crop.clientHeight);
   const sourceSide = Math.min(customSourceWidth.value, customSourceHeight.value);
-  if (stageSize <= 0 || sourceSide <= 0) return;
-  const scale = stageSize / sourceSide;
-  const overflowX = customSourceWidth.value * scale - stageSize;
-  const overflowY = customSourceHeight.value * scale - stageSize;
+  if (cropSize <= 0 || sourceSide <= 0) return;
+  const scale = cropSize / sourceSide;
+  const overflowX = customSourceWidth.value * scale - cropSize;
+  const overflowY = customSourceHeight.value * scale - cropSize;
   const deltaX = event.clientX - cropStartX;
   const deltaY = event.clientY - cropStartY;
   customCrop.value = {
@@ -737,11 +768,11 @@ async function handleConfirm(): Promise<void> {
 }
 
 .cpap-scroll {
+  overflow: hidden auto;
   min-height: 0;
   box-sizing: border-box;
   flex: 1 1 auto;
   padding: 16px;
-  overflow-y: auto;
   overscroll-behavior: contain;
 }
 
@@ -753,14 +784,35 @@ async function handleConfirm(): Promise<void> {
 
 .cpap-custom {
   display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
   min-height: 100%;
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
-  gap: 16px;
+  padding: 12px;
+  gap: 10px;
   text-align: center;
+}
+
+.cpap-custom-visual {
+  display: flex;
+  max-width: 100%;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cpap-custom-info {
+  display: flex;
+  min-width: 0;
+  max-width: 420px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .cpap-crop {
@@ -773,11 +825,12 @@ async function handleConfirm(): Promise<void> {
 .cpap-crop-stage {
   position: relative;
   overflow: hidden;
-  width: 220px;
-  height: 220px;
-  border: 2px solid var(--common-shadow-2);
-  border-radius: 50%;
-  background: var(--box-bg-2);
+  width: 260px;
+  max-width: 100%;
+  height: 180px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  background: var(--box-bg-1);
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -790,6 +843,33 @@ async function handleConfirm(): Promise<void> {
   &.is-dragging {
     cursor: grabbing;
   }
+}
+
+.cpap-crop-full {
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  object-fit: contain;
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cpap-crop-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  width: 160px;
+  height: 160px;
+  border: 2px solid var(--common-text-title);
+  border-radius: 50%;
+  background: var(--box-bg-2);
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 35%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
 .cpap-crop-image {
@@ -817,23 +897,37 @@ async function handleConfirm(): Promise<void> {
   padding: 8px;
   border: 1px dashed var(--common-shadow-2);
   border-radius: 50%;
+  margin: 0;
   background: var(--box-bg-2);
   color: var(--box-text-4);
+  cursor: pointer;
+  font: inherit;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
 
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--common-text-title);
+    background: var(--box-bg-3);
   }
 }
 
 .cpap-custom-copy {
   display: flex;
-  max-width: 420px;
+  max-width: 100%;
   flex-direction: column;
   gap: 4px;
+  text-align: center;
 
   h3,
   p {
@@ -841,10 +935,13 @@ async function handleConfirm(): Promise<void> {
   }
 
   h3 {
+    overflow: hidden;
+    max-width: 100%;
     color: var(--common-text-title);
     font-size: 16px;
     font-weight: 500;
-    overflow-wrap: anywhere;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   p {
@@ -977,14 +1074,28 @@ async function handleConfirm(): Promise<void> {
     grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   }
 
+  .cpap-custom {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .cpap-custom-info {
+    max-width: 100%;
+  }
+
   .cpap-crop-stage {
-    width: 180px;
-    height: 180px;
+    width: 100%;
+    height: 170px;
+  }
+
+  .cpap-crop-window {
+    width: 140px;
+    height: 140px;
   }
 
   .cpap-custom-preview {
-    width: 144px;
-    height: 144px;
+    width: 150px;
+    height: 150px;
   }
 
   .cpap-group-tabs {
