@@ -333,17 +333,32 @@
                   {{ fmtUtil.num(post.stat.forward_num) }}
                 </span>
               </div>
-              <v-btn
-                v-if="isEditablePost(post)"
-                class="community-profile-edit-button"
-                prepend-icon="mdi-pencil-outline"
-                size="small"
-                title="编辑这篇帖子"
-                variant="tonal"
-                @click="editPost(post)"
-              >
-                编辑
-              </v-btn>
+              <div class="community-profile-post-actions">
+                <v-btn
+                  v-if="isEditablePost(post)"
+                  class="community-profile-edit-button"
+                  prepend-icon="mdi-pencil-outline"
+                  size="small"
+                  title="编辑这篇帖子"
+                  variant="tonal"
+                  @click="editPost(post)"
+                >
+                  编辑
+                </v-btn>
+                <v-btn
+                  v-if="isDeletablePost(post)"
+                  :disabled="deletingPostId !== ''"
+                  :loading="deletingPostId === post.post.post_id"
+                  class="community-profile-delete-button"
+                  prepend-icon="mdi-delete-outline"
+                  size="small"
+                  title="删除这篇帖子"
+                  variant="tonal"
+                  @click="deletePost(post)"
+                >
+                  删除
+                </v-btn>
+              </div>
             </footer>
           </article>
         </div>
@@ -406,16 +421,18 @@ import CpNotifications from "@comp/communityProfile/cp-notifications.vue";
 import CpNotifySettings from "@comp/communityProfile/cp-notify-settings.vue";
 import CpSettings from "@comp/communityProfile/cp-settings.vue";
 import CpTypeBadge from "@comp/communityProfile/cp-type-badge.vue";
+import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
+import postEditReq from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import {
   getPostForumIcon,
   getPostImageCount,
@@ -607,6 +624,7 @@ const pageOffsets = shallowRef<Array<string>>([]);
 const pageLastFlags = shallowRef<Array<boolean>>([]);
 const page = ref<number>(1);
 const loading = ref<boolean>(false);
+const deletingPostId = ref<string>("");
 const loadError = ref<string>("");
 const refreshVersion = ref<number>(0);
 const searchInput = ref<string | null>("");
@@ -1103,6 +1121,89 @@ function isEditablePost(post: TGApp.BBS.Post.FullData): boolean {
     post.post.uid === uid.value &&
     (post.post.view_type === 1 || post.post.view_type === 2)
   );
+}
+
+function isDeletablePost(post: TGApp.BBS.Post.FullData): boolean {
+  return isOwnProfile.value && canViewProfile.value && post.post.uid === uid.value;
+}
+
+function removePostFromList(postId: string): void {
+  const nextPages = postPages.value.map((posts) =>
+    posts.filter((item) => item.post.post_id !== postId),
+  );
+  let nextLength = nextPages.length;
+  while (nextLength > 1 && nextPages[nextLength - 1].length === 0) nextLength -= 1;
+  postPages.value = nextPages.slice(0, nextLength);
+  pageOffsets.value = pageOffsets.value.slice(0, nextLength);
+  pageLastFlags.value = pageLastFlags.value.slice(0, nextLength);
+  if (page.value > nextLength) page.value = nextLength;
+  if (profile.value !== undefined) {
+    const postNum = Number.parseInt(profile.value.achieve.post_num, 10);
+    profile.value = {
+      ...profile.value,
+      achieve: {
+        ...profile.value.achieve,
+        post_num: String(Math.max((Number.isFinite(postNum) ? postNum : 0) - 1, 0)),
+      },
+    };
+  }
+  if (searchKeyword.value) searchTotal.value = Math.max(searchTotal.value - 1, 0);
+}
+
+async function deletePost(post: TGApp.BBS.Post.FullData): Promise<void> {
+  if (!isDeletablePost(post) || deletingPostId.value !== "") return;
+  const snapshot = getAccountSnapshot();
+  if (snapshot === undefined) {
+    showSnackbar.warn("当前账号凭据不可用，请重新登录米游社账号。");
+    return;
+  }
+  const postId = post.post.post_id;
+  const subject = post.post.subject.trim() || `帖子 ${postId}`;
+  const account: TGApp.BBS.Reply.AccountSnapshot = {
+    uid: snapshot.uid,
+    cookie: { ltoken: snapshot.cookie.ltoken, ltuid: snapshot.cookie.ltuid },
+  };
+  const requestCookie = { ...account.cookie };
+  const version = requestVersion;
+  deletingPostId.value = postId;
+  try {
+    const confirmed = await showDialog.checkF({
+      cancelLabel: "取消",
+      confirmLabel: "删除",
+      text: `确定删除“${subject}”（ID：${postId}）吗？此操作不可撤销。`,
+      title: "删除帖子",
+    });
+    if (!confirmed) return;
+    if (!isCurrentRequest(version, snapshot) || !matchesCurrentAccount(account)) {
+      showSnackbar.warn("登录账号或页面状态已变化，请重新操作");
+      return;
+    }
+    const latest = await postReq.post(postId, requestCookie);
+    if (!isCurrentRequest(version, snapshot) || !matchesCurrentAccount(account)) return;
+    if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
+    if (latest.data.post.post.post_id !== postId || latest.data.post.post.uid !== snapshot.uid) {
+      throw new Error("帖子状态已变化，请刷新后重试");
+    }
+    const result = await executeReplyForCurrentAccount(account, () =>
+      postEditReq.delete(latest.data.post, requestCookie),
+    );
+    if (!result.allowed) {
+      showSnackbar.warn("登录账号已变化，请重新操作");
+      return;
+    }
+    if (result.data.retcode !== 0) {
+      showSnackbar.error(`[${result.data.retcode}] ${result.data.message}`);
+      return;
+    }
+    if (!isCurrentRequest(version, snapshot)) return;
+    removePostFromList(postId);
+    showSnackbar.success("帖子已删除");
+  } catch (cause) {
+    if (!isCurrentRequest(version, snapshot)) return;
+    showSnackbar.error(`删除帖子失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    deletingPostId.value = "";
+  }
 }
 
 function getPostGame(post: TGApp.BBS.Post.FullData): ProfileGameOption | undefined {
@@ -1746,6 +1847,13 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   gap: 16px;
 }
 
+.community-profile-post-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+
 .community-profile-post-stats {
   display: flex;
   min-width: 0;
@@ -1767,6 +1875,13 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   z-index: 2;
   flex-shrink: 0;
   color: var(--common-text-title);
+}
+
+.community-profile-delete-button {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  color: var(--tgc-od-red);
 }
 
 .community-profile-state {
