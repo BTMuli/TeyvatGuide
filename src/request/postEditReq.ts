@@ -179,10 +179,10 @@ function getCreateUserAiContentChoice(value: unknown): string {
 /**
  * 提取最小登录凭据。
  * @since Beta v0.12.6
- * @param cookie - 完整 Cookie
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 用于签名的 ltoken 和 ltuid
  */
-function getAuthCookie(cookie: Record<string, string>): Record<string, string> {
+function getAuthCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
   const ltoken = cookie?.ltoken?.trim();
   const ltuid = cookie?.ltuid?.trim();
   if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
@@ -696,7 +696,7 @@ function buildMutationBody(
  * @returns 带 K2 签名的 JSON 请求头
  */
 function getMutationHeaders(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   body: PostMutationBody | DeleteBody,
 ): Record<string, string> {
   return {
@@ -716,9 +716,9 @@ function getMutationHeaders(
  */
 function assertOwner(
   source: TGApp.BBS.Post.FullData,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   editable: boolean = true,
-): { authCookie: Record<string, string>; sourceCollectionId: string | null } {
+): { authCookie: TGApp.App.Account.LoginCookie; sourceCollectionId: string | null } {
   const sourceCollectionId = editable ? assertEditableSource(source) : null;
   if (!editable) assertDeletableSource(source);
   const authCookie = getAuthCookie(cookie);
@@ -735,7 +735,7 @@ function assertOwner(
  */
 export async function createPost(
   settings: TGApp.BBS.PostEdit.Settings,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.PostEdit.MutationResponse> {
   const { body } = buildMutationBody(settings);
   const response = await TGHttps.post<TGApp.BBS.PostEdit.MutationResponse>(
@@ -756,7 +756,7 @@ export async function createPost(
 export async function updatePost(
   source: TGApp.BBS.Post.FullData,
   settings: TGApp.BBS.PostEdit.Settings,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.PostEdit.MutationResponse> {
   const { authCookie, sourceCollectionId } = assertOwner(source, cookie);
   if ((settings.sourceCollectionId ?? null) !== sourceCollectionId) {
@@ -796,7 +796,7 @@ export async function updatePost(
  */
 export async function deletePost(
   source: TGApp.BBS.Post.FullData,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.PostEdit.MutationResponse> {
   const { authCookie } = assertOwner(source, cookie, false);
   const postId = source.post.post_id;
@@ -826,7 +826,7 @@ export async function deletePost(
 export async function checkRelease(
   gid: number,
   forumId: number,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.PostEdit.ReleaseConfigResponse> {
   const params = {
     gids: getPositiveInteger(gid, "社区 ID"),

@@ -236,7 +236,7 @@ const {
   allowCustomEmoticon = true,
 } = defineProps<{
   disabled: boolean;
-  cookie?: Record<string, string>;
+  cookie?: TGApp.App.Account.EditorCookie;
   gid: number;
   contextId: number;
   hideToolbar?: boolean;
@@ -267,7 +267,7 @@ const mentionError = ref<string>("");
 const error = ref<string>("");
 let controller: AbortController | undefined;
 let mentionController: AbortController | undefined;
-let picker: { version: number; cookie: Record<string, string>; gid: number } | undefined;
+let picker: { version: number; cookie: TGApp.App.Account.LoginCookie; gid: number } | undefined;
 let version = 0;
 
 const emojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
@@ -348,7 +348,7 @@ function clearImagePicker(): void {
   if (imageInput.value) imageInput.value.value = "";
 }
 
-function getCookie(): Record<string, string> {
+function getCookie(): TGApp.App.Account.LoginCookie {
   if (!cookie || !matchesCurrentAccount({ uid: cookie.ltuid, cookie })) {
     throw new Error("账号状态已变化，请重新打开编辑器");
   }

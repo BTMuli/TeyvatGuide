@@ -14,10 +14,10 @@ const customEmoticonListUrl: Readonly<string> =
 /**
  * 提取收藏表情请求所需的最小登录凭据
  * @since Beta v0.12.6
- * @param cookie - 用户 Cookie
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @returns 仅包含 stuid、stoken 与 mid 的 Cookie
  */
-function getAuthCookie(cookie: Record<string, string>): Record<string, string> {
+function getAuthCookie(cookie: TGApp.App.Account.SignUidCookie): TGApp.App.Account.SignCookie {
   if (typeof cookie !== "object" || cookie === null || Array.isArray(cookie)) {
     throw new TypeError("登录凭据无效");
   }
@@ -35,12 +35,12 @@ function getAuthCookie(cookie: Record<string, string>): Record<string, string> {
 /**
  * 获取收藏表情列表
  * @since Beta v0.12.6
- * @param cookie - 用户 Cookie，仅使用 stuid、stoken 与 mid
+ * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid
  * @param signal - 可选的请求取消信号
  * @returns 可用的收藏表情列表
  */
 async function getCustomEmoticonList(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.SignUidCookie,
   signal?: AbortSignal,
 ): Promise<Array<TGApp.BBS.CustomEmoticon.Item>> {
   const config: TGApp.App.Response.ReqConfParams = {

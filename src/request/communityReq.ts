@@ -26,7 +26,7 @@ type CommunityQuery = Record<string, string | number>;
  * @param cookie - 完整账户 Cookie
  * @returns 用于请求头签名的最小 Cookie
  */
-function getCommunityCookie(cookie: TGApp.App.Account.Cookie): Record<string, string> {
+function getCommunityCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account.CookieTokenCookie {
   return { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
 }
 

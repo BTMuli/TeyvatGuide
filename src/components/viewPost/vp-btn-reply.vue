@@ -191,7 +191,7 @@ const showOverlay = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
-const readCookie = computed<Record<string, string> | undefined>(() => {
+const readCookie = computed<TGApp.App.Account.LoginCookie | undefined>(() => {
   if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
     return undefined;
   return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };

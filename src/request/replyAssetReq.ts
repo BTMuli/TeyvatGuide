@@ -84,10 +84,10 @@ function assertPositiveNumber(value: number, name: string): void {
 /**
  * 提取回复资源请求所需的登录凭据
  * @since Beta v0.12.6
- * @param cookie - 完整 Cookie
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 仅包含回复接口所需字段的 Cookie
  */
-function getReplyCookie(cookie: Record<string, string>): TGApp.BBS.Reply.AccountSnapshot["cookie"] {
+function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
   if (!isRecord(cookie)) throw new TypeError("登录凭据无效");
   const ltoken = typeof cookie.ltoken === "string" ? cookie.ltoken.trim() : "";
   const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
@@ -534,7 +534,7 @@ function combineSignals(signal: AbortSignal | undefined, accountSignal: AbortSig
  */
 export async function resolveMention(
   nickname: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   gid: number,
   signal?: AbortSignal,
 ): Promise<TGApp.BBS.ReplyAsset.Mention> {
@@ -577,7 +577,7 @@ export async function resolveMention(
  */
 export async function uploadImage(
   file: File,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   gid: number,
   signal?: AbortSignal,
 ): Promise<TGApp.BBS.ReplyAsset.UploadedImage> {

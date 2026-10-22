@@ -403,6 +403,8 @@ describe("postReq.reply mutation requests", () => {
   });
 
   it("rejects invalid input before making an HTTP request", async () => {
+    const cookieWithoutToken = <TGApp.App.Account.LoginCookie>{ ltuid: cookie.ltuid };
+    const cookieWithoutUid = <TGApp.App.Account.LoginCookie>{ ltoken: cookie.ltoken };
     const requests = [
       () => postReq.reply.create({ postId: "0", gid: 2, content: "hello" }, cookie),
       () => postReq.reply.create({ postId: " 123", gid: 2, content: "hello" }, cookie),
@@ -418,11 +420,8 @@ describe("postReq.reply mutation requests", () => {
       () => postReq.reply.delete("123", "456", cookie, 1.5),
       () => postReq.reply.pin("123", "456", { ltoken: "", ltuid: cookie.ltuid }),
       () => postReq.reply.pin("123", "456", cookie, false, -1),
-      () =>
-        postReq.reply.main("123", 2, true, undefined, false, undefined, 20, {
-          ltuid: cookie.ltuid,
-        }),
-      () => postReq.reply.sub(3, 2, "123", undefined, 20, { ltoken: cookie.ltoken }),
+      () => postReq.reply.main("123", 2, true, undefined, false, undefined, 20, cookieWithoutToken),
+      () => postReq.reply.sub(3, 2, "123", undefined, 20, cookieWithoutUid),
     ];
 
     for (const request of requests) await expect(request()).rejects.toThrow();

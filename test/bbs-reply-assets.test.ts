@@ -284,7 +284,7 @@ describe("resolveMention", () => {
       () => resolveMention("Alice", cookie, 0),
       () => resolveMention("Alice", cookie, 1.5),
       () => resolveMention("Alice", { ltoken: "", ltuid: cookie.ltuid }, 2),
-      () => resolveMention("Alice", { ltoken: cookie.ltoken }, 2),
+      () => resolveMention("Alice", <TGApp.App.Account.LoginCookie>{ ltoken: cookie.ltoken }, 2),
     ];
 
     for (const request of requests) await expect(request()).rejects.toThrow();

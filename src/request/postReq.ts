@@ -44,10 +44,10 @@ function assertPositiveNumber(value: number, name: string): void {
 /**
  * 提取回复请求所需的登录凭据
  * @since Beta v0.12.6
- * @param cookie - 完整 Cookie
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 供请求头签名使用的最小 Cookie
  */
-function getReplyCookie(cookie: Record<string, string>): Record<string, string> {
+function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
   const ltoken = cookie?.ltoken?.trim();
   const ltuid = cookie?.ltuid?.trim();
   if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
@@ -57,12 +57,12 @@ function getReplyCookie(cookie: Record<string, string>): Record<string, string> 
 /**
  * 创建回复读取请求头
  * @since Beta v0.12.6
- * @param cookie - 完整 Cookie
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @param params - 请求参数
  * @returns 带签名的请求头
  */
 function getReplyReadHeaders(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   params: ReplyRequestData,
 ): Record<string, string> {
   return {
@@ -74,12 +74,12 @@ function getReplyReadHeaders(
 /**
  * 创建回复变更请求头
  * @since Beta v0.12.6
- * @param cookie - 完整 Cookie
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @param body - 请求体
  * @returns 带签名的 JSON 请求头
  */
 function getReplyWriteHeaders(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   body: ReplyRequestData,
 ): Record<string, string> {
   return {
@@ -163,7 +163,7 @@ async function getPostReplies(
   onlyMaster: boolean = false,
   orderType?: TGApp.BBS.Reply.ReplyOrderTypeEnum,
   size: number = 20,
-  cookie?: Record<string, string>,
+  cookie?: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.Reply.MainResp> {
   const params: TGApp.BBS.Reply.MainReplyParam = {
     post_id: postId,
@@ -202,7 +202,7 @@ async function getSubReplies(
   postId: string,
   lastId?: string,
   size: number = 20,
-  cookie?: Record<string, string>,
+  cookie?: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.Reply.SubResp> {
   const params: TGApp.BBS.Reply.SubReplyParam = {
     floor_id: floorId,
@@ -227,7 +227,7 @@ async function getSubReplies(
  */
 async function createReply(
   input: TGApp.BBS.Reply.CreateParams,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.Reply.MutationResp> {
   assertPositiveId(input.postId, "帖子 ID");
   assertPositiveNumber(input.gid, "社区 ID");
@@ -274,7 +274,7 @@ async function createReply(
 async function likeReply(
   postId: string,
   replyId: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   cancel: boolean = false,
   gid?: number,
 ): Promise<TGApp.BBS.Reply.MutationResp> {
@@ -304,7 +304,7 @@ async function likeReply(
 async function deleteReply(
   postId: string,
   replyId: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   gid?: number,
 ): Promise<TGApp.BBS.Reply.MutationResp> {
   assertPositiveId(postId, "帖子 ID");
@@ -334,7 +334,7 @@ async function deleteReply(
 async function pinReply(
   postId: string,
   replyId: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   cancel: boolean = false,
   gid?: number,
 ): Promise<TGApp.BBS.Reply.MutationResp> {

@@ -60,7 +60,7 @@ import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import { onBeforeUnmount, ref, watch } from "vue";
 
 const props = defineProps<{
-  cookie?: Record<string, string>;
+  cookie?: TGApp.App.Account.EditorCookie;
   contextId: number;
   disabled: boolean;
 }>();
@@ -94,7 +94,7 @@ onBeforeUnmount(() => {
   controller?.abort();
 });
 
-function getCookie(): Record<string, string> {
+function getCookie(): TGApp.App.Account.EditorCookie {
   const cookie = props.cookie;
   if (!cookie?.ltoken || !cookie.ltuid) throw new Error("请先登录米游社账号");
   const snapshot = {

@@ -369,7 +369,7 @@ function getReplyContent(): Array<TGApp.BBS.SctPost.Base> {
   return [{ insert: fallback || raw }];
 }
 
-function getReadCookie(): Record<string, string> | undefined {
+function getReadCookie(): TGApp.App.Account.LoginCookie | undefined {
   if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
     return undefined;
   return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };

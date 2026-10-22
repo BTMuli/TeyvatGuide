@@ -180,12 +180,7 @@ declare namespace TGApp.BBS.Reply {
     /** 当前账号 UID */
     uid: string;
     /** 当前账号用于回复请求的 Cookie */
-    cookie: {
-      /** LongTime Token */
-      ltoken: string;
-      /** LongTime UID */
-      ltuid: string;
-    };
+    cookie: TGApp.App.Account.LoginCookie;
   };
 
   /**

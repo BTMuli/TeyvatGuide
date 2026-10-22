@@ -41,7 +41,7 @@ const { label, disabled, gid, cookie, contextId } = defineProps<{
   label: string;
   disabled: boolean;
   gid: number;
-  cookie?: Record<string, string>;
+  cookie?: TGApp.App.Account.EditorCookie;
   contextId: number;
 }>();
 const model = defineModel<Array<TGApp.BBS.SctPost.Base>>({ required: true });

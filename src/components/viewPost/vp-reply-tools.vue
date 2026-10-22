@@ -288,7 +288,7 @@ type ReplyToolsProps = {
   disabled: boolean;
   contextId: number;
   gid: number;
-  cookie?: Record<string, string>;
+  cookie?: TGApp.App.Account.Cookie;
 };
 
 /**
@@ -298,7 +298,7 @@ type ReplyToolsProps = {
 type ImagePickerContext = {
   version: number;
   gid: number;
-  cookie: Record<string, string>;
+  cookie: TGApp.App.Account.LoginCookie;
 };
 
 /**
@@ -463,7 +463,7 @@ function handleGameUidOpen(open: boolean): void {
   }
 }
 
-function getGameUidCookie(cookie: Record<string, string>): GameUidCookie {
+function getGameUidCookie(cookie: GameUidCookie): GameUidCookie {
   return validateGameUidCookie(cookie);
 }
 

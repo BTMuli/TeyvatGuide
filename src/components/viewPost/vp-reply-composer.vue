@@ -158,7 +158,7 @@ const hasContent = computed<boolean>(
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
 );
-const toolCookie = computed<Record<string, string> | undefined>(() => {
+const toolCookie = computed<TGApp.App.Account.Cookie | undefined>(() => {
   if (!canWrite.value || !cookie.value) return undefined;
   return {
     ltoken: cookie.value.ltoken,

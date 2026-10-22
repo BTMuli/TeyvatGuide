@@ -11,13 +11,13 @@ const voteApiUrl: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/sapi/"
 /**
  * 校验并提取投票请求使用的登录 Cookie。
  * @since Beta v0.12.6
- * @param cookie - 用户 Cookie
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @returns 可用于签名的 Cookie
  */
 function getAuthCookie(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.SignUidCookie,
   expectedUid?: string,
-): Record<string, string> {
+): TGApp.App.Account.SignCookie {
   if (typeof cookie !== "object" || cookie === null || Array.isArray(cookie)) {
     throw new TypeError("登录凭据无效");
   }
@@ -38,12 +38,12 @@ function getAuthCookie(
 /**
  * 构建 APK sapi 投票请求头。
  * @since Beta v0.12.6
- * @param cookie - 用户 Cookie
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @param body - 请求体
  * @returns 带 K2 签名的请求头
  */
 function getVoteHeaders(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.SignUidCookie,
   body: TGApp.BBS.Vote.CreateRequest,
   expectedUid?: string,
 ): Record<string, string> {
@@ -67,13 +67,13 @@ function getVoteHeaders(
  * APK 只在该请求成功后返回投票数据；调用方应保存成功响应中的 ID，再将投票节点插入帖子。
  * @since Beta v0.12.6
  * @param body - APK CreateVoteVoBean 字段
- * @param cookie - 用户 Cookie
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @param expectedUid - 当前账号快照 UID
  * @returns 服务端投票响应
  */
 export async function createVote(
   body: TGApp.BBS.Vote.CreateRequest,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.SignUidCookie,
   expectedUid?: string,
 ): Promise<TGApp.BBS.Vote.CreateResp> {
   const response = await TGHttps.post<TGApp.BBS.Vote.CreateResp>(`${voteApiUrl}createVote`, {

@@ -449,7 +449,7 @@ const contentLength = computed<number>(() => {
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
 );
-const toolCookie = computed<Record<string, string> | undefined>(() =>
+const toolCookie = computed<TGApp.App.Account.EditorCookie | undefined>(() =>
   canWrite.value && cookie.value
     ? {
         ltoken: cookie.value.ltoken,

@@ -174,7 +174,7 @@ const {
   disabled: boolean;
   loading: boolean;
   gid: number;
-  cookie?: Record<string, string>;
+  cookie?: TGApp.App.Account.EditorCookie;
   contextId: number;
   fold?: TGApp.BBS.PostEdit.Fold;
   vote?: TGApp.BBS.PostEdit.Vote;
