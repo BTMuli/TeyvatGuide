@@ -193,6 +193,9 @@
                   (selectedCommentId === null ? "当前评论装扮" : "不使用评论装扮")
                 }}
               </h3>
+              <span v-if="isCommentInUse(selectedCommentDecoration)" class="cppp-badge is-in-use">
+                使用中
+              </span>
               <span
                 v-if="selectedCommentDecoration && isLimited(selectedCommentDecoration)"
                 class="cppp-badge"
@@ -298,6 +301,7 @@
                             :src="decoration.url"
                           />
                           <span v-else>{{ decoration.name }}</span>
+                          <span v-if="isCommentInUse(decoration)" class="cppp-in-use">使用中</span>
                           <span v-if="!decoration.owned" aria-hidden="true" class="cppp-lock">
                             <v-icon size="12">mdi-lock</v-icon>
                           </span>
@@ -371,6 +375,8 @@ type PendantPickerProps = {
   commentDecorations: Array<TGApp.BBS.CommunitySettings.CommentDecoration>;
   /** 当前评论装扮 ID，null 表示尚未加载，空串表示未使用 */
   currentCommentId: string | null;
+  /** 已保存的评论装扮 ID，null 表示尚未加载，空串表示未使用 */
+  serverCommentId: string | null;
   /** 是否正在加载评论装扮 */
   commentLoading: boolean;
   /** 评论装扮加载错误 */
@@ -609,6 +615,16 @@ function getObtainMethod(
   return "暂无获取方法";
 }
 
+/**
+ * 判断评论装扮是否为当前使用中的装扮。
+ * @since Beta v0.12.6
+ * @param decoration - 评论装扮
+ * @returns 是否为使用中的装扮
+ */
+function isCommentInUse(decoration: TGApp.BBS.CommunitySettings.CommentDecoration | null): boolean {
+  return decoration !== null && decoration.id === props.serverCommentId;
+}
+
 function handleConfirm(): void {
   if (!canConfirm.value) return;
   if (activeTab.value === "pendant") {
@@ -787,6 +803,11 @@ function handleConfirm(): void {
   line-height: 18px;
 
   &.is-locked {
+    color: var(--common-text-title);
+  }
+
+  &.is-in-use {
+    border-color: var(--common-text-title);
     color: var(--common-text-title);
   }
 }
@@ -981,6 +1002,18 @@ function handleConfirm(): void {
   border-radius: 2px;
   background: var(--box-bg-3);
   color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.cppp-in-use {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--box-bg-3);
+  color: var(--common-text-title);
   font-size: 10px;
   line-height: 16px;
 }

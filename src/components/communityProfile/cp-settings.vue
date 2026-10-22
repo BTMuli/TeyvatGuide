@@ -231,6 +231,7 @@
         :commentLoading="commentListLoading"
         :currentCommentId="commentDraftId"
         :currentUrl="pendantDraft.url"
+        :serverCommentId="commentOriginalId"
         :error="pendantListError"
         :loading="pendantListLoading"
         :pendants="pendants"
