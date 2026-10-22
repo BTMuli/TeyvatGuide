@@ -319,7 +319,7 @@ function openPost(): void {
   display: flex;
   flex-wrap: wrap;
   font-size: 12px;
-  gap: 8px 16px;
+  gap: 4px;
 }
 
 .cp-post-topic {

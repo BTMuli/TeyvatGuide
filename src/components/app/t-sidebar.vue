@@ -58,10 +58,10 @@
               :link="true"
               class="side-item-menu"
               :to="{ name: '个人信息' }"
-              title="个人信息"
+              title="主页"
             >
               <template #prepend>
-                <v-icon class="side-icon-menu" size="20">mdi-account-circle-outline</v-icon>
+                <img :src="userInfo.avatar" alt="userAvatar" class="side-icon-menu side-avatar" />
               </template>
             </v-list-item>
           </v-list>
@@ -1176,6 +1176,10 @@ async function addByCookie(): Promise<void> {
 
   &[alt="relicIcon"] {
     filter: var(--icon-filter);
+  }
+
+  &.side-avatar {
+    border-radius: 50%;
   }
 }
 </style>

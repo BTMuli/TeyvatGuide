@@ -2,7 +2,7 @@
   <span :aria-label="avatarAlt" :style="avatarStyle" class="cp-avatar">
     <span class="cp-avatar-image">
       <img v-if="isGifAvatar" :alt="avatarAlt" :src="avatarUrl" />
-      <TMiImg v-else :alt="avatarAlt" :ori="true" :size="innerSize" :src="avatarUrl" />
+      <TMiImg v-else :alt="avatarAlt" :ori="true" :size="loadingSize" :src="avatarUrl" />
     </span>
     <span v-if="user.pendant" aria-hidden="true" class="cp-avatar-pendant">
       <TMiImg :ori="true" :size="size" :src="user.pendant" alt="" />
@@ -24,6 +24,7 @@ type CpAvatarProps = {
 
 const { user, size = 48 } = defineProps<CpAvatarProps>();
 const innerSize = computed<number>(() => Math.max(1, Math.round(size * 0.8)));
+const loadingSize = computed<number>(() => Math.max(14, Math.round(size * 0.4)));
 const avatarUrl = computed<string>(() => getUserAvatar(user) || "/UI/nav/lumine.webp");
 const avatarAlt = computed<string>(() => `${user.nickname || "用户"}的头像`);
 const isGifAvatar = computed<boolean>(() => /\.gif(?:$|[?#])/i.test(avatarUrl.value));
@@ -63,11 +64,6 @@ const avatarStyle = computed<Record<string, string>>(() => ({
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  :deep(.progress) {
-    width: 100%;
-    height: 100%;
   }
 }
 

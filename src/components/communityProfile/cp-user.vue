@@ -70,7 +70,7 @@ function handleOpenProfile(): void {
   background: var(--box-bg-1);
   color: var(--app-page-content);
   cursor: pointer;
-  gap: 12px;
+  gap: 8px;
   text-align: left;
   transition:
     background-color 120ms ease,
@@ -148,9 +148,9 @@ function handleOpenProfile(): void {
   overflow: hidden;
   -webkit-box-orient: vertical;
   color: var(--box-text-4);
-  font-size: 14px;
+  font-size: 12px;
   -webkit-line-clamp: 2;
-  line-height: 20px;
+  line-height: 18px;
   overflow-wrap: anywhere;
 }
 

@@ -171,6 +171,16 @@
             <h2 id="community-profile-posts-title">
               <v-icon size="20" aria-hidden="true">{{ activeNavigation?.icon }}</v-icon>
               {{ activeNavigation?.label }}
+              <span
+                v-if="profile && currentSection === 'posts' && (!searchKeyword || !loading)"
+                class="community-profile-post-count"
+              >
+                {{
+                  searchKeyword
+                    ? fmtUtil.num(searchTotal)
+                    : fmtUtil.num(Number(profile.achieve.post_num))
+                }}
+              </span>
             </h2>
             <p v-if="currentSection === 'posts'">
               {{
@@ -196,12 +206,6 @@
               @click:clear="clearSearch"
               @keyup.enter="searchPosts(searchInput)"
             />
-            <span v-if="!searchKeyword" class="community-profile-post-count">
-              共 {{ fmtUtil.num(Number(profile.achieve.post_num)) }} 篇
-            </span>
-            <span v-else-if="!loading" class="community-profile-post-count">
-              找到 {{ fmtUtil.num(searchTotal) }} 篇
-            </span>
           </div>
         </header>
 
@@ -239,7 +243,7 @@
             isOwnProfile ? "发布后可在这里查看和编辑" : "用户的公开帖子会在这里展示"
           }}</span>
         </div>
-        <div v-else :key="page" class="community-profile-post-list">
+        <div v-else class="community-profile-post-list">
           <article
             v-for="post in currentPosts"
             :key="post.post.post_id"
@@ -361,17 +365,25 @@
               </div>
             </footer>
           </article>
-        </div>
-
-        <div v-if="pageCount > 1" class="community-profile-pagination">
-          <v-pagination
-            v-model="page"
-            :disabled="loading"
-            :length="pageCount"
-            :total-visible="5"
-            density="compact"
-            @update:model-value="handlePageChange"
-          />
+          <footer v-if="currentPosts.length" class="community-profile-post-list-footer">
+            <template v-if="loadMoreError">
+              <span :title="loadMoreError">加载失败</span>
+              <v-btn :disabled="loadingMore" size="small" variant="tonal" @click="loadMorePosts">
+                重试
+              </v-btn>
+            </template>
+            <template v-else-if="loadingMore">
+              <v-progress-circular indeterminate size="18" />
+              <span>正在加载更多…</span>
+            </template>
+            <span v-else-if="isLast">已全部加载</span>
+            <span
+              v-else
+              ref="postsLoadMoreRef"
+              aria-hidden="true"
+              class="community-profile-load-more-trigger"
+            />
+          </footer>
         </div>
       </section>
       <CpSettings
@@ -454,7 +466,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
 
@@ -619,11 +631,14 @@ const activeNavigation = computed<NavigationItem | undefined>(() =>
 const profile = shallowRef<TGApp.BBS.User.Info>();
 const headerUserInfo = shallowRef<TGApp.BBS.User.Info>();
 const profileAudit = shallowRef<TGApp.BBS.User.InfoRes["audit_info"]>();
-const postPages = shallowRef<Array<Array<TGApp.BBS.Post.FullData>>>([]);
-const pageOffsets = shallowRef<Array<string>>([]);
-const pageLastFlags = shallowRef<Array<boolean>>([]);
-const page = ref<number>(1);
+const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const nextOffset = ref<string>("");
+const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
+const loadingMore = ref<boolean>(false);
+const loadMoreError = ref<string>("");
+const postsLoadMoreRef = useTemplateRef<HTMLElement>("postsLoadMoreRef");
+let postsLoadMoreObserver: IntersectionObserver | undefined;
 const deletingPostId = ref<string>("");
 const loadError = ref<string>("");
 const refreshVersion = ref<number>(0);
@@ -675,7 +690,7 @@ const levelLabel = computed<string>(() => {
 });
 const gameMenuVisible = ref<boolean>(false);
 const currentPosts = computed<Array<ProfilePost>>(() =>
-  (postPages.value[page.value - 1] ?? []).map((post) => {
+  posts.value.map((post) => {
     const images = getPostPreviewImages(post);
     return {
       ...post,
@@ -688,12 +703,6 @@ const currentPosts = computed<Array<ProfilePost>>(() =>
     };
   }),
 );
-const pageCount = computed<number>(() => {
-  if (postPages.value.length === 0) return 1;
-  const lastPageIndex = postPages.value.length - 1;
-  return pageLastFlags.value[lastPageIndex] ? postPages.value.length : postPages.value.length + 1;
-});
-
 let requestVersion = 0;
 let unreadVersion = 0;
 let headerRequestVersion = 0;
@@ -764,10 +773,25 @@ watch(
 watch(profileUid, recordProfileVisit, { immediate: true });
 
 watch(currentSection, (section) => {
-  if (section === "posts" && profile.value && !loading.value && postPages.value.length === 0) {
+  if (section === "posts" && profile.value && !loading.value && posts.value.length === 0) {
     void loadProfile();
   }
 });
+watch(
+  [loading, loadingMore, isLast, () => posts.value.length, loadMoreError, currentSection],
+  () => {
+    postsLoadMoreObserver?.disconnect();
+    if (
+      currentSection.value !== "posts" ||
+      loading.value ||
+      loadingMore.value ||
+      isLast.value ||
+      loadMoreError.value !== ""
+    )
+      return;
+    void nextTick(observePostsLoadMore);
+  },
+);
 
 void ensureGameList();
 
@@ -776,6 +800,7 @@ onBeforeUnmount(() => {
   requestVersion += 1;
   unreadVersion += 1;
   headerRequestVersion += 1;
+  postsLoadMoreObserver?.disconnect();
 });
 
 function isNotificationSection(section: ProfileSection): section is NotificationSection {
@@ -833,24 +858,25 @@ async function fetchPostPage(
 }
 
 function applyFirstPostPage(postPage: PostPage): void {
-  postPages.value = [postPage.list];
-  pageOffsets.value = [postPage.nextOffset];
-  pageLastFlags.value = [postPage.isLast];
+  posts.value = postPage.list;
+  nextOffset.value = postPage.nextOffset;
+  isLast.value = postPage.isLast;
   searchTotal.value = postPage.total;
 }
 
-function resetPostPages(): void {
-  postPages.value = [];
-  pageOffsets.value = [];
-  pageLastFlags.value = [];
-  page.value = 1;
+function resetPostList(): void {
+  posts.value = [];
+  nextOffset.value = "";
+  isLast.value = false;
+  loadingMore.value = false;
+  loadMoreError.value = "";
   searchTotal.value = 0;
 }
 
 function resetProfileData(): void {
   profile.value = undefined;
   profileAudit.value = undefined;
-  resetPostPages();
+  resetPostList();
   searchInput.value = "";
   searchKeyword.value = "";
   loadError.value = "";
@@ -1034,7 +1060,7 @@ async function searchPosts(input: string | null): Promise<void> {
   if (snapshot === undefined) return;
   const version = ++requestVersion;
   searchKeyword.value = keyword;
-  resetPostPages();
+  resetPostList();
   loadError.value = "";
   loading.value = true;
   try {
@@ -1078,40 +1104,58 @@ function handleSettingsSaved(warning?: string): void {
   void loadProfile(true);
 }
 
-async function handlePageChange(nextPage: number): Promise<void> {
-  const loadedPageCount = postPages.value.length;
-  if (nextPage <= loadedPageCount) {
-    loadError.value = "";
-    return;
-  }
-  if (nextPage !== loadedPageCount + 1) {
-    page.value = loadedPageCount;
-    return;
-  }
+async function loadMorePosts(): Promise<void> {
+  if (loading.value || loadingMore.value || isLast.value) return;
   const snapshot = getAccountSnapshot();
-  const offset = pageOffsets.value[loadedPageCount - 1];
-  if (snapshot === undefined || offset === undefined || offset.trim() === "") {
-    page.value = loadedPageCount;
-    loadError.value = "帖子分页游标无效，请重新加载。";
-    return;
-  }
+  const offset = nextOffset.value.trim();
+  if (snapshot === undefined || offset === "") return;
   const version = requestVersion;
-  loading.value = true;
-  loadError.value = "";
+  loadingMore.value = true;
+  loadMoreError.value = "";
   try {
     const postPage = await fetchPostPage(snapshot, searchKeyword.value, offset);
     if (!isCurrentRequest(version, snapshot)) return;
-    postPages.value = [...postPages.value, postPage.list];
-    pageOffsets.value = [...pageOffsets.value, postPage.nextOffset];
-    pageLastFlags.value = [...pageLastFlags.value, postPage.isLast];
+    if (!postPage.isLast && postPage.nextOffset === offset)
+      throw new Error("帖子分页游标无效，请刷新后重试。");
+    const ids = new Set(posts.value.map((post) => post.post.post_id));
+    posts.value = [
+      ...posts.value,
+      ...postPage.list.filter((post) => {
+        if (ids.has(post.post.post_id)) return false;
+        ids.add(post.post.post_id);
+        return true;
+      }),
+    ];
+    nextOffset.value = postPage.nextOffset;
+    isLast.value = postPage.isLast;
   } catch (cause) {
-    if (isCurrentRequest(version, snapshot)) {
-      page.value = loadedPageCount;
-      loadError.value = TGHttps.getErrMsg(cause);
-    }
+    if (isCurrentRequest(version, snapshot)) loadMoreError.value = TGHttps.getErrMsg(cause);
   } finally {
-    if (isCurrentRequest(version, snapshot)) loading.value = false;
+    if (isCurrentRequest(version, snapshot)) loadingMore.value = false;
   }
+}
+
+function observePostsLoadMore(): void {
+  const target = postsLoadMoreRef.value;
+  if (
+    target === null ||
+    currentSection.value !== "posts" ||
+    loading.value ||
+    loadingMore.value ||
+    isLast.value ||
+    loadMoreError.value !== ""
+  )
+    return;
+  postsLoadMoreObserver ??= new IntersectionObserver(
+    (records) => {
+      const entry = records.find((record) => record.isIntersecting);
+      if (entry === undefined) return;
+      postsLoadMoreObserver?.unobserve(entry.target);
+      void loadMorePosts();
+    },
+    { rootMargin: "240px 0px" },
+  );
+  postsLoadMoreObserver.observe(target);
 }
 
 function isEditablePost(post: TGApp.BBS.Post.FullData): boolean {
@@ -1128,15 +1172,7 @@ function isDeletablePost(post: TGApp.BBS.Post.FullData): boolean {
 }
 
 function removePostFromList(postId: string): void {
-  const nextPages = postPages.value.map((posts) =>
-    posts.filter((item) => item.post.post_id !== postId),
-  );
-  let nextLength = nextPages.length;
-  while (nextLength > 1 && nextPages[nextLength - 1].length === 0) nextLength -= 1;
-  postPages.value = nextPages.slice(0, nextLength);
-  pageOffsets.value = pageOffsets.value.slice(0, nextLength);
-  pageLastFlags.value = pageLastFlags.value.slice(0, nextLength);
-  if (page.value > nextLength) page.value = nextLength;
+  posts.value = posts.value.filter((item) => item.post.post_id !== postId);
   if (profile.value !== undefined) {
     const postNum = Number.parseInt(profile.value.achieve.post_num, 10);
     profile.value = {
@@ -1148,6 +1184,7 @@ function removePostFromList(postId: string): void {
     };
   }
   if (searchKeyword.value) searchTotal.value = Math.max(searchTotal.value - 1, 0);
+  if (posts.value.length === 0 && !isLast.value) void loadMorePosts();
 }
 
 async function deletePost(post: TGApp.BBS.Post.FullData): Promise<void> {
@@ -1668,8 +1705,15 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-post-count {
   flex-shrink: 0;
+  padding: 1px 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 999px;
+  background: var(--box-bg-2);
   color: var(--box-text-4);
   font-size: 12px;
+  font-weight: normal;
+  line-height: 18px;
+  white-space: nowrap;
 }
 
 .community-profile-post-list {
@@ -1681,6 +1725,22 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   gap: 12px;
   overflow-y: auto;
   scrollbar-gutter: stable;
+}
+
+.community-profile-post-list-footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  color: var(--box-text-4);
+  font-size: 12px;
+  gap: 8px;
+}
+
+.community-profile-load-more-trigger {
+  width: 100%;
+  height: 1px;
 }
 
 .community-profile-post {
@@ -1824,7 +1884,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   display: flex;
   flex-wrap: wrap;
   font-size: 12px;
-  gap: 8px 16px;
+  gap: 4px;
 }
 
 .community-profile-post-topic {
@@ -1910,12 +1970,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 .community-profile-posts > .community-profile-state {
   min-height: 0;
   flex: 1 1 auto;
-}
-
-.community-profile-pagination {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: center;
 }
 
 @media (width <= 900px) {

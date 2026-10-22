@@ -12,7 +12,7 @@
     </header>
 
     <div class="cp-notifications-body">
-      <div v-if="error" class="cp-notifications-state" role="alert">
+      <div v-if="error && !notifications.length" class="cp-notifications-state" role="alert">
         <v-icon size="28">mdi-alert-circle-outline</v-icon>
         <p>{{ error }}</p>
         <v-btn :disabled="loading" variant="tonal" @click="loadMore">重新加载</v-btn>
@@ -32,13 +32,31 @@
         <v-icon size="32">{{ categoryInfo.icon }}</v-icon>
         <p>{{ categoryInfo.empty }}</p>
       </div>
-      <div v-if="loading" class="cp-notifications-state" role="status" aria-live="polite">
+      <div
+        v-if="loading && !notifications.length"
+        class="cp-notifications-state"
+        role="status"
+        aria-live="polite"
+      >
         <v-progress-circular indeterminate size="28" />
         <p>正在加载{{ categoryInfo.title }}…</p>
       </div>
-      <footer v-if="notifications.length && !loading && !error" class="cp-notifications-footer">
-        <span v-if="isLast">已全部加载</span>
-        <v-btn v-else variant="tonal" @click="loadMore">加载更多</v-btn>
+      <footer v-if="notifications.length" class="cp-notifications-footer">
+        <template v-if="error">
+          <span :title="error">加载失败</span>
+          <v-btn :disabled="loading" size="small" variant="tonal" @click="loadMore">重试</v-btn>
+        </template>
+        <template v-else-if="loading">
+          <v-progress-circular indeterminate size="18" />
+          <span>正在加载更多…</span>
+        </template>
+        <span v-else-if="isLast">已全部加载</span>
+        <span
+          v-else
+          ref="loadMoreRef"
+          aria-hidden="true"
+          class="cp-notifications-load-more-trigger"
+        />
       </footer>
     </div>
   </section>
@@ -56,7 +74,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import CpNotification from "./cp-notification.vue";
 
@@ -109,6 +127,8 @@ const loading = ref<boolean>(false);
 const error = ref<string>("");
 const lastId = ref<string>("");
 const isLast = ref<boolean>(false);
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
+let loadMoreObserver: IntersectionObserver | undefined;
 let generation = 0;
 let cleared = false;
 let active = true;
@@ -135,9 +155,15 @@ watch(
   },
   { immediate: true },
 );
+watch([loading, isLast, () => notifications.value.length, error], () => {
+  loadMoreObserver?.disconnect();
+  if (loading.value || isLast.value || error.value !== "") return;
+  void nextTick(observeLoadMore);
+});
 onBeforeUnmount(() => {
   active = false;
   generation += 1;
+  loadMoreObserver?.disconnect();
 });
 
 function getSnapshot(): AccountSnapshot | undefined {
@@ -202,6 +228,21 @@ async function loadMore(): Promise<void> {
   } finally {
     if (isCurrent(snapshot, version)) loading.value = false;
   }
+}
+
+function observeLoadMore(): void {
+  const target = loadMoreRef.value;
+  if (target === null || loading.value || isLast.value || error.value !== "") return;
+  loadMoreObserver ??= new IntersectionObserver(
+    (records) => {
+      const entry = records.find((record) => record.isIntersecting);
+      if (entry === undefined) return;
+      loadMoreObserver?.unobserve(entry.target);
+      void loadMore();
+    },
+    { rootMargin: "240px 0px" },
+  );
+  loadMoreObserver.observe(target);
 }
 
 async function clearUnread(snapshot: AccountSnapshot, version: number): Promise<void> {
@@ -369,10 +410,17 @@ async function openProfile(userId: string): Promise<void> {
 
 .cp-notifications-footer {
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 16px 0 4px;
   color: var(--box-text-4);
   font-size: 12px;
+  gap: 8px;
+}
+
+.cp-notifications-load-more-trigger {
+  width: 100%;
+  height: 1px;
 }
 
 @media (width <= 640px) {

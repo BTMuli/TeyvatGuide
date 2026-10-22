@@ -5,12 +5,19 @@
     class="cp-content"
   >
     <header class="cp-content-header">
-      <div class="cp-content-heading">
-        <h2 id="cp-content-title">
-          <v-icon size="20" aria-hidden="true">{{ sectionInfo.icon }}</v-icon>
-          {{ selectedCollection?.title || sectionInfo.title }}
-        </h2>
-        <p>{{ selectedCollection ? selectedCollection.desc : sectionInfo.description }}</p>
+      <div
+        :class="['cp-content-heading', { 'cp-content-heading--collection': selectedCollection }]"
+      >
+        <span v-if="selectedCollection?.cover" class="cp-content-heading-cover">
+          <TMiImg :src="selectedCollection.cover" alt="合集封面" />
+        </span>
+        <div class="cp-content-heading-text">
+          <h2 id="cp-content-title">
+            <v-icon size="20" aria-hidden="true">{{ sectionInfo.icon }}</v-icon>
+            {{ selectedCollection?.title || sectionInfo.title }}
+          </h2>
+          <p>{{ selectedCollection ? selectedCollection.desc : sectionInfo.description }}</p>
+        </div>
       </div>
       <v-btn
         v-if="selectedCollection"
@@ -153,10 +160,16 @@
               <span v-if="entry.collection.desc" class="cp-entry-description">{{
                 entry.collection.desc
               }}</span>
-              <span class="cp-entry-meta"
-                >{{ fmtUtil.num(entry.collection.post_num) }} 篇帖子 ·
-                {{ fmtUtil.num(entry.collection.view_num) }} 次浏览</span
-              >
+              <span aria-label="合集统计" class="cp-entry-meta">
+                <span :title="`${fmtUtil.num(entry.collection.post_num)} 篇帖子`">
+                  <v-icon aria-hidden="true" size="16">mdi-text-box-outline</v-icon>
+                  {{ fmtUtil.num(entry.collection.post_num) }}
+                </span>
+                <span :title="`${fmtUtil.num(entry.collection.view_num)} 次浏览`">
+                  <v-icon aria-hidden="true" size="16">mdi-eye-outline</v-icon>
+                  {{ fmtUtil.num(entry.collection.view_num) }}
+                </span>
+              </span>
             </span>
             <v-icon size="18" aria-hidden="true">mdi-chevron-right</v-icon>
           </button>
@@ -698,11 +711,55 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   gap: 4px;
 }
 
-.cp-content-count,
-.cp-entry-meta {
+.cp-content-heading--collection {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.cp-content-heading-cover {
+  display: grid;
+  overflow: hidden;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  place-items: center;
+
+  :deep(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cp-content-heading-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cp-content-count {
   flex-shrink: 0;
   color: var(--box-text-4);
   font-size: 12px;
+}
+
+.cp-entry-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  color: var(--box-text-4);
+  font-size: 12px;
+  gap: 16px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 
 .cp-content-body {
@@ -752,7 +809,7 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   border-radius: 8px;
   background: var(--box-bg-1);
   color: inherit;
-  gap: 16px;
+  gap: 8px;
   text-align: left;
 }
 
@@ -786,12 +843,15 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   }
 }
 
+.cp-entry-button:hover .cp-entry-image {
+  background: var(--box-bg-1);
+}
+
 .cp-entry-content {
   display: flex;
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 8px;
 }
 
 .cp-entry-title {
@@ -803,9 +863,12 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
 }
 
 .cp-entry-description {
-  font-size: 14px;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
+  overflow: hidden;
+  min-width: 0;
+  color: var(--box-text-4);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cp-content-state {
@@ -849,7 +912,6 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   .cp-entry {
     flex-wrap: wrap;
     padding: 12px;
-    gap: 8px;
   }
 }
 </style>
