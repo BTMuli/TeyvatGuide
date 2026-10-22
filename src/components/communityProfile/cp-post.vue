@@ -1,8 +1,18 @@
 <template>
-  <article class="cp-post">
+  <article
+    :class="['cp-post', { 'cp-post--selectable': selectable, 'cp-post--selected': selected }]"
+    @click.capture="handleCardClick"
+  >
     <header class="cp-post-meta">
       <div class="cp-post-meta-top">
         <div class="cp-post-channels">
+          <span
+            v-if="selectable"
+            :class="['cp-post-select-indicator', { 'is-selected': selected }]"
+            aria-hidden="true"
+          >
+            <v-icon size="20">{{ selected ? "mdi-check-circle" : "mdi-circle-outline" }}</v-icon>
+          </span>
           <CpTypeBadge v-if="typeLabel" :icon="typeIcon" :label="typeLabel" />
           <CpChannelTag
             v-if="game"
@@ -41,7 +51,16 @@
       </button>
     </header>
     <h3 class="cp-post-title">
-      <button type="button" @click="openPost">
+      <button
+        :aria-label="
+          selectable
+            ? `${selected ? '取消选择' : '选择'}帖子：${post.post.subject || '无标题帖子'}`
+            : undefined
+        "
+        :aria-pressed="selectable ? selected : undefined"
+        type="button"
+        @click="openPost"
+      >
         <TpTitle :text="post.post.subject || '无标题帖子'" />
       </button>
     </h3>
@@ -122,10 +141,21 @@ import CpTypeBadge from "./cp-type-badge.vue";
 
 type PostGame = { name: string; icon?: string };
 
-const { post, viewedAt } = defineProps<{ post: TGApp.BBS.Post.FullData; viewedAt?: number }>();
+const {
+  post,
+  viewedAt,
+  selectable = false,
+  selected = false,
+} = defineProps<{
+  post: TGApp.BBS.Post.FullData;
+  viewedAt?: number;
+  selectable?: boolean;
+  selected?: boolean;
+}>();
 const emit = defineEmits<{
   openPost: [postId: string, title: string];
   openProfile: [uid: string];
+  toggleSelect: [];
 }>();
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
@@ -149,6 +179,13 @@ const remainingImages = computed<number>(() =>
 function openPost(): void {
   emit("openPost", post.post.post_id, post.post.subject);
 }
+
+function handleCardClick(event: MouseEvent): void {
+  if (!selectable) return;
+  event.preventDefault();
+  event.stopPropagation();
+  emit("toggleSelect");
+}
 </script>
 
 <style lang="scss" scoped>
@@ -168,6 +205,27 @@ function openPost(): void {
 
   &:hover {
     background: var(--box-bg-2);
+  }
+
+  &.cp-post--selectable {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  &.cp-post--selected {
+    border-color: var(--common-text-title);
+    background: var(--box-bg-2);
+  }
+}
+
+.cp-post-select-indicator {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-4);
+
+  &.is-selected {
+    color: var(--common-text-title);
   }
 }
 

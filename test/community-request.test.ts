@@ -193,6 +193,156 @@ describe("communityReq favorite write requests", () => {
   });
 });
 
+describe("communityReq history write requests", () => {
+  it("deletes selected history entries with the SToken signature", async () => {
+    const params: TGApp.BBS.Community.HistoryDeleteParams = {
+      is_delete_all: false,
+      operate_id_list: [{ item_type: "HISTORY_ITEM_TYPE_POST", item_id: "79040314" }],
+      user_last_view_at: 1729600000,
+    };
+    await communityReq.deleteHistory(cookie, params);
+
+    const historyCookie = { mid: cookie.mid, stoken: cookie.stoken, stuid: cookie.stuid };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      historyCookie,
+      "POST",
+      JSON.stringify(params),
+      "X4",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/history_view/api/history/operate",
+      {
+        headers: {
+          ...appHeaders,
+          "x-rpc-client_type": "2",
+          "Content-Type": "application/json",
+        },
+        body: params,
+      },
+    );
+  });
+
+  it("deletes all history except the excluded entries", async () => {
+    const params: TGApp.BBS.Community.HistoryDeleteParams = {
+      is_delete_all: true,
+      operate_id_list: [{ item_type: "HISTORY_ITEM_TYPE_POST", item_id: "79040315" }],
+      user_last_view_at: 1729600100,
+    };
+    await communityReq.deleteHistory(cookie, params);
+
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/history_view/api/history/operate",
+      expect.objectContaining({ body: params }),
+    );
+  });
+});
+
+describe("communityReq collection management requests", () => {
+  it("creates a collection with a signed JSON body and returns the new ID", async () => {
+    const response = { retcode: 0, message: "ok", data: { id: 123456 } };
+    mocks.post.mockResolvedValueOnce({ data: response });
+    const params = {
+      title: "提瓦特游记",
+      desc: "记录旅行见闻",
+      cover: "https://upload-bbs.miyoushe.com/upload/cover.png",
+    };
+
+    await expect(communityReq.createCollection(cookie, params)).resolves.toEqual(response);
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(params),
+    );
+    expect(mocks.getRequestHeader).not.toHaveBeenCalled();
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/create",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body: params },
+    );
+  });
+
+  it("edits a collection with its ID and updated fields", async () => {
+    const params = {
+      id: 123456,
+      title: "新标题",
+      desc: "新的合集描述",
+      cover: "https://upload-bbs.miyoushe.com/upload/cover.png",
+    };
+
+    await communityReq.editCollection(cookie, params);
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(params),
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/edit",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body: params },
+    );
+  });
+
+  it("deletes a collection by ID", async () => {
+    await communityReq.deleteCollection(cookie, 123456);
+    const body = { id: 123456 };
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/del",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body },
+    );
+  });
+
+  it("sorts collections with the complete ID order", async () => {
+    await communityReq.sortCollections(cookie, [3, 1, 2]);
+    const body = { ids: [3, 1, 2] };
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/list/sort",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body },
+    );
+  });
+});
+
+describe("communityReq follow write requests", () => {
+  it("follows a user with a signed JSON body", async () => {
+    await communityReq.setFollow(cookie, "200000002", true);
+
+    const body = { entity_id: "200000002" };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+      "X4",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/timeline/wapi/follow",
+      { headers: { ...appHeaders, "Content-Type": "application/json" }, body },
+    );
+  });
+
+  it("unfollows a user and rejects following the current account", async () => {
+    await communityReq.setFollow(cookie, "200000002", false);
+    const body = { entity_id: "200000002" };
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/timeline/wapi/unfollow",
+      { headers: { ...appHeaders, "Content-Type": "application/json" }, body },
+    );
+
+    await expect(communityReq.setFollow(cookie, cookie.ltuid, true)).rejects.toThrow(
+      "不能关注自己",
+    );
+    expect(mocks.post).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("communityReq notification requests", () => {
   it("requests notifications by category with the official cursor and focus flag", async () => {
     await communityReq.notifications(cookie, "reply");

@@ -136,6 +136,91 @@ async function getCollections(
 }
 
 /**
+ * 发出合集管理写请求
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param action - 合集管理接口路径
+ * @param body - 请求体
+ * @returns 接口响应数据
+ */
+async function postCollectionManage<T>(
+  cookie: TGApp.App.Account.Cookie,
+  action: "create" | "edit" | "del" | "list/sort",
+  body: Record<string, unknown>,
+): Promise<T> {
+  const resp = await TGHttps.post<T>(`${communityApiBaseUrl}collection/wapi/collection/${action}`, {
+    headers: {
+      ...getCollectionRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body)),
+      "Content-Type": "application/json",
+    },
+    body,
+  });
+  return resp.data;
+}
+
+/**
+ * 创建合集
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param params - 合集创建参数
+ * @returns 创建合集响应数据
+ */
+async function createCollection(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.BBS.Collection.CreateParams,
+): Promise<TGApp.BBS.Collection.CreateResp> {
+  return await postCollectionManage<TGApp.BBS.Collection.CreateResp>(cookie, "create", {
+    ...params,
+  });
+}
+
+/**
+ * 编辑合集信息
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param params - 合集编辑参数
+ * @returns 编辑合集响应数据
+ */
+async function editCollection(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.BBS.Collection.EditParams,
+): Promise<TGApp.BBS.Collection.ManageResp> {
+  return await postCollectionManage<TGApp.BBS.Collection.ManageResp>(cookie, "edit", {
+    ...params,
+  });
+}
+
+/**
+ * 删除合集
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param id - 合集 ID
+ * @returns 删除合集响应数据
+ */
+async function deleteCollection(
+  cookie: TGApp.App.Account.Cookie,
+  id: number,
+): Promise<TGApp.BBS.Collection.ManageResp> {
+  const body: TGApp.BBS.Collection.DeleteParams = { id };
+  return await postCollectionManage<TGApp.BBS.Collection.ManageResp>(cookie, "del", body);
+}
+
+/**
+ * 调整合集排序
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param ids - 按新顺序排列的合集 ID 列表
+ * @returns 调整排序响应数据
+ */
+async function sortCollections(
+  cookie: TGApp.App.Account.Cookie,
+  ids: Array<number>,
+): Promise<TGApp.BBS.Collection.ManageResp> {
+  const body: TGApp.BBS.Collection.SortParams = { ids };
+  return await postCollectionManage<TGApp.BBS.Collection.ManageResp>(cookie, "list/sort", body);
+}
+
+/**
  * 获取收藏的帖子
  * @since Beta v0.12.6
  * @param cookie - 账户 Cookie
@@ -217,6 +302,31 @@ async function getFavoriteCollections(
 }
 
 /**
+ * 取消收藏合集
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param collectionId - 合集 ID
+ * @returns 取消收藏响应数据
+ */
+async function unfollowCollection(
+  cookie: TGApp.App.Account.Cookie,
+  collectionId: number,
+): Promise<TGApp.BBS.Response.Base> {
+  const body = { id: collectionId };
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
+    `${communityApiBaseUrl}collection/wapi/collection/unfollow`,
+    {
+      headers: {
+        ...getCollectionRequestHeader(getCommunityCookie(cookie), "POST", body),
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
+/**
  * 获取我的关注
  * @since Beta v0.12.6
  * @param cookie - 账户 Cookie
@@ -275,6 +385,36 @@ async function getFollowers(
 }
 
 /**
+ * 关注或取消关注指定用户
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param uid - 目标用户 ID
+ * @param follow - true 表示关注，false 表示取消关注
+ * @returns 关注关系变更响应数据
+ */
+async function setFollow(
+  cookie: TGApp.App.Account.Cookie,
+  uid: string,
+  follow: boolean,
+): Promise<TGApp.BBS.Response.Base> {
+  const normalizedUid = uid.trim();
+  if (!/^[1-9]\d*$/.test(normalizedUid)) throw new TypeError("用户 ID 必须为正整数");
+  if (isCurrentUser(cookie, normalizedUid)) throw new TypeError("不能关注自己");
+  const body = { entity_id: normalizedUid };
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
+    `${communityApiBaseUrl}timeline/wapi/${follow ? "follow" : "unfollow"}`,
+    {
+      headers: {
+        ...getRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body), "X4", true),
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
+/**
  * 获取当前账户的帖子浏览历史
  * @since Beta v0.12.6
  * @param cookie - 账户 Cookie
@@ -293,6 +433,31 @@ async function getHistory(
   const resp = await TGHttps.get<TGApp.BBS.Community.HistoryResp>(
     `${communityApiBaseUrl}painter/api/history/list`,
     { headers, query: params },
+  );
+  return resp.data;
+}
+
+/**
+ * 删除当前账户的浏览历史
+ * @since Beta v0.12.6
+ * @param cookie - 账户 Cookie
+ * @param params - 删除参数
+ * @returns 删除浏览历史响应数据
+ * @remarks 该接口只识别 SToken 登录态
+ */
+async function deleteHistory(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.BBS.Community.HistoryDeleteParams,
+): Promise<TGApp.BBS.Response.Base> {
+  const ck = { mid: cookie.mid, stoken: cookie.stoken, stuid: cookie.stuid };
+  const headers = {
+    ...getRequestHeader(ck, "POST", JSON.stringify(params), "X4", true),
+    "x-rpc-client_type": "2",
+    "Content-Type": "application/json",
+  };
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
+    `${communityApiBaseUrl}history_view/api/history/operate`,
+    { headers, body: params },
   );
   return resp.data;
 }
@@ -442,12 +607,19 @@ const communityReq = {
   searchPosts: searchUserPosts,
   comments: getComments,
   collections: getCollections,
+  createCollection,
+  editCollection,
+  deleteCollection,
+  sortCollections,
   favorites: getFavorites,
   unfavoritePost,
   favoriteCollections: getFavoriteCollections,
+  unfollowCollection,
   following: getFollowing,
   followers: getFollowers,
+  setFollow,
   history: getHistory,
+  deleteHistory,
   notifications: getNotifications,
   notificationUnread: getNotificationUnread,
   clearNotificationUnread,

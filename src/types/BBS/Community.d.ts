@@ -142,6 +142,12 @@ declare namespace TGApp.BBS.Community {
   };
 
   /**
+   * 用户关注关系操作
+   * @since Beta v0.12.6
+   */
+  type UserRelationAction = "follow-back" | "unfollow";
+
+  /**
    * 关注关系条目
    * @since Beta v0.12.6
    */
@@ -257,22 +263,41 @@ declare namespace TGApp.BBS.Community {
   };
 
   /**
+   * 浏览历史条目标识
+   * @since Beta v0.12.6
+   */
+  type HistoryItemId = {
+    /** 条目类型，帖子为 HISTORY_ITEM_TYPE_POST */
+    item_type: string;
+    /** 条目 ID */
+    item_id: string;
+  };
+
+  /**
    * 浏览历史条目
    * @since Beta v0.12.6
    */
   type HistoryItem = {
     /** 条目标识 */
-    id: {
-      /** 条目类型，帖子为 HISTORY_ITEM_TYPE_POST */
-      item_type: string;
-      /** 条目 ID */
-      item_id: string;
-    };
+    id: HistoryItemId;
     /** 浏览时间（秒级时间戳） */
     view_at: string;
     /** 是否已删除 */
     is_deleted: boolean;
     /** 帖子数据；非帖子条目或帖子不可用时可能为 null */
     post: TGApp.BBS.Post.FullData | null;
+  };
+
+  /**
+   * 浏览历史操作参数
+   * @since Beta v0.12.6
+   */
+  type HistoryDeleteParams = {
+    /** 是否删除全部；为 true 时 operate_id_list 表示排除项 */
+    is_delete_all: boolean;
+    /** 待操作条目标识列表 */
+    operate_id_list: Array<HistoryItemId>;
+    /** 用户最后浏览时间（秒级时间戳） */
+    user_last_view_at: number;
   };
 }

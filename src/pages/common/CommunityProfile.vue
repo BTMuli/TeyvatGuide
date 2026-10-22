@@ -675,9 +675,10 @@ const profileStats = computed<Array<ProfileStat>>(() => {
     value === undefined ? "-" : fmtUtil.num(Number(value));
   return [
     { label: "获赞", value: format(achieve?.like_num) },
-    { label: "发帖", value: format(achieve?.post_num) },
-    { label: "回帖", value: format(achieve?.replypost_num) },
+    { label: "发布", value: format(achieve?.post_num) },
+    { label: "评论", value: format(achieve?.replypost_num) },
     { label: "粉丝", value: format(achieve?.followed_cnt) },
+    { label: "关注", value: format(achieve?.follow_cnt) },
   ];
 });
 const headerLevel = computed<TGApp.BBS.User.LevelExp | undefined>(() =>
@@ -1502,10 +1503,10 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-stats {
-  display: grid;
-  min-width: 240px;
-  gap: 12px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
 }
 
 .community-profile-stat {
@@ -1984,7 +1985,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
   .community-profile-stats {
     width: 100%;
-    min-width: 0;
   }
 }
 
