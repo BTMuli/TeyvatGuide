@@ -3,6 +3,7 @@
  * @since Beta v0.12.6
  */
 
+import bbsEnum from "@enum/bbs.js";
 import { emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, ref, shallowRef } from "vue";
@@ -68,7 +69,89 @@ function matchesPostKeyword(post: TGApp.BBS.Post.FullData, keyword: string): boo
   return [post.post.subject, post.post.content].some((text) => text.toLowerCase().includes(needle));
 }
 
+/**
+ * 获取帖子类型的展示名称。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @returns 帖子类型名称，未知类型返回 undefined
+ */
+function getPostTypeLabel(post: TGApp.BBS.Post.FullData): string | undefined {
+  switch (post.post.view_type) {
+    case bbsEnum.post.viewType.NORMAL:
+      return "长文";
+    case bbsEnum.post.viewType.PIC:
+      return "图文";
+    case bbsEnum.post.viewType.VOD:
+      return "视频";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * 获取帖子类型对应的图标。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @returns 帖子类型图标，未知类型返回 undefined
+ */
+function getPostTypeIcon(post: TGApp.BBS.Post.FullData): string | undefined {
+  switch (post.post.view_type) {
+    case bbsEnum.post.viewType.NORMAL:
+      return "mdi-text-box-outline";
+    case bbsEnum.post.viewType.PIC:
+      return "mdi-image-outline";
+    case bbsEnum.post.viewType.VOD:
+      return "mdi-video-outline";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * 获取帖子版块的图标，优先使用版块列表中的纯图标。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @param forumList - 分区版块列表
+ * @returns 版块图标，缺失时返回 undefined
+ */
+function getPostForumIcon(
+  post: TGApp.BBS.Post.FullData,
+  forumList: Array<TGApp.BBS.Forum.GameForum>,
+): string | undefined {
+  const game = forumList.find((item) => item.game_id === post.post.game_id);
+  const forum = game?.forums.find((item) => item.id === post.forum?.id);
+  return forum?.icon_pure || post.forum?.icon;
+}
+
+/**
+ * 获取帖子卡片展示的预览图，最多 3 张。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @returns 预览图地址列表
+ */
+function getPostPreviewImages(post: TGApp.BBS.Post.FullData): Array<string> {
+  if (post.post.images.length) return post.post.images.slice(0, 3);
+  const cover = post.cover?.url || post.post.cover;
+  return cover ? [cover] : [];
+}
+
+/**
+ * 获取帖子的图片总数。
+ * @since Beta v0.12.6
+ * @param post - 帖子数据
+ * @returns 图片总数
+ */
+function getPostImageCount(post: TGApp.BBS.Post.FullData): number {
+  if (post.post.images.length) return post.post.images.length;
+  return post.cover?.url || post.post.cover ? 1 : 0;
+}
+
 export {
+  getPostForumIcon,
+  getPostImageCount,
+  getPostPreviewImages,
+  getPostTypeIcon,
+  getPostTypeLabel,
   hasNextProfile,
   hasPreviousProfile,
   matchesPostKeyword,

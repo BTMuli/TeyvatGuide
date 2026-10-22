@@ -1,6 +1,34 @@
 <template>
   <article class="cp-post">
     <header class="cp-post-meta">
+      <div class="cp-post-meta-top">
+        <div class="cp-post-channels">
+          <CpTypeBadge v-if="typeLabel" :icon="typeIcon" :label="typeLabel" />
+          <CpChannelTag
+            v-if="game"
+            :aria-label="`进入分区：${game.name}`"
+            :icon="game.icon"
+            kind="game"
+            :name="game.name"
+            :to="`/posts/forum/${post.post.game_id}`"
+          />
+          <CpChannelTag
+            v-if="post.forum"
+            :aria-label="`进入版块：${post.forum.name}`"
+            :icon="forumIcon"
+            kind="forum"
+            :name="post.forum.name"
+            :to="`/posts/forum/${post.post.game_id}/${post.forum.id}`"
+          />
+        </div>
+        <time
+          class="cp-post-time"
+          :title="`发布于 ${fmtUtil.dateTime(post.post.created_at * 1000)}`"
+        >
+          <v-icon size="16" aria-hidden="true">mdi-clock-outline</v-icon>
+          {{ timeText }}
+        </time>
+      </div>
       <button
         v-if="post.user"
         :title="`查看 ${post.user.nickname} 的米游社主页`"
@@ -11,20 +39,6 @@
         <CpAvatar :user="post.user" :size="24" />
         <span class="cp-post-author-name">{{ post.user.nickname }}</span>
       </button>
-      <v-icon size="16" aria-hidden="true">mdi-clock-outline</v-icon>
-      <time v-if="viewedAt" :title="`发布于 ${fmtUtil.dateTime(post.post.created_at * 1000)}`">
-        浏览于 {{ fmtUtil.dateTime(viewedAt * 1000) }}
-      </time>
-      <time v-else>{{ fmtUtil.dateTime(post.post.created_at * 1000) }}</time>
-      <RouterLink
-        v-if="post.forum"
-        :aria-label="`进入版块：${post.forum.name}`"
-        class="cp-post-forum"
-        :to="`/posts/forum/${post.post.game_id}/${post.forum.id}`"
-      >
-        <TMiImg v-if="post.forum.icon" :alt="post.forum.name" :ori="true" :src="post.forum.icon" />
-        {{ post.forum.name }}
-      </RouterLink>
     </header>
     <h3 class="cp-post-title">
       <button type="button" @click="openPost">
@@ -34,6 +48,10 @@
     <div v-if="images.length" class="cp-post-images">
       <span v-for="(image, index) in images" :key="`${index}:${image}`" class="cp-post-image">
         <TMiImg :src="image" :alt="`第 ${index + 1} 张帖子图片`" />
+        <span v-if="index === images.length - 1 && remainingImages > 0" class="cp-post-image-more">
+          <v-icon aria-hidden="true" size="10">mdi-folder-multiple-image</v-icon>
+          +{{ fmtUtil.num(remainingImages) }}
+        </span>
       </span>
     </div>
     <div v-if="post.topics.length" class="cp-post-topics">
@@ -59,6 +77,17 @@
         <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
         {{ fmtUtil.num(post.stat.like_num) }}
       </span>
+      <span
+        v-if="post.stat.bookmark_num > 0"
+        :title="`收藏 ${fmtUtil.num(post.stat.bookmark_num)}`"
+      >
+        <v-icon size="16" aria-hidden="true">mdi-star-outline</v-icon>
+        {{ fmtUtil.num(post.stat.bookmark_num) }}
+      </span>
+      <span v-if="post.stat.forward_num > 0" :title="`转发 ${fmtUtil.num(post.stat.forward_num)}`">
+        <v-icon size="16" aria-hidden="true">mdi-share-variant-outline</v-icon>
+        {{ fmtUtil.num(post.stat.forward_num) }}
+      </span>
     </footer>
   </article>
 </template>
@@ -67,21 +96,47 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
+import useBBSStore from "@store/bbs.js";
+import {
+  getPostForumIcon,
+  getPostImageCount,
+  getPostPreviewImages,
+  getPostTypeIcon,
+  getPostTypeLabel,
+} from "@utils/communityProfile.js";
 import fmtUtil from "@utils/fmtUtil.js";
+import { storeToRefs } from "pinia";
 import { computed } from "vue";
 
 import CpAvatar from "./cp-avatar.vue";
+import CpChannelTag from "./cp-channel-tag.vue";
+import CpTypeBadge from "./cp-type-badge.vue";
+
+type PostGame = { name: string; icon?: string };
 
 const { post, viewedAt } = defineProps<{ post: TGApp.BBS.Post.FullData; viewedAt?: number }>();
 const emit = defineEmits<{
   openPost: [postId: string, title: string];
   openProfile: [uid: string];
 }>();
-const images = computed<Array<string>>(() => {
-  if (post.post.images.length) return post.post.images.slice(0, 3);
-  const cover = post.cover?.url || post.post.cover;
-  return cover ? [cover] : [];
+const bbsStore = useBBSStore();
+const { gameList, forumList } = storeToRefs(bbsStore);
+const game = computed<PostGame | undefined>(() => {
+  const find = gameList.value.find((item) => item.id === post.post.game_id);
+  return find ? { name: find.name, icon: find.app_icon || find.icon } : undefined;
 });
+const forumIcon = computed<string | undefined>(() => getPostForumIcon(post, forumList.value));
+const timeText = computed<string>(() =>
+  viewedAt
+    ? `浏览于 ${fmtUtil.dateTime(viewedAt * 1000)}`
+    : fmtUtil.dateTime(post.post.created_at * 1000),
+);
+const typeLabel = computed<string | undefined>(() => getPostTypeLabel(post));
+const typeIcon = computed<string | undefined>(() => getPostTypeIcon(post));
+const images = computed<Array<string>>(() => getPostPreviewImages(post));
+const remainingImages = computed<number>(() =>
+  Math.max(getPostImageCount(post) - images.value.length, 0),
+);
 
 function openPost(): void {
   emit("openPost", post.post.post_id, post.post.subject);
@@ -110,10 +165,25 @@ function openPost(): void {
 
 .cp-post-meta {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   color: var(--box-text-4);
   font-size: 12px;
+  gap: 8px;
+}
+
+.cp-post-meta-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.cp-post-channels {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
@@ -151,32 +221,13 @@ function openPost(): void {
   }
 }
 
-.cp-post-forum {
-  position: relative;
-  z-index: 2;
+.cp-post-time {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--box-text-5);
+  margin-left: auto;
   gap: 4px;
-  text-decoration: none;
-
-  :deep(img) {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-  }
-
-  &:hover {
-    background: var(--box-bg-3);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
-  }
+  white-space: nowrap;
 }
 
 .cp-post-title {
@@ -218,18 +269,21 @@ function openPost(): void {
 
 .cp-post-images {
   display: flex;
-  width: 100%;
-  max-width: 520px;
+  width: fit-content;
+  max-width: 100%;
   gap: 8px;
 }
 
 .cp-post-image {
+  position: relative;
   display: grid;
   overflow: hidden;
-  width: min(30%, 160px);
+  width: 160px;
+  max-width: 100%;
+  flex: 0 1 160px;
   border-radius: 4px;
   aspect-ratio: 1;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
   place-items: center;
 
   :deep(img) {
@@ -237,6 +291,24 @@ function openPost(): void {
     height: 100%;
     object-fit: cover;
   }
+}
+
+.cp-post-image-more {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 4px;
+  padding-left: 8px;
+  background: var(--tgc-od-blue);
+  border-top-left-radius: 12px;
+  box-shadow: -1px -1px 6px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
+  column-gap: 2px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .cp-post-topics {

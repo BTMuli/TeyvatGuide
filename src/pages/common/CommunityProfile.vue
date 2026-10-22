@@ -245,36 +245,53 @@
             :key="post.post.post_id"
             class="community-profile-post"
           >
-            <div class="community-profile-post-meta">
-              <v-icon size="16" aria-hidden="true">mdi-clock-outline</v-icon>
-              <time>{{ fmtUtil.dateTime(post.post.created_at * 1000) }}</time>
-              <RouterLink
-                v-if="post.forum"
-                :aria-label="`进入版块：${post.forum.name}`"
-                class="community-profile-post-forum"
-                :to="`/posts/forum/${post.post.game_id}/${post.forum.id}`"
-              >
-                <TMiImg
-                  v-if="post.forum.icon"
-                  :alt="post.forum.name"
-                  :ori="true"
-                  :src="post.forum.icon"
+            <header class="community-profile-post-meta">
+              <div class="community-profile-post-channels">
+                <CpTypeBadge v-if="post.typeLabel" :icon="post.typeIcon" :label="post.typeLabel" />
+                <CpChannelTag
+                  v-if="post.game"
+                  :aria-label="`进入分区：${post.game.name}`"
+                  :icon="post.game.icon"
+                  kind="game"
+                  :name="post.game.name"
+                  :to="`/posts/forum/${post.post.game_id}`"
                 />
-                {{ post.forum.name }}
-              </RouterLink>
-            </div>
+                <CpChannelTag
+                  v-if="post.forum"
+                  :aria-label="`进入版块：${post.forum.name}`"
+                  :icon="post.forumIcon"
+                  kind="forum"
+                  :name="post.forum.name"
+                  :to="`/posts/forum/${post.post.game_id}/${post.forum.id}`"
+                />
+              </div>
+              <time
+                class="community-profile-post-time"
+                :title="`发布于 ${fmtUtil.dateTime(post.post.created_at * 1000)}`"
+              >
+                <v-icon size="16" aria-hidden="true">mdi-clock-outline</v-icon>
+                {{ fmtUtil.dateTime(post.post.created_at * 1000) }}
+              </time>
+            </header>
             <h3 class="community-profile-post-title">
               <button type="button" @click="openPost(post)">
                 <TpTitle :text="post.post.subject || '无标题帖子'" />
               </button>
             </h3>
-            <div v-if="getPostImages(post).length" class="community-profile-post-images">
+            <div v-if="post.images.length" class="community-profile-post-images">
               <span
-                v-for="(image, index) in getPostImages(post)"
+                v-for="(image, index) in post.images"
                 :key="`${index}:${image}`"
                 class="community-profile-post-image"
               >
                 <TMiImg :alt="`第 ${index + 1} 张帖子图片`" :src="image" />
+                <span
+                  v-if="index === post.images.length - 1 && post.remainingImages > 0"
+                  class="community-profile-post-image-more"
+                >
+                  <v-icon aria-hidden="true" size="10">mdi-folder-multiple-image</v-icon>
+                  +{{ fmtUtil.num(post.remainingImages) }}
+                </span>
               </span>
             </div>
             <div v-if="post.topics.length" class="community-profile-post-topics">
@@ -300,6 +317,20 @@
                 <span :title="`点赞 ${fmtUtil.num(post.stat.like_num)}`">
                   <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
                   {{ fmtUtil.num(post.stat.like_num) }}
+                </span>
+                <span
+                  v-if="post.stat.bookmark_num > 0"
+                  :title="`收藏 ${fmtUtil.num(post.stat.bookmark_num)}`"
+                >
+                  <v-icon size="16" aria-hidden="true">mdi-star-outline</v-icon>
+                  {{ fmtUtil.num(post.stat.bookmark_num) }}
+                </span>
+                <span
+                  v-if="post.stat.forward_num > 0"
+                  :title="`转发 ${fmtUtil.num(post.stat.forward_num)}`"
+                >
+                  <v-icon size="16" aria-hidden="true">mdi-share-variant-outline</v-icon>
+                  {{ fmtUtil.num(post.stat.forward_num) }}
                 </span>
               </div>
               <v-btn
@@ -341,7 +372,9 @@
         v-else-if="isOwnProfile && isNotificationSection(currentSection)"
         :key="`${profileUid}:${currentSection}:${refreshVersion}`"
         :category="notificationCategories[currentSection]"
+        :unreadCount="currentUnreadCount"
         class="community-profile-panel"
+        @item-read="handleNotificationItemRead"
         @read="handleNotificationRead"
       />
       <CpNotifySettings
@@ -368,10 +401,12 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
+import CpChannelTag from "@comp/communityProfile/cp-channel-tag.vue";
 import CpContent from "@comp/communityProfile/cp-content.vue";
 import CpNotifications from "@comp/communityProfile/cp-notifications.vue";
 import CpNotifySettings from "@comp/communityProfile/cp-notify-settings.vue";
 import CpSettings from "@comp/communityProfile/cp-settings.vue";
+import CpTypeBadge from "@comp/communityProfile/cp-type-badge.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
@@ -383,6 +418,11 @@ import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import {
+  getPostForumIcon,
+  getPostImageCount,
+  getPostPreviewImages,
+  getPostTypeIcon,
+  getPostTypeLabel,
   hasNextProfile,
   hasPreviousProfile,
   recordProfileVisit,
@@ -448,6 +488,15 @@ type ProfileGameOption = Pick<TGApp.BBS.Game.Item, "id" | "name"> & {
   icon?: string;
 };
 
+type ProfilePost = TGApp.BBS.Post.FullData & {
+  forumIcon?: string;
+  game?: ProfileGameOption;
+  images: Array<string>;
+  remainingImages: number;
+  typeIcon?: string;
+  typeLabel?: string;
+};
+
 const defaultProfileGame: ProfileGameOption = {
   id: 2,
   name: "原神",
@@ -469,7 +518,7 @@ const router = useRouter();
 const route = useRoute();
 const { isLogin } = storeToRefs(useAppStore());
 const bbsStore = useBBSStore();
-const { gameList } = storeToRefs(bbsStore);
+const { gameList, forumList } = storeToRefs(bbsStore);
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const profileUid = computed<string>(() => {
   const targetUid = route.params.uid;
@@ -550,6 +599,12 @@ const currentSection = computed<ProfileSection>(() => {
 const activeNavigation = computed<NavigationItem | undefined>(() =>
   navigation.value.find((item) => item.section === currentSection.value),
 );
+const currentUnreadCount = computed<number>(() => {
+  const section = currentSection.value;
+  return isNotificationSection(section)
+    ? (unreadCounts.value[notificationCategories[section]] ?? 0)
+    : 0;
+});
 
 const profile = shallowRef<TGApp.BBS.User.Info>();
 const headerUserInfo = shallowRef<TGApp.BBS.User.Info>();
@@ -608,8 +663,19 @@ const levelLabel = computed<string>(() => {
   return headerLevel.value ? `Lv.${headerLevel.value.level}` : "暂无等级";
 });
 const gameMenuVisible = ref<boolean>(false);
-const currentPosts = computed<Array<TGApp.BBS.Post.FullData>>(
-  () => postPages.value[page.value - 1] ?? [],
+const currentPosts = computed<Array<ProfilePost>>(() =>
+  (postPages.value[page.value - 1] ?? []).map((post) => {
+    const images = getPostPreviewImages(post);
+    return {
+      ...post,
+      forumIcon: getPostForumIcon(post, forumList.value),
+      game: getPostGame(post),
+      images,
+      remainingImages: getPostImageCount(post) - images.length,
+      typeIcon: getPostTypeIcon(post),
+      typeLabel: getPostTypeLabel(post),
+    };
+  }),
 );
 const pageCount = computed<number>(() => {
   if (postPages.value.length === 0) return 1;
@@ -891,6 +957,12 @@ function handleNotificationRead(category: TGApp.BBS.Notification.Category): void
   unreadCounts.value = { ...unreadCounts.value, [category]: 0 };
 }
 
+function handleNotificationItemRead(category: TGApp.BBS.Notification.Category): void {
+  const current = unreadCounts.value[category] ?? 0;
+  if (current <= 0) return;
+  unreadCounts.value = { ...unreadCounts.value, [category]: current - 1 };
+}
+
 async function loadProfile(refreshHeader: boolean = false): Promise<void> {
   const version = ++requestVersion;
   refreshVersion.value += 1;
@@ -1040,10 +1112,8 @@ function isEditablePost(post: TGApp.BBS.Post.FullData): boolean {
   );
 }
 
-function getPostImages(post: TGApp.BBS.Post.FullData): Array<string> {
-  if (post.post.images.length) return post.post.images.slice(0, 3);
-  const cover = post.cover?.url || post.post.cover;
-  return cover ? [cover] : [];
+function getPostGame(post: TGApp.BBS.Post.FullData): ProfileGameOption | undefined {
+  return gameOptions.value.find((game) => game.id === post.post.game_id);
 }
 
 async function openPost(post: TGApp.BBS.Post.FullData): Promise<void> {
@@ -1542,37 +1612,27 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   color: var(--box-text-4);
   font-size: 12px;
+  gap: 8px 12px;
+}
+
+.community-profile-post-channels {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
-.community-profile-post-forum {
-  position: relative;
-  z-index: 2;
+.community-profile-post-time {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--box-text-5);
+  margin-left: auto;
   gap: 4px;
-  text-decoration: none;
-
-  :deep(img) {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-  }
-
-  &:hover {
-    background: var(--box-bg-3);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
-  }
+  white-space: nowrap;
 }
 
 .community-profile-post-title {
@@ -1614,8 +1674,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
 .community-profile-post-images {
   display: flex;
-  width: 100%;
-  max-width: 520px;
+  width: fit-content;
+  max-width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1625,13 +1685,16 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post-image {
+  position: relative;
   display: grid;
   overflow: hidden;
-  width: min(30%, 160px);
+  width: 160px;
+  max-width: 100%;
   height: auto;
+  flex: 0 1 160px;
   border-radius: 4px;
   aspect-ratio: 1;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
   place-items: center;
 
   :deep(img) {
@@ -1639,6 +1702,24 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     height: 100%;
     object-fit: cover;
   }
+}
+
+.community-profile-post-image-more {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 4px;
+  padding-left: 8px;
+  background: var(--tgc-od-blue);
+  border-top-left-radius: 12px;
+  box-shadow: -1px -1px 6px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
+  column-gap: 2px;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .community-profile-post-topics {

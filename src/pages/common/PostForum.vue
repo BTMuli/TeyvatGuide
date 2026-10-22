@@ -93,6 +93,30 @@
         @click:append-inner="searchPost"
         @keyup.enter="searchPost"
       />
+      <v-menu v-if="publishTypes.length > 0" location="bottom end">
+        <template #activator="{ props: menuProps }">
+          <v-btn
+            v-bind="menuProps"
+            :disabled="!selectedForum"
+            class="post-forum-btn"
+            prepend-icon="mdi-pencil-plus-outline"
+            rounded
+            variant="elevated"
+          >
+            发布
+          </v-btn>
+        </template>
+        <v-list aria-label="选择发布类型" class="post-publish-menu" density="compact" lines="two">
+          <v-list-item
+            v-for="item in publishTypes"
+            :key="item.value"
+            :prepend-icon="item.icon"
+            :subtitle="item.desc"
+            :title="item.title"
+            @click="newPost(item.value)"
+          />
+        </v-list>
+      </v-menu>
       <v-btn
         :loading="isReq"
         :rounded="true"
@@ -132,9 +156,33 @@
       </div>
     </template>
   </v-app-bar>
-  <div :class="{ grid: postGridMode }" class="posts-grid">
-    <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
+  <div class="posts-body">
+    <div
+      v-if="topPosts.length > 0"
+      ref="postsPinnedEl"
+      :class="{ 'is-stuck': isPinnedStuck }"
+      class="posts-pinned"
+    >
+      <div
+        v-for="post in topPosts"
+        :key="post.post_id"
+        :title="post.subject"
+        class="posts-pinned-item"
+        @click="openTopPost(post)"
+      >
+        <span class="posts-pinned-tag">
+          <v-icon size="14">mdi-pin</v-icon>
+          <span>置顶</span>
+        </span>
+        <span class="posts-pinned-title">
+          <TpTitle :single-line="true" :text="post.subject || '无标题帖子'" />
+        </span>
+      </div>
+    </div>
+    <div :class="{ grid: postGridMode }" class="posts-grid">
+      <div v-for="post in posts" :key="post.post.post_id">
+        <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
+      </div>
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />
@@ -145,24 +193,37 @@ import TGameNav from "@comp/app/t-gameNav.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TpTitle from "@comp/viewPost/tp-title.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
+import apiHubReq from "@req/apiHubReq.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
+import { canPublishForumPost } from "@utils/bbsPostPublish.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
 type SortSelectForum = Omit<SortSelect<TGApp.BBS.Post.ForumSortTypeEnum>, "icon">;
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };
+type PublishType = { value: 1 | 2; title: string; desc: string; icon: string };
 type PostRaw = { isLast: boolean; lastId: string; total: number };
 
 // 简单封装选项生成
@@ -202,24 +263,83 @@ const showUser = ref<boolean>(false);
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
 const { incognito, postGridMode } = storeToRefs(useAppStore());
-const { cookie } = storeToRefs(useUserStore());
+const { cookie, uid } = storeToRefs(useUserStore());
 
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const topPosts = shallowRef<Array<TGApp.BBS.Forum.TopPost>>([]);
+const postsPinnedEl = useTemplateRef<HTMLElement>("postsPinnedEl");
+const isPinnedStuck = ref<boolean>(false);
+let topPostRequestId = 0;
+let pinnedStuckFrame = 0;
 const curGame = computed<SortSelectGame | undefined>(() => {
   return sortGameList.value.find((item) => item.gid === curGid.value);
 });
 const curForums = computed<Array<SortSelect>>(() => {
   return curGame.value?.forum ?? [];
 });
+const currentForumInfo = computed<TGApp.BBS.Forum.GameForumItem | undefined>(() => {
+  const forumId = selectedForum.value?.value;
+  if (forumId === undefined) return undefined;
+  return forumList.value
+    .find((item) => item.game_id === curGid.value)
+    ?.forums.find((item) => item.id === forumId);
+});
+const publishTypes = computed<Array<PublishType>>(() => {
+  const forum = currentForumInfo.value;
+  if (!forum || !canPublishForumPost(forum, 2)) return [];
+  if (!canPublishForumPost(forum, 1)) {
+    return [
+      {
+        value: 2,
+        title: "发布图文",
+        desc: forum.view_type === 2 ? "当前版块仅支持发布图片帖" : "当前版块未开放长文发布",
+        icon: "mdi-image-plus-outline",
+      },
+    ];
+  }
+  return [
+    {
+      value: 1,
+      title: "发布长文",
+      desc: "支持文字、图片与富文本组件",
+      icon: "mdi-text-box-plus-outline",
+    },
+    { value: 2, title: "发布图文", desc: "以图片列表展示帖子", icon: "mdi-image-plus-outline" },
+  ];
+});
+const canWrite = computed<boolean>(
+  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+);
 const reqCk = computed<TGApp.App.Account.Cookie | undefined>(() => {
   if (incognito.value) return undefined;
   return cookie.value;
 });
 
+function updatePinnedStuck(): void {
+  const pinned = postsPinnedEl.value;
+  if (!pinned) {
+    isPinnedStuck.value = false;
+    return;
+  }
+  const stickyTop = Number.parseFloat(getComputedStyle(pinned).top) || 0;
+  const offset = pinned.getBoundingClientRect().top;
+  isPinnedStuck.value = Math.abs(offset - stickyTop) <= 1;
+}
+
+function schedulePinnedStuckUpdate(): void {
+  if (pinnedStuckFrame !== 0) return;
+  pinnedStuckFrame = requestAnimationFrame(() => {
+    pinnedStuckFrame = 0;
+    updatePinnedStuck();
+  });
+}
+
 onMounted(async () => {
+  window.addEventListener("scroll", schedulePinnedStuckUpdate, { passive: true });
+  window.addEventListener("resize", schedulePinnedStuckUpdate);
   await showLoading.start("正在加载帖子数据");
   await loadForums();
   await nextTick();
@@ -239,6 +359,13 @@ onMounted(async () => {
   await freshPostData();
   firstLoad.value = true;
 });
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", schedulePinnedStuckUpdate);
+  window.removeEventListener("resize", schedulePinnedStuckUpdate);
+  if (pinnedStuckFrame !== 0) cancelAnimationFrame(pinnedStuckFrame);
+});
+
 watch(
   () => isReachBottom.value,
   async () => {
@@ -305,6 +432,13 @@ watch(
     }
   },
 );
+watch(
+  () => topPosts.value,
+  async () => {
+    await nextTick();
+    updatePinnedStuck();
+  },
+);
 
 // 初始化
 async function loadForums(): Promise<void> {
@@ -334,6 +468,19 @@ function getForum(forum: number): SortSelect {
 function getSortLabel(value: number): string {
   const order = sortOrderList.find((item) => item.value === value);
   return order ? order.text : "";
+}
+
+async function newPost(viewType: 1 | 2): Promise<void> {
+  if (!selectedForum.value) return;
+  if (!canWrite.value) {
+    showSnackbar.warn("请先登录米游社账号");
+    return;
+  }
+  await router.push({
+    name: "新建帖子",
+    params: { gid: String(curGid.value), viewType: String(viewType) },
+    query: { forum: String(selectedForum.value.value), from: "forum" },
+  });
 }
 
 async function getCurrentPosts(
@@ -368,6 +515,26 @@ function refreshSelect(): void {
   sortLabel.value = "排序";
 }
 
+async function loadTopPosts(forumId: number, gid: number): Promise<void> {
+  const requestId = ++topPostRequestId;
+  try {
+    const resp = await apiHubReq.forumMain(forumId, gid);
+    if (requestId !== topPostRequestId) return;
+    if (resp.retcode !== 0) {
+      topPosts.value = [];
+      await TGLogger.Warn(`[PostForum][loadTopPosts] 获取置顶帖子异常`);
+      await TGLogger.Warn(`[PostForum][loadTopPosts] ${resp.retcode}-${resp.message}`);
+      return;
+    }
+    topPosts.value = resp.data.top_posts;
+  } catch (e) {
+    if (requestId !== topPostRequestId) return;
+    topPosts.value = [];
+    await TGLogger.Error(`[PostForum][loadTopPosts] 获取置顶帖子异常`);
+    await TGLogger.Error(`[PostForum][loadTopPosts] ${e}`);
+  }
+}
+
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value || isReq.value) return;
   hasPendingChange.value = false;
@@ -389,7 +556,8 @@ async function freshPostData(): Promise<void> {
   );
   await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  // 获取帖子列表
+  // 获取置顶帖子与帖子列表
+  const topPostTask = loadTopPosts(selectedForum.value.value, curGid.value);
   let postsResp: TGApp.BBS.Forum.PostForumResp | undefined;
   try {
     postsResp = await getCurrentPosts(false, selectedForum.value.value);
@@ -408,6 +576,7 @@ async function freshPostData(): Promise<void> {
     await showLoading.end();
     isReq.value = false;
   }
+  await topPostTask;
   if (!postsResp) return;
   // 处理帖子列表数据
   posts.value = postsResp.data.list;
@@ -484,6 +653,10 @@ async function searchPost(): Promise<void> {
   showSearch.value = true;
 }
 
+async function openTopPost(post: TGApp.BBS.Forum.TopPost): Promise<void> {
+  await createPost({ postId: post.post_id, title: post.subject });
+}
+
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   if (showSearch.value) showSearch.value = false;
   curGid.value = gid;
@@ -492,6 +665,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .posts-top {
   display: flex;
   align-items: center;
@@ -530,6 +705,31 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
 }
 
+.post-publish-menu {
+  padding-block: 4px;
+
+  :deep(.v-list-item--two-line) {
+    --v-list-prepend-gap: 16px;
+
+    min-height: 46px;
+    padding-block: 5px;
+  }
+
+  :deep(.v-list-item-title) {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  :deep(.v-list-item-subtitle) {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  :deep(.v-list-item__prepend > .v-icon) {
+    font-size: 20px;
+  }
+}
+
 .posts-conf {
   position: relative;
   display: flex;
@@ -556,6 +756,82 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   &.grid {
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   }
+}
+
+.posts-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.posts-pinned {
+  @include github-styles.github-card;
+
+  position: sticky;
+  z-index: 2;
+  top: var(--v-layout-top, 0);
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 4px;
+  gap: 2px;
+}
+
+.dark .posts-pinned {
+  @include github-styles.github-card("dark");
+}
+
+.posts-pinned.is-stuck {
+  padding-right: 21px;
+  padding-left: 21px;
+  border-radius: 0;
+  border-right: none;
+  border-left: none;
+  margin-right: -16px;
+  margin-left: -16px;
+}
+
+.posts-pinned-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  color: var(--common-text-title);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 15px;
+  font-weight: normal;
+  gap: 8px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--common-shadow-1);
+  }
+}
+
+.posts-pinned-tag {
+  display: flex;
+  height: 20px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tgc-od-blue) 14%, transparent);
+  color: var(--tgc-od-blue);
+  font-size: 12px;
+  gap: 2px;
+  line-height: 1;
+  user-select: none;
+}
+
+.posts-pinned-title {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  align-items: center;
 }
 
 .select-item {
