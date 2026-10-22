@@ -8,7 +8,13 @@ import { BlockEmbed } from "quill/blots/block.js";
 import Embed from "quill/blots/embed.js";
 
 import { parseCustomEmoticon } from "./bbsCustomEmoticon.js";
-import { isPostDivider, parsePostFold, parsePostNodes, parsePostVote } from "./bbsPostDocument.js";
+import {
+  isPostDivider,
+  parsePostFold,
+  parsePostNodes,
+  parsePostVod,
+  parsePostVote,
+} from "./bbsPostDocument.js";
 
 /**
  * 帖子编辑器内部的用户提及值。
@@ -48,6 +54,7 @@ export const postEditorFormats: ReadonlyArray<string> = [
   "emoticon",
   "custom_emoticon",
   "vote",
+  "vod",
   "fold",
 ];
 
@@ -322,6 +329,76 @@ class PostVoteBlot extends BlockEmbed {
 }
 
 /**
+ * 帖子视频节点。
+ * @since Beta v0.12.6
+ */
+class PostVodBlot extends BlockEmbed {
+  static blotName = "vod";
+
+  static className = "ql-vod";
+
+  static tagName = "DIV";
+
+  static scope = Parchment.Scope.BLOCK_BLOT;
+
+  /** 创建带封面和时长的视频块。 @since Beta v0.12.6 */
+  static create(value: unknown): HTMLElement {
+    const vod = parsePostVod(value);
+    const node = super.create(value);
+    if (!(node instanceof HTMLElement)) throw new TypeError("帖子视频节点无效");
+    node.classList.add("ql-vod");
+    node.dataset.vod = JSON.stringify(vod);
+    node.setAttribute("contenteditable", "false");
+    node.setAttribute("role", "group");
+    node.setAttribute("aria-label", "视频");
+    const card = document.createElement("div");
+    card.className = "ql-vod-card";
+    if (vod.cover) {
+      const cover = document.createElement("img");
+      cover.className = "ql-vod-cover";
+      cover.alt = "";
+      cover.draggable = false;
+      cover.src = vod.cover;
+      card.append(cover);
+    } else {
+      const placeholder = document.createElement("span");
+      placeholder.className = "ql-vod-placeholder";
+      placeholder.textContent = "视频";
+      card.append(placeholder);
+    }
+    const play = document.createElement("img");
+    play.className = "ql-vod-play";
+    play.alt = "";
+    play.draggable = false;
+    play.src = "/UI/post/video_play.svg";
+    const duration = document.createElement("span");
+    duration.className = "ql-vod-duration";
+    duration.textContent = formatPostVodDuration(vod.duration);
+    card.append(play, duration);
+    node.replaceChildren(card);
+    return node;
+  }
+
+  /** 从视频块读取完整嵌入值。 @since Beta v0.12.6 */
+  static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Vod {
+    const encoded = domNode.dataset.vod;
+    if (encoded === undefined) throw new TypeError("帖子视频数据缺失");
+    let value: unknown;
+    try {
+      value = JSON.parse(encoded);
+    } catch {
+      throw new TypeError("帖子视频数据无效");
+    }
+    return parsePostVod(value);
+  }
+
+  /** 视频块不接受段落或文字格式。 @since Beta v0.12.6 */
+  format(): void {
+    // 视频块只保留自身的结构化值。
+  }
+}
+
+/**
  * 帖子折叠节点。
  * @since Beta v0.12.6
  */
@@ -399,6 +476,7 @@ export function registerPostEditorFormats(): void {
   Quill.register(PostImageBlot, true);
   Quill.register(PostDividerBlot, true);
   Quill.register(PostVoteBlot, true);
+  Quill.register(PostVodBlot, true);
   Quill.register(PostFoldBlot, true);
   formatsRegistered = true;
 }
@@ -466,6 +544,22 @@ function normalizeCustomEmoticonEmbed(value: unknown): CustomEmoticonValue {
   } catch {
     throw new TypeError("帖子自定义表情无效");
   }
+}
+
+/**
+ * 格式化视频时长，供编辑器和折叠预览展示。
+ * @since Beta v0.12.6
+ * @param duration - 视频时长，单位毫秒
+ * @returns `mm:ss` 或 `hh:mm:ss`
+ */
+function formatPostVodDuration(duration: number): string {
+  const total = Math.floor(duration / 1000);
+  const seconds = total % 60;
+  const minutes = Math.floor(total / 60) % 60;
+  const hours = Math.floor(total / 3600);
+  const mm = String(minutes).padStart(2, "0");
+  const ss = String(seconds).padStart(2, "0");
+  return hours > 0 ? `${String(hours).padStart(2, "0")}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
 /**
@@ -585,6 +679,13 @@ function appendFoldNodeMarkup(parent: HTMLElement, node: TGApp.BBS.PostEdit.Node
     vote.className = "ql-fold-vote";
     vote.textContent = `投票 ${node.insert.vote.id}`;
     parent.append(vote);
+    return;
+  }
+  if ("vod" in node.insert) {
+    const vod = document.createElement("span");
+    vod.className = "ql-fold-vod";
+    vod.textContent = `[视频 ${formatPostVodDuration(node.insert.vod.duration)}]`;
+    parent.append(vod);
     return;
   }
   if ("fold" in node.insert) {

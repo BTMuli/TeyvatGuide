@@ -19,9 +19,32 @@ vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getReques
 vi.mock("@utils/bbsPostHtml.js", () => ({ serializePostDocument: mocks.serializePostDocument }));
 
 import postEditReq, { getPostEditSettings } from "../src/request/postEditReq.js";
+import postReq from "../src/request/postReq.js";
 import { buildPostDocument } from "../src/utils/bbsPostDocument.js";
 
 const imageUrl = "https://example.com/images/post.png";
+const vodMetadata = {
+  id: "2112510696792002560",
+  duration: 782407,
+  cover: imageUrl,
+  resolutions: [
+    {
+      url: "https://example.com/video/720p.mp4",
+      definition: "720P",
+      height: 720,
+      width: 1280,
+      bitrate: 833679,
+      size: 81534558,
+      format: ".mp4",
+      label: "720P",
+      codec: "h264",
+    },
+  ],
+  view_num: 40,
+  transcoding_status: 2,
+  review_status: 2,
+  backup_resolutions: [],
+};
 const pictureImageUrls = [
   "https://example.com/images/picture-1.png",
   "https://example.com/images/picture-2.png",
@@ -183,6 +206,34 @@ beforeEach(() => {
   }));
 });
 
+describe("postReq.post captcha requests", () => {
+  it("sends the challenge header after a 1034 verification", async () => {
+    await postReq.post(123, authCookie, "captcha-challenge");
+
+    expect(mocks.get).toHaveBeenCalledWith("https://bbs-api.miyoushe.com/post/wapi/getPostFull", {
+      headers: {
+        "x-test-header": "test",
+        "x-rpc-client_type": "2",
+        "x-rpc-challenge": "captcha-challenge",
+      },
+      query: { post_id: 123, read: 1 },
+    });
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(
+      authCookie,
+      "GET",
+      { post_id: 123, read: 1 },
+      "K2",
+      true,
+    );
+  });
+
+  it("omits the challenge header during the first request", async () => {
+    await postReq.post(123, authCookie);
+
+    expect(mocks.get.mock.calls[0][1].headers).not.toHaveProperty("x-rpc-challenge");
+  });
+});
+
 describe("postEditReq mutation requests", () => {
   it("sends HTML and normalized nodes from the same canonical document", async () => {
     const canonical = {
@@ -195,6 +246,29 @@ describe("postEditReq mutation requests", () => {
       content: canonical.html,
       structured_content: JSON.stringify(canonical.nodes),
     });
+  });
+
+  it("allows a topic-only create when at least one topic is selected", async () => {
+    const settings = { ...getPostEditSettings(source), forumId: 0, cover: "" };
+
+    await expect(postEditReq.create(settings, cookie)).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls[0][1].body).toMatchObject({
+      f_forum_id: 0,
+      forum_id: 0,
+      topic_ids: [7],
+    });
+  });
+
+  it("rejects a topic-only create without topics", async () => {
+    const settings = {
+      ...getPostEditSettings(source),
+      forumId: 0,
+      topicIds: [],
+      cover: "",
+    };
+
+    await expect(postEditReq.create(settings, cookie)).rejects.toThrow("至少一个话题");
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 
   it("sends the normal-post create payload and signs its complete JSON body", async () => {
@@ -575,7 +649,6 @@ describe("postEditReq source initialization and validation", () => {
     "post_full_extra_info",
     "post_attachment_info",
     "feed_attachment_info",
-    "external_link",
     "is_official_master",
   ])("rejects missing edit metadata %s before HTTP", async (key) => {
     const invalid = structuredClone(source);
@@ -657,6 +730,54 @@ describe("postEditReq source initialization and validation", () => {
       post_id: "123",
       structured_content: JSON.stringify(voteNodes),
     });
+  });
+
+  it("reads and updates an embedded video with a non-empty vod_list", async () => {
+    const videoSource = structuredClone(source);
+    const videoNodes = [{ insert: { vod: vodMetadata } }, { insert: "\n" }];
+    videoSource.post.cover = "";
+    videoSource.post.structured_content = JSON.stringify(videoNodes);
+    videoSource.vod_list = [<TGApp.BBS.Post.Vod>(<unknown>vodMetadata)];
+
+    const settings = getPostEditSettings(videoSource);
+
+    expect(settings.nodes).toEqual(videoNodes);
+    await expect(
+      postEditReq.update(videoSource, { ...settings, subject: "编辑视频帖子" }, cookie),
+    ).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).toMatchObject({
+      post_id: "123",
+      structured_content: JSON.stringify(videoNodes),
+    });
+  });
+
+  it("rejects a vod_list entry that is not embedded in structured content", async () => {
+    const videoSource = structuredClone(source);
+    videoSource.vod_list = [<TGApp.BBS.Post.Vod>(<unknown>vodMetadata)];
+
+    expect(() => getPostEditSettings(videoSource)).toThrow("视频附件");
+    await expect(
+      postEditReq.update(videoSource, getPostEditSettings(source), cookie),
+    ).rejects.toThrow("视频附件");
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    null,
+    {
+      external_link: "https://act.mihoyo.com/sr/event/example.html",
+      external_link_title: "活动链接",
+    },
+  ])("edits a post with external link metadata %#", async (externalLink) => {
+    const externalSource = structuredClone(source);
+    externalSource.external_link = externalLink;
+
+    const settings = getPostEditSettings(externalSource);
+
+    await expect(postEditReq.update(externalSource, settings, cookie)).resolves.toEqual(
+      successResponse,
+    );
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).not.toHaveProperty("external_link");
   });
 
   it("initializes and updates an API-encoded ordinary post", async () => {

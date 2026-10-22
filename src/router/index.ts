@@ -12,6 +12,7 @@ const router = createRouter({ history: createWebHistory(), routes: routes });
 const ignoreRoutes: ReadonlyArray<string> = [
   "酒馆",
   "话题",
+  "新建帖子",
   "编辑帖子",
   "实用脚本",
   "角色图鉴",

@@ -382,6 +382,42 @@ function containsVoteNode(value: unknown): boolean {
 }
 
 /**
+ * 收集来源帖子结构化正文中的视频 ID，包括折叠内的嵌套 Delta。
+ * @since Beta v0.12.6
+ * @param value - 未知的结构化正文
+ * @param ids - 已收集的视频 ID
+ */
+function collectVodIds(value: unknown, ids: Set<string>): void {
+  if (typeof value === "string") {
+    try {
+      collectVodIds(JSON.parse(value), ids);
+    } catch {
+      // 正文完整校验会报告具体的 JSON 错误。
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) collectVodIds(entry, ids);
+    return;
+  }
+  if (!isRecord(value)) return;
+  const insert = value.insert;
+  if (!isRecord(insert)) return;
+  const vod = insert.vod;
+  if (isRecord(vod) && typeof vod.id === "string") ids.add(vod.id);
+  const fold = insert.fold;
+  if (!isRecord(fold)) return;
+  for (const key of ["title", "content"]) {
+    if (typeof fold[key] !== "string") continue;
+    try {
+      collectVodIds(JSON.parse(fold[key]), ids);
+    } catch {
+      // 正文完整校验会报告具体的折叠 JSON 错误。
+    }
+  }
+}
+
+/**
  * 校验帖子来源的可编辑元数据。
  * @since Beta v0.12.6
  * @param source - 帖子完整数据
@@ -416,8 +452,19 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): string | null {
   if (post.block_reply_img !== 0 && post.block_reply_img !== 1) {
     throw new TypeError("评论图片权限状态未知，无法安全编辑");
   }
-  if (!Array.isArray(source.vod_list) || source.vod_list.length)
+  if (!Array.isArray(source.vod_list)) {
     throw new TypeError("视频附件元数据无法安全保留");
+  }
+  if (source.vod_list.length > 0) {
+    const vodIds = new Set<string>();
+    collectVodIds(source.post.structured_content, vodIds);
+    const vodList: Array<unknown> = source.vod_list;
+    if (
+      vodList.some((vod) => !isRecord(vod) || typeof vod.id !== "string" || !vodIds.has(vod.id))
+    ) {
+      throw new TypeError("视频附件元数据无法安全保留");
+    }
+  }
   if (typeof source.is_has_vote !== "boolean") {
     throw new TypeError("投票元数据状态未知，无法安全编辑");
   }
@@ -434,11 +481,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): string | null {
   ) {
     throw new TypeError("帖子附件元数据无法安全保留");
   }
-  if (
-    source.external_link?.external_link !== "" ||
-    source.external_link?.external_link_title !== ""
-  )
-    throw new TypeError("外部链接元数据无法安全保留");
+  // 外部链接由服务端独立维护，官方网页编辑器编辑时同样不回传该字段。
   return collectionId;
 }
 
@@ -618,7 +661,6 @@ function buildMutationBody(
   sourceImageCount?: number,
 ): { body: PostMutationBody; document: MutationDocument } {
   const gid = getPositiveInteger(settings.gid, "社区 ID");
-  const forumId = getPositiveInteger(settings.forumId, "版块 ID");
   const subject = typeof settings.subject === "string" ? settings.subject : "";
   if (!subject.trim()) throw new TypeError("帖子标题不能为空");
   if (subject.length > maxSubjectLength) throw new TypeError("帖子标题不能超过 30 字");
@@ -626,6 +668,13 @@ function buildMutationBody(
   if (!Array.isArray(settings.nodes)) throw new TypeError("帖子正文节点无效");
   if (!Array.isArray(settings.topicIds)) throw new TypeError("帖子话题数据无效");
   const topicIds = settings.topicIds.map((topicId) => getPositiveInteger(topicId, "话题 ID"));
+  const forumId =
+    postId === undefined
+      ? getNonNegativeInteger(settings.forumId, "版块 ID")
+      : getPositiveInteger(settings.forumId, "版块 ID");
+  if (postId === undefined && forumId === 0 && topicIds.length === 0) {
+    throw new TypeError("请选择发布版块或至少一个话题");
+  }
   let document: MutationDocument;
   let content: string;
   let cover = settings.cover;

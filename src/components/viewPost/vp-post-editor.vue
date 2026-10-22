@@ -26,6 +26,7 @@
         <v-icon size="20">mdi-emoticon-happy-outline</v-icon>
       </button>
       <button
+        v-if="mode !== 'fold-title'"
         :disabled
         aria-label="提及用户"
         title="提及用户"
@@ -194,7 +195,7 @@
       </template>
     </div>
     <slot name="insert-panel" />
-    <div ref="editorContainer" class="tgpe-editor"></div>
+    <div ref="editorContainer" :aria-label="editorLabel" class="tgpe-editor"></div>
   </div>
 </template>
 
@@ -208,6 +209,7 @@ import {
   isPostDivider,
   isPostUrl,
   parsePostFold,
+  parsePostVod,
   parsePostVote,
 } from "@utils/bbsPostDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
@@ -227,9 +229,13 @@ const DeltaClass = <DeltaConstructor>(<unknown>Quill.import("delta"));
 
 type PostEditorProps = {
   disabled: boolean;
-  mode?: "article" | "picture";
+  mode?: "article" | "picture" | "fold-title";
   /** 是否显示投票与折叠工具；折叠子编辑器应关闭以避免递归入口。 */
   allowComponents?: boolean;
+  /** 编辑器允许输入的最大字符数。 */
+  maxLength?: number;
+  /** 编辑器无障碍名称。 */
+  ariaLabel?: string;
 };
 
 type SelectionRange = {
@@ -305,7 +311,23 @@ const selectedHeader = computed<string>(() => {
   return String(header);
 });
 const isLinkActive = computed<boolean>(() => typeof activeFormats.value.link === "string");
+const editorLabel = computed<string>(() => {
+  if (props.ariaLabel) return props.ariaLabel;
+  if (props.mode === "picture") return "图片介绍";
+  if (props.mode === "fold-title") return "折叠标题";
+  return "帖子正文";
+});
+const editorPlaceholder = computed<string>(() => {
+  if (props.mode === "picture") return "请输入图片介绍";
+  if (props.mode === "fold-title") {
+    return props.maxLength === undefined
+      ? "请输入折叠标题"
+      : `请输入折叠标题，最多${props.maxLength}字`;
+  }
+  return "请尽情发挥吧…";
+});
 
+let composing = false;
 let mounted = false;
 let applyingModel = false;
 let modelSnapshot = "";
@@ -353,10 +375,9 @@ onMounted(() => {
       clipboard: false,
       history: { delay: 1000, maxStack: 100, userOnly: true },
     },
-    placeholder: props.mode === "picture" ? "请输入图片介绍" : "请尽情发挥吧…",
+    placeholder: editorPlaceholder.value,
   });
   quill.value = instance;
-  instance.root.setAttribute("aria-label", props.mode === "picture" ? "图片介绍" : "帖子正文");
   instance.root.setAttribute("aria-multiline", "true");
   instance.root.setAttribute("role", "textbox");
   mounted = true;
@@ -367,6 +388,9 @@ onMounted(() => {
   instance.root.addEventListener("drop", preventDrop, true);
   instance.root.addEventListener("dblclick", handleComponentDoubleClick, true);
   instance.root.addEventListener("keydown", handleComponentKeydown, true);
+  instance.root.addEventListener("compositionstart", handleCompositionStart);
+  instance.root.addEventListener("compositionupdate", handleCompositionUpdate);
+  instance.root.addEventListener("compositionend", handleCompositionEnd);
   emoticonMap.value = readCachedEmoticonMap();
   applyModel(model.value);
   instance.enable(!props.disabled);
@@ -388,6 +412,9 @@ onBeforeUnmount(() => {
   current.root.removeEventListener("drop", preventDrop, true);
   current.root.removeEventListener("dblclick", handleComponentDoubleClick, true);
   current.root.removeEventListener("keydown", handleComponentKeydown, true);
+  current.root.removeEventListener("compositionstart", handleCompositionStart);
+  current.root.removeEventListener("compositionupdate", handleCompositionUpdate);
+  current.root.removeEventListener("compositionend", handleCompositionEnd);
   current.disable();
   quill.value = undefined;
 });
@@ -706,6 +733,13 @@ function buildEditorDelta(
       delta.insert({ vote: parsePostVote(insert.vote) });
       continue;
     }
+    if ("vod" in insert) {
+      if (props.mode === "picture" || node.attributes !== undefined) {
+        throw new TypeError("图片帖或带格式的帖子视频无效");
+      }
+      delta.insert({ vod: parsePostVod(insert.vod) });
+      continue;
+    }
     if ("fold" in insert) {
       if (
         props.mode === "picture" ||
@@ -778,6 +812,13 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
         throw new TypeError("图片帖或带格式的帖子投票无效");
       }
       nodes.push(createNode({ vote: parsePostVote(op.insert.vote) }));
+      continue;
+    }
+    if ("vod" in op.insert) {
+      if (props.mode === "picture" || (op.attributes && Object.keys(op.attributes).length > 0)) {
+        throw new TypeError("图片帖或带格式的帖子视频无效");
+      }
+      nodes.push(createNode({ vod: parsePostVod(op.insert.vod) }));
       continue;
     }
     if ("fold" in op.insert) {
@@ -896,9 +937,52 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
   }
 }
 
+function enforceMaxLength(current: Quill, change?: QuillDelta): void {
+  if (props.maxLength === undefined) return;
+  const length = current.getLength() - 1;
+  if (length <= props.maxLength) return;
+  const overflow = length - props.maxLength;
+  let deleteIndex = props.maxLength;
+  if (change) {
+    let position = 0;
+    for (const operation of change.ops) {
+      if (typeof operation.retain === "number") {
+        position += operation.retain;
+        continue;
+      }
+      if (typeof operation.insert === "string" && operation.insert.length >= overflow) {
+        deleteIndex = position + operation.insert.length - overflow;
+        break;
+      }
+    }
+  }
+  const selection = current.getSelection(false);
+  current.deleteText(deleteIndex, overflow, "user");
+  if (selection) current.setSelection(Math.min(selection.index, deleteIndex), 0, "silent");
+}
+
+function handleCompositionStart(): void {
+  composing = true;
+}
+
+function handleCompositionUpdate(): void {
+  composing = true;
+}
+
+function handleCompositionEnd(): void {
+  composing = false;
+  const current = quill.value;
+  if (!mounted || applyingModel || !current) return;
+  enforceMaxLength(current);
+}
+
 function handleTextChange(change: QuillDelta, _oldChange: QuillDelta, source: string): void {
   const current = quill.value;
   if (!mounted || applyingModel || !current) return;
+  if (!composing && props.maxLength !== undefined && current.getLength() - 1 > props.maxLength) {
+    enforceMaxLength(current, change);
+    return;
+  }
   if (source === "user") transformEmoticonCandidates(change);
   editVersion += 1;
   try {
@@ -930,7 +1014,7 @@ function handlePaste(event: ClipboardEvent): void {
   const selection = selectionForAction(current);
   const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert(text);
   current.updateContents(delta, "user");
-  setEditorCursor(current, selection.index + text.length);
+  setEditorCursor(current, Math.min(selection.index + text.length, current.getLength() - 1));
 }
 
 function preventDrop(event: DragEvent): void {
@@ -1172,7 +1256,7 @@ function insertText(text: string): void {
   const selection = selectionForAction(current);
   const delta = new DeltaClass().retain(selection.index).delete(selection.length).insert(text);
   current.updateContents(delta, "user");
-  setEditorCursor(current, selection.index + text.length);
+  setEditorCursor(current, Math.min(selection.index + text.length, current.getLength() - 1));
 }
 
 function insertMention(user: TGApp.BBS.ReplyAsset.Mention): void {
@@ -1391,7 +1475,7 @@ defineExpose({
   flex: none;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-2);
   color: var(--app-page-content);
@@ -1542,8 +1626,8 @@ defineExpose({
 }
 
 .tgpe-editor :deep(.ql-editor:focus) {
-  outline: 2px solid var(--common-text-title);
-  outline-offset: -2px;
+  outline: 1px solid var(--common-shadow-1);
+  outline-offset: -1px;
 }
 
 .tgpe-editor :deep(.ql-editor.ql-blank::before) {
@@ -1582,6 +1666,58 @@ defineExpose({
 .tgpe-editor :deep(.ql-divider img) {
   max-width: 100%;
   height: auto;
+}
+
+.tgpe-editor :deep(.ql-vod) {
+  display: block;
+  margin: 10px 0;
+}
+
+.tgpe-editor :deep(.ql-vod-card) {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  aspect-ratio: 16 / 9;
+  background: var(--box-bg-2);
+}
+
+.tgpe-editor :deep(.ql-vod-cover) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tgpe-editor :deep(.ql-vod-placeholder) {
+  color: var(--box-text-4);
+  font-size: 14px;
+}
+
+.tgpe-editor :deep(.ql-vod-play) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  opacity: 0.85;
+  transform: translate(-50%, -50%);
+}
+
+.tgpe-editor :deep(.ql-vod-duration) {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: #00000080;
+  color: var(--tgc-white-4);
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .tgpe-editor :deep(.ql-vote),
@@ -1635,6 +1771,7 @@ defineExpose({
 }
 
 .tgpe-editor :deep(.ql-fold-mention),
+.tgpe-editor :deep(.ql-fold-vod),
 .tgpe-editor :deep(.ql-fold-vote) {
   color: var(--common-text-title);
 }

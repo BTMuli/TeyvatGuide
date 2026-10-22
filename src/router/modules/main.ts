@@ -32,6 +32,11 @@ const mainRoutes = (<const>[
     component: async () => await import("@/pages/common/PostTopic.vue"),
   },
   {
+    path: "/posts/new/:gid?/:viewType?",
+    name: "新建帖子",
+    component: async () => await import("@/pages/common/PostNew.vue"),
+  },
+  {
     path: "/community/profile",
     name: "个人信息",
     component: async () => await import("@/pages/common/CommunityProfile.vue"),

@@ -250,8 +250,8 @@ declare namespace TGApp.BBS.Post {
     release_time_type: string;
     /** 未来发布时间 */
     future_release_time: number;
-    /** 外部链接信息 */
-    external_link: ExternalLink;
+    /** 外部链接信息，可能为 null */
+    external_link: ExternalLink | null;
     /** 帖子完整额外信息，可能为 null */
     post_full_extra_info: PostExtraFull | null;
     /** 帖子附件信息，可能为 null */

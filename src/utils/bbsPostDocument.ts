@@ -8,6 +8,12 @@ import { parseCustomEmoticon } from "./bbsCustomEmoticon.js";
 const customEmoticonBackupText: Readonly<"[自定义表情]"> = "[自定义表情]";
 
 /**
+ * 米游社折叠标题的最大字符数。
+ * @since Beta v0.12.6
+ */
+export const postFoldTitleMaxLength = 40;
+
+/**
  * 判断值是否为普通记录。
  * @since Beta v0.12.6
  */
@@ -182,6 +188,40 @@ export function parsePostVote(value: unknown): TGApp.BBS.PostEdit.Vote {
     vote.url = value.url;
   }
   return vote;
+}
+
+/**
+ * 校验帖子视频嵌入值，并完整保留官方附带的元数据。
+ * @since Beta v0.12.6
+ * @param value - 未知的视频嵌入值
+ * @returns 已校验且不共享嵌套对象的视频嵌入值
+ */
+export function parsePostVod(value: unknown): TGApp.BBS.PostEdit.Vod {
+  if (!isRecord(value)) throw new TypeError("帖子视频信息无效");
+  if (typeof value.id !== "string" || !value.id.trim() || /[\r\n]/u.test(value.id)) {
+    throw new TypeError("帖子视频 ID 无效");
+  }
+  if (
+    typeof value.duration !== "number" ||
+    !Number.isSafeInteger(value.duration) ||
+    value.duration < 0
+  ) {
+    throw new TypeError("帖子视频时长无效");
+  }
+  if (Object.hasOwn(value, "cover") && value.cover !== "" && !isPostUrl(value.cover, true)) {
+    throw new TypeError("帖子视频封面无效");
+  }
+  if (Object.hasOwn(value, "view_num")) {
+    if (
+      typeof value.view_num !== "number" ||
+      !Number.isSafeInteger(value.view_num) ||
+      value.view_num < 0
+    ) {
+      throw new TypeError("帖子视频观看数无效");
+    }
+  }
+  // 编辑器传入的是响应式代理，structuredClone 无法克隆，改用 JSON 深拷贝。
+  return <TGApp.BBS.PostEdit.Vod>JSON.parse(JSON.stringify(value));
 }
 
 /**
@@ -369,6 +409,8 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
       node = { insert: { divider: insert.divider } };
     } else if (isRecord(insert) && Object.keys(insert).length === 1 && "vote" in insert) {
       node = { insert: { vote: parsePostVote(insert.vote) } };
+    } else if (isRecord(insert) && Object.keys(insert).length === 1 && "vod" in insert) {
+      node = { insert: { vod: parsePostVod(insert.vod) } };
     } else if (isRecord(insert) && "fold" in insert) {
       if (
         Object.keys(insert).some((key) => key !== "fold" && key !== "backup_text") ||
@@ -398,7 +440,10 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
     }
     if (
       typeof node.insert !== "string" &&
-      ("divider" in node.insert || "vote" in node.insert || "fold" in node.insert) &&
+      ("divider" in node.insert ||
+        "vote" in node.insert ||
+        "vod" in node.insert ||
+        "fold" in node.insert) &&
       Object.prototype.hasOwnProperty.call(value, "attributes")
     ) {
       throw new TypeError("帖子卡片不支持格式属性");
@@ -446,6 +491,8 @@ export function buildPostDocument(input: unknown): TGApp.BBS.PostEdit.DraftDocum
       images.push(node.insert.image);
     } else if ("vote" in node.insert) {
       text += "[投票]";
+    } else if ("vod" in node.insert) {
+      text += "[视频]";
     } else if ("fold" in node.insert) {
       const title = <unknown>JSON.parse(node.insert.fold.title);
       const content = <unknown>JSON.parse(node.insert.fold.content);
@@ -474,4 +521,27 @@ export function assertPostDocumentContent(document: TGApp.BBS.PostEdit.DraftDocu
   if (stats.emoticons > 50) throw new TypeError("帖子最多添加 50 个表情");
   if (stats.mentions > 100) throw new TypeError("帖子最多提及 100 位用户");
   if (stats.customEmoticons > 1) throw new TypeError("帖子最多添加一个自定义表情");
+}
+
+/**
+ * 校验折叠标题是否仅包含文字及允许的文字格式。
+ * @since Beta v0.12.6
+ * @param document - 已校验的折叠标题文档
+ */
+export function assertPostFoldTitle(document: TGApp.BBS.PostEdit.DraftDocument): void {
+  if (document.nodes.some((node) => typeof node.insert !== "string")) {
+    throw new TypeError("折叠标题仅支持文字");
+  }
+  if (
+    document.nodes.some((node) =>
+      Object.keys(node.attributes ?? {}).some(
+        (key) => key !== "bold" && key !== "italic" && key !== "header" && key !== "color",
+      ),
+    )
+  ) {
+    throw new TypeError("折叠标题仅支持粗体、斜体、标题和颜色");
+  }
+  if (document.text.length > postFoldTitleMaxLength) {
+    throw new TypeError(`折叠标题最多 ${postFoldTitleMaxLength} 字`);
+  }
 }

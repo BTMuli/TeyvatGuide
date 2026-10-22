@@ -212,6 +212,7 @@ async function handleSaved(): Promise<void> {
 
 .post-edit-back,
 .post-edit-save {
+  border: 1px solid var(--common-shadow-1);
   font-family: var(--font-title);
   font-weight: normal;
 }

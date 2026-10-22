@@ -1,7 +1,7 @@
-<!-- 独立页面中的帖子编辑表单 -->
+<!-- 独立页面中的帖子发布/编辑表单 -->
 <template>
   <form :id="formId" class="post-composer" @submit.prevent="savePost">
-    <div v-if="loading" class="post-composer-state" role="status">正在加载编辑设置…</div>
+    <div v-if="loading" class="post-composer-state" role="status">正在加载帖子设置…</div>
     <div v-else-if="loadError" class="post-composer-state" role="alert">
       <p>{{ loadError }}</p>
       <v-btn :disabled="busy" size="small" variant="tonal" @click="initialize(true)"
@@ -171,23 +171,38 @@
         <h2 class="post-composer-section-title">发布设置</h2>
         <div class="post-composer-row">
           <span class="post-composer-label">发布版块</span>
-          <div>
-            <v-radio-group
-              v-model="draft.forumId"
-              :disabled="busy || !canWrite || !!source"
-              inline
-              hide-details
+          <div class="post-composer-forum-field">
+            <div
+              v-if="forums.length > 0"
+              class="post-composer-forums"
+              role="group"
               aria-label="发布版块"
-              density="compact"
             >
-              <v-radio
+              <button
                 v-for="forum in forums"
                 :key="forum.id"
-                :label="forum.name"
-                :value="forum.id"
-                color="var(--tgc-btn-1)"
-              />
-            </v-radio-group>
+                :aria-pressed="draft.forumId === forum.id"
+                :class="{ selected: draft.forumId === forum.id }"
+                :disabled="!!source || busy || !canWrite"
+                :title="forum.name"
+                class="post-composer-forum"
+                type="button"
+                @click="draft.forumId = forum.id"
+              >
+                <TMiImg
+                  v-if="forum.icon"
+                  :alt="forum.name"
+                  :ori="true"
+                  :size="20"
+                  :src="forum.icon"
+                />
+                <v-icon v-else size="18">{{
+                  forum.id === 0 ? "mdi-forum-remove-outline" : "mdi-forum-outline"
+                }}</v-icon>
+                <span>{{ forum.name }}</span>
+              </button>
+            </div>
+            <p v-else class="post-composer-hint">当前分区没有可发布该类型帖子的版块</p>
             <v-select
               v-if="categories.length > 1"
               v-model="draft.cateId"
@@ -205,36 +220,83 @@
         </div>
         <div class="post-composer-row">
           <span class="post-composer-label">选择话题</span>
-          <div>
-            <p class="post-composer-hint">选择相关角色、内容分类，方便其他旅行者发现</p>
-            <div class="post-composer-topics">
-              <v-chip
-                v-for="id in draft.topicIds"
-                :key="id"
-                :closable="!busy && canWrite"
-                size="small"
-                @click:close="removeTopic(id)"
-                >{{ topicNames.get(id) || "话题 " + id }}</v-chip
-              >
-            </div>
-            <div class="post-composer-topic-input">
+          <div class="post-composer-topic-field">
+            <div class="post-composer-topic-head">
+              <div class="post-composer-selected-topics">
+                <span
+                  v-for="id in draft.topicIds"
+                  :key="id"
+                  :class="{ 'has-close': !busy && canWrite }"
+                  :title="topicNames.get(id) || '话题 ' + id"
+                  class="post-composer-topic-option post-composer-selected-topic"
+                >
+                  <TMiImg
+                    v-if="topicCovers.get(id)"
+                    :alt="topicNames.get(id) || ''"
+                    :ori="true"
+                    :size="20"
+                    :src="topicCovers.get(id) ?? ''"
+                  />
+                  <v-icon v-else size="18">mdi-pound</v-icon>
+                  <span>{{ topicNames.get(id) || "话题 " + id }}</span>
+                  <button
+                    v-if="!busy && canWrite"
+                    :aria-label="'移除话题 ' + (topicNames.get(id) || id)"
+                    class="post-composer-topic-close"
+                    title="移除话题"
+                    type="button"
+                    @click="removeTopic(id)"
+                  >
+                    <v-icon size="14">mdi-close</v-icon>
+                  </button>
+                </span>
+              </div>
               <v-text-field
-                v-model="topicLink"
-                :disabled="busy || !canWrite || topicLoading"
+                v-model="topicQuery"
+                :clearable="true"
+                :disabled="busy || !canWrite"
+                :loading="topicLoading"
+                append-inner-icon="mdi-magnify"
+                autocomplete="off"
+                class="post-composer-topic-search"
                 density="compact"
                 hide-details
-                label="米游社话题链接"
+                label="搜索话题"
+                placeholder="输入话题名称搜索"
                 variant="outlined"
-                @keydown.enter.prevent="addTopic"
+                @update:focused="handleTopicFocus"
+                @update:model-value="handleTopicSearch"
               />
-              <v-btn
-                :disabled="busy || !canWrite || !topicLink.trim()"
-                :loading="topicLoading"
-                variant="tonal"
-                @click="addTopic"
-                >添加</v-btn
-              >
             </div>
+            <div
+              v-if="topicOptions.length > 0"
+              :aria-label="topicQuery.trim() ? '搜索结果' : '推荐话题'"
+              class="post-composer-topic-options"
+              role="group"
+            >
+              <button
+                v-for="topic in topicOptions"
+                :key="topic.id"
+                :disabled="busy || !canWrite"
+                :title="topic.desc || topic.name"
+                class="post-composer-topic-option"
+                type="button"
+                @click="selectTopic(topic.id)"
+              >
+                <TMiImg
+                  v-if="topic.cover"
+                  :alt="topic.name"
+                  :ori="true"
+                  :size="20"
+                  :src="topic.cover"
+                />
+                <v-icon v-else size="18">mdi-pound</v-icon>
+                <span>{{ topic.name }}</span>
+              </button>
+            </div>
+            <p v-else-if="topicEmptyText" class="post-composer-hint" role="status">
+              {{ topicEmptyText }}
+            </p>
           </div>
         </div>
         <div v-if="!isPicture && coverItems.length > 1" class="post-composer-row">
@@ -349,6 +411,7 @@
   </form>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
@@ -367,10 +430,11 @@ import {
   getMissingPostPreviewEmoticonNames,
   renderPostPreviewEmoticons,
 } from "@utils/bbsPostPreview.js";
+import { canPublishForumPost } from "@utils/bbsPostPublish.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
 import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeUnmount, ref, toRaw, useId, useTemplateRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, toRaw, useId, useTemplateRef, watch } from "vue";
 
 import VpPostComponentDialog from "./vp-post-component-dialog.vue";
 import VpPostEditor from "./vp-post-editor.vue";
@@ -379,7 +443,10 @@ import VpPostTools from "./vp-post-tools.vue";
 const props = defineProps<{
   formId: string;
   gid: number;
-  source: TGApp.BBS.Post.FullData;
+  source?: TGApp.BBS.Post.FullData;
+  viewType?: 1 | 2;
+  forumId?: number;
+  initialTopic?: { id: number; name: string };
 }>();
 const emits = defineEmits<{ saved: [postId: string | undefined] }>();
 const titleId = useId();
@@ -399,11 +466,27 @@ const error = ref<string>("");
 const editorInvalid = ref<boolean>(false);
 const conflict = ref<boolean>(false);
 const maxPictureCount = ref<number>(18);
-const topicLink = ref<string>("");
-const topicLoading = ref<boolean>(false);
+const topicQuery = ref<string>("");
+const topicRecommendations = ref<Array<TopicOption>>([]);
+const topicSearchResults = ref<Array<TopicOption>>([]);
+const topicRecommendLoading = ref<boolean>(false);
+const topicSearchLoading = ref<boolean>(false);
+const topicError = ref<string>("");
 const topicNames = ref<Map<number, string>>(new Map());
+const topicCovers = ref<Map<number, string>>(new Map());
 const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
+type TopicOption = {
+  id: number;
+  name: string;
+  desc?: string;
+  cover?: string;
+};
+type ForumOption = {
+  id: number;
+  name: string;
+  icon?: string;
+};
 type ComponentDialogState = {
   visible: boolean;
   kind: "vote" | "fold";
@@ -422,20 +505,26 @@ const componentDialog = ref<ComponentDialogState>({
 let seed: TGApp.BBS.Post.FullData | undefined;
 let active = true;
 let previewRenderVersion = 0;
+let topicSearchTimer: number | undefined;
+let topicSearchVersion = 0;
+let topicRecommendVersion = 0;
+let loadedTopicRecommendKey = "";
 
 const busy = computed<boolean>(() => pending.value || uploading.value);
+const topicLoading = computed<boolean>(
+  () => topicRecommendLoading.value || topicSearchLoading.value,
+);
 const canSubmit = computed<boolean>(
   () =>
     !busy.value &&
     !componentDialog.value.visible &&
     !componentDialog.value.loading &&
-    !topicLoading.value &&
     !editorInvalid.value &&
     canWrite.value &&
     !loading.value &&
     !loadError.value,
 );
-const isPicture = computed<boolean>(() => props.source.post.view_type === 2);
+const isPicture = computed<boolean>(() => draft.value.viewType === 2);
 const pictureImages = computed<Array<string>>(() => draft.value.imageUrls ?? []);
 const contentLength = computed<number>(() => {
   try {
@@ -460,15 +549,29 @@ const toolCookie = computed<TGApp.App.Account.EditorCookie | undefined>(() =>
       }
     : undefined,
 );
-const forums = computed<Array<{ id: number; name: string }>>(() => {
-  const items = (forumList.value.find((item) => item.game_id === props.gid)?.forums ?? [])
-    .filter(
-      (item) =>
-        item.post_limit === 3 && item.visible === 1 && (isPicture.value || item.view_type === 1),
-    )
-    .map((item) => ({ id: item.id, name: item.name }));
-  if (props.source?.forum && !items.some((item) => item.id === draft.value.forumId))
-    items.push({ id: draft.value.forumId, name: props.source.forum.name });
+const eligibleForums = computed<Array<ForumOption>>(() => {
+  const viewType = isPicture.value ? 2 : 1;
+  return (forumList.value.find((item) => item.game_id === props.gid)?.forums ?? [])
+    .filter((item) => canPublishForumPost(item, viewType))
+    .map((item) => ({ id: item.id, name: item.name, icon: item.icon_pure || item.icon }));
+});
+const forums = computed<Array<ForumOption>>(() => {
+  const items = [...eligibleForums.value];
+  if (
+    !props.source &&
+    props.initialTopic &&
+    (props.forumId === undefined ||
+      props.forumId === 0 ||
+      !items.some((item) => item.id === props.forumId))
+  )
+    items.push({ id: 0, name: "不发布到版块" });
+  if (props.source?.forum && !items.some((item) => item.id === props.source?.post.f_forum_id)) {
+    items.push({
+      id: props.source.post.f_forum_id,
+      name: props.source.forum.name,
+      icon: props.source.forum.icon,
+    });
+  }
   return items;
 });
 const categories = computed<Array<{ id: number; name: string }>>(() => {
@@ -499,6 +602,19 @@ const previewDocument = computed<TGApp.BBS.PostEdit.DraftDocument>(() => {
   } catch {
     return { nodes: [], text: "", images: [] };
   }
+});
+const topicOptions = computed<Array<TopicOption>>(() => {
+  const items = topicQuery.value.trim() ? topicSearchResults.value : topicRecommendations.value;
+  return items.filter((item) => !draft.value.topicIds.includes(item.id));
+});
+const topicEmptyText = computed<string>(() => {
+  if (topicLoading.value) return "正在加载话题…";
+  if (topicError.value) return topicError.value;
+  return topicQuery.value.trim() ? "未找到相关话题" : "暂无推荐话题";
+});
+const topicRecommendationKey = computed<string>(() => {
+  const text = previewDocument.value.text;
+  return `${draft.value.gid}\u0000${draft.value.forumId}\u0000${draft.value.viewType ?? 1}\u0000${draft.value.topicIds.join(",")}\u0000${draft.value.subject}\u0000${text}`;
 });
 const coverItems = computed<Array<{ title: string; value: string }>>(() => [
   { title: "自动选择封面", value: "" },
@@ -536,8 +652,15 @@ watch(preview, (value) => {
 });
 watch(
   () => [
+    props.source,
+    props.source?.post.post_id,
+    props.source?.post.uid,
+    props.source?.post.subject,
+    props.source?.post.structured_content,
     props.gid,
-    props.source.post.post_id,
+    props.viewType,
+    props.forumId,
+    props.initialTopic?.id,
     uid.value,
     cookie.value?.ltoken,
     cookie.value?.ltuid,
@@ -564,23 +687,47 @@ watch(
 );
 onBeforeUnmount(() => {
   active = false;
+  if (topicSearchTimer !== undefined) window.clearTimeout(topicSearchTimer);
+  topicSearchTimer = undefined;
+  topicSearchVersion += 1;
+  topicRecommendVersion += 1;
   closeComponentDialog();
   contextVersion.value += 1;
 });
 
 function emptyDraft(): TGApp.BBS.PostEdit.Settings {
+  const viewType = getInitialViewType();
   return {
     gid: props.gid,
-    forumId: props.source.post.f_forum_id,
+    forumId: props.source?.post.f_forum_id ?? props.forumId ?? 0,
     subject: "",
     nodes: [{ insert: "\n" }],
-    topicIds: [],
+    viewType,
+    ...(viewType === 2 ? { imageUrls: [] } : {}),
+    topicIds: props.source ? [] : props.initialTopic ? [props.initialTopic.id] : [],
     cateId: 0,
     isOriginal: 0,
     republishAuthorization: 0,
     cover: "",
     userAiContentChoice: "USER_AI_CONTENT_CHOICE_NOT_AI",
   };
+}
+
+function getInitialViewType(): 1 | 2 {
+  if (props.source) return props.source.post.view_type === 2 ? 2 : 1;
+  return props.viewType === 2 ? 2 : 1;
+}
+
+function normalizeForumId(): void {
+  if (props.source) return;
+  if (
+    props.forumId !== undefined &&
+    eligibleForums.value.some((item) => item.id === props.forumId)
+  ) {
+    draft.value.forumId = props.forumId;
+    return;
+  }
+  draft.value.forumId = props.initialTopic ? 0 : (eligibleForums.value[0]?.id ?? 0);
 }
 
 function readPreviewEmoticonMap(): Record<string, string> {
@@ -640,6 +787,20 @@ async function renderPreview(version: number, context: number): Promise<void> {
   }
 }
 
+function resetTopicPicker(): void {
+  if (topicSearchTimer !== undefined) window.clearTimeout(topicSearchTimer);
+  topicSearchTimer = undefined;
+  topicSearchVersion += 1;
+  topicRecommendVersion += 1;
+  loadedTopicRecommendKey = "";
+  topicQuery.value = "";
+  topicRecommendations.value = [];
+  topicSearchResults.value = [];
+  topicRecommendLoading.value = false;
+  topicSearchLoading.value = false;
+  topicError.value = "";
+}
+
 async function initialize(force: boolean = false): Promise<void> {
   const version = ++contextVersion.value;
   loading.value = true;
@@ -648,34 +809,51 @@ async function initialize(force: boolean = false): Promise<void> {
   conflict.value = false;
   preview.value = false;
   editorInvalid.value = false;
+  resetTopicPicker();
   try {
     if (
       forumList.value.length === 0 ||
+      !forumList.value.some((item) => item.game_id === props.gid) ||
       forumList.value.some((item) => item.forums.some((forum) => forum.view_type === undefined))
     )
       await bbsStore.refreshForumList();
     if (!active || version !== contextVersion.value) return;
-    seed = structuredClone(toRaw(props.source));
-    if (force && seed && toolCookie.value) {
-      const latest = await postReq.post(seed.post.post_id, toolCookie.value);
-      if (!active || version !== contextVersion.value) return;
-      if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
-      if (
-        latest.data.post.post.uid !== uid.value ||
-        latest.data.post.post.post_id !== seed.post.post_id
-      )
-        throw new Error("仅能编辑当前账号发布的帖子");
-      seed = latest.data.post;
+    if (props.source) {
+      seed = structuredClone(toRaw(props.source));
+      if (force && toolCookie.value) {
+        const latest = await postReq.post(seed.post.post_id, toolCookie.value);
+        if (!active || version !== contextVersion.value) return;
+        if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
+        if (
+          latest.data.post.post.uid !== uid.value ||
+          latest.data.post.post.post_id !== seed.post.post_id
+        )
+          throw new Error("仅能编辑当前账号发布的帖子");
+        seed = latest.data.post;
+      }
+      const initial = getPostEditSettings(seed);
+      maxPictureCount.value = Math.max(18, initial.imageUrls?.length ?? 0);
+      draft.value = initial;
+      topicNames.value = new Map((seed.topics ?? []).map((item) => [item.id, item.name]));
+      topicCovers.value = new Map(
+        (seed.topics ?? []).filter((item) => item.cover).map((item) => [item.id, item.cover]),
+      );
+    } else {
+      seed = undefined;
+      maxPictureCount.value = 18;
+      draft.value = emptyDraft();
+      topicNames.value = new Map();
+      topicCovers.value = new Map();
+      if (props.initialTopic) topicNames.value.set(props.initialTopic.id, props.initialTopic.name);
+      normalizeForumId();
     }
-    const initial = getPostEditSettings(seed);
-    maxPictureCount.value = Math.max(18, initial.imageUrls?.length ?? 0);
-    draft.value = initial;
-    topicNames.value = new Map((seed?.topics ?? []).map((item) => [item.id, item.name]));
   } catch (cause) {
     if (active && version === contextVersion.value) loadError.value = TGHttps.getErrMsg(cause);
   } finally {
     if (version === contextVersion.value) loading.value = false;
   }
+  if (active && version === contextVersion.value && !loadError.value)
+    void loadTopicRecommendations();
 }
 
 async function reloadPost(): Promise<void> {
@@ -874,32 +1052,115 @@ function movePicture(index: number, offset: number): void {
   draft.value.imageUrls = images;
 }
 function removeTopic(id: number): void {
-  if (!busy.value) draft.value.topicIds = draft.value.topicIds.filter((item) => item !== id);
+  if (busy.value) return;
+  draft.value.topicIds = draft.value.topicIds.filter((item) => item !== id);
+  if (!topicQuery.value.trim()) void loadTopicRecommendations(true);
 }
 
-async function addTopic(): Promise<void> {
-  if (busy.value || !canWrite.value || topicLoading.value) return;
-  const id = topicLink.value.match(/(?:topicDetail\/|[?&]topic_id=)([1-9]\d*)/u)?.[1];
-  if (!id) {
-    error.value = "请输入有效的米游社话题链接";
+function readTopicText(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const text = value.trim();
+  return text || undefined;
+}
+
+function readTopicOptions(items: Array<TGApp.BBS.Topic.Summary> | undefined): Array<TopicOption> {
+  const options: Array<TopicOption> = [];
+  const seen = new Set<number>();
+  for (const item of items ?? []) {
+    const id = Number(item.id);
+    if (!Number.isSafeInteger(id) || id <= 0 || seen.has(id)) continue;
+    const name = readTopicText(item.name);
+    if (!name) continue;
+    seen.add(id);
+    options.push({
+      id,
+      name,
+      desc: readTopicText(item.desc),
+      cover: readTopicText(item.cover),
+    });
+  }
+  return options;
+}
+
+async function loadTopicRecommendations(force: boolean = false): Promise<void> {
+  if (!active) return;
+  const key = topicRecommendationKey.value;
+  if (!force && (topicRecommendLoading.value || key === loadedTopicRecommendKey)) return;
+  const version = ++topicRecommendVersion;
+  topicRecommendLoading.value = true;
+  topicError.value = "";
+  try {
+    const response = await topicReq.recommend(
+      draft.value.gid,
+      draft.value.forumId,
+      draft.value.viewType ?? 1,
+      draft.value.subject,
+      previewDocument.value.text,
+      draft.value.topicIds.map(String),
+    );
+    if (!active || version !== topicRecommendVersion) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    topicRecommendations.value = readTopicOptions(response.data?.topics);
+    loadedTopicRecommendKey = key;
+  } catch (cause) {
+    if (active && version === topicRecommendVersion && !topicQuery.value.trim())
+      topicError.value = TGHttps.getErrMsg(cause);
+  } finally {
+    if (version === topicRecommendVersion) topicRecommendLoading.value = false;
+  }
+}
+
+async function searchTopics(keyword: string, version: number): Promise<void> {
+  try {
+    const response = await topicReq.search(keyword);
+    if (!active || version !== topicSearchVersion) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    topicSearchResults.value = readTopicOptions(response.data?.topics);
+  } catch (cause) {
+    if (active && version === topicSearchVersion && topicQuery.value.trim())
+      topicError.value = TGHttps.getErrMsg(cause);
+  } finally {
+    if (version === topicSearchVersion) topicSearchLoading.value = false;
+  }
+}
+
+function handleTopicSearch(value: string): void {
+  topicError.value = "";
+  if (topicSearchTimer !== undefined) window.clearTimeout(topicSearchTimer);
+  topicSearchTimer = undefined;
+  const version = ++topicSearchVersion;
+  const keyword = value.trim();
+  if (!keyword) {
+    topicSearchLoading.value = false;
+    topicSearchResults.value = [];
+    if (loadedTopicRecommendKey !== topicRecommendationKey.value) void loadTopicRecommendations();
     return;
   }
-  const version = contextVersion.value;
-  topicLoading.value = true;
-  error.value = "";
-  try {
-    const response = await topicReq.info(String(draft.value.gid), id);
-    if (!active || version !== contextVersion.value) return;
-    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
-    const topicId = Number(id);
-    if (!draft.value.topicIds.includes(topicId)) draft.value.topicIds.push(topicId);
-    topicNames.value.set(topicId, response.data.topic.name);
-    topicLink.value = "";
-  } catch (cause) {
-    if (version === contextVersion.value) error.value = TGHttps.getErrMsg(cause);
-  } finally {
-    topicLoading.value = false;
-  }
+  topicSearchResults.value = [];
+  topicSearchLoading.value = true;
+  topicSearchTimer = window.setTimeout(() => {
+    topicSearchTimer = undefined;
+    void searchTopics(keyword, version);
+  }, 300);
+}
+
+function handleTopicFocus(focused: boolean): void {
+  if (!focused || topicQuery.value.trim()) return;
+  void loadTopicRecommendations();
+}
+
+function selectTopic(value: number): void {
+  const topic = [...topicRecommendations.value, ...topicSearchResults.value].find(
+    (item) => item.id === value,
+  );
+  if (!topic) return;
+  if (!draft.value.topicIds.includes(value)) draft.value.topicIds.push(value);
+  topicNames.value.set(value, topic.name);
+  if (topic.cover) topicCovers.value.set(value, topic.cover);
+  topicError.value = "";
+  void nextTick(() => {
+    topicQuery.value = "";
+  });
 }
 
 async function savePost(): Promise<void> {
@@ -908,7 +1169,6 @@ async function savePost(): Promise<void> {
     componentDialog.value.visible ||
     componentDialog.value.loading ||
     editorInvalid.value ||
-    topicLoading.value ||
     !canWrite.value ||
     !cookie.value ||
     loading.value ||
@@ -919,8 +1179,7 @@ async function savePost(): Promise<void> {
   const requestCookie = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   const settings = structuredClone(toRaw(draft.value));
   const source = seed;
-  if (!source) return;
-  const action = "保存修改";
+  const action = source ? "保存修改" : isPicture.value ? "发布图片帖" : "发布长文";
   pending.value = true;
   error.value = "";
   try {
@@ -935,47 +1194,84 @@ async function savePost(): Promise<void> {
     else assertPostDocumentContent(document);
     if (!settings.subject.trim() || settings.subject.length > 30)
       throw new Error("请输入 1 至 30 字的帖子标题");
-    if (!settings.forumId) throw new Error("请选择发布版块");
-    const permission = await postEditReq.checkRelease(
-      settings.gid,
-      settings.forumId,
-      requestCookie,
-    );
-    if (!active || version !== contextVersion.value || !canWrite.value) return;
-    if (permission.retcode !== 0) throw new Error(`[${permission.retcode}] ${permission.message}`);
+    if (source) {
+      if (!settings.forumId) throw new Error("请选择发布版块");
+    } else {
+      if (settings.forumId < 0) throw new Error("发布版块无效");
+      if (settings.forumId === 0 && settings.topicIds.length === 0)
+        throw new Error("请选择发布版块或至少一个话题");
+    }
+    if (settings.forumId > 0) {
+      const permission = await postEditReq.checkRelease(
+        settings.gid,
+        settings.forumId,
+        requestCookie,
+      );
+      if (!active || version !== contextVersion.value || !canWrite.value) return;
+      if (permission.retcode !== 0)
+        throw new Error(`[${permission.retcode}] ${permission.message}`);
+      if (permission.data?.can_release === false)
+        throw new Error(permission.data.msg?.trim() || "当前账号暂时无法在该版块发帖");
+    }
+    const forumName =
+      settings.forumId === 0
+        ? "不发布到版块"
+        : (forums.value.find((item) => item.id === settings.forumId)?.name ??
+          String(settings.forumId));
     const confirmed = await showDialog.checkF({
       title: action,
-      text: `账号：${briefInfo.value.nickname || uid.value}\n版块：${forums.value.find((item) => item.id === settings.forumId)?.name ?? settings.forumId}\n标题：${settings.subject}\n${document.text.slice(0, 500)}\n图片 ${document.images.length} 张`,
+      text: `账号：${briefInfo.value.nickname || uid.value}\n版块：${forumName}\n标题：${settings.subject}\n${document.text.slice(0, 500)}\n图片 ${document.images.length} 张`,
       confirmLabel: action,
       cancelLabel: "继续编辑",
     });
     if (!confirmed || !active || version !== contextVersion.value || !canWrite.value) return;
-    let latestSource = source;
-    if (source) {
-      const latest = await postReq.post(source.post.post_id, requestCookie);
+    const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+      uid: requestCookie.ltuid,
+      cookie: requestCookie,
+    };
+    if (!source) {
+      const execution = await executeReplyForCurrentAccount(snapshot, () =>
+        postEditReq.create(settings, requestCookie),
+      );
       if (!active || version !== contextVersion.value) return;
-      if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
-      if (
-        latest.data.post.post.post_id !== source.post.post_id ||
-        latest.data.post.post.uid !== requestCookie.ltuid ||
-        latest.data.post.post.updated_at !== source.post.updated_at ||
-        JSON.stringify(getPostEditSettings(latest.data.post)) !==
-          JSON.stringify(getPostEditSettings(source))
-      ) {
-        conflict.value = true;
-        throw new Error("帖子已在其他地方更新，请载入最新帖子后核对");
-      }
-      latestSource = latest.data.post;
+      if (!execution.allowed) throw new Error("账号状态已变化，请重新打开编辑器");
+      const response = execution.data;
+      if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+      const releaseCheck = response.data?.release_check_result;
+      if (releaseCheck?.can_release === false)
+        throw new Error(releaseCheck.msg?.trim() || "当前账号暂时无法在该版块发帖");
+      const rawPostId = response.data?.post_id;
+      const postId =
+        typeof rawPostId === "number"
+          ? String(rawPostId)
+          : typeof rawPostId === "string" && /^[1-9]\d*$/u.test(rawPostId)
+            ? rawPostId
+            : undefined;
+      pending.value = false;
+      showSnackbar.success(`${action}成功`);
+      emits("saved", postId);
+      return;
     }
-    const execution = await executeReplyForCurrentAccount(
-      { uid: requestCookie.ltuid, cookie: requestCookie },
-      () => postEditReq.update(latestSource, settings, requestCookie),
+    let latestSource = source;
+    const latest = await postReq.post(source.post.post_id, requestCookie);
+    if (!active || version !== contextVersion.value) return;
+    if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
+    if (
+      latest.data.post.post.post_id !== source.post.post_id ||
+      latest.data.post.post.uid !== requestCookie.ltuid ||
+      latest.data.post.post.updated_at !== source.post.updated_at ||
+      JSON.stringify(getPostEditSettings(latest.data.post)) !==
+        JSON.stringify(getPostEditSettings(source))
+    ) {
+      conflict.value = true;
+      throw new Error("帖子已在其他地方更新，请载入最新帖子后核对");
+    }
+    latestSource = latest.data.post;
+    const execution = await executeReplyForCurrentAccount(snapshot, () =>
+      postEditReq.update(latestSource, settings, requestCookie),
     );
     if (!active || version !== contextVersion.value) return;
-    if (
-      !execution.allowed ||
-      !matchesCurrentAccount({ uid: requestCookie.ltuid, cookie: requestCookie })
-    )
+    if (!execution.allowed || !matchesCurrentAccount(snapshot))
       throw new Error("账号状态已变化，请重新打开编辑器");
     const response = execution.data;
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
@@ -1119,6 +1415,58 @@ defineExpose({ busy, canSubmit, pending });
   margin: 10px auto;
 }
 
+.post-composer-preview :deep(.ql-vod) {
+  display: block;
+  margin: 10px 0;
+}
+
+.post-composer-preview :deep(.ql-vod-card) {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  aspect-ratio: 16 / 9;
+  background: var(--box-bg-2);
+}
+
+.post-composer-preview :deep(.ql-vod-cover) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-composer-preview :deep(.ql-vod-placeholder) {
+  color: var(--box-text-4);
+  font-size: 14px;
+}
+
+.post-composer-preview :deep(.ql-vod-play) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  opacity: 0.85;
+  transform: translate(-50%, -50%);
+}
+
+.post-composer-preview :deep(.ql-vod-duration) {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: #00000080;
+  color: var(--tgc-white-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
 .post-composer-hint {
   margin: 0;
   color: var(--box-text-4);
@@ -1126,26 +1474,158 @@ defineExpose({ busy, canSubmit, pending });
   line-height: 20px;
 }
 
-.post-composer-topics,
-.post-composer-topic-input,
 .post-composer-original {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.post-composer-topics {
-  flex-wrap: wrap;
-  margin: 8px 0;
-}
-
-.post-composer-topic-input {
-  max-width: 560px;
-}
-
-.post-composer-topic-input > .v-input {
+.post-composer-forum-field,
+.post-composer-topic-field {
+  display: flex;
   min-width: 0;
-  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.post-composer-topic-head {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.post-composer-selected-topics {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.post-composer-selected-topic {
+  position: relative;
+}
+
+.post-composer-topic-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--box-bg-1);
+  border-radius: 50%;
+  background: var(--tgc-od-red);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+}
+
+.post-composer-topic-close:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.post-composer-topic-close:hover {
+  opacity: 0.82;
+}
+
+.post-composer-forums,
+.post-composer-topic-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-composer-forum,
+.post-composer-topic-option {
+  display: inline-flex;
+  max-width: 100%;
+  min-height: 32px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
+  cursor: pointer;
+  font-size: 13px;
+  gap: 6px;
+  line-height: 20px;
+}
+
+.post-composer-forum img,
+.post-composer-topic-option img {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.post-composer-forum span,
+.post-composer-topic-option span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-composer-topic-options .post-composer-topic-option {
+  background: var(--box-bg-4);
+}
+
+.post-composer-forum:not(.selected) {
+  opacity: 0.55;
+}
+
+.post-composer-forum.selected {
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-4);
+  color: var(--common-text-title);
+}
+
+.post-composer-forum:disabled,
+.post-composer-topic-option:disabled {
+  cursor: default;
+}
+
+.post-composer-forum:focus-visible,
+.post-composer-topic-option:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.post-composer-forum:hover:not(:disabled, .selected),
+.post-composer-topic-option:hover:not(:disabled) {
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-4);
+  color: var(--common-text-title);
+  opacity: 0.85;
+}
+
+.post-composer-topic-option.post-composer-selected-topic,
+.post-composer-topic-option.post-composer-selected-topic:hover {
+  border-color: var(--common-shadow-2);
+  background: var(--box-bg-4);
+  color: var(--common-text-title);
+  cursor: default;
+  opacity: 1;
+}
+
+.post-composer-topic-search {
+  width: 280px;
+  max-width: 100%;
+  flex: 0 0 280px;
+  margin-left: auto;
 }
 
 .post-composer-original :deep(.v-input) {
@@ -1365,6 +1845,11 @@ defineExpose({ busy, canSubmit, pending });
   .post-composer-label {
     flex-basis: auto;
     padding-top: 0;
+  }
+
+  .post-composer-topic-search {
+    width: 100%;
+    flex-basis: 100%;
   }
 
   .post-composer-content-footer {

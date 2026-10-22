@@ -105,6 +105,29 @@
         @click:append-inner="searchPost"
         @keyup.enter="searchPost"
       />
+      <v-menu v-if="publishTypes.length > 0" location="bottom start" offset="4">
+        <template #activator="{ props: menuProps }">
+          <v-btn
+            v-bind="menuProps"
+            class="post-topic-btn"
+            prepend-icon="mdi-pencil-plus-outline"
+            rounded
+            variant="elevated"
+          >
+            发布
+          </v-btn>
+        </template>
+        <v-list aria-label="选择发布类型" class="post-publish-menu" density="compact" lines="two">
+          <v-list-item
+            v-for="item in publishTypes"
+            :key="item.value"
+            :prepend-icon="item.icon"
+            :subtitle="item.desc"
+            :title="item.title"
+            @click="newPost(item.value)"
+          />
+        </v-list>
+      </v-menu>
       <v-btn
         :loading="isReq"
         class="post-topic-btn"
@@ -139,6 +162,7 @@ import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useUserStore from "@store/user.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
@@ -149,6 +173,7 @@ import { useRoute, useRouter } from "vue-router";
 type SortSelect<T extends number = number> = { text: string; value: T };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
 type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
+type PublishType = { value: 1 | 2; title: string; desc: string; icon: string };
 
 // 简单封装选项生成
 const genSortOrderItem = (
@@ -164,6 +189,7 @@ const router = useRouter();
 const { isReachBottom } = usePageReachBottom();
 const { sidebar, postGridMode } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
+const { cookie, uid } = storeToRefs(useUserStore());
 
 const curGid = ref<number>(0);
 const disGid = ref<number>(0);
@@ -199,6 +225,34 @@ const sortList = computed<Array<SortSelect<TGApp.BBS.Post.PostTopicSortTypeEnum>
     ];
   }
   return sortArr.map(genSortOrderItem);
+});
+const publishGid = computed<number>(() =>
+  curGid.value > 0 ? curGid.value : (curGame.value?.id ?? 0),
+);
+const canWrite = computed<boolean>(
+  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+);
+const publishTypes = computed<Array<PublishType>>(() => {
+  if (publishGid.value <= 0) return [];
+  const types = topicInfo.value?.topic.view_type ?? [];
+  const items: Array<PublishType> = [];
+  if (types.includes(1)) {
+    items.push({
+      value: 1,
+      title: "发布长文",
+      desc: "自动带入当前话题，可选择关联版块",
+      icon: "mdi-text-box-plus-outline",
+    });
+  }
+  if (types.includes(2)) {
+    items.push({
+      value: 2,
+      title: "发布图文",
+      desc: "自动带入当前话题，以图片列表发布",
+      icon: "mdi-image-plus-outline",
+    });
+  }
+  return items;
 });
 
 onMounted(async () => {
@@ -413,6 +467,34 @@ function getSortLabel(value: number): string {
   return order ? order.text : "";
 }
 
+function getRelatedForumId(viewType: 1 | 2): number | undefined {
+  const forumId = topicInfo.value?.topic.related_forum_ids?.[String(viewType)];
+  return typeof forumId === "number" && Number.isSafeInteger(forumId) && forumId > 0
+    ? forumId
+    : undefined;
+}
+
+async function newPost(viewType: 1 | 2): Promise<void> {
+  const topic = topicInfo.value?.topic;
+  if (!topic || publishGid.value <= 0) return;
+  if (!canWrite.value) {
+    showSnackbar.warn("请先登录米游社账号");
+    return;
+  }
+  const forumId = getRelatedForumId(viewType);
+  const query: Record<string, string> = {
+    from: "topic",
+    topic: curTopic.value,
+    topicName: topic.name,
+  };
+  if (forumId !== undefined) query.forum = String(forumId);
+  await router.push({
+    name: "新建帖子",
+    params: { gid: String(publishGid.value), viewType: String(viewType) },
+    query,
+  });
+}
+
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   if (showSearch.value) showSearch.value = false;
   curGid.value = gid;
@@ -516,6 +598,31 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
+}
+
+.post-publish-menu {
+  padding-block: 4px;
+
+  :deep(.v-list-item--two-line) {
+    --v-list-prepend-gap: 16px;
+
+    min-height: 46px;
+    padding-block: 5px;
+  }
+
+  :deep(.v-list-item-title) {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  :deep(.v-list-item-subtitle) {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  :deep(.v-list-item__prepend > .v-icon) {
+    font-size: 20px;
+  }
 }
 
 .post-topic-grid {

@@ -1,6 +1,6 @@
 /**
  * 米游社话题类型声明
- * @since Beta v0.7.1
+ * @since Beta v0.12.6
  */
 declare namespace TGApp.BBS.Topic {
   /**
@@ -8,6 +8,61 @@ declare namespace TGApp.BBS.Topic {
    * @since Beta v0.7.1
    */
   type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
+
+  /**
+   * 推荐话题返回数据
+   * @since Beta v0.12.6
+   */
+  type RecommendResp = TGApp.BBS.Response.BaseWithData<RecommendRes>;
+
+  /**
+   * 搜索话题返回数据
+   * @since Beta v0.12.6
+   */
+  type SearchResp = TGApp.BBS.Response.BaseWithData<SearchRes>;
+
+  /**
+   * 推荐话题列表
+   * @since Beta v0.12.6
+   */
+  type RecommendRes = {
+    /** 推荐话题列表 */
+    topics?: Array<Summary>;
+  };
+
+  /**
+   * 搜索话题列表
+   * @since Beta v0.12.6
+   */
+  type SearchRes = {
+    /** 搜索结果 */
+    topics?: Array<Summary>;
+    /** 最后一条结果 ID */
+    last_id?: number;
+    /** 是否最后一页 */
+    is_last?: boolean;
+  };
+
+  /**
+   * 话题列表条目
+   * @since Beta v0.12.6
+   */
+  type Summary = {
+    /** 话题 ID */
+    id: string;
+    /** 话题名称 */
+    name: string;
+    /** 话题简介 */
+    desc?: string;
+    /** 话题封面图 URL */
+    cover?: string;
+    /** 话题别名 */
+    alias?: Array<string>;
+    /** 话题统计，可能为 null */
+    stat?: unknown;
+    /** 其余字段保持宽容 */
+    [key: string]: unknown;
+  };
 
   /**
    * 特定话题返回数据 - 帖子列表
@@ -107,8 +162,8 @@ declare namespace TGApp.BBS.Topic {
     name: string;
     /** 排序 */
     order: number;
-    /** 相关版块 ID */
-    related_forum_ids: unknown;
+    /** 相关版块 ID，键为帖子类型 */
+    related_forum_ids: Partial<Record<string, number>>;
     /** 话题统计，可能为 null */
     stat: unknown;
     /** 话题排序配置 */

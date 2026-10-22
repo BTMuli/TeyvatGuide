@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertPostDocumentContent,
+  assertPostFoldTitle,
   buildPostDocument,
   isPostDivider,
   isPostUrl,
@@ -23,6 +24,28 @@ const customEmoticon = {
   size: { width: 96, height: 64, file_size: 2048 },
   is_available: true,
   hash: "custom-one-hash",
+};
+const vod = {
+  id: "2112510696792002560",
+  duration: 782407,
+  cover: "https://example.com/images/vod-cover.jpg",
+  resolutions: [
+    {
+      url: "https://example.com/video/720p.mp4",
+      definition: "720P",
+      height: 720,
+      width: 1280,
+      bitrate: 833679,
+      size: 81534558,
+      format: ".mp4",
+      label: "720P",
+      codec: "h264",
+    },
+  ],
+  view_num: 40,
+  transcoding_status: 2,
+  review_status: 2,
+  backup_resolutions: [],
 };
 
 describe("parsePostNodes", () => {
@@ -188,6 +211,51 @@ describe("parsePostNodes", () => {
     expect(parsePostNodes(nodes)).toEqual([nodes[0], nodes[1], { insert: "\n" }]);
   });
 
+  it("preserves official video metadata without mutating the input", () => {
+    const nodes = [{ insert: { vod } }];
+    const before = structuredClone(nodes);
+
+    const parsed = parsePostNodes(nodes);
+
+    expect(parsed).toEqual([{ insert: { vod } }, { insert: "\n" }]);
+    expect(nodes).toEqual(before);
+    const insert = parsed[0]?.insert;
+    if (typeof insert === "string" || !("vod" in insert)) throw new Error("视频节点未保留");
+    insert.vod.duration = 1;
+    expect(nodes).toEqual(before);
+  });
+
+  it("accepts a video without a cover", () => {
+    const noCover = { ...vod, cover: "" };
+
+    expect(parsePostNodes([{ insert: { vod: noCover } }])).toEqual([
+      { insert: { vod: noCover } },
+      { insert: "\n" },
+    ]);
+  });
+
+  it("clones proxied video metadata without structured clone errors", () => {
+    const proxied = new Proxy({ ...vod, resolutions: new Proxy(vod.resolutions, {}) }, {});
+
+    const parsed = parsePostNodes([{ insert: { vod: proxied } }]);
+
+    expect(parsed[0]).toEqual({ insert: { vod } });
+  });
+
+  it.each(<ReadonlyArray<unknown>>[
+    [{ insert: { vod: null } }],
+    [{ insert: { vod: { ...vod, id: "" } } }],
+    [{ insert: { vod: { ...vod, id: "id\nnext" } } }],
+    [{ insert: { vod: { ...vod, duration: -1 } } }],
+    [{ insert: { vod: { ...vod, duration: 1.5 } } }],
+    [{ insert: { vod: { ...vod, cover: "http://example.com/vod-cover.jpg" } } }],
+    [{ insert: { vod: { ...vod, view_num: -1 } } }],
+    [{ insert: { vod }, attributes: {} }],
+    [{ insert: { vod, backup_text: "" } }],
+  ])("rejects invalid video nodes %j", (nodes) => {
+    expect(() => parsePostNodes(nodes)).toThrow();
+  });
+
   it.each(<ReadonlyArray<unknown>>[
     [{ insert: { divider: "line_0" } }],
     [{ insert: { divider: "line_1" }, attributes: {} }],
@@ -335,6 +403,14 @@ describe("buildPostDocument", () => {
     ).toThrow("一个自定义表情");
   });
 
+  it("counts an embedded video as content without treating it as an image", () => {
+    const document = buildPostDocument([{ insert: { vod } }]);
+
+    expect(document.text).toBe("[视频]");
+    expect(document.images).toEqual([]);
+    expect(() => assertPostDocumentContent(document)).not.toThrow();
+  });
+
   it("excludes dividers from text and image statistics", () => {
     const document = buildPostDocument([{ insert: { divider: "line_2" } }]);
 
@@ -347,6 +423,33 @@ describe("buildPostDocument", () => {
     const document = buildPostDocument([{ insert: "first\nsecond\n" }]);
 
     expect(document.text).toBe("first\nsecond");
+  });
+
+  it("accepts text with supported fold title formats", () => {
+    const document = buildPostDocument([
+      { insert: "折叠标题", attributes: { bold: true, italic: true, header: 2, color: "#ff0000" } },
+    ]);
+
+    expect(() => assertPostFoldTitle(document)).not.toThrow();
+  });
+
+  it("rejects non-text fold title nodes", () => {
+    const document = buildPostDocument([{ insert: { image: imageUrl } }]);
+
+    expect(() => assertPostFoldTitle(document)).toThrow("仅支持文字");
+  });
+
+  it("rejects unsupported fold title formats", () => {
+    const document = buildPostDocument([{ insert: "折叠标题", attributes: { align: "center" } }]);
+
+    expect(() => assertPostFoldTitle(document)).toThrow("粗体、斜体、标题和颜色");
+  });
+
+  it.each([40, 41])("checks the %s-character fold title boundary", (length) => {
+    const document = buildPostDocument([{ insert: "字".repeat(length) }]);
+    const validate = () => assertPostFoldTitle(document);
+    if (length === 40) expect(validate).not.toThrow();
+    else expect(validate).toThrow("40");
   });
 
   it.each([30000, 30001])("checks the %s-character content boundary", (length) => {
