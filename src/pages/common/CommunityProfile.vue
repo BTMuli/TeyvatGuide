@@ -65,8 +65,8 @@
                   </div>
                 </div>
               </v-menu>
-              <span :title="`米游社 ID：${profileUid}`" class="community-profile-uid">
-                ID: {{ profileUid }}
+              <span :title="`米游社 ID：${profileUidText}`" class="community-profile-uid">
+                ID: {{ profileUidText }}
               </span>
             </div>
             <p :title="profile?.introduce" class="community-profile-description">
@@ -463,6 +463,7 @@ import {
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { maskUid } from "@utils/TGUid.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
@@ -554,6 +555,9 @@ const profileUid = computed<string>(() => {
 });
 const isOwnProfile = computed<boolean>(
   () => profileUid.value !== "" && profileUid.value === uid.value,
+);
+const profileUidText = computed<string>(() =>
+  isOwnProfile.value ? maskUid(profileUid.value) : profileUid.value,
 );
 const selectedGid = ref<number>(defaultProfileGame.id);
 const gameOptions = computed<Array<ProfileGameOption>>(() => {
