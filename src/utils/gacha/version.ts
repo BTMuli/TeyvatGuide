@@ -1,9 +1,7 @@
 /**
  * 祈愿版本区间与展示筛选工具
- * @since Beta v0.12.0
+ * @since Beta v0.13.0
  */
-
-import { compareVersions } from "@utils/common/toolFunc.js";
 
 import { AppGachaData } from "@/data/index.js";
 
@@ -190,16 +188,6 @@ function buildVersionRanges(): Array<GachaVersionRange> {
 
 /** 全局版本区间（按开始时间升序） */
 export const GACHA_VERSION_RANGES: Array<GachaVersionRange> = buildVersionRanges();
-
-/**
- * 版本下拉选项（按版本号降序；清空表示全部�?
- * @since Beta v0.12.0
- */
-export const GACHA_VERSION_OPTIONS: Array<{ title: string; value: string }> = [
-  ...GACHA_VERSION_RANGES,
-]
-  .sort((a, b) => compareVersions(b.version, a.version))
-  .map((range) => ({ title: range.version, value: range.version }));
 
 /**
  * 根据抽卡时间解析所属版�?

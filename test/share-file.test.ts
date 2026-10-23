@@ -27,7 +27,6 @@ vi.mock("@tauri-apps/api/path", () => ({ sep: () => "/" }));
 vi.mock("@tauri-apps/plugin-dialog", () => ({ save: mocks.save }));
 vi.mock("@tauri-apps/plugin-fs", () => ({ writeFile: mocks.writeFile }));
 vi.mock("@tauri-apps/plugin-os", () => ({ platform: vi.fn(async () => "windows") }));
-vi.mock("@zumer/snapdom", () => ({ snapdom: vi.fn() }));
 vi.mock("html2canvas", () => ({ default: vi.fn() }));
 vi.mock("modern-screenshot", () => ({ domToBlob: vi.fn() }));
 vi.mock("modern-screenshot/worker?url&no-inline", () => ({ default: "worker" }));

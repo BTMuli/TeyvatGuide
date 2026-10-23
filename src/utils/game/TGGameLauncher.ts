@@ -1,6 +1,6 @@
 /**
  * 游戏安装与启动命令适配。
- * @since Beta v0.12.2
+ * @since Beta v0.13.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -456,12 +456,6 @@ export async function ensureGameInstallDefenderExclusions(
     showSnackbar.error(`添加 Defender 排除失败：${error}`);
     return false;
   }
-}
-
-export async function getGameInstallStatus(
-  installId: string,
-): Promise<TGApp.Game.Package.TaskSummary | null> {
-  return await invoke<TGApp.Game.Package.TaskSummary | null>("game_install_status", { installId });
 }
 
 export async function recoverGameInstall(

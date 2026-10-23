@@ -4,12 +4,8 @@
  */
 
 import { platform } from "@tauri-apps/plugin-os";
-import type {
-  CraftableMaterial,
-  CultivationMaterial,
-  ExperienceTarget,
-} from "@utils/game/userCalc.js";
-import userCalc, {
+import type { CraftableMaterial } from "@utils/game/userCalc.js";
+import {
   allocateExperienceRequirements,
   calculateCraftableMaterials,
   createCraftingCalculator,
@@ -1671,22 +1667,6 @@ export function getConversionOptions(
 }
 
 /**
- * 汇总活动养成目标的材料需求
- * @since Beta v0.11.2
- * @param entries - 养成目标列表
- * @returns 聚合后的材料需求
- */
-export function aggregateEntryMaterials(
-  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
-): Array<CultivationMaterial> {
-  return userCalc.merge(
-    ...entries
-      .filter((entry) => entry.status === "active")
-      .map((entry) => entry.items.map((item) => ({ id: item.materialId, count: item.required }))),
-  );
-}
-
-/**
  * 从接口快照读取明确返回的背包数量。
  */
 function getCalculateAvailableMaterials(result: TGApp.Game.Calculate.Result): Map<number, number> {
@@ -1770,71 +1750,6 @@ export function mergePlanInventory(
 }
 
 /**
- * 根据需求和背包构建材料完成情况
- * @since Beta v0.12.2
- * @param requirements - 材料需求
- * @param inventory - 背包材料
- * @param materials - 材料 Wiki 数据
- * @param allowCrafting - 是否允许合成
- * @param useDust - 是否允许使用嬗变之尘
- * @param useSolvent - 是否允许使用异梦溶媒
- * @param experienceTargets - 用于独立结算突破区间的等级目标
- * @returns 材料完成情况
- */
-export function buildCultivationResults(
-  requirements: ReadonlyArray<CultivationMaterial>,
-  inventory: ReadonlyMap<number, number>,
-  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-  allowCrafting: boolean,
-  useDust: boolean,
-  useSolvent: boolean,
-  experienceTargets: ReadonlyArray<ExperienceTarget> = [],
-): Array<TGApp.App.UserCalc.ResultMaterial> {
-  const adjustedRequirements = allocateExperienceRequirements(
-    requirements,
-    inventory,
-    experienceTargets,
-  );
-  const craftableMaterials: Map<number, CraftableMaterial> = allowCrafting
-    ? userCalc.craft(adjustedRequirements, inventory, materials, useDust, useSolvent)
-    : new Map();
-  return sortCultivationResults(
-    adjustedRequirements.map((required) => {
-      const info = materials.find((material) => material.id === required.id);
-      const owned = inventory.get(required.id) ?? 0;
-      const crafting = craftableMaterials.get(required.id);
-      const craftable = crafting?.count ?? 0;
-      const available = owned + craftable;
-      const craftingCosts: Array<TGApp.App.UserCalc.CraftingCost> = (crafting?.consumed ?? [])
-        .map((cost) => {
-          const costInfo = materials.find((material) => material.id === cost.id);
-          return {
-            id: cost.id,
-            name: costInfo?.name ?? `材料 ${cost.id}`,
-            type: costInfo?.type ?? "未知类型",
-            star: costInfo?.star ?? 1,
-            count: cost.count,
-            owned: inventory.get(cost.id) ?? 0,
-          };
-        })
-        .sort((a, b) => b.star - a.star || a.id - b.id);
-      return {
-        id: required.id,
-        name: info?.name ?? `材料 ${required.id}`,
-        type: info?.type ?? "未知类型",
-        star: info?.star ?? 1,
-        required: required.count,
-        owned,
-        craftable,
-        craftingCosts,
-        missing: Math.max(required.count - available, 0),
-        progress: required.count === 0 ? 100 : Math.min((available / required.count) * 100, 100),
-      };
-    }),
-  );
-}
-
-/**
  * 按养成用途及完成状态排列材料结果。
  * @since Beta v0.11.4
  * @param results - 材料完成情况
@@ -1877,17 +1792,6 @@ export function isMaterialAvailableToday(
 export function getServerDay(timezone: number): number {
   const serverResetOffset = (timezone - 4) * 60 * 60 * 1000;
   return new Date(Date.now() + serverResetOffset).getUTCDay();
-}
-
-/**
- * 获取固定服务器时区下按每日 4 点刷新的日期键
- * @since Beta v0.11.2
- * @param timezone - UTC 时区偏移小时数
- * @returns YYYY-MM-DD 日期
- */
-export function getServerDateKey(timezone: number): string {
-  const serverResetOffset = (timezone - 4) * 60 * 60 * 1000;
-  return new Date(Date.now() + serverResetOffset).toISOString().slice(0, 10);
 }
 
 /**
