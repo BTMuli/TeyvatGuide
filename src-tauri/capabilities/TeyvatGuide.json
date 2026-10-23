@@ -58,6 +58,7 @@
       "identifier": "http:default",
       "allow": [
         { "url": "https://*.miyoushe.com/*" },
+        { "url": "https://plat-sh-community-prod-upload-ugc.oss-cn-shanghai.aliyuncs.com/*" },
         { "url": "https://*.mihoyo.com/*" },
         { "url": "https://homa.snapgenshin.cn/*" },
         { "url": "https://*.hoyoverse.com/*" },
