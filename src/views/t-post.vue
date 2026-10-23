@@ -30,31 +30,31 @@
           </div>
         </div>
         <template v-if="postViewWide">
-          <div :title="`浏览数：${postData?.stat?.view_num}`" class="mpm-item">
+          <div :title="`浏览数：${formatStat(postData?.stat?.view_num)}`" class="mpm-item">
             <v-icon size="16">mdi-eye</v-icon>
-            <span>{{ postData?.stat?.view_num }}</span>
+            <span>{{ formatStat(postData?.stat?.view_num) }}</span>
           </div>
-          <div :title="`收藏数：${postData?.stat?.bookmark_num}`" class="mpm-item">
+          <div :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`" class="mpm-item">
             <v-icon size="16">mdi-star</v-icon>
-            <span>{{ postData?.stat?.bookmark_num }}</span>
+            <span>{{ formatStat(postData?.stat?.bookmark_num) }}</span>
           </div>
-          <div :title="`回复数：${postData?.stat?.reply_num}`" class="mpm-item">
+          <div :title="`回复数：${formatStat(postData?.stat?.reply_num)}`" class="mpm-item">
             <v-icon size="16">mdi-comment</v-icon>
-            <span>{{ postData?.stat?.reply_num }}</span>
+            <span>{{ formatStat(postData?.stat?.reply_num) }}</span>
           </div>
           <!-- TODO: 展示不同种类点赞图标&数量 -->
           <div
             :class="{ like: isLike }"
-            :title="`点赞数：${postData?.stat?.like_num}`"
+            :title="`点赞数：${formatStat(postData?.stat?.like_num)}`"
             class="mpm-item"
             @click="tryLike()"
           >
             <v-icon size="16">mdi-thumb-up</v-icon>
-            <span>{{ postData?.stat?.like_num }}</span>
+            <span>{{ formatStat(postData?.stat?.like_num) }}</span>
           </div>
-          <div :title="`转发数：${postData?.stat?.forward_num}`" class="mpm-item">
+          <div :title="`转发数：${formatStat(postData?.stat?.forward_num)}`" class="mpm-item">
             <v-icon size="16">mdi-share-variant</v-icon>
-            <span>{{ postData?.stat?.forward_num }}</span>
+            <span>{{ formatStat(postData?.stat?.forward_num) }}</span>
           </div>
         </template>
       </div>
@@ -110,31 +110,31 @@
       />
     </div>
     <div v-if="!postViewWide" class="tp-post-data">
-      <div :title="`浏览数：${postData?.stat?.view_num}`" class="mpm-item">
+      <div :title="`浏览数：${formatStat(postData?.stat?.view_num)}`" class="mpm-item">
         <v-icon size="16">mdi-eye</v-icon>
-        <span>{{ postData?.stat?.view_num }}</span>
+        <span>{{ formatStat(postData?.stat?.view_num) }}</span>
       </div>
-      <div :title="`收藏数：${postData?.stat?.bookmark_num}`" class="mpm-item">
+      <div :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`" class="mpm-item">
         <v-icon size="16">mdi-star</v-icon>
-        <span>{{ postData?.stat?.bookmark_num }}</span>
+        <span>{{ formatStat(postData?.stat?.bookmark_num) }}</span>
       </div>
-      <div :title="`回复数：${postData?.stat?.reply_num}`" class="mpm-item">
+      <div :title="`回复数：${formatStat(postData?.stat?.reply_num)}`" class="mpm-item">
         <v-icon size="16">mdi-comment</v-icon>
-        <span>{{ postData?.stat?.reply_num }}</span>
+        <span>{{ formatStat(postData?.stat?.reply_num) }}</span>
       </div>
       <!-- TODO: 展示不同种类点赞图标&数量 -->
       <div
         :class="{ like: isLike }"
-        :title="`点赞数：${postData?.stat?.like_num}`"
+        :title="`点赞数：${formatStat(postData?.stat?.like_num)}`"
         class="mpm-item"
         @click="tryLike()"
       >
         <v-icon size="16">mdi-thumb-up</v-icon>
-        <span>{{ postData?.stat?.like_num }}</span>
+        <span>{{ formatStat(postData?.stat?.like_num) }}</span>
       </div>
-      <div :title="`转发数：${postData?.stat?.forward_num}`" class="mpm-item">
+      <div :title="`转发数：${formatStat(postData?.stat?.forward_num)}`" class="mpm-item">
         <v-icon size="16">mdi-share-variant</v-icon>
-        <span>{{ postData?.stat?.forward_num }}</span>
+        <span>{{ formatStat(postData?.stat?.forward_num) }}</span>
       </div>
     </div>
     <div class="tp-post-subtitle">
@@ -194,6 +194,7 @@ import { emit, type Event, listen, type UnlistenFn } from "@tauri-apps/api/event
 import { parseLink, parsePost } from "@utils/app/linkParser.js";
 import TGClient from "@utils/app/TGClient.js";
 import { createTGWindow } from "@utils/app/TGWindow.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -358,6 +359,10 @@ function showOverlayC() {
 
 function getDate(date: number): string {
   return new Date(date * 1000).toLocaleString().replace(/\//g, "-");
+}
+
+function formatStat(value?: number): string {
+  return value === undefined ? "" : fmtUtil.num(value);
 }
 
 function getRepublishAuthorization(type: number): string {

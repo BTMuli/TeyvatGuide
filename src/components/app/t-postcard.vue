@@ -104,33 +104,33 @@
           </Teleport>
         </div>
         <div v-if="card.data !== null" class="tpc-data">
-          <div :title="`浏览数：${card.data.view}`" class="tpc-info-item">
+          <div :title="`浏览数：${fmtUtil.num(card.data.view)}`" class="tpc-info-item">
             <v-icon size="12">mdi-eye</v-icon>
-            <span>{{ card.data.view }}</span>
+            <span>{{ fmtUtil.num(card.data.view) }}</span>
           </div>
           <div
             :class="{ collected: props.post.self_operation?.is_collected }"
-            :title="`收藏数：${card.data.mark}`"
+            :title="`收藏数：${fmtUtil.num(card.data.mark)}`"
             class="tpc-info-item"
           >
             <v-icon size="12">mdi-star</v-icon>
-            <span>{{ card.data.mark }}</span>
+            <span>{{ fmtUtil.num(card.data.mark) }}</span>
           </div>
-          <div :title="`回复数：${card.data.reply}`" class="tpc-info-item">
+          <div :title="`回复数：${fmtUtil.num(card.data.reply)}`" class="tpc-info-item">
             <v-icon size="12">mdi-comment</v-icon>
-            <span>{{ card.data.reply }}</span>
+            <span>{{ fmtUtil.num(card.data.reply) }}</span>
           </div>
           <div
             :class="{ love: props.post.self_operation?.upvote_type ?? 0 > 0 }"
-            :title="`点赞数：${card.data.like}`"
+            :title="`点赞数：${fmtUtil.num(card.data.like)}`"
             class="tpc-info-item"
           >
             <v-icon size="12">mdi-thumb-up</v-icon>
-            <span>{{ card.data.like }}</span>
+            <span>{{ fmtUtil.num(card.data.like) }}</span>
           </div>
-          <div :title="`转发数：${card.data.forward}`" class="tpc-info-item">
+          <div :title="`转发数：${fmtUtil.num(card.data.forward)}`" class="tpc-info-item">
             <v-icon size="12">mdi-share-variant</v-icon>
-            <span>{{ card.data.forward }}</span>
+            <span>{{ fmtUtil.num(card.data.forward) }}</span>
           </div>
         </div>
         <div class="tpc-data">
