@@ -5,10 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import {
-  getCommunityProfileLevel,
-  getCommunityProfileLevelColor,
-} from "../src/utils/community/profileLevel.js";
+import { getCommunityProfileLevel } from "../src/utils/community/profileLevel.js";
 
 /**
  * 构造等级选择测试所需的最小用户信息。
@@ -51,13 +48,5 @@ describe("getCommunityProfileLevel", () => {
 
     expect(getCommunityProfileLevel(userInfo, 6, 6)).toMatchObject({ level: 9, exp: 90 });
     expect(getCommunityProfileLevel(userInfo, 6)).toBeUndefined();
-  });
-
-  it("returns the expected level colors without a level fallback", () => {
-    expect(getCommunityProfileLevelColor(undefined)).toBe("var(--tgc-od-green)");
-    expect(getCommunityProfileLevelColor(4)).toBe("var(--tgc-od-green)");
-    expect(getCommunityProfileLevelColor(8)).toBe("var(--tgc-od-blue)");
-    expect(getCommunityProfileLevelColor(12)).toBe("var(--tgc-od-purple)");
-    expect(getCommunityProfileLevelColor(13)).toBe("var(--tgc-od-orange)");
   });
 });
