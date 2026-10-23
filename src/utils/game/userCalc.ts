@@ -1115,7 +1115,8 @@ function calculateCraftingAllocationWithMaterials(
 
   for (const item of pending) {
     if (!hasUsableCraftingRecipe(context.materials.get(item.id), useDust, useSolvent)) continue;
-    const inventoryBefore = new Map(context.inventory);
+    // 只记录本轮成功合成实际触及的材料及其首次变更前的数量，避免复制整份背包再逐项比对。
+    const touched = new Map<number, number | undefined>();
     let count = 0;
     while (count < item.count) {
       const checkpoint = transaction.length;
@@ -1124,14 +1125,21 @@ function calculateCraftingAllocationWithMaterials(
         rollbackCraftingTransaction(context, transaction, checkpoint);
         break;
       }
+      for (let index = checkpoint; index < transaction.length; index++) {
+        const change = transaction[index];
+        if (!touched.has(change.id)) touched.set(change.id, change.previous);
+      }
       transaction.length = checkpoint;
       count++;
     }
     if (count > 0) {
-      const consumed = Array.from(inventoryBefore, ([id, before]) => ({
-        id,
-        count: before - (context.inventory.get(id) ?? 0),
-      })).filter((material) => material.count > 0);
+      // 按库存键序输出消耗，保持与逐项快照比较时一致的展示顺序。
+      const consumed: Array<CultivationMaterial> = [];
+      for (const [id, current] of context.inventory) {
+        if (!touched.has(id)) continue;
+        const amount = (touched.get(id) ?? 0) - current;
+        if (amount > 0) consumed.push({ id, count: amount });
+      }
       craftable.set(item.id, { count, consumed });
     }
   }

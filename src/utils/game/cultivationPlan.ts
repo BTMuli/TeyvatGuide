@@ -116,6 +116,58 @@ function mergeCraftingCosts(
  */
 type MaterialMap = ReadonlyMap<number, TGApp.App.Material.WikiItem>;
 
+/** 按 Wiki 数据数组引用缓存材料索引与派生快照，Wiki 数据视为不可变快照。 */
+const materialMapCache = new WeakMap<
+  ReadonlyArray<TGApp.App.Material.WikiItem>,
+  ReadonlyMap<number, TGApp.App.Material.WikiItem>
+>();
+const ordinaryMaterialsCache = new WeakMap<
+  ReadonlyArray<TGApp.App.Material.WikiItem>,
+  ReadonlyArray<TGApp.App.Material.WikiItem>
+>();
+const conversionSourceRateCache = new WeakMap<
+  ReadonlyArray<TGApp.App.Material.WikiItem>,
+  Map<number, ReadonlyMap<number, number>>
+>();
+const conversionMediaRateCache = new WeakMap<ReadonlyArray<TGApp.App.Material.WikiItem>, number>();
+
+/**
+ * 获取按 Wiki 数据数组缓存的材料索引。
+ * @since Beta v0.13.0
+ * @param materials - 材料 Wiki 数据
+ * @returns 按材料 ID 索引的只读 Wiki 数据
+ */
+function getMaterialMap(materials: ReadonlyArray<TGApp.App.Material.WikiItem>): MaterialMap {
+  const cached = materialMapCache.get(materials);
+  if (cached) return cached;
+  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+  materialMapCache.set(materials, materialMap);
+  return materialMap;
+}
+
+/**
+ * 获取每种媒介配方消耗的媒介数量上限。
+ * @since Beta v0.13.0
+ * @param materials - 材料 Wiki 数据
+ * @returns 所有媒介配方中单次消耗的最大数量，至少为 1
+ */
+function getConversionMediaRate(materials: ReadonlyArray<TGApp.App.Material.WikiItem>): number {
+  const cached = conversionMediaRateCache.get(materials);
+  if (cached !== undefined) return cached;
+  const rate = Math.max(
+    1,
+    ...materials.flatMap((item) =>
+      item.convert.flatMap((recipe) =>
+        recipe.source
+          .filter((source) => CONVERSION_MEDIA_IDS.has(Number(source.id)))
+          .map((source) => source.count),
+      ),
+    ),
+  );
+  conversionMediaRateCache.set(materials, rate);
+  return rate;
+}
+
 /**
  * 普通合成与完整转换使用的计算器集合。
  * @since Beta v0.13.0
@@ -124,6 +176,30 @@ type CraftingCalculators = {
   ordinary: TGApp.App.UserCalc.CraftingCalculator;
   full: TGApp.App.UserCalc.CraftingCalculator;
 };
+
+const craftingCalculatorsCache = new WeakMap<
+  ReadonlyArray<TGApp.App.Material.WikiItem>,
+  CraftingCalculators
+>();
+
+/**
+ * 获取按 Wiki 数据数组复用的普通与完整转换计算器。
+ * @since Beta v0.13.0
+ * @param materials - 材料 Wiki 数据
+ * @returns 复用预解析配方的计算器集合
+ */
+function getCraftingCalculators(
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): CraftingCalculators {
+  const cached = craftingCalculatorsCache.get(materials);
+  if (cached) return cached;
+  const calculators: CraftingCalculators = {
+    ordinary: createCraftingCalculator(buildOrdinaryMaterials(materials)),
+    full: createCraftingCalculator(materials),
+  };
+  craftingCalculatorsCache.set(materials, calculators);
+  return calculators;
+}
 
 /**
  * 单个养成目标的材料分配上下文。
@@ -316,6 +392,29 @@ function usesConversionMedia(crafting: CraftableMaterial): boolean {
 }
 
 /**
+ * 判断材料是否至少存在一条可执行配方。
+ * @since Beta v0.13.0
+ * @param material - 材料 Wiki 数据
+ * @returns 是否存在来源非空的配方
+ */
+function hasAnyCraftingRecipe(material: TGApp.App.Material.WikiItem | undefined): boolean {
+  return material?.convert.some((recipe) => recipe.source.length > 0) ?? false;
+}
+
+/**
+ * 判断材料是否至少存在一条不含转换媒介的可执行配方。
+ * @since Beta v0.13.0
+ * @param material - 材料 Wiki 数据
+ * @returns 是否存在来源非空的普通配方
+ */
+function hasUsableOrdinaryRecipe(material: TGApp.App.Material.WikiItem | undefined): boolean {
+  return (
+    material?.convert.some((recipe) => recipe.source.length > 0 && !hasConversionMedia(recipe)) ??
+    false
+  );
+}
+
+/**
  * 构建不含媒介配方的 Wiki 快照，供普通合成阶段使用。
  * @since Beta v0.13.0
  * @param materials - 材料 Wiki 数据
@@ -323,11 +422,15 @@ function usesConversionMedia(crafting: CraftableMaterial): boolean {
  */
 function buildOrdinaryMaterials(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
-): Array<TGApp.App.Material.WikiItem> {
-  return materials.map((material) => {
+): ReadonlyArray<TGApp.App.Material.WikiItem> {
+  const cached = ordinaryMaterialsCache.get(materials);
+  if (cached) return cached;
+  const ordinaryMaterials = materials.map((material) => {
     const convert = material.convert.filter((recipe) => !hasConversionMedia(recipe));
     return convert.length === material.convert.length ? material : { ...material, convert };
   });
+  ordinaryMaterialsCache.set(materials, ordinaryMaterials);
+  return ordinaryMaterials;
 }
 
 /**
@@ -503,6 +606,7 @@ function allocateMediaConversions(
     if (missing <= 0) continue;
     const material = materialMap.get(result.id);
     if (!material) continue;
+    if (!hasAnyCraftingRecipe(material)) continue;
     const canUseDust = useDust && (remainingInventory.get(DUST_OF_AZOTH_ID) ?? 0) > 0;
     const canUseSolvent = useSolvent && (remainingInventory.get(DREAM_SOLVENT_ID) ?? 0) > 0;
     if (!canUseDust && !canUseSolvent) break;
@@ -700,6 +804,7 @@ export function mergeCultivationResults(
  * @since Beta v0.13.0
  * @param results - 目标材料需求与分配结果
  * @param remainingInventory - 已扣除直接需求及已采用合成的库存余量
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
  * @param calculator - 本轮复用的材料合成计算器
  * @param protectedResults - 需优先保护普通合成来源的其他目标结果
  * @returns 预留普通合成来源后的库存和材料缺口
@@ -707,6 +812,7 @@ export function mergeCultivationResults(
 function prepareConversionRecommendationsWithCalculator(
   results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
   remainingInventory: ReadonlyMap<number, number>,
+  materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
   calculator: TGApp.App.UserCalc.CraftingCalculator,
   protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
 ): ConversionPreparation {
@@ -729,6 +835,14 @@ function prepareConversionRecommendationsWithCalculator(
     const requiredMissing = Math.max(result.required - result.owned - result.craftable, 0);
     if (requiredMissing <= 0) {
       missing.set(result.id, 0);
+      continue;
+    }
+    // 目标自身余量已耗尽且没有普通配方时，计算器只会复制库存后原样返回。
+    if (
+      (ordinaryRemaining.get(result.id) ?? 0) <= 0 &&
+      !hasUsableOrdinaryRecipe(materialMap.get(result.id))
+    ) {
+      missing.set(result.id, requiredMissing);
       continue;
     }
     const allocation = calculator(
@@ -760,11 +874,11 @@ export function prepareConversionRecommendations(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   protectedResults: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial> = [],
 ): ConversionPreparation {
-  const ordinaryMaterials = buildOrdinaryMaterials(materials);
   return prepareConversionRecommendationsWithCalculator(
     results,
     normalizeInventory(remainingInventory),
-    createCraftingCalculator(ordinaryMaterials),
+    getMaterialMap(materials),
+    getCraftingCalculators(materials).ordinary,
     protectedResults,
   );
 }
@@ -796,6 +910,7 @@ function buildConversionRecommendationsFromPreparation(
     if (missing <= 0) continue;
     const material = materialMap.get(result.id);
     if (!material) continue;
+    if (!hasAnyCraftingRecipe(material)) continue;
     const canUseDust = (available.get(DUST_OF_AZOTH_ID) ?? 0) > 0;
     const canUseSolvent = (available.get(DREAM_SOLVENT_ID) ?? 0) > 0;
     if (!canUseDust && !canUseSolvent) break;
@@ -842,12 +957,11 @@ export function buildConversionRecommendations(
     materials,
     protectedResults,
   );
-  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
-  const fullCalculator = createCraftingCalculator(materials);
+  const fullCalculator = getCraftingCalculators(materials).full;
   return buildConversionRecommendationsFromPreparation(
     results,
     preparation,
-    materialMap,
+    getMaterialMap(materials),
     fullCalculator,
   );
 }
@@ -865,7 +979,7 @@ export function getConversionSourceMaterials(
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
 ): Array<TGApp.App.Material.WikiItem> {
-  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+  const materialMap = getMaterialMap(materials);
   const candidates = new Map<number, TGApp.App.Material.WikiItem>();
   const visited = new Set<number>();
 
@@ -944,7 +1058,7 @@ function calculateConversionPreviewWithCalculator(
     return empty();
   }
 
-  const materialInfo = materials.find((item) => item.id === material.id);
+  const materialInfo = getMaterialMap(materials).get(material.id);
   if (!materialInfo || materialInfo.convert.length === 0) return empty();
 
   const dust = Math.max(inventory.get(DUST_OF_AZOTH_ID) ?? 0, 0);
@@ -978,11 +1092,10 @@ function calculateConversionPreviewWithCalculator(
   const crafting = allocation.materials.get(material.id);
   if (!crafting || crafting.count <= 0 || !usesConversionMedia(crafting)) return empty();
 
-  const materialMap = new Map(materials.map((item) => <const>[item.id, item]));
   return {
     material: previewMaterial,
     count: Math.min(crafting.count, material.missing),
-    costs: buildCraftingCosts(crafting, inventory, materialMap),
+    costs: buildCraftingCosts(crafting, inventory, getMaterialMap(materials)),
   };
 }
 
@@ -1009,25 +1122,21 @@ export function calculateConversionPreview(
     materials,
     sourceLimits,
     count,
-    createCraftingCalculator(materials),
+    getCraftingCalculators(materials).full,
   );
 }
 
 /**
- * 按目标需求计算各转换来源的数量上限，不受当前库存限制。
+ * 构建目标材料到各转换来源的单位配方倍率。
  * @since Beta v0.13.0
  * @param targetId - 目标材料 ID
- * @param count - 目标需求数量
- * @param materials - 材料配方数据
- * @returns 各来源通过最短配方路径满足需求所需的数量
+ * @param materialMap - 按材料 ID 索引的 Wiki 数据
+ * @returns 各来源相对目标材料的单位数量倍率
  */
-export function getConversionSourceLimits(
+function prepareConversionSourceRates(
   targetId: number,
-  count: number,
-  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  materialMap: MaterialMap,
 ): Map<number, number> {
-  if (!Number.isSafeInteger(count) || count < 0) return new Map();
-  const materialMap = new Map(materials.map((material) => [material.id, material]));
   const rates = new Map<number, number>([[targetId, 1]]);
   const pending = [targetId];
   for (let index = 0; index < pending.length; index++) {
@@ -1053,6 +1162,33 @@ export function getConversionSourceLimits(
     }
   }
   rates.delete(targetId);
+  return rates;
+}
+
+/**
+ * 按目标需求计算各转换来源的数量上限，不受当前库存限制。
+ * @since Beta v0.13.0
+ * @param targetId - 目标材料 ID
+ * @param count - 目标需求数量
+ * @param materials - 材料配方数据
+ * @returns 各来源通过最短配方路径满足需求所需的数量
+ */
+export function getConversionSourceLimits(
+  targetId: number,
+  count: number,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): Map<number, number> {
+  if (!Number.isSafeInteger(count) || count < 0) return new Map();
+  let ratesByTarget = conversionSourceRateCache.get(materials);
+  if (!ratesByTarget) {
+    ratesByTarget = new Map();
+    conversionSourceRateCache.set(materials, ratesByTarget);
+  }
+  let rates = ratesByTarget.get(targetId);
+  if (!rates) {
+    rates = prepareConversionSourceRates(targetId, getMaterialMap(materials));
+    ratesByTarget.set(targetId, rates);
+  }
   return new Map(Array.from(rates, ([id, rate]) => [id, rate * count]));
 }
 
@@ -1089,16 +1225,7 @@ function calculateConversionPlanWithCalculator(
     limits.set(id, Math.max(Math.min(limit, capacities.get(id) ?? 0) - (spent.get(id) ?? 0), 0));
   }
   // 仅供需求预览使用的媒介预算；不写入真实库存，也不参与实际材料分配。
-  const mediaRate = Math.max(
-    1,
-    ...materials.flatMap((item) =>
-      item.convert.flatMap((recipe) =>
-        recipe.source
-          .filter((source) => CONVERSION_MEDIA_IDS.has(Number(source.id)))
-          .map((source) => source.count),
-      ),
-    ),
-  );
+  const mediaRate = getConversionMediaRate(materials);
   const mediaBudget =
     Math.max(
       Array.from(limits.values()).reduce((sum, value) => sum + value, 0),
@@ -1165,7 +1292,7 @@ export function calculateConversionPlan(
     sourceLimits,
     count,
     actual,
-    createCraftingCalculator(materials),
+    getCraftingCalculators(materials).full,
   );
 }
 
@@ -1367,12 +1494,8 @@ export function allocatePlanMaterials(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   intents: ReadonlyMap<string, ReadonlyArray<TGApp.App.UserCalc.ConversionIntent>> = new Map(),
 ): PlanMaterialAllocation {
-  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
-  const ordinaryMaterials = buildOrdinaryMaterials(materials);
-  const calculators: CraftingCalculators = {
-    ordinary: createCraftingCalculator(ordinaryMaterials),
-    full: createCraftingCalculator(materials),
-  };
+  const materialMap = getMaterialMap(materials);
+  const calculators = getCraftingCalculators(materials);
   const allocatedEntries = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
   const appliedConversions = new Map<string, Array<TGApp.App.UserCalc.AppliedConversion>>();
   const automaticConversions = new Map<string, Array<AutomaticConversionContext>>();
@@ -1439,17 +1562,19 @@ export function allocatePlanMaterials(
   // 普通合成完成后，先按目标优先级应用明确转换，再执行没有明确意图的自动转换。
   for (const plan of activePlans) {
     const entryIntents = intents.get(getCultivationEntryKey(plan.entry)) ?? [];
-    const explicit = allocateExplicitConversions(
-      plan.results,
-      conversionInventory,
-      materials,
-      calculators.full,
-      entryIntents,
-    );
-    plan.results = explicit.results;
-    plan.explicitMaterialIds = explicit.explicitMaterialIds;
-    appliedConversions.set(plan.entry.id, explicit.appliedConversions);
-    conversionInventory = explicit.remainingInventory;
+    if (entryIntents.length > 0) {
+      const explicit = allocateExplicitConversions(
+        plan.results,
+        conversionInventory,
+        materials,
+        calculators.full,
+        entryIntents,
+      );
+      plan.results = explicit.results;
+      plan.explicitMaterialIds = explicit.explicitMaterialIds;
+      appliedConversions.set(plan.entry.id, explicit.appliedConversions);
+      conversionInventory = explicit.remainingInventory;
+    }
     let entryAutomaticConversions: Array<AutomaticConversionContext> = [];
 
     const automaticResults = plan.results.filter(
@@ -1524,6 +1649,7 @@ export function allocatePlanMaterials(
   const conversionPreparation = prepareConversionRecommendationsWithCalculator(
     resultMaterials,
     remainingInventory,
+    materialMap,
     calculators.ordinary,
   );
   const recommendations = buildConversionRecommendationsFromPreparation(
@@ -1566,7 +1692,7 @@ export function getConversionOptions(
   );
   let workingInventory = normalizeInventory(allocation.remainingInventory);
   const options: Array<TGApp.App.UserCalc.ConversionOption> = [];
-  let materialMap: Map<number, TGApp.App.Material.WikiItem> | undefined;
+  let materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem> | undefined;
   let calculators: CraftingCalculators | undefined;
 
   for (const entry of activeEntries) {
@@ -1609,12 +1735,8 @@ export function getConversionOptions(
       continue;
     }
     if (materialMap === undefined || calculators === undefined) {
-      materialMap = new Map(materials.map((material) => <const>[material.id, material]));
-      const ordinaryMaterials = buildOrdinaryMaterials(materials);
-      calculators = {
-        ordinary: createCraftingCalculator(ordinaryMaterials),
-        full: createCraftingCalculator(materials),
-      };
+      materialMap = getMaterialMap(materials);
+      calculators = getCraftingCalculators(materials);
     }
     const protectedResults = activeEntries.flatMap((otherEntry) =>
       (allocation.entries.get(otherEntry.id) ?? []).filter(
@@ -1624,6 +1746,7 @@ export function getConversionOptions(
     const preparation = prepareConversionRecommendationsWithCalculator(
       automaticResults,
       workingInventory,
+      materialMap,
       calculators.ordinary,
       protectedResults,
     );

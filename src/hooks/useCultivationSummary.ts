@@ -16,13 +16,14 @@ import {
   mergePlanInventory,
 } from "@utils/game/cultivationPlan.js";
 import type { CultivationMaterial } from "@utils/game/userCalc.js";
-import { computed } from "vue";
+import { computed, onScopeDispose, ref, watch } from "vue";
 import type { ComputedRef, Ref } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
 const EMPTY_BAG_MATERIAL_DETAILS: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable> =
   new Map();
+const CALCULATION_SETTLE_MS = 150;
 
 /** 汇总域依赖的共享状态与跨域输出。 */
 type CultivationSummaryDeps = {
@@ -161,15 +162,41 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
         };
       }),
   );
+  // 编辑目标出现或消失时立即生效，仅对连续调整期间的中间状态合并计算。
+  const settledCalculatorEntries = ref<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(
+    calculatorEntries.value,
+  );
+  let settleTimer: ReturnType<typeof setTimeout> | undefined;
+  watch(
+    calculatorEntries,
+    (entries) => {
+      if (settleTimer !== undefined) {
+        clearTimeout(settleTimer);
+        settleTimer = undefined;
+      }
+      if (entries.length === 0 || settledCalculatorEntries.value.length === 0) {
+        settledCalculatorEntries.value = entries;
+        return;
+      }
+      settleTimer = setTimeout(() => {
+        settleTimer = undefined;
+        settledCalculatorEntries.value = entries;
+      }, CALCULATION_SETTLE_MS);
+    },
+    { flush: "sync" },
+  );
+  onScopeDispose(() => {
+    if (settleTimer !== undefined) clearTimeout(settleTimer);
+  });
   const calculatorOtherEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() => {
-    const previewIds = new Set(calculatorEntries.value.map((entry) => entry.id));
+    const previewIds = new Set(settledCalculatorEntries.value.map((entry) => entry.id));
     return planEntries.value.filter(
       (entry) => entry.id !== editingEntry.value?.id && !previewIds.has(entry.id),
     );
   });
   const calculatorAllocation = computed<TGApp.App.UserCalc.PlanMaterialAllocation>(() => {
     return allocatePlanMaterials(
-      [...calculatorOtherEntries.value, ...calculatorEntries.value],
+      [...calculatorOtherEntries.value, ...settledCalculatorEntries.value],
       calculatorInventory.value,
       WikiMaterialData,
       conversionIntents.value,
@@ -177,7 +204,7 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
   });
   const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
     mergeCultivationResults(
-      calculatorEntries.value.flatMap(
+      settledCalculatorEntries.value.flatMap(
         (entry) => calculatorAllocation.value.entries.get(entry.id) ?? [],
       ),
     ),
@@ -187,10 +214,10 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
       return [];
     if (useApiCalculation.value && !apiCalculated.value) return [];
     return getConversionOptions(
-      [...calculatorOtherEntries.value, ...calculatorEntries.value],
+      [...calculatorOtherEntries.value, ...settledCalculatorEntries.value],
       calculatorAllocation.value,
       WikiMaterialData,
-      new Set(calculatorEntries.value.map((entry) => entry.id)),
+      new Set(settledCalculatorEntries.value.map((entry) => entry.id)),
     );
   });
   const planInventory = computed<Map<number, number>>(() =>
@@ -273,7 +300,7 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
     return avatarRequiredMaterials.value.length > 0 || weaponRequiredMaterials.value.length > 0;
   });
   const rawDisplayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
-    const hasExplicitConversion = calculatorEntries.value.some(
+    const hasExplicitConversion = settledCalculatorEntries.value.some(
       (entry) => (calculatorAllocation.value.appliedConversions.get(entry.id)?.length ?? 0) > 0,
     );
     return useApiCalculation.value && !hasExplicitConversion
