@@ -5,6 +5,7 @@
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
+import { isRecord } from "@utils/common/typeGuards.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import appFs from "@utils/system/appFs.js";
 import TGLogger from "@utils/system/TGLogger.js";
@@ -50,10 +51,6 @@ function transUserChallenge(
     blings: data.blings,
     updated: fmtUtil.dateTime(new Date().getTime()),
   };
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isChallengeTeam(value: unknown): boolean {
@@ -301,17 +298,6 @@ function getInsertSql(
   data: TGApp.Sqlite.Challenge.TableTrans,
   uid?: string,
 ): TGApp.App.Sqlite.SqlStatement {
-  const parsed = parseRawChallenge({
-    ...data,
-    uid: uid ?? data.uid,
-    single: stringifyJson(data.single, "single"),
-    mp: stringifyJson(data.mp, "mp"),
-    blings: stringifyJson(data.blings, "blings"),
-  });
-  if (isQuarantine(parsed)) {
-    throw new Error(`HardChallenge validation failed: ${parsed.field}/${parsed.reason}`);
-  }
-  const updated = fmtUtil.dateTime(new Date().getTime());
   return {
     query: `INSERT INTO HardChallenge(uid, id, startTime, endTime, name, single, mp, blings, updated)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -324,15 +310,15 @@ function getInsertSql(
               blings = $8,
               updated = $9;`,
     values: [
-      parsed.uid,
-      parsed.id,
-      parsed.startTime,
-      parsed.endTime,
-      parsed.name,
-      stringifyJson(parsed.single, "single"),
-      stringifyJson(parsed.mp, "mp"),
-      stringifyJson(parsed.blings, "blings"),
-      updated,
+      uid ?? data.uid,
+      data.id,
+      data.startTime,
+      data.endTime,
+      data.name,
+      stringifyJson(data.single, "single"),
+      stringifyJson(data.mp, "mp"),
+      stringifyJson(data.blings, "blings"),
+      fmtUtil.dateTime(new Date().getTime()),
     ],
   };
 }

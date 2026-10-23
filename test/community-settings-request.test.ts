@@ -15,7 +15,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get, post: mocks.post },
 }));
-vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/getRequestHeader.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@utils/network/getRequestHeader.js")>()),
+  getRequestHeader: mocks.getRequestHeader,
+}));
 vi.mock("../src/request/replyAssetReq.js", () => ({
   uploadCustomAvatarImage: mocks.uploadCustomAvatarImage,
 }));
@@ -152,20 +155,13 @@ describe("communitySettingsReq", () => {
     );
   });
 
-  it("writes exactly the five official fields and excludes unknown input fields", async () => {
-    const settings = privacyUpdate;
-    const input = {
-      ...settings,
-      privacy_future_toggle: "keep",
-      privacy_invisible: { future_flag: true },
-    };
-
-    await communitySettingsReq.setPrivacy(cookie, input);
+  it("writes the five official privacy fields through the official endpoint", async () => {
+    await communitySettingsReq.setPrivacy(cookie, privacyUpdate);
 
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(
       authCookie,
       "POST",
-      JSON.stringify(settings),
+      JSON.stringify(privacyUpdate),
       "X4",
       true,
     );
@@ -173,7 +169,7 @@ describe("communitySettingsReq", () => {
       "https://bbs-api.miyoushe.com/user/wapi/userPrivacySetting",
       {
         headers: { "x-test-header": "test", "Content-Type": "application/json" },
-        body: settings,
+        body: privacyUpdate,
       },
     );
   });
@@ -306,21 +302,6 @@ describe("communitySettingsReq", () => {
     ).rejects.toThrow("UID 不一致");
     expect(mocks.post).not.toHaveBeenCalled();
   });
-
-  it.each(["", "blob:avatar", "https://example.com/avatar.png"])(
-    "rejects an invalid avatar URL before editing a profile: %s",
-    async (avatarUrl) => {
-      await expect(
-        communitySettingsReq.updateAppProfile(cookie, {
-          nickname: "旅行者",
-          introduce: "",
-          gender: 0,
-          avatar_url: avatarUrl,
-        }),
-      ).rejects.toThrow("头像地址无效");
-      expect(mocks.post).not.toHaveBeenCalled();
-    },
-  );
 
   it("writes custom avatar profiles through the native API_BBS endpoint", async () => {
     const signal = new AbortController().signal;

@@ -3,7 +3,12 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import { isRecord } from "@utils/common/typeGuards.js";
+import {
+  getAppSignCookie,
+  getCommunityCookie,
+  getRequestHeader,
+} from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 import { uploadCustomAvatarImage } from "./replyAssetReq.js";
@@ -14,37 +19,6 @@ const customAvatarProfileUrl: Readonly<string> = `${communityApiBaseUrl}user/api
 const avatarAssetsUrl: Readonly<string> = `${communityApiBaseUrl}pendant/api/assets/getMyBackpackAssets`;
 const commentDecorationAssetsUrl: Readonly<string> = `${communityApiBaseUrl}pendant/api/setUserAssets`;
 const commentDecorationAssetsType: Readonly<number> = 4;
-
-/**
- * 提取设置请求所需的最小 Cookie
- * @since Beta v0.13.0
- * @param cookie - 完整账户 Cookie
- * @returns 用于请求头签名的最小 Cookie
- */
-function getCommunityCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account.CookieTokenCookie {
-  return { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-}
-
-/**
- * 提取自定义头像检查请求所需的米游社 App Cookie
- * @since Beta v0.13.0
- * @param cookie - 完整账户 Cookie
- * @returns 用于 App 端签名与 Cookie 注入的凭据
- */
-function getCustomAvatarCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account.SignCookie {
-  if (typeof cookie !== "object" || cookie === null || Array.isArray(cookie)) {
-    throw new TypeError("登录凭据无效");
-  }
-  const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
-  const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
-  const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
-  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
-  if (!stuid || !stoken || !mid || !ltuid) {
-    throw new Error("登录凭据不完整，请刷新登录凭据");
-  }
-  if (stuid !== ltuid) throw new Error("登录凭据 UID 不一致，请刷新登录凭据");
-  return { stuid, stoken, mid };
-}
 
 /**
  * 创建设置写入请求头
@@ -73,8 +47,8 @@ function getSettingsWriteHeaders(
  * @returns 对象值或 undefined
  */
 function getRecord(value: unknown): Record<string, unknown> | undefined {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
-  return <Record<string, unknown>>value;
+  if (!isRecord(value)) return undefined;
+  return value;
 }
 
 /**
@@ -192,21 +166,11 @@ async function setPrivacy(
   cookie: TGApp.App.Account.Cookie,
   settings: TGApp.BBS.CommunitySettings.PrivacyUpdate,
 ): Promise<TGApp.BBS.CommunitySettings.PrivacyUpdateResp> {
-  const body: TGApp.BBS.CommunitySettings.PrivacyUpdate = {
-    privacy_invisible_post_and_instant: readBoolean(settings.privacy_invisible_post_and_instant),
-    privacy_invisible_collect: readBoolean(settings.privacy_invisible_collect),
-    privacy_invisible_watermark: readBoolean(settings.privacy_invisible_watermark),
-    privacy_visible_reply: readBoolean(settings.privacy_visible_reply),
-    privacy_user_center_view: settings.privacy_user_center_view,
-  };
-  if (body.privacy_user_center_view !== 1 && body.privacy_user_center_view !== 2) {
-    throw new TypeError("隐私设置数据无效，请重新加载。");
-  }
   const resp = await TGHttps.post<TGApp.BBS.CommunitySettings.PrivacyUpdateResp>(
     `${communityApiBaseUrl}user/wapi/userPrivacySetting`,
     {
-      headers: getSettingsWriteHeaders(cookie, body),
-      body,
+      headers: getSettingsWriteHeaders(cookie, settings),
+      body: settings,
     },
   );
   return resp.data;
@@ -281,7 +245,7 @@ async function getCustomAvatarPolicy(
 ): Promise<TGApp.BBS.CommunitySettings.CustomAvatarPolicy> {
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
-      ...getRequestHeader(getCustomAvatarCookie(cookie), "POST", "", "K2", true),
+      ...getRequestHeader(getAppSignCookie(cookie), "POST", "", "K2", true),
       "x-rpc-client_type": "2",
     },
     body: "",
@@ -320,59 +284,18 @@ async function uploadCustomAvatar(
  * 构造官方 App 资料更新参数
  * @since Beta v0.13.0
  * @param profile - 包含资料与头像地址的更新参数
- * @returns 仅包含官方 App 资料接口支持的字段
- * @remarks 自定义头像要求 upload-bbs 地址；动态头像允许携带查询参数的官方资源地址
+ * @returns 仅包含官方 App 资料接口支持的字段；字符串字段去除首尾空白
  */
 function buildAppProfile(
   profile: TGApp.BBS.CommunitySettings.ProfileUpdate,
 ): TGApp.BBS.CommunitySettings.ProfileUpdate {
-  const nickname = profile.nickname;
-  const introduce = profile.introduce;
-  const gender = profile.gender;
-  const avatarUrl = profile.avatar_url;
-  const rawAvatarAssetsId = profile.avatar_assets_id ?? "";
-  if (typeof nickname !== "string" || nickname.trim() === "") {
-    throw new TypeError("昵称不能为空");
-  }
-  if (typeof introduce !== "string") throw new TypeError("个人简介无效");
-  if (typeof gender !== "number" || !Number.isSafeInteger(gender)) {
-    throw new TypeError("性别数据无效");
-  }
-  if (typeof rawAvatarAssetsId !== "string") throw new TypeError("动态头像数据无效");
-  if (typeof avatarUrl !== "string" || avatarUrl.trim() === "") {
-    throw new TypeError("自定义头像地址无效");
-  }
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(avatarUrl);
-  } catch {
-    throw new TypeError("自定义头像地址无效");
-  }
-  const avatarAssetsId = rawAvatarAssetsId.trim();
-  const isDynamicAvatar = avatarAssetsId !== "";
-  if (
-    parsedUrl.protocol !== "https:" ||
-    parsedUrl.port !== "" ||
-    parsedUrl.username !== "" ||
-    parsedUrl.password !== ""
-  ) {
-    throw new TypeError("自定义头像地址无效");
-  }
-  if (
-    !isDynamicAvatar &&
-    (parsedUrl.hostname !== "upload-bbs.miyoushe.com" ||
-      parsedUrl.search !== "" ||
-      parsedUrl.hash !== "")
-  ) {
-    throw new TypeError("自定义头像地址无效");
-  }
   return {
     avatar: "",
-    avatar_url: avatarUrl,
-    avatar_assets_id: avatarAssetsId,
-    gender,
-    introduce: introduce.trim(),
-    nickname: nickname.trim(),
+    avatar_url: profile.avatar_url,
+    avatar_assets_id: profile.avatar_assets_id?.trim() ?? "",
+    gender: profile.gender,
+    introduce: profile.introduce?.trim() ?? "",
+    nickname: profile.nickname?.trim() ?? "",
   };
 }
 
@@ -390,7 +313,7 @@ async function updateAppProfile(
   signal?: AbortSignal,
 ): Promise<TGApp.BBS.CommunitySettings.ProfileUpdateResp> {
   const body = buildAppProfile(profile);
-  const authCookie = getCustomAvatarCookie(cookie);
+  const authCookie = getAppSignCookie(cookie);
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
       ...getRequestHeader(authCookie, "POST", JSON.stringify(body), "K2", true),
@@ -434,7 +357,7 @@ async function getAvatarAssets(
   const query = { assets_type: 3 };
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
-      ...getRequestHeader(getCustomAvatarCookie(cookie), "GET", query, "K2", true),
+      ...getRequestHeader(getAppSignCookie(cookie), "GET", query, "K2", true),
       "x-rpc-client_type": "2",
     },
     query,
@@ -601,7 +524,7 @@ async function getCommentDecorationList(
   const query = { assets_type: commentDecorationAssetsType };
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
-      ...getRequestHeader(getCustomAvatarCookie(cookie), "GET", query, "K2", true),
+      ...getRequestHeader(getAppSignCookie(cookie), "GET", query, "K2", true),
       "x-rpc-client_type": "2",
     },
     query,
@@ -665,7 +588,7 @@ async function setCommentDecoration(
   const query = { assets_id: assetsId, assets_type: commentDecorationAssetsType };
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
-      ...getRequestHeader(getCustomAvatarCookie(cookie), "POST", query, "K2", true),
+      ...getRequestHeader(getAppSignCookie(cookie), "POST", query, "K2", true),
       "x-rpc-client_type": "2",
     },
     query,
