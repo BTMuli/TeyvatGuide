@@ -337,6 +337,7 @@ function getBox(
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 14px;
+  white-space: nowrap;
 
   &:hover {
     color: var(--tgc-yellow-2);
@@ -361,6 +362,7 @@ function getBox(
   column-gap: 4px;
   font-size: 12px;
   user-select: none;
+  white-space: nowrap;
 
   span:last-child {
     font-size: 10px;

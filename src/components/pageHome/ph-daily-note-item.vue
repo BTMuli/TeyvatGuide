@@ -154,6 +154,7 @@ async function handleShare(): Promise<void> {
   column-gap: 4px;
   font-family: var(--font-title);
   font-weight: normal;
+  white-space: nowrap;
 }
 
 .dni-header-acts {
@@ -167,6 +168,7 @@ async function handleShare(): Promise<void> {
   align-items: center;
   column-gap: 4px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .dni-content {

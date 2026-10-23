@@ -237,6 +237,7 @@ function getAnnoTime(content: string): string | false {
   margin: 4px;
   color: var(--tgc-white-1);
   gap: 4px;
+  white-space: nowrap;
 }
 
 .anno-label {

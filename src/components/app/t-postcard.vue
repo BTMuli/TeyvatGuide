@@ -925,6 +925,7 @@ function onUserClick(): void {
   color: var(--tgc-white-1);
   gap: 4px;
   opacity: 0.8;
+  white-space: nowrap;
 
   &--with-images {
     margin-right: 40px;

@@ -7,7 +7,7 @@
           <TMiImg :ori="true" :src="props.pos.icon" alt="icon" />
         </div>
         <div class="ph-po-right">
-          <div class="ph-po-title">{{ props.pos.title }}</div>
+          <div :title="props.pos.title" class="ph-po-title">{{ props.pos.title }}</div>
           <div class="ph-po-sub">{{ props.pos.abstract }}</div>
         </div>
       </div>
@@ -120,6 +120,8 @@ onUnmounted(() => {
 .ph-po-main {
   position: relative;
   display: flex;
+  min-width: 0;
+  flex: 1;
   align-items: center;
   justify-content: flex-start;
   column-gap: 8px;
@@ -130,6 +132,7 @@ onUnmounted(() => {
   overflow: hidden;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   border-radius: 3px;
   background: var(--box-bg-2);
   object-fit: contain;
@@ -150,6 +153,7 @@ onUnmounted(() => {
 .ph-po-right {
   position: relative;
   display: flex;
+  min-width: 0;
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
@@ -157,8 +161,12 @@ onUnmounted(() => {
 }
 
 .ph-po-title {
+  overflow: hidden;
+  max-width: 100%;
   font-family: var(--font-title);
   font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ph-po-sub {
@@ -191,6 +199,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: flex-start;
   column-gap: 4px;
+  white-space: nowrap;
 
   :first-child {
     color: var(--tgc-od-orange);
@@ -204,6 +213,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: flex-end;
   column-gap: 4px;
+  white-space: nowrap;
 
   :first-child {
     color: var(--tgc-od-green);

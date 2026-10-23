@@ -83,7 +83,9 @@ defineProps<TurRoleInfoProps>();
   column-gap: 4px;
   font-family: var(--font-title);
   font-size: 16px;
+  font-weight: normal;
   line-height: 20px;
+  white-space: nowrap;
 }
 
 .tur-ri-subtitle {
