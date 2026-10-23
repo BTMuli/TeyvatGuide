@@ -35,6 +35,20 @@
         </div>
       </div>
       <div v-if="selectedCollection" class="cp-content-actions">
+        <v-btn
+          v-if="canToggleCollectionFavorite"
+          :aria-pressed="isSelectedCollectionFavorite"
+          :class="['cp-collection-favorite', { 'is-favorite': isSelectedCollectionFavorite }]"
+          :disabled="togglingCollectionFavoriteId !== undefined"
+          :loading="togglingCollectionFavoriteId === selectedCollection?.id"
+          :prepend-icon="isSelectedCollectionFavorite ? 'mdi-star' : 'mdi-star-outline'"
+          :title="isSelectedCollectionFavorite ? '取消收藏合集' : '收藏合集'"
+          size="small"
+          variant="text"
+          @click="toggleCollectionFavorite(selectedCollection)"
+        >
+          {{ isSelectedCollectionFavorite ? "已收藏" : "收藏" }}
+        </v-btn>
         <v-btn prepend-icon="mdi-arrow-left" size="small" variant="text" @click="closeCollection"
           >返回合集</v-btn
         >
@@ -310,6 +324,24 @@
                 @click="unfavoriteCollection(entry.collection)"
               />
             </div>
+            <div v-else-if="canToggleCollectionFavorite" class="cp-entry-actions">
+              <v-btn
+                :aria-label="`${isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'}合集：${entry.collection.title}`"
+                :aria-pressed="isCollectionFavorite(entry.collection)"
+                :class="[
+                  'cp-entry-favorite',
+                  { 'is-favorite': isCollectionFavorite(entry.collection) },
+                ]"
+                :disabled="togglingCollectionFavoriteId !== undefined"
+                :icon="isCollectionFavorite(entry.collection) ? 'mdi-star' : 'mdi-star-outline'"
+                :loading="togglingCollectionFavoriteId === entry.collection.id"
+                :title="isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'"
+                size="small"
+                type="button"
+                variant="text"
+                @click="toggleCollectionFavorite(entry.collection)"
+              />
+            </div>
             <v-icon class="cp-entry-chevron" size="18" aria-hidden="true">mdi-chevron-right</v-icon>
           </div>
         </template>
@@ -521,6 +553,13 @@ const filteredCollectionPosts = computed<Array<TGApp.BBS.Post.FullData>>(() => {
 const canUnfavoriteCollection = computed<boolean>(
   () =>
     section === "favorites" && favoriteTab.value === "collections" && !isViewingOtherProfile.value,
+);
+const canToggleCollectionFavorite = computed<boolean>(
+  () => section === "collections" && isViewingOtherProfile.value,
+);
+const togglingCollectionFavoriteId = ref<number | undefined>();
+const isSelectedCollectionFavorite = computed<boolean>(() =>
+  Boolean(selectedCollection.value?.is_following),
 );
 const collectionFormVisible = ref<boolean>(false);
 const editingCollection = shallowRef<TGApp.BBS.Collection.Collection>();
@@ -1089,6 +1128,54 @@ async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<v
   }
 }
 
+function isCollectionFavorite(collection: TGApp.BBS.Collection.Collection): boolean {
+  return Boolean(collection.is_following);
+}
+
+function setCollectionFavorite(id: number, favorite: boolean): void {
+  entries.value = entries.value.map((entry) =>
+    entry.kind === "collection" && entry.id === String(id)
+      ? { ...entry, collection: { ...entry.collection, is_following: favorite } }
+      : entry,
+  );
+  if (selectedCollection.value?.id === id) {
+    selectedCollection.value = { ...selectedCollection.value, is_following: favorite };
+  }
+}
+
+async function toggleCollectionFavorite(
+  collection: TGApp.BBS.Collection.Collection | undefined,
+): Promise<void> {
+  if (
+    collection === undefined ||
+    !canToggleCollectionFavorite.value ||
+    togglingCollectionFavoriteId.value !== undefined
+  )
+    return;
+  const snapshot = getSnapshot();
+  if (snapshot === undefined) {
+    showSnackbar.warn("当前账号凭据不可用，请重新登录米游社账号。");
+    return;
+  }
+  const version = generation;
+  const favorite = !isCollectionFavorite(collection);
+  togglingCollectionFavoriteId.value = collection.id;
+  try {
+    const response = favorite
+      ? await communityReq.followCollection(snapshot.cookie, collection.id)
+      : await communityReq.unfollowCollection(snapshot.cookie, collection.id);
+    if (!isCurrent(snapshot, version)) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    setCollectionFavorite(collection.id, favorite);
+    showSnackbar.success(favorite ? "收藏成功" : "已取消收藏");
+  } catch (cause) {
+    if (!isCurrent(snapshot, version)) return;
+    showSnackbar.error(`${favorite ? "收藏" : "取消收藏"}失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    togglingCollectionFavoriteId.value = undefined;
+  }
+}
+
 async function unfavoriteCollection(
   collection: TGApp.BBS.Collection.Collection | undefined = selectedCollection.value,
 ): Promise<void> {
@@ -1322,6 +1409,22 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
   gap: 8px;
 }
 
+.cp-collection-favorite {
+  border: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-2);
+  color: var(--box-text-4);
+  font-weight: normal;
+
+  &.is-favorite {
+    color: var(--tgc-od-orange);
+  }
+
+  &:hover {
+    border-color: var(--common-shadow-2);
+    background: var(--box-bg-3);
+  }
+}
+
 .cp-content-heading {
   display: flex;
   min-width: 0;
@@ -1537,6 +1640,25 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
 
 .cp-entry-card:hover .cp-entry-delete-button {
   background: var(--box-bg-1);
+}
+
+.cp-entry-favorite {
+  flex: none;
+  border: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-2);
+  color: var(--box-text-4);
+
+  &.is-favorite {
+    color: var(--tgc-od-orange);
+  }
+}
+
+.cp-entry-card:hover .cp-entry-favorite {
+  background: var(--box-bg-1);
+}
+
+.cp-entry-card:hover .cp-entry-favorite:hover {
+  background: var(--box-bg-3);
 }
 
 .cp-entry-chevron {
