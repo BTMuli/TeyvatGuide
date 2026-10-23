@@ -26,6 +26,18 @@
           <span>ID:{{ userInfo.uid }}</span>
           <span>IP:{{ userInfo.ip_region }}</span>
         </div>
+        <button
+          v-if="canFollow && followState"
+          :aria-label="followState.label"
+          :disabled="followLoading"
+          :title="followState.label"
+          class="vp-ou-follow"
+          type="button"
+          @click="toggleFollow()"
+        >
+          <v-progress-circular v-if="followLoading" indeterminate size="14" width="2" />
+          <v-icon v-else aria-hidden="true" size="16">{{ followState.icon }}</v-icon>
+        </button>
       </div>
       <div class="vp-ou-divider" />
       <div ref="listRef" class="vp-ou-list">
@@ -44,28 +56,54 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
+import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
+import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
 import { openCommunityProfile } from "@utils/community/profile.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
+import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostUserProps = { gid: number; uid: string; postId?: string };
+type FollowState = { icon: string; label: string };
+type AccountSnapshot = {
+  uid: string;
+  targetUid: string;
+  cookie: TGApp.App.Account.Cookie;
+};
 
 const listEl = useTemplateRef<HTMLElement>("listRef");
 const { isReachBottom } = useBoxReachBottom(listEl);
 
 const props = defineProps<ToPostUserProps>();
 const visible = defineModel<boolean>();
+const { isLogin } = storeToRefs(useAppStore());
+const { uid: accountUid, cookie } = storeToRefs(useUserStore());
 const offset = ref<string>();
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const userInfo = shallowRef<TGApp.BBS.User.Info>();
+const followRelation = shallowRef<TGApp.BBS.User.FollowRelation>();
+const followLoading = ref<boolean>(false);
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const canFollow = computed<boolean>(() => getAccountSnapshot() !== undefined);
+const followState = computed<FollowState | undefined>(() => {
+  const relation = followRelation.value;
+  if (relation === undefined) return undefined;
+  if (relation.is_following && relation.is_followed)
+    return { icon: "mdi-account-multiple-check-outline", label: "互关，点击取关" };
+  if (relation.is_following)
+    return { icon: "mdi-account-check-outline", label: "已关注，点击取关" };
+  if (relation.is_followed) return { icon: "mdi-account-heart-outline", label: "粉丝，点击回关" };
+  return { icon: "mdi-account-plus-outline", label: "未关注，点击关注" };
+});
 const avatarUrl = computed<string>(() => {
   if (!userInfo.value) return "";
   return getUserAvatar(userInfo.value);
@@ -113,9 +151,11 @@ watch(
 );
 
 async function loadUser(): Promise<void> {
+  followLoading.value = false;
+  followRelation.value = undefined;
   let resp: TGApp.BBS.User.InfoResp | undefined;
   try {
-    resp = await bbsReq.otherUserInfo(props.gid.toString(), props.uid);
+    resp = await bbsReq.otherUserInfo(props.gid.toString(), props.uid, cookie.value);
     if (resp.retcode !== 0) {
       showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
       await TGLogger.Warn(`[vp-overlay-user] 获取用户信息失败：[${resp.retcode}] ${resp.message}`);
@@ -128,6 +168,7 @@ async function loadUser(): Promise<void> {
     return;
   }
   userInfo.value = resp.data.user_info;
+  followRelation.value = resp.data.follow_relation;
 }
 
 async function toCurrentUserProfile(): Promise<void> {
@@ -136,6 +177,73 @@ async function toCurrentUserProfile(): Promise<void> {
 
 async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
   await openCommunityProfile(user.uid, gid);
+}
+
+/**
+ * 获取当前账户与目标用户的可关注快照
+ * @since Beta v0.13.0
+ * @returns 账户快照；未登录、凭据不可用或目标为本人时返回 undefined
+ */
+function getAccountSnapshot(): AccountSnapshot | undefined {
+  const targetUid = userInfo.value?.uid.trim();
+  const accountCookie = cookie.value;
+  if (!isLogin.value || !accountUid.value || !accountCookie || !targetUid) return undefined;
+  if (targetUid === accountUid.value.trim()) return undefined;
+  if (accountCookie.account_id.trim() === "" || accountCookie.cookie_token.trim() === "")
+    return undefined;
+  return { uid: accountUid.value, targetUid, cookie: { ...accountCookie } };
+}
+
+/**
+ * 校验关注操作前后的账户与目标用户是否一致
+ * @since Beta v0.13.0
+ * @param snapshot - 操作前的账户快照
+ * @returns 账户与目标用户是否仍与快照一致
+ */
+function isCurrentAccount(snapshot: AccountSnapshot): boolean {
+  const accountCookie = cookie.value;
+  return (
+    isLogin.value &&
+    accountUid.value === snapshot.uid &&
+    userInfo.value?.uid.trim() === snapshot.targetUid &&
+    accountCookie?.account_id === snapshot.cookie.account_id &&
+    accountCookie?.cookie_token === snapshot.cookie.cookie_token
+  );
+}
+
+/**
+ * 切换对目标用户的关注状态
+ * @since Beta v0.13.0
+ * @returns 无返回值
+ */
+async function toggleFollow(): Promise<void> {
+  const relation = followRelation.value;
+  const snapshot = getAccountSnapshot();
+  if (relation === undefined || snapshot === undefined || followLoading.value) return;
+  const follow = !relation.is_following;
+  if (!follow) {
+    const nickname = userInfo.value?.nickname.trim() || `用户 ${snapshot.targetUid}`;
+    const confirmed = await showDialog.checkF({
+      cancelLabel: "继续关注",
+      confirmLabel: "取消关注",
+      text: `确定要取消关注“${nickname}”吗？`,
+      title: "取消关注",
+    });
+    if (!confirmed || !isCurrentAccount(snapshot)) return;
+  }
+  followLoading.value = true;
+  try {
+    const response = await communityReq.setFollow(snapshot.cookie, snapshot.targetUid, follow);
+    if (!isCurrentAccount(snapshot)) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    followRelation.value = { ...relation, is_following: follow };
+    showSnackbar.success(follow ? "关注成功" : "已取消关注");
+  } catch (cause) {
+    if (!isCurrentAccount(snapshot)) return;
+    showSnackbar.error(`${follow ? "关注" : "取消关注"}失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    followLoading.value = false;
+  }
 }
 
 async function loadPosts(): Promise<void> {
@@ -311,6 +419,7 @@ async function loadPosts(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .vp-ouu-extra {
@@ -322,6 +431,40 @@ async function loadPosts(): Promise<void> {
   column-gap: 8px;
   font-size: 12px;
   opacity: 0.6;
+}
+
+.vp-ou-follow {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--tgc-od-orange);
+    outline-offset: 1px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--common-shadow-2);
+    background: var(--box-bg-3);
+  }
 }
 
 .vp-ou-divider {
