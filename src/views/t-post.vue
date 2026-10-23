@@ -295,6 +295,7 @@ onMounted(async () => {
   }
   console.log(postData.value);
   isLike.value = (postData.value.self_operation?.upvote_type ?? 0) > 0;
+  if (incognito.value) await syncDynamic();
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);
   await webviewWindow
@@ -483,6 +484,25 @@ async function createPostJson(postId: number): Promise<void> {
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 
+async function syncDynamic(): Promise<void> {
+  if (!cookie.value || !postData.value) return;
+  const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  try {
+    const resp = await postReq.dynamic([postData.value.post.post_id], ck);
+    if (resp.retcode !== 0) {
+      await TGLogger.Warn(`[t-post][${postId}][syncDynamic] ${resp.retcode}: ${resp.message}`);
+      return;
+    }
+    const dynamic = resp.data.list[0];
+    if (!dynamic) return;
+    isLike.value = dynamic.is_upvote;
+    if (postData.value.stat) postData.value.stat.like_num = dynamic.stat.like_num;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await TGLogger.Warn(`[t-post][${postId}][syncDynamic] ${errMsg}`);
+  }
+}
+
 async function tryLike(): Promise<void> {
   if (!cookie.value) {
     showSnackbar.error("请先登录");
@@ -509,6 +529,7 @@ async function tryLike(): Promise<void> {
   isLike.value = !isLike.value;
   postData.value.stat!.like_num += isLike.value ? 1 : -1;
   showSnackbar.success(isLike.value ? "点赞成功" : "取消点赞成功");
+  if (incognito.value) await syncDynamic();
 }
 
 async function toPost(): Promise<void> {

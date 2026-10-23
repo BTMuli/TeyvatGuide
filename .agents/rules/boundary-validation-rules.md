@@ -28,6 +28,7 @@
 ## 已接入接口
 
 - `postReq.post`（getPostFull）：`isPostFullResp`，schema `postFull.json`。
+- `postReq.dynamic`（getDynamicData）：`isPostDynamicResp`，schema `postDynamic.json`。
 - `postReq.collection`（getPostFullInCollection）：`isCollectionPostsResp`，schema `collectionPosts.json`。
 - 共享骨架：`fullData.json`（FullData 最小骨架）。
 

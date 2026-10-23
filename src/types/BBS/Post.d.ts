@@ -536,6 +536,30 @@ declare namespace TGApp.BBS.Post {
   };
 
   /**
+   * 帖子动态数据
+   * @since Beta v0.13.0
+   */
+  type DynamicData = {
+    /** 帖子 ID */
+    post_id: string;
+    /** 是否已点赞 */
+    is_upvote: boolean;
+    /** 帖子状态 */
+    stat: Stat;
+    /** 当前用户操作，可能为 null */
+    self_operation: TGApp.BBS.User.SelfOperation | null;
+  };
+
+  /**
+   * 帖子动态数据响应
+   * @since Beta v0.13.0
+   */
+  type DynamicResp = TGApp.BBS.Response.BaseWithData<{
+    /** 帖子动态数据列表 */
+    list: Array<DynamicData>;
+  }>;
+
+  /**
    * 图片数据
    * @since Beta v0.7.2
    */

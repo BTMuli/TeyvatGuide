@@ -3,7 +3,7 @@
  * @since Beta v0.13.0
  */
 import bbsEnum from "@enum/bbs.js";
-import { isCollectionPostsResp, isPostFullResp } from "@req/respValidator.js";
+import { isCollectionPostsResp, isPostDynamicResp, isPostFullResp } from "@req/respValidator.js";
 import {
   getReplyContentFromSendNodes,
   serializeReplySendNodes,
@@ -105,6 +105,36 @@ async function getPostFull(
       query: param,
     },
     isPostFullResp,
+  );
+  return resp.data;
+}
+
+/**
+ * 获取帖子动态数据
+ * @since Beta v0.13.0
+ * @param postIds - 帖子 ID 列表
+ * @param cookie - 用户 Cookie，用于读取自身点赞状态
+ * @returns 帖子动态数据响应
+ * @remarks 用于批量刷新帖子统计与自身操作状态，不记录浏览历史。
+ */
+async function getPostDynamicData(
+  postIds: Array<number | string>,
+  cookie?: TGApp.App.Account.LoginCookie,
+): Promise<TGApp.BBS.Post.DynamicResp> {
+  if (postIds.length === 0) throw new TypeError("帖子 ID 列表不能为空");
+  for (const id of postIds) assertPositiveId(String(id), "帖子 ID");
+  const param = { post_ids: postIds.map(String).join(",") };
+  const header: Record<string, string> = {
+    ...getRequestHeader(cookie ?? {}, "GET", param, "K2", true),
+    "x-rpc-client_type": "2",
+  };
+  const resp = await TGHttps.get(
+    `${bapBu}getDynamicData`,
+    {
+      headers: header,
+      query: param,
+    },
+    isPostDynamicResp,
   );
   return resp.data;
 }
@@ -439,6 +469,7 @@ async function userFavouritePost(
 
 const postReq = {
   collection: getPostFullInCollection,
+  dynamic: getPostDynamicData,
   post: getPostFull,
   topic: getTopicPostList,
   reply: {

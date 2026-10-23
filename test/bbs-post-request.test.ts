@@ -243,6 +243,33 @@ describe("postReq.post captcha requests", () => {
   });
 });
 
+describe("postReq.dynamic requests", () => {
+  it("queries dynamic data with comma-joined ids and signed credentials", async () => {
+    await postReq.dynamic([123, "456"], authCookie);
+
+    expect(mocks.get).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/getDynamicData",
+      {
+        headers: { "x-test-header": "test", "x-rpc-client_type": "2" },
+        query: { post_ids: "123,456" },
+      },
+      expect.any(Function),
+    );
+    expect(mocks.getRequestHeader).toHaveBeenCalledWith(
+      authCookie,
+      "GET",
+      { post_ids: "123,456" },
+      "K2",
+      true,
+    );
+  });
+
+  it.each([[[]], [[0]], [["12a"]]])("rejects invalid post ids %j before HTTP", async (ids) => {
+    await expect(postReq.dynamic(ids)).rejects.toThrow();
+    expect(mocks.get).not.toHaveBeenCalled();
+  });
+});
+
 describe("postEditReq mutation requests", () => {
   it("sends HTML and normalized nodes from the same canonical document", async () => {
     const canonical = {

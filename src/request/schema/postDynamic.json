@@ -1,0 +1,37 @@
+{
+  "$id": "https://schema.local/bbs/postDynamic.json",
+  "type": "object",
+  "title": "帖子动态数据",
+  "required": ["list"],
+  "properties": {
+    "list": {
+      "type": "array",
+      "title": "帖子动态数据列表",
+      "items": {
+        "type": "object",
+        "required": ["post_id", "is_upvote", "stat"],
+        "properties": {
+          "post_id": {
+            "type": "string",
+            "title": "帖子 ID"
+          },
+          "is_upvote": {
+            "type": "boolean",
+            "title": "是否已点赞"
+          },
+          "stat": {
+            "type": "object",
+            "title": "帖子统计",
+            "required": ["like_num"],
+            "properties": {
+              "like_num": {
+                "type": "number",
+                "title": "点赞数"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
