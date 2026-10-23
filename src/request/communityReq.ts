@@ -302,6 +302,31 @@ async function getFavoriteCollections(
 }
 
 /**
+ * 收藏合集
+ * @since Beta v0.13.0
+ * @param cookie - 账户 Cookie
+ * @param collectionId - 合集 ID
+ * @returns 收藏响应数据
+ */
+async function followCollection(
+  cookie: TGApp.App.Account.Cookie,
+  collectionId: number,
+): Promise<TGApp.BBS.Response.Base> {
+  const body = { id: collectionId };
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
+    `${communityApiBaseUrl}collection/wapi/collection/follow`,
+    {
+      headers: {
+        ...getCollectionRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body)),
+        "Content-Type": "application/json",
+      },
+      body,
+    },
+  );
+  return resp.data;
+}
+
+/**
  * 取消收藏合集
  * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
@@ -317,7 +342,7 @@ async function unfollowCollection(
     `${communityApiBaseUrl}collection/wapi/collection/unfollow`,
     {
       headers: {
-        ...getCollectionRequestHeader(getCommunityCookie(cookie), "POST", body),
+        ...getCollectionRequestHeader(getCommunityCookie(cookie), "POST", JSON.stringify(body)),
         "Content-Type": "application/json",
       },
       body,
@@ -614,6 +639,7 @@ const communityReq = {
   favorites: getFavorites,
   unfavoritePost,
   favoriteCollections: getFavoriteCollections,
+  followCollection,
   unfollowCollection,
   following: getFollowing,
   followers: getFollowers,

@@ -167,6 +167,31 @@ describe("communityReq read requests", () => {
 });
 
 describe("communityReq favorite write requests", () => {
+  it("follows and unfollows a collection with a signed JSON body", async () => {
+    const body = { id: 123456 };
+    await communityReq.followCollection(cookie, 123456);
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/follow",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body },
+    );
+
+    await communityReq.unfollowCollection(cookie, 123456);
+    expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(
+      authCookie,
+      "POST",
+      JSON.stringify(body),
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/collection/wapi/collection/unfollow",
+      { headers: { ...collectionHeaders, "Content-Type": "application/json" }, body },
+    );
+  });
+
   it("cancels a favorite with a signed JSON body", async () => {
     await communityReq.unfavoritePost(cookie, "79040314");
 
