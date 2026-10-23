@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心评论正文转换回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";
@@ -9,7 +9,7 @@ import { getCommunityCommentContent } from "../src/utils/communityComment.js";
 
 /**
  * 评论正文测试的字段覆盖值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CommentOverrides = {
   reply?: Record<string, unknown>;
@@ -20,7 +20,7 @@ type CommentOverrides = {
 
 /**
  * 构造正文转换所需的最小评论响应夹具。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param overrides - 待覆盖的字段
  * @returns 评论响应夹具
  */
@@ -44,7 +44,7 @@ function createComment(overrides: CommentOverrides = {}): TGApp.BBS.Community.Co
 
 /**
  * 构造评论图片夹具。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param url - 图片地址
  * @returns 评论图片夹具
  */

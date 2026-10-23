@@ -1,11 +1,11 @@
 /**
  * 个人主页分区等级选择工具。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 /**
  * 从用户信息中选择指定分区的等级经验。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param userInfo - 用户信息
  * @param gid - 当前分区 ID
  * @param requestedGid - 请求明确指定的分区 ID
@@ -31,7 +31,7 @@ export function getCommunityProfileLevel(
 
 /**
  * 获取个人主页等级徽章颜色。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param level - 用户等级
  * @returns 等级徽章颜色 token
  */

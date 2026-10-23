@@ -500,7 +500,7 @@ const notificationCategories: Readonly<
 
 /**
  * 查看用户资料时的账户与目标用户快照。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AccountSnapshot = {
   uid: string;
@@ -534,7 +534,7 @@ const defaultProfileGame: ProfileGameOption = {
 
 /**
  * 归一化后的帖子分页数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostPage = {
   list: Array<TGApp.BBS.Post.FullData>;

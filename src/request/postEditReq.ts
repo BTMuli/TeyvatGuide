@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文帖发布、编辑与删除请求。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -40,7 +40,7 @@ const userAiContentChoices: ReadonlySet<string> = new Set([
 
 /**
  * 普通图文帖变更请求体。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostMutationBody = {
   gids: string;
@@ -66,7 +66,7 @@ type MutationDocument =
 
 /**
  * 帖子删除请求体。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type DeleteBody = {
   gids: string;
@@ -77,13 +77,13 @@ type DeleteBody = {
 
 /**
  * 来源数据运行时记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type SourceRecord = Record<string, unknown>;
 
 /**
  * 判断值是否为普通记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为普通记录
  */
@@ -93,7 +93,7 @@ function isRecord(value: unknown): value is SourceRecord {
 
 /**
  * 校验正整数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的值
  * @param name - 字段名称
  * @returns 校验后的整数
@@ -107,7 +107,7 @@ function getPositiveInteger(value: unknown, name: string): number {
 
 /**
  * 校验非负整数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的值
  * @param name - 字段名称
  * @returns 校验后的整数
@@ -121,7 +121,7 @@ function getNonNegativeInteger(value: unknown, name: string): number {
 
 /**
  * 校验当前帖子类型。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 米游社 view_type
  * @returns 支持的帖子类型
  */
@@ -134,7 +134,7 @@ function getPostViewType(value: unknown): 1 | 2 {
 
 /**
  * 获取编辑设置中的帖子类型，缺省按普通图文帖处理。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 编辑设置中的 viewType
  * @returns 支持的帖子类型
  */
@@ -144,7 +144,7 @@ function getSettingsViewType(value: unknown): 1 | 2 {
 
 /**
  * 校验评论图片权限标记。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 米游社 0/1 权限标记
  * @returns 校验后的标记
  */
@@ -155,7 +155,7 @@ function getBlockReplyImg(value: unknown): number {
 
 /**
  * 校验 AI 内容选择标记。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 米游社 AI 内容选择标记
  * @returns 校验后的标记
  */
@@ -168,7 +168,7 @@ function getUserAiContentChoice(value: unknown): string {
 
 /**
  * 获取新帖默认 AI 内容选择标记。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 米游社 AI 内容选择标记
  * @returns 校验后的标记
  */
@@ -178,7 +178,7 @@ function getCreateUserAiContentChoice(value: unknown): string {
 
 /**
  * 提取最小登录凭据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 用于签名的 ltoken 和 ltuid
  */
@@ -191,7 +191,7 @@ function getAuthCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account
 
 /**
  * 校验帖子正文节点中的提及数量。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 结构化正文节点
  * @returns 提及数量
  */
@@ -213,7 +213,7 @@ function countMentions(nodes: Array<TGApp.BBS.SctPost.Base>): number {
 
 /**
  * 移除米游社原生投票规范化时不会保留的 URL 字段。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已规范化的帖子节点
  * @returns 可发送的帖子节点
  */
@@ -248,7 +248,7 @@ function stripPostVoteUrls(nodes: Array<TGApp.BBS.PostEdit.Node>): Array<TGApp.B
 
 /**
  * 判断帖子节点是否为自定义表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param node - 帖子正文节点
  * @returns 是否为自定义表情节点
  */
@@ -260,7 +260,7 @@ function isCustomEmoticonNode(
 
 /**
  * 拒绝新帖使用已失效的收藏表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已规范化的帖子正文节点
  */
 function assertNewPostCustomEmoticons(nodes: Array<TGApp.BBS.PostEdit.Node>): void {
@@ -282,7 +282,7 @@ function assertNewPostCustomEmoticons(nodes: Array<TGApp.BBS.PostEdit.Node>): vo
 
 /**
  * 校验帖子来源的基础元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  */
 function assertBasicSource(source: TGApp.BBS.Post.FullData): void {
@@ -299,7 +299,7 @@ function assertBasicSource(source: TGApp.BBS.Post.FullData): void {
 /**
  * 判断来源是否明确标记为非盈利帖子。
  * 官方普通帖响应已观察到状态 -2，保留现有状态 0 作为兼容值；这里不宣称完整状态枚举。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子状态
  * @returns 是否可安全保留盈利元数据
  */
@@ -313,7 +313,7 @@ function hasSafeProfitMetadata(post: TGApp.BBS.Post.FullData["post"]): boolean {
 
 /**
  * 校验已有合集的完整来源元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 合集来源数据
  * @returns 已校验的合集 ID；无合集时为 null
  */
@@ -349,7 +349,7 @@ function assertEditableCollection(value: unknown): string | null {
 
 /**
  * 判断来源帖子的结构化正文是否包含投票节点，包括折叠内的嵌套 Delta。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的结构化正文
  * @returns 是否存在投票嵌入
  */
@@ -383,7 +383,7 @@ function containsVoteNode(value: unknown): boolean {
 
 /**
  * 收集来源帖子结构化正文中的视频 ID，包括折叠内的嵌套 Delta。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的结构化正文
  * @param ids - 已收集的视频 ID
  */
@@ -419,7 +419,7 @@ function collectVodIds(value: unknown, ids: Set<string>): void {
 
 /**
  * 校验帖子来源的可编辑元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @returns 已校验的来源合集 ID；无合集时为 null
  */
@@ -487,7 +487,7 @@ function assertEditableSource(source: TGApp.BBS.Post.FullData): string | null {
 
 /**
  * 校验帖子来源的删除元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  */
 function assertDeletableSource(source: TGApp.BBS.Post.FullData): void {
@@ -500,7 +500,7 @@ function assertDeletableSource(source: TGApp.BBS.Post.FullData): void {
 
 /**
  * 解析并校验来源帖子的结构化正文。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @returns 可编辑节点
  */
@@ -523,7 +523,7 @@ function getSourceNodes(source: TGApp.BBS.Post.FullData): Array<TGApp.BBS.SctPos
 
 /**
  * 解析并校验来源图片帖的介绍和独立图片列表。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @returns 可编辑的图片帖文档
  */
@@ -555,7 +555,7 @@ function getSourcePictureDocument(
 
 /**
  * 获取来源帖子中的封面地址，并确认它仍存在于正文图片中。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @param images - 正文图片
  * @param viewType - 帖子类型
@@ -595,7 +595,7 @@ function getSourceCover(
 
 /**
  * 从官方帖子详情初始化编辑设置。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @returns 普通图文帖编辑设置
  */
@@ -649,7 +649,7 @@ export function getPostEditSettings(source: TGApp.BBS.Post.FullData): TGApp.BBS.
 
 /**
  * 校验并构建帖子发布请求体。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param settings - 发布设置
  * @param postId - 编辑时的帖子 ID
  * @param sourceImageCount - 编辑来源图片数量
@@ -739,7 +739,7 @@ function buildMutationBody(
 
 /**
  * 创建帖子变更请求头。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 用户 Cookie
  * @param body - 完整请求体
  * @returns 带 K2 签名的 JSON 请求头
@@ -757,7 +757,7 @@ function getMutationHeaders(
 
 /**
  * 校验帖子作者与当前登录账号一致。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @param cookie - 用户 Cookie
  * @param editable - 是否应用普通图文帖编辑限制
@@ -777,7 +777,7 @@ function assertOwner(
 
 /**
  * 创建普通图文帖。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param settings - 发布设置
  * @param cookie - 用户 Cookie
  * @returns 服务端变更响应
@@ -796,7 +796,7 @@ export async function createPost(
 
 /**
  * 编辑作者自己的普通图文帖。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 原帖子完整数据
  * @param settings - 更新后的发布设置
  * @param cookie - 用户 Cookie
@@ -838,7 +838,7 @@ export async function updatePost(
 
 /**
  * 删除作者自己的普通图文帖。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param source - 帖子完整数据
  * @param cookie - 用户 Cookie
  * @returns 服务端变更响应
@@ -866,7 +866,7 @@ export async function deletePost(
 
 /**
  * 查询版块发布限制。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param gid - 社区 ID
  * @param forumId - 版块 ID
  * @param cookie - 用户 Cookie

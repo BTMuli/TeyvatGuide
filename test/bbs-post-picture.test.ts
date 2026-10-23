@@ -1,6 +1,6 @@
 /**
  * 米游社图片帖正文契约回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";
@@ -14,7 +14,7 @@ import {
 
 /**
  * 生成固定的图片测试地址。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param index - 图片序号
  * @returns 图片地址
  */

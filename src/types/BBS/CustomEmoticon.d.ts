@@ -1,11 +1,11 @@
 /**
  * 米游社自定义表情类型定义
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 declare namespace TGApp.BBS.CustomEmoticon {
   /**
    * 收藏表情列表接口响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ListResp = Omit<TGApp.BBS.Response.Base, "data"> & {
     /** 列表数据；接口失败时为 null */
@@ -14,7 +14,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 收藏表情列表接口数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ListRes = {
     /** 原始收藏条目列表 */
@@ -23,7 +23,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 收藏表情列表接口的原始条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ListItem = {
     /** 表情 ID */
@@ -48,7 +48,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 收藏表情列表接口的图片信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ImageExt = Size & {
     /** 图片文件大小，单位为字节 */
@@ -57,7 +57,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 自定义表情尺寸
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Size = {
     /** 图片宽度 */
@@ -70,7 +70,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 可安全发送的自定义表情数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Value = {
     /** 表情 ID */
@@ -87,7 +87,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 收藏列表中的可用自定义表情
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Item = Value & {
     /** 表情是否可用 */
@@ -96,7 +96,7 @@ declare namespace TGApp.BBS.CustomEmoticon {
 
   /**
    * 帖子或回复中的自定义表情节点内容
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Insert = {
     /** 自定义表情数据 */

@@ -1,12 +1,12 @@
 /**
  * 米游社个人中心设置类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.CommunitySettings {
   /**
    * 隐私隐藏字段
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyInvisible = {
     /** 是否隐藏发帖 */
@@ -25,7 +25,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 获取隐私设置接口返回的数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyInfo = {
     /** 隐私隐藏字段 */
@@ -36,13 +36,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 获取隐私设置响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyInfoResp = TGApp.BBS.Response.BaseWithData<PrivacyInfo>;
 
   /**
    * 隐私设置界面展示值
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyDraft = {
     /** 是否在个人中心展示帖子 */
@@ -59,7 +59,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 隐私设置写入参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyUpdate = {
     /** 是否隐藏发帖和即时 */
@@ -76,13 +76,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 隐私设置写入响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PrivacyUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
 
   /**
    * 资料编辑参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ProfileUpdate = {
     /** 用户昵称 */
@@ -101,13 +101,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 资料编辑响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ProfileUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
 
   /**
    * 自定义头像费用检查接口数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CustomAvatarCheckInfo = {
     /** 当前米游币余额 */
@@ -122,13 +122,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 自定义头像费用检查响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CustomAvatarCheckResp = TGApp.BBS.Response.BaseWithData<CustomAvatarCheckInfo>;
 
   /**
    * 自定义头像费用策略
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CustomAvatarPolicy = {
     /** 本次实际扣除米游币 */
@@ -141,7 +141,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 米游社可选头像
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Avatar = {
     /** 头像 ID */
@@ -158,7 +158,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 米游社可选头像分组
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarGroup = {
     /** 分组 ID，官方当前均为 0 */
@@ -179,13 +179,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 可选头像列表响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarSetResp = TGApp.BBS.Response.BaseWithData<{ list: Array<AvatarGroup> }>;
 
   /**
    * 动态头像资源
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarAssetItem = {
     /** 资源 ID */
@@ -215,7 +215,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 当前账户拥有的动态头像列表
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarAssetList = {
     /** 已拥有的资源列表 */
@@ -224,13 +224,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 动态头像列表响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarAssetResp = TGApp.BBS.Response.BaseWithData<AvatarAssetList>;
 
   /**
    * 动态头像选择项
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DynamicAvatar = {
     /** 动态头像资源 ID */
@@ -243,7 +243,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 自定义头像裁切位置
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AvatarCrop = {
     /** 水平位置，0 为最左，1 为最右 */
@@ -254,7 +254,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 自定义头像确认结果
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CustomAvatarSelection = {
     /** 裁切后的静态头像文件 */
@@ -267,7 +267,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 用户头像框
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Pendant = {
     /** 头像框 ID */
@@ -294,7 +294,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 评论装扮
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @remarks 官方以字符串返回 19 位资源 ID，不能转换为 Number，否则会丢失精度
    */
   type CommentDecoration = {
@@ -324,13 +324,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 用户头像框列表响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PendantListResp = TGApp.BBS.Response.BaseWithData<{ list: Array<Pendant> }>;
 
   /**
    * 头像框设置参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PendantUpdate = {
     /** 头像框 ID，0 表示不使用头像框 */
@@ -339,13 +339,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 头像框设置响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PendantUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
 
   /**
    * 评论装扮列表响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CommentDecorationListResp = TGApp.BBS.Response.BaseWithData<{
     list: Array<CommentDecoration>;
@@ -353,7 +353,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 评论装扮设置响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CommentDecorationUpdateResp = TGApp.BBS.Response.BaseWithData<unknown>;
 }

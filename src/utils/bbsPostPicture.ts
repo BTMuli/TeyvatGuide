@@ -1,6 +1,6 @@
 /**
  * 米游社图片帖正文校验与内容统计。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { isPostUrl } from "@utils/bbsPostDocument.js";
@@ -9,7 +9,7 @@ const maxPictureContentLength: Readonly<number> = 500;
 
 /**
  * 判断值是否为普通记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -17,7 +17,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 解析图片帖介绍节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - 未知来源的结构化节点
  * @returns 仅包含文字和用户提及的规范化节点
  */
@@ -67,7 +67,7 @@ function parsePicturePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
 
 /**
  * 规范化图片帖介绍为官方 `$normalizeDelta(..., { mention: true })` 的文本。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已校验的图片帖介绍节点
  * @returns 供 `content.describe` 使用的文本
  */
@@ -83,7 +83,7 @@ export function serializePicturePostDescribe(nodes: Array<TGApp.BBS.PostEdit.Nod
 
 /**
  * 构建图片帖编辑文档。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 图片帖介绍节点
  * @param images - 独立图片 URL 列表
  * @returns 规范化节点、UI 文本、官方字数和图片顺序
@@ -123,7 +123,7 @@ export function buildPicturePostDocument(
 
 /**
  * 校验图片帖文档的官方长度和图片数量限制。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param document - 图片帖编辑文档
  * @param maxImages - 当前请求允许的图片上限
  */
@@ -151,7 +151,7 @@ export function assertPicturePostDocument(
 
 /**
  * 解析并校验图片帖 `post.content`。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - JSON 字符串或已解析的图片帖内容
  * @returns 图片帖正文内容
  */

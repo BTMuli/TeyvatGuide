@@ -1,6 +1,6 @@
 /**
  * 米游社帖子编辑器的 Quill 扩展格式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import Quill, { Parchment } from "quill";
@@ -18,13 +18,13 @@ import {
 
 /**
  * 帖子编辑器内部的用户提及值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type MentionValue = TGApp.BBS.ReplyAsset.Mention;
 
 /**
  * 编辑器内部的表情值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type EmoticonValue = {
   src: string;
@@ -33,13 +33,13 @@ type EmoticonValue = {
 
 /**
  * 编辑器内部的收藏表情值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CustomEmoticonValue = TGApp.BBS.CustomEmoticon.Value;
 
 /**
  * 可见编辑器和发布序列化共用的帖子格式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export const postEditorFormats: ReadonlyArray<string> = [
   "bold",
@@ -65,7 +65,7 @@ const PostAlignAttributor = new Parchment.StyleAttributor("align", "text-align",
 
 /**
  * 帖子用户提及节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostMentionBlot extends Embed {
   static blotName = "mention";
@@ -74,7 +74,7 @@ class PostMentionBlot extends Embed {
 
   static tagName = "A";
 
-  /** 创建带 UID 的提及元素。 @since Beta v0.12.6 */
+  /** 创建带 UID 的提及元素。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     if (!isMentionValue(value)) throw new TypeError("帖子提及用户无效");
     const node = super.create(value);
@@ -86,7 +86,7 @@ class PostMentionBlot extends Embed {
     return node;
   }
 
-  /** 读取提及值。 @since Beta v0.12.6 */
+  /** 读取提及值。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): MentionValue {
     const value: unknown = {
       uid: Number(domNode.dataset.uid),
@@ -99,7 +99,7 @@ class PostMentionBlot extends Embed {
 
 /**
  * 编辑时显示图片的默认表情节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostEmoticonBlot extends Embed {
   static blotName = "emoticon";
@@ -108,7 +108,7 @@ class PostEmoticonBlot extends Embed {
 
   static tagName = "IMG";
 
-  /** 创建表情元素。 @since Beta v0.12.6 */
+  /** 创建表情元素。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     if (!isEmoticonValue(value)) throw new TypeError("帖子表情无效");
     const node = super.create(value);
@@ -123,7 +123,7 @@ class PostEmoticonBlot extends Embed {
     return node;
   }
 
-  /** 读取表情值。 @since Beta v0.12.6 */
+  /** 读取表情值。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): EmoticonValue {
     const value: unknown = {
       src: domNode.getAttribute("src") ?? "",
@@ -136,7 +136,7 @@ class PostEmoticonBlot extends Embed {
 
 /**
  * 编辑时显示收藏表情的节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostCustomEmoticonBlot extends Embed {
   static blotName = "custom_emoticon";
@@ -145,7 +145,7 @@ class PostCustomEmoticonBlot extends Embed {
 
   static tagName = "IMG";
 
-  /** 创建并安全保存收藏表情的完整值。 @since Beta v0.12.6 */
+  /** 创建并安全保存收藏表情的完整值。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     const customEmoticon = normalizeCustomEmoticonEmbed(value);
     const node = super.create(value);
@@ -162,7 +162,7 @@ class PostCustomEmoticonBlot extends Embed {
     return node;
   }
 
-  /** 读取收藏表情的完整值。 @since Beta v0.12.6 */
+  /** 读取收藏表情的完整值。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): CustomEmoticonValue {
     const encoded = domNode.dataset.json;
     if (encoded === undefined) throw new TypeError("帖子自定义表情数据缺失");
@@ -178,7 +178,7 @@ class PostCustomEmoticonBlot extends Embed {
 
 /**
  * 帖子块级图片节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostImageBlot extends BlockEmbed {
   static blotName = "image";
@@ -189,7 +189,7 @@ class PostImageBlot extends BlockEmbed {
 
   static scope = Parchment.Scope.BLOCK_BLOT;
 
-  /** 创建官方结构的图片块。 @since Beta v0.12.6 */
+  /** 创建官方结构的图片块。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     if (!isImageUrl(value)) throw new TypeError("帖子图片地址无效");
     const node = super.create(value);
@@ -206,7 +206,7 @@ class PostImageBlot extends BlockEmbed {
     return node;
   }
 
-  /** 读取图片超链接。 @since Beta v0.12.6 */
+  /** 读取图片超链接。 @since Beta v0.13.0 */
   static formats(domNode: HTMLElement): Record<string, string> {
     const formats: Record<string, string> = {};
     const link = domNode.getAttribute("link");
@@ -217,14 +217,14 @@ class PostImageBlot extends BlockEmbed {
     return formats;
   }
 
-  /** 读取图片地址。 @since Beta v0.12.6 */
+  /** 读取图片地址。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): string {
     const value = getImageElement(domNode).getAttribute("src");
     if (!isImageUrl(value)) throw new TypeError("帖子图片地址无效");
     return value;
   }
 
-  /** 修改图片超链接。 @since Beta v0.12.6 */
+  /** 修改图片超链接。 @since Beta v0.13.0 */
   format(name: string, value: unknown): void {
     if (name === "link") {
       if (value === undefined || value === null || value === false || value === "") {
@@ -242,7 +242,7 @@ class PostImageBlot extends BlockEmbed {
 
 /**
  * 帖子块级分割线节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostDividerBlot extends BlockEmbed {
   static blotName = "divider";
@@ -253,7 +253,7 @@ class PostDividerBlot extends BlockEmbed {
 
   static scope = Parchment.Scope.BLOCK_BLOT;
 
-  /** 使用帖子分割线组件的图片资源创建分割线块。 @since Beta v0.12.6 */
+  /** 使用帖子分割线组件的图片资源创建分割线块。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     if (!isPostDivider(value)) throw new TypeError("帖子分割线无效");
     const node = super.create(value);
@@ -271,14 +271,14 @@ class PostDividerBlot extends BlockEmbed {
     return node;
   }
 
-  /** 读取分割线样式。 @since Beta v0.12.6 */
+  /** 读取分割线样式。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Divider {
     const value = domNode.dataset.divider;
     if (!isPostDivider(value)) throw new TypeError("帖子分割线无效");
     return value;
   }
 
-  /** 忽略文本和段落格式，避免分割线产生附加属性。 @since Beta v0.12.6 */
+  /** 忽略文本和段落格式，避免分割线产生附加属性。 @since Beta v0.13.0 */
   format(): void {
     // 分割线只保留自身样式和数据值。
   }
@@ -286,7 +286,7 @@ class PostDividerBlot extends BlockEmbed {
 
 /**
  * 帖子投票节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostVoteBlot extends BlockEmbed {
   static blotName = "vote";
@@ -297,7 +297,7 @@ class PostVoteBlot extends BlockEmbed {
 
   static scope = Parchment.Scope.BLOCK_BLOT;
 
-  /** 创建保留投票 ID 和发布者 UID 的投票块。 @since Beta v0.12.6 */
+  /** 创建保留投票 ID 和发布者 UID 的投票块。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     const vote = parsePostVote(value);
     const node = super.create(value);
@@ -312,7 +312,7 @@ class PostVoteBlot extends BlockEmbed {
     return node;
   }
 
-  /** 从投票块读取完整嵌入值。 @since Beta v0.12.6 */
+  /** 从投票块读取完整嵌入值。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Vote {
     const value: Record<string, string> = {
       id: domNode.dataset.voteId ?? "",
@@ -322,7 +322,7 @@ class PostVoteBlot extends BlockEmbed {
     return parsePostVote(value);
   }
 
-  /** 投票块不接受段落或文字格式。 @since Beta v0.12.6 */
+  /** 投票块不接受段落或文字格式。 @since Beta v0.13.0 */
   format(): void {
     // 投票块只保留自身的结构化值。
   }
@@ -330,7 +330,7 @@ class PostVoteBlot extends BlockEmbed {
 
 /**
  * 帖子视频节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostVodBlot extends BlockEmbed {
   static blotName = "vod";
@@ -341,7 +341,7 @@ class PostVodBlot extends BlockEmbed {
 
   static scope = Parchment.Scope.BLOCK_BLOT;
 
-  /** 创建带封面和时长的视频块。 @since Beta v0.12.6 */
+  /** 创建带封面和时长的视频块。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     const vod = parsePostVod(value);
     const node = super.create(value);
@@ -379,7 +379,7 @@ class PostVodBlot extends BlockEmbed {
     return node;
   }
 
-  /** 从视频块读取完整嵌入值。 @since Beta v0.12.6 */
+  /** 从视频块读取完整嵌入值。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Vod {
     const encoded = domNode.dataset.vod;
     if (encoded === undefined) throw new TypeError("帖子视频数据缺失");
@@ -392,7 +392,7 @@ class PostVodBlot extends BlockEmbed {
     return parsePostVod(value);
   }
 
-  /** 视频块不接受段落或文字格式。 @since Beta v0.12.6 */
+  /** 视频块不接受段落或文字格式。 @since Beta v0.13.0 */
   format(): void {
     // 视频块只保留自身的结构化值。
   }
@@ -400,7 +400,7 @@ class PostVodBlot extends BlockEmbed {
 
 /**
  * 帖子折叠节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class PostFoldBlot extends BlockEmbed {
   static blotName = "fold";
@@ -411,7 +411,7 @@ class PostFoldBlot extends BlockEmbed {
 
   static scope = Parchment.Scope.BLOCK_BLOT;
 
-  /** 创建保留嵌套 Delta 的折叠块。 @since Beta v0.12.6 */
+  /** 创建保留嵌套 Delta 的折叠块。 @since Beta v0.13.0 */
   static create(value: unknown): HTMLElement {
     const fold = parsePostFold(value);
     const node = super.create(value);
@@ -434,7 +434,7 @@ class PostFoldBlot extends BlockEmbed {
     return node;
   }
 
-  /** 从折叠块读取完整嵌套 Delta。 @since Beta v0.12.6 */
+  /** 从折叠块读取完整嵌套 Delta。 @since Beta v0.13.0 */
   static value(domNode: HTMLElement): TGApp.BBS.PostEdit.Fold {
     const value: Record<string, string> = {
       title: domNode.dataset.title ?? "",
@@ -445,7 +445,7 @@ class PostFoldBlot extends BlockEmbed {
     return parsePostFold(value);
   }
 
-  /** 折叠块不接受段落或文字格式。 @since Beta v0.12.6 */
+  /** 折叠块不接受段落或文字格式。 @since Beta v0.13.0 */
   format(): void {
     // 折叠块只保留自身的结构化值。
   }
@@ -455,7 +455,7 @@ let formatsRegistered = false;
 
 /**
  * 判断值是否为普通记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为普通记录
  */
@@ -465,7 +465,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 注册帖子编辑器所需的 Quill 格式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export function registerPostEditorFormats(): void {
   if (formatsRegistered) return;
@@ -483,7 +483,7 @@ export function registerPostEditorFormats(): void {
 
 /**
  * 判断值是否为帖子编辑器可用的用户提及。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isMentionValue(value: unknown): value is MentionValue {
   return (
@@ -502,7 +502,7 @@ function isMentionValue(value: unknown): value is MentionValue {
 
 /**
  * 判断值是否为帖子编辑器可用的表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isEmoticonValue(value: unknown): value is EmoticonValue {
   if (
@@ -523,7 +523,7 @@ function isEmoticonValue(value: unknown): value is EmoticonValue {
 
 /**
  * 规范化 Quill 收藏表情值，兼容帖子节点中的占位封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - Quill embed 或帖子节点中的未知值
  * @returns 已校验且不共享嵌套对象的收藏表情值
  */
@@ -548,7 +548,7 @@ function normalizeCustomEmoticonEmbed(value: unknown): CustomEmoticonValue {
 
 /**
  * 格式化视频时长，供编辑器和折叠预览展示。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param duration - 视频时长，单位毫秒
  * @returns `mm:ss` 或 `hh:mm:ss`
  */
@@ -564,7 +564,7 @@ function formatPostVodDuration(duration: number): string {
 
 /**
  * 判断值是否为帖子编辑器可用的图片地址。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isImageUrl(value: unknown): value is string {
   if (
@@ -584,7 +584,7 @@ function isImageUrl(value: unknown): value is string {
 
 /**
  * 校验帖子图片的超链接。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isPostLink(value: unknown): value is string {
   if (typeof value !== "string" || value.trim() !== value || value.length === 0) return false;
@@ -603,7 +603,7 @@ function isPostLink(value: unknown): value is string {
 
 /**
  * 将折叠内的 Delta 安全转换为富文本 DOM，供编辑器 HTML 预览使用。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param parent - 目标容器
  * @param value - JSON 编码的 Delta
  */
@@ -626,7 +626,7 @@ function appendFoldDeltaMarkup(parent: HTMLElement, value: string): void {
 
 /**
  * 将一个已校验的折叠内节点转换为 DOM。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param parent - 目标容器
  * @param node - 折叠内节点
  */
@@ -701,7 +701,7 @@ function appendFoldNodeMarkup(parent: HTMLElement, node: TGApp.BBS.PostEdit.Node
 
 /**
  * 应用折叠内文字格式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param element - 文字元素
  * @param attributes - 已校验的文字属性
  */
@@ -717,7 +717,7 @@ function applyFoldTextAttributes(
 
 /**
  * 在折叠内安全添加超链接。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param parent - 目标容器
  * @param element - 待添加元素
  * @param link - 可选链接
@@ -737,7 +737,7 @@ function appendFoldLink(parent: HTMLElement, element: HTMLElement, link?: string
 
 /**
  * 获取帖子图片块中的图片元素。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function getImageElement(domNode: HTMLElement): HTMLImageElement {
   const image = domNode.querySelector("img");

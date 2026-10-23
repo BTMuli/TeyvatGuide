@@ -1,6 +1,6 @@
 /**
  * painter 下的请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -11,7 +11,7 @@ const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
 
 /**
  * 获取 APK 首页的发现推荐流
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param gid - 社区 ID
  * @param lastId - 推荐流游标，刷新时留空
  * @param isFirstInitialize - 是否首次加载当前社区的推荐流

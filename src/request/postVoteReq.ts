@@ -1,6 +1,6 @@
 /**
  * 米游社帖子投票创建请求。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -10,7 +10,7 @@ const voteApiUrl: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/sapi/"
 
 /**
  * 校验并提取投票请求使用的登录 Cookie。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @returns 可用于签名的 Cookie
  */
@@ -37,7 +37,7 @@ function getAuthCookie(
 
 /**
  * 构建 APK sapi 投票请求头。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @param body - 请求体
  * @returns 带 K2 签名的请求头
@@ -65,7 +65,7 @@ function getVoteHeaders(
  * 创建米游社投票。
  *
  * APK 只在该请求成功后返回投票数据；调用方应保存成功响应中的 ID，再将投票节点插入帖子。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param body - APK CreateVoteVoBean 字段
  * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @param expectedUid - 当前账号快照 UID

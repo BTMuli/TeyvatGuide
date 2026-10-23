@@ -1,6 +1,6 @@
 /**
  * 米游社回复交互锁回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";
@@ -9,7 +9,7 @@ import { createReplyInteraction } from "../src/hooks/useReplyInteraction.js";
 
 /**
  * 可手动完成的异步测试信号。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type Deferred = {
   promise: Promise<void>;
@@ -18,7 +18,7 @@ type Deferred = {
 
 /**
  * 创建可手动完成的异步测试信号。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 可手动完成的异步测试信号
  */
 function createDeferred(): Deferred {

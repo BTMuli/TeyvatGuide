@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -238,7 +238,7 @@ async function deleteGachaRecords(uid: string): Promise<void> {
 
 /**
  * 清理祈愿记录
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - UID
  * @param pool - 池子
  * @param map - 祈愿数据

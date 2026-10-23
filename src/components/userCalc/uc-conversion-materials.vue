@@ -16,7 +16,7 @@ import { computed } from "vue";
 
 /**
  * 转换材料需求列表属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcConversionMaterialsProps = {
   options?: ReadonlyArray<TGApp.App.UserCalc.ConversionOption>;
@@ -25,7 +25,7 @@ type UcConversionMaterialsProps = {
 
 /**
  * 标注转换来源或媒介及缺口的材料消耗。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ConversionDemandCost = TGApp.App.UserCalc.CraftingCost & {
   role: string;

@@ -1,6 +1,6 @@
 /**
  * 应用请求客户端封装
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import useAppStore from "@store/app.js";
@@ -48,7 +48,7 @@ function createHttpError(
 
 /**
  * 执行 HTTP 请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param method - 请求方法
  * @param url - 请求地址
  * @param config - 请求配置

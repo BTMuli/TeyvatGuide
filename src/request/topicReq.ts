@@ -1,6 +1,6 @@
 /**
  * 话题相关的请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import TGHttps from "@utils/TGHttps.js";
 
@@ -25,7 +25,7 @@ async function getTopicFullInfo(gid: string, topicId: string): Promise<TGApp.BBS
 
 /**
  * 获取帖子话题推荐
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param gid - 游戏分区 ID
  * @param forumId - 版块 ID，0 表示不指定版块
  * @param viewType - 帖子类型
@@ -63,7 +63,7 @@ async function getRecommendedTopics(
 
 /**
  * 搜索米游社话题
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param keyword - 搜索关键词
  * @param size - 返回数量，默认 10
  * @returns 搜索话题响应数据

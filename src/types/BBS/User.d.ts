@@ -1,6 +1,6 @@
 /**
  * 用户类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.User {
@@ -12,7 +12,7 @@ declare namespace TGApp.BBS.User {
 
   /**
    * 用户信息返回
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type InfoRes = {
     /** 用户信息 */

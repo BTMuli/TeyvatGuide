@@ -1,6 +1,6 @@
 /**
  * 材料合成的事务回滚与计算器复用回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { calculateCraftingAllocation, createCraftingCalculator } from "@utils/userCalc.js";
@@ -10,7 +10,7 @@ import { WikiMaterialData } from "@/data/index.js";
 
 /**
  * 创建指定星级与配方的材料 Wiki 测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 材料 ID
  * @param star - 材料星级
  * @param convert - 材料可用的合成配方
@@ -35,7 +35,7 @@ function makeMaterial(
 
 /**
  * 创建指定来源材料与数量的合成配方。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 合成配方 ID
  * @param sources - 来源材料 ID 与需求数量
  * @returns 包含来源材料数量的合成配方
@@ -58,7 +58,7 @@ function makeRecipe(
 
 /**
  * 创建备用、递归、循环及失败配方的回滚测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 包含材料、库存与场景 ID 的回滚测试数据
  */
 function createRollbackBundle(): {
@@ -260,7 +260,7 @@ describe("calculateCraftingAllocation", () => {
 describe("createCraftingCalculator", () => {
   /**
    * 合成计算提前返回的回归测试用例。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type EarlyExitCase = {
     name: string;

@@ -1,6 +1,6 @@
 /**
  * 米游社回复祖先链回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";
@@ -9,7 +9,7 @@ import { resolveReplyAncestors } from "../src/utils/bbsReplyChain.js";
 
 /**
  * 创建仅包含祖先链所需字段的回复。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 回复 ID
  * @param parentId - 直接上级回复 ID
  * @returns 回复测试数据
@@ -23,7 +23,7 @@ function createReply(id: string, parentId: string): TGApp.BBS.Reply.ReplyFull {
 
 /**
  * 提取回复链中的 ID。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param chain - 回复链
  * @returns 回复 ID 列表
  */

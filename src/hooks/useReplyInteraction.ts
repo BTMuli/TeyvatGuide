@@ -1,6 +1,6 @@
 /**
  * 回复交互锁。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { inject, ref } from "vue";
@@ -8,14 +8,14 @@ import type { InjectionKey } from "vue";
 
 /**
  * 回复交互状态的注入键。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export const replyInteractionKey: InjectionKey<TGApp.BBS.Reply.Interaction> =
   Symbol("replyInteraction");
 
 /**
  * 创建一组共享回复交互状态。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 回复交互状态与执行入口
  */
 export function createReplyInteraction(): TGApp.BBS.Reply.Interaction {
@@ -23,7 +23,7 @@ export function createReplyInteraction(): TGApp.BBS.Reply.Interaction {
 
   /**
    * 在共享锁内执行回复操作。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @param action - 需要独占执行的异步操作
    * @returns 是否取得并完成执行权
    */
@@ -43,7 +43,7 @@ export function createReplyInteraction(): TGApp.BBS.Reply.Interaction {
 
 /**
  * 使用父级提供的共享回复交互状态。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 回复交互状态与执行入口
  * 未找到父级回复交互提供者时抛出内部错误。
  */

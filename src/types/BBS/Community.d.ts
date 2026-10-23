@@ -1,12 +1,12 @@
 /**
  * 米游社个人中心类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Community {
   /**
    * 个人中心列表响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @typeParam T - 列表分页数据类型
    */
   type BaseResp<T> = Omit<TGApp.BBS.Response.Base, "data"> & {
@@ -16,13 +16,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 我的评论返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CommentsResp = BaseResp<CommentsRes>;
 
   /**
    * 我的评论返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CommentsRes = {
     /** 评论列表 */
@@ -35,13 +35,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 收藏帖子返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FavoritesResp = BaseResp<FavoritesRes>;
 
   /**
    * 收藏帖子返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FavoritesRes = {
     /** 收藏帖子列表 */
@@ -54,7 +54,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 个人评论条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Comment = Omit<TGApp.BBS.Reply.ReplyFull, "r_reply" | "r_post" | "stat"> & {
     /** 被回复的评论 */
@@ -67,13 +67,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 我的合集返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CollectionsResp = BaseResp<CollectionsRes>;
 
   /**
    * 我的合集返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CollectionsRes = {
     /** 合集列表 */
@@ -86,13 +86,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 收藏合集返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FavoriteCollectionsResp = BaseResp<FavoriteCollectionsRes>;
 
   /**
    * 收藏合集返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FavoriteCollectionsRes = {
     /** 收藏合集列表 */
@@ -105,13 +105,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 我的关注返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FollowingResp = BaseResp<FollowingRes>;
 
   /**
    * 我的关注返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FollowingRes = {
     /** 用户列表 */
@@ -124,13 +124,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 我的粉丝返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FollowersResp = BaseResp<FollowersRes>;
 
   /**
    * 我的粉丝返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FollowersRes = {
     /** 用户列表 */
@@ -143,13 +143,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 用户关注关系操作
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UserRelationAction = "follow-back" | "unfollow";
 
   /**
    * 关注关系条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UserRelation = {
     /** 用户信息 */
@@ -166,7 +166,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 关注关系中的用户信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type User = {
     /** 用户 ID */
@@ -197,13 +197,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 用户帖子搜索返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PostSearchResp = BaseResp<PostSearchRes>;
 
   /**
    * 用户帖子搜索返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PostSearchRes = {
     /** 搜索结果列表 */
@@ -220,7 +220,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 用户帖子搜索结果条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PostSearchItem = {
     /** 条目 ID */
@@ -241,13 +241,13 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 浏览历史返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type HistoryResp = BaseResp<HistoryRes>;
 
   /**
    * 浏览历史返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type HistoryRes = {
     /** 历史记录总数 */
@@ -264,7 +264,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 浏览历史条目标识
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type HistoryItemId = {
     /** 条目类型，帖子为 HISTORY_ITEM_TYPE_POST */
@@ -275,7 +275,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 浏览历史条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type HistoryItem = {
     /** 条目标识 */
@@ -290,7 +290,7 @@ declare namespace TGApp.BBS.Community {
 
   /**
    * 浏览历史操作参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type HistoryDeleteParams = {
     /** 是否删除全部；为 true 时 operate_id_list 表示排除项 */

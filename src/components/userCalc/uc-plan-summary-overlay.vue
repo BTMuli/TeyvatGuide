@@ -231,7 +231,7 @@ type PlanTargetCounts = {
 
 /**
  * 养成计划汇总浮窗属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
@@ -247,7 +247,7 @@ type UcPlanSummaryOverlayProps = {
 
 /**
  * 按 Wiki 材料分类聚合的计划需求。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type MaterialGroup = {
   key: string;

@@ -1,6 +1,6 @@
 /**
  * 米游社回复资源请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
@@ -39,7 +39,7 @@ const reservedFormFields: ReadonlySet<string> = new Set([
 
 /**
  * OSS 图片上传参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type OssUploadParams = {
   accessid: string;
@@ -58,7 +58,7 @@ type OssUploadParams = {
 
 /**
  * 官方头像上传预签名响应
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CustomUploadParamsResp = {
   retcode: number;
@@ -68,7 +68,7 @@ type CustomUploadParamsResp = {
 
 /**
  * 判断值是否为普通对象
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为字符串键对象
  */
@@ -78,7 +78,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 判断字符串是否包含有效内容
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为非空字符串
  */
@@ -88,7 +88,7 @@ function isNonBlankString(value: unknown): value is string {
 
 /**
  * 校验正整数参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的数值
  * @param name - 错误信息中的字段名称
  */
@@ -98,7 +98,7 @@ function assertPositiveNumber(value: number, name: string): void {
 
 /**
  * 提取回复资源请求所需的登录凭据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 仅包含回复接口所需字段的 Cookie
  */
@@ -112,7 +112,7 @@ function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Accoun
 
 /**
  * 校验提及昵称
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nickname - 待查询的昵称
  * @returns 去除首尾空白后的昵称
  */
@@ -125,7 +125,7 @@ function normalizeNickname(nickname: string): string {
 
 /**
  * 从官方昵称解析响应中提取 UID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param data - 接口响应数据
  * @param nickname - 请求的昵称
  * @returns 用户 UID
@@ -147,7 +147,7 @@ function getMentionUid(data: unknown, nickname: string): number {
 
 /**
  * 创建取消错误
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns AbortError
  */
 function createAbortError(): DOMException {
@@ -156,7 +156,7 @@ function createAbortError(): DOMException {
 
 /**
  * 判断错误是否来自取消
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param error - 待判断的错误
  * @param signal - 请求信号
  * @returns 是否为取消错误
@@ -171,7 +171,7 @@ function isAbortError(error: unknown, signal: AbortSignal): boolean {
 
 /**
  * 传播取消错误
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param error - 原始错误
  * @param signal - 请求信号
  */
@@ -187,7 +187,7 @@ function throwCancellation(error: unknown, signal: AbortSignal): never {
 
 /**
  * 从本地策略中校验有效期与字节大小范围
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param policy - OSS Base64 策略
  * @param size - 图片字节数
  */
@@ -235,7 +235,7 @@ function validatePolicy(policy: string, size: number): void {
 
 /**
  * 校验相对路径片段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 路径值
  * @param name - 错误信息中的字段名称
  */
@@ -259,7 +259,7 @@ function assertSafePathPart(value: unknown, name: string): asserts value is stri
 
 /**
  * 校验图片上传主机
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 服务端返回的 host
  */
 function validateOssHost(value: unknown): asserts value is string {
@@ -270,7 +270,7 @@ function validateOssHost(value: unknown): asserts value is string {
 
 /**
  * 校验回调字段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 回调字段对象
  * @returns 保留官方顺序的回调字段
  */
@@ -292,7 +292,7 @@ function parseCallbackFields(value: unknown): Array<TGApp.BBS.ReplyAsset.FormFie
 
 /**
  * 校验 OSS 额外表单字段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 额外表单字段列表
  * @param objectAcl - 已声明的对象 ACL
  * @returns 保留官方顺序与重复键的字段
@@ -321,7 +321,7 @@ function parseExtraFormData(
 
 /**
  * 解析 OSS 上传参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param data - 签名接口 data
  * @param prepared - 已准备的图片
  * @returns 可安全发送的 OSS 参数
@@ -373,7 +373,7 @@ function parseOssUploadParams(
 
 /**
  * 解析官方头像上传器返回的 OSS 参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param data - `apihub/sapi/getUploadParams` 的 data 字段
  * @param prepared - 已准备的图片
  * @returns 可安全发送的 OSS 参数与官方表单文件名
@@ -427,7 +427,7 @@ function parseCustomAvatarUploadParams(
 
 /**
  * 在上传阶段之间同步校验账号和取消状态
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param snapshot - 回复账号快照
  * @param storage - 当前账号存储
  * @param signal - 合并取消信号
@@ -445,7 +445,7 @@ function assertUploadActive(
 
 /**
  * 校验自定义头像上传阶段使用的 App Cookie 是否仍为当前账号。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param snapshot - 回复账号快照
  * @param cookie - 自定义头像签名使用的 App Cookie
  * @param storage - 当前账号存储
@@ -465,7 +465,7 @@ function assertCustomAvatarUploadActive(
 
 /**
  * 判断自定义头像上传期间的网页登录账号与 App 凭据是否仍一致。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param snapshot - 回复账号快照
  * @param cookie - 自定义头像签名使用的 App Cookie
  * @param storage - 当前账号存储
@@ -495,7 +495,7 @@ function matchesCustomAvatarAccount(
 
 /**
  * 保留可诊断的 HTTP 状态，避免把上传凭证或原始响应放入错误链
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param message - 用户可见错误
  * @param error - 传输层错误
  * @returns 已移除敏感响应的错误
@@ -510,7 +510,7 @@ function createUploadRequestError(message: string, error: unknown): Error {
 
 /**
  * 发出受控 JSON 请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param url - 请求地址
  * @param config - 请求配置
  * @param snapshot - 回复账号快照
@@ -544,7 +544,7 @@ async function postJson<T>(
 
 /**
  * 发出受控 JSON GET 请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param url - 请求地址
  * @param config - 请求配置
  * @param snapshot - 回复账号快照
@@ -575,7 +575,7 @@ async function getJson<T>(
 
 /**
  * 校验 OSS 响应 URL
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - OSS 响应 URL
  * @param key - 已签名对象键
  * @returns 原始 URL
@@ -616,7 +616,7 @@ function validateUploadedUrl(value: unknown, key: string): string {
 
 /**
  * 解析并校验 OSS 上传响应
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param data - OSS 响应数据
  * @param key - 已签名对象键
  * @returns 上传 URL
@@ -633,7 +633,7 @@ function parseOssResponse(data: unknown, key: string): string {
 
 /**
  * 构造 OSS multipart 表单
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param params - OSS 上传参数
  * @param file - 原始文件
  * @param prepared - 已准备的图片
@@ -665,7 +665,7 @@ function createOssForm(
 
 /**
  * 合并外部取消信号与账号切换取消信号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param signal - 外部取消信号
  * @param accountSignal - 账号切换取消信号
  * @returns 合并后的信号
@@ -676,7 +676,7 @@ function combineSignals(signal: AbortSignal | undefined, accountSignal: AbortSig
 
 /**
  * 解析米游社用户昵称
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nickname - 待查询的昵称
  * @param cookie - 用户 Cookie，仅使用 ltoken 与 ltuid
  * @param gid - 社区 ID
@@ -719,7 +719,7 @@ export async function resolveMention(
 
 /**
  * 校验图片文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 待上传的图片文件
  */
 function assertImageFile(file: File): void {
@@ -730,7 +730,7 @@ function assertImageFile(file: File): void {
 
 /**
  * 提取自定义头像上传所需的 App Cookie
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @returns 用于 API_BBS K2 签名的 Cookie
  */
@@ -751,7 +751,7 @@ function getCustomAvatarUploadCookie(
 
 /**
  * 上传自定义头像图片
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 待上传的图片
  * @param cookie - 用户 App Cookie
  * @param signal - 可选的取消信号
@@ -843,7 +843,7 @@ export async function uploadCustomAvatarImage(
 
 /**
  * 上传回复图片
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 待上传的图片文件
  * @param cookie - 用户 Cookie，仅使用 ltoken 与 ltuid
  * @param gid - 社区 ID
@@ -942,7 +942,7 @@ export async function uploadImage(
 
 /**
  * 回复资源能力
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export const replyAssetCapabilities = <const>{ imageUpload: true, mention: true };
 

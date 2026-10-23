@@ -1,6 +1,6 @@
 /**
  * 隐藏 UID 的跨窗口持久化回归测试
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -48,7 +48,7 @@ const { default: useAppStore } = await import("../src/store/modules/app.js");
 
 /**
  * 模拟一个新窗口：独立 pinia 实例，共享同一份 localStorage
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 该窗口的 app store
  */
 function openWindow(): ReturnType<typeof useAppStore> {
@@ -62,7 +62,7 @@ function openWindow(): ReturnType<typeof useAppStore> {
 
 /**
  * 等待持久化写入落地（插件按 pre flush 异步落盘）
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 无返回值
  */
 async function flush(): Promise<void> {
@@ -71,7 +71,7 @@ async function flush(): Promise<void> {
 
 /**
  * 读取落地到存储的 app 状态
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 解析后的持久化对象
  */
 function stored(): { hideUid?: boolean; postViewWide?: boolean } {

@@ -187,7 +187,7 @@ import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.
 
 /**
  * 单个养成目标卡片属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanTargetCardProps = {
   canMoveDown: boolean;

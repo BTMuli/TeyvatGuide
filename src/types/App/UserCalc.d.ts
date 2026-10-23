@@ -1,6 +1,6 @@
 /**
  * 用户养成计算相关类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.App.UserCalc {
@@ -134,7 +134,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 材料转换只读推荐。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ConversionRecommendation = {
     /** 待补足的目标材料及其当前完成情况 */
@@ -147,7 +147,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 材料转换手动意图。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ConversionIntent = {
     /** 转换目标材料 ID */
@@ -160,7 +160,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 已应用的材料转换结果。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AppliedConversion = {
     /** 应用的手动转换意图 */
@@ -175,7 +175,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 养成目标的材料转换选项。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ConversionOption = {
     /** 养成目标稳定键 */
@@ -221,7 +221,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 单项养成材料需求。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CultivationMaterial = {
     /** 材料 ID */
@@ -232,7 +232,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 单项材料的可合成结果。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CraftableMaterial = {
     /** 可用于补足需求的合成数量 */
@@ -243,7 +243,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 材料合成后的分配结果。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CraftingAllocation = {
     /** 各需求材料可通过合成补足的数量及实际消耗 */
@@ -254,7 +254,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 复用同一组材料 Wiki 数据的合成计算器。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CraftingCalculator = (
     requirements: ReadonlyArray<CultivationMaterial>,
@@ -265,7 +265,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 自动媒介转换的推荐及库存快照。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AutomaticConversionContext = {
     recommendation: ConversionRecommendation;
@@ -274,7 +274,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 养成计划的材料分配结果。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PlanMaterialAllocation = {
     /** 按目标 ID 保存的实际材料分配结果 */
@@ -295,7 +295,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 媒介转换推荐的普通合成预留结果。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ConversionPreparation = {
     /** 预留普通合成来源后的库存 */

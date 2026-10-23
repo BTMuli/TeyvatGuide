@@ -32,7 +32,7 @@ import VpOverlayImage from "./vp-overlay-image.vue";
 
 /**
  * 自定义表情组件数据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TpCustomEmoticon = {
   insert: TGApp.BBS.CustomEmoticon.Insert;

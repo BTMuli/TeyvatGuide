@@ -1,6 +1,6 @@
 /**
  * 回复数据类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Reply {
@@ -75,7 +75,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复变更请求参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CreateParams = {
     /** 帖子 ID */
@@ -92,7 +92,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复结构化内容中的节点
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SendNode =
     | {
@@ -129,19 +129,19 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复文档中的提及用户
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DocumentMention = TGApp.BBS.ReplyAsset.Mention;
 
   /**
    * 回复文档中的图片
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DocumentImage = TGApp.BBS.ReplyAsset.UploadedImage;
 
   /**
    * 回复编辑器生成的文档
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Document = {
     /** 纯文本内容，图片不包含在其中 */
@@ -154,7 +154,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复变更响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MutationResp = Omit<TGApp.BBS.Response.Base, "data"> & {
     /** 变更结果，接口可能返回空对象或 null */
@@ -163,7 +163,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复交互执行器
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Interaction = {
     /** 当前是否有交互请求 */
@@ -174,7 +174,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复变更的账号快照
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AccountSnapshot = {
     /** 当前账号 UID */
@@ -185,7 +185,7 @@ declare namespace TGApp.BBS.Reply {
 
   /**
    * 回复变更的账号校验结果
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type AccountExecution<T> =
     | { allowed: false }

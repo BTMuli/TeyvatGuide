@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -107,7 +107,7 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
 
 /**
  * 检测并更新
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 无返回值
  */
 async function updateAllAccountCk(): Promise<void> {

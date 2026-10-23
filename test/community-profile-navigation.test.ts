@@ -1,6 +1,6 @@
 /**
  * 米游社用户主页导航回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

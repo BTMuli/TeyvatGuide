@@ -1,6 +1,6 @@
 /**
  * 米游社话题类型声明
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 declare namespace TGApp.BBS.Topic {
   /**
@@ -11,19 +11,19 @@ declare namespace TGApp.BBS.Topic {
 
   /**
    * 推荐话题返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type RecommendResp = TGApp.BBS.Response.BaseWithData<RecommendRes>;
 
   /**
    * 搜索话题返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SearchResp = TGApp.BBS.Response.BaseWithData<SearchRes>;
 
   /**
    * 推荐话题列表
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type RecommendRes = {
     /** 推荐话题列表 */
@@ -32,7 +32,7 @@ declare namespace TGApp.BBS.Topic {
 
   /**
    * 搜索话题列表
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SearchRes = {
     /** 搜索结果 */
@@ -45,7 +45,7 @@ declare namespace TGApp.BBS.Topic {
 
   /**
    * 话题列表条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Summary = {
     /** 话题 ID */

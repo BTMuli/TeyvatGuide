@@ -1,6 +1,6 @@
 /**
  * 米游社回复资源请求契约回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -47,7 +47,7 @@ const preparedImage: TGApp.BBS.ReplyAsset.PreparedImage = {
 
 /**
  * 测试用账号存储
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TestStorage = Pick<Storage, "getItem"> & {
   setStored: (value: string | null) => void;
@@ -55,7 +55,7 @@ type TestStorage = Pick<Storage, "getItem"> & {
 
 /**
  * 测试用窗口事件接口
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TestWindow = {
   localStorage: TestStorage;
@@ -66,7 +66,7 @@ type TestWindow = {
 
 /**
  * 回复图片请求测试环境
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TestEnvironment = {
   storage: TestStorage;
@@ -77,7 +77,7 @@ type TestEnvironment = {
 
 /**
  * 创建序列化的本地账号状态
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - 账号 UID
  * @param ltoken - ltoken
  * @param ltuid - ltuid
@@ -102,7 +102,7 @@ function serializedAccount(
 
 /**
  * 将策略对象编码为 OSS 使用的 Base64
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 策略对象
  * @returns Base64 策略
  */
@@ -115,7 +115,7 @@ function encodePolicy(value: Record<string, unknown>): string {
 
 /**
  * 创建有效的测试策略
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param maxSize - 允许的最大字节数
  * @returns Base64 策略
  */
@@ -128,7 +128,7 @@ function validPolicy(maxSize: number = imageBytes.byteLength): string {
 
 /**
  * 创建签名接口响应
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param overrides - OSS 参数覆盖项
  * @returns 签名接口响应
  */
@@ -176,7 +176,7 @@ function signedResponse(overrides: Record<string, unknown> = {}): {
 
 /**
  * 创建官方头像签名接口响应
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 官方 UploadPreBean 形状的响应
  */
 function customAvatarSignedResponse(): { data: Record<string, unknown> } {
@@ -204,7 +204,7 @@ function customAvatarSignedResponse(): { data: Record<string, unknown> } {
 
 /**
  * 创建 OSS 成功响应
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param url - 返回 URL
  * @param object - 返回对象键
  * @returns OSS 响应
@@ -220,7 +220,7 @@ function ossResponse(
 
 /**
  * 创建内存账号存储与窗口事件边界
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 测试环境
  */
 function installEnvironment(): TestEnvironment {

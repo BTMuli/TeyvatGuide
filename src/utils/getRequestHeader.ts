@@ -1,6 +1,6 @@
 /**
  * 获取请求头
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -22,7 +22,7 @@ function getRandomNumber(min: number, max: number): number {
 
 /**
  * 获取 salt
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param salt - salt 类型或自定义 salt
  * @returns salt 值
  */
@@ -33,7 +33,7 @@ function getSalt(salt: TGApp.BBS.Auth.SaltKeyEnum | string): string {
 
 /**
  * 获取 ds
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param method - 请求方法
  * @param data - 请求数据
  * @param saltType - salt 类型或自定义 salt
@@ -122,7 +122,7 @@ export function getRequestHeader(
 
 /**
  * 获取合集接口请求头
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - cookie
  * @param method - 请求方法
  * @param data - 请求数据

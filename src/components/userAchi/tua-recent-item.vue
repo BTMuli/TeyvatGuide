@@ -48,7 +48,7 @@ import { computed } from "vue";
 
 /**
  * 最近完成成就条目属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TuaRecentItemProps = {
   completedStageCount: number;
@@ -58,7 +58,7 @@ type TuaRecentItemProps = {
 };
 /**
  * 最近完成成就条目事件。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TuaRecentItemEmits = {
   selectAchi: [data: TGApp.App.Achievement.RenderItem];

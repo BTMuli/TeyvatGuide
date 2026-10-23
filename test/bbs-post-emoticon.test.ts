@@ -1,6 +1,6 @@
 /**
  * 米游社帖子编辑器表情令牌回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";

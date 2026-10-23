@@ -161,7 +161,7 @@ import { computed, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch 
 
 /**
  * 合集信息对话框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CollectionFormProps = {
   /** 待编辑的合集；未提供时为创建合集 */
@@ -170,7 +170,7 @@ type CollectionFormProps = {
 
 /**
  * 合集信息草稿。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CollectionDraft = {
   /** 合集标题 */
@@ -183,7 +183,7 @@ type CollectionDraft = {
 
 /**
  * 合集管理的登录账户快照。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AccountSnapshot = {
   /** 当前登录 UID */

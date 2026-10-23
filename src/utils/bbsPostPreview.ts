@@ -1,13 +1,13 @@
 /**
  * 米游社帖子预览中的表情令牌渲染。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { parsePostEmoticonMap, splitPostEmoticonText } from "./bbsPostEmoticon.js";
 
 /**
  * 从帖子节点收集可用于预览的表情图片地址。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 帖子编辑器节点
  * @returns 已清洗的表情名称与图片地址映射
  */
@@ -38,7 +38,7 @@ export function collectPostPreviewEmoticonMap(
 
 /**
  * 查找编辑器文本节点中尚未解析的表情令牌名称。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 帖子编辑器节点
  * @param emoticons - 已清洗的表情映射
  * @returns 去重后的待加载表情名称
@@ -67,7 +67,7 @@ export function getMissingPostPreviewEmoticonNames(
 
 /**
  * 在预览 HTML 的文本节点中替换已知表情令牌，保留原有元素及其属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param html - Quill 生成的预览 HTML
  * @param emoticons - 已清洗的表情映射
  * @returns 插入表情图片后的预览 HTML

@@ -1,6 +1,6 @@
 /**
  * 米游社富文本帖子文档校验与内容统计
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { parseCustomEmoticon } from "./bbsCustomEmoticon.js";
@@ -9,13 +9,13 @@ const customEmoticonBackupText: Readonly<"[自定义表情]"> = "[自定义表�
 
 /**
  * 米游社折叠标题的最大字符数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export const postFoldTitleMaxLength = 40;
 
 /**
  * 判断值是否为普通记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -23,7 +23,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 规范化帖子中的自定义表情节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的自定义表情节点内容
  * @returns 已校验并补齐占位文本的自定义表情节点
  */
@@ -51,7 +51,7 @@ function parseCustomEmoticonInsert(
 
 /**
  * 判断帖子节点是否为自定义表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param node - 待判断的帖子节点
  * @returns 是否为自定义表情节点
  */
@@ -63,7 +63,7 @@ function isCustomEmoticonNode(
 
 /**
  * 校验帖子中自定义表情的数量。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已规范化的帖子节点
  */
 function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.PostEdit.Node>): void {
@@ -77,7 +77,7 @@ function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.PostEdit.Node>): void
 
 /**
  * 帖子正文递归统计结果。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostNodeStats = {
   customEmoticons: number;
@@ -87,7 +87,7 @@ type PostNodeStats = {
 
 /**
  * 递归统计帖子节点，避免折叠内的内容绕过表情和提及数量限制。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已规范化的帖子节点
  * @param stats - 累计统计结果
  */
@@ -116,7 +116,7 @@ function collectPostNodeStats(nodes: Array<TGApp.BBS.PostEdit.Node>, stats: Post
 
 /**
  * 校验 HTTP 链接，拒绝脚本、凭据和控制字符。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的地址
  * @param image - 是否仅允许 HTTPS 图片
  * @returns 是否为安全地址
@@ -144,7 +144,7 @@ export function isPostUrl(value: unknown, image: boolean = false): value is stri
 
 /**
  * 校验富文本颜色，避免向 HTML 样式注入声明。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function isPostColor(value: unknown): value is string {
   return typeof value === "string" && /^#[\da-f]{6}$/iu.test(value);
@@ -152,7 +152,7 @@ function isPostColor(value: unknown): value is string {
 
 /**
  * 判断值是否为帖子编辑器支持的分割线样式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的分割线样式
  * @returns 是否为支持的分割线样式
  */
@@ -162,7 +162,7 @@ export function isPostDivider(value: unknown): value is TGApp.BBS.PostEdit.Divid
 
 /**
  * 校验帖子投票嵌入值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的投票嵌入值
  * @returns 已校验的投票嵌入值
  */
@@ -192,7 +192,7 @@ export function parsePostVote(value: unknown): TGApp.BBS.PostEdit.Vote {
 
 /**
  * 校验帖子视频嵌入值，并完整保留官方附带的元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的视频嵌入值
  * @returns 已校验且不共享嵌套对象的视频嵌入值
  */
@@ -226,7 +226,7 @@ export function parsePostVod(value: unknown): TGApp.BBS.PostEdit.Vod {
 
 /**
  * 解析并校验折叠块内的 Delta，确保嵌套富文本在编辑往返时不会被当作纯文本丢弃。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - JSON 编码的 Delta
  * @param label - 内容位置名称
  */
@@ -246,7 +246,7 @@ function assertFoldDelta(value: string, label: string): void {
 
 /**
  * 校验帖子折叠嵌入值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知的折叠嵌入值
  * @returns 已校验的折叠嵌入值
  */
@@ -288,7 +288,7 @@ export function parsePostFold(value: unknown): TGApp.BBS.PostEdit.Fold {
 
 /**
  * 校验官方图片节点附带的资源元数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param key - 元数据字段名
  * @param value - 元数据字段值
  * @returns 是否为可安全丢弃的官方元数据
@@ -309,7 +309,7 @@ function isOfficialImageMetadata(key: string, value: unknown): boolean {
 
 /**
  * 校验并复制单个节点的属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function parseAttributes(value: unknown, image: boolean): TGApp.BBS.PostEdit.Attributes {
   if (!isRecord(value)) throw new TypeError("帖子格式属性无效");
@@ -371,7 +371,7 @@ function parseAttributes(value: unknown, image: boolean): TGApp.BBS.PostEdit.Att
 
 /**
  * 校验并复制富文本节点，未知节点直接拒绝，避免重新编辑时丢失内容。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - 未知来源的 Delta 节点列表
  * @returns 已校验的节点副本
  */
@@ -472,7 +472,7 @@ export function parsePostNodes(input: unknown): Array<TGApp.BBS.PostEdit.Node> {
 
 /**
  * 校验 Delta 并收集纯文字和图片；HTML 由帖子 Quill 编辑器统一导出。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - 待发布的富文本节点
  * @returns 可供内容统计与发布校验的文档
  */
@@ -507,7 +507,7 @@ export function buildPostDocument(input: unknown): TGApp.BBS.PostEdit.DraftDocum
 
 /**
  * 校验发布正文的实际内容和长度。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param document - 已校验的富文本文档
  */
 export function assertPostDocumentContent(document: TGApp.BBS.PostEdit.DraftDocument): void {
@@ -525,7 +525,7 @@ export function assertPostDocumentContent(document: TGApp.BBS.PostEdit.DraftDocu
 
 /**
  * 校验折叠标题是否仅包含文字及允许的文字格式。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param document - 已校验的折叠标题文档
  */
 export function assertPostFoldTitle(document: TGApp.BBS.PostEdit.DraftDocument): void {

@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 
 # 从 Tauri 构建产物生成用于 Microsoft Store 提交的未签名 x64 MSIX。
-# @since Beta v0.12.6
+# @since Beta v0.13.0
 [CmdletBinding()]
 param(
     [string]$BuildDirectory,
@@ -31,7 +31,7 @@ $stagingRoot = Join-Path $tauriRoot "target\msix"
 .OUTPUTS
     System.String。解析后的绝对路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Resolve-FullPath {
     param([string]$Value, [string]$Base, [string]$Label)
@@ -53,7 +53,7 @@ function Resolve-FullPath {
 .OUTPUTS
     System.String。经过边界校验的绝对路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Resolve-SafeChildPath {
     param([string]$Base, [string]$RelativePath, [string]$Label)
@@ -76,7 +76,7 @@ function Resolve-SafeChildPath {
 .OUTPUTS
     System.String。第四段为零的规范化版本。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Normalize-Version {
     param([string]$Requested, [string]$ConfigPath)
@@ -110,7 +110,7 @@ function Normalize-Version {
 .OUTPUTS
     System.Management.Automation.PSCustomObject。可执行文件相对路径与资源语言。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Read-ManifestInfo {
     param([string]$Path, [string]$SetVersion)
@@ -142,7 +142,7 @@ function Read-ManifestInfo {
 .PARAMETER Path
     需要清理的 MakePri 配置文件路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Remove-MakePriPackaging {
     param([string]$Path)
@@ -163,7 +163,7 @@ function Remove-MakePriPackaging {
 .PARAMETER Path
     待校验的可执行文件路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Assert-X64Executable {
     param([string]$Path)
@@ -200,7 +200,7 @@ function Assert-X64Executable {
 .PARAMETER Height
     输出图标的像素高度。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Write-ResizedPng {
     param([string]$SourcePath, [string]$DestinationPath, [int]$Width, [int]$Height)
@@ -229,7 +229,7 @@ function Write-ResizedPng {
 .PARAMETER Destination
     生成资源的目标目录。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function New-Assets {
     param([string]$Icons, [string]$Destination)
@@ -292,7 +292,7 @@ function New-Assets {
 .OUTPUTS
     System.Management.Automation.PSCustomObject。MakeAppx 与 MakePri 的绝对路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Find-Sdk {
     param([string]$Requested)
@@ -341,7 +341,7 @@ function Find-Sdk {
 .PARAMETER UnicodeOutput
     是否使用 Unicode 解码工具输出。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Invoke-Native {
     param([string]$Executable, [string[]]$Arguments, [switch]$UnicodeOutput)
@@ -379,7 +379,7 @@ function Invoke-Native {
 .PARAMETER Root
     允许清理的生成目录根路径。
 .NOTES
-    @since Beta v0.12.6
+    @since Beta v0.13.0
 #>
 function Remove-StagingDirectory {
     param([string]$Path, [string]$Root)

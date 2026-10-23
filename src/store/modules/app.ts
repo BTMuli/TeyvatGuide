@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -100,7 +100,7 @@ const useAppStore = defineStore(
 
     /**
      * 初始化应用状态
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @remarks 用于首次运行或重置应用状态
      * @returns 无返回值
      */
@@ -130,7 +130,7 @@ const useAppStore = defineStore(
 
     /**
      * 设置隐藏 UID 状态（供跨窗口同步使用）
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param value - 是否隐藏 UID
      * @returns 无返回值
      */

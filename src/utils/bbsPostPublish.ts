@@ -1,13 +1,13 @@
 /**
  * 米游社帖子发布版块筛选。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 const publishableForumSrcTypes: ReadonlySet<number> = new Set([0, 2, 3]);
 
 /**
  * 判断版块是否允许发布指定类型的帖子。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param forum - 米游社版块信息
  * @param viewType - 帖子类型，1 为长文，2 为图文
  * @returns 是否允许发布

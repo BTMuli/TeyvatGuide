@@ -1,6 +1,6 @@
 /**
  * 抬升版本号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import fs from "fs-extra";
 import { resolve } from "path";

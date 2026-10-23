@@ -1,6 +1,6 @@
 /**
  * 米游社用户主页导航
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -19,7 +19,7 @@ const hasNextProfile = computed<boolean>(
 
 /**
  * 记录一次用户主页访问；回到访问记录中的当前用户时不新增记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param userId - 米游社用户 ID
  */
 function recordProfileVisit(userId: string): void {
@@ -30,7 +30,7 @@ function recordProfileVisit(userId: string): void {
 
 /**
  * 在用户主页访问记录中前进或后退一步。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param step - -1 为上一个主页，1 为下一个主页
  * @returns 目标用户 ID，不存在时返回 undefined
  */
@@ -42,7 +42,7 @@ function stepProfileTrail(step: -1 | 1): string | undefined {
 
 /**
  * 打开米游社用户主页。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param userId - 米游社用户 ID
  * @returns 导航完成后的 Promise
  */
@@ -59,7 +59,7 @@ async function openCommunityProfile(userId: string): Promise<void> {
 
 /**
  * 判断帖子标题或摘要是否包含关键词（忽略大小写）。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @param keyword - 已去除首尾空白的关键词
  * @returns 是否匹配
@@ -71,7 +71,7 @@ function matchesPostKeyword(post: TGApp.BBS.Post.FullData, keyword: string): boo
 
 /**
  * 获取帖子类型的展示名称。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @returns 帖子类型名称，未知类型返回 undefined
  */
@@ -90,7 +90,7 @@ function getPostTypeLabel(post: TGApp.BBS.Post.FullData): string | undefined {
 
 /**
  * 获取帖子类型对应的图标。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @returns 帖子类型图标，未知类型返回 undefined
  */
@@ -109,7 +109,7 @@ function getPostTypeIcon(post: TGApp.BBS.Post.FullData): string | undefined {
 
 /**
  * 获取帖子版块的图标，优先使用版块列表中的纯图标。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @param forumList - 分区版块列表
  * @returns 版块图标，缺失时返回 undefined
@@ -125,7 +125,7 @@ function getPostForumIcon(
 
 /**
  * 获取帖子卡片展示的预览图，最多 3 张。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @returns 预览图地址列表
  */
@@ -137,7 +137,7 @@ function getPostPreviewImages(post: TGApp.BBS.Post.FullData): Array<string> {
 
 /**
  * 获取帖子的图片总数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param post - 帖子数据
  * @returns 图片总数
  */

@@ -1,6 +1,6 @@
 /**
  * 用户信息模块
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -38,7 +38,7 @@ const useUserStore = defineStore(
 
     /**
      * 切换当前账号的游戏账户
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uidG - 目标游戏 UID
      * @returns 是否切换成功
      */

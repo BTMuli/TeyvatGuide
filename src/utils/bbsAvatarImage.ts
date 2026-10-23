@@ -1,6 +1,6 @@
 /**
  * 米游社自定义头像的本地裁剪与静态图片转换。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { prepareReplyImage } from "@utils/bbsReplyImage.js";
@@ -10,7 +10,7 @@ const maxAvatarSize = 512;
 
 /**
  * 自定义头像裁剪参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CustomAvatarPrepareOptions = {
   /** 裁切位置，缺省时居中 */
@@ -21,7 +21,7 @@ type CustomAvatarPrepareOptions = {
 
 /**
  * 将裁切位置限制在 0 到 1 之间。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 原始位置
  * @returns 有效的裁切位置
  */
@@ -32,7 +32,7 @@ function normalizeCropPosition(value: number | undefined): number {
 
 /**
  * 校验图片并按指定位置转换为方形静态头像。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 用户选择的原始图片
  * @param options - 裁切位置与取消信号
  * @returns 最大 512px、保持透明度的 PNG 头像文件

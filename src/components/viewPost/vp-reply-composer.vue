@@ -123,7 +123,7 @@ import VpReplyTools from "./vp-reply-tools.vue";
 
 /**
  * 评论输入框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyComposerProps = {
   postId: string;
@@ -287,7 +287,7 @@ function addGameUid(value: TGApp.BBS.GameUid.Info): void {
 
 /**
  * 获取 UID 卡片预览节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns UID 卡片节点
  */
 function getGameUidPreview(): TGApp.BBS.GameUid.Node {

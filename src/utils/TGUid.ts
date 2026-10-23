@@ -1,6 +1,6 @@
 /**
  * UID 展示工具
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import useAppStore from "@store/app.js";
@@ -14,7 +14,7 @@ const UID_TAIL_KEEP = 4;
 
 /**
  * 按设置隐藏 UID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待展示的 UID
  * @returns 未开启隐藏时原样返回，否则返回等长掩码
  */
@@ -26,7 +26,7 @@ export function maskUid(value: string | number | null | undefined): string {
 
 /**
  * 按设置隐藏 UID，保留尾号用于区分账号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待展示的 UID
  * @returns 未开启隐藏时原样返回，否则返回掩码加尾号
  */
@@ -39,7 +39,7 @@ export function maskUidTail(value: string | number | null | undefined): string {
 
 /**
  * 按设置隐藏文件名中的 UID，保留尾号以区分账号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @remarks 星号在 Windows 文件名中非法，因此这里用文件名安全的 `UID` 前缀加尾号
  * @param value - 待写入文件名的 UID
  * @returns 未开启隐藏时原样返回，否则返回 `UID` 加尾号
@@ -52,7 +52,7 @@ export function maskUidName(value: string | number | null | undefined): string {
 
 /**
  * 生成 v-select 的 UID 选项标题
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param item - 选项原始值
  * @returns 保留尾号的掩码文本，便于区分账号
  */
@@ -62,7 +62,7 @@ export function uidItemTitle(item: unknown): string {
 }
 /**
  * 生成 v-select 的 UID 选项取值
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @remarks
  * Vuetify 在未显式声明 item-value 时会把 item-title 当作取值，
  * 导致 v-model 拿到掩码字符串，这里显式还原为原始 UID。
@@ -75,7 +75,7 @@ export function uidItemValue(item: unknown): unknown {
 
 /**
  * 生成 UID 的悬停提示
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @remarks 仅在开启隐藏时给出可区分的尾号，关闭时返回 undefined 以免与展示文本重复
  * @param value - 待提示的 UID
  * @returns 悬停提示文本，或 undefined

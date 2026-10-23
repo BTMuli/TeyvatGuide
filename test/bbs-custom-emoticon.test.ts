@@ -1,6 +1,6 @@
 /**
  * 米游社收藏表情数据契约回归测试
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";

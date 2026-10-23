@@ -1,12 +1,12 @@
 /**
  * 结构化帖子类型声明文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 declare namespace TGApp.BBS.SctPost {
-  /** 帖子投票结构化值。 @since Beta v0.12.6 */
+  /** 帖子投票结构化值。 @since Beta v0.13.0 */
   type Vote = TGApp.BBS.PostEdit.Vote;
 
-  /** 帖子折叠结构化值，兼容旧帖子回退文本。 @since Beta v0.12.6 */
+  /** 帖子折叠结构化值，兼容旧帖子回退文本。 @since Beta v0.13.0 */
   type Fold = TGApp.BBS.PostEdit.FoldInsert;
 
   /**

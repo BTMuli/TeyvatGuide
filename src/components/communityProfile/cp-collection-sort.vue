@@ -124,7 +124,7 @@ import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watc
 
 /**
  * 合集排序对话框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CollectionSortProps = {
   /** 待排序的完整合集列表 */

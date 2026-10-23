@@ -247,7 +247,7 @@ import TpParser from "./tp-parser.vue";
 
 /**
  * 回复项参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TprReplyProps =
   | {
@@ -266,7 +266,7 @@ type TprReplyProps =
 
 /**
  * 回复项事件。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type TprReplyEmits = {
   reply: [item: TGApp.BBS.Reply.ReplyFull, ancestors?: Array<TGApp.BBS.Reply.ReplyFull>];
@@ -275,7 +275,7 @@ type TprReplyEmits = {
 
 /**
  * 回复变更的账号与上下文快照。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type WriteSnapshot = TGApp.BBS.Reply.AccountSnapshot & {
   postId: string;

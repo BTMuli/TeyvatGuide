@@ -102,19 +102,19 @@ import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from "vue
 
 /**
  * 可选择接收范围的消息设置键
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ScopeKey = "reply" | "active_mention" | "upvote";
 
 /**
  * 消息设置的登录账户快照
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AccountSnapshot = { uid: string; cookie: TGApp.App.Account.Cookie };
 
 /**
  * 消息设置草稿
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type SettingsDraft = Record<ScopeKey, TGApp.BBS.Notification.SettingScope> & { system: boolean };
 

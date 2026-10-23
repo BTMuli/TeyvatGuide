@@ -1,6 +1,6 @@
 /**
  * 关于 BBS 的工具函数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -8,13 +8,13 @@ import bbsEnum from "@enum/bbs.js";
 const BBS_VERSION: Readonly<string> = "2.115.0";
 /**
  * 合集接口网页端版本号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @remarks 与服务端 2.102 版本线绑定，升级版本线时需同步更换 salt
  */
 const BBS_COLLECTION_VERSION: Readonly<string> = "2.102.0";
 /**
  * 合集接口 salt
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @remarks 合集接口只接受网页端 2.102 版本线的签名
  */
 const BBS_COLLECTION_SALT: Readonly<string> = "r3KppdID2yT6ht6P7MxzQykauJj0Cmtg";

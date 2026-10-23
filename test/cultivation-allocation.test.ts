@@ -1,6 +1,6 @@
 /**
  * 养成计划材料分配回归检查。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import {
@@ -25,7 +25,7 @@ import { WikiMaterialData } from "@/data/index.js";
 
 /**
  * 创建指定星级与配方的材料 Wiki 测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 材料 ID
  * @param star - 材料星级
  * @param convert - 材料可用的合成配方
@@ -50,7 +50,7 @@ function makeMaterial(
 
 /**
  * 创建指定来源材料与数量的合成配方。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 合成配方 ID
  * @param sources - 来源材料 ID 与需求数量
  * @returns 包含来源材料数量的合成配方
@@ -70,7 +70,7 @@ function makeRecipe(id: string, sources: Array<[number, number]>): TGApp.App.Mat
 
 /**
  * 创建包含单项材料需求的养成目标测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 养成目标 ID
  * @param materialId - 目标材料 ID
  * @param sortOrder - 目标分配优先级
@@ -120,7 +120,7 @@ function makeEntry(
 
 /**
  * 创建包含持有量、合成量与缺口的材料结果。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 材料 ID
  * @param required - 材料需求数量
  * @param owned - 背包持有数量
@@ -149,7 +149,7 @@ function makeResult(
 
 /**
  * 读取指定材料在消耗列表中的数量。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param costs - 材料消耗列表
  * @param id - 材料 ID
  * @returns 指定材料的消耗数量，不存在时为零
@@ -160,7 +160,7 @@ function countCost(costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>, id: nu
 
 /**
  * 创建材料消耗展示项测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param id - 材料 ID
  * @param count - 材料数量
  * @param owned - 背包持有数量
@@ -185,7 +185,7 @@ function makeCost(
 
 /**
  * 创建可覆盖意图与消耗的材料转换选项。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param material - 待转换的材料需求结果
  * @param costs - 材料消耗列表
  * @param values - 需要覆盖的转换选项字段

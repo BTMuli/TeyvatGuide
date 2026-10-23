@@ -1,6 +1,6 @@
 /**
  * 帖子相关的请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import bbsEnum from "@enum/bbs.js";
 import {
@@ -17,13 +17,13 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * 回复请求签名数据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyRequestData = Record<string, string | number | boolean | Array<string>>;
 
 /**
  * 校验回复请求中的 ID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的 ID
  * @param name - 错误信息中的字段名称
  */
@@ -33,7 +33,7 @@ function assertPositiveId(value: string, name: string): void {
 
 /**
  * 校验正整数参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的数值
  * @param name - 错误信息中的字段名称
  */
@@ -43,7 +43,7 @@ function assertPositiveNumber(value: number, name: string): void {
 
 /**
  * 提取回复请求所需的登录凭据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @returns 供请求头签名使用的最小 Cookie
  */
@@ -56,7 +56,7 @@ function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Accoun
 
 /**
  * 创建回复读取请求头
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @param params - 请求参数
  * @returns 带签名的请求头
@@ -73,7 +73,7 @@ function getReplyReadHeaders(
 
 /**
  * 创建回复变更请求头
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
  * @param body - 请求体
  * @returns 带签名的 JSON 请求头
@@ -91,7 +91,7 @@ function getReplyWriteHeaders(
 
 /**
  * 校验回复内容
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param content - 回复内容
  */
 function assertReplyContent(content: string): void {
@@ -102,7 +102,7 @@ function assertReplyContent(content: string): void {
 
 /**
  * 获取单个帖子信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param postId - 帖子 ID
  * @param cookie - Cookie
  * @param challenge - 极验验证参数
@@ -147,7 +147,7 @@ async function getPostFullInCollection(
 
 /**
  * 获取帖子回复信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param postId - 帖子 ID
  * @param gid - 社区 ID
  * @param isHot - 是否热门
@@ -190,7 +190,7 @@ async function getPostReplies(
 
 /**
  * 获取帖子子回复信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param floorId - 楼层 ID
  * @param gid - 社区 ID
  * @param postId - 帖子 ID
@@ -223,7 +223,7 @@ async function getSubReplies(
 
 /**
  * 发布回复
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - 回复参数
  * @param cookie - 用户 Cookie
  * @returns 回复变更响应
@@ -266,7 +266,7 @@ async function createReply(
 
 /**
  * 点赞或取消点赞回复
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param postId - 帖子 ID
  * @param replyId - 回复 ID
  * @param cookie - 用户 Cookie
@@ -297,7 +297,7 @@ async function likeReply(
 
 /**
  * 删除回复
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param postId - 帖子 ID
  * @param replyId - 回复 ID
  * @param cookie - 用户 Cookie
@@ -326,7 +326,7 @@ async function deleteReply(
 
 /**
  * 置顶或取消置顶帖子回复
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param postId - 帖子 ID
  * @param replyId - 回复 ID
  * @param cookie - 用户 Cookie

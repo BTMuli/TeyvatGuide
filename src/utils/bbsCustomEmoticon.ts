@@ -1,13 +1,13 @@
 /**
  * 米游社自定义表情校验与列表转换
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 type CustomEmoticonRecord = Record<string, unknown>;
 
 /**
  * 判断值是否为普通对象
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为普通对象
  */
@@ -17,7 +17,7 @@ function isRecord(value: unknown): value is CustomEmoticonRecord {
 
 /**
  * 判断值是否为安全的 HTTPS 图片地址
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的地址
  * @returns 是否为安全地址
  */
@@ -42,7 +42,7 @@ function isSafeImageUrl(value: unknown): value is string {
 
 /**
  * 判断值是否为正安全整数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为正安全整数
  */
@@ -52,7 +52,7 @@ function isPositiveInteger(value: unknown): value is number {
 
 /**
  * 从服务端字段中选择主字段或兼容字段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 服务端对象
  * @param primary - 主字段名
  * @param fallback - 兼容字段名
@@ -69,7 +69,7 @@ function getCompatibleField(
 
 /**
  * 将列表状态转换为发送节点使用的可用标记。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 服务端收藏条目
  * @returns 是否明确可用
  */
@@ -91,7 +91,7 @@ function getListItemAvailability(value: CustomEmoticonRecord): boolean {
 
 /**
  * 解析并复制单个自定义表情
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待解析的自定义表情
  * @returns 已校验且不共享嵌套对象的自定义表情
  */
@@ -142,7 +142,7 @@ export function parseCustomEmoticon(value: unknown): TGApp.BBS.CustomEmoticon.Va
 
 /**
  * 解析收藏表情列表响应数据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口响应中的 data
  * @returns 已校验且可用的收藏表情列表
  */

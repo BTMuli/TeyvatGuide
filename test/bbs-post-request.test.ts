@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文帖请求契约回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -177,7 +177,7 @@ const pictureNoTrailingLfSource = <TGApp.BBS.Post.FullData>(<unknown>{
 
 /**
  * 构造用于图片帖介绍一致性校验的合成来源。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param structuredDescription - 结构化介绍文本
  * @param describe - 正文中的图片介绍
  * @returns 保留测试图片顺序的来源帖子

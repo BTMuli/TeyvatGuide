@@ -1,6 +1,6 @@
 /**
  * dialog 组件封装，函数式调用
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import type { ComponentInternalInstance, VNode } from "vue";
@@ -63,7 +63,7 @@ let dialogInstance: VNode;
 
 /**
  * 函数式弹窗任务
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type DialogTask<T> = () => Promise<T>;
 
@@ -71,7 +71,7 @@ let dialogQueueTail: Promise<void> = Promise.resolve();
 
 /**
  * 按调用顺序串行执行函数式弹窗任务。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param task - 待执行的弹窗任务
  * @returns 弹窗任务结果
  */
@@ -170,7 +170,7 @@ async function showDialogInputFull(
 
 /**
  * 排队调用完整弹窗封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param mode - 弹窗模式
  * @param title - 标题
  * @param text - 文本
@@ -190,7 +190,7 @@ function queuedDialogFull(
 
 /**
  * 排队调用确认弹窗简易封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param title - 标题
  * @param text - 文本
  * @param otcancel - 是否允许点击外部取消
@@ -206,7 +206,7 @@ function queuedDialogCheck(
 
 /**
  * 排队调用输入弹窗简易封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param title - 标题
  * @param text - 文本
  * @param input - 默认输入值
@@ -224,7 +224,7 @@ function queuedDialogInput(
 
 /**
  * 排队调用输入弹窗完整封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param opts - 弹窗参数
  * @returns 输入结果
  */
@@ -236,7 +236,7 @@ function queuedDialogInputFull(
 
 /**
  * 排队调用确认弹窗完整封装。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param opts - 弹窗参数
  * @returns 确认结果
  */

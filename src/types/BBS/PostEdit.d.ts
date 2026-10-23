@@ -1,11 +1,11 @@
 /**
  * 米游社富文本帖子编辑类型
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 declare namespace TGApp.BBS.PostEdit {
   /**
    * 可编辑的富文本属性
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Attributes = {
     bold?: boolean;
@@ -18,13 +18,13 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 富文本分割线样式
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Divider = "line_1" | "line_2" | "line_3" | "line_4";
 
   /**
    * 米游社帖子投票嵌入值。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Vote = {
     /** 投票 ID */
@@ -40,7 +40,7 @@ declare namespace TGApp.BBS.PostEdit {
    *
    * 编辑时完整保留官方 `structured_content` 中的视频元数据，仅对编辑器
    * 实际使用的字段做校验；服务端会依据视频节点重新生成 `vod_list`。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Vod = {
     /** 视频 ID */
@@ -60,7 +60,7 @@ declare namespace TGApp.BBS.PostEdit {
    *
    * `title` 和 `content` 是 JSON 编码的 Quill Delta；`id` 与 `size` 为 APK
    * 折叠 Blot 的可选 DOM 数据属性，旧帖子可能不包含它们。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Fold = {
     /** JSON 编码的折叠标题 Delta */
@@ -73,7 +73,7 @@ declare namespace TGApp.BBS.PostEdit {
     id?: string;
   };
 
-  /** 旧帖子结构中用于折叠回退显示的兼容封装。 @since Beta v0.12.6 */
+  /** 旧帖子结构中用于折叠回退显示的兼容封装。 @since Beta v0.13.0 */
   type FoldInsert = {
     fold: Fold;
     backup_text?: string;
@@ -81,7 +81,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 富文本帖子节点
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Node = {
     insert:
@@ -98,7 +98,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 校验后的帖子节点、纯文字及图片
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DraftDocument = {
     nodes: Array<Node>;
@@ -108,7 +108,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 图片帖的正文封装。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PictureContent = {
     /** 图片 URL 列表 */
@@ -121,13 +121,13 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 从同一份 Quill 文档导出的帖子正文
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Document = DraftDocument & { html: string };
 
   /**
    * 图文帖发布设置
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Settings = {
     gid: number;
@@ -153,7 +153,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 版块发布限制信息。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ReleaseConfig = {
     /** 当前账号是否可在该版块发帖 */
@@ -164,7 +164,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 帖子写接口响应，保留服务端业务错误。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MutationResponse = {
     retcode: number;
@@ -177,7 +177,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 帖子发布检查响应。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ReleaseConfigResponse = {
     retcode: number;

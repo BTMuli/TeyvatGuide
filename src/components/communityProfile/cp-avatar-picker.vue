@@ -290,7 +290,7 @@ import {
 
 /**
  * 头像选择对话框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AvatarPickerProps = {
   /** 可选预设头像分组 */
@@ -528,7 +528,7 @@ function handleCropImageLoad(event: Event): void {
 
 /**
  * 记录裁切舞台尺寸，供圆形选框定位使用。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 function updateCropStageSize(): void {
   const stage = cropStage.value;

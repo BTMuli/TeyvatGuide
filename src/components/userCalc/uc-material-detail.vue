@@ -105,7 +105,7 @@ import { computed, ref, useTemplateRef } from "vue";
 
 /**
  * 养成材料详情面板属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialDetailProps = {
   bag?: TGApp.Sqlite.UserBag.MaterialTable;

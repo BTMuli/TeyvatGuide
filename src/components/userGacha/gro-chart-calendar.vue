@@ -93,7 +93,7 @@ function groupRecordsByDate(
 }
 
 /**
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @description 获取日历图表配置
  * @returns {EChartsOption}
  */

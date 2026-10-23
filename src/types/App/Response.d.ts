@@ -1,6 +1,6 @@
 /**
  * 应用请求封装相关类型定义
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.App.Response {
@@ -24,7 +24,7 @@ declare namespace TGApp.App.Response {
 
   /**
    * 请求配置
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @remarks 只写了用到的部分
    */
   type ReqConf = {

@@ -33,7 +33,7 @@ import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 
 /**
  * 材料合成消耗列表属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcCraftingCostListProps = {
   costs: ReadonlyArray<TGApp.App.UserCalc.CraftingCost>;

@@ -14,7 +14,7 @@ import { computed } from "vue";
 
 /**
  * 养成材料合成消耗汇总属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcCraftingSummaryProps = {
   materials: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>;

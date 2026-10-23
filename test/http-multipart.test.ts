@@ -1,6 +1,6 @@
 /**
  * TGHttps multipart 请求回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -19,7 +19,7 @@ import TGHttps from "../src/utils/TGHttps.js";
 
 /**
  * 创建成功响应替身。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 可被 TGHttps 消费的成功响应
  */
 function createResponse(): Response {
@@ -28,7 +28,7 @@ function createResponse(): Response {
 
 /**
  * 判断字节数组是否包含目标序列。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param bytes - 待搜索的字节数组
  * @param needle - 目标字节序列
  * @returns 是否包含目标序列

@@ -1,12 +1,12 @@
 /**
  * 回复资源请求类型定义
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.ReplyAsset {
   /**
    * 昵称解析接口响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MentionResp = Omit<TGApp.BBS.Response.Base, "data"> & {
     /** 昵称解析数据；接口失败时为 null */
@@ -15,7 +15,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 昵称解析接口数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MentionRes = {
     /** 昵称与 UID 映射，兼容字符串 UID */
@@ -24,7 +24,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 图片上传签名接口响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UploadParamsResp = {
     /** 响应代码，0 表示成功 */
@@ -35,7 +35,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 图片上传签名数据中已接入的 OSS 分支
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UploadParamsRes = {
     /** 上传方式 */
@@ -46,7 +46,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 签名接口返回的 OSS 参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type OssConfig = {
     /** OSS 上传地址 */
@@ -77,7 +77,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * OSS 上传回调响应的消费字段
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UploadResp = {
     /** 响应代码，0 表示成功 */
@@ -88,7 +88,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * OSS 上传结果
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UploadRes = {
     /** 已上传图片的 URL */
@@ -99,7 +99,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * OSS 自定义表单字段
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type FormField = {
     /** 字段名称 */
@@ -110,7 +110,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 回复中提及的用户
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Mention = {
     /** 用户 UID */
@@ -121,7 +121,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 已上传的回复图片
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UploadedImage = {
     /** 图片 URL */
@@ -134,7 +134,7 @@ declare namespace TGApp.BBS.ReplyAsset {
 
   /**
    * 已校验的本地回复图片
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type PreparedImage = {
     /** 原始文件字节，用于计算摘要 */

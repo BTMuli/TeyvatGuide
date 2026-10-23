@@ -64,7 +64,7 @@ import VpReplyItem from "./vp-reply-item.vue";
 
 /**
  * 回复对话框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyDialogProps = {
   postId: string;

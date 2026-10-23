@@ -1,13 +1,13 @@
 /**
  * 米游社帖子表情令牌解析。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { isPostUrl } from "./bbsPostDocument.js";
 
 /**
  * 编辑器内部的官方表情值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostEmoticonValue = {
   src: string;
@@ -16,7 +16,7 @@ type PostEmoticonValue = {
 
 /**
  * 文本表情令牌拆分后的编辑器插入值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostEmoticonSegment = {
   insert: string | { emoticon: PostEmoticonValue };
@@ -25,7 +25,7 @@ type PostEmoticonSegment = {
 
 /**
  * 判断表情名称是否能安全作为帖子令牌。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 表情名称
  * @returns 是否为单行且不含令牌分隔符的名称
  */
@@ -35,7 +35,7 @@ function isSafePostEmoticonName(value: string): boolean {
 
 /**
  * 清洗本地缓存或请求得到的官方表情映射。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知来源的表情映射或 JSON 文本
  * @returns 只包含安全 HTTPS 图片地址的表情映射
  */
@@ -64,7 +64,7 @@ export function parsePostEmoticonMap(value: unknown): Record<string, string> {
 
 /**
  * 将已知的帖子表情令牌拆分为普通文字和行内表情节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param text - 帖子文本节点
  * @param emoticons - 已清洗的表情映射
  * @returns 可直接插入 Quill 的分段及其原始文字长度

@@ -352,7 +352,7 @@ import { computed, ref, useId, watch } from "vue";
 
 /**
  * 头像框选择对话框用户信息。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendantPickerUser = Pick<TGApp.BBS.User.Info, "nickname" | "avatar_url"> & {
   avatar_ext?: TGApp.BBS.User.AvatarExt | null;
@@ -360,7 +360,7 @@ type PendantPickerUser = Pick<TGApp.BBS.User.Info, "nickname" | "avatar_url"> & 
 
 /**
  * 挂件选择对话框参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendantPickerProps = {
   /** 可选头像框列表 */
@@ -389,7 +389,7 @@ type PendantPickerProps = {
 
 /**
  * 按可用状态组织的头像框分组。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendantGroup = {
   title: string;
@@ -399,7 +399,7 @@ type PendantGroup = {
 
 /**
  * 按可用状态组织的评论装扮分组。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CommentDecorationGroup = {
   title: string;
@@ -552,7 +552,7 @@ function initializeCommentSelection(): void {
 
 /**
  * 将剩余秒数格式化为官方头像框选择器的展示文本。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param seconds - 剩余秒数
  * @returns 剩余时间文本
  */
@@ -588,7 +588,7 @@ function getCommentLimit(decoration: TGApp.BBS.CommunitySettings.CommentDecorati
 
 /**
  * 将接口返回的评论气泡背景色转换为 CSS 颜色。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param color - 十六进制颜色，接口不带 #
  * @returns CSS 颜色，格式无效时返回 undefined
  */
@@ -602,7 +602,7 @@ function getCommentBackground(color?: string): string | undefined {
 
 /**
  * 生成挂件项的获取方法提示。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param item - 头像框或评论装扮
  * @returns 用于悬停提示的获取方法文本
  * @remarks 优先使用扩展获取方法字段；官方描述只在包含获取语义时作为获取方法展示
@@ -621,7 +621,7 @@ function getObtainMethod(
 
 /**
  * 判断评论装扮是否为当前使用中的装扮。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param decoration - 评论装扮
  * @returns 是否为使用中的装扮
  */
@@ -631,7 +631,7 @@ function isCommentInUse(decoration: TGApp.BBS.CommunitySettings.CommentDecoratio
 
 /**
  * 判断头像框是否为当前使用中的头像框。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param pendant - 头像框
  * @returns 是否为使用中的头像框
  */

@@ -1,6 +1,6 @@
 /**
  * 回复图片本地校验与资源释放回归测试
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import { createHash } from "node:crypto";
 
@@ -13,7 +13,7 @@ const images: Array<FakeImage> = [];
 
 /**
  * 模拟浏览器图片解码边界
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 class FakeImage {
   naturalWidth = 320;
@@ -42,7 +42,7 @@ afterEach(() => {
 
 /**
  * 等待异步文件读取进入图片解码阶段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 当前图片边界对象
  */
 async function decodingImage(): Promise<FakeImage> {

@@ -1,25 +1,25 @@
 /**
  * 米游社消息通知类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Notification {
   /**
    * 消息通知分类
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @remarks reply 为回复我的，active_mention 为主动\@我，system 为系统通知，comment 为收到的赞
    */
   type Category = "reply" | "active_mention" | "system" | "comment";
 
   /**
    * 消息通知列表返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ListResp = TGApp.BBS.Community.BaseResp<ListRes>;
 
   /**
    * 消息通知列表返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ListRes = {
     /** 通知列表 */
@@ -32,13 +32,13 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 未读消息数返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UnreadResp = TGApp.BBS.Community.BaseResp<UnreadRes>;
 
   /**
    * 未读消息数返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type UnreadRes = {
     /** 各分类未读数，带 _focus 后缀的为关注用户产生的未读数 */
@@ -47,7 +47,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 清除未读请求参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ClearUnreadParams = {
     /** 通知分类 */
@@ -58,13 +58,13 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 清除未读返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ClearUnreadResp = TGApp.BBS.Response.Base;
 
   /**
    * 消息通知条目
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Item = {
     /** 通知 ID */
@@ -119,7 +119,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 通知操作者信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type OpUser = {
     /** 用户 ID */
@@ -146,7 +146,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 通知关联的原内容
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Origin = {
     /** 原内容文本 */
@@ -163,7 +163,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 原内容图片
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type OriginImage = {
     /** 图片链接 */
@@ -178,7 +178,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 通知扩展信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Ext = {
     /** 关联帖子 ID */
@@ -199,21 +199,21 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 互动消息接收范围
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @remarks All 为所有人，Follow 为仅关注人，Never 为不接受任何消息提醒
    */
   type SettingScope = "All" | "Follow" | "Never";
 
   /**
    * 系统通知接收选项
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    * @remarks 官网将 OPTION_ONLY_IMPORTANT 视为开启
    */
   type SystemSetting = "OPTION_ALL" | "OPTION_ONLY_IMPORTANT" | "OPTION_CLOSED";
 
   /**
    * 消息设置
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Settings = {
     /** 回复我的 */
@@ -246,13 +246,13 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 消息设置返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SettingsResp = TGApp.BBS.Community.BaseResp<SettingsRes>;
 
   /**
    * 消息设置返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SettingsRes = {
     /** 消息设置 */
@@ -261,7 +261,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 更新消息设置请求参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SettingsUpdateParams = {
     /** 完整消息设置 */
@@ -270,7 +270,7 @@ declare namespace TGApp.BBS.Notification {
 
   /**
    * 更新消息设置返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SettingsUpdateResp = TGApp.BBS.Response.Base;
 }

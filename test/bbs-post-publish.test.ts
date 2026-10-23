@@ -1,6 +1,6 @@
 /**
  * 米游社发帖版块筛选测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";

@@ -58,7 +58,7 @@ import { computed, ref, useId } from "vue";
 
 /**
  * 材料消耗列表的输入项。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialCostListItem = Pick<
   TGApp.App.UserCalc.CraftingCost,
@@ -70,7 +70,7 @@ type UcMaterialCostListItem = Pick<
 
 /**
  * 材料消耗列表的渲染项。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialCostListDisplayItem = TGApp.App.UserCalc.ResultMaterial & {
   role?: string;
@@ -78,7 +78,7 @@ type UcMaterialCostListDisplayItem = TGApp.App.UserCalc.ResultMaterial & {
 
 /**
  * 材料消耗列表组件属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialCostListProps = {
   title: string;

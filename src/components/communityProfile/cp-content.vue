@@ -408,14 +408,14 @@ type ContentEntry =
   | { kind: "collection"; id: string; collection: TGApp.BBS.Collection.Collection };
 /**
  * 浏览历史列表中的帖子条目。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type HistoryEntry = Extract<ContentEntry, { kind: "post" }> & {
   historyId: TGApp.BBS.Community.HistoryItemId;
 };
 /**
  * 内容列表的登录账户和目标用户快照。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AccountSnapshot = { uid: string; profileUid: string; cookie: TGApp.App.Account.Cookie };
 type ContentPage = {

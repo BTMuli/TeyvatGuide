@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心设置请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -17,7 +17,7 @@ const commentDecorationAssetsType: Readonly<number> = 4;
 
 /**
  * 提取设置请求所需的最小 Cookie
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @returns 用于请求头签名的最小 Cookie
  */
@@ -27,7 +27,7 @@ function getCommunityCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account
 
 /**
  * 提取自定义头像检查请求所需的米游社 App Cookie
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @returns 用于 App 端签名与 Cookie 注入的凭据
  */
@@ -48,7 +48,7 @@ function getCustomAvatarCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Acco
 
 /**
  * 创建设置写入请求头
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @param body - JSON 请求体
  * @returns 带签名的 JSON 请求头
@@ -68,7 +68,7 @@ function getSettingsWriteHeaders(
 
 /**
  * 将未知接口值转换为对象
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待转换值
  * @returns 对象值或 undefined
  */
@@ -79,7 +79,7 @@ function getRecord(value: unknown): Record<string, unknown> | undefined {
 
 /**
  * 将资源 ID 归一为安全整数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口返回的资源 ID
  * @param errorMessage - 数据无效时的错误消息
  * @returns 资源数字 ID
@@ -95,7 +95,7 @@ function getAssetId(value: unknown, errorMessage: string): number {
 
 /**
  * 读取接口返回的获取方法
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口资源对象
  * @returns 去除首尾空白后的获取方法，缺失或空字符串返回 undefined
  */
@@ -108,7 +108,7 @@ function getObtainMethod(value: Record<string, unknown>): string | undefined {
 
 /**
  * 校验隐私接口中的布尔值
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口返回值
  * @returns 布尔值
  */
@@ -119,7 +119,7 @@ function readBoolean(value: unknown): boolean {
 
 /**
  * 将官方隐私响应转换为设置界面值
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param info - 隐私接口返回数据，缺失或无效设置会被拒绝
  * @param profileUserCenterView - 个人资料中的主页访问值，1 为允许，2 为禁止
  * @returns 设置界面值
@@ -145,7 +145,7 @@ function getPrivacyDraft(
 
 /**
  * 按官方请求协议生成完整的五项隐私设置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param draft - 当前界面值
  * @returns 官方隐私写入参数
  */
@@ -165,7 +165,7 @@ export { buildPrivacyUpdate, getPrivacyDraft };
 
 /**
  * 获取当前账户的隐私设置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @returns 隐私设置响应数据
  */
@@ -183,7 +183,7 @@ async function getPrivacy(
 
 /**
  * 更新当前账户的隐私设置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param settings - 完整的五项隐私设置参数
  * @returns 隐私设置响应数据
@@ -214,7 +214,7 @@ async function setPrivacy(
 
 /**
  * 更新当前账户的昵称和简介
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param profile - 资料编辑参数
  * @param signal - 可选的请求取消信号
@@ -239,7 +239,7 @@ async function updateProfile(
 
 /**
  * 解析自定义头像费用检查结果
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 检查接口 data 字段
  * @returns 头像更换的有效费用与米游币余额
  */
@@ -270,7 +270,7 @@ function parseCustomAvatarPolicy(value: unknown): TGApp.BBS.CommunitySettings.Cu
 
 /**
  * 获取自定义头像更换费用与余额
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param signal - 可选的请求取消信号
  * @returns 有效费用与米游币余额
@@ -299,7 +299,7 @@ async function getCustomAvatarPolicy(
 
 /**
  * 上传自定义头像并生成资料更新字段
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 已完成本地裁剪的头像图片
  * @param cookie - 账户 Cookie
  * @param signal - 可选的请求取消信号
@@ -318,7 +318,7 @@ async function uploadCustomAvatar(
 
 /**
  * 构造官方 App 资料更新参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param profile - 包含资料与头像地址的更新参数
  * @returns 仅包含官方 App 资料接口支持的字段
  * @remarks 自定义头像要求 upload-bbs 地址；动态头像允许携带查询参数的官方资源地址
@@ -378,7 +378,7 @@ function buildAppProfile(
 
 /**
  * 使用官方 API_BBS 接口提交资料、自定义头像或动态头像
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @param profile - 包含昵称、简介、性别和头像资料的参数
  * @param signal - 可选的请求取消信号
@@ -409,7 +409,7 @@ async function updateAppProfile(
 
 /**
  * 获取米游社可选头像列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 可选头像分组响应数据
  */
 async function getAvatars(): Promise<TGApp.BBS.CommunitySettings.AvatarSetResp> {
@@ -422,7 +422,7 @@ async function getAvatars(): Promise<TGApp.BBS.CommunitySettings.AvatarSetResp> 
 
 /**
  * 获取当前账户拥有的动态头像列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param signal - 可选的请求取消信号
  * @returns 动态头像列表响应数据
@@ -449,7 +449,7 @@ async function getAvatarAssets(
 
 /**
  * 将接口返回的头像框 ID 归一为数字
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口返回的头像框 ID，官方接口可能以字符串返回
  * @returns 头像框数字 ID
  * @remarks ID 缺失、非整数或为负数时抛出错误
@@ -460,7 +460,7 @@ function getPendantId(value: unknown): number {
 
 /**
  * 保留评论装扮资源 ID 的字符串精度
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口返回的评论装扮资源 ID
  * @returns 去除首尾空白后的字符串 ID
  * @remarks 官方资源 ID 为 19 位整数，超出 Number 安全范围，必须按字符串保存
@@ -473,7 +473,7 @@ function getCommentDecorationId(value: unknown): string {
 
 /**
  * 将接口返回的可选数字字段归一化
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 接口返回值
  * @returns 有限数字或 undefined
  */
@@ -486,7 +486,7 @@ function getOptionalNumber(value: unknown): number | undefined {
 
 /**
  * 将接口返回的评论装扮资源归一化
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 评论装扮资源对象
  * @param owned - 是否属于已拥有列表
  * @returns 评论装扮选择项
@@ -539,7 +539,7 @@ function normalizeCommentDecoration(
 
 /**
  * 提取评论装扮接口列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 评论装扮接口 data 字段
  * @returns 已拥有与未拥有的原始列表
  * @remarks 背包接口返回 assets_list / unowned_assets_list，兼容旧版 list 字段
@@ -561,7 +561,7 @@ function getCommentDecorationRecords(value: unknown): {
 
 /**
  * 获取当前账户拥有的头像框列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @returns 头像框列表响应数据
  */
@@ -589,7 +589,7 @@ async function getPendantList(
 
 /**
  * 获取当前账户的评论装扮列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @param signal - 可选的请求取消信号
  * @returns 评论装扮列表响应数据
@@ -622,7 +622,7 @@ async function getCommentDecorationList(
 
 /**
  * 设置当前账户使用的头像框
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param pendantId - 头像框 ID，0 表示不使用头像框
  * @param signal - 可选的请求取消信号
@@ -649,7 +649,7 @@ async function setPendant(
 
 /**
  * 设置当前账户使用的评论装扮
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @param id - 评论装扮 ID，空字符串或 0 表示不使用评论装扮
  * @param signal - 可选的请求取消信号

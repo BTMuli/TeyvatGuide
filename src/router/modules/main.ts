@@ -1,6 +1,6 @@
 /**
  * 主路由模块
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import { platform } from "@tauri-apps/plugin-os";
 import type { RouteRecordRaw } from "vue-router";

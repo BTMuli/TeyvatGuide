@@ -1,6 +1,6 @@
 /**
  * 米游社收藏表情读取请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -13,7 +13,7 @@ const customEmoticonListUrl: Readonly<string> =
 
 /**
  * 提取收藏表情请求所需的最小登录凭据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
  * @returns 仅包含 stuid、stoken 与 mid 的 Cookie
  */
@@ -34,7 +34,7 @@ function getAuthCookie(cookie: TGApp.App.Account.SignUidCookie): TGApp.App.Accou
 
 /**
  * 获取收藏表情列表
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid
  * @param signal - 可选的请求取消信号
  * @returns 可用的收藏表情列表

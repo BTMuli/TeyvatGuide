@@ -1,11 +1,11 @@
 /**
  * 米游社回复 UID 卡片工具
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 /**
  * 判断值是否为字符串键对象
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为对象记录
  */
@@ -15,7 +15,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 判断值是否为无首尾空白且不含换行的非空字符串
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为有效字符串
  */
@@ -27,7 +27,7 @@ function isGameUidText(value: unknown): value is string {
 
 /**
  * 判断对象是否只包含指定自有键
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的对象
  * @param keys - 允许的键
  * @returns 是否完全匹配指定键
@@ -39,7 +39,7 @@ function hasExactKeys(value: Record<string, unknown>, keys: Array<string>): bool
 
 /**
  * 校验 UID 卡片请求使用的登录凭据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的凭据
  * @returns 已整理的登录凭据
  */
@@ -65,7 +65,7 @@ export function validateGameUidCookie(value: unknown): TGApp.App.Account.Cookie 
 
 /**
  * 解析 UID 卡片等级
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 角色接口返回的等级
  * @returns 数字等级
  */
@@ -82,7 +82,7 @@ function parseGameUidLevel(value: unknown): number {
 
 /**
  * 校验并复制 UID 卡片游戏账号信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的信息
  * @returns 已校验的 UID 卡片信息
  */
@@ -117,7 +117,7 @@ export function validateGameUidInfo(value: unknown): TGApp.BBS.GameUid.Info {
 
 /**
  * 从绑定角色接口结果创建 UID 卡片信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param account - 绑定游戏角色
  * @param gameName - 游戏显示名称
  * @returns UID 卡片信息
@@ -138,7 +138,7 @@ export function createGameUidInfo(
 
 /**
  * 筛选当前分区的绑定角色并转换为可预览的 UID 卡片。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param accounts - 当前账号的绑定游戏角色
  * @param games - 米游社分区与游戏标识列表
  * @param gid - 当前分区 ID
@@ -166,7 +166,7 @@ export function getGameUidInfos(
 
 /**
  * 创建 UID 卡片结构化节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param info - UID 卡片信息
  * @returns UID 卡片节点
  */
@@ -182,7 +182,7 @@ export function createGameUidNode(info: TGApp.BBS.GameUid.Info): {
 
 /**
  * 创建 UID 卡片的本地确认预览文本
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param info - UID 卡片信息
  * @returns 预览文本
  */

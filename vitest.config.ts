@@ -1,6 +1,6 @@
 /**
  * Vitest 测试配置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import { fileURLToPath } from "node:url";
 

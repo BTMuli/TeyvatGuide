@@ -214,7 +214,7 @@ import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.
 
 /**
  * 单个养成目标汇总浮窗属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanTargetSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
@@ -227,7 +227,7 @@ type UcPlanTargetSummaryOverlayProps = {
 
 /**
  * 单个养成目标汇总浮窗事件。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanTargetSummaryOverlayEmits = {
   select: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];

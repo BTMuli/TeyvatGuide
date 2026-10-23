@@ -1,6 +1,6 @@
 /**
  * BBS 收藏相关类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Collection {
@@ -86,7 +86,7 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 合集创建参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CreateParams = {
     /** 合集标题 */
@@ -99,7 +99,7 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 合集编辑参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type EditParams = CreateParams & {
     /** 合集 ID */
@@ -108,7 +108,7 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 合集删除参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DeleteParams = {
     /** 合集 ID */
@@ -117,7 +117,7 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 合集排序参数
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type SortParams = {
     /** 按新顺序排列的合集 ID 列表 */
@@ -126,13 +126,13 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 创建合集响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CreateResp = TGApp.BBS.Community.BaseResp<CreateRes>;
 
   /**
    * 创建合集响应数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CreateRes = {
     /** 新合集 ID */
@@ -141,7 +141,7 @@ declare namespace TGApp.BBS.Collection {
 
   /**
    * 合集管理响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type ManageResp = TGApp.BBS.Community.BaseResp<unknown>;
 

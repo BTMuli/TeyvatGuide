@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getCollectionRequestHeader, getRequestHeader } from "@utils/getRequestHeader.js";
@@ -9,20 +9,20 @@ import TGHttps from "@utils/TGHttps.js";
 const communityApiBaseUrl: Readonly<string> = "https://bbs-api.miyoushe.com/";
 /**
  * 米游社原神社区 ID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 const communityGameId: Readonly<number> = 2;
 const communityPageSize: Readonly<number> = 20;
 
 /**
  * 个人中心读取请求查询参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type CommunityQuery = Record<string, string | number>;
 
 /**
  * 提取个人中心读取请求所需的最小 Cookie
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 完整账户 Cookie
  * @returns 用于请求头签名的最小 Cookie
  */
@@ -32,7 +32,7 @@ function getCommunityCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account
 
 /**
  * 判断 UID 是否指向当前登录用户
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 当前账户 Cookie
  * @param uid - 待请求的用户 ID
  * @returns 是否为当前登录用户
@@ -47,7 +47,7 @@ function isCurrentUser(cookie: TGApp.App.Account.Cookie, uid: string): boolean {
 
 /**
  * 创建符合官网个人中心契约的用户筛选参数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 当前账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @returns 用户筛选参数
@@ -60,7 +60,7 @@ function getUserQuery(cookie: TGApp.App.Account.Cookie, uid?: string): Community
 
 /**
  * 获取自己的帖子
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param offset - 下一页偏移量
  * @returns 自己的帖子响应数据
@@ -83,7 +83,7 @@ async function getPosts(
 
 /**
  * 获取我的评论
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
@@ -108,7 +108,7 @@ async function getComments(
 
 /**
  * 获取我的合集
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
@@ -137,7 +137,7 @@ async function getCollections(
 
 /**
  * 发出合集管理写请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param action - 合集管理接口路径
  * @param body - 请求体
@@ -160,7 +160,7 @@ async function postCollectionManage<T>(
 
 /**
  * 创建合集
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param params - 合集创建参数
  * @returns 创建合集响应数据
@@ -176,7 +176,7 @@ async function createCollection(
 
 /**
  * 编辑合集信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param params - 合集编辑参数
  * @returns 编辑合集响应数据
@@ -192,7 +192,7 @@ async function editCollection(
 
 /**
  * 删除合集
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param id - 合集 ID
  * @returns 删除合集响应数据
@@ -207,7 +207,7 @@ async function deleteCollection(
 
 /**
  * 调整合集排序
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param ids - 按新顺序排列的合集 ID 列表
  * @returns 调整排序响应数据
@@ -222,7 +222,7 @@ async function sortCollections(
 
 /**
  * 获取收藏的帖子
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
@@ -247,7 +247,7 @@ async function getFavorites(
 
 /**
  * 取消收藏帖子
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param postId - 帖子 ID
  * @returns 取消收藏响应数据
@@ -274,7 +274,7 @@ async function unfavoritePost(
 
 /**
  * 获取收藏的合集
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
@@ -303,7 +303,7 @@ async function getFavoriteCollections(
 
 /**
  * 取消收藏合集
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param collectionId - 合集 ID
  * @returns 取消收藏响应数据
@@ -328,7 +328,7 @@ async function unfollowCollection(
 
 /**
  * 获取我的关注
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页最后 ID
@@ -357,7 +357,7 @@ async function getFollowing(
 
 /**
  * 获取我的粉丝
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页最后 ID
@@ -386,7 +386,7 @@ async function getFollowers(
 
 /**
  * 关注或取消关注指定用户
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 目标用户 ID
  * @param follow - true 表示关注，false 表示取消关注
@@ -416,7 +416,7 @@ async function setFollow(
 
 /**
  * 获取当前账户的帖子浏览历史
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param offset - 下一页偏移量
  * @returns 浏览历史响应数据
@@ -439,7 +439,7 @@ async function getHistory(
 
 /**
  * 删除当前账户的浏览历史
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param params - 删除参数
  * @returns 删除浏览历史响应数据
@@ -464,7 +464,7 @@ async function deleteHistory(
 
 /**
  * 搜索指定用户发布的帖子
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - 用户 ID
  * @param keyword - 搜索关键词
  * @param offset - 下一页偏移量
@@ -486,7 +486,7 @@ async function searchUserPosts(
 
 /**
  * 获取当前账户的消息通知
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param category - 通知分类
  * @param lastId - 下一页最后 ID
@@ -512,7 +512,7 @@ async function getNotifications(
 
 /**
  * 获取当前账户的未读消息数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @returns 未读消息数响应数据
  */
@@ -532,7 +532,7 @@ async function getNotificationUnread(
 
 /**
  * 清除当前账户指定分类的未读消息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param category - 通知分类
  * @returns 清除未读响应数据
@@ -557,7 +557,7 @@ async function clearNotificationUnread(
 
 /**
  * 获取当前账户的消息设置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param uid - 当前用户 ID
  * @returns 消息设置响应数据
@@ -579,7 +579,7 @@ async function getNotificationSettings(
 
 /**
  * 更新当前账户的消息设置
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param settings - 完整消息设置
  * @returns 更新消息设置响应数据

@@ -1,6 +1,6 @@
 /**
  * APK 发现推荐流请求契约回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

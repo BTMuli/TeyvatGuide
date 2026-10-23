@@ -1,13 +1,13 @@
 /**
  * 米游社回复变更的账号一致性校验
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 const currentAccountStorageKey: Readonly<string> = "curAccount";
 
 /**
  * 判断值是否为非空对象
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为非空对象
  */
@@ -17,7 +17,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 判断字符串是否包含有效内容
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为非空字符串
  */
@@ -27,7 +27,7 @@ function isNonBlankString(value: unknown): value is string {
 
 /**
  * 校验回复变更账号快照
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的快照
  * @returns 是否为可用于回复变更的快照
  */
@@ -42,7 +42,7 @@ function isValidSnapshot(value: unknown): value is TGApp.BBS.Reply.AccountSnapsh
 
 /**
  * 比对持久化账号与回复变更快照
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param snapshot - 回复变更账号快照
  * @param storage - 账号持久化存储
  * @returns 持久化账号是否与快照完全匹配
@@ -72,7 +72,7 @@ export function matchesCurrentAccount(
 
 /**
  * 在回复变更前校验当前账号
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @typeParam T - 变更 action 的返回值类型
  * @param snapshot - 回复变更账号快照
  * @param action - 通过账号校验后立即执行的变更 action

@@ -1,6 +1,6 @@
 /**
  * 函数式弹窗队列回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -9,7 +9,7 @@ import type { DialogCheckParams, DialogInputParams } from "../src/components/fun
 
 /**
  * Vue 虚拟节点测试桩。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type FakeVNode = {
   component?: {
@@ -22,7 +22,7 @@ type FakeVNode = {
 
 /**
  * 待完成的确认弹窗测试调用。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendingCheck = {
   mode: "check";
@@ -33,7 +33,7 @@ type PendingCheck = {
 
 /**
  * 待完成的输入弹窗测试调用。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendingInput = {
   mode: "input";
@@ -44,13 +44,13 @@ type PendingInput = {
 
 /**
  * 待完成的弹窗测试调用。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PendingDialog = PendingCheck | PendingInput;
 
 /**
  * 函数式弹窗测试桩。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type DialogHarness = {
   pending: Array<PendingDialog>;
@@ -70,7 +70,7 @@ let activeHarness: DialogHarness | undefined;
 
 /**
  * 创建一个可手动完成的弹窗调用测试桩。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 弹窗调用测试桩
  */
 function createDialogHarness(): DialogHarness {
@@ -90,7 +90,7 @@ function createDialogHarness(): DialogHarness {
 
 /**
  * 加载一个带有隔离弹窗桩的函数式弹窗模块。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 弹窗 API 与测试桩
  */
 async function loadDialog(): Promise<{
@@ -125,7 +125,7 @@ async function loadDialog(): Promise<{
 
 /**
  * 等待排队任务完成当前微任务链。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 微任务链完成信号
  */
 async function flushDialogQueue(): Promise<void> {

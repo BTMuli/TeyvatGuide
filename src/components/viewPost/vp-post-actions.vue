@@ -47,7 +47,7 @@ import { useRouter } from "vue-router";
 
 /**
  * 帖子作者操作参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PostActionsProps = {
   source: TGApp.BBS.Post.FullData;

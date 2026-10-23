@@ -1,6 +1,6 @@
 /**
  * 米游社回复表情编辑器工具回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";

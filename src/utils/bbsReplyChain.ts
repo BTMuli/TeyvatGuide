@@ -1,11 +1,11 @@
 /**
  * 米游社回复祖先链工具
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 /**
  * 构建一级主回复到目标子回复之间的祖先链。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param root - 一级主回复
  * @param target - 被回复的子回复
  * @param knownReplies - 当前已加载的子回复

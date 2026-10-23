@@ -1,6 +1,6 @@
 /**
  * 米社版块类型
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Forum {
@@ -49,13 +49,13 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * APK 发现推荐流响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DiscoverResp = TGApp.BBS.Response.BaseWithData<DiscoverRes>;
 
   /**
    * APK 发现推荐流数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type DiscoverRes = Pick<PostForumRes, "list" | "last_id"> & {
     /** 是否最后一页；原生推荐流可能省略此字段 */
@@ -75,7 +75,7 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * 版块信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type GameForumItem = {
     /** 版块 ID */
@@ -174,13 +174,13 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * 获取版块主页信息返回响应
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MainResp = TGApp.BBS.Response.BaseWithData<MainRes>;
 
   /**
    * 获取版块主页信息返回数据
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type MainRes = GameForumItem & {
     /** 置顶帖子列表 */
@@ -189,7 +189,7 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * 版块置顶帖子
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type TopPost = {
     /** 帖子 ID */

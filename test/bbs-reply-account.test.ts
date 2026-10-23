@@ -1,6 +1,6 @@
 /**
  * 米游社回复变更账号校验回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -15,7 +15,7 @@ const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
 
 /**
  * 创建序列化的本地账号状态
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - 持久化账号 UID
  * @param ltoken - 持久化账号 token
  * @param ltuid - 持久化账号 UID
@@ -31,7 +31,7 @@ function serializedAccount(
 
 /**
  * 创建内存存储替身
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - getItem 返回值
  * @returns 仅实现 getItem 的存储替身
  */

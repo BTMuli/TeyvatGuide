@@ -81,7 +81,7 @@ import CpNotification from "./cp-notification.vue";
 type CategoryInfo = { title: string; description: string; icon: string; empty: string };
 /**
  * 通知列表的登录账户快照。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AccountSnapshot = { uid: string; cookie: TGApp.App.Account.Cookie };
 

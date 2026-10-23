@@ -1,6 +1,6 @@
 /**
  * 米游社回复编辑器的表情文档工具。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import type Quill from "quill";
@@ -10,19 +10,19 @@ import { splitPostEmoticonText } from "./bbsPostEmoticon.js";
 
 /**
  * 回复编辑器内部的官方表情值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export type ReplyEditorEmoticon = TGApp.BBS.ReplyEditor.Emoticon;
 
 /**
  * 回复编辑器可插入的值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export type ReplyEditorInsert = TGApp.BBS.ReplyEditor.Insert;
 
 /**
  * 回复编辑器可序列化的操作。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 export type ReplyEditorOperation = TGApp.BBS.ReplyEditor.Operation;
 
@@ -30,7 +30,7 @@ type QuillOperation = ReturnType<Quill["getContents"]>["ops"][number];
 
 /**
  * 判断值是否为对象记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为对象记录
  */
@@ -40,7 +40,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 校验回复表情名称。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的名称
  * @returns 是否为安全的单行表情名称
  */
@@ -55,7 +55,7 @@ function isReplyEditorEmoticonName(value: unknown): value is string {
 
 /**
  * 校验并复制回复编辑器表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知来源的表情值
  * @returns 已校验的表情值
  */
@@ -73,7 +73,7 @@ export function normalizeReplyEditorEmoticon(value: unknown): ReplyEditorEmotico
 
 /**
  * 将回复文本中的已知表情令牌转换为编辑器操作。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param text - 回复纯文本
  * @param emoticons - 已清洗的表情映射
  * @returns 回复编辑器操作
@@ -91,7 +91,7 @@ export function parseReplyEditorText(
 
 /**
  * 校验并复制回复编辑器插入值。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 未知来源的插入值
  * @returns 已校验的插入值
  */
@@ -105,7 +105,7 @@ function normalizeReplyEditorInsert(value: unknown): ReplyEditorInsert {
 
 /**
  * 将编辑器操作转换为米游社回复纯文本。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param operations - Quill 操作列表
  * @param stripTerminalNewline - 是否去除 Quill 自动追加的末尾换行
  * @returns 回复纯文本
@@ -131,7 +131,7 @@ export function serializeReplyEditorOps(
 
 /**
  * 获取回复编辑器插入值占用的 Quill 长度。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param insert - 回复编辑器插入值
  * @returns Quill 文档长度
  */

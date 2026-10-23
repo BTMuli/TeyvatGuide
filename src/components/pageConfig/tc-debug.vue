@@ -171,7 +171,7 @@ async function switchIncognito(): Promise<void> {
 
 /**
  * 切换隐藏 UID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 无返回值
  */
 async function switchHideUid(): Promise<void> {

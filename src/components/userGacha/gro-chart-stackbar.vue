@@ -86,7 +86,7 @@ function groupRecordsByDate(
 }
 
 /**
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @description 堆叠柱状图
  * @returns {EChartsOption}
  */

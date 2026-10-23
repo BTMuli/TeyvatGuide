@@ -1,6 +1,6 @@
 /**
  * 验证转换设置保存、目标保存与汇总重算之间的数据同步。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import {
@@ -17,7 +17,7 @@ import useCultivationConversionStore from "@/store/modules/cultivationConversion
 
 /**
  * 持久化回归测试使用的内存存储。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type MemoryStorage = {
   data: Map<string, string>;
@@ -29,7 +29,7 @@ type MemoryStorage = {
 
 /**
  * 转换意图与库存同步回归测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ConversionFixture = {
   uid: number;
@@ -48,7 +48,7 @@ const createdPinia: Array<ReturnType<typeof createPinia>> = [];
 
 /**
  * 创建与持久化插件兼容的内存存储。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 内存数据及存储读写接口
  */
 function createMemoryStorage(): MemoryStorage {
@@ -66,7 +66,7 @@ function createMemoryStorage(): MemoryStorage {
 
 /**
  * 在独立 Pinia 实例中创建转换意图存储。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param storage - 持久化插件使用的存储接口
  * @returns 隔离用户持久化状态的转换意图存储
  */
@@ -83,7 +83,7 @@ function createStore(
 
 /**
  * 创建转换意图保存与汇总计算共用的测试数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 转换材料、目标、库存及意图测试数据
  */
 function createFixture(): ConversionFixture {
@@ -163,7 +163,7 @@ function createFixture(): ConversionFixture {
 
 /**
  * 将预览目标转换为带数据库 ID 的已保存目标。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param entry - 养成目标及其材料需求
  * @param projectId - 养成计划 ID
  * @returns 保留逻辑键且具有数据库 ID 的养成目标

@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -267,7 +267,7 @@ export async function exportUigfData(
 
 /**
  * 导出UIGF4数据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param usg - 祈愿UID列表
  * @param usb - 颂愿UID列表
  * @param savePath - 保存路径
@@ -320,7 +320,7 @@ export async function backUpUigf(dir: string): Promise<void> {
 
 /**
  * 恢复祈愿数据-旧版
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param dir - 目录
  * @param file - 文件名称
  * @returns 是否恢复成功
@@ -351,7 +351,7 @@ async function restoreUigfByLegacyFile(dir: string, file: string): Promise<boole
 
 /**
  * 恢复祈愿数据
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param filePath - 文件路径
  * @returns 是否恢复成功
  */

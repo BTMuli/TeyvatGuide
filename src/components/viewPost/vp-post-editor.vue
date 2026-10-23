@@ -1024,7 +1024,7 @@ function preventDrop(event: DragEvent): void {
 
 /**
  * 从组件 DOM 读取投票或折叠值并通知外层编辑弹窗。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param element - 组件根元素
  * @returns 是否识别到可编辑组件
  */
@@ -1064,7 +1064,7 @@ function emitComponentEdit(element: HTMLElement): boolean {
 
 /**
  * 双击帖子组件时打开其编辑弹窗。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param event - 鼠标事件
  */
 function handleComponentDoubleClick(event: MouseEvent): void {
@@ -1076,7 +1076,7 @@ function handleComponentDoubleClick(event: MouseEvent): void {
 
 /**
  * 在选中帖子组件时用 Enter、空格或 F2 打开编辑弹窗。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param event - 键盘事件
  */
 function handleComponentKeydown(event: KeyboardEvent): void {
@@ -1108,7 +1108,7 @@ function handleComponentKeydown(event: KeyboardEvent): void {
 
 /**
  * 从 Quill 嵌入值通知外层编辑弹窗。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 嵌入值
  * @param kind - 嵌入类型
  * @returns 是否成功发出编辑事件

@@ -280,7 +280,7 @@ type AccountSnapshot = {
 
 /**
  * 编辑资料时的头像草稿。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type AvatarSelection = {
   /** 预设头像编号 */

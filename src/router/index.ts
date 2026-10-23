@@ -1,6 +1,6 @@
 /**
  * 路由入口
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { createRouter, createWebHistory } from "vue-router";

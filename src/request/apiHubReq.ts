@@ -1,6 +1,6 @@
 /**
  * apiHub下的请求
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -25,7 +25,7 @@ async function getAllGamesForums(): Promise<TGApp.BBS.Forum.GameForumResp> {
 
 /**
  * 获取版块主页信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param forumId - 版块 ID
  * @param gid - 社区 ID
  * @returns 版块主页信息响应数据

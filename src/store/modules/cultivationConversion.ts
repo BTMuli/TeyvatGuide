@@ -1,6 +1,6 @@
 /**
  * 养成计划材料转换意图状态。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { defineStore } from "pinia";
@@ -11,7 +11,7 @@ const PERSISTENCE_VERSION = 1;
 
 /**
  * 持久化转换方案中的来源材料上限。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedSourceLimit = {
   id: number;
@@ -20,7 +20,7 @@ type PersistedSourceLimit = {
 
 /**
  * 持久化的材料转换意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedIntent = {
   materialId: number;
@@ -30,23 +30,23 @@ type PersistedIntent = {
 
 /**
  * 按目标逻辑键分组的持久化转换意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedEntryIntents = Record<string, Array<PersistedIntent>>;
 /**
  * 按计划 ID 分组的持久化转换意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedProjectIntents = Record<string, PersistedEntryIntents>;
 /**
  * 按游戏 UID 分组的持久化转换意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedUidIntents = Record<string, PersistedProjectIntents>;
 
 /**
  * 带格式版本的转换意图持久化数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type PersistedEnvelope = {
   version: 1;
@@ -55,7 +55,7 @@ type PersistedEnvelope = {
 
 /**
  * 创建没有原型属性的键值记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 不包含原型属性的空记录
  */
 function createRecord<T>(): Record<string, T> {
@@ -64,7 +64,7 @@ function createRecord<T>(): Record<string, T> {
 
 /**
  * 创建当前格式的空转换意图存储。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @returns 当前版本的空持久化数据
  */
 function createEmptyEnvelope(): PersistedEnvelope {
@@ -76,7 +76,7 @@ function createEmptyEnvelope(): PersistedEnvelope {
 
 /**
  * 判断未知值是否为可读取字段的普通记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 是否为非空且非数组的对象记录
  */
@@ -86,7 +86,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 判断未知值是否为有限正整数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 是否为有效正整数
  */
@@ -98,7 +98,7 @@ function isPositiveInteger(value: unknown): value is number {
 
 /**
  * 判断未知值是否为有限非负整数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 是否为有效非负整数
  */
@@ -110,7 +110,7 @@ function isNonNegativeInteger(value: unknown): value is number {
 
 /**
  * 校验并去重持久化的来源材料上限。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 校验后的来源上限；输入不是数组时为 undefined
  */
@@ -133,7 +133,7 @@ function normalizeSourceLimits(value: unknown): Array<PersistedSourceLimit> | un
 
 /**
  * 校验并规范化单个持久化转换意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 有效转换意图；校验失败时为 undefined
  */
@@ -149,7 +149,7 @@ function normalizeIntent(value: unknown): PersistedIntent | undefined {
 
 /**
  * 规范化转换意图列表并按目标材料去重。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 去除无效项与重复目标后的转换意图
  */
@@ -168,7 +168,7 @@ function normalizeIntentArray(value: unknown): Array<PersistedIntent> {
 
 /**
  * 校验持久化版本并清理无效的用户与计划数据。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的未知值
  * @returns 当前格式且已清理的持久化数据
  */
@@ -200,7 +200,7 @@ function normalizePersistedState(value: unknown): PersistedEnvelope {
 
 /**
  * 复制转换意图及其来源上限，隔离可变状态。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param intent - 待复制的转换意图
  * @returns 与原对象不共享来源数组的转换意图
  */
@@ -216,7 +216,7 @@ function cloneIntent(
 
 /**
  * 复制转换意图列表。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param intents - 待处理的转换意图列表
  * @returns 逐项复制后的转换意图列表
  */
@@ -228,7 +228,7 @@ function cloneIntents(
 
 /**
  * 按目标材料合并转换意图，并优先采用迁入项。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param existing - 当前目标已保存的转换意图
  * @param moved - 迁入目标的转换意图
  * @returns 合并并隔离原对象后的转换意图列表
@@ -249,7 +249,7 @@ function mergeIntents(
 
 /**
  * 判断游戏 UID 是否为有效正整数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - 游戏用户 UID
  * @returns UID 是否有效
  */
@@ -259,7 +259,7 @@ function isValidUid(uid: number): boolean {
 
 /**
  * 持久化养成计划中的材料转换手动意图。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 const useCultivationConversionStore = defineStore(
   "cultivationConversion",
@@ -268,7 +268,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 获取或初始化当前版本的转换意图存储。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @returns 可读写的当前版本持久化数据
      */
     function ensurePersisted(): PersistedEnvelope {
@@ -280,7 +280,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 获取指定用户和项目的转换意图。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param projectId - 养成计划 ID，可为空
      * @returns 按养成目标键分组的转换意图
@@ -303,7 +303,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 写入指定目标的材料转换意图。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param projectId - 养成计划 ID，可为空
      * @param entryKey - 养成目标稳定键
@@ -333,7 +333,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 移除指定目标中的一个材料转换意图。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param projectId - 养成计划 ID，可为空
      * @param entryKey - 养成目标稳定键
@@ -371,7 +371,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 清除指定目标的全部材料转换意图。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param projectId - 养成计划 ID，可为空
      * @param entryKey - 养成目标稳定键
@@ -390,7 +390,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 清除指定项目的全部材料转换意图。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param projectId - 养成计划 ID，可为空
      */
@@ -407,7 +407,7 @@ const useCultivationConversionStore = defineStore(
 
     /**
      * 将指定目标从一个项目移动到另一个项目。
-     * @since Beta v0.12.6
+     * @since Beta v0.13.0
      * @param uid - 游戏用户 UID
      * @param fromProjectId - 源项目 ID，可为空
      * @param toProjectId - 目标项目 ID，可为空

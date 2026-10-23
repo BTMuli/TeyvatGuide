@@ -293,7 +293,7 @@ type ReplyToolsProps = {
 
 /**
  * 打开图片选择器时的账号与帖子上下文
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ImagePickerContext = {
   version: number;
@@ -303,7 +303,7 @@ type ImagePickerContext = {
 
 /**
  * UID 卡片请求所需的账号上下文
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type GameUidCookie = TGApp.App.Account.Cookie;
 

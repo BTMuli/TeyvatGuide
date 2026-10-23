@@ -1,23 +1,23 @@
 /**
  * 米游社个人中心评论内容工具。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 /**
  * TpParser 使用的结构化节点别名。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyNode = TGApp.BBS.SctPost.Base;
 
 /**
  * 未知接口对象记录别名。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type RecordValue = Record<string, unknown>;
 
 /**
  * 判断值是否为对象记录。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为对象记录
  */
@@ -27,7 +27,7 @@ function isRecord(value: unknown): value is RecordValue {
 
 /**
  * 判断值是否为可供帖子解析器使用的结构化节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否包含结构化插入内容
  */
@@ -38,7 +38,7 @@ function isReplyNode(value: unknown): value is ReplyNode {
 
 /**
  * 复制结构化节点，避免解析器规范化文本时改动接口响应对象。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param node - 待复制的节点
  * @returns 可供解析器使用的节点副本
  */
@@ -55,7 +55,7 @@ function cloneReplyNode(node: ReplyNode): ReplyNode {
 
 /**
  * 将已解析的未知值转换为结构化节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 已解析的结构化内容
  * @returns 结构化节点副本
  */
@@ -70,7 +70,7 @@ function parseReplyNodes(value: unknown): Array<ReplyNode> {
 
 /**
  * 解析接口中的结构化内容字符串。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param raw - 结构化内容字符串
  * @returns 结构化节点及是否成功解析 JSON
  */
@@ -84,7 +84,7 @@ function parseReplyContent(raw: string): { nodes: Array<ReplyNode>; parsed: bool
 
 /**
  * 解析结构化内容行，兼容接口返回已解析节点或 JSON 字符串的情况。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param rows - 结构化内容行
  * @returns 结构化节点副本
  */
@@ -102,7 +102,7 @@ function parseReplyRows(rows: unknown): Array<ReplyNode> {
 
 /**
  * 获取结构化节点中的图片链接。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param node - 待检查的结构化节点
  * @returns 图片链接
  */
@@ -116,7 +116,7 @@ function getImageUrl(node: ReplyNode): string | undefined {
 
 /**
  * 收集结构化内容中已经存在的图片，防止重复追加接口图片列表。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 待检查的结构化节点
  * @param urls - 图片链接集合
  */
@@ -130,7 +130,7 @@ function collectImageUrls(nodes: Array<ReplyNode>, urls: Set<string>): void {
 
 /**
  * 创建评论顶层图片节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param image - 评论图片
  * @returns 图片节点；地址无效时返回 undefined
  */
@@ -150,7 +150,7 @@ function createImageNode(image: TGApp.BBS.Post.Image): ReplyNode | undefined {
 
 /**
  * 将评论响应中的图片补入正文节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已解析正文节点
  * @param images - 评论图片列表
  * @returns 包含未重复图片的正文节点
@@ -178,7 +178,7 @@ function appendCommentImages(
 
 /**
  * 解析结构化内容字符串，失败时回退为纯文本。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param raw - 结构化内容 JSON 字符串
  * @param fallback - 纯文本内容
  * @returns 可交给 TpParser 渲染的节点
@@ -194,7 +194,7 @@ export function getStructuredContent(raw: unknown, fallback: unknown): Array<Rep
 
 /**
  * 获取个人中心评论的安全结构化正文。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param comment - 个人中心评论条目
  * @returns 可交给 TpParser 渲染的正文节点
  */

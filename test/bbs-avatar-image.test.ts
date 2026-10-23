@@ -1,6 +1,6 @@
 /**
  * 自定义头像裁切位置、静态输出与资源释放回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,12 +1,12 @@
 /**
  * 米游社回复 UID 卡片类型定义文件
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.GameUid {
   /**
    * UID 卡片游戏账号信息
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Info = {
     /** 游戏业务标识，例如 hk4e_cn */
@@ -25,7 +25,7 @@ declare namespace TGApp.BBS.GameUid {
 
   /**
    * UID 卡片结构化节点内容
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Insert = {
     /** UID 卡片信息 */
@@ -34,7 +34,7 @@ declare namespace TGApp.BBS.GameUid {
 
   /**
    * UID 卡片结构化节点
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type Node = {
     /** UID 卡片节点内容 */

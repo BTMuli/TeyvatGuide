@@ -24,7 +24,7 @@ import "quill/dist/quill.core.css";
 
 /**
  * 回复编辑器参数。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyEditorProps = {
   disabled: boolean;

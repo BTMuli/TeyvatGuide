@@ -1,12 +1,12 @@
 /**
  * 米社帖子投票相关类型
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 declare namespace TGApp.BBS.Vote {
   /**
    * APK createVote 请求体。
-   * @since Beta v0.12.6
+   * @since Beta v0.13.0
    */
   type CreateRequest = {
     /** 秒级结束时间 */
@@ -19,10 +19,10 @@ declare namespace TGApp.BBS.Vote {
     vote_options: Array<string>;
   };
 
-  /** createVote 响应数据。 @since Beta v0.12.6 */
+  /** createVote 响应数据。 @since Beta v0.13.0 */
   type CreateData = { vote_id: string };
 
-  /** createVote 响应。 @since Beta v0.12.6 */
+  /** createVote 响应。 @since Beta v0.13.0 */
   type CreateResp = TGApp.BBS.Response.BaseWithData<CreateData>;
 
   /**

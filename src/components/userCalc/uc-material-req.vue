@@ -52,7 +52,7 @@ import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 
 /**
  * 单项养成材料需求属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialReqProps = {
   /** 强调高亮（如当日可刷）：左侧加粗描边 */

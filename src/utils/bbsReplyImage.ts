@@ -1,6 +1,6 @@
 /**
  * 米游社回复图片的本地校验与尺寸读取
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import Md5 from "js-md5";
 
@@ -9,7 +9,7 @@ const maxLocalImageSize = 20 * 1024 * 1024;
 
 /**
  * 检查文件头的固定字节
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param bytes - 文件字节
  * @param expected - 预期字节
  * @param offset - 文件偏移
@@ -21,7 +21,7 @@ function matchesHeader(bytes: Uint8Array, expected: Array<number>, offset: numbe
 
 /**
  * 根据原始文件头识别支持的图片格式
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param bytes - 文件字节
  * @returns 图片格式
  */
@@ -51,7 +51,7 @@ function getImageFormat(
 
 /**
  * 读取本地图片尺寸，并在结束或取消时释放临时 URL
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 本地图片
  * @param signal - 取消信号
  * @returns 图片尺寸
@@ -100,7 +100,7 @@ async function getImageDimensions(
 
 /**
  * 校验回复图片并准备原始文件摘要与尺寸
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param file - 用户选择的图片
  * @param signal - 取消信号
  * @returns 已准备的图片信息

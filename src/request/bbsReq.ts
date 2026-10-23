@@ -1,6 +1,6 @@
 /**
  * BBS 请求模块
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -21,7 +21,7 @@ async function getEmoticonSet(): Promise<TGApp.BBS.Emoji.Resp> {
 
 /**
  * 根据 cookie 获取用户信息
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param cookie - 账户 cookie
  * @param gid - 分区 ID，默认原神分区
  * @returns 用户信息响应数据

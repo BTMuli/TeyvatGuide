@@ -1,6 +1,6 @@
 /**
  * 账号相关辅助函数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -12,7 +12,7 @@ import TGLogger from "./TGLogger.js";
 
 /**
  * 获取刷新用的账号和Cookie
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param uid - 当前选择的UID
  * @param dAc - 默认账号
  * @param dCk - 默认Cookie

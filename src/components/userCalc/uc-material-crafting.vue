@@ -94,7 +94,7 @@ import { WikiMaterialData } from "@/data/index.js";
 
 /**
  * 材料合成与转换详情属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcMaterialCraftingProps = {
   active?: boolean;

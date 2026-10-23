@@ -1,6 +1,6 @@
 /**
  * 个人主页分区等级选择回归测试。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { describe, expect, it } from "vitest";
@@ -12,7 +12,7 @@ import {
 
 /**
  * 构造等级选择测试所需的最小用户信息。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param levelExps - 各分区等级经验
  * @param levelExp - 当前请求返回的等级经验
  * @returns 包含等级字段的用户信息

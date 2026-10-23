@@ -1,6 +1,6 @@
 /**
  * 米游社回复结构化文档工具
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
@@ -12,13 +12,13 @@ import {
 
 /**
  * 回复节点校验使用的对象记录
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type ReplyRecord = Record<string, unknown>;
 
 /**
  * 带文本标记的已选提及用户
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type MentionCandidate = {
   mention: TGApp.BBS.Reply.DocumentMention;
@@ -27,13 +27,13 @@ type MentionCandidate = {
 
 /**
  * 自定义表情在回复文档中的确定性文本占位。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 const customEmoticonBackupText = "[自定义表情]";
 
 /**
  * 判断值是否为对象记录
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的值
  * @returns 是否为对象记录
  */
@@ -43,7 +43,7 @@ function isReplyRecord(value: unknown): value is ReplyRecord {
 
 /**
  * 判断对象是否只有指定的自有键
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待判断的对象
  * @param keys - 允许的键
  * @returns 是否完全匹配指定键
@@ -55,7 +55,7 @@ function hasExactKeys(value: ReplyRecord, keys: Array<string>): boolean {
 
 /**
  * 校验回复用户 UID
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的 UID
  * @returns 是否为正安全整数
  */
@@ -65,7 +65,7 @@ function isReplyUid(value: unknown): value is number {
 
 /**
  * 校验回复图片尺寸
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的尺寸
  * @returns 是否为正安全整数
  */
@@ -75,7 +75,7 @@ function isReplyImageDimension(value: unknown): value is number {
 
 /**
  * 校验回复提及昵称
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的昵称
  * @returns 是否为有效昵称
  */
@@ -90,7 +90,7 @@ function isReplyNickname(value: unknown): value is string {
 
 /**
  * 校验回复图片 HTTPS 地址
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待校验的图片地址
  * @returns 是否为 HTTPS 地址
  */
@@ -108,7 +108,7 @@ function isReplyImageUrl(value: unknown): value is string {
 
 /**
  * 判断回复节点是否为自定义表情节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param node - 回复结构化节点
  * @returns 是否为自定义表情节点
  */
@@ -120,7 +120,7 @@ function isCustomEmoticonNode(
 
 /**
  * 创建回复提及节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param mention - 提及用户
  * @returns 提及节点
  */
@@ -132,7 +132,7 @@ function createMentionNode(mention: TGApp.BBS.Reply.DocumentMention): TGApp.BBS.
 
 /**
  * 创建回复图片节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param image - 回复图片
  * @returns 图片节点
  */
@@ -149,7 +149,7 @@ function createImageNode(image: TGApp.BBS.Reply.DocumentImage): TGApp.BBS.Reply.
 
 /**
  * 创建回复自定义表情节点。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 自定义表情值
  * @returns 自定义表情节点
  */
@@ -166,7 +166,7 @@ function createCustomEmoticonNode(value: TGApp.BBS.CustomEmoticon.Value): TGApp.
 
 /**
  * 将未知值解析为回复结构化节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param value - 待解析的节点
  * @param index - 节点索引
  * @returns 已校验且已复制的节点
@@ -279,7 +279,7 @@ function parseReplySendNode(value: unknown, index: number): TGApp.BBS.Reply.Send
 
 /**
  * 判断结构化节点是否含有实际内容
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已校验的节点
  * @returns 是否含有实际内容
  */
@@ -292,7 +292,7 @@ function hasReplySendContent(nodes: Array<TGApp.BBS.Reply.SendNode>): boolean {
 
 /**
  * 校验回复中最多存在一个自定义表情。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 已校验的回复节点
  */
 function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.Reply.SendNode>): void {
@@ -306,7 +306,7 @@ function assertSingleCustomEmoticon(nodes: Array<TGApp.BBS.Reply.SendNode>): voi
 
 /**
  * 校验并复制米游社回复结构化节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 待校验的结构化节点
  * @returns 已校验且不与输入共享可变对象的节点
  */
@@ -322,7 +322,7 @@ export function validateReplySendNodes(nodes: unknown): Array<TGApp.BBS.Reply.Se
 
 /**
  * 从结构化节点提取回复纯文本
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 回复结构化节点
  * @returns 回复纯文本，图片和 UID 卡片不包含在其中
  */
@@ -352,7 +352,7 @@ export function getReplyContentFromSendNodes(nodes: Array<TGApp.BBS.Reply.SendNo
 
 /**
  * 序列化米游社回复结构化节点
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param nodes - 待序列化的结构化节点
  * @returns 结构化内容 JSON
  */
@@ -362,7 +362,7 @@ export function serializeReplySendNodes(nodes: unknown): string {
 
 /**
  * 获取按昵称长度排序的提及候选
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param mentions - 已选用户
  * @returns 去重后的提及候选
  */
@@ -387,7 +387,7 @@ function getMentionCandidates(
 
 /**
  * 构建米游社回复文档
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param text - 回复文本
  * @param mentions - 已选提及用户
  * @param images - 待附加图片

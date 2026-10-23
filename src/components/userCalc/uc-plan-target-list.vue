@@ -122,7 +122,7 @@ import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 /**
  * 养成计划目标列表属性。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanTargetListProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
@@ -136,7 +136,7 @@ type UcPlanTargetListProps = {
 
 /**
  * 养成计划目标列表事件。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type UcPlanTargetListEmits = {
   add: [];

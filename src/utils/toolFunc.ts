@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -238,7 +238,7 @@ export function getWikiBrief(
 
 /**
  * 根据传入角色信息获取头像
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param user - 用户信息
  * @returns 头像链接
  */

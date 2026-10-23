@@ -1,6 +1,6 @@
 /**
  * 使用帖子编辑器同一套 Quill 格式导出正文与 Delta。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 import Quill from "quill";
 
@@ -9,13 +9,13 @@ import { postEditorFormats, registerPostEditorFormats } from "./bbsPostEditor.js
 
 /**
  * Quill Delta 的运行时构造器。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  */
 type DeltaConstructor = { new (): ReturnType<Quill["getContents"]> };
 
 /**
  * 从同一份 Quill 文档导出规范化节点及 HTML；仅用于浏览器环境。
- * @since Beta v0.12.6
+ * @since Beta v0.13.0
  * @param input - 编辑器或来源帖子的正文节点
  * @returns Quill 规范化后的正文与安全预览数据
  */
