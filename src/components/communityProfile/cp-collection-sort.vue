@@ -31,60 +31,63 @@
 
       <div ref="bodyRef" class="cpcs-body">
         <ol v-if="items.length > 0" ref="listRef" aria-label="合集排序列表" class="cpcs-list">
-          <li
-            v-for="(item, index) in items"
-            :key="item.id"
-            :class="{
-              'is-dragging': dragIndex === index,
-              'is-drag-over': dragOverIndex === index && dragIndex !== index,
-            }"
-            class="cpcs-item"
-            @lostpointercapture="handlePointerCancel"
-            @pointercancel="handlePointerCancel"
-            @pointerdown="handlePointerDown(index, $event)"
-            @pointermove="handlePointerMove"
-            @pointerup="handlePointerUp"
-          >
-            <span aria-hidden="true" class="cpcs-handle">
-              <v-icon size="18">mdi-drag-vertical</v-icon>
-            </span>
-            <span aria-hidden="true" class="cpcs-order">{{ index + 1 }}</span>
-            <span class="cpcs-cover">
-              <TMiImg
-                v-if="item.cover"
-                :alt="`${item.title}封面`"
-                :src="item.cover"
-                draggable="false"
-              />
-              <v-icon v-else aria-hidden="true" size="24">mdi-folder-outline</v-icon>
-            </span>
-            <span class="cpcs-content">
-              <span class="cpcs-title"><TpTitle :text="item.title" /></span>
-              <span class="cpcs-meta">{{ fmtUtil.num(item.post_num) }} 篇帖子</span>
-            </span>
-            <span class="cpcs-actions">
-              <v-btn
-                :aria-label="`上移${item.title}`"
-                :disabled="props.saving || index === 0"
-                icon="mdi-arrow-up"
-                size="x-small"
-                title="上移"
-                type="button"
-                variant="text"
-                @click="moveItem(index, -1)"
-              />
-              <v-btn
-                :aria-label="`下移${item.title}`"
-                :disabled="props.saving || index === items.length - 1"
-                icon="mdi-arrow-down"
-                size="x-small"
-                title="下移"
-                type="button"
-                variant="text"
-                @click="moveItem(index, 1)"
-              />
-            </span>
-          </li>
+          <TransitionGroup name="cpcs">
+            <li
+              v-for="(item, index) in items"
+              :key="item.id"
+              :class="{
+                'is-dragging': dragIndex === index,
+                'is-drop-before': dropIndex === index && !dropAfter,
+                'is-drop-after': dropIndex === index && dropAfter,
+              }"
+              class="cpcs-item"
+              @lostpointercapture="handlePointerCancel"
+              @pointercancel="handlePointerCancel"
+              @pointerdown="handlePointerDown(index, $event)"
+              @pointermove="handlePointerMove"
+              @pointerup="handlePointerUp"
+            >
+              <span aria-hidden="true" class="cpcs-handle">
+                <v-icon size="18">mdi-drag-vertical</v-icon>
+              </span>
+              <span aria-hidden="true" class="cpcs-order">{{ index + 1 }}</span>
+              <span class="cpcs-cover">
+                <TMiImg
+                  v-if="item.cover"
+                  :alt="`${item.title}封面`"
+                  :src="item.cover"
+                  draggable="false"
+                />
+                <v-icon v-else aria-hidden="true" size="24">mdi-folder-outline</v-icon>
+              </span>
+              <span class="cpcs-content">
+                <span class="cpcs-title"><TpTitle :text="item.title" /></span>
+                <span class="cpcs-meta">{{ fmtUtil.num(item.post_num) }} 篇帖子</span>
+              </span>
+              <span class="cpcs-actions">
+                <v-btn
+                  :aria-label="`上移${item.title}`"
+                  :disabled="props.saving || index === 0"
+                  icon="mdi-arrow-up"
+                  size="x-small"
+                  title="上移"
+                  type="button"
+                  variant="text"
+                  @click="moveItem(index, -1)"
+                />
+                <v-btn
+                  :aria-label="`下移${item.title}`"
+                  :disabled="props.saving || index === items.length - 1"
+                  icon="mdi-arrow-down"
+                  size="x-small"
+                  title="下移"
+                  type="button"
+                  variant="text"
+                  @click="moveItem(index, 1)"
+                />
+              </span>
+            </li>
+          </TransitionGroup>
         </ol>
         <div v-else class="cpcs-state" role="status">
           <v-icon size="32">mdi-folder-open-outline</v-icon>
@@ -146,11 +149,26 @@ const initialIds = ref<string>("");
 const dragIndex = ref<number | undefined>();
 const dragOverIndex = ref<number | undefined>();
 let dragPointerId: number | undefined;
+let dragPointerX = 0;
 let dragPointerY = 0;
+let ghostElement: HTMLElement | undefined;
+let ghostOffsetX = 0;
+let ghostOffsetY = 0;
 let autoScrollFrame: number | undefined;
 const dirty = computed<boolean>(
   () => items.value.map((item) => item.id).join(",") !== initialIds.value,
 );
+const dropIndex = computed<number | undefined>(() => {
+  const from = dragIndex.value;
+  const to = dragOverIndex.value;
+  if (from === undefined || to === undefined || from === to) return undefined;
+  return to;
+});
+const dropAfter = computed<boolean>(() => {
+  const from = dragIndex.value;
+  const to = dropIndex.value;
+  return from !== undefined && to !== undefined && to > from;
+});
 
 watch(
   visible,
@@ -180,10 +198,36 @@ function resetDrag(): void {
   dragIndex.value = undefined;
   dragOverIndex.value = undefined;
   dragPointerId = undefined;
+  ghostElement?.remove();
+  ghostElement = undefined;
   if (autoScrollFrame !== undefined) {
     window.cancelAnimationFrame(autoScrollFrame);
     autoScrollFrame = undefined;
   }
+}
+
+/**
+ * 克隆拖拽源作为跟手浮层，重新挂载会让封面图与表情标题空一帧
+ * @since Beta v0.13.0
+ */
+function createGhost(item: HTMLElement): void {
+  const cloned = item.cloneNode(true);
+  if (!(cloned instanceof HTMLElement)) return;
+  const rect = item.getBoundingClientRect();
+  cloned.querySelector(".cpcs-actions")?.remove();
+  cloned.classList.add("cpcs-ghost");
+  cloned.setAttribute("aria-hidden", "true");
+  cloned.style.width = `${rect.width}px`;
+  ghostOffsetX = dragPointerX - rect.left;
+  ghostOffsetY = dragPointerY - rect.top;
+  document.body.append(cloned);
+  ghostElement = cloned;
+  moveGhost(rect.left, rect.top);
+}
+
+function moveGhost(x: number, y: number): void {
+  if (ghostElement === undefined) return;
+  ghostElement.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 }
 
 function moveItemTo(from: number, to: number): void {
@@ -213,14 +257,19 @@ function handlePointerDown(index: number, event: PointerEvent): void {
   dragIndex.value = index;
   dragOverIndex.value = index;
   dragPointerId = event.pointerId;
+  dragPointerX = event.clientX;
   dragPointerY = event.clientY;
   item.setPointerCapture(event.pointerId);
-  autoScrollFrame = window.requestAnimationFrame(autoScrollStep);
+  createGhost(item);
+  ensureAutoScroll();
 }
 
 function handlePointerMove(event: PointerEvent): void {
   if (dragPointerId !== event.pointerId || dragIndex.value === undefined) return;
+  dragPointerX = event.clientX;
   dragPointerY = event.clientY;
+  moveGhost(dragPointerX - ghostOffsetX, dragPointerY - ghostOffsetY);
+  ensureAutoScroll();
   updateDropTarget();
 }
 
@@ -238,6 +287,10 @@ function handlePointerCancel(event: PointerEvent): void {
   resetDrag();
 }
 
+function ensureAutoScroll(): void {
+  if (autoScrollFrame === undefined) autoScrollFrame = window.requestAnimationFrame(autoScrollStep);
+}
+
 function autoScrollStep(): void {
   if (dragIndex.value === undefined) {
     autoScrollFrame = undefined;
@@ -246,7 +299,7 @@ function autoScrollStep(): void {
   const container = bodyRef.value;
   if (container !== null) {
     const rect = container.getBoundingClientRect();
-    const edge = 36;
+    const edge = 48;
     if (dragPointerY < rect.top + edge) container.scrollTop -= 8;
     else if (dragPointerY > rect.bottom - edge) container.scrollTop += 8;
     updateDropTarget();
@@ -346,6 +399,7 @@ function handleSave(): void {
 }
 
 .cpcs-item {
+  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -365,13 +419,50 @@ function handleSave(): void {
   }
 
   &.is-dragging {
+    border-style: dashed;
     cursor: grabbing;
-    opacity: 0.5;
+    opacity: 0.45;
   }
 
-  &.is-drag-over {
-    border-color: var(--common-text-title);
+  &.is-drop-before::before,
+  &.is-drop-after::after {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--common-text-title);
+    content: "";
+    pointer-events: none;
   }
+
+  &.is-drop-before::before {
+    top: -5px;
+  }
+
+  &.is-drop-after::after {
+    bottom: -5px;
+  }
+}
+
+.cpcs-move {
+  transition: transform 200ms ease;
+}
+
+.cpcs-ghost {
+  position: fixed;
+  z-index: 90; /* 需高于 v-dialog 的 z-index 80 */
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border-color: var(--common-shadow-2);
+  box-shadow: 0 8px 24px var(--common-shadow-2);
+  cursor: grabbing;
+  pointer-events: none;
+}
+
+.dark .cpcs-ghost {
+  box-shadow: 0 8px 24px var(--common-shadow-t-4);
 }
 
 .cpcs-handle {
@@ -393,6 +484,14 @@ function handleSave(): void {
   color: var(--box-text-4);
   font-size: 12px;
   line-height: 24px;
+}
+
+.cpcs-item:hover .cpcs-order {
+  background: var(--box-bg-1);
+}
+
+.dark .cpcs-item:hover .cpcs-order {
+  background: var(--box-bg-4);
 }
 
 .cpcs-cover {
@@ -440,6 +539,11 @@ function handleSave(): void {
   flex: none;
   align-items: center;
   gap: 2px;
+
+  :deep(.v-btn) {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .cpcs-state {
