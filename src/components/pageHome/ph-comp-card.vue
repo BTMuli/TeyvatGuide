@@ -112,6 +112,7 @@ async function share(): Promise<void> {
   border-radius: 4px;
   background: var(--tgc-od-blue);
   font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .thc-title {
