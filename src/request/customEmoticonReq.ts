@@ -3,34 +3,13 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import { getAppSignCookie, getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 import { parseCustomEmoticonList } from "../utils/bbs/customEmoticon.js";
 
 const customEmoticonListUrl: Readonly<string> =
   "https://bbs-api.miyoushe.com/misc/api/customEmoticonList";
-
-/**
- * 提取收藏表情请求所需的最小登录凭据
- * @since Beta v0.13.0
- * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
- * @returns 仅包含 stuid、stoken 与 mid 的 Cookie
- */
-function getAuthCookie(cookie: TGApp.App.Account.SignUidCookie): TGApp.App.Account.SignCookie {
-  if (typeof cookie !== "object" || cookie === null || Array.isArray(cookie)) {
-    throw new TypeError("登录凭据无效");
-  }
-  const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
-  const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
-  const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
-  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
-  if (!stuid || !stoken || !mid || !ltuid) {
-    throw new Error("登录凭据不完整，请刷新登录凭据");
-  }
-  if (stuid !== ltuid) throw new Error("登录凭据 UID 不一致，请刷新登录凭据");
-  return { stuid, stoken, mid };
-}
 
 /**
  * 获取收藏表情列表
@@ -45,7 +24,7 @@ async function getCustomEmoticonList(
 ): Promise<Array<TGApp.BBS.CustomEmoticon.Item>> {
   const config: TGApp.App.Response.ReqConfParams = {
     headers: {
-      ...getRequestHeader(getAuthCookie(cookie), "GET", {}, "K2", true),
+      ...getRequestHeader(getAppSignCookie(cookie), "GET", {}, "K2", true),
       "x-rpc-client_type": "2",
     },
   };

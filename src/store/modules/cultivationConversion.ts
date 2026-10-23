@@ -3,6 +3,7 @@
  * @since Beta v0.13.0
  */
 
+import { isRecord } from "@utils/common/typeGuards.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -72,16 +73,6 @@ function createEmptyEnvelope(): PersistedEnvelope {
     version: PERSISTENCE_VERSION,
     intents: createRecord<PersistedProjectIntents>(),
   };
-}
-
-/**
- * 判断未知值是否为可读取字段的普通记录。
- * @since Beta v0.13.0
- * @param value - 待校验的未知值
- * @returns 是否为非空且非数组的对象记录
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**

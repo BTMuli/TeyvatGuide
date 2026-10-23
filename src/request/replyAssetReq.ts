@@ -5,6 +5,7 @@
 
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { prepareReplyImage } from "@utils/bbs/replyImage.js";
+import { assertPositiveNumber, isNonBlankString, isRecord } from "@utils/common/typeGuards.js";
 import { getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
@@ -65,36 +66,6 @@ type CustomUploadParamsResp = {
   message: string;
   data: unknown;
 };
-
-/**
- * 判断值是否为普通对象
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为字符串键对象
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/**
- * 判断字符串是否包含有效内容
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为非空字符串
- */
-function isNonBlankString(value: unknown): value is string {
-  return typeof value === "string" && value.trim() !== "";
-}
-
-/**
- * 校验正整数参数
- * @since Beta v0.13.0
- * @param value - 待校验的数值
- * @param name - 错误信息中的字段名称
- */
-function assertPositiveNumber(value: number, name: string): void {
-  if (!Number.isSafeInteger(value) || value <= 0) throw new TypeError(`${name}必须为正整数`);
-}
 
 /**
  * 提取回复资源请求所需的登录凭据

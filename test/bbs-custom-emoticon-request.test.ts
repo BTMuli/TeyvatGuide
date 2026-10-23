@@ -11,7 +11,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@utils/network/TGHttps.js", () => ({ default: { get: mocks.get } }));
-vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/getRequestHeader.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@utils/network/getRequestHeader.js")>()),
+  getRequestHeader: mocks.getRequestHeader,
+}));
 
 import customEmoticonReq from "../src/request/customEmoticonReq.js";
 

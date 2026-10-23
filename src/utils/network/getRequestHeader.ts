@@ -1,5 +1,5 @@
 /**
- * 获取请求头
+ * 请求头构建与登录凭据提取
  * @since Beta v0.13.0
  */
 
@@ -189,4 +189,55 @@ export function getDS4JS(
   }
   const md5Str = Md5.md5.update(hashStr).hex();
   return `${time},${random},${md5Str}`;
+}
+
+/**
+ * 提取米游社 App 端接口签名所需的最小 Cookie
+ * @since Beta v0.13.0
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
+ * @returns 仅包含 stuid、stoken 与 mid 的 Cookie
+ * @remarks 凭据缺失、无效或 stuid 与 ltuid 不一致时抛出错误
+ */
+export function getAppSignCookie(
+  cookie: TGApp.App.Account.SignUidCookie,
+): TGApp.App.Account.SignCookie {
+  if (typeof cookie !== "object" || cookie === null || Array.isArray(cookie)) {
+    throw new TypeError("登录凭据无效");
+  }
+  const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
+  const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
+  const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
+  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
+  if (!stuid || !stoken || !mid || !ltuid) {
+    throw new Error("登录凭据不完整，请刷新登录凭据");
+  }
+  if (stuid !== ltuid) throw new Error("登录凭据 UID 不一致，请刷新登录凭据");
+  return { stuid, stoken, mid };
+}
+
+/**
+ * 提取回复与帖子编辑请求所需的登录凭据
+ * @since Beta v0.13.0
+ * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
+ * @returns 供请求头签名使用的最小 Cookie
+ */
+export function getReplyCookie(
+  cookie: TGApp.App.Account.LoginCookie,
+): TGApp.App.Account.LoginCookie {
+  const ltoken = cookie?.ltoken?.trim();
+  const ltuid = cookie?.ltuid?.trim();
+  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
+  return { ltoken, ltuid };
+}
+
+/**
+ * 提取个人中心读取请求所需的最小 Cookie
+ * @since Beta v0.13.0
+ * @param cookie - 完整账户 Cookie
+ * @returns 用于请求头签名的最小 Cookie
+ */
+export function getCommunityCookie(
+  cookie: TGApp.App.Account.Cookie,
+): TGApp.App.Account.CookieTokenCookie {
+  return { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
 }

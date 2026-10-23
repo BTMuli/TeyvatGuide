@@ -3,27 +3,9 @@
  * @since Beta v0.13.0
  */
 
+import { isNonBlankString, isRecord } from "@utils/common/typeGuards.js";
+
 const currentAccountStorageKey: Readonly<string> = "curAccount";
-
-/**
- * 判断值是否为非空对象
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为非空对象
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/**
- * 判断字符串是否包含有效内容
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为非空字符串
- */
-function isNonBlankString(value: unknown): value is string {
-  return typeof value === "string" && value.trim() !== "";
-}
 
 /**
  * 校验回复变更账号快照

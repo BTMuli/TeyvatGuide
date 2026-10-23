@@ -3,7 +3,11 @@
  * @since Beta v0.13.0
  */
 
-import { getCollectionRequestHeader, getRequestHeader } from "@utils/network/getRequestHeader.js";
+import {
+  getCollectionRequestHeader,
+  getCommunityCookie,
+  getRequestHeader,
+} from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 const communityApiBaseUrl: Readonly<string> = "https://bbs-api.miyoushe.com/";
@@ -19,16 +23,6 @@ const communityPageSize: Readonly<number> = 20;
  * @since Beta v0.13.0
  */
 type CommunityQuery = Record<string, string | number>;
-
-/**
- * 提取个人中心读取请求所需的最小 Cookie
- * @since Beta v0.13.0
- * @param cookie - 完整账户 Cookie
- * @returns 用于请求头签名的最小 Cookie
- */
-function getCommunityCookie(cookie: TGApp.App.Account.Cookie): TGApp.App.Account.CookieTokenCookie {
-  return { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-}
 
 /**
  * 判断 UID 是否指向当前登录用户

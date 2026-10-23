@@ -3,6 +3,8 @@
  * @since Beta v0.13.0
  */
 
+import { isRecord } from "@utils/common/typeGuards.js";
+
 import { parseCustomEmoticon } from "./customEmoticon.js";
 
 const customEmoticonBackupText: Readonly<"[自定义表情]"> = "[自定义表情]";
@@ -12,14 +14,6 @@ const customEmoticonBackupText: Readonly<"[自定义表情]"> = "[自定义表�
  * @since Beta v0.13.0
  */
 export const postFoldTitleMaxLength = 40;
-
-/**
- * 判断值是否为普通记录。
- * @since Beta v0.13.0
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * 规范化帖子中的自定义表情节点。

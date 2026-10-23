@@ -17,7 +17,7 @@ import {
   parsePicturePostContent,
   serializePicturePostDescribe,
 } from "@utils/bbs/postPicture.js";
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import { getRequestHeader, getReplyCookie } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 const postApiUrl: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
@@ -174,19 +174,6 @@ function getUserAiContentChoice(value: unknown): string {
  */
 function getCreateUserAiContentChoice(value: unknown): string {
   return value === undefined ? defaultUserAiContentChoice : getUserAiContentChoice(value);
-}
-
-/**
- * 提取最小登录凭据。
- * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
- * @returns 用于签名的 ltoken 和 ltuid
- */
-function getAuthCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
-  const ltoken = cookie?.ltoken?.trim();
-  const ltuid = cookie?.ltuid?.trim();
-  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
-  return { ltoken, ltuid };
 }
 
 /**
@@ -749,7 +736,7 @@ function getMutationHeaders(
   body: PostMutationBody | DeleteBody,
 ): Record<string, string> {
   return {
-    ...getRequestHeader(getAuthCookie(cookie), "POST", JSON.stringify(body), "K2", true),
+    ...getRequestHeader(getReplyCookie(cookie), "POST", JSON.stringify(body), "K2", true),
     "x-rpc-client_type": "2",
     "Content-Type": "application/json",
   };
@@ -770,7 +757,7 @@ function assertOwner(
 ): { authCookie: TGApp.App.Account.LoginCookie; sourceCollectionId: string | null } {
   const sourceCollectionId = editable ? assertEditableSource(source) : null;
   if (!editable) assertDeletableSource(source);
-  const authCookie = getAuthCookie(cookie);
+  const authCookie = getReplyCookie(cookie);
   if (String(source.post.uid) !== authCookie.ltuid) throw new Error("仅允许帖子作者执行此操作");
   return { authCookie, sourceCollectionId };
 }
@@ -885,7 +872,7 @@ export async function checkRelease(
     `${postApiUrl}check/release`,
     {
       headers: {
-        ...getRequestHeader(getAuthCookie(cookie), "GET", params, "K2", true),
+        ...getRequestHeader(getReplyCookie(cookie), "GET", params, "K2", true),
         "x-rpc-client_type": "2",
       },
       query: params,

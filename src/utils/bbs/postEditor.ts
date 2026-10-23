@@ -3,6 +3,7 @@
  * @since Beta v0.13.0
  */
 
+import { isRecord } from "@utils/common/typeGuards.js";
 import Quill, { Parchment } from "quill";
 import { BlockEmbed } from "quill/blots/block.js";
 import Embed from "quill/blots/embed.js";
@@ -452,16 +453,6 @@ class PostFoldBlot extends BlockEmbed {
 }
 
 let formatsRegistered = false;
-
-/**
- * 判断值是否为普通记录。
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为普通记录
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * 注册帖子编辑器所需的 Quill 格式。

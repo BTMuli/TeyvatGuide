@@ -3,15 +3,7 @@
  * @since Beta v0.13.0
  */
 
-/**
- * 判断值是否为字符串键对象
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为对象记录
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+import { isRecord } from "@utils/common/typeGuards.js";
 
 /**
  * 判断值是否为无首尾空白且不含换行的非空字符串

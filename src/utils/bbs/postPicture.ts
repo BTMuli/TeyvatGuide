@@ -4,16 +4,9 @@
  */
 
 import { isPostUrl } from "@utils/bbs/postDocument.js";
+import { isRecord } from "@utils/common/typeGuards.js";
 
 const maxPictureContentLength: Readonly<number> = 500;
-
-/**
- * 判断值是否为普通记录。
- * @since Beta v0.13.0
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * 解析图片帖介绍节点。

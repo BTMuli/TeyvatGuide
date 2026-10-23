@@ -3,6 +3,7 @@
  * @since Beta v0.13.0
  */
 
+import { isRecord } from "@utils/common/typeGuards.js";
 import type Quill from "quill";
 
 import { isPostUrl } from "./postDocument.js";
@@ -27,16 +28,6 @@ export type ReplyEditorInsert = TGApp.BBS.ReplyEditor.Insert;
 export type ReplyEditorOperation = TGApp.BBS.ReplyEditor.Operation;
 
 type QuillOperation = ReturnType<Quill["getContents"]>["ops"][number];
-
-/**
- * 判断值是否为对象记录。
- * @since Beta v0.13.0
- * @param value - 待判断的值
- * @returns 是否为对象记录
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * 校验回复表情名称。
