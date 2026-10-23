@@ -1069,7 +1069,7 @@ function tryCraftMaterial(
  * 使用延迟获取的材料索引计算合成分配。
  * @since Beta v0.13.0
  * @param requirements - 本轮需要满足的材料 ID 与数量
- * @param inventory - 可用于本轮计算的材料库存
+ * @param inventory - 可用于本轮计算且由调用方拥有的材料库存
  * @param getMaterials - 按需提供本轮预解析材料索引的函数
  * @param useDust - 是否允许使用含嬗变之尘的配方
  * @param useSolvent - 是否允许使用含异梦溶媒的配方
@@ -1077,7 +1077,7 @@ function tryCraftMaterial(
  */
 function calculateCraftingAllocationWithMaterials(
   requirements: ReadonlyArray<CultivationMaterial>,
-  inventory: ReadonlyMap<number, number>,
+  inventory: Map<number, number>,
   getMaterials: () => ReadonlyMap<number, PreparedCraftingMaterial>,
   useDust: boolean = false,
   useSolvent: boolean = false,
@@ -1090,18 +1090,17 @@ function calculateCraftingAllocationWithMaterials(
     count: Math.max(required - (inventory.get(id) ?? 0), 0),
   })).filter((item) => item.count > 0);
 
-  const remainingInventory = new Map(inventory);
   for (const [id, required] of requiredCounts) {
-    const owned = remainingInventory.get(id) ?? 0;
-    remainingInventory.set(id, Math.max(owned - required, 0));
+    const owned = inventory.get(id) ?? 0;
+    inventory.set(id, Math.max(owned - required, 0));
   }
 
   if (pendingCounts.length === 0) {
-    return { materials: new Map(), remainingInventory };
+    return { materials: new Map(), remainingInventory: inventory };
   }
 
   const context: CraftingContext = {
-    inventory: remainingInventory,
+    inventory,
     materials: getMaterials(),
     useDust,
     useSolvent,
@@ -1161,6 +1160,23 @@ function calculateCraftingAllocationWithMaterials(
 export function createCraftingCalculator(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
 ): TGApp.App.UserCalc.CraftingCalculator {
+  const calculateOwned = createOwnedInventoryCraftingCalculator(materials);
+  return (requirements, inventory, useDust = false, useSolvent = false) =>
+    calculateOwned(requirements, new Map(inventory), useDust, useSolvent);
+}
+
+/**
+ * 创建供内部直接修改自有库存的材料合成计算器。
+ *
+ * @remarks 调用方必须将传入库存视为本次计算的专属可变状态；返回结果中的
+ * `remainingInventory` 与传入的 `inventory` 是同一个 Map。
+ * @param materials - 材料 Wiki 数据
+ * @returns 使用同一组材料数据执行合成分配的可变计算器
+ * @since Beta v0.13.0
+ */
+export function createOwnedInventoryCraftingCalculator(
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): TGApp.App.UserCalc.OwnedInventoryCraftingCalculator {
   let preparedMaterials: ReadonlyMap<number, PreparedCraftingMaterial> | undefined;
   /**
    * 按需创建并复用本轮材料的预解析索引。

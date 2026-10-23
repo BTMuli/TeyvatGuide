@@ -253,6 +253,18 @@ declare namespace TGApp.App.UserCalc {
   };
 
   /**
+   * 供内部直接复用并修改传入库存的合成计算器。
+   *
+   * @since Beta v0.13.0
+   */
+  type OwnedInventoryCraftingCalculator = (
+    requirements: ReadonlyArray<CultivationMaterial>,
+    inventory: Map<number, number>,
+    useDust?: boolean,
+    useSolvent?: boolean,
+  ) => CraftingAllocation;
+
+  /**
    * 复用同一组材料 Wiki 数据的合成计算器。
    * @since Beta v0.13.0
    */

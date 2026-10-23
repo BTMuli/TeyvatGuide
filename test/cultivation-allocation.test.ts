@@ -420,6 +420,16 @@ describe("养成计划材料分配", () => {
     expect(automaticDemands.find((item) => item.id === dust)?.missing).toBe(0);
     const automaticOptionsSnapshot = structuredClone(automaticOptions);
     const automaticInventorySnapshots = automaticOptions.map((option) => new Map(option.inventory));
+    const firstAutomaticOption = automaticOptions.find(
+      (option) => option.entryKey === getCultivationEntryKey(automaticFirst),
+    );
+    const secondAutomaticOption = automaticOptions.find(
+      (option) => option.entryKey === getCultivationEntryKey(automaticSecond),
+    );
+    expect(firstAutomaticOption?.inventory.get(source)).toBe(2);
+    expect(firstAutomaticOption?.inventory.get(dust)).toBe(2);
+    expect(secondAutomaticOption?.inventory.get(source)).toBe(1);
+    expect(secondAutomaticOption?.inventory.get(dust)).toBe(1);
     expect(buildConversionDemandMaterials(automaticOptions)).toStrictEqual(automaticDemands);
     expect(automaticOptions).toStrictEqual(automaticOptionsSnapshot);
     expect(automaticOptions.map((option) => option.inventory)).toStrictEqual(
@@ -1262,6 +1272,46 @@ describe("养成计划材料分配", () => {
     );
     expect(ownProtectedOptions.length).toBe(1);
     expect(ownProtectedOptions[0]?.intent?.materialId).toBe(protectedTarget);
+  });
+
+  it.each([
+    { stock: 3, recommended: 0 },
+    { stock: 4, recommended: 1 },
+  ])("同一目标的普通材料在库存为 $stock 时仍先于转换推荐预留来源", ({ stock, recommended }) => {
+    const source = 7051;
+    const ordinaryTarget = 7052;
+    const conversionTarget = 7053;
+    const dust = 104201;
+    const materials = [
+      makeMaterial(source, 1),
+      makeMaterial(ordinaryTarget, 3, [makeRecipe("ordinary", [[source, 3]])]),
+      makeMaterial(conversionTarget, 5, [
+        makeRecipe("conversion", [
+          [source, 1],
+          [dust, 1],
+        ]),
+      ]),
+      makeMaterial(dust, 1),
+    ];
+    const entry = makeEntry("mixed-target", conversionTarget, 0, { allowCrafting: false });
+    entry.items.push({ entryId: entry.id, materialId: ordinaryTarget, required: 1 });
+    const inventory = new Map([
+      [source, stock],
+      [dust, 1],
+    ]);
+    const allocation = allocatePlanMaterials([entry], inventory, materials);
+    const options = getConversionOptions([entry], allocation, materials);
+
+    expect(options).toHaveLength(recommended);
+    expect(options[0]?.recommendation.material.id ?? conversionTarget).toBe(conversionTarget);
+    expect(options[0]?.recommendation.count ?? 0).toBe(recommended);
+    expect(
+      allocation.entries.get(entry.id)?.find((result) => result.id === ordinaryTarget)?.missing,
+    ).toBe(1);
+    expect(Array.from(inventory)).toStrictEqual([
+      [source, stock],
+      [dust, 1],
+    ]);
   });
 
   it("普通合成按目标优先级消耗共享来源。", () => {

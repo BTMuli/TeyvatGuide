@@ -3,7 +3,11 @@
  * @since Beta v0.13.0
  */
 
-import { calculateCraftingAllocation, createCraftingCalculator } from "@utils/game/userCalc.js";
+import {
+  calculateCraftingAllocation,
+  createCraftingCalculator,
+  createOwnedInventoryCraftingCalculator,
+} from "@utils/game/userCalc.js";
 import { describe, expect, it } from "vitest";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -184,6 +188,7 @@ describe("calculateCraftingAllocation", () => {
 
   it("递归合成的同级来源失败时回滚子配方消耗", () => {
     const { materials, inventory, ids } = createRollbackBundle();
+    const inventorySnapshot = new Map(inventory);
     const result = calculateCraftingAllocation(
       [{ id: ids.recursive, count: 1 }],
       inventory,
@@ -197,6 +202,7 @@ describe("calculateCraftingAllocation", () => {
     expect(result.remainingInventory.get(ids.recursiveLeaf)).toBe(1);
     expect(result.remainingInventory.get(ids.recursiveAlternative)).toBe(0);
     expect(result.remainingInventory.has(ids.recursiveMissingSource)).toBe(false);
+    expect(inventory).toStrictEqual(inventorySnapshot);
   });
 
   it("循环配方失败后仍可使用非循环备用配方", () => {
@@ -254,6 +260,69 @@ describe("calculateCraftingAllocation", () => {
       expect(result.remainingInventory.get(sourceId)).toBe(0);
     }
     expect({ requirements, inventory }).toStrictEqual(snapshot);
+  });
+
+  it("合成结果保留无关库存，并与调用方及其他调用保持独立", () => {
+    const source = 900101;
+    const target = 900102;
+    const unrelatedPositive = 900103;
+    const unrelatedZero = 900104;
+    const materials = [
+      makeMaterial(target, 5, [makeRecipe("target-from-source", [[source, 1]])]),
+      makeMaterial(source, 1),
+      makeMaterial(unrelatedPositive, 1),
+      makeMaterial(unrelatedZero, 1),
+    ];
+    const inventory = new Map([
+      [source, 1],
+      [unrelatedPositive, 7],
+      [unrelatedZero, 0],
+    ]);
+    const inventorySnapshot = new Map(inventory);
+    const calculator = createCraftingCalculator(materials);
+    const first = calculator([{ id: target, count: 1 }], inventory);
+
+    expect(first.materials.get(target)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: source, count: 1 }],
+    });
+    expect(first.remainingInventory.get(source)).toBe(0);
+    expect(first.remainingInventory.get(unrelatedPositive)).toBe(7);
+    expect(first.remainingInventory.get(unrelatedZero)).toBe(0);
+    expect(first.remainingInventory.get(target)).toBe(0);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+
+    inventory.set(unrelatedPositive, 2);
+    expect(first.remainingInventory.get(unrelatedPositive)).toBe(7);
+    first.remainingInventory.set(unrelatedPositive, 99);
+
+    const second = calculator([{ id: target, count: 1 }], inventorySnapshot);
+    expect(second.remainingInventory.get(unrelatedPositive)).toBe(7);
+    expect(second.remainingInventory.get(unrelatedZero)).toBe(0);
+    expect(second.materials.get(target)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: source, count: 1 }],
+    });
+  });
+});
+
+describe("createOwnedInventoryCraftingCalculator", () => {
+  it("直接更新自有库存，失败配方回滚后仍可采用备用来源", () => {
+    const { materials, ids } = createRollbackBundle();
+    const inventory = new Map([
+      [ids.fallbackFirstSource, 1],
+      [ids.fallbackSecondSource, 1],
+    ]);
+    const calculator = createOwnedInventoryCraftingCalculator(materials);
+    const result = calculator([{ id: ids.fallback, count: 1 }], inventory);
+
+    expect(result.remainingInventory).toBe(inventory);
+    expect(inventory.get(ids.fallbackFirstSource)).toBe(1);
+    expect(inventory.get(ids.fallbackSecondSource)).toBe(0);
+    expect(result.materials.get(ids.fallback)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: ids.fallbackSecondSource, count: 1 }],
+    });
   });
 });
 
@@ -329,6 +398,7 @@ describe("createCraftingCalculator", () => {
     const result = calculator(requirements, inventory);
 
     expect(result.materials.size).toBe(0);
+    expect(result.remainingInventory).not.toBe(inventory);
     expect(Array.from(result.remainingInventory)).toStrictEqual(remaining);
     expect({ requirements, inventory, materials }).toStrictEqual(snapshot);
   });
