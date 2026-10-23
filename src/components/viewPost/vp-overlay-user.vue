@@ -17,7 +17,7 @@
               <div class="nickname">{{ userInfo.nickname }}</div>
               <div class="level">Lv.{{ userInfo.level_exp.level }}</div>
             </div>
-            <div :title="userInfo.introduce" class="desc">{{ userInfo.introduce }}</div>
+            <div v-if="userDesc" :title="userDesc" class="desc">{{ userDesc }}</div>
           </div>
         </div>
       </div>
@@ -69,6 +69,11 @@ const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const avatarUrl = computed<string>(() => {
   if (!userInfo.value) return "";
   return getUserAvatar(userInfo.value);
+});
+const userDesc = computed<string>(() => {
+  if (!userInfo.value) return "";
+  if (userInfo.value.certification.label !== "") return userInfo.value.certification.label;
+  return userInfo.value.introduce;
 });
 const levelColor = computed<string>(() => {
   if (!userInfo.value) return "var(--tgc-od-white)";
