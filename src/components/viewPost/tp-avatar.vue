@@ -72,8 +72,12 @@ const levelColor = computed<string>(() => {
 }
 
 .tpa-text :first-child {
+  overflow: hidden;
+  max-width: 100%;
   font-family: var(--font-title);
   font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tpa-text :last-child {

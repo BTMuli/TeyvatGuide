@@ -98,15 +98,20 @@ async function shareRound(): Promise<void> {
   }
 
   .main {
+    overflow: hidden;
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .sub {
+    flex-shrink: 0;
     margin-left: auto;
     font-size: 12px;
     opacity: 0.8;
+    white-space: nowrap;
   }
 }
 
@@ -116,6 +121,7 @@ async function shareRound(): Promise<void> {
   top: 24px;
   right: 8px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .tucr-content {

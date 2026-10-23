@@ -246,6 +246,8 @@ function getAnnoTime(content: string): string | false {
   right: 0;
   display: flex;
   overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
@@ -257,11 +259,19 @@ function getAnnoTime(content: string): string | false {
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   text-shadow: 0 0 4px var(--tgc-dark-1);
+  white-space: nowrap;
 
   img {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
     margin-right: 4px;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

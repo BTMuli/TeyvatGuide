@@ -146,10 +146,14 @@ defineExpose({ displayBox });
 
 .hyperlink-title {
   position: relative;
+  overflow: hidden;
+  max-width: 100%;
   color: var(--common-text-title);
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hyperlink-desc {

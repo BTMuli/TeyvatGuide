@@ -81,6 +81,7 @@ const overview = computed<TGApp.Game.Record.Home | undefined>(() => props.homes[
   backdrop-filter: blur(4px);
   background: var(--common-shadow-1);
   column-gap: 16px;
+  white-space: nowrap;
 }
 
 .tur-hoco-item {

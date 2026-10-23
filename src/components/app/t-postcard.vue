@@ -540,7 +540,16 @@ async function shareCard(): Promise<void> {
     return;
   }
   const fileName = `PostCard_${card.value.postId}`;
-  await TGShare.modern(fileName, shareDom, 2.5, false, { backdropBlurScale: 0.75 });
+  await TGShare.modern(fileName, shareDom, 2.5, false, {
+    backdropBlurScale: 0.75,
+    onCloneNode: (cloned) => {
+      if (!(cloned instanceof HTMLElement)) return;
+      const titleEl = cloned.querySelector<HTMLElement>(".tpc-title");
+      if (titleEl === null) return;
+      titleEl.style.width = "100%";
+      titleEl.style.boxSizing = "border-box";
+    },
+  });
 }
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
@@ -767,6 +776,8 @@ function onUserClick(): void {
   top: 0;
   right: 0;
   display: flex;
+  max-width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
@@ -783,7 +794,14 @@ function onUserClick(): void {
   img {
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
     margin-right: 4px;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .list-mode & {
@@ -898,6 +916,7 @@ function onUserClick(): void {
   background-color: v-bind(cardBg); /* stylelint-disable-line value-keyword-case */
   clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
   color: var(--tgc-white-1);
+  white-space: nowrap;
 
   &::after {
     position: absolute;
