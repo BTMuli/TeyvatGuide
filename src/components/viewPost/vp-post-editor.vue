@@ -214,9 +214,19 @@ import {
 } from "@utils/bbs/postDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbs/postEditor.js";
 import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
+import { isRecord } from "@utils/common/typeGuards.js";
 import Quill from "quill";
 import type { Range } from "quill";
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  toRaw,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import "quill/dist/quill.core.css";
 
@@ -331,22 +341,21 @@ let composing = false;
 let mounted = false;
 let applyingModel = false;
 let modelSnapshot = "";
+let lastSyncedNodes: Array<TGApp.BBS.SctPost.Base> | undefined;
 let editVersion = 0;
 let emoticonLoadVersion = 0;
 let emoticonCandidates: Array<EmoticonCandidate> = [];
 let savedSelection: SelectionRange = { index: 0, length: 0 };
 
-watch(
-  model,
-  (next) => {
-    const current = quill.value;
-    if (!current) return;
-    const serialized = JSON.stringify(next);
-    if (serialized === modelSnapshot) return;
-    applyModel(next);
-  },
-  { deep: true, flush: "sync" },
-);
+// 父级只整组替换 model；编辑器写回自身时按引用短路，避免按键路径重复序列化。
+watch(model, (next) => {
+  if (toRaw(next) === lastSyncedNodes) return;
+  const current = quill.value;
+  if (!current) return;
+  const serialized = JSON.stringify(next);
+  if (serialized === modelSnapshot) return;
+  applyModel(next);
+});
 
 watch(
   () => props.disabled,
@@ -418,10 +427,6 @@ onBeforeUnmount(() => {
   current.disable();
   quill.value = undefined;
 });
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function emitEditorError(error: unknown, fallback: string): void {
   emits("error", error instanceof Error ? error.message : fallback);
@@ -927,6 +932,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     savedSelection = clampSelection(current, selection);
     current.setSelection(savedSelection, "silent");
     modelSnapshot = JSON.stringify(next);
+    lastSyncedNodes = toRaw(next);
     emits("validityChange", true);
     updateActiveFormats(savedSelection);
   } catch (error) {
@@ -989,7 +995,10 @@ function handleTextChange(change: QuillDelta, _oldChange: QuillDelta, source: st
     const next = readEditorNodes(current);
     const serialized = JSON.stringify(next);
     modelSnapshot = serialized;
-    if (serialized !== JSON.stringify(model.value)) model.value = next;
+    if (serialized !== JSON.stringify(model.value)) {
+      lastSyncedNodes = next;
+      model.value = next;
+    }
     emits("validityChange", true);
     updateActiveFormats();
   } catch (error) {
