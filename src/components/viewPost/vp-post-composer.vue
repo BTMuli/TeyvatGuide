@@ -460,7 +460,7 @@ const editor = useTemplateRef<InstanceType<typeof VpPostEditor>>("editor");
 const tools = useTemplateRef<InstanceType<typeof VpPostTools>>("tools");
 const bbsStore = useBBSStore();
 const { forumList } = storeToRefs(bbsStore);
-const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
+const { uid, cookie } = storeToRefs(useUserStore());
 const loading = ref<boolean>(false);
 const pending = ref<boolean>(false);
 const uploading = ref<boolean>(false);
@@ -1246,18 +1246,7 @@ async function savePost(): Promise<void> {
       if (permission.data?.can_release === false)
         throw new Error(permission.data.msg?.trim() || "当前账号暂时无法在该版块发帖");
     }
-    const forumName =
-      settings.forumId === 0
-        ? "不发布到版块"
-        : (forums.value.find((item) => item.id === settings.forumId)?.name ??
-          String(settings.forumId));
-    const confirmed = await showDialog.checkF({
-      title: action,
-      text: `账号：${briefInfo.value.nickname || uid.value}\n版块：${forumName}\n标题：${settings.subject}\n${document.text.slice(0, 500)}\n图片 ${document.images.length} 张`,
-      confirmLabel: action,
-      cancelLabel: "继续编辑",
-    });
-    if (!confirmed || !active || version !== contextVersion.value || !canWrite.value) return;
+    if (!active || version !== contextVersion.value || !canWrite.value) return;
     const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
       uid: requestCookie.ltuid,
       cookie: requestCookie,

@@ -105,7 +105,6 @@
   </form>
 </template>
 <script lang="ts" setup>
-import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
@@ -342,17 +341,9 @@ async function publishReply(): Promise<void> {
   };
   const requestCookie = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   const title = props.target ? "发布回复" : "发布评论";
-  const targetLabel = props.target ? `回复 ${props.target.user.nickname}` : "评论当前帖子";
   await interaction.run(async () => {
     publishing.value = true;
     try {
-      const confirmed = await showDialog.checkF({
-        title,
-        text: `以 ${briefInfo.value.nickname || "当前账号"} ${targetLabel}：\n${document.preview}`,
-        confirmLabel: title,
-        cancelLabel: "继续编辑",
-      });
-      if (!confirmed) return;
       if (!mounted || version !== contextVersion || !canWrite.value) {
         showSnackbar.warn("账号或回复目标已变化，请重新确认");
         return;
@@ -376,7 +367,7 @@ async function publishReply(): Promise<void> {
       emits("published");
     } catch {
       if (mounted && version === contextVersion) {
-        showSnackbar.error("评论未确认成功，请先刷新回复列表核对后再重试");
+        showSnackbar.error("评论发布失败，请刷新回复列表核对后再重试");
       }
     } finally {
       publishing.value = false;

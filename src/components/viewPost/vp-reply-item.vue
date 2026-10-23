@@ -744,11 +744,6 @@ async function togglePin(): Promise<void> {
 
 async function exportData(): Promise<void> {
   await interaction.run(async () => {
-    const exportCheck = await showDialog.check("导出数据", "是否导出回复数据？");
-    if (!exportCheck) {
-      showSnackbar.cancel("已取消导出该回复数据");
-      return;
-    }
     const data = JSON.stringify(toRaw(props.modelValue), null, 2);
     const savePath = await save({
       title: "导出回复数据",
