@@ -30,9 +30,9 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useUserStore from "@store/user.js";
-import { openCommunityProfile } from "@utils/communityProfile.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import { openCommunityProfile } from "@utils/community/profile.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 

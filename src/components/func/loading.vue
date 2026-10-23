@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import {
   onMounted,
   onUnmounted,

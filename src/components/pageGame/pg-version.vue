@@ -183,12 +183,12 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { confirmStopRunningGame } from "@utils/TGGame.js";
+import { confirmStopRunningGame } from "@utils/game/TGGame.js";
 import {
   getGamePackageApplySpace,
   getGamePackageSnapshot,
   getGamePreDownloadCacheStatus,
-} from "@utils/TGGameLauncher.js";
+} from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 

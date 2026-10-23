@@ -42,7 +42,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import TGClient from "@utils/TGClient.js";
+import TGClient from "@utils/app/TGClient.js";
 
 type TpUgcLevel = { insert: { level: TGApp.BBS.UGC.Level } };
 type TpUgcLevelProps = { data: TpUgcLevel };

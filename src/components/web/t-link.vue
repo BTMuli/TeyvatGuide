@@ -4,7 +4,7 @@
 <script lang="ts" setup>
 import showHyperLink from "@comp/func/hyperlink.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { onMounted, shallowRef } from "vue";
 
 import { WikiHyperLinkData } from "@/data/index.js";

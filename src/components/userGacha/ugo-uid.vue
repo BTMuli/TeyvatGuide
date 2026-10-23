@@ -64,10 +64,10 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUidTail } from "@utils/TGUid.js";
-import { checkUigfData, exportUigf4Data, readUigf4Data, readUigfData } from "@utils/UIGF.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUidTail } from "@utils/display/TGUid.js";
+import { checkUigfData, exportUigf4Data, readUigf4Data, readUigfData } from "@utils/gacha/UIGF.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 type UgoUidProps = {

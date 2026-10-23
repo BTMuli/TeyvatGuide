@@ -66,8 +66,8 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { ref, useTemplateRef } from "vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";

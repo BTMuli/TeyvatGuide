@@ -11,8 +11,8 @@
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { saveImgFile } from "@utils/TGShare.js";
-import { maskUidName } from "@utils/TGUid.js";
+import { maskUidName } from "@utils/display/TGUid.js";
+import { saveImgFile } from "@utils/share/TGShare.js";
 import type { PieSeriesOption } from "echarts/charts.js";
 import { BarChart, PieChart } from "echarts/charts.js";
 import type {

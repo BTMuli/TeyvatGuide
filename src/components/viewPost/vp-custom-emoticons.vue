@@ -55,8 +55,8 @@
 </template>
 <script lang="ts" setup>
 import customEmoticonReq from "@req/customEmoticonReq.js";
-import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { onBeforeUnmount, ref, watch } from "vue";
 
 const props = defineProps<{

@@ -5,7 +5,7 @@
 
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

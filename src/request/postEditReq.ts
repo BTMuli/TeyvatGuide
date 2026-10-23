@@ -9,16 +9,16 @@ import {
   buildPostDocument,
   isPostUrl,
   parsePostNodes,
-} from "@utils/bbsPostDocument.js";
-import { serializePostDocument } from "@utils/bbsPostHtml.js";
+} from "@utils/bbs/postDocument.js";
+import { serializePostDocument } from "@utils/bbs/postHtml.js";
 import {
   assertPicturePostDocument,
   buildPicturePostDocument,
   parsePicturePostContent,
   serializePicturePostDescribe,
-} from "@utils/bbsPostPicture.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+} from "@utils/bbs/postPicture.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const postApiUrl: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
 const postViewType: Readonly<1> = 1;

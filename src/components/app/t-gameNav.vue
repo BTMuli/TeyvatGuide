@@ -32,10 +32,10 @@ import OtherApi from "@req/otherReq.js";
 import useAppStore from "@store/app.js";
 import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import TGClient from "@utils/TGClient.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { createPost } from "@utils/TGWindow.js";
+import TGClient from "@utils/app/TGClient.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 

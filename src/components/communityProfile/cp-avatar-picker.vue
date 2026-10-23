@@ -274,8 +274,8 @@
 </template>
 
 <script lang="ts" setup>
-import { prepareCustomAvatar } from "@utils/bbsAvatarImage.js";
-import { prepareReplyImage } from "@utils/bbsReplyImage.js";
+import { prepareCustomAvatar } from "@utils/bbs/avatarImage.js";
+import { prepareReplyImage } from "@utils/bbs/replyImage.js";
 import type { CSSProperties } from "vue";
 import {
   computed,

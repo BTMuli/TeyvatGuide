@@ -8,8 +8,8 @@
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 type TShareBtnProps = { selector: string; title: string; scale?: number };
 const props = defineProps<TShareBtnProps>();

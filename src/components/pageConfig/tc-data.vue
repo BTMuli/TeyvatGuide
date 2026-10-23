@@ -91,11 +91,11 @@ import useHomeStore from "@store/home.js";
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
-import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
-import { maskDeviceValue } from "@utils/devicePrivacy.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
-import { getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
+import { backUpUserData, restoreUserData } from "@utils/account/dataBS.js";
+import { getCacheDir, getDeviceInfo, getRandomString } from "@utils/common/toolFunc.js";
+import { maskDeviceValue } from "@utils/display/devicePrivacy.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 

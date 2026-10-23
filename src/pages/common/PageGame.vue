@@ -173,13 +173,13 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
 import { listen } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
-import { confirmStopRunningGame, launchInstallation, tryLaunchGame } from "@utils/TGGame.js";
+import { confirmStopRunningGame, launchInstallation, tryLaunchGame } from "@utils/game/TGGame.js";
 import {
   createGamePackageSwitchPlan,
   ensureGameInstallDefenderExclusions,
   listGameInstallDrafts,
   listGameInstallations,
-} from "@utils/TGGameLauncher.js";
+} from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
 

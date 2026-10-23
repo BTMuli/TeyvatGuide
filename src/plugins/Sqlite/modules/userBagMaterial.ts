@@ -3,8 +3,8 @@
  * @since Beta v0.12.2
  */
 import { platform } from "@tauri-apps/plugin-os";
-import { getCalculateInventory } from "@utils/cultivationPlan.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { getCalculateInventory } from "@utils/game/cultivationPlan.js";
 
 import TGSqlite from "../index.js";
 

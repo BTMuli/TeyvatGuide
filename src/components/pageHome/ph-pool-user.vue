@@ -67,9 +67,9 @@
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
-import { getWikiBrief } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 
 import PhPoolItemOverlay, {

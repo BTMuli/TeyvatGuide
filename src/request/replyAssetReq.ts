@@ -3,10 +3,10 @@
  * @since Beta v0.13.0
  */
 
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
-import { prepareReplyImage } from "@utils/bbsReplyImage.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import { prepareReplyImage } from "@utils/bbs/replyImage.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const replyApiBase: Readonly<string> = "https://bbs-api.miyoushe.com/";
 const mentionUrl: Readonly<string> = `${replyApiBase}user/wapi/getUIDByNickname`;

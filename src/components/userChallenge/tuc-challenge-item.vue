@@ -53,7 +53,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getRcStar, getZhElement, parseHtmlText } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement, parseHtmlText } from "@utils/common/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import TucMonsterTag from "./tuc-monster-tag.vue";

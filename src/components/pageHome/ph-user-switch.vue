@@ -32,7 +32,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
-import { maskUid, maskUidTail } from "@utils/TGUid.js";
+import { maskUid, maskUidTail } from "@utils/display/TGUid.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
 

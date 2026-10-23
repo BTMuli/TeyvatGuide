@@ -84,7 +84,7 @@ import useAppStore from "@store/app.js";
 import { core, event } from "@tauri-apps/api";
 import { emit as emitTauri } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 

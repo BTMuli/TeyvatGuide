@@ -137,9 +137,9 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 

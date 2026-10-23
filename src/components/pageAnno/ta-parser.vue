@@ -12,7 +12,7 @@ import TpImage from "@comp/viewPost/tp-image.vue";
 import TpText from "@comp/viewPost/tp-text.vue";
 import TpTexts from "@comp/viewPost/tp-texts.vue";
 import TpUnknown from "@comp/viewPost/tp-unknown.vue";
-import parseAnnoContent from "@utils/annoParser.js";
+import parseAnnoContent from "@utils/game/annoParser.js";
 import type { Component } from "vue";
 
 import TaTable from "./ta-table.vue";

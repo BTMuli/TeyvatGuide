@@ -183,9 +183,9 @@ import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
-import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
-import { getWeaponRefineLevel, groupWeapons } from "@utils/userBagGroup.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/display/TGUid.js";
+import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/game/TGGame.js";
+import { getWeaponRefineLevel, groupWeapons } from "@utils/game/userBagGroup.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 

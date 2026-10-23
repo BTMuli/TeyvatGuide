@@ -68,11 +68,11 @@ import communityReq from "@req/communityReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { openCommunityProfile } from "@utils/communityProfile.js";
-import { parseLink, parsePost } from "@utils/linkParser.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { createPost } from "@utils/TGWindow.js";
+import { parseLink, parsePost } from "@utils/app/linkParser.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import { openCommunityProfile } from "@utils/community/profile.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 

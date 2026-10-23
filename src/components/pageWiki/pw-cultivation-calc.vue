@@ -215,19 +215,19 @@ import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useCultivationConversionStore from "@store/cultivationConversion.js";
 import useUserStore from "@store/user.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
 import {
   allocatePlanMaterials,
   getConversionOptions,
   getCultivationEntryKey,
   getUidServerTimezone,
   mergePlanInventory,
-} from "@utils/cultivationPlan.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
-import userCalc, { ASCENSION_LEVELS } from "@utils/userCalc.js";
-import type { CultivationMaterial } from "@utils/userCalc.js";
+} from "@utils/game/cultivationPlan.js";
+import userCalc, { ASCENSION_LEVELS } from "@utils/game/userCalc.js";
+import type { CultivationMaterial } from "@utils/game/userCalc.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";

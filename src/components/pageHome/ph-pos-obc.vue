@@ -36,9 +36,9 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import fmtUtil from "@utils/fmtUtil.js";
-import { parseLink } from "@utils/linkParser.js";
-import { createPost, toObcPage } from "@utils/TGWindow.js";
+import { parseLink } from "@utils/app/linkParser.js";
+import { createPost, toObcPage } from "@utils/app/TGWindow.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 type PhPosObcProps = { pos: TGApp.BBS.Obc.PositionItem };

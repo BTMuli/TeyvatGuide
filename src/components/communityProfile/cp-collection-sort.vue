@@ -119,7 +119,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpTitle from "@comp/viewPost/tp-title.vue";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 /**

@@ -107,9 +107,9 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
 import useHutaoStore from "@store/hutao.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { validEmail } from "@utils/toolFunc.js";
+import { validEmail } from "@utils/common/toolFunc.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { VForm, VTextField } from "vuetify/components";
 

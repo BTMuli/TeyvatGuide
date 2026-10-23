@@ -3,8 +3,8 @@
  * @since Beta v0.13.0
  */
 import bbsEnum from "@enum/bbs.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 // BBSApiPainterBaseUrl => bapBu
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";

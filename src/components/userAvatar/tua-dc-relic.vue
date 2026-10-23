@@ -94,8 +94,8 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { parseHtmlText } from "@utils/toolFunc.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { computed } from "vue";
 
 type TuaDcRelicProps = {

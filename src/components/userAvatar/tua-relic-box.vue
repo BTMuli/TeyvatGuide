@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import wikiUtils from "@utils/wikiUtils.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { ref } from "vue";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };

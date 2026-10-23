@@ -384,10 +384,10 @@ import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { matchesPostKeyword, openCommunityProfile } from "@utils/communityProfile.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import { createPost } from "@utils/TGWindow.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import { matchesPostKeyword, openCommunityProfile } from "@utils/community/profile.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 

@@ -113,8 +113,8 @@
 <script lang="ts" setup>
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { computed, shallowRef, useSlots, useTemplateRef, watch } from "vue";
 
 import TwoBookDetail from "./two-book-detail.vue";

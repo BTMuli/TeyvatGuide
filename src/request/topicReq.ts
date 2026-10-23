@@ -2,7 +2,7 @@
  * 话题相关的请求
  * @since Beta v0.13.0
  */
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const batBu: Readonly<string> = "https://bbs-api.miyoushe.com/topic/wapi/";
 const outerBu: Readonly<string> = "https://bbs-api.miyoushe.com/topic/outerApi/";

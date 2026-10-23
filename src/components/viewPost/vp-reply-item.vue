@@ -224,13 +224,13 @@ import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
-import { resolveReplyAncestors } from "@utils/bbsReplyChain.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { getUserAvatar } from "@utils/toolFunc.js";
+import { executeReplyForCurrentAccount } from "@utils/bbs/replyAccount.js";
+import { resolveReplyAncestors } from "@utils/bbs/replyChain.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import {
   computed,

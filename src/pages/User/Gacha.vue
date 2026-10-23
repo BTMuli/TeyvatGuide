@@ -292,7 +292,15 @@ import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import {
+  maskUid,
+  maskUidName,
+  maskUidTail,
+  uidItemTitle,
+  uidItemValue,
+} from "@utils/display/TGUid.js";
+import { exportUigfData } from "@utils/gacha/UIGF.js";
 import {
   filterGachaDisplayList,
   formatGachaInclusiveEnd,
@@ -304,12 +312,10 @@ import {
   parseGachaIsoDate,
   shiftGachaIsoDate,
   type GachaVersionLegendItem,
-} from "@utils/gachaVersion.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
-import { exportUigfData } from "@utils/UIGF.js";
-import fetchYattaJson from "@utils/Yatta.js";
+} from "@utils/gacha/version.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import fetchYattaJson from "@utils/network/Yatta.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";

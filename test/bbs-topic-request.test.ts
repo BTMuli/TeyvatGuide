@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   post: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { get: mocks.get, post: mocks.post } }));
+vi.mock("@utils/network/TGHttps.js", () => ({ default: { get: mocks.get, post: mocks.post } }));
 
 import topicReq from "../src/request/topicReq.js";
 

@@ -51,13 +51,13 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TusMoRecord from "@comp/userScripts/tus-mo-record.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGNotify from "@utils/TGNotify.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
-import { createPost } from "@utils/TGWindow.js";
+import TGNotify from "@utils/app/TGNotify.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 /** 用于渲染的任务项 */

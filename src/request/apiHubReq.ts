@@ -3,9 +3,9 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGBbs from "@utils/TGBbs.js";
-import TGHttps from "@utils/TGHttps.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 // MysApiHubBaseUrl => Mahbu
 const Mahbu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/";

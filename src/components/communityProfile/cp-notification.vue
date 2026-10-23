@@ -67,8 +67,8 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
-import { getStructuredContent } from "@utils/communityComment.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import { getStructuredContent } from "@utils/community/comment.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
 
 import CpAvatar from "./cp-avatar.vue";

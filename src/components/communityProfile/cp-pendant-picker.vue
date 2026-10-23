@@ -347,7 +347,7 @@
 
 <script lang="ts" setup>
 import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
-import { getUserAvatar } from "@utils/toolFunc.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
 import { computed, ref, useId, watch } from "vue";
 
 /**

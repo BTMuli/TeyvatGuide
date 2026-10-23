@@ -7,7 +7,7 @@ import {
   allocatePlanMaterials,
   getConversionOptions,
   getCultivationEntryKey,
-} from "@utils/cultivationPlan.js";
+} from "@utils/game/cultivationPlan.js";
 import { createPinia, disposePinia, setActivePinia } from "pinia";
 import { createPersistedState } from "pinia-plugin-persistedstate";
 import { afterEach, describe, expect, it } from "vitest";

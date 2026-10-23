@@ -108,8 +108,8 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { listen } from "@tauri-apps/api/event";
-import fmtUtil from "@utils/fmtUtil.js";
-import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/TGGameLauncher.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onWatcherCleanup, ref, watch } from "vue";
 

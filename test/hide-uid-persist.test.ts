@@ -37,7 +37,7 @@ vi.mock("@tauri-apps/api", () => ({
   },
 }));
 
-vi.mock("@utils/toolFunc.js", () => ({
+vi.mock("@utils/common/toolFunc.js", () => ({
   getInitDeviceInfo: () => ({ device_id: "test" }),
 }));
 

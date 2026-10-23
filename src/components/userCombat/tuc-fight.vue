@@ -20,7 +20,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { getWikiBrief } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
 
 type TucFightProps = {
   label: string;

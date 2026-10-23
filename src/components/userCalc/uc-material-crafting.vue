@@ -86,8 +86,8 @@
 import UcConversionEditor from "@comp/userCalc/uc-conversion-editor.vue";
 import UcCraftingCostList from "@comp/userCalc/uc-crafting-cost-list.vue";
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
-import { getMaterialCraftingCosts } from "@utils/cultivationPlan.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { getMaterialCraftingCosts } from "@utils/game/cultivationPlan.js";
 import { computed, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";

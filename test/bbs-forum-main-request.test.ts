@@ -9,10 +9,10 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({
+vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get, post: vi.fn() },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: vi.fn() }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: vi.fn() }));
 
 import apiHubReq from "../src/request/apiHubReq.js";
 

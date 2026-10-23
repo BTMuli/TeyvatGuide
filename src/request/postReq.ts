@@ -7,9 +7,9 @@ import {
   getReplyContentFromSendNodes,
   serializeReplySendNodes,
   validateReplySendNodes,
-} from "@utils/bbsReplyDocument.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+} from "@utils/bbs/replyDocument.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
 const apihubReplyLikeUrl: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/api/upvoteReply";

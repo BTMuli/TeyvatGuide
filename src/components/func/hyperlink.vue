@@ -16,8 +16,8 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TGShare from "@utils/TGShare.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import TGShare from "@utils/share/TGShare.js";
 import { onMounted, onWatcherCleanup, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import type { HyperLinkParams } from "./hyperlink.js";

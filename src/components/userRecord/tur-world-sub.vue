@@ -130,8 +130,8 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare, { type ShareProgress } from "@utils/TGShare.js";
+import TGShare, { type ShareProgress } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, useTemplateRef } from "vue";
 
 import TurWorldMenu from "./tur-world-menu.vue";

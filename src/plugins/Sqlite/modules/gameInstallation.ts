@@ -3,7 +3,7 @@
  * @since Beta v0.12.2
  */
 
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import TGSqlite from "../index.js";
 

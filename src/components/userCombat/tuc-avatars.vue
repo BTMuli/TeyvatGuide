@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import gameEnum from "@enum/game.js";
-import { getRcStar, getWikiBrief, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getWikiBrief, getZhElement } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
 type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar> };

@@ -2,9 +2,9 @@
  * 签到模块请求
  * @since Beta v0.10.1
  */
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGBbs from "@utils/TGBbs.js";
-import TGHttps from "@utils/TGHttps.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 // takumiEventLunaApiBaseUrl => telaBu
 const telaBu: Readonly<string> = "https://api-takumi.mihoyo.com/event/luna/";

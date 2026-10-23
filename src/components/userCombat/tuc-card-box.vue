@@ -35,7 +35,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 
 type TucCardBoxProps = { modelValue: Array<TGApp.Game.Combat.Card> };
 

@@ -65,7 +65,7 @@
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
-import { canPublishForumPost } from "@utils/bbsPostPublish.js";
+import { canPublishForumPost } from "@utils/bbs/postPublish.js";
 import { storeToRefs } from "pinia";
 import { computed, useId, useTemplateRef } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";

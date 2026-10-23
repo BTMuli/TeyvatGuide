@@ -215,10 +215,10 @@ import UcConversionRecommendations from "@comp/userCalc/uc-conversion-recommenda
 import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { getCultivationEntryKey } from "@utils/cultivationPlan.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import { getCultivationEntryKey } from "@utils/game/cultivationPlan.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 import { getWikiMaterialById, WikiMaterialData } from "@/data/index.js";

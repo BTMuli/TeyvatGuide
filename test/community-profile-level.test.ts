@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   getCommunityProfileLevel,
   getCommunityProfileLevelColor,
-} from "../src/utils/communityProfileLevel.js";
+} from "../src/utils/community/profileLevel.js";
 
 /**
  * 构造等级选择测试所需的最小用户信息。

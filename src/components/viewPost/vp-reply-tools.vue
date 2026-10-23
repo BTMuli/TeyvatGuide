@@ -276,8 +276,8 @@ import bbsReq from "@req/bbsReq.js";
 import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useBBSStore from "@store/bbs.js";
-import { getGameUidInfos, validateGameUidCookie } from "@utils/bbsGameUid.js";
-import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { getGameUidInfos, validateGameUidCookie } from "@utils/bbs/gameUid.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 

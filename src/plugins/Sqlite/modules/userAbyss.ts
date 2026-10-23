@@ -4,9 +4,9 @@
  */
 
 import { path } from "@tauri-apps/api";
-import appFs from "@utils/appFs.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import appFs from "@utils/system/appFs.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import TGSqlite from "../index.js";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";

@@ -173,8 +173,8 @@ import TSUserBagMaterial, {
 } from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { tryCallYae } from "@utils/TGGame.js";
-import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/display/TGUid.js";
+import { tryCallYae } from "@utils/game/TGGame.js";
 import { storeToRefs } from "pinia";
 import {
   computed,

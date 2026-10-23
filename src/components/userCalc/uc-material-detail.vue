@@ -96,11 +96,11 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, ref, useTemplateRef } from "vue";
 
 /**

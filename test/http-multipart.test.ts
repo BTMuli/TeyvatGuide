@@ -13,9 +13,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@store/app.js", () => ({ default: () => ({ useProxy: mocks.useProxy }) }));
 vi.mock("@tauri-apps/plugin-http", () => ({ fetch: mocks.fetch }));
-vi.mock("@utils/TGLogger.js", () => ({ default: { Warn: mocks.loggerWarn } }));
+vi.mock("@utils/system/TGLogger.js", () => ({ default: { Warn: mocks.loggerWarn } }));
 
-import TGHttps from "../src/utils/TGHttps.js";
+import TGHttps from "../src/utils/network/TGHttps.js";
 
 /**
  * 创建成功响应替身。

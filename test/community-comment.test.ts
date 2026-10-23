@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { getCommunityCommentContent } from "../src/utils/communityComment.js";
+import { getCommunityCommentContent } from "../src/utils/community/comment.js";
 
 /**
  * 评论正文测试的字段覆盖值。

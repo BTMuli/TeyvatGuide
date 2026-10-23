@@ -38,13 +38,13 @@ vi.mock("@/assets/fonts/HYWenHei-55W.ttf?url", () => ({ default: "genshin-light"
 vi.mock("@/assets/fonts/JetBrainsMono-Bold.ttf?url", () => ({ default: "jetbrains-bold" }));
 vi.mock("@/assets/fonts/JetBrainsMono-Regular.ttf?url", () => ({ default: "jetbrains" }));
 vi.mock("@/assets/fonts/zh-cn.ttf?url", () => ({ default: "genshin" }));
-vi.mock("../src/utils/shareBackdropBlur.js", () => ({}));
-vi.mock("../src/utils/shareBackdropWorker?worker", () => ({ default: "worker" }));
-vi.mock("../src/utils/TGHttps.js", () => ({ default: {} }));
-vi.mock("../src/utils/TGLogger.js", () => ({ default: { Info: mocks.info } }));
-vi.mock("../src/utils/fmtUtil.js", () => ({ default: { size: mocks.size } }));
+vi.mock("../src/utils/share/backdropBlur.js", () => ({}));
+vi.mock("../src/utils/share/backdropWorker?worker", () => ({ default: "worker" }));
+vi.mock("../src/utils/network/TGHttps.js", () => ({ default: {} }));
+vi.mock("../src/utils/system/TGLogger.js", () => ({ default: { Info: mocks.info } }));
+vi.mock("../src/utils/display/fmtUtil.js", () => ({ default: { size: mocks.size } }));
 
-import { saveBufferFile } from "../src/utils/TGShare.js";
+import { saveBufferFile } from "../src/utils/share/TGShare.js";
 
 beforeEach(() => {
   mocks.save.mockReset();

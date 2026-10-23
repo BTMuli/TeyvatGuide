@@ -342,7 +342,7 @@
 import PbBagWorkspaceShell from "@comp/pageBag/pb-bag-workspace-shell.vue";
 import PbRelicDetailContent from "@comp/pageBag/pb-relic-detail-content.vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
-import wikiUtils from "@utils/wikiUtils.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import {
   computed,
   nextTick,

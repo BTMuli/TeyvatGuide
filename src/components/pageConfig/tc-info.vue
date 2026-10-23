@@ -80,9 +80,9 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { platform, version } from "@tauri-apps/plugin-os";
-import { maskDeviceValue } from "@utils/devicePrivacy.js";
-import TGBbs from "@utils/TGBbs.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
+import { maskDeviceValue } from "@utils/display/devicePrivacy.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, onMounted, ref, shallowRef } from "vue";
 
 import TcInfoItem from "./tc-info-item.vue";

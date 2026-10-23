@@ -99,7 +99,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import HutaoImport from "@Hutao/utils/importData.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, ref, useId } from "vue";
 
 type ImportRow = {

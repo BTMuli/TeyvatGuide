@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import UcCraftingCostList from "@comp/userCalc/uc-crafting-cost-list.vue";
-import { getAdditionalCraftingCosts } from "@utils/cultivationPlan.js";
+import { getAdditionalCraftingCosts } from "@utils/game/cultivationPlan.js";
 import { computed } from "vue";
 
 /**

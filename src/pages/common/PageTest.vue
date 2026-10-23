@@ -25,8 +25,8 @@ import showSnackbar from "@comp/func/snackbar.js";
 import VpReplyDebug from "@comp/viewPost/vp-reply-debug.vue";
 import recordReq from "@req/recordReq.js";
 import useUserStore from "@store/user.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 

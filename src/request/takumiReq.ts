@@ -2,8 +2,8 @@
  * Takumi 相关请求函数
  * @since Beta v0.10.1
  */
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 // TakumiApiBaseUrl => taBu
 const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";

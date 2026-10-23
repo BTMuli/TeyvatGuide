@@ -9,7 +9,7 @@
 
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { str2Color } from "@utils/colorFunc.js";
+import { str2Color } from "@utils/display/colorFunc.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 

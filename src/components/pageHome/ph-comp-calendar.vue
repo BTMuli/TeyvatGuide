@@ -96,7 +96,7 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import useHomeStore from "@store/home.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { storeToRefs } from "pinia";
 import {
   computed,

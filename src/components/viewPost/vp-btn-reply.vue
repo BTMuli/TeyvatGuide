@@ -131,8 +131,8 @@ import { createReplyInteraction, replyInteractionKey } from "@hooks/useReplyInte
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
 import { emit } from "@tauri-apps/api/event";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, provide, ref, shallowRef, useTemplateRef, watch } from "vue";
 

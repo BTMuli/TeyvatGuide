@@ -47,7 +47,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { getOdStarColor } from "@utils/colorFunc.js";
+import { getOdStarColor } from "@utils/display/colorFunc.js";
 import { computed } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

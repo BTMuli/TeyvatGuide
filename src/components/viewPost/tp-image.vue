@@ -28,8 +28,8 @@
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import { saveImgBlob } from "@utils/TGShare.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { saveImgBlob } from "@utils/share/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 

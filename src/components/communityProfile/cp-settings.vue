@@ -258,9 +258,9 @@ import communitySettingsReq, {
 } from "@req/communitySettingsReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
-import TGHttps from "@utils/TGHttps.js";
-import { getUserAvatar } from "@utils/toolFunc.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from "vue";
 

@@ -129,8 +129,8 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { getGachaVersion } from "@utils/gachaVersion.js";
-import { compareVersions, getWikiBrief } from "@utils/toolFunc.js";
+import { compareVersions, getWikiBrief } from "@utils/common/toolFunc.js";
+import { getGachaVersion } from "@utils/gacha/version.js";
 import { computed, ref, watch } from "vue";
 import type { DataTableHeader } from "vuetify/lib/components/VDataTable/types.js";
 

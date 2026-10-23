@@ -72,8 +72,8 @@ import TaoIframe from "@comp/pageAnno/tao-iframe.vue";
 import gameEnum from "@enum/game.js";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 

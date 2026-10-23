@@ -25,7 +25,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getRcStar } from "@utils/toolFunc.js";
+import { getRcStar } from "@utils/common/toolFunc.js";
 
 import { AppCharacterData } from "@/data/index.js";
 

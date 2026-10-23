@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { maskDeviceValue } from "../src/utils/devicePrivacy.js";
+import { maskDeviceValue } from "../src/utils/display/devicePrivacy.js";
 
 describe("设备隐私展示掩码", () => {
   it("保留首尾字符并掩码中间内容", () => {

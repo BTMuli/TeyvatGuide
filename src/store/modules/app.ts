@@ -6,7 +6,7 @@
 import bbsEnum from "@enum/bbs.js";
 import gameEnum from "@enum/game.js";
 import { path } from "@tauri-apps/api";
-import { getInitDeviceInfo } from "@utils/toolFunc.js";
+import { getInitDeviceInfo } from "@utils/common/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 

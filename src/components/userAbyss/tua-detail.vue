@@ -31,8 +31,8 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TuaDetailLevel from "./tua-detail-level.vue";

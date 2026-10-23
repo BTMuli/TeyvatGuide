@@ -3,7 +3,7 @@
  * @since Beta v0.13.0
  */
 
-import { calculateCraftingAllocation, createCraftingCalculator } from "@utils/userCalc.js";
+import { calculateCraftingAllocation, createCraftingCalculator } from "@utils/game/userCalc.js";
 import { describe, expect, it } from "vitest";
 
 import { WikiMaterialData } from "@/data/index.js";

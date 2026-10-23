@@ -7,7 +7,7 @@
 
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { colord } from "colord";
 import type { EChartsOption } from "echarts";
 import { LineChart } from "echarts/charts.js";

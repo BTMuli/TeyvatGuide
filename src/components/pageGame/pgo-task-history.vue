@@ -212,8 +212,8 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import { core, path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
-import fmtUtil from "@utils/fmtUtil.js";
-import { listGamePackageTaskRecords } from "@utils/TGGameLauncher.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { listGamePackageTaskRecords } from "@utils/game/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
 import PgAudioLangTags from "./pg-audio-lang-tags.vue";

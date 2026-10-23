@@ -30,7 +30,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { onMounted, watch } from "vue";
 
 type TwcConstellationProps = { data: Array<TGApp.Plugins.Hutao.Character.RhisdTalent> };

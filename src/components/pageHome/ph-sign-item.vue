@@ -108,10 +108,10 @@ import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 

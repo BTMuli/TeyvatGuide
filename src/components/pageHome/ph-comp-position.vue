@@ -95,9 +95,9 @@ import useAppStore from "@store/app.js";
 import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 

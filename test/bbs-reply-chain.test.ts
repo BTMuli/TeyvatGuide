@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { resolveReplyAncestors } from "../src/utils/bbsReplyChain.js";
+import { resolveReplyAncestors } from "../src/utils/bbs/replyChain.js";
 
 /**
  * 创建仅包含祖先链所需字段的回复。

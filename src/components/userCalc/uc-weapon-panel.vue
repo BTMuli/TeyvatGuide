@@ -261,8 +261,8 @@
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
 import UcPickerListItem from "@comp/userCalc/uc-picker-list-item.vue";
-import userCalc from "@utils/userCalc.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import userCalc from "@utils/game/userCalc.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { computed, ref, watch } from "vue";
 
 type UcWeaponPanelProps = {

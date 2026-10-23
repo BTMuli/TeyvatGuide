@@ -27,9 +27,9 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import passportReq from "@req/passportReq.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import QrcodeVue from "qrcode.vue";
 import { onUnmounted, ref, watch } from "vue";
 

@@ -26,9 +26,9 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TucAeBox from "./tuc-ae-box.vue";

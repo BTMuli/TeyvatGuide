@@ -12,9 +12,9 @@ const mocks = vi.hoisted(() => ({
   prepareReplyImage: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { get: mocks.get, post: mocks.post } }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
-vi.mock("@utils/bbsReplyImage.js", () => ({ prepareReplyImage: mocks.prepareReplyImage }));
+vi.mock("@utils/network/TGHttps.js", () => ({ default: { get: mocks.get, post: mocks.post } }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/bbs/replyImage.js", () => ({ prepareReplyImage: mocks.prepareReplyImage }));
 
 import replyAssetReq, {
   replyAssetCapabilities,

@@ -180,13 +180,13 @@ import TOverlayPanel from "@comp/app/t-overlay-panel.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { computed, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 import { WikiMaterialData } from "@/data/index.js";
-import { getServerDay, isMaterialAvailableToday } from "@/utils/cultivationPlan.js";
+import { getServerDay, isMaterialAvailableToday } from "@/utils/game/cultivationPlan.js";
 
 type PhCalendarCultivationPanelProps = {
   /** 来源组件标签 */

@@ -3,7 +3,7 @@
  * @since Beta v0.11.3
  */
 
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import type { ComponentInternalInstance, VNode } from "vue";
 import { h, render } from "vue";
 

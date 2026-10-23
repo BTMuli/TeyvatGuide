@@ -13,7 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { parseBookText } from "@utils/toolFunc.js";
+import { parseBookText } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
 type TwoBookDetailProps = { book: TGApp.App.Material.WikiBook };

@@ -43,7 +43,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 
 type TuaDcConstellationsProps = { modelValue: Array<TGApp.Game.Avatar.Constellation> };
 

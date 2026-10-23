@@ -12,15 +12,17 @@ const mocks = vi.hoisted(() => ({
   serializePostDocument: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({
+vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get, post: mocks.post },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
-vi.mock("@utils/bbsPostHtml.js", () => ({ serializePostDocument: mocks.serializePostDocument }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/bbs/postHtml.js", () => ({
+  serializePostDocument: mocks.serializePostDocument,
+}));
 
 import postEditReq, { getPostEditSettings } from "../src/request/postEditReq.js";
 import postReq from "../src/request/postReq.js";
-import { buildPostDocument } from "../src/utils/bbsPostDocument.js";
+import { buildPostDocument } from "../src/utils/bbs/postDocument.js";
 
 const imageUrl = "https://example.com/images/post.png";
 const vodMetadata = {

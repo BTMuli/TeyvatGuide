@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import UcMaterialCostList from "@comp/userCalc/uc-material-cost-list.vue";
-import { buildConversionDemandMaterials } from "@utils/cultivationPlan.js";
+import { buildConversionDemandMaterials } from "@utils/game/cultivationPlan.js";
 import { computed } from "vue";
 
 /**

@@ -6,7 +6,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { str2Color } from "@utils/colorFunc.js";
+import { str2Color } from "@utils/display/colorFunc.js";
 import { computed, ref, useTemplateRef } from "vue";
 
 type TurHomeNameProps = { name: string; icon: string };

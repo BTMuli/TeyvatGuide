@@ -85,8 +85,8 @@
 
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TGShare from "@utils/TGShare.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData, wrRelic, wrSet } from "@/data/index.js";

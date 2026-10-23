@@ -12,7 +12,7 @@
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getUserAvatar } from "@utils/toolFunc.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
 type CpAvatarProps = {

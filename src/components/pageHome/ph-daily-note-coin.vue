@@ -31,7 +31,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteCoinProps = {

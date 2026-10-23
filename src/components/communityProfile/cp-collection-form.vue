@@ -154,8 +154,8 @@ import communityReq from "@req/communityReq.js";
 import replyAssetReq from "@req/replyAssetReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
-import TGHttps from "@utils/TGHttps.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch } from "vue";
 

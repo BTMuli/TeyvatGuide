@@ -382,14 +382,14 @@ import gameEnum from "@enum/game.js";
 import useBBSStore from "@store/bbs.js";
 import { listen } from "@tauri-apps/api/event";
 import { openPath } from "@tauri-apps/plugin-opener";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import {
   chooseGameInstallation,
   getGameInstallationAudioUsage,
   getGameInstallationSize,
   uninstallGameInstallation,
   unregisterGameInstallation,
-} from "@utils/TGGameLauncher.js";
+} from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, ref, watch } from "vue";
 

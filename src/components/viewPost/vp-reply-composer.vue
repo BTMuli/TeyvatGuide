@@ -110,10 +110,10 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
-import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
-import { validateGameUidInfo } from "@utils/bbsGameUid.js";
-import { executeReplyForCurrentAccount } from "@utils/bbsReplyAccount.js";
-import { buildReplyDocument } from "@utils/bbsReplyDocument.js";
+import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
+import { validateGameUidInfo } from "@utils/bbs/gameUid.js";
+import { executeReplyForCurrentAccount } from "@utils/bbs/replyAccount.js";
+import { buildReplyDocument } from "@utils/bbs/replyDocument.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 

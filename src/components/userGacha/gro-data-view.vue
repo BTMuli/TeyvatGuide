@@ -92,8 +92,8 @@
 import gameEnum from "@enum/game.js";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import fmtUtil from "@utils/fmtUtil.js";
-import { matchGachaDisplayScope } from "@utils/gachaVersion.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { matchGachaDisplayScope } from "@utils/gacha/version.js";
 import {
   computed,
   nextTick,

@@ -24,11 +24,11 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import useAppStore from "@store/app.js";
-import { str2Color } from "@utils/colorFunc.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare from "@utils/TGShare.js";
-import { createTGWindow } from "@utils/TGWindow.js";
-import { decodeRegExp } from "@utils/toolFunc.js";
+import { createTGWindow } from "@utils/app/TGWindow.js";
+import { decodeRegExp } from "@utils/common/toolFunc.js";
+import { str2Color } from "@utils/display/colorFunc.js";
+import TGShare from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 

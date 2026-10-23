@@ -8,11 +8,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
-import appFs from "@utils/appFs.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUidTail } from "@utils/TGUid.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUidTail } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import appFs from "@utils/system/appFs.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import TGSqlite from "../index.js";
 

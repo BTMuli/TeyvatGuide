@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { parseCustomEmoticon, parseCustomEmoticonList } from "../src/utils/bbsCustomEmoticon.js";
+import { parseCustomEmoticon, parseCustomEmoticonList } from "../src/utils/bbs/customEmoticon.js";
 
 const imageUrl = "https://example.com/emoticons/one.webp";
 

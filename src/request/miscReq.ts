@@ -4,8 +4,8 @@
  */
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 // BBSApiMiscBaseUrl => bamBu
 const bamBu: Readonly<string> = "https://bbs-api.miyoushe.com/misc/api/";

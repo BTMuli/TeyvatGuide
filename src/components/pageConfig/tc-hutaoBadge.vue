@@ -56,7 +56,7 @@ import TcoHutaoRegister from "@comp/pageConfig/tco-hutaoRegister.vue";
 import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
 import useHutaoStore from "@store/hutao.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 

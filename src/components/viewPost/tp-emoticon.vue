@@ -24,7 +24,7 @@
   />
 </template>
 <script lang="ts" setup>
-import { saveImgBlob } from "@utils/TGShare.js";
+import { saveImgBlob } from "@utils/share/TGShare.js";
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";

@@ -63,8 +63,8 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { getRcStar, getZhElement } from "@utils/common/toolFunc.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { computed } from "vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";

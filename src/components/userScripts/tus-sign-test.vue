@@ -105,9 +105,9 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
 import useBBSStore from "@store/bbs.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 

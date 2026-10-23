@@ -444,7 +444,9 @@ import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
-import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
 import {
   getPostForumIcon,
   getPostImageCount,
@@ -455,17 +457,15 @@ import {
   hasPreviousProfile,
   recordProfileVisit,
   stepProfileTrail,
-} from "@utils/communityProfile.js";
+} from "@utils/community/profile.js";
 import {
   getCommunityProfileLevel,
   getCommunityProfileLevelColor,
-} from "@utils/communityProfileLevel.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
-import { createPost } from "@utils/TGWindow.js";
-import { getUserAvatar } from "@utils/toolFunc.js";
+} from "@utils/community/profileLevel.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";

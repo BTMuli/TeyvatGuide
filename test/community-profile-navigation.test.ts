@@ -15,7 +15,7 @@ vi.mock("@tauri-apps/api/event", () => ({ emit: mocks.emit }));
 vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: mocks.getCurrentWindow }));
 vi.mock("@/router/index.js", () => ({ default: { push: mocks.push } }));
 
-import { matchesPostKeyword, openCommunityProfile } from "../src/utils/communityProfile.js";
+import { matchesPostKeyword, openCommunityProfile } from "../src/utils/community/profile.js";
 
 function createPost(subject: string, content: string): TGApp.BBS.Post.FullData {
   return <TGApp.BBS.Post.FullData>(<unknown>{ post: { subject, content } });

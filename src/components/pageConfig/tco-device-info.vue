@@ -77,7 +77,7 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TGSqlite from "@Sql/index.js";
 import useAppStore from "@store/app.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { ref, useId, useTemplateRef, watch } from "vue";
 import { VForm } from "vuetify/components";

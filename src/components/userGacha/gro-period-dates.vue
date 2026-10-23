@@ -132,7 +132,7 @@
   </v-input>
 </template>
 <script lang="ts" setup>
-import { formatGachaPeriodDate, parseGachaIsoDate } from "@utils/gachaVersion.js";
+import { formatGachaPeriodDate, parseGachaIsoDate } from "@utils/gacha/version.js";
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 
 type GroPeriodDatesProps = {

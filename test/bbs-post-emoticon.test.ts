@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { parsePostEmoticonMap, splitPostEmoticonText } from "../src/utils/bbsPostEmoticon.js";
+import { parsePostEmoticonMap, splitPostEmoticonText } from "../src/utils/bbs/postEmoticon.js";
 
 const smileUrl = "https://example.com/emoticons/smile.png";
 

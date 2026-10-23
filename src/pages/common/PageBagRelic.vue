@@ -205,10 +205,10 @@ import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
-import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
-import { groupRelics } from "@utils/userBagGroup.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/display/TGUid.js";
+import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/game/TGGame.js";
+import { groupRelics } from "@utils/game/userBagGroup.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 

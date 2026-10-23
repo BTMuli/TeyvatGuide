@@ -3,7 +3,7 @@
  * @since Beta v0.12.0
  */
 
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 
 import TGSqlite from "../index.js";
 

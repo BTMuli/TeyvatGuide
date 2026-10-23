@@ -29,7 +29,7 @@ import {
   startGameInstall,
   startGamePackageTask,
   verifyGamePackage,
-} from "@utils/TGGameLauncher.js";
+} from "@utils/game/TGGameLauncher.js";
 import { defineStore } from "pinia";
 import { nextTick, ref, shallowRef } from "vue";
 

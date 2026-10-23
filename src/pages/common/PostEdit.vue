@@ -69,8 +69,8 @@
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
-import TGHttps from "@utils/TGHttps.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";

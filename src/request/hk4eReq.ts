@@ -4,8 +4,8 @@
  */
 
 import gameEnum from "@enum/game.js";
-import TGHttps from "@utils/TGHttps.js";
-import { getDeviceInfo } from "@utils/toolFunc.js";
+import { getDeviceInfo } from "@utils/common/toolFunc.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
 const AnnoApiGlobal: Readonly<string> =

@@ -3,7 +3,7 @@
  * @since Beta v0.12.5
  */
 
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 import { getReqHeader, rsaEncrypt } from "../utils/authUtils.js";
 

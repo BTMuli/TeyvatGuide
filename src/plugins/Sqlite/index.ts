@@ -7,7 +7,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { app } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import Database from "@tauri-apps/plugin-sql";
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import createTable from "./sql/createTable.sql?raw";
 import initDataSql from "./sql/initData.js";

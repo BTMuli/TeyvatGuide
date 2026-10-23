@@ -91,8 +91,8 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { getVersion } from "@tauri-apps/api/app";
-import TGShare from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, onMounted, ref, useTemplateRef, watch } from "vue";
 
 import TOverlay from "./t-overlay.vue";

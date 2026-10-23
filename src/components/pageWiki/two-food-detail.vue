@@ -61,7 +61,7 @@
   </section>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
 import { getWikiFoodById, getWikiMaterialById } from "@/data/index.js";

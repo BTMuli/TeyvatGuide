@@ -42,8 +42,8 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, useTemplateRef } from "vue";
 

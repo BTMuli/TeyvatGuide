@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts" setup>
-import { registerPostEditorFormats } from "@utils/bbsPostEditor.js";
-import { parsePostEmoticonMap } from "@utils/bbsPostEmoticon.js";
+import { registerPostEditorFormats } from "@utils/bbs/postEditor.js";
+import { parsePostEmoticonMap } from "@utils/bbs/postEmoticon.js";
 import {
   getReplyEditorInsertLength,
   normalizeReplyEditorEmoticon,
@@ -15,7 +15,7 @@ import {
   serializeReplyEditorOps,
   type ReplyEditorEmoticon,
   type ReplyEditorOperation,
-} from "@utils/bbsReplyEditor.js";
+} from "@utils/bbs/replyEditor.js";
 import Quill from "quill";
 import type { Range } from "quill";
 import { onBeforeUnmount, onMounted, shallowRef, useTemplateRef, watch } from "vue";

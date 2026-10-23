@@ -89,8 +89,8 @@ import { core, path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { backUpUserData } from "@utils/dataBS.js";
-import TGLogger from "@utils/TGLogger.js";
+import { backUpUserData } from "@utils/account/dataBS.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 

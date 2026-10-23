@@ -126,9 +126,9 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import { app } from "@tauri-apps/api";
-import TGShare from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, onMounted, ref } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";

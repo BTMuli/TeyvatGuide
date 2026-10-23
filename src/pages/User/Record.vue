@@ -115,11 +115,17 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
-import { getRfAc } from "@utils/acUtils.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import { getRfAc } from "@utils/account/acUtils.js";
+import {
+  maskUid,
+  maskUidName,
+  maskUidTail,
+  uidItemTitle,
+  uidItemValue,
+} from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGShare from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 

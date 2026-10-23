@@ -64,7 +64,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { ref } from "vue";
 
 type TuaDcTalentItemProps = { skill: TGApp.Game.Avatar.Skill };

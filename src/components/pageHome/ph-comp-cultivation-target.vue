@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";

@@ -45,7 +45,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import bbsEnum from "@enum/bbs.js";
 import TSAvatarBirth from "@Sqlm/avatarBirth.js";
 import useAppStore from "@store/app.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";

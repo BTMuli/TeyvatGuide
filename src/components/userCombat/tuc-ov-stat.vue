@@ -54,8 +54,8 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, ref, useId, useTemplateRef } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

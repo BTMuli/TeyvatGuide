@@ -57,10 +57,10 @@
 
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TGShare from "@utils/TGShare.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
-import { getWeaponRefineLevel } from "@utils/userBagGroup.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import { getWeaponRefineLevel } from "@utils/game/userBagGroup.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, useTemplateRef } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

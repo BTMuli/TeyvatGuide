@@ -72,7 +72,7 @@ import {
   getServerDay,
   isMaterialAvailableToday,
   mergePlanInventory,
-} from "@utils/cultivationPlan.js";
+} from "@utils/game/cultivationPlan.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, shallowRef } from "vue";
 import { useRouter } from "vue-router";

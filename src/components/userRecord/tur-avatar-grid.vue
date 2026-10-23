@@ -17,7 +17,7 @@
 </template>
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/common/toolFunc.js";
 
 type TurAvatarGridProps = { modelValue: Array<TGApp.Game.Record.Avatar> };
 

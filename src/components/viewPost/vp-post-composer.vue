@@ -426,18 +426,18 @@ import postVoteReq from "@req/postVoteReq.js";
 import topicReq from "@req/topicReq.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
-import { assertPostDocumentContent, buildPostDocument } from "@utils/bbsPostDocument.js";
-import { parsePostEmoticonMap } from "@utils/bbsPostEmoticon.js";
-import { serializePostDocument } from "@utils/bbsPostHtml.js";
-import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbsPostPicture.js";
+import { assertPostDocumentContent, buildPostDocument } from "@utils/bbs/postDocument.js";
+import { parsePostEmoticonMap } from "@utils/bbs/postEmoticon.js";
+import { serializePostDocument } from "@utils/bbs/postHtml.js";
+import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbs/postPicture.js";
 import {
   collectPostPreviewEmoticonMap,
   getMissingPostPreviewEmoticonNames,
   renderPostPreviewEmoticons,
-} from "@utils/bbsPostPreview.js";
-import { canPublishForumPost } from "@utils/bbsPostPublish.js";
-import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
-import TGHttps from "@utils/TGHttps.js";
+} from "@utils/bbs/postPreview.js";
+import { canPublishForumPost } from "@utils/bbs/postPublish.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, toRaw, useId, useTemplateRef, watch } from "vue";
 

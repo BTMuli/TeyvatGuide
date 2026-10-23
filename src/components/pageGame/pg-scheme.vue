@@ -59,8 +59,8 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { confirmStopRunningGame } from "@utils/TGGame.js";
-import { createGamePackageSwitchPlan } from "@utils/TGGameLauncher.js";
+import { confirmStopRunningGame } from "@utils/game/TGGame.js";
+import { createGamePackageSwitchPlan } from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onWatcherCleanup, ref, watch } from "vue";
 

@@ -205,9 +205,9 @@ import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";

@@ -3,8 +3,8 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 /* MysBBSBaseUrl => mbBu */
 const mbBu: Readonly<string> = "https://bbs-api.miyoushe.com/";

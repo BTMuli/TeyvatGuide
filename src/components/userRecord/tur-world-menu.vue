@@ -177,9 +177,9 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, ref, useTemplateRef } from "vue";
 

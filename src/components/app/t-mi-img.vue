@@ -8,7 +8,7 @@
 import useAppStore from "@store/app.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import { saveImgBlob } from "@/utils/TGShare.js";
+import { saveImgBlob } from "@/utils/share/TGShare.js";
 
 type TMiImgProps = {
   src: string;

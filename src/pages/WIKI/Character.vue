@@ -30,7 +30,7 @@ import TwcCharacter from "@comp/pageWiki/twc-character.vue";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
-import { toObcPage } from "@utils/TGWindow.js";
+import { toObcPage } from "@utils/app/TGWindow.js";
 import { computed, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 

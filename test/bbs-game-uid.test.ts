@@ -11,8 +11,8 @@ import {
   getGameUidPreviewText,
   validateGameUidCookie,
   validateGameUidInfo,
-} from "../src/utils/bbsGameUid.js";
-import { buildReplyDocument, validateReplySendNodes } from "../src/utils/bbsReplyDocument.js";
+} from "../src/utils/bbs/gameUid.js";
+import { buildReplyDocument, validateReplySendNodes } from "../src/utils/bbs/replyDocument.js";
 
 const info: TGApp.BBS.GameUid.Info = {
   game_biz: "hk4e_cn",

@@ -3,8 +3,8 @@
  * @since Beta v0.10.1
  */
 import apiHubReq from "@req/apiHubReq.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { defineStore } from "pinia";
 import { shallowRef } from "vue";
 

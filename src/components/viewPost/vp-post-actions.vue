@@ -40,7 +40,7 @@ import bbsEnum from "@enum/bbs.js";
 import postEditReq from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
-import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { useRouter } from "vue-router";

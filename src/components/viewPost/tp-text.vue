@@ -31,11 +31,11 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { isColorSimilar } from "@utils/colorFunc.js";
-import { parseLink, parsePost } from "@utils/linkParser.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { decodeRegExp } from "@utils/toolFunc.js";
+import { parseLink, parsePost } from "@utils/app/linkParser.js";
+import { decodeRegExp } from "@utils/common/toolFunc.js";
+import { isColorSimilar } from "@utils/display/colorFunc.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
 
 export type TpText = {

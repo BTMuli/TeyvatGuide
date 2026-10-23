@@ -146,15 +146,15 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
-import { toObcPage } from "@utils/TGWindow.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { toObcPage } from "@utils/app/TGWindow.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import {
   ASCENSION_LEVELS,
   getWeaponMaxLevel,
   isAscensionLevel,
   resolvePromoteLevel,
-} from "@utils/userCalc.js";
-import wikiUtils from "@utils/wikiUtils.js";
+} from "@utils/game/userCalc.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import PwCultivationCalc from "./pw-cultivation-calc.vue";

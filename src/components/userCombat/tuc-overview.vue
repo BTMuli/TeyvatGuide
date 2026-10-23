@@ -53,7 +53,7 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
 
 import TucFight from "./tuc-fight.vue";
 import TucTile from "./tuc-tile.vue";

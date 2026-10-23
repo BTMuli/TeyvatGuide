@@ -3,7 +3,7 @@
  * @since Beta v0.12.0
  */
 
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const ApiOrigin: Readonly<string> = "https://hyp-api.mihoyo.com";
 const OfficialGameId: Readonly<string> = "1Z8W5NHUQb";

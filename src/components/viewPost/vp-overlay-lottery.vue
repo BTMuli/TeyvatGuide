@@ -41,11 +41,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
 import { emit } from "@tauri-apps/api/event";
-import { openCommunityProfile } from "@utils/communityProfile.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import { openCommunityProfile } from "@utils/community/profile.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 
 type TpoLotteryProps = { lottery: string | undefined };

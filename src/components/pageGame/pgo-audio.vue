@@ -164,7 +164,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { createGamePackageAudioPlan, isGameRunning, stopGame } from "@utils/TGGameLauncher.js";
+import { createGamePackageAudioPlan, isGameRunning, stopGame } from "@utils/game/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useId, watch } from "vue";
 

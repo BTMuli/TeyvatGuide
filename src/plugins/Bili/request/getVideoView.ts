@@ -3,7 +3,7 @@
  * @since Beta v0.10.0
  */
 
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 import { BILI_HEADER, getWrid } from "../utils.js";
 

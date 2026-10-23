@@ -83,9 +83,9 @@ import useHutaoStore from "@store/hutao.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import getLrv from "@utils/Github.js";
-import TGLogger from "@utils/TGLogger.js";
-import { compareVersions } from "@utils/toolFunc.js";
+import { compareVersions } from "@utils/common/toolFunc.js";
+import getLrv from "@utils/network/Github.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 

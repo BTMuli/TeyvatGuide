@@ -4,7 +4,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onMounted, toRaw } from "vue";
 
 type TpUnknownProps = { data: TGApp.BBS.SctPost.Empty };

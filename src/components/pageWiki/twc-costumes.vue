@@ -43,7 +43,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { nextTick, watch } from "vue";
 
 type TwcConstellationProps = { costumes: Array<TGApp.App.Character.Costume> };

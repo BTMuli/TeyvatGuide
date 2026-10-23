@@ -59,9 +59,9 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUidTail } from "@utils/TGUid.js";
+import { maskUidTail } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
 

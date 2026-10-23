@@ -5,14 +5,14 @@
 
 import { describe, expect, it } from "vitest";
 
-import { buildReplyDocument } from "../src/utils/bbsReplyDocument.js";
+import { buildReplyDocument } from "../src/utils/bbs/replyDocument.js";
 import {
   getReplyEditorInsertLength,
   normalizeReplyEditorEmoticon,
   parseReplyEditorText,
   serializeReplyEditorOps,
   type ReplyEditorOperation,
-} from "../src/utils/bbsReplyEditor.js";
+} from "../src/utils/bbs/replyEditor.js";
 
 const smileUrl = "https://example.com/emoticons/smile.png";
 const smile = { name: "smile", src: smileUrl };

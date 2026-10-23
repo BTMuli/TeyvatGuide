@@ -4,8 +4,8 @@
  */
 
 import gameEnum from "@enum/game.js";
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 const trgAbu: Readonly<string> =
   "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";

@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ get: vi.fn(), header: vi.fn() }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { get: mocks.get } }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.header }));
+vi.mock("@utils/network/TGHttps.js", () => ({ default: { get: mocks.get } }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.header }));
 
 import painterReq from "../src/request/painterReq.js";
 

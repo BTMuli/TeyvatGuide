@@ -130,8 +130,8 @@ import {
   getPostPreviewImages,
   getPostTypeIcon,
   getPostTypeLabel,
-} from "@utils/communityProfile.js";
-import fmtUtil from "@utils/fmtUtil.js";
+} from "@utils/community/profile.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 

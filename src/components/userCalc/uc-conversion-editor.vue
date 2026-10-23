@@ -228,13 +228,13 @@
 <script lang="ts" setup>
 import TopOverlay from "@comp/app/top-overlay.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import {
   calculateConversionPlan,
   calculateConversionPreview,
   getConversionSourceLimits,
   getConversionSourceMaterials,
-} from "@utils/cultivationPlan.js";
-import fmtUtil from "@utils/fmtUtil.js";
+} from "@utils/game/cultivationPlan.js";
 import { computed, ref, useId, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";

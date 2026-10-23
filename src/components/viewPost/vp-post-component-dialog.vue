@@ -190,7 +190,7 @@ import {
   assertPostDocumentContent,
   assertPostFoldTitle,
   buildPostDocument,
-} from "@utils/bbsPostDocument.js";
+} from "@utils/bbs/postDocument.js";
 import { computed, ref, useId, watch } from "vue";
 
 import TpVote from "./tp-vote.vue";

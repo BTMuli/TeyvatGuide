@@ -10,7 +10,7 @@ import {
   getReplyContentFromSendNodes,
   serializeReplySendNodes,
   validateReplySendNodes,
-} from "../src/utils/bbsReplyDocument.js";
+} from "../src/utils/bbs/replyDocument.js";
 
 const mention = { uid: 100000001, nickname: "旅行者" };
 const firstImage = { url: "https://example.com/first.png", width: 640, height: 480 };

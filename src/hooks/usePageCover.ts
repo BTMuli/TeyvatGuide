@@ -5,8 +5,8 @@
 
 import hoyoPlayReq from "@req/hoyoPlayReq.js";
 import useAppStore from "@store/app.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onMounted, onUnmounted, ref } from "vue";
 import type { Ref } from "vue";
 

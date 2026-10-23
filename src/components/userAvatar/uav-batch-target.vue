@@ -114,7 +114,7 @@
 
 <script lang="ts" setup>
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
-import userCalc from "@utils/userCalc.js";
+import userCalc from "@utils/game/userCalc.js";
 import { computed, ref, watch } from "vue";
 
 type UavBatchTargetProps = {

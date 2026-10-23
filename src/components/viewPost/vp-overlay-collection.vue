@@ -29,9 +29,9 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { openCommunityProfile } from "@utils/communityProfile.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import { openCommunityProfile } from "@utils/community/profile.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };

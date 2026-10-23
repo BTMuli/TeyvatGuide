@@ -11,10 +11,10 @@ const mocks = vi.hoisted(() => ({
   getCollectionRequestHeader: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({
+vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({
+vi.mock("@utils/network/getRequestHeader.js", () => ({
   getRequestHeader: mocks.getRequestHeader,
   getCollectionRequestHeader: mocks.getCollectionRequestHeader,
 }));

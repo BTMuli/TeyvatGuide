@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   collectPostPreviewEmoticonMap,
   getMissingPostPreviewEmoticonNames,
-} from "../src/utils/bbsPostPreview.js";
+} from "../src/utils/bbs/postPreview.js";
 
 const smileUrl = "https://example.com/emoticons/smile.png";
 const customUrl = "https://example.com/emoticons/custom.webp";

@@ -202,7 +202,7 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import bbsReq from "@req/bbsReq.js";
-import { parseCustomEmoticon } from "@utils/bbsCustomEmoticon.js";
+import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
 import {
   assertPostDocumentContent,
   buildPostDocument,
@@ -211,9 +211,9 @@ import {
   parsePostFold,
   parsePostVod,
   parsePostVote,
-} from "@utils/bbsPostDocument.js";
-import { postEditorFormats, registerPostEditorFormats } from "@utils/bbsPostEditor.js";
-import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbsPostEmoticon.js";
+} from "@utils/bbs/postDocument.js";
+import { postEditorFormats, registerPostEditorFormats } from "@utils/bbs/postEditor.js";
+import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
 import Quill from "quill";
 import type { Range } from "quill";
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";

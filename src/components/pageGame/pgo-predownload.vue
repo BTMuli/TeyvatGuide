@@ -125,7 +125,7 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { createGamePackagePlan } from "@utils/TGGameLauncher.js";
+import { createGamePackagePlan } from "@utils/game/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";

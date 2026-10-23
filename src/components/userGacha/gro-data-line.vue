@@ -16,7 +16,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { getWikiBrief } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
 /**

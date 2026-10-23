@@ -55,8 +55,8 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import { usePageCover } from "@hooks/usePageCover.js";
-import TGHttps from "@utils/TGHttps.js";
-import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { copyToClipboard, saveBufferFile } from "@utils/share/TGShare.js";
 import { computed, ref } from "vue";
 
 import PgCoverItem from "./pg-cover-item.vue";

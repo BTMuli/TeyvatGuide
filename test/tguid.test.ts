@@ -12,7 +12,7 @@ import {
   uidHint,
   uidItemTitle,
   uidItemValue,
-} from "../src/utils/TGUid.js";
+} from "../src/utils/display/TGUid.js";
 
 const state = vi.hoisted(() => ({ hidden: false }));
 

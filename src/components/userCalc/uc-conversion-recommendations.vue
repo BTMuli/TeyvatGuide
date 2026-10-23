@@ -104,7 +104,7 @@
 import UcConversionEditor from "@comp/userCalc/uc-conversion-editor.vue";
 import UcConversionMaterials from "@comp/userCalc/uc-conversion-materials.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, ref, shallowRef, watch } from "vue";
 
 /**

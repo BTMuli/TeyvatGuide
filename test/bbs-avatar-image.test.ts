@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ prepareReplyImage: vi.fn() }));
 
-vi.mock("@utils/bbsReplyImage.js", () => ({ prepareReplyImage: mocks.prepareReplyImage }));
+vi.mock("@utils/bbs/replyImage.js", () => ({ prepareReplyImage: mocks.prepareReplyImage }));
 
-import { prepareCustomAvatar } from "../src/utils/bbsAvatarImage.js";
+import { prepareCustomAvatar } from "../src/utils/bbs/avatarImage.js";
 
 const png = Uint8Array.from([0x89, 0x50, 0x4e, 0x47]);
 const drawImage = vi.fn();

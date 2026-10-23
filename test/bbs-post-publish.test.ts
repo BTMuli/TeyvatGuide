@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { canPublishForumPost } from "../src/utils/bbsPostPublish.js";
+import { canPublishForumPost } from "../src/utils/bbs/postPublish.js";
 
 type PublishForum = Pick<
   TGApp.BBS.Forum.GameForumItem,

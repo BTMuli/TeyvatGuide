@@ -48,10 +48,10 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
-import { openCommunityProfile } from "@utils/communityProfile.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { getUserAvatar } from "@utils/toolFunc.js";
+import { getUserAvatar } from "@utils/common/toolFunc.js";
+import { openCommunityProfile } from "@utils/community/profile.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostUserProps = { gid: number; uid: string; postId?: string };

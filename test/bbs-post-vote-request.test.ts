@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   getRequestHeader: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { post: mocks.post } }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/TGHttps.js", () => ({ default: { post: mocks.post } }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
 
 import postVoteReq from "../src/request/postVoteReq.js";
 

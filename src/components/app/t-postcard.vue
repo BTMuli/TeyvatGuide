@@ -159,10 +159,10 @@ import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import useBBSStore from "@store/bbs.js";
 import { emit } from "@tauri-apps/api/event";
-import { str2Color } from "@utils/colorFunc.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
-import { createPost } from "@utils/TGWindow.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import { str2Color } from "@utils/display/colorFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGShare from "@utils/share/TGShare.js";
 import { storeToRefs } from "pinia";
 import {
   computed,

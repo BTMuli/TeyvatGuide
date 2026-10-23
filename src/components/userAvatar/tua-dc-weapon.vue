@@ -73,9 +73,9 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
-import { maskUid } from "@utils/TGUid.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";
 
 import { AppCalendarData } from "@/data/index.js";

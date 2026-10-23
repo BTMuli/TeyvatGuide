@@ -159,7 +159,7 @@ import {
   chooseGameInstallation,
   inspectGameInstallation,
   locateGameInstallations,
-} from "@utils/TGGameLauncher.js";
+} from "@utils/game/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";

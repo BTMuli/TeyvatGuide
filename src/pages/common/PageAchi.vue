@@ -131,15 +131,21 @@ import { path } from "@tauri-apps/api";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { tryCallYae } from "@utils/TGGame.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid, maskUidName, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
+import {
+  maskUid,
+  maskUidName,
+  maskUidTail,
+  uidItemTitle,
+  uidItemValue,
+} from "@utils/display/TGUid.js";
 import {
   getUiafHeader,
   readUiafData,
   verifyUiafData,
   verifyUiafDataClipboard,
-} from "@utils/UIAF.js";
+} from "@utils/gacha/UIAF.js";
+import { tryCallYae } from "@utils/game/TGGame.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";

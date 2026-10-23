@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
 
 type UcMaterialCountProps = {

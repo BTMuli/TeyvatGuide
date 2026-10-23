@@ -2,8 +2,8 @@
  * Bili 插件工具函数
  * @since Beta v0.10.1
  */
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import md5 from "js-md5";
 
 export const BILI_HEADER: Readonly<Record<string, string>> = {

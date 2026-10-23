@@ -75,7 +75,7 @@
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 

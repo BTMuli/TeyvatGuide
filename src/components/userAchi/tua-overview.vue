@@ -133,9 +133,9 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { AppAchiData } from "@/data/index.js";

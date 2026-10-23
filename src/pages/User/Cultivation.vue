@@ -321,7 +321,10 @@ import TSUserRecord from "@Sqlm/userRecord.js";
 import useCultivationConversionStore from "@store/cultivationConversion.js";
 import useUserStore from "@store/user.js";
 import { platform } from "@tauri-apps/plugin-os";
-import { getRfAc } from "@utils/acUtils.js";
+import { getRfAc } from "@utils/account/acUtils.js";
+import { getRcStar, getZhElement } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/display/TGUid.js";
 import {
   allocatePlanMaterials,
   getConversionOptions,
@@ -332,13 +335,10 @@ import {
   mergeCultivationResults,
   mergePlanInventory,
   sortCultivationResults,
-} from "@utils/cultivationPlan.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import { tryCallYae } from "@utils/TGGame.js";
-import TGHttps from "@utils/TGHttps.js";
-import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/TGUid.js";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
-import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
+} from "@utils/game/cultivationPlan.js";
+import { tryCallYae } from "@utils/game/TGGame.js";
+import userCalc, { type CultivationMaterial } from "@utils/game/userCalc.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";

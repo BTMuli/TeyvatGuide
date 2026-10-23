@@ -27,9 +27,9 @@
 </template>
 <script lang="ts" setup>
 import ApiHubReq from "@req/apiHubReq.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onMounted, ref, shallowRef } from "vue";
 
 /** 投票组件数据类型 */

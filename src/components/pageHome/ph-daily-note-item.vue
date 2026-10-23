@@ -61,8 +61,8 @@
 </template>
 <script lang="ts" setup>
 import dnEnum from "@enum/dailyNote.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, useTemplateRef } from "vue";
 
 import PhDailyNoteBoss from "./ph-daily-note-boss.vue";

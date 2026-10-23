@@ -63,10 +63,10 @@ import miscReq from "@req/miscReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGNotify from "@utils/TGNotify.js";
-import { maskUid, maskUidTail } from "@utils/TGUid.js";
+import TGNotify from "@utils/app/TGNotify.js";
+import { maskUid, maskUidTail } from "@utils/display/TGUid.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 

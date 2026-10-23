@@ -31,7 +31,7 @@
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
 import gameEnum from "@enum/game.js";
-import { getRcStar, getWikiBrief, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getWikiBrief, getZhElement } from "@utils/common/toolFunc.js";
 
 type TucAeBoxProps = {
   /* 上场角色数据 */

@@ -12,10 +12,10 @@ const mocks = vi.hoisted(() => ({
   uploadCustomAvatarImage: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({
+vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get, post: mocks.post },
 }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
 vi.mock("../src/request/replyAssetReq.js", () => ({
   uploadCustomAvatarImage: mocks.uploadCustomAvatarImage,
 }));

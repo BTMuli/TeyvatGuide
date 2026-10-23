@@ -3,10 +3,10 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
+import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
-import { parseCustomEmoticonList } from "../utils/bbsCustomEmoticon.js";
+import { parseCustomEmoticonList } from "../utils/bbs/customEmoticon.js";
 
 const customEmoticonListUrl: Readonly<string> =
   "https://bbs-api.miyoushe.com/misc/api/customEmoticonList";

@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   getRequestHeader: vi.fn(),
 }));
 
-vi.mock("@utils/TGHttps.js", () => ({ default: { get: mocks.get } }));
-vi.mock("@utils/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/TGHttps.js", () => ({ default: { get: mocks.get } }));
+vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
 
 import bbsReq from "../src/request/bbsReq.js";
 

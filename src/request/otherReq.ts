@@ -3,10 +3,10 @@
  * @since Beta v0.9.9
  */
 
-import TGBbs from "@utils/TGBbs.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { getInitDeviceInfo } from "@utils/toolFunc.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
+import { getInitDeviceInfo } from "@utils/common/toolFunc.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 /**
  * 设备指纹返回类型

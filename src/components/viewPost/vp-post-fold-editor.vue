@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { postFoldTitleMaxLength } from "@utils/bbsPostDocument.js";
+import { postFoldTitleMaxLength } from "@utils/bbs/postDocument.js";
 import { ref, useTemplateRef } from "vue";
 
 import VpPostEditor from "./vp-post-editor.vue";

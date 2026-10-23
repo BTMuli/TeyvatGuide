@@ -22,7 +22,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { maskUid, uidHint } from "@utils/TGUid.js";
+import { maskUid, uidHint } from "@utils/display/TGUid.js";
 
 type TurRoleInfoProps = { uid: number | string; role: TGApp.Game.Record.Role };
 

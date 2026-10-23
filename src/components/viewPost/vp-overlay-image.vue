@@ -89,10 +89,10 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import { copyToClipboard, saveBufferFile } from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import {
   computed,
   nextTick,

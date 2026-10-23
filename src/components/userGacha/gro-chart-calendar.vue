@@ -13,8 +13,8 @@
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { saveImgFile } from "@utils/TGShare.js";
-import { maskUidName } from "@utils/TGUid.js";
+import { maskUidName } from "@utils/display/TGUid.js";
+import { saveImgFile } from "@utils/share/TGShare.js";
 import type { HeatmapSeriesOption } from "echarts/charts.js";
 import { HeatmapChart } from "echarts/charts.js";
 import type {

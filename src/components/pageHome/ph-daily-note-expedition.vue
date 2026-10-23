@@ -33,7 +33,7 @@
 </template>
 <script lang="ts" setup>
 import dnEnum from "@enum/dailyNote.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteExpeditionProps = {

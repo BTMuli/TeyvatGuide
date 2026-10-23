@@ -14,7 +14,7 @@ import {
   parsePostFold,
   parsePostNodes,
   parsePostVote,
-} from "../src/utils/bbsPostDocument.js";
+} from "../src/utils/bbs/postDocument.js";
 
 const imageUrl = "https://example.com/images/post.png";
 const mention = { uid: 100000001, nickname: "旅行者" };

@@ -5,7 +5,7 @@
 
 import showLoading from "@comp/func/loading.js";
 import TGSqlite from "@Sql/index.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { ref, type Ref } from "vue";
 
 import { AppGachaBData } from "@/data/index.js";

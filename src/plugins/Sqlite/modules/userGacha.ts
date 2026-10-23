@@ -5,10 +5,10 @@
 
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
-import { getWikiBrief } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { ref, type Ref } from "vue";
 
 import TGSqlite from "../index.js";

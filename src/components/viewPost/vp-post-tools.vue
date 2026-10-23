@@ -222,7 +222,7 @@
 <script lang="ts" setup>
 import bbsReq from "@req/bbsReq.js";
 import replyAssetReq from "@req/replyAssetReq.js";
-import { matchesCurrentAccount } from "@utils/bbsReplyAccount.js";
+import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
 import VpCustomEmoticons from "./vp-custom-emoticons.vue";

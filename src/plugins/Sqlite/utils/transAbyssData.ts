@@ -3,7 +3,7 @@
  * @since Beta v0.10.1
  */
 
-import fmtUtil from "@utils/fmtUtil.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 
 /**
  * 转换角色数据

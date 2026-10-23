@@ -41,8 +41,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { getOdStarColor } from "@utils/colorFunc.js";
-import { getWeaponRefineLevel } from "@utils/userBagGroup.js";
+import { getOdStarColor } from "@utils/display/colorFunc.js";
+import { getWeaponRefineLevel } from "@utils/game/userBagGroup.js";
 import { computed } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

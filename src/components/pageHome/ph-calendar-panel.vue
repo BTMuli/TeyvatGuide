@@ -124,8 +124,8 @@ import TOverlayPanel from "@comp/app/t-overlay-panel.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { generateShareImg } from "@utils/TGShare.js";
-import { toObcPage } from "@utils/TGWindow.js";
+import { toObcPage } from "@utils/app/TGWindow.js";
+import { generateShareImg } from "@utils/share/TGShare.js";
 import { computed, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 

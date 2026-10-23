@@ -345,12 +345,12 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import gameEnum from "@enum/game.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
 import {
   GACHA_FILTER_ALL,
   toGachaPeriodEndBound,
   toGachaPeriodStartBound,
-} from "@utils/gachaVersion.js";
-import { getWikiBrief } from "@utils/toolFunc.js";
+} from "@utils/gacha/version.js";
 import { computed, nextTick, onMounted, onUnmounted, ref, useId, useTemplateRef, watch } from "vue";
 import { VBtn, VTextField } from "vuetify/components";
 

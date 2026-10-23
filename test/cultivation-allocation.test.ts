@@ -18,7 +18,7 @@ import {
   getMaterialCraftingCosts,
   mergeCultivationResults,
   prepareConversionRecommendations,
-} from "@utils/cultivationPlan.js";
+} from "@utils/game/cultivationPlan.js";
 import { describe, expect, it } from "vitest";
 
 import { WikiMaterialData } from "@/data/index.js";

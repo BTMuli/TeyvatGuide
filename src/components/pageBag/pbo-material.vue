@@ -75,9 +75,9 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid } from "@utils/TGUid.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, shallowRef, useSlots, watch } from "vue";
 
 import PbMaterialRecordChart from "./pb-material-record-chart.vue";

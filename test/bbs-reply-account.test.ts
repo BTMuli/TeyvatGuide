@@ -6,7 +6,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createReplyInteraction } from "../src/hooks/useReplyInteraction.js";
-import { executeReplyForCurrentAccount } from "../src/utils/bbsReplyAccount.js";
+import { executeReplyForCurrentAccount } from "../src/utils/bbs/replyAccount.js";
 
 const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
   uid: "100000001",

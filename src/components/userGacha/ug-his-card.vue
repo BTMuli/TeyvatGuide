@@ -66,10 +66,10 @@ import PhPoolItemOverlay, {
 } from "@comp/pageHome/ph-pool-item-overlay.vue";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import { toGachaPeriodEndBound, toGachaPeriodStartBound } from "@utils/gachaVersion.js";
-import { createPost } from "@utils/TGWindow.js";
-import { getWikiBrief } from "@utils/toolFunc.js";
+import { createPost } from "@utils/app/TGWindow.js";
+import { getWikiBrief } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import { toGachaPeriodEndBound, toGachaPeriodStartBound } from "@utils/gacha/version.js";
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
 
 type UgHisCardProps = {

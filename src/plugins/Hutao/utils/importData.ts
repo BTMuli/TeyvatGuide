@@ -7,7 +7,7 @@ import TSUserAbyss from "@Sqlm/userAbyss.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
 import { readTextFile } from "@tauri-apps/plugin-fs";
-import TGLogger from "@utils/TGLogger.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import HutaoValid from "./RawValidator.js";
 

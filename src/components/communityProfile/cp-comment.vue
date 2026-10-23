@@ -38,8 +38,8 @@
 <script lang="ts" setup>
 import TpParser from "@comp/viewPost/tp-parser.vue";
 import TpTitle from "@comp/viewPost/tp-title.vue";
-import { getCommunityCommentContent } from "@utils/communityComment.js";
-import fmtUtil from "@utils/fmtUtil.js";
+import { getCommunityCommentContent } from "@utils/community/comment.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
 
 type CpCommentProps = { comment: TGApp.BBS.Community.Comment };

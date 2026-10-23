@@ -208,8 +208,8 @@ import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwcCostumes from "@comp/pageWiki/twc-costumes.vue";
-import { toObcPage } from "@utils/TGWindow.js";
-import { parseHtmlText } from "@utils/toolFunc.js";
+import { toObcPage } from "@utils/app/TGWindow.js";
+import { parseHtmlText } from "@utils/common/toolFunc.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 

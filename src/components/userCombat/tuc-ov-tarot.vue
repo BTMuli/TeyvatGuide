@@ -58,8 +58,8 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucOvtItem from "@comp/userCombat/tuc-ovt-item.vue";
 import { getVersion } from "@tauri-apps/api/app";
-import TGShare from "@utils/TGShare.js";
-import { maskUid, maskUidName } from "@utils/TGUid.js";
+import { maskUid, maskUidName } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
 import { computed, onMounted, ref, useId, useTemplateRef } from "vue";
 
 type TucOvTarotProps = { data: TGApp.Game.Combat.TarotState | undefined; uid: string | undefined };

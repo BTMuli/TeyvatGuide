@@ -15,7 +15,7 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
-import TGShare, { generateShareImg, type ShareProgress } from "@utils/TGShare.js";
+import TGShare, { generateShareImg, type ShareProgress } from "@utils/share/TGShare.js";
 import { useTemplateRef } from "vue";
 
 /** 首页组件参数 */

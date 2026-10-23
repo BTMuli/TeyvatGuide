@@ -2,7 +2,7 @@
  * 幻想真境剧诗相关请求
  * @since Beta v0.12.2
  */
-import TGHttps from "@utils/TGHttps.js";
+import TGHttps from "@utils/network/TGHttps.js";
 
 import { HOMA_API } from "./base.js";
 

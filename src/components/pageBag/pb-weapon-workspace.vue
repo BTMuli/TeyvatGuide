@@ -304,7 +304,7 @@
 import PbBagWorkspaceShell from "@comp/pageBag/pb-bag-workspace-shell.vue";
 import PbWeaponDetailContent from "@comp/pageBag/pb-weapon-detail-content.vue";
 import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
-import { getWeaponRefineLevel } from "@utils/userBagGroup.js";
+import { getWeaponRefineLevel } from "@utils/game/userBagGroup.js";
 import { computed, ref, useId, useTemplateRef, watch } from "vue";
 
 type PbWeaponWorkspaceProps = {

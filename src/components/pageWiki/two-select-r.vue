@@ -38,7 +38,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TwfFilterShell from "@comp/pageWiki/twf-filter-shell.vue";
 import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
-import wikiUtils from "@utils/wikiUtils.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 import { ref, shallowRef, watch } from "vue";
 
 export type SelectedRValue = {

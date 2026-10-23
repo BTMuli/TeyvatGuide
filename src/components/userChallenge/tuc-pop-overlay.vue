@@ -103,11 +103,11 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
-import fmtUtil from "@utils/fmtUtil.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare from "@utils/TGShare.js";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/common/toolFunc.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGShare from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

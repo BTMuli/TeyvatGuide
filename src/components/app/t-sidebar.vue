@@ -526,11 +526,11 @@ import { event, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
-import mhyClient from "@utils/TGClient.js";
-import { tryCallYae } from "@utils/TGGame.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
-import { maskUid, maskUidTail } from "@utils/TGUid.js";
+import mhyClient from "@utils/app/TGClient.js";
+import { maskUid, maskUidTail } from "@utils/display/TGUid.js";
+import { tryCallYae } from "@utils/game/TGGame.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 

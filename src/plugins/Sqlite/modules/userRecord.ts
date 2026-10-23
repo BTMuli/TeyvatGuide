@@ -3,8 +3,8 @@
  * @since Beta v0.12.0
  */
 
-import fmtUtil from "@utils/fmtUtil.js";
-import TGLogger from "@utils/TGLogger.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import TGLogger from "@utils/system/TGLogger.js";
 
 import TGSqlite from "../index.js";
 import { transUserRecord } from "../utils/transUserRecord.js";

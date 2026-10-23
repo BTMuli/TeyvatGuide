@@ -3,8 +3,8 @@
  * @since Beta v0.11.0
  */
 
-import fmtUtil from "@utils/fmtUtil.js";
-import wikiUtils from "@utils/wikiUtils.js";
+import fmtUtil from "@utils/display/fmtUtil.js";
+import wikiUtils from "@utils/game/wikiUtils.js";
 
 import TGSqlite from "../index.js";
 

@@ -17,8 +17,8 @@
 </template>
 <script lang="ts" setup>
 import bbsReq from "@req/bbsReq.js";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { onMounted, shallowRef } from "vue";
 
 const EMOJI_REGEX = /(?<=\n|.+?|^)(_\(.+?\)(?=\n|.+?|$))/g;

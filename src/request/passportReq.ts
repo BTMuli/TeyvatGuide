@@ -2,10 +2,10 @@
  * Passport 相关请求
  * @since Beta v0.12.5
  */
-import { getDS4JS, getRequestHeader } from "@utils/getRequestHeader.js";
-import TGBbs from "@utils/TGBbs.js";
-import TGHttps from "@utils/TGHttps.js";
-import { getDeviceInfo } from "@utils/toolFunc.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
+import { getDeviceInfo } from "@utils/common/toolFunc.js";
+import { getDS4JS, getRequestHeader } from "@utils/network/getRequestHeader.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { JSEncrypt } from "jsencrypt";
 
 /* PassportApiBaseUrl => pAbu */

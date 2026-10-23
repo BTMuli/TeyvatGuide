@@ -196,9 +196,9 @@ import { getStatusIcon, getStatusLabel, UiafAchiStatEnum } from "@enum/uiaf.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { event } from "@tauri-apps/api";
 import { getVersion } from "@tauri-apps/api/app";
-import TGLogger from "@utils/TGLogger.js";
-import TGShare from "@utils/TGShare.js";
-import { maskUid } from "@utils/TGUid.js";
+import { maskUid } from "@utils/display/TGUid.js";
+import TGShare from "@utils/share/TGShare.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppNameCardsData } from "@/data/index.js";

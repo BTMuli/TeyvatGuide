@@ -107,12 +107,12 @@ import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import UcPlanTargetSummaryOverlay from "@comp/userCalc/uc-plan-target-summary-overlay.vue";
+import { maskUid } from "@utils/display/TGUid.js";
 import {
   getCultivationEntryKey,
   getServerDay,
   isMaterialAvailableToday,
-} from "@utils/cultivationPlan.js";
-import { maskUid } from "@utils/TGUid.js";
+} from "@utils/game/cultivationPlan.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { computed, nextTick, ref, shallowRef } from "vue";

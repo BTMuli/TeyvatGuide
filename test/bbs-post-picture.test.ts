@@ -10,7 +10,7 @@ import {
   buildPicturePostDocument,
   parsePicturePostContent,
   serializePicturePostDescribe,
-} from "../src/utils/bbsPostPicture.js";
+} from "../src/utils/bbs/postPicture.js";
 
 /**
  * 生成固定的图片测试地址。
