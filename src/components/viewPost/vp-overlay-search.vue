@@ -46,7 +46,7 @@
           :listMode="!gridMode"
           :post
           class="tops-item"
-          @user-click="toUserProfile"
+          @user-click="onUserClick"
         />
       </div>
     </div>
@@ -61,7 +61,6 @@ import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
-import { openCommunityProfile } from "@utils/community/profile.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -90,6 +89,7 @@ const { isReachBottom } = useBoxReachBottom(listEl);
 
 const props = defineProps<ToPostSearchProps>();
 const visible = defineModel<boolean>();
+const emits = defineEmits<{ userClick: [u: TGApp.BBS.Post.User, g: number] }>();
 
 const search = ref<string>();
 const lastId = ref<string>("");
@@ -214,8 +214,8 @@ async function searchPosts(): Promise<void> {
   showSnackbar.success(`成功加载${res.data.posts.length}条数据`);
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
-  await openCommunityProfile(user.uid, gid);
+function onUserClick(user: TGApp.BBS.Post.User, gid: number): void {
+  emits("userClick", user, gid);
 }
 </script>
 <style lang="css" scoped>

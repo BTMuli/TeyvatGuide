@@ -62,7 +62,14 @@
         />
       </template>
     </TuaAchiOverlay>
-    <VpOverlaySearch v-model="showSearch" :gid="2" :keyword="searchWd" topOffset="112px" />
+    <VpOverlaySearch
+      v-model="showSearch"
+      :gid="2"
+      :keyword="searchWd"
+      topOffset="112px"
+      @user-click="handleUserClick"
+    />
+    <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -70,6 +77,7 @@ import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -109,6 +117,9 @@ const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
 const searchWd = ref<string>();
 const showSearch = ref<boolean>(false);
+const showUser = ref<boolean>(false);
+const curUid = ref<string>("");
+const curGid = ref<number>(2);
 const expandedStageChains = ref<Set<number>>(new Set());
 
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
@@ -210,6 +221,12 @@ watch(
 function handleSearch(kw: string): void {
   searchWd.value = kw;
   showSearch.value = true;
+}
+
+function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
+  curGid.value = gid;
+  curUid.value = user.uid;
+  showUser.value = true;
 }
 
 async function searchAchi(): Promise<void> {

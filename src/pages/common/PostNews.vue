@@ -46,7 +46,14 @@
     </v-window-item>
   </v-window>
   <ToChannel v-model="showList" :gid />
-  <VpOverlaySearch v-model="showSearch" :gid="Number(gid)" :keyword="search" topOffset="64px" />
+  <VpOverlaySearch
+    v-model="showSearch"
+    :gid="Number(gid)"
+    :keyword="search"
+    topOffset="64px"
+    @user-click="handleUserClick"
+  />
+  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TPostCard from "@comp/app/t-postcard.vue";
@@ -54,6 +61,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
@@ -84,6 +92,9 @@ const label = computed<string>(() => {
 const loading = ref<boolean>(false);
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
+const showUser = ref<boolean>(false);
+const curUid = ref<string>("");
+const curGid = ref<number>(Number(gid));
 const search = ref<string>("");
 
 const postData: PostData = reactive(
@@ -179,6 +190,12 @@ async function firstLoad(refresh: boolean = false): Promise<void> {
 function handleList(): void {
   if (showSearch.value === true) showSearch.value = false;
   showList.value = true;
+}
+
+function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
+  curGid.value = gid;
+  curUid.value = user.uid;
+  showUser.value = true;
 }
 
 // 加载更多

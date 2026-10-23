@@ -145,7 +145,13 @@
       <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />
+  <VpOverlaySearch
+    v-model="showSearch"
+    :gid="disGid"
+    :keyword="search"
+    topOffset="112px"
+    @user-click="handleUserClick"
+  />
   <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
@@ -496,7 +502,6 @@ async function newPost(viewType: 1 | 2): Promise<void> {
 }
 
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
-  if (showSearch.value) showSearch.value = false;
   curGid.value = gid;
   curUid.value = user.uid;
   showUser.value = true;
