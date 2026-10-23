@@ -85,9 +85,11 @@ const props = defineProps<TucCardBoxProps>();
 .tuc-card-title-label {
   color: var(--common-text-title);
   font-size: 16px;
+  white-space: nowrap;
 }
 
 .tuc-card-title-count {
+  flex-shrink: 0;
   padding: 2px 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 12px;
@@ -95,6 +97,7 @@ const props = defineProps<TucCardBoxProps>();
   background: var(--box-bg-3);
   color: var(--tgc-od-orange);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .tuc-card-list {
@@ -204,6 +207,7 @@ const props = defineProps<TucCardBoxProps>();
   img {
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     filter: invert(1);
     object-fit: contain;
   }

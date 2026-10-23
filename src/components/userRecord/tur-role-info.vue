@@ -56,6 +56,7 @@ defineProps<TurRoleInfoProps>();
   display: flex;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
@@ -96,5 +97,6 @@ defineProps<TurRoleInfoProps>();
   column-gap: 10px;
   font-size: 14px;
   line-height: 16px;
+  white-space: nowrap;
 }
 </style>

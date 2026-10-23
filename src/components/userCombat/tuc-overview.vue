@@ -123,6 +123,7 @@ function isFinTarot(): boolean {
 .tuco-heading {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   row-gap: 4px;
 }
 
@@ -130,10 +131,12 @@ function isFinTarot(): boolean {
   display: flex;
   align-items: center;
   column-gap: 8px;
+  white-space: nowrap;
 
   img {
     width: 30px;
     height: 30px;
+    flex-shrink: 0;
     object-fit: contain;
   }
 
@@ -149,17 +152,20 @@ function isFinTarot(): boolean {
   color: var(--box-text-2);
   font-size: 12px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .tuco-meta {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: flex-end;
   justify-content: center;
   margin-left: auto;
   font-size: 12px;
   opacity: 0.8;
   row-gap: 4px;
+  white-space: nowrap;
 }
 
 .tuco-content {

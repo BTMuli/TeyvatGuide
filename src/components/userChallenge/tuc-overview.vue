@@ -55,12 +55,15 @@ const props = defineProps<TucOverviewProps>();
   .title {
     font-family: var(--font-title);
     font-size: 18px;
+    white-space: nowrap;
   }
 
   .append {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     color: var(--box-text-2);
+    white-space: nowrap;
 
     span {
       font-size: 14px;
@@ -76,6 +79,7 @@ const props = defineProps<TucOverviewProps>();
     img {
       width: 24px;
       height: 24px;
+      flex-shrink: 0;
       object-fit: contain;
     }
   }

@@ -528,6 +528,7 @@ button.tur-wm-icon:focus-visible {
   font-size: 14px;
   font-weight: normal;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .tur-wm-menu-section h3 .v-icon {

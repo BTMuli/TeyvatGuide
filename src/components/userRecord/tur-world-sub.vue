@@ -599,6 +599,7 @@ async function shareWorldCard(): Promise<void> {
   color: var(--box-text-4);
   font-size: 11px;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .tur-ws-extra-offering-icon {

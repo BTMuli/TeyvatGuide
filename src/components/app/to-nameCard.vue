@@ -506,6 +506,7 @@ async function shareNameCard(): Promise<void> {
   right: 10px;
   color: var(--tgc-white-1);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .ton-share {

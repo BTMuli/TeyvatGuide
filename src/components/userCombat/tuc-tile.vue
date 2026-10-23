@@ -49,11 +49,13 @@ const props = defineProps<TucTileProps>();
 .tuct-title {
   color: var(--box-text-4);
   font-size: 20px;
+  white-space: nowrap;
 }
 
 .tuct-text {
   color: var(--box-text-8);
   font-size: 20px;
+  white-space: nowrap;
 }
 
 .tuct-icons {

@@ -207,6 +207,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   font-size: 16px;
   font-weight: normal;
   line-height: 20px;
+  white-space: nowrap;
 }
 
 .right-desc {
@@ -243,18 +244,22 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   column-gap: 8px;
 
   .name {
+    flex-shrink: 0;
     font-family: var(--font-title);
     font-size: 16px;
+    white-space: nowrap;
   }
 
   .append {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     margin-left: auto;
     color: var(--box-text-2);
     font-family: var(--font-title);
     font-size: 16px;
     gap: 4px;
+    white-space: nowrap;
 
     span {
       color: var(--box-text-2);

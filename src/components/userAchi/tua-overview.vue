@@ -327,6 +327,7 @@ onUnmounted(() => {
   margin-top: 4px;
   color: var(--box-text-4);
   gap: 4px 16px;
+  white-space: nowrap;
 }
 
 .overview-summary {
@@ -362,6 +363,7 @@ onUnmounted(() => {
 
 .overview-progress {
   gap: 12px;
+  white-space: nowrap;
 
   span {
     flex-shrink: 0;
@@ -502,6 +504,7 @@ progress {
   font-size: 11px;
   gap: 4px 12px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .overview-state {

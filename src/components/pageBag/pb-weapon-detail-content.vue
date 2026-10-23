@@ -204,6 +204,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   justify-content: space-between;
   font-family: var(--font-title);
   font-weight: normal;
+  white-space: nowrap;
 }
 
 .pb-wdt-sub {
@@ -212,6 +213,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  white-space: nowrap;
 }
 
 .pb-wdt-meta {

@@ -99,6 +99,7 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
 .tuc-ae-title {
   color: var(--box-text-2);
   font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .tuc-ae-grid {
@@ -155,6 +156,7 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   background: var(--box-bg-3);
   box-shadow: 0 2px 4px var(--common-shadow-1);
   column-gap: 4px;
+  white-space: nowrap;
 }
 
 .tuc-enemy-icon {
@@ -162,6 +164,7 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   overflow: hidden;
   width: 40px;
   height: 40px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--box-bg-4);
 

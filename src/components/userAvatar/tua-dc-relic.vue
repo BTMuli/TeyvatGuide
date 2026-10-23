@@ -254,8 +254,11 @@ function getPropSubStyle(
 }
 
 .tua-dcr-title {
+  overflow: hidden;
   width: 100%;
   font-family: var(--font-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tua-dcr-sub {
@@ -264,6 +267,7 @@ function getPropSubStyle(
   align-items: center;
   justify-content: space-between;
   column-gap: 5px;
+  white-space: nowrap;
 }
 
 .tua-dcr-props {

@@ -90,6 +90,7 @@ async function shareRound(): Promise<void> {
 
   img {
     height: 30px;
+    flex-shrink: 0;
     object-fit: contain;
 
     &.stat_false {

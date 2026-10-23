@@ -173,5 +173,6 @@ defineExpose({ displayBox });
   right: 8px;
   bottom: 0;
   font-size: 12px;
+  white-space: nowrap;
 }
 </style>

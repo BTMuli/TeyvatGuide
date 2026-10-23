@@ -229,6 +229,7 @@ function loadPosInfo(): void {
   align-items: center;
   justify-content: space-between;
   font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .pb-rdt-sub {
@@ -237,6 +238,7 @@ function loadPosInfo(): void {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  white-space: nowrap;
 }
 
 .pb-rdt-stat {

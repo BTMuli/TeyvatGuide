@@ -151,9 +151,11 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
 .tuc-buff-title-label {
   color: var(--common-text-title);
   font-size: 16px;
+  white-space: nowrap;
 }
 
 .tuc-buff-title-level {
+  flex-shrink: 0;
   padding: 2px 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 12px;
@@ -161,6 +163,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   background: var(--box-bg-3);
   color: var(--tgc-od-orange);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .tuc-buff-list {
@@ -239,6 +242,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   font-weight: bold;
   line-height: 14px;
   text-align: center;
+  white-space: nowrap;
 }
 
 .tuc-buff-name {
@@ -286,6 +290,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
 .tuc-effect-title img {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
   filter: invert(0.6);
 }
 
@@ -324,10 +329,12 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   img {
     width: 36px;
     height: 36px;
+    flex-shrink: 0;
     object-fit: contain;
   }
 
   small {
+    flex-shrink: 0;
     padding: 2px 7px;
     border-radius: 10px;
     margin-left: auto;
@@ -335,6 +342,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
     color: #ffffffff;
     font-family: var(--font-text);
     font-size: 11px;
+    white-space: nowrap;
   }
 }
 

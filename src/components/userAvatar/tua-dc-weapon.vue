@@ -169,6 +169,7 @@ function toHtml(desc: string): string {
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .tua-dcw-props {
@@ -257,6 +258,7 @@ function toHtml(desc: string): string {
   align-items: flex-start;
   justify-content: flex-start;
   margin-top: auto;
+  white-space: nowrap;
 }
 
 .tua-share-title {

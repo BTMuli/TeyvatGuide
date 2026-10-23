@@ -95,5 +95,6 @@ const props = defineProps<TucOvcItemProps>();
   color: #a67754ff;
   font-family: var(--font-title);
   font-size: 14px;
+  white-space: nowrap;
 }
 </style>

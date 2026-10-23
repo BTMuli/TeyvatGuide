@@ -68,10 +68,12 @@ function parseDesc(desc: string): Array<MonsterDesc> {
   padding: 4px 8px;
   border-radius: 16px;
   column-gap: 2px;
+  white-space: nowrap;
 
   img {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
   }
 
   span {

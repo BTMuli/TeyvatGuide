@@ -565,6 +565,7 @@ async function deleteChallenge(): Promise<void> {
   flex-direction: column;
   font-size: 12px;
   row-gap: 4px;
+  white-space: nowrap;
 
   > :first-child {
     color: var(--common-text-title);
@@ -582,8 +583,10 @@ async function deleteChallenge(): Promise<void> {
 
 .ucw-share {
   z-index: -1;
+  flex-shrink: 0;
   font-size: 12px;
   opacity: 0.8;
+  white-space: nowrap;
 }
 
 .danger-btn {

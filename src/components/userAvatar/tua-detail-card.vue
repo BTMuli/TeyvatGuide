@@ -319,6 +319,7 @@ async function share(): Promise<void> {
   column-gap: 4px;
   font-size: 12px;
   opacity: 0.4;
+  white-space: nowrap;
 }
 
 .tua-dcp-share-title {
@@ -364,6 +365,7 @@ async function share(): Promise<void> {
   font-family: var(--font-title);
   font-size: 14px;
   text-shadow: 0 0 5px #00000080;
+  white-space: nowrap;
 }
 
 .tua-dc-detail {

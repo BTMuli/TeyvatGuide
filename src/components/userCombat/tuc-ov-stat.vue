@@ -189,6 +189,7 @@ async function share(): Promise<void> {
   font-size: 12px;
   gap: 8px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .tuc-ovs-meta-tag {

@@ -339,6 +339,7 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   font-size: 12px;
   gap: 8px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .tucpo-meta-tag,
@@ -379,6 +380,7 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   font-size: 14px;
   gap: 12px;
   line-height: 20px;
+  white-space: nowrap;
 
   img {
     width: 96px;

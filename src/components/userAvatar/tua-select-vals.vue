@@ -185,8 +185,10 @@ function getTeamLabel(team: string): string {
 }
 
 .tua-sv-title {
+  flex-shrink: 0;
   color: var(--common-text-title);
   font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .tua-sv-selects {
@@ -204,6 +206,7 @@ function getTeamLabel(team: string): string {
   position: relative;
   display: flex;
   height: 20px;
+  flex-shrink: 0;
   justify-content: center;
   padding: 0 8px;
   border-radius: 12px;
@@ -211,10 +214,12 @@ function getTeamLabel(team: string): string {
   font-size: 12px;
   line-height: 20px;
   place-items: center stretch;
+  white-space: nowrap;
 
   img {
     width: 16px;
     height: 16px;
+    flex-shrink: 0;
     object-fit: contain;
   }
 
@@ -256,6 +261,7 @@ function getTeamLabel(team: string): string {
 .tua-svo-item {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   padding: 0 8px;
@@ -263,6 +269,7 @@ function getTeamLabel(team: string): string {
   column-gap: 4px;
   font-size: 12px;
   line-height: 20px;
+  white-space: nowrap;
 
   &.down {
     @include github-styles.github-tag-dark-gen(#98c379);

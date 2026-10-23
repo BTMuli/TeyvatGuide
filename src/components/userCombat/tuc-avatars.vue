@@ -95,12 +95,15 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
     font-family: var(--font-title);
     font-size: 20px;
     font-weight: normal;
+    white-space: nowrap;
   }
 
   .sub {
+    flex-shrink: 0;
     margin-left: auto;
     font-size: 12px;
     opacity: 0.8;
+    white-space: nowrap;
   }
 }
 

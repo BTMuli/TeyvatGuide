@@ -79,11 +79,13 @@ function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
 .tucfi-label {
   color: var(--box-text-4);
   font-size: 20px;
+  white-space: nowrap;
 }
 
 .tucfi-data {
   color: var(--box-text-8);
   font-size: 20px;
+  white-space: nowrap;
 }
 
 .tucfi-icons {

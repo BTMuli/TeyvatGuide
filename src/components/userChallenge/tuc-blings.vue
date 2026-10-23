@@ -34,11 +34,13 @@ const plusLen = computed<number>(() => props.data.filter((i) => i.is_plus).lengt
 .title {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   column-gap: 8px;
   font-family: var(--font-title);
   font-size: 18px;
+  white-space: nowrap;
 }
 
 .append {

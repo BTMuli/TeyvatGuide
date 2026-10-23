@@ -446,6 +446,7 @@ function getTaskTypeLabel(taskType: string): string {
   justify-self: start;
   line-height: 16px;
   text-shadow: 0 0 8px var(--common-shadow-t-8);
+  white-space: nowrap;
 }
 
 .tua-ao-series:hover {
@@ -497,6 +498,7 @@ function getTaskTypeLabel(taskType: string): string {
   font-family: var(--font-title);
   font-size: 10px;
   line-height: 14px;
+  white-space: nowrap;
 }
 
 .tua-ao-stage,
@@ -514,6 +516,7 @@ function getTaskTypeLabel(taskType: string): string {
   column-gap: 4px;
   font-size: 10px;
   line-height: 14px;
+  white-space: nowrap;
 }
 
 .tua-ao-stage {
@@ -926,6 +929,7 @@ function getTaskTypeLabel(taskType: string): string {
 
 .tua-ao-metadata > span {
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .tua-ao-actions {

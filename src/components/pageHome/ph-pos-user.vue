@@ -296,6 +296,7 @@ async function sharePos(): Promise<void> {
     justify-content: flex-start;
     column-gap: 4px;
     font-size: 12px;
+    white-space: nowrap;
 
     .challenge-append,
     .combat-append,
@@ -312,6 +313,7 @@ async function sharePos(): Promise<void> {
     .abyss-append img {
       width: 24px;
       height: 24px;
+      flex-shrink: 0;
       cursor: pointer;
     }
 
