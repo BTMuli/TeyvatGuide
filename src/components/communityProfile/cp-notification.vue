@@ -320,6 +320,21 @@ function handleCardKeydown(event: KeyboardEvent): void {
     margin: 0;
     object-fit: contain;
   }
+
+  :deep(.tp-emo-box) {
+    width: fit-content;
+    max-width: min(100%, 320px);
+    justify-content: flex-start;
+    margin: 8px 0;
+  }
+
+  :deep(.tp-emo-box img) {
+    width: auto;
+    max-width: min(100%, 320px);
+    max-height: 240px;
+    margin: 0;
+    object-fit: contain;
+  }
 }
 
 .cp-notification-cover {
