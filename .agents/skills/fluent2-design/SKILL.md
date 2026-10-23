@@ -68,6 +68,9 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 - 只有走 `generateShareImg`（html2canvas）的分享图才必须避免 `color-mix()`，也不得复用内部含
   `color-mix()` 的 SCSS 封装。`TGShare.modern` 可以处理 `color-mix()`，不必规避。
 - 获取分享 DOM 使用原生 `querySelector` 或 `useTemplateRef`。
+- `TGShare.modern` 的文本换行约束见
+  [modern-screenshot 分享换行规则](../../rules/modern-screenshot-rules.md)：分享根节点内本应单行的
+  文本需显式 nowrap，依赖 `fit-content` 的换行标题只在克隆节点放宽宽度。
 
 ## 验证
 

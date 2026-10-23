@@ -19,6 +19,8 @@
 - Sentry 错误、事件、堆栈、版本回归或线上修复验证：使用
   `.agents/skills/sentry-mcp/SKILL.md`，默认只读查询；变更 issue 状态或项目配置前须取得明确授权。
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。
+- 分享截图或使用 `TGShare.modern` / modern-screenshot：读取
+  [modern-screenshot 分享换行规则](.agents/rules/modern-screenshot-rules.md)，重点检查文本换行与冻结宽度。
 - 测试设计、Bug 回归、覆盖审查或交付验收：使用 `.agents/skills/testing/SKILL.md`，按改动风险
   选择检查，不把 lint 通过当作功能验证完成。
 - Tauri 桌面 UI：除非用户明确要求截图识别，否则不主动使用 connector 调试桥；
@@ -32,6 +34,9 @@
   内部包含 `color-mix()` 的现有 SCSS 封装。`TGShare.modern` 可以处理 `color-mix()`，不必规避。
 - 获取分享 DOM 时，只使用原生 `querySelector` 或 Vue 的 `useTemplateRef`；不得使用已过时的 `ref`
   绑定模板元素。
+- 使用 `TGShare.modern` / modern-screenshot 时，分享根节点内本应单行的文本必须显式 nowrap；
+  依赖 `fit-content` 的换行标题只在克隆节点放宽宽度。详见
+  [modern-screenshot 分享换行规则](.agents/rules/modern-screenshot-rules.md)。
 
 ## 基本验证
 
