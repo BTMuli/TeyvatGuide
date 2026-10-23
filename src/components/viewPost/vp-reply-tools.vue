@@ -79,6 +79,7 @@
                 :contextId="props.contextId"
                 :cookie="props.cookie"
                 :disabled
+                :gid="props.gid"
                 @select="insertCustomEmoticon"
               />
               <div v-else-if="emojiLoading" aria-live="polite" class="vprt-status" role="status">

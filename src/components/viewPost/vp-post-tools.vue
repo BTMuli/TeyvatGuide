@@ -96,6 +96,7 @@
               :contextId
               :cookie
               :disabled="disabled || uploading"
+              :gid
               @select="insertCustomEmoticon"
             />
             <div

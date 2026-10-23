@@ -69,6 +69,50 @@ declare namespace TGApp.BBS.CustomEmoticon {
   };
 
   /**
+   * 新增收藏表情接口请求体
+   * @since Beta v0.13.0
+   */
+  type AddInfo = {
+    /** 已上传图片的 HTTPS 地址 */
+    img_url: string;
+    /** 图片尺寸与文件信息 */
+    img_ext: ImageExt;
+  };
+
+  /**
+   * 删除收藏表情接口请求体
+   * @since Beta v0.13.0
+   */
+  type RemoveInfo = {
+    /** 待删除的表情 ID 列表 */
+    ids: Array<string>;
+  };
+
+  /**
+   * 收藏表情写入接口响应
+   * @since Beta v0.13.0
+   */
+  type WriteResp = Omit<TGApp.BBS.Response.Base, "data"> & {
+    /** 写入结果；接口失败时为 null */
+    data: unknown;
+  };
+
+  /**
+   * 待新增收藏表情的本地图片信息
+   * @since Beta v0.13.0
+   */
+  type AddImage = {
+    /** 已上传图片的 HTTPS 地址 */
+    url: string;
+    /** 图片宽度 */
+    width: number;
+    /** 图片高度 */
+    height: number;
+    /** 图片文件大小，单位为字节 */
+    fileSize: number;
+  };
+
+  /**
    * 可安全发送的自定义表情数据
    * @since Beta v0.13.0
    */
