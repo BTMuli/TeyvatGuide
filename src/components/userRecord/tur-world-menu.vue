@@ -302,7 +302,7 @@ function formatExploration(value: number): number {
 async function shareMenu(): Promise<void> {
   const menu = menuEl.value;
   if (menu === null) return;
-  const fileName = `世界探索-${world.name}.png`;
+  const fileName = `世界探索-${world.name}`;
   await showLoading.start("正在生成探索分享图片", fileName, 0);
   isSharing.value = true;
   try {

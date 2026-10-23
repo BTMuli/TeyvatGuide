@@ -298,7 +298,7 @@ async function refreshAbyss(): Promise<void> {
 
 async function shareAbyss(): Promise<void> {
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片`);
-  const fileName = `【深渊数据】${userTab.value}-${maskUidName(account.value.gameUid)}.png`;
+  const fileName = `【深渊数据】${userTab.value}-${maskUidName(account.value.gameUid)}`;
   const shareDom = document.querySelector<HTMLElement>(`#user-abyss-${userTab.value}`);
   if (shareDom === null) {
     showSnackbar.error("未找到深渊数据");

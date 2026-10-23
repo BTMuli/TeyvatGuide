@@ -296,7 +296,7 @@ async function shareChallenge(): Promise<void> {
     await TGLogger.Warn("[UserChallenge][shareChallenge] 未找到对应的挑战记录");
     return;
   }
-  const fileName = `【幽境危战】【${challengeFind.name}】${challengeFind.id}-${maskUidName(uidCur.value)}.png`;
+  const fileName = `【幽境危战】【${challengeFind.name}】${challengeFind.id}-${maskUidName(uidCur.value)}`;
   const shareDom = document.querySelector<HTMLDivElement>(`#user-challenge-${challengeFind.id}`);
   if (shareDom === null) {
     showSnackbar.warn("未找到对应的挑战记录DOM");

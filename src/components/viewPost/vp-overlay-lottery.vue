@@ -166,7 +166,7 @@ async function onUserClick(user: TGApp.BBS.Post.User): Promise<void> {
 async function shareLottery(): Promise<void> {
   const shareDom = document.querySelector<HTMLDivElement>(".tpol-box");
   if (!shareDom) return;
-  const fileName = `lottery-${card.value?.id}.png`;
+  const fileName = `lottery-${card.value?.id}`;
   await generateShareImg(fileName, shareDom, 2, true);
 }
 

@@ -285,7 +285,7 @@ async function shareRecord(): Promise<void> {
     showSnackbar.error("未找到战绩数据，请尝试刷新");
     return;
   }
-  const fileName = `【原神战绩】-${maskUidName(uidCur.value)}.png`;
+  const fileName = `【原神战绩】-${maskUidName(uidCur.value)}`;
   let progressAt = 0;
 
   function reportShareProgress(progress: {

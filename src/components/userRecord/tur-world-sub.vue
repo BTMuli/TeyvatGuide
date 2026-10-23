@@ -267,7 +267,7 @@ function formatExploration(value: number): number {
 async function shareWorldCard(): Promise<void> {
   const card = worldCardEl.value;
   if (card === null) return;
-  const fileName = `世界探索卡片-${world.name}.png`;
+  const fileName = `世界探索卡片-${world.name}`;
   let progressAt = 0;
 
   function reportShareProgress(progress: ShareProgress): void {

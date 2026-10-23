@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.12.4
+ * @since Beta v0.13.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -34,9 +34,9 @@ import fontGenshinUrl from "@/assets/fonts/zh-cn.ttf?url";
 
 /**
  * 保存图片-canvas
- * @since Beta v0.12.4
+ * @since Beta v0.13.0
  * @param buffer - 图片数据
- * @param filename - 文件名
+ * @param filename - 文件名，可不带扩展名或已包含目标扩展名
  * @param format - 文件格式
  * @param filterName - 保存对话框的筛选器名称
  * @returns 无返回值
@@ -48,11 +48,15 @@ export async function saveBufferFile(
   filterName?: string,
 ): Promise<void> {
   if (format === undefined) format = "png";
+  const extension = `.${format}`;
+  const defaultFilename = filename.toLowerCase().endsWith(extension.toLowerCase())
+    ? filename
+    : `${filename}${extension}`;
   const name = filterName ?? "图片";
   const res = await save({
     title: `保存${name}`,
     filters: [{ name, extensions: [format] }],
-    defaultPath: `${await path.downloadDir()}${path.sep()}${filename}.${format}`,
+    defaultPath: `${await path.downloadDir()}${path.sep()}${defaultFilename}`,
   });
   if (res === null) {
     await TGLogger.Info(`[saveCanvasImg][${filename}] 未选择保存路径`);

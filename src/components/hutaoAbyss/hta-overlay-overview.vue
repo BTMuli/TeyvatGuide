@@ -87,7 +87,7 @@ async function share(): Promise<void> {
     loadShare.value = false;
     return;
   }
-  const fileName = `深渊数据统计_${fmtUtil.dateTime(props.data.cur.Timestamp)}.png`;
+  const fileName = `深渊数据统计_${fmtUtil.dateTime(props.data.cur.Timestamp)}`;
   await generateShareImg(fileName, shareEl.value, 2);
   loadShare.value = false;
 }

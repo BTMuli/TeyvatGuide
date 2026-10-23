@@ -230,7 +230,7 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
 
 async function sharePos(): Promise<void> {
   if (!posEl.value) return;
-  await TGShare.modern(`活动-${props.pos.name}.png`, posEl.value, 2.5);
+  await TGShare.modern(`活动-${props.pos.name}`, posEl.value, 2.5);
 }
 </script>
 <style lang="scss" scoped>
@@ -276,6 +276,7 @@ async function sharePos(): Promise<void> {
     column-gap: 4px;
     font-family: var(--font-title);
     font-weight: normal;
+    white-space: nowrap;
 
     .share {
       flex-shrink: 0;
@@ -334,6 +335,7 @@ async function sharePos(): Promise<void> {
   column-gap: 4px;
   font-size: 12px;
   user-select: none;
+  white-space: nowrap;
 
   span:last-child {
     font-size: 10px;
