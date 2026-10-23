@@ -68,9 +68,10 @@
                 <v-btn
                   v-if="hasCover && !uploading"
                   :disabled="saving"
+                  color="var(--tgc-od-red)"
                   size="small"
                   type="button"
-                  variant="text"
+                  variant="tonal"
                   @click="clearCover"
                 >
                   移除
@@ -93,30 +94,40 @@
 
           <v-text-field
             v-model="draft.title"
-            :counter="15"
             :disabled="saving"
             :error-messages="titleError ? [titleError] : []"
             :maxlength="15"
             autocomplete="off"
             density="comfortable"
             hide-details="auto"
-            label="合集标题"
             placeholder="给合集起一个标题"
             variant="outlined"
-          />
+          >
+            <template #label>
+              <span class="cpcf-label">
+                合集标题
+                <span class="cpcf-label-count">{{ draft.title.length }} / 15</span>
+              </span>
+            </template>
+          </v-text-field>
           <v-textarea
             v-model="draft.desc"
-            :counter="80"
             :disabled="saving"
             :maxlength="80"
             auto-grow
             density="comfortable"
             hide-details="auto"
-            label="合集描述（可选）"
             placeholder="简要介绍这个合集"
             :rows="3"
             variant="outlined"
-          />
+          >
+            <template #label>
+              <span class="cpcf-label">
+                合集描述（可选）
+                <span class="cpcf-label-count">{{ draft.desc.length }} / 80</span>
+              </span>
+            </template>
+          </v-textarea>
 
           <div v-if="error" aria-live="assertive" class="cpcf-error" role="alert">
             <v-icon size="18">mdi-alert-circle-outline</v-icon>
@@ -561,6 +572,19 @@ async function handleSubmit(): Promise<void> {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.cpcf-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.cpcf-label-count {
+  color: var(--box-text-4);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .cpcf-error {
