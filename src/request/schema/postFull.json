@@ -1,0 +1,11 @@
+{
+  "$id": "https://schema.local/bbs/postFull.json",
+  "type": "object",
+  "title": "帖子详情数据",
+  "required": ["post"],
+  "properties": {
+    "post": {
+      "$ref": "https://schema.local/bbs/fullData.json"
+    }
+  }
+}

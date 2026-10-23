@@ -53,6 +53,13 @@ declare namespace TGApp.App.Response {
   type ReqConfParams = Omit<ReqConf, "baseURL">;
 
   /**
+   * 响应数据结构校验函数
+   * @since Beta v0.13.0
+   * @remarks 用于边界处拦截接口结构漂移
+   */
+  type RespValidate<T> = (data: unknown) => data is T;
+
+  /**
    * 响应类型
    * @since Beta v0.10.0
    */

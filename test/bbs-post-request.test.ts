@@ -15,7 +15,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@utils/network/TGHttps.js", () => ({
   default: { get: mocks.get, post: mocks.post },
 }));
-vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.getRequestHeader }));
+vi.mock("@utils/network/getRequestHeader.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@utils/network/getRequestHeader.js")>()),
+  getRequestHeader: mocks.getRequestHeader,
+}));
 vi.mock("@utils/bbs/postHtml.js", () => ({
   serializePostDocument: mocks.serializePostDocument,
 }));
@@ -212,14 +215,18 @@ describe("postReq.post captcha requests", () => {
   it("sends the challenge header after a 1034 verification", async () => {
     await postReq.post(123, authCookie, "captcha-challenge");
 
-    expect(mocks.get).toHaveBeenCalledWith("https://bbs-api.miyoushe.com/post/wapi/getPostFull", {
-      headers: {
-        "x-test-header": "test",
-        "x-rpc-client_type": "2",
-        "x-rpc-challenge": "captcha-challenge",
+    expect(mocks.get).toHaveBeenCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/getPostFull",
+      {
+        headers: {
+          "x-test-header": "test",
+          "x-rpc-client_type": "2",
+          "x-rpc-challenge": "captcha-challenge",
+        },
+        query: { post_id: 123, read: 1 },
       },
-      query: { post_id: 123, read: 1 },
-    });
+      expect.any(Function),
+    );
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(
       authCookie,
       "GET",

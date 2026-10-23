@@ -52,12 +52,14 @@ function createHttpError(
  * @param method - 请求方法
  * @param url - 请求地址
  * @param config - 请求配置
+ * @param validate - 可选的响应数据结构校验；校验失败时抛出 HTTP 错误
  * @returns 响应对象
  */
 async function request<T>(
   method: TGApp.App.Response.ReqMethodEnum,
   url: string,
   config: TGApp.App.Response.ReqConf = {},
+  validate?: TGApp.App.Response.RespValidate<T>,
 ): Promise<TGApp.App.Response.Resp<T>> {
   // 默认超时1min
   const timeout = config.timeout ?? 60000;
@@ -143,6 +145,9 @@ async function request<T>(
       });
     }
     const data = <T>await rawResponse.json();
+    if (validate !== undefined && !validate(data)) {
+      throw createHttpError(`响应数据结构校验失败: ${method} ${finalUrl}`, { data });
+    }
     return {
       data: data,
       status: rawResponse.status,
@@ -187,24 +192,28 @@ const TGHttps = {
    * @since Beta v0.10.0
    * @param url - 请求地址
    * @param config - 请求配置
+   * @param validate - 可选的响应数据结构校验；校验失败时抛出 HTTP 错误
    * @returns 响应对象
    */
   get: <T>(
     url: string,
     config?: TGApp.App.Response.ReqConfParams,
-  ): Promise<TGApp.App.Response.Resp<T>> => request<T>("GET", url, config),
+    validate?: TGApp.App.Response.RespValidate<T>,
+  ): Promise<TGApp.App.Response.Resp<T>> => request<T>("GET", url, config, validate),
 
   /**
    * POST 请求
    * @since Beta v0.10.0
    * @param url - 请求地址
    * @param config - 请求配置
+   * @param validate - 可选的响应数据结构校验；校验失败时抛出 HTTP 错误
    * @returns 响应对象
    */
   post: <T>(
     url: string,
     config?: TGApp.App.Response.ReqConfParams,
-  ): Promise<TGApp.App.Response.Resp<T>> => request<T>("POST", url, config),
+    validate?: TGApp.App.Response.RespValidate<T>,
+  ): Promise<TGApp.App.Response.Resp<T>> => request<T>("POST", url, config, validate),
 
   /**
    * 用于获取图像 ArrayBuffer
@@ -247,13 +256,15 @@ const TGHttps = {
    * @param method - 请求方法
    * @param url - 请求地址
    * @param config - 请求配置
+   * @param validate - 可选的响应数据结构校验；校验失败时抛出 HTTP 错误
    * @returns 响应对象
    */
   request: <T>(
     method: TGApp.App.Response.ReqMethodEnum,
     url: string,
     config?: TGApp.App.Response.ReqConfParams,
-  ): Promise<TGApp.App.Response.Resp<T>> => request<T>(method, url, config),
+    validate?: TGApp.App.Response.RespValidate<T>,
+  ): Promise<TGApp.App.Response.Resp<T>> => request<T>(method, url, config, validate),
 
   /**
    * 获取 ErrMsg

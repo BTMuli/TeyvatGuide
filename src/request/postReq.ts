@@ -3,12 +3,14 @@
  * @since Beta v0.13.0
  */
 import bbsEnum from "@enum/bbs.js";
+import { isCollectionPostsResp, isPostFullResp } from "@req/respValidator.js";
 import {
   getReplyContentFromSendNodes,
   serializeReplySendNodes,
   validateReplySendNodes,
 } from "@utils/bbs/replyDocument.js";
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import { assertPositiveNumber } from "@utils/common/typeGuards.js";
+import { getRequestHeader, getReplyCookie } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
@@ -29,29 +31,6 @@ type ReplyRequestData = Record<string, string | number | boolean | Array<string>
  */
 function assertPositiveId(value: string, name: string): void {
   if (!/^[1-9]\d*$/.test(value)) throw new TypeError(`${name}必须为正整数`);
-}
-
-/**
- * 校验正整数参数
- * @since Beta v0.13.0
- * @param value - 待校验的数值
- * @param name - 错误信息中的字段名称
- */
-function assertPositiveNumber(value: number, name: string): void {
-  if (!Number.isSafeInteger(value) || value <= 0) throw new TypeError(`${name}必须为正整数`);
-}
-
-/**
- * 提取回复请求所需的登录凭据
- * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
- * @returns 供请求头签名使用的最小 Cookie
- */
-function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
-  const ltoken = cookie?.ltoken?.trim();
-  const ltuid = cookie?.ltuid?.trim();
-  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
-  return { ltoken, ltuid };
 }
 
 /**
@@ -119,10 +98,14 @@ async function getPostFull(
     "x-rpc-client_type": "2",
   };
   if (challenge) header["x-rpc-challenge"] = challenge;
-  const resp = await TGHttps.get<TGApp.BBS.Post.FullResp>(`${bapBu}getPostFull`, {
-    headers: header,
-    query: param,
-  });
+  const resp = await TGHttps.get(
+    `${bapBu}getPostFull`,
+    {
+      headers: header,
+      query: param,
+    },
+    isPostFullResp,
+  );
   return resp.data;
 }
 
@@ -135,12 +118,13 @@ async function getPostFull(
 async function getPostFullInCollection(
   collectionId: string,
 ): Promise<TGApp.BBS.Collection.PostsResp> {
-  const resp = await TGHttps.get<TGApp.BBS.Collection.PostsResp>(
+  const resp = await TGHttps.get(
     `${bapBu}getPostFullInCollection`,
     {
       headers: { "Content-Type": "application/json", referer: Referer, cookie: "" },
       query: { collection_id: collectionId },
     },
+    isCollectionPostsResp,
   );
   return resp.data;
 }

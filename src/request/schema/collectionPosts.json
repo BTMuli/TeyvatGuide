@@ -1,0 +1,14 @@
+{
+  "$id": "https://schema.local/bbs/collectionPosts.json",
+  "type": "object",
+  "title": "合集帖子数据",
+  "required": ["posts"],
+  "properties": {
+    "posts": {
+      "type": "array",
+      "items": {
+        "$ref": "https://schema.local/bbs/fullData.json"
+      }
+    }
+  }
+}

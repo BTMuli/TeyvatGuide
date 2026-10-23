@@ -1,0 +1,79 @@
+{
+  "$id": "https://schema.local/bbs/fullData.json",
+  "type": "object",
+  "title": "BBS 帖子数据骨架",
+  "description": "帖子详情与帖子列表共用的最小结构骨架；仅约束关键路径硬解引用的字段，其余字段接受接口自由增删",
+  "required": ["post", "topics", "image_list"],
+  "properties": {
+    "post": {
+      "type": "object",
+      "title": "帖子主体",
+      "required": [
+        "post_id",
+        "subject",
+        "content",
+        "structured_content",
+        "view_type",
+        "created_at",
+        "images"
+      ],
+      "properties": {
+        "post_id": {
+          "type": "string",
+          "title": "帖子 ID"
+        },
+        "subject": {
+          "type": "string",
+          "title": "帖子标题"
+        },
+        "content": {
+          "type": "string",
+          "title": "帖子内容"
+        },
+        "structured_content": {
+          "type": "string",
+          "title": "结构化内容"
+        },
+        "view_type": {
+          "type": "number",
+          "title": "浏览类型"
+        },
+        "created_at": {
+          "type": "number",
+          "title": "发帖时间"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "图片列表"
+        }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "title": "话题列表"
+    },
+    "image_list": {
+      "type": "array",
+      "title": "图片数据列表"
+    },
+    "user": {
+      "type": ["object", "null"],
+      "title": "发帖人"
+    },
+    "forum": {
+      "type": ["object", "null"],
+      "title": "所属版块"
+    },
+    "stat": {
+      "type": ["object", "null"],
+      "title": "帖子统计"
+    },
+    "collection": {
+      "type": ["object", "null"],
+      "title": "合集信息"
+    }
+  }
+}
