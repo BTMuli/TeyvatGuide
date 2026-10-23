@@ -12,6 +12,9 @@
 
 - TypeScript、Vue 或类型声明：读取 `.agents/rules/typescript-rules.md`；需要完整模式时使用
   `.agents/skills/typescript-standards/SKILL.md`。
+- 网络请求层、接口响应校验或考虑对数据重新做 unknown 校验：读取
+  [边界校验规则](.agents/rules/boundary-validation-rules.md)，遵守混合渐进策略，不重复校验
+  内部强类型数据。
 - Vue 组件、组合式 API 或 Vue 现代化改造：使用 `.agents/skills/vue3-standards/SKILL.md`。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
 - 跨语言源代码的文件头、函数、类型与 `@since`：读取
