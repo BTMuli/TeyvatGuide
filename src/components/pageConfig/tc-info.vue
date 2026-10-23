@@ -31,8 +31,17 @@
         :title="latestAchiVersion"
         subtitle="成就版本"
       />
-      <TcInfoItem :title="machineId" icon="mdi-chip" subtitle="设备ID">
+      <TcInfoItem :title="machineIdDisplay" icon="mdi-chip" subtitle="设备ID">
         <template #subtitleAction>
+          <v-btn
+            :aria-label="machineIdVisible ? '隐藏设备ID' : '显示设备ID'"
+            :aria-pressed="machineIdVisible"
+            :icon="machineIdVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :title="machineIdVisible ? '隐藏设备ID' : '显示设备ID'"
+            size="20"
+            variant="text"
+            @click.stop="toggleMachineIdVisibility"
+          />
           <v-icon
             :disabled="!machineId"
             :rounded="false"
@@ -71,9 +80,10 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { platform, version } from "@tauri-apps/plugin-os";
+import { maskDeviceValue } from "@utils/devicePrivacy.js";
 import TGBbs from "@utils/TGBbs.js";
 import TGLogger from "@utils/TGLogger.js";
-import { onMounted, ref, shallowRef } from "vue";
+import { computed, onMounted, ref, shallowRef } from "vue";
 
 import TcInfoItem from "./tc-info-item.vue";
 
@@ -84,6 +94,10 @@ const osPlatform = platform();
 const osVersion = version();
 
 const machineId = ref<string>("");
+const machineIdVisible = ref<boolean>(false);
+const machineIdDisplay = computed<string>(() =>
+  machineIdVisible.value ? machineId.value : maskDeviceValue(machineId.value),
+);
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
 const iconPlatform = ref<string>("mdi-microsoft-windows");
@@ -97,6 +111,10 @@ async function copyMachineId(): Promise<void> {
   } catch {
     showSnackbar.error("复制设备ID失败，请重试");
   }
+}
+
+function toggleMachineIdVisibility(): void {
+  machineIdVisible.value = !machineIdVisible.value;
 }
 
 onMounted(async () => {

@@ -35,9 +35,18 @@
     >
       <template #subtitle>
         <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
-        {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
+        {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ displayedDeviceFp }}
       </template>
       <template #append>
+        <v-btn
+          :aria-label="deviceInfoVisible ? '隐藏设备信息' : '显示设备信息'"
+          :aria-pressed="deviceInfoVisible"
+          :icon="deviceInfoVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+          :title="deviceInfoVisible ? '隐藏设备信息' : '显示设备信息'"
+          size="24"
+          variant="text"
+          @click.stop="toggleDeviceInfoVisibility"
+        />
         <v-btn
           aria-label="强制刷新设备信息"
           title="强制刷新设备信息"
@@ -45,7 +54,7 @@
           color="var(--tgc-od-red)"
           size="28"
           variant="text"
-          @click="confirmUpdateDevice(true)"
+          @click.stop="confirmUpdateDevice(true)"
         />
       </template>
     </TcConfigItem>
@@ -83,11 +92,12 @@ import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
+import { maskDeviceValue } from "@utils/devicePrivacy.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import TcConfigItem from "./tc-config-item.vue";
 import TcConfigSection from "./tc-config-section.vue";
@@ -100,8 +110,19 @@ const homeStore = useHomeStore();
 // @ts-expect-error import.meta
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const cacheSize = ref<number>(0);
+const deviceInfoVisible = ref<boolean>(false);
+const displayedDeviceFp = computed<string>(() => getDisplayedDeviceFp(deviceInfo.value.device_fp));
 const showDeviceEditor = ref<boolean>(false);
 const showHutaoImport = ref<boolean>(false);
+
+function getDisplayedDeviceFp(value: string): string {
+  return deviceInfoVisible.value ? value : maskDeviceValue(value);
+}
+
+function toggleDeviceInfoVisibility(): void {
+  deviceInfoVisible.value = !deviceInfoVisible.value;
+}
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return `${error}`;
@@ -241,13 +262,16 @@ async function confirmUpdate(title?: string): Promise<void> {
   window.location.reload();
 }
 
-// 更新设备信息
+/**
+ * 更新设备信息
+ * @since Beta v0.13.0
+ */
 async function confirmUpdateDevice(force?: boolean): Promise<void> {
   if (force !== undefined && force) {
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 开始强制更新设备信息");
     const forceCheck = await showDialog.check(
       "确认强制更新设备信息吗？",
-      `DeviceFp:${deviceInfo.value.device_fp}`,
+      `DeviceFp:${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
     );
     if (!forceCheck) {
       showSnackbar.cancel("已取消强制更新设备信息");
@@ -257,9 +281,14 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
     deviceInfo.value = await OtherApi.fp();
     if (deviceInfo.value.device_fp === "0000000000000") {
       deviceInfo.value.device_fp = getRandomString(13, "hex");
-      showSnackbar.warn(`设备信息获取失败!已使用随机值${deviceInfo.value.device_fp}代替`);
+      showSnackbar.warn(
+        `设备信息获取失败!已使用随机值${getDisplayedDeviceFp(deviceInfo.value.device_fp)}代替`,
+      );
       await TGLogger.Warn("[Config][confirmUpdateDevice][force] 设备信息获取失败!已使用随机值代替");
-    } else showSnackbar.success(`设备信息已更新! DeviceFp: ${deviceInfo.value.device_fp}`);
+    } else
+      showSnackbar.success(
+        `设备信息已更新! DeviceFp: ${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
+      );
     await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 设备信息更新完成");
     return;
@@ -267,7 +296,10 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   await TGLogger.Info("[Config][confirmUpdateDevice] 开始更新设备信息");
   const localFp = getDeviceInfo("device_fp");
   if (localFp !== "0000000000000") {
-    const updateCheck = await showDialog.check("确认更新设备信息吗？", `DeviceFp:${localFp}`);
+    const updateCheck = await showDialog.check(
+      "确认更新设备信息吗？",
+      `DeviceFp:${getDisplayedDeviceFp(localFp)}`,
+    );
     if (!updateCheck) {
       showSnackbar.cancel("已取消更新设备信息");
       await TGLogger.Info("[Config][confirmUpdateDevice] 取消更新设备信息");
@@ -277,11 +309,15 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   deviceInfo.value = await OtherApi.fp(deviceInfo.value);
   if (deviceInfo.value.device_fp === "0000000000000") {
     deviceInfo.value.device_fp = getRandomString(13, "hex");
-    showSnackbar.warn(`设备信息获取失败!已使用随机值${deviceInfo.value.device_fp}代替`);
+    showSnackbar.warn(
+      `设备信息获取失败!已使用随机值${getDisplayedDeviceFp(deviceInfo.value.device_fp)}代替`,
+    );
     await TGLogger.Warn("[Config][confirmUpdateDevice] 设备信息获取失败!已使用随机值代替");
     return;
   }
-  showSnackbar.success(`设备信息已更新! DeviceFp: ${deviceInfo.value.device_fp}`);
+  showSnackbar.success(
+    `设备信息已更新! DeviceFp: ${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
+  );
   await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
   await TGLogger.Info("[Config][confirmUpdateDevice] 设备信息更新完成");
 }
