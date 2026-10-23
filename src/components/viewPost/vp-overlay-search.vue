@@ -214,8 +214,8 @@ async function searchPosts(): Promise<void> {
   showSnackbar.success(`成功加载${res.data.posts.length}条数据`);
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
-  await openCommunityProfile(user.uid);
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  await openCommunityProfile(user.uid, gid);
 }
 </script>
 <style lang="css" scoped>

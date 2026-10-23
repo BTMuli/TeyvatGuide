@@ -103,8 +103,8 @@ async function toOuterCollect(): Promise<void> {
   await openUrl(`https://www.miyoushe.com/ys/collection/${props.collection.collection_id}`);
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
-  await openCommunityProfile(user.uid);
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  await openCommunityProfile(user.uid, gid);
 }
 </script>
 <style lang="scss" scoped>

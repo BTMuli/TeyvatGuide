@@ -111,9 +111,9 @@ async function loadMore(refresh: boolean = false): Promise<void> {
   }
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
   visible.value = false;
-  await openCommunityProfile(user.uid);
+  await openCommunityProfile(user.uid, gid);
 }
 </script>
 <style lang="scss" scoped>

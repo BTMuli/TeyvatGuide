@@ -567,13 +567,13 @@ async function handleDeepLink(payload: string): Promise<void> {
   }
   if (payload.startsWith("router?path=")) {
     const routerPath = payload.replace("router?path=", "");
-    const curPath = router.currentRoute.value.path;
-    if (curPath === routerPath) {
+    const target = router.resolve(routerPath);
+    if (router.currentRoute.value.fullPath === target.fullPath) {
       showSnackbar.warn("已在当前页面！", 3000);
       return;
     }
-    await router.push({ path: routerPath, query: {} });
-    window.location.pathname = routerPath;
+    await router.push(routerPath);
+    window.location.href = target.fullPath;
     return;
   }
 }

@@ -44,7 +44,7 @@
         :title="`查看 ${post.user.nickname} 的米游社主页`"
         class="cp-post-author"
         type="button"
-        @click="emit('openProfile', post.user.uid)"
+        @click="emit('openProfile', post.user.uid, post.post.game_id)"
       >
         <CpAvatar :user="post.user" :size="24" />
         <span class="cp-post-author-name">{{ post.user.nickname }}</span>
@@ -154,7 +154,7 @@ const {
 }>();
 const emit = defineEmits<{
   openPost: [postId: string, title: string];
-  openProfile: [uid: string];
+  openProfile: [uid: string, gid: number];
   toggleSelect: [];
 }>();
 const bbsStore = useBBSStore();

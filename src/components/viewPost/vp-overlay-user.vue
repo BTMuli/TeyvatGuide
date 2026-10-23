@@ -1,7 +1,7 @@
 <template>
   <TOverlay v-model="visible">
     <div class="vp-ou-box">
-      <div v-if="userInfo" class="vp-ou-user" @click="toUserProfile()">
+      <div v-if="userInfo" class="vp-ou-user" @click="toCurrentUserProfile()">
         <div class="vp-ouu-info">
           <div class="left">
             <div class="avatar">
@@ -34,7 +34,7 @@
           :key="post.post.post_id"
           :post
           class="vp-ou-item"
-          @user-click="toUserProfile()"
+          @user-click="toUserProfile"
         />
       </div>
     </div>
@@ -130,8 +130,12 @@ async function loadUser(): Promise<void> {
   userInfo.value = resp.data.user_info;
 }
 
-async function toUserProfile(): Promise<void> {
-  await openCommunityProfile(props.uid);
+async function toCurrentUserProfile(): Promise<void> {
+  await openCommunityProfile(props.uid, props.gid);
+}
+
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  await openCommunityProfile(user.uid, gid);
 }
 
 async function loadPosts(): Promise<void> {

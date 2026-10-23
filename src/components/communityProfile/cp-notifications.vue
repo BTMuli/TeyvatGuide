@@ -322,9 +322,9 @@ function markItemRead(notificationId: string): void {
   emit("itemRead", category);
 }
 
-async function openProfile(userId: string): Promise<void> {
+async function openProfile(userId: string, gid?: number): Promise<void> {
   try {
-    await openCommunityProfile(userId);
+    await openCommunityProfile(userId, gid);
   } catch (cause) {
     showSnackbar.error(`打开个人主页失败：${TGHttps.getErrMsg(cause)}`);
   }

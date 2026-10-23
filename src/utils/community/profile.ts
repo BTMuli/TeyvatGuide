@@ -44,17 +44,38 @@ function stepProfileTrail(step: -1 | 1): string | undefined {
  * 打开米游社用户主页。
  * @since Beta v0.13.0
  * @param userId - 米游社用户 ID
+ * @param gameId - 帖子所在分区 ID，用于让主页默认展示该分区
  * @returns 导航完成后的 Promise
  */
-async function openCommunityProfile(userId: string): Promise<void> {
+async function openCommunityProfile(userId: string, gameId?: number): Promise<void> {
   const normalizedUid = userId.trim();
   if (!/^[1-9]\d*$/.test(normalizedUid)) return;
+  const gid = gameId !== undefined && Number.isInteger(gameId) && gameId > 0 ? gameId : undefined;
 
   if (getCurrentWindow().label === "TeyvatGuide") {
-    await router.push({ name: "用户信息", params: { uid: normalizedUid } });
+    await router.push(
+      gid === undefined
+        ? { name: "用户信息", params: { uid: normalizedUid } }
+        : { name: "用户信息", params: { uid: normalizedUid }, query: { gid: gid.toString() } },
+    );
     return;
   }
-  await emit("active_deep_link", `router?path=/community/profile/${normalizedUid}`);
+  const suffix = gid === undefined ? "" : `?gid=${gid}`;
+  await emit("active_deep_link", `router?path=/community/profile/${normalizedUid}${suffix}`);
+}
+
+/**
+ * 解析个人主页的分区 ID 参数。
+ * @since Beta v0.13.0
+ * @param value - 分区 ID 参数值
+ * @returns 有效的分区 ID，缺失或无效时返回 undefined
+ */
+function parseCommunityProfileGid(value: unknown): number | undefined {
+  const rawGid = Array.isArray(value) ? value[0] : value;
+  if (typeof rawGid !== "string") return undefined;
+  const gid = rawGid.trim();
+  if (!/^[1-9]\d*$/.test(gid)) return undefined;
+  return Number(gid);
 }
 
 /**
@@ -156,6 +177,7 @@ export {
   hasPreviousProfile,
   matchesPostKeyword,
   openCommunityProfile,
+  parseCommunityProfileGid,
   recordProfileVisit,
   stepProfileTrail,
 };

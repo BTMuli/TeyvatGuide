@@ -469,6 +469,7 @@ import {
   getPostTypeLabel,
   hasNextProfile,
   hasPreviousProfile,
+  parseCommunityProfileGid,
   recordProfileVisit,
   stepProfileTrail,
 } from "@utils/community/profile.js";
@@ -578,7 +579,8 @@ const isOwnProfile = computed<boolean>(
 const profileUidText = computed<string>(() =>
   isOwnProfile.value ? maskUid(profileUid.value) : profileUid.value,
 );
-const selectedGid = ref<number>(defaultProfileGame.id);
+const routeGid = computed<number | undefined>(() => parseCommunityProfileGid(route.query.gid));
+const selectedGid = ref<number>(routeGid.value ?? defaultProfileGame.id);
 const gameOptions = computed<Array<ProfileGameOption>>(() => {
   const options = gameList.value.map<ProfileGameOption>(({ id, name, app_icon, icon }) => ({
     id,
@@ -811,6 +813,10 @@ watch(
 );
 
 watch(profileUid, recordProfileVisit, { immediate: true });
+
+watch(routeGid, (gid) => {
+  if (gid !== undefined) selectedGid.value = gid;
+});
 
 watch(currentSection, (section) => {
   if (section === "posts" && profile.value && !loading.value && posts.value.length === 0) {

@@ -15,7 +15,7 @@
         :title="`查看 ${user.nickname} 的米游社主页`"
         class="cp-notification-author"
         type="button"
-        @click.stop="emit('openProfile', user.uid)"
+        @click.stop="emit('openProfile', user.uid, profileGid)"
       >
         <CpAvatar :user="avatarUser" :size="32" />
         <span>{{ user.nickname }}</span>
@@ -68,6 +68,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
 import { getStructuredContent } from "@utils/community/comment.js";
+import { parseCommunityProfileGid } from "@utils/community/profile.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
 
@@ -80,13 +81,16 @@ type CpNotificationProps = {
 };
 
 const { notification, category, clickable } = defineProps<CpNotificationProps>();
-const emit = defineEmits<{ open: []; openProfile: [uid: string] }>();
+const emit = defineEmits<{ open: []; openProfile: [uid: string, gid?: number] }>();
 
 const user = computed<TGApp.BBS.Notification.OpUser | undefined>(() => {
   if (category === "system") return undefined;
   const opUser = notification.op_user;
   return opUser && opUser.uid.trim() !== "" ? opUser : undefined;
 });
+const profileGid = computed<number | undefined>(() =>
+  parseCommunityProfileGid(notification.game_id),
+);
 const avatarUser = computed(() => ({
   nickname: user.value?.nickname ?? "",
   avatar_url: user.value?.avatar_url ?? "",
