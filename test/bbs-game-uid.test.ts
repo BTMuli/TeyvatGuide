@@ -64,6 +64,7 @@ const gameRoles: Array<TGApp.BBS.Game.Account> = [
 const games: Array<Pick<TGApp.BBS.Game.Item, "id" | "name" | "op_name" | "en_name">> = [
   { id: 2, name: "原神", op_name: "ys", en_name: "hk4e" },
   { id: 6, name: "崩坏：星穹铁道", op_name: "sr", en_name: "hkrpg" },
+  { id: 5, name: "大别野", op_name: "plat", en_name: "dby" },
 ];
 
 describe("bbsGameUid", () => {
@@ -145,6 +146,22 @@ describe("UID cards for the current community", () => {
   it("skips malformed role information without hiding valid matching roles", () => {
     expect(
       getGameUidInfos([{ ...gameRoles[0], level: "invalid" }, gameRoles[0]], games, 2),
+    ).toEqual([info]);
+  });
+
+  it("shows every bound role with its own game name in the Villa community", () => {
+    const cards = getGameUidInfos(gameRoles, games, 5);
+
+    expect(cards.map((card) => card.game_uid)).toEqual(["100000001", "800000001", "100000002"]);
+    expect(cards.map((card) => card.game_name)).toEqual(["原神", "原神", "崩坏：星穹铁道"]);
+  });
+
+  it("skips Villa roles whose game is missing from the community list", () => {
+    const unknownRole: TGApp.BBS.Game.Account = { ...gameRoles[0], game_biz: "unknown_cn" };
+
+    expect(getGameUidInfos([...gameRoles, unknownRole], games, 5)).toHaveLength(3);
+    expect(
+      getGameUidInfos([{ ...gameRoles[0], level: "invalid" }, gameRoles[0]], games, 5),
     ).toEqual([info]);
   });
 });

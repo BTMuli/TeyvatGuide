@@ -6,6 +6,12 @@
 import { isRecord } from "@utils/common/typeGuards.js";
 
 /**
+ * 大别野分区 ID，该分区为跨游戏社区，UID 卡片不限制游戏范围
+ * @since Beta v0.13.0
+ */
+const VillaGid = 5;
+
+/**
  * 判断值是否为无首尾空白且不含换行的非空字符串
  * @since Beta v0.13.0
  * @param value - 待判断的值
@@ -130,6 +136,7 @@ export function createGameUidInfo(
 
 /**
  * 筛选当前分区的绑定角色并转换为可预览的 UID 卡片。
+ * 大别野分区为跨游戏社区，返回全部分区绑定角色的 UID 卡片。
  * @since Beta v0.13.0
  * @param accounts - 当前账号的绑定游戏角色
  * @param games - 米游社分区与游戏标识列表
@@ -144,11 +151,21 @@ export function getGameUidInfos(
   const game = games.find((item) => item.id === gid);
   if (!game) return [];
   const gameKeys = new Set([game.op_name, game.en_name].filter((key) => !!key));
+  const isVilla = game.id === VillaGid;
   const infos: Array<TGApp.BBS.GameUid.Info> = [];
   for (const account of accounts) {
     try {
       const gameKey = account.game_biz.split("_", 1)[0];
-      if (gameKey && gameKeys.has(gameKey)) infos.push(createGameUidInfo(account, game.name));
+      if (!gameKey) continue;
+      if (gameKeys.has(gameKey)) {
+        infos.push(createGameUidInfo(account, game.name));
+        continue;
+      }
+      if (!isVilla) continue;
+      const accountGame = games.find(
+        (item) => item.op_name === gameKey || item.en_name === gameKey,
+      );
+      if (accountGame) infos.push(createGameUidInfo(account, accountGame.name));
     } catch {
       // 单个角色信息异常时继续显示同分区的其他有效角色。
     }
