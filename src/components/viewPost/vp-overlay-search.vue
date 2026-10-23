@@ -61,7 +61,7 @@ import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openCommunityProfile } from "@utils/communityProfile.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -214,11 +214,8 @@ async function searchPosts(): Promise<void> {
   showSnackbar.success(`成功加载${res.data.posts.length}条数据`);
 }
 
-async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
-  // TODO: 专门的个人页面
-  console.log(user, gid);
-  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${user.uid}`;
-  await openUrl(profileUrl);
+async function toUserProfile(user: TGApp.BBS.Post.User): Promise<void> {
+  await openCommunityProfile(user.uid);
 }
 </script>
 <style lang="css" scoped>

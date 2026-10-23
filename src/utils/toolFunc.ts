@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.12.5
+ * @since Beta v0.12.6
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -238,13 +238,14 @@ export function getWikiBrief(
 
 /**
  * 根据传入角色信息获取头像
- * @since Beta v0.9.1
+ * @since Beta v0.12.6
  * @param user - 用户信息
  * @returns 头像链接
  */
-export function getUserAvatar(
-  user: TGApp.BBS.Reply.User | TGApp.BBS.Post.User | TGApp.BBS.User.Info,
-): string {
+export function getUserAvatar(user: {
+  avatar_url: string;
+  avatar_ext?: TGApp.BBS.User.AvatarExt | null;
+}): string {
   if (!user.avatar_ext) return user.avatar_url;
   if (user.avatar_ext.avatar_type === bbsEnum.user.avatarExtType.CUSTOM) return user.avatar_url;
   if (user.avatar_ext.avatar_type === bbsEnum.user.avatarExtType.GIF) {

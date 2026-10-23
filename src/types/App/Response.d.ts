@@ -1,6 +1,6 @@
 /**
  * 应用请求封装相关类型定义
- * @since Beta v0.10.0
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.App.Response {
@@ -24,7 +24,7 @@ declare namespace TGApp.App.Response {
 
   /**
    * 请求配置
-   * @since Beta v0.10.0
+   * @since Beta v0.12.6
    * @remarks 只写了用到的部分
    */
   type ReqConf = {
@@ -35,9 +35,11 @@ declare namespace TGApp.App.Response {
     /** URL 查询参数 */
     query?: Record<string, string | number | boolean>;
     /** 请求体 */
-    body?: string | Record<string, unknown>;
+    body?: string | Record<string, unknown> | FormData;
     /** 请求超时时间（毫秒） */
     timeout?: number;
+    /** 最大重定向次数 */
+    maxRedirections?: number;
     /** AbortSignal 用于取消请求 */
     signal?: AbortSignal;
     /** 基础 URL */

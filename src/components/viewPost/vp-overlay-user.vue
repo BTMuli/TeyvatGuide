@@ -48,7 +48,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openCommunityProfile } from "@utils/communityProfile.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
@@ -126,9 +126,7 @@ async function loadUser(): Promise<void> {
 }
 
 async function toUserProfile(): Promise<void> {
-  // TODO: 专门的个人页面
-  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${props.uid}`;
-  await openUrl(profileUrl);
+  await openCommunityProfile(props.uid);
 }
 
 async function loadPosts(): Promise<void> {

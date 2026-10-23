@@ -5,6 +5,7 @@
   <VpBtnCollect :data="postData" :model-value="postId" />
   <TShareBtn :scale="postViewWide ? 1.5 : 2" :title="shareTitle" selector=".tp-post-body" />
   <VpBtnReply v-if="postData" :gid="postData.post.game_id" :post-id="postData.post.post_id" />
+  <VpPostActions v-if="postData" :source="postData" @deleted="handlePostDeleted" />
   <div v-if="postData" class="tp-post-body">
     <div class="tp-post-info">
       <div class="tp-post-version" @click="openJson()">
@@ -152,6 +153,10 @@
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
+  <div v-else-if="postDeleted" class="tp-post-deleted">
+    <v-icon size="28">mdi-delete-outline</v-icon>
+    <span>帖子已删除</span>
+  </div>
   <VpOverlayCollection
     v-if="postData?.collection && postData"
     v-model="showCollection"
@@ -176,8 +181,10 @@ import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import VpPostActions from "@comp/viewPost/vp-post-actions.vue";
 import bbsEnum from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
+import miscReq from "@req/miscReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
@@ -207,6 +214,7 @@ const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.BBS.Post.FullData>();
+const postDeleted = ref<boolean>(false);
 const viewWidth = computed<string>(() => (postViewWide.value ? "800px" : "400px"));
 const shareTitle = computed<string>(() =>
   postViewWide.value ? `Post_${postId}` : `Post_Thin_${postId}`,
@@ -251,7 +259,23 @@ onMounted(async () => {
     ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   }
   try {
-    const resp = await postReq.post(postId, ck);
+    let resp = await postReq.post(postId, ck);
+    if (<number>resp.retcode === 1034) {
+      await TGLogger.Info(`[t-post][${postId}][onMounted] 触发 1034 验证`);
+      await showLoading.update("需要完成极验验证");
+      const signCookie: Record<string, string> = cookie.value
+        ? { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid }
+        : {};
+      const challenge = await miscReq.challenge(signCookie);
+      if (challenge === false) {
+        await showLoading.empty("数据加载失败", "[1034] 验证未完成");
+        showSnackbar.error("验证未完成，无法加载帖子");
+        await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} 验证未完成`);
+        return;
+      }
+      await showLoading.update("验证成功，正在重新加载帖子");
+      resp = await postReq.post(postId, ck, challenge);
+    }
     if (resp.retcode !== 0) {
       await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
@@ -304,6 +328,15 @@ onUnmounted(() => {
     userListener = null;
   }
 });
+
+function handlePostDeleted(): void {
+  postData.value = undefined;
+  renderPost.value = [];
+  postDeleted.value = true;
+  showCollection.value = false;
+  showUser.value = false;
+  showSnackbar.success("帖子已删除");
+}
 
 async function openJson(): Promise<void> {
   // @ts-expect-error import.meta
@@ -454,10 +487,6 @@ async function tryLike(): Promise<void> {
     showSnackbar.error("数据未加载");
     return;
   }
-  if (incognito.value) {
-    showSnackbar.error("无法在无痕浏览模式下操作");
-    return;
-  }
   const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   try {
     const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
@@ -530,6 +559,20 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   margin: 0 auto;
   font-family: var(--font-text);
   transition: width 0.3s ease-in-out;
+}
+
+.tp-post-deleted {
+  display: flex;
+  width: min(800px, calc(100% - 100px));
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  margin: 48px auto;
+  color: var(--box-text-3);
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: normal;
+  gap: 8px;
 }
 
 .tp-post-title {

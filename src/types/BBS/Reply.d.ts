@@ -1,6 +1,6 @@
 /**
  * 回复数据类型定义文件
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.BBS.Reply {
@@ -72,6 +72,127 @@ declare namespace TGApp.BBS.Reply {
    * @since Beta v0.7.1
    */
   type SubResp = TGApp.BBS.Response.BaseWithData<SubRes>;
+
+  /**
+   * 回复变更请求参数
+   * @since Beta v0.12.6
+   */
+  type CreateParams = {
+    /** 帖子 ID */
+    postId: string;
+    /** 社区 ID */
+    gid: number;
+    /** 回复内容 */
+    content: string;
+    /** 回复结构化内容 */
+    structuredContent?: Array<SendNode>;
+    /** 被回复的回复 ID */
+    replyId?: string;
+  };
+
+  /**
+   * 回复结构化内容中的节点
+   * @since Beta v0.12.6
+   */
+  type SendNode =
+    | {
+        /** 文本内容 */
+        insert: string;
+      }
+    | {
+        /** 提及内容 */
+        insert: {
+          mention: DocumentMention;
+        };
+      }
+    | {
+        /** 图片内容 */
+        insert: {
+          image: string;
+        };
+        /** 图片尺寸 */
+        attributes: {
+          /** 图片宽度 */
+          width: number;
+          /** 图片高度 */
+          height: number;
+        };
+      }
+    | {
+        /** 收藏表情内容 */
+        insert: TGApp.BBS.CustomEmoticon.Insert;
+      }
+    | {
+        /** 游戏 UID 卡片内容 */
+        insert: TGApp.BBS.GameUid.Insert;
+      };
+
+  /**
+   * 回复文档中的提及用户
+   * @since Beta v0.12.6
+   */
+  type DocumentMention = TGApp.BBS.ReplyAsset.Mention;
+
+  /**
+   * 回复文档中的图片
+   * @since Beta v0.12.6
+   */
+  type DocumentImage = TGApp.BBS.ReplyAsset.UploadedImage;
+
+  /**
+   * 回复编辑器生成的文档
+   * @since Beta v0.12.6
+   */
+  type Document = {
+    /** 纯文本内容，图片不包含在其中 */
+    content: string;
+    /** 米游社回复结构化内容 */
+    structuredContent: Array<SendNode>;
+    /** 用于发布确认的预览文本 */
+    preview: string;
+  };
+
+  /**
+   * 回复变更响应
+   * @since Beta v0.12.6
+   */
+  type MutationResp = Omit<TGApp.BBS.Response.Base, "data"> & {
+    /** 变更结果，接口可能返回空对象或 null */
+    data: unknown;
+  };
+
+  /**
+   * 回复交互执行器
+   * @since Beta v0.12.6
+   */
+  type Interaction = {
+    /** 当前是否有交互请求 */
+    busy: import("vue").Ref<boolean>;
+    /** 执行一项回复交互请求 */
+    run: (action: () => Promise<void>) => Promise<boolean>;
+  };
+
+  /**
+   * 回复变更的账号快照
+   * @since Beta v0.12.6
+   */
+  type AccountSnapshot = {
+    /** 当前账号 UID */
+    uid: string;
+    /** 当前账号用于回复请求的 Cookie */
+    cookie: TGApp.App.Account.LoginCookie;
+  };
+
+  /**
+   * 回复变更的账号校验结果
+   * @since Beta v0.12.6
+   */
+  type AccountExecution<T> =
+    | { allowed: false }
+    | {
+        allowed: true;
+        data: T;
+      };
 
   /**
    * 回复数据类型

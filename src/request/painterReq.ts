@@ -1,6 +1,6 @@
 /**
  * painter 下的请求
- * @since Beta v0.10.0
+ * @since Beta v0.12.6
  */
 import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -8,6 +8,45 @@ import TGHttps from "@utils/TGHttps.js";
 
 // BBSApiPainterBaseUrl => bapBu
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
+
+/**
+ * 获取 APK 首页的发现推荐流
+ * @since Beta v0.12.6
+ * @param gid - 社区 ID
+ * @param lastId - 推荐流游标，刷新时留空
+ * @param isFirstInitialize - 是否首次加载当前社区的推荐流
+ * @param cookie - 用户 Cookie，匿名或无痕浏览时不传
+ * @returns 推荐帖子与下一页游标
+ * @remarks 参数来自 APK 2.116.0 的 wl.b.l，推荐流不支持版块排序或 page_size。
+ */
+async function getDiscoverPostList(
+  gid: number,
+  lastId: string = "",
+  isFirstInitialize: boolean = false,
+  cookie?: TGApp.App.Account.Cookie,
+): Promise<TGApp.BBS.Forum.DiscoverResp> {
+  const params = {
+    gids: String(gid),
+    last_id: lastId,
+    fresh_action: lastId ? 2 : 1,
+    is_first_initialize: isFirstInitialize,
+    filter: "",
+    algorithm_type: 0,
+    is_triggered_by_resource: false,
+  };
+  const auth: Record<string, string> = cookie
+    ? { stuid: cookie.stuid, stoken: cookie.stoken, mid: cookie.mid }
+    : {};
+  const headers = {
+    ...getRequestHeader(auth, "GET", params, "K2", true),
+    "x-rpc-client_type": "2",
+  };
+  const resp = await TGHttps.get<TGApp.BBS.Forum.DiscoverResp>(
+    "https://bbs-api.miyoushe.com/painter/api/feeds/posts",
+    { query: params, headers },
+  );
+  return resp.data;
+}
 
 /**
  * 获取 News 列表
@@ -137,6 +176,7 @@ async function lotteryUserShow(lotteryId: string): Promise<TGApp.BBS.Lottery.Res
 }
 
 const painterReq = {
+  discover: getDiscoverPostList,
   forum: {
     hot: getHotForumPostList,
     recent: getRecentForumPostList,

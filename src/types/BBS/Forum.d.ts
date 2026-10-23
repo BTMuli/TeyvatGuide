@@ -1,6 +1,6 @@
 /**
  * 米社版块类型
- * @since Beta v0.10.1
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.BBS.Forum {
@@ -48,6 +48,21 @@ declare namespace TGApp.BBS.Forum {
   type PostForumResp = TGApp.BBS.Response.BaseWithData<PostForumRes>;
 
   /**
+   * APK 发现推荐流响应
+   * @since Beta v0.12.6
+   */
+  type DiscoverResp = TGApp.BBS.Response.BaseWithData<DiscoverRes>;
+
+  /**
+   * APK 发现推荐流数据
+   * @since Beta v0.12.6
+   */
+  type DiscoverRes = Pick<PostForumRes, "list" | "last_id"> & {
+    /** 是否最后一页；原生推荐流可能省略此字段 */
+    is_last?: boolean;
+  };
+
+  /**
    * 分区版块信息
    * @since Beta v0.6.8
    */
@@ -60,7 +75,7 @@ declare namespace TGApp.BBS.Forum {
 
   /**
    * 版块信息
-   * @since Beta v0.6.8
+   * @since Beta v0.12.6
    */
   type GameForumItem = {
     /** 版块 ID */
@@ -77,6 +92,8 @@ declare namespace TGApp.BBS.Forum {
     visible: number;
     /** 创建类型 */
     create_type: number;
+    /** 版块支持的帖子类型，旧缓存可能缺失 */
+    view_type?: number;
     /** 发帖限制 */
     post_limit: number;
     /** 最大置顶数 */
@@ -153,5 +170,43 @@ declare namespace TGApp.BBS.Forum {
     databox: unknown;
     /** 帖子列表 */
     list: Array<TGApp.BBS.Post.FullData>;
+  };
+
+  /**
+   * 获取版块主页信息返回响应
+   * @since Beta v0.12.6
+   */
+  type MainResp = TGApp.BBS.Response.BaseWithData<MainRes>;
+
+  /**
+   * 获取版块主页信息返回数据
+   * @since Beta v0.12.6
+   */
+  type MainRes = GameForumItem & {
+    /** 置顶帖子列表 */
+    top_posts: Array<TopPost>;
+  };
+
+  /**
+   * 版块置顶帖子
+   * @since Beta v0.12.6
+   */
+  type TopPost = {
+    /** 帖子 ID */
+    post_id: string;
+    /** 游戏 ID */
+    game_id: number;
+    /** 所属版块 ID */
+    f_forum_id: number;
+    /** 帖子标题 */
+    subject: string;
+    /** 帖子封面 */
+    cover: string;
+    /** 浏览类型 */
+    view_type: number;
+    /** 回复时间 */
+    reply_time: string;
+    /** 创建时间 */
+    created_at: string;
   };
 }

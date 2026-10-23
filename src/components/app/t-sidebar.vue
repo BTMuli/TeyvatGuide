@@ -21,18 +21,51 @@
             <img alt="annoIcon" class="side-icon" src="@/assets/icons/board.svg" />
           </template>
         </v-list-item>
-        <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'资讯'">
-          <template #title>资讯</template>
-          <template #prepend>
-            <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
+        <v-menu v-model="communityMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'米游社'" v-bind="props">
+              <template #title>米游社</template>
+              <template #prepend>
+                <span class="side-icon-wrap">
+                  <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: communityMenuOpen }"
+                    size="12"
+                  />
+                </span>
+              </template>
+            </v-list-item>
           </template>
-        </v-list-item>
-        <v-list-item :link="true" :title.attr="'帖子'" href="/posts/forum">
-          <template #title>帖子</template>
-          <template #prepend>
-            <img alt="posts" class="side-icon" src="/UI/nav/posts.webp" />
-          </template>
-        </v-list-item>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item
+              :href="`/news/2/${recentNewsType}`"
+              :link="true"
+              class="side-item-menu"
+              title="资讯"
+            >
+              <template #prepend>
+                <img alt="mihoyo" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/posts/forum" title="帖子">
+              <template #prepend>
+                <img alt="posts" class="side-icon-menu" src="/UI/nav/posts.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              :to="{ name: '个人信息' }"
+              title="主页"
+            >
+              <template #prepend>
+                <img :src="userInfo.avatar" alt="userAvatar" class="side-icon-menu side-avatar" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
           <template #title>成就</template>
           <template #prepend>
@@ -515,6 +548,7 @@ const isTryLogin = ref<boolean>(false);
 const isOpeningTravelersTales = ref<boolean>(false);
 const bagMenuOpen = ref<boolean>(false);
 const challengeMenuOpen = ref<boolean>(false);
+const communityMenuOpen = ref<boolean>(false);
 const wikiMenuOpen = ref<boolean>(false);
 const storyMenuOpen = ref<boolean>(false);
 const userMenuOpen = ref<boolean>(false);
@@ -1142,6 +1176,10 @@ async function addByCookie(): Promise<void> {
 
   &[alt="relicIcon"] {
     filter: var(--icon-filter);
+  }
+
+  &.side-avatar {
+    border-radius: 50%;
   }
 }
 </style>

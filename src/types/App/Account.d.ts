@@ -1,6 +1,6 @@
 /**
  * App 账号相关类型定义文件
- * @since Beta v0.9.9
+ * @since Beta v0.12.6
  */
 
 declare namespace TGApp.App.Account {
@@ -54,6 +54,36 @@ declare namespace TGApp.App.Account {
     /** STUid */
     stuid: string;
   };
+
+  /**
+   * 登录凭据子集
+   * @since Beta v0.12.6
+   */
+  type LoginCookie = Pick<Cookie, "ltoken" | "ltuid">;
+
+  /**
+   * 签到凭据子集
+   * @since Beta v0.12.6
+   */
+  type SignCookie = Pick<Cookie, "stoken" | "stuid" | "mid">;
+
+  /**
+   * CookieToken 凭据子集
+   * @since Beta v0.12.6
+   */
+  type CookieTokenCookie = Pick<Cookie, "account_id" | "cookie_token">;
+
+  /**
+   * 帖子编辑器凭据子集
+   * @since Beta v0.12.6
+   */
+  type EditorCookie = Pick<Cookie, "ltoken" | "ltuid" | "stoken" | "stuid" | "mid">;
+
+  /**
+   * 带 UID 校验的签到凭据子集
+   * @since Beta v0.12.6
+   */
+  type SignUidCookie = Pick<Cookie, "ltuid" | "stoken" | "stuid" | "mid">;
 
   /**
    * 获取当前刷新账号返回

@@ -7,12 +7,15 @@
       :no-click-animation="true"
       :offset="[12, 0]"
       :persistent="true"
+      eager
       location="end"
       z-index="60"
     >
       <template #activator="{ props }">
         <v-btn
+          :disabled="writing"
           :loading
+          aria-label="查看回复"
           class="tpr-btn"
           size="36"
           v-bind="props"
@@ -24,23 +27,48 @@
           </template>
         </v-btn>
       </template>
-      <div class="tpr-main-reply">
+      <div aria-label="回复列表与编辑器" class="tpr-main-reply">
         <div class="tpr-main-filter">
           <div class="tpr-title">
-            <span title="刷新" @click="handleDebug">回复列表</span>
-            <v-btn class="tpr-btn-close" icon="mdi-close" size="32" @click="showOverlay = false" />
+            <button
+              :disabled="writing || loading"
+              aria-label="刷新回复列表"
+              class="tpr-title-copy"
+              type="button"
+              @click="reloadReply"
+            >
+              回复列表
+            </button>
+            <div class="tpr-title-actions">
+              <v-btn
+                :disabled="writing"
+                aria-label="关闭回复列表"
+                class="tpr-btn-close"
+                icon="mdi-close"
+                size="32"
+                title="关闭回复列表"
+                @click="showOverlay = false"
+              />
+            </div>
           </div>
           <div class="tpr-subtitle">
-            <div class="tpr-switch" @click="switchOnlyLz()">
+            <button
+              :aria-pressed="onlyLz"
+              :disabled="writing"
+              class="tpr-switch"
+              type="button"
+              @click="switchOnlyLz()"
+            >
               <v-icon v-if="onlyLz" color="var(--tgc-od-green)">
                 mdi-checkbox-marked-circle-outline
               </v-icon>
               <v-icon v-else color="var(--tgc-od-white)">mdi-circle</v-icon>
               <span>只看楼主</span>
-            </div>
+            </button>
             <div class="tpr-select">
               <v-select
                 v-model="orderType"
+                :disabled="writing"
                 :hide-details="true"
                 :items="orderList"
                 density="compact"
@@ -52,34 +80,63 @@
             </div>
           </div>
         </div>
-        <v-list class="tpr-reply-list" @scroll="handleListScroll">
+        <v-list aria-label="回复列表" class="tpr-reply-list" @scroll="handleListScroll">
           <VpReplyItem
             v-for="item in reply"
             :key="item.reply.reply_id"
             :modelValue="item"
             :pinId
+            :postOwnerId
             mode="main"
+            @changed="handleReplyChanged"
+            @reply="selectReply"
           />
           <div v-if="isLast" class="tpr-list-item">
-            <v-chip color="blue" label>没有更多了</v-chip>
+            <v-chip label variant="tonal">没有更多了</v-chip>
           </div>
           <div v-else class="tpr-list-item">
-            <v-btn :loading color="blue" @click="loadReply()">加载更多</v-btn>
+            <v-btn :loading size="small" variant="tonal" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
+        <button
+          ref="composerTrigger"
+          :aria-expanded="showComposer"
+          :disabled="writing"
+          aria-label="发表评论"
+          aria-haspopup="dialog"
+          class="tpr-composer-trigger"
+          type="button"
+          @click="openComment"
+        >
+          <v-icon size="20">mdi-comment-edit-outline</v-icon>
+          <span>发表评论</span>
+        </button>
       </div>
     </v-menu>
+    <VpReplyDialog
+      v-model="showComposer"
+      :ancestors="replyAncestors"
+      :gid="props.gid"
+      :postId="props.postId"
+      :target="replyTarget"
+      @closed="handleComposerClosed"
+      @published="handlePublished"
+    />
   </div>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
+import { createReplyInteraction, replyInteractionKey } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
+import useUserStore from "@store/user.js";
 import { emit } from "@tauri-apps/api/event";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { computed, ref, shallowRef, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, onBeforeUnmount, provide, ref, shallowRef, useTemplateRef, watch } from "vue";
 
+import VpReplyDialog from "./vp-reply-dialog.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
 /**
@@ -103,6 +160,10 @@ type SelectItem = {
 };
 
 const props = defineProps<TprMainProps>();
+const { uid, cookie } = storeToRefs(useUserStore());
+const interaction = createReplyInteraction();
+provide(replyInteractionKey, interaction);
+const writing = interaction.busy;
 
 // 简单封装选项
 const genOrderItem = (order: TGApp.BBS.Reply.ReplyOrderTypeEnum): SelectItem => ({
@@ -116,6 +177,13 @@ const orderList: Array<SelectItem> = [
 ].map(genOrderItem);
 
 const pinId = ref<string>("0");
+const postOwnerId = ref<string>("");
+const replyTarget = shallowRef<TGApp.BBS.Reply.ReplyFull>();
+const replyAncestors = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const composerTrigger = useTemplateRef<HTMLButtonElement>("composerTrigger");
+const showComposer = ref<boolean>(false);
+const composerFocusOrigin = shallowRef<HTMLElement>();
+let requestVersion = 0;
 const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
@@ -123,6 +191,11 @@ const showOverlay = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const readCookie = computed<TGApp.App.Account.LoginCookie | undefined>(() => {
+  if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
+    return undefined;
+  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+});
 const isHot = computed<boolean>(() => orderType.value === bbsEnum.post.replyOrderType.HOT);
 const replyOrder = computed<TGApp.BBS.Reply.ReplyOrderTypeEnum | undefined>(() => {
   if (orderType.value === bbsEnum.post.replyOrderType.HOT) return undefined;
@@ -136,6 +209,30 @@ watch(
     await reloadReply();
   },
 );
+
+watch(
+  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken, cookie.value?.ltuid],
+  async () => {
+    replyTarget.value = undefined;
+    replyAncestors.value = [];
+    showComposer.value = false;
+    resetReplies();
+    if (showOverlay.value) await loadReply();
+  },
+  { flush: "sync" },
+);
+
+watch(showOverlay, (visible) => {
+  if (!visible) {
+    showComposer.value = false;
+    replyTarget.value = undefined;
+    replyAncestors.value = [];
+  }
+});
+
+onBeforeUnmount(() => {
+  requestVersion += 1;
+});
 
 function handleListScroll(e: Event): void {
   if (!(e.target instanceof HTMLElement)) return;
@@ -153,6 +250,7 @@ function handleListScroll(e: Event): void {
 }
 
 async function showReply(): Promise<void> {
+  if (loading.value) return;
   if (reply.value.length > 0) return;
   if (isLast.value) return;
   await loadReply();
@@ -164,52 +262,109 @@ async function switchOnlyLz(): Promise<void> {
 }
 
 async function reloadReply(): Promise<void> {
-  lastId.value = undefined;
-  reply.value = [];
+  resetReplies();
   await loadReply();
 }
 
+function resetReplies(): void {
+  requestVersion += 1;
+  lastId.value = undefined;
+  isLast.value = false;
+  pinId.value = "0";
+  postOwnerId.value = "";
+  reply.value = [];
+  loading.value = false;
+}
+
+function openComment(): void {
+  if (writing.value || showComposer.value) return;
+  rememberComposerFocus();
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  showComposer.value = true;
+}
+
+function selectReply(
+  item: TGApp.BBS.Reply.ReplyFull,
+  ancestors: Array<TGApp.BBS.Reply.ReplyFull> = [],
+): void {
+  if (writing.value) return;
+  if (!showComposer.value) rememberComposerFocus();
+  replyTarget.value = item;
+  replyAncestors.value = ancestors;
+  showComposer.value = true;
+}
+
+function rememberComposerFocus(): void {
+  const activeElement = document.activeElement;
+  composerFocusOrigin.value = activeElement instanceof HTMLElement ? activeElement : undefined;
+}
+
+function handleComposerClosed(): void {
+  if (showComposer.value) return;
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  const origin = composerFocusOrigin.value;
+  composerFocusOrigin.value = undefined;
+  if (origin?.isConnected) {
+    origin.focus();
+    return;
+  }
+  const trigger = composerTrigger.value;
+  if (trigger?.isConnected) trigger.focus();
+}
+
+async function handleReplyChanged(): Promise<void> {
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  await reloadReply();
+}
+
+async function handlePublished(): Promise<void> {
+  showComposer.value = false;
+  replyTarget.value = undefined;
+  replyAncestors.value = [];
+  onlyLz.value = false;
+  if (orderType.value === bbsEnum.post.replyOrderType.LATEST) await reloadReply();
+  else orderType.value = bbsEnum.post.replyOrderType.LATEST;
+}
+
 async function loadReply(): Promise<void> {
+  if (loading.value || isLast.value) return;
+  const version = requestVersion;
   loading.value = true;
-  let resp: TGApp.BBS.Reply.MainResp | undefined;
   try {
-    resp = await postReq.reply.main(
+    const resp = await postReq.reply.main(
       props.postId,
       props.gid,
       isHot.value,
       lastId.value,
       onlyLz.value,
       replyOrder.value,
+      20,
+      readCookie.value,
     );
-    console.debug("[VpBtnReply] Load Reply Response:", resp);
+    if (version !== requestVersion) return;
     if (resp.retcode !== 0) {
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      await TGLogger.Warn(`[VpBtnReply] Load Reply Error: ${resp.retcode} - ${resp.message}`);
-      loading.value = false;
       return;
     }
+    isLast.value = resp.data.is_last;
+    lastId.value = resp.data.last_id;
+    pinId.value = resp.data.pin_reply_id;
+    postOwnerId.value = resp.data.post_owner_id;
+    const existingIds = new Set(reply.value.map((item) => item.reply.reply_id));
+    reply.value = reply.value.concat(
+      resp.data.list.filter((item) => !existingIds.has(item.reply.reply_id)),
+    );
   } catch (e) {
+    if (version !== requestVersion) return;
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取回复失败：${errMsg}`);
     await TGLogger.Error(`[VpBtnReply] 获取回复异常`);
-    await TGLogger.Error(`[VpBtnReply] ${e}`);
-    loading.value = false;
-    return;
+  } finally {
+    if (version === requestVersion) loading.value = false;
   }
-  isLast.value = resp.data.is_last;
-  lastId.value = resp.data.last_id;
-  pinId.value = resp.data.pin_reply_id;
-  reply.value = reply.value.concat(resp.data.list);
-  loading.value = false;
-  if (isLast.value) {
-    showSnackbar.warn("没有更多了");
-    return;
-  }
-  showSnackbar.success(`成功加载${resp.data.list.length}条回复`);
-}
-
-async function handleDebug(): Promise<void> {
-  await reloadReply();
 }
 </script>
 <style lang="scss" scoped>
@@ -229,11 +384,10 @@ async function handleDebug(): Promise<void> {
   box-shadow: 1px 3px 6px var(--common-shadow-2);
   color: var(--btn-text);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tpr-main-box:hover {
-  box-shadow: 2px 4px 12px var(--common-shadow-4);
   transform: scale(1.15);
 }
 
@@ -255,11 +409,18 @@ async function handleDebug(): Promise<void> {
   border-radius: 50%;
 }
 
+.tpr-btn:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 3px;
+}
+
 .tpr-main-reply {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 300px;
-  max-height: calc(100vh - 24px);
+  min-height: 0;
+  max-height: calc(100dvh - 24px);
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
@@ -269,9 +430,8 @@ async function handleDebug(): Promise<void> {
   border-radius: 8px;
   background: var(--app-page-bg);
   box-shadow: 2px 2px 8px var(--common-shadow-4);
-  overflow-y: auto;
+  color: var(--app-page-content);
   row-gap: 8px;
-  transition: height 0.5s ease-in-out;
 }
 
 .tpr-main-filter {
@@ -292,21 +452,76 @@ async function handleDebug(): Promise<void> {
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
+}
 
-  span {
-    padding: 2px 4px;
-    border-radius: 4px;
-    background: var(--tgc-od-blue);
-    color: var(--tgc-white-1);
-    cursor: pointer;
-    font-family: var(--font-title);
-    white-space: nowrap;
+.tpr-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tpr-title-copy {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--tgc-od-blue);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.tpr-title-copy:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tpr-title-copy:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.tpr-title-actions {
+  margin-left: auto;
+}
+
+.tpr-composer-trigger {
+  display: flex;
+  width: calc(100% + 16px);
+  min-height: 36px;
+  box-sizing: border-box;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 0;
+  border-radius: 0 0 7px 7px;
+  border-top: 1px solid var(--common-shadow-2);
+  margin: 0 -8px -8px;
+  background: var(--box-bg-1);
+  color: var(--app-page-content);
+  cursor: pointer;
+  font: inherit;
+  gap: 4px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: -2px;
   }
 }
 
 .tpr-btn-close {
   border: 1px solid var(--common-shadow-2);
-  margin-left: auto;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -328,9 +543,19 @@ async function handleDebug(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--app-page-content);
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
+  font-weight: normal;
+}
+
+.tpr-switch:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
 }
 
 .tpr-reply-list {
@@ -339,7 +564,9 @@ async function handleDebug(): Promise<void> {
   overflow: hidden auto;
   width: 100%;
   height: fit-content;
+  min-height: 0;
   box-sizing: border-box;
+  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -357,5 +584,40 @@ async function handleDebug(): Promise<void> {
   height: 40px;
   align-items: center;
   justify-content: center;
+}
+
+@media (width <= 480px) {
+  .tpr-main-box {
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .tpr-main-reply {
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .tpr-subtitle {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .tpr-select {
+    min-width: 120px;
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tpr-main-box {
+    transition: none;
+  }
+
+  .tpr-main-box:hover,
+  .tpr-main-box:active {
+    transform: none;
+  }
 }
 </style>
