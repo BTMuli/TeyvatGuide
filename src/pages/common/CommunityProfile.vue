@@ -103,7 +103,21 @@
     <section v-else class="community-profile-layout">
       <aside aria-label="个人中心导航" class="community-profile-sidebar">
         <div class="community-profile-sidebar-header">
-          <h2>{{ isOwnProfile ? "个人中心" : "用户信息" }}</h2>
+          <div class="community-profile-sidebar-heading">
+            <h2>{{ isOwnProfile ? "个人中心" : "用户信息" }}</h2>
+            <button
+              v-if="!isOwnProfile && followState"
+              :aria-label="followState.label"
+              :disabled="followLoading"
+              :title="followState.label"
+              class="community-profile-follow-state"
+              type="button"
+              @click="toggleFollow"
+            >
+              <v-progress-circular v-if="followLoading" indeterminate size="14" width="2" />
+              <v-icon v-else aria-hidden="true" size="16">{{ followState.icon }}</v-icon>
+            </button>
+          </div>
           <div class="community-profile-sidebar-actions">
             <div class="community-profile-sidebar-trail">
               <v-btn
@@ -513,6 +527,11 @@ type ProfileStat = {
   value: string;
 };
 
+type FollowState = {
+  icon: string;
+  label: string;
+};
+
 type ProfileGameOption = Pick<TGApp.BBS.Game.Item, "id" | "name"> & {
   icon?: string;
 };
@@ -651,6 +670,8 @@ const searchKeyword = ref<string>("");
 const searchTotal = ref<number>(0);
 const headerLevelLoading = ref<boolean>(false);
 const headerLevelError = ref<string>("");
+const followRelation = shallowRef<TGApp.BBS.User.FollowRelation>();
+const followLoading = ref<boolean>(false);
 const canViewProfile = computed<boolean>(() => {
   const currentUid = uid.value;
   const currentCookie = cookie.value;
@@ -692,6 +713,20 @@ const levelLabel = computed<string>(() => {
   if (headerLevelError.value) return "加载失败";
   if (headerUserInfo.value === undefined) return "Lv.-";
   return headerLevel.value ? `Lv.${headerLevel.value.level}` : "暂无等级";
+});
+const followState = computed<FollowState | undefined>(() => {
+  const relation = followRelation.value;
+  if (relation === undefined) return undefined;
+  if (relation.is_following && relation.is_followed) {
+    return { icon: "mdi-account-multiple-check-outline", label: "互关，点击取关" };
+  }
+  if (relation.is_following) {
+    return { icon: "mdi-account-check-outline", label: "已关注，点击取关" };
+  }
+  if (relation.is_followed) {
+    return { icon: "mdi-account-heart-outline", label: "粉丝，点击回关" };
+  }
+  return { icon: "mdi-account-plus-outline", label: "未关注，点击关注" };
 });
 const gameMenuVisible = ref<boolean>(false);
 const currentPosts = computed<Array<ProfilePost>>(() =>
@@ -881,6 +916,8 @@ function resetPostList(): void {
 function resetProfileData(): void {
   profile.value = undefined;
   profileAudit.value = undefined;
+  followRelation.value = undefined;
+  followLoading.value = false;
   resetPostList();
   searchInput.value = "";
   searchKeyword.value = "";
@@ -1028,7 +1065,7 @@ async function loadProfile(refreshHeader: boolean = false): Promise<void> {
     const userResponse =
       snapshot.profileUid === snapshot.uid
         ? await bbsReq.userInfo(snapshot.cookie)
-        : await bbsReq.otherUserInfo("2", snapshot.profileUid);
+        : await bbsReq.otherUserInfo("2", snapshot.profileUid, snapshot.cookie);
     if (!isCurrentRequest(version, snapshot)) return;
     if (userResponse.retcode !== 0) {
       throw new Error(`[${userResponse.retcode}] ${userResponse.message}`);
@@ -1037,6 +1074,8 @@ async function loadProfile(refreshHeader: boolean = false): Promise<void> {
       throw new Error("用户信息与当前查看的用户不一致");
     }
     profile.value = userResponse.data.user_info;
+    followRelation.value =
+      snapshot.profileUid === snapshot.uid ? undefined : userResponse.data.follow_relation;
     profileAudit.value =
       snapshot.profileUid === snapshot.uid ? userResponse.data.audit_info : undefined;
     if (snapshot.profileUid === snapshot.uid && matchesCurrentAccount(snapshot)) {
@@ -1098,6 +1137,55 @@ function retryHeaderLevel(): void {
 function selectGame(gid: number): void {
   selectedGid.value = gid;
   gameMenuVisible.value = false;
+}
+
+function adjustFollowedCount(delta: number): void {
+  const current = profile.value;
+  if (current === undefined) return;
+  const followedCount = Number.parseInt(current.achieve.followed_cnt, 10);
+  if (!Number.isFinite(followedCount)) return;
+  profile.value = {
+    ...current,
+    achieve: {
+      ...current.achieve,
+      followed_cnt: String(Math.max(followedCount + delta, 0)),
+    },
+  };
+}
+
+async function toggleFollow(): Promise<void> {
+  const relation = followRelation.value;
+  if (relation === undefined || followLoading.value) return;
+  const snapshot = getAccountSnapshot();
+  if (snapshot === undefined) {
+    showSnackbar.warn("当前账号凭据不可用，请重新登录米游社账号。");
+    return;
+  }
+  const follow = !relation.is_following;
+  if (!follow) {
+    const nickname = profile.value?.nickname.trim() || `用户 ${snapshot.profileUid}`;
+    const confirmed = await showDialog.checkF({
+      cancelLabel: "继续关注",
+      confirmLabel: "取消关注",
+      text: `确定要取消关注“${nickname}”吗？`,
+      title: "取消关注",
+    });
+    if (!confirmed || !isCurrentAccount(snapshot)) return;
+  }
+  followLoading.value = true;
+  try {
+    const response = await communityReq.setFollow(snapshot.cookie, snapshot.profileUid, follow);
+    if (!isCurrentAccount(snapshot)) return;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    followRelation.value = { ...relation, is_following: follow };
+    adjustFollowedCount(follow ? 1 : -1);
+    showSnackbar.success(follow ? "关注成功" : "已取消关注");
+  } catch (cause) {
+    if (!isCurrentAccount(snapshot)) return;
+    showSnackbar.error(`${follow ? "关注" : "取消关注"}失败：${TGHttps.getErrMsg(cause)}`);
+  } finally {
+    if (isCurrentAccount(snapshot)) followLoading.value = false;
+  }
 }
 
 function handleSettingsSaved(warning?: string): void {
@@ -1563,12 +1651,55 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   gap: 4px;
 
   h2 {
-    padding: 0 6px;
+    padding: 0;
     margin: 0;
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 16px;
     font-weight: normal;
+  }
+}
+
+.community-profile-sidebar-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  gap: 4px;
+}
+
+.community-profile-follow-state {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 1px solid var(--tgc-od-orange);
+    outline-offset: 1px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--common-shadow-2);
+    background: var(--box-bg-3);
   }
 }
 

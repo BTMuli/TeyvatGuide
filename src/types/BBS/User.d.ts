@@ -18,7 +18,7 @@ declare namespace TGApp.BBS.User {
     /** 用户信息 */
     user_info: Info;
     /** 关注关系 */
-    follow_relation: unknown;
+    follow_relation: FollowRelation;
     /** 认证关系 */
     auth_relations: Array<unknown>;
     /** 是否在黑名单中 */
@@ -51,6 +51,17 @@ declare namespace TGApp.BBS.User {
       /** 昵称状态 */
       nickname_status: number;
     };
+  };
+
+  /**
+   * 当前登录用户与主页用户的关注关系
+   * @since Beta v0.13.0
+   */
+  type FollowRelation = {
+    /** 当前用户是否关注该用户 */
+    is_following: boolean;
+    /** 该用户是否关注当前用户 */
+    is_followed: boolean;
   };
 
   /**

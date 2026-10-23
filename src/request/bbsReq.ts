@@ -41,15 +41,24 @@ async function getUserFullInfo(
 
 /**
  * 根据gid和id获取用户信息
- * @since Beta v0.10.1
+ * @since Beta v0.13.0
  * @param gid - gid
  * @param userId - 用户 id
+ * @param cookie - 当前账户 cookie，传入后才能获取真实关注关系
  * @returns 用户信息响应数据
  */
-async function getOtherUserInfo(gid: string, userId: string): Promise<TGApp.BBS.User.InfoResp> {
+async function getOtherUserInfo(
+  gid: string,
+  userId: string,
+  cookie?: TGApp.App.Account.Cookie,
+): Promise<TGApp.BBS.User.InfoResp> {
   const params = { gids: gid.toString(), uid: userId };
+  const ck: Record<string, string> =
+    cookie === undefined
+      ? {}
+      : { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const resp = await TGHttps.get<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
-    headers: getRequestHeader({}, "GET", params, "X4", true),
+    headers: getRequestHeader(ck, "GET", params, "X4", true),
     query: params,
   });
   return resp.data;
