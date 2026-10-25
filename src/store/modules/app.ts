@@ -58,6 +58,8 @@ const useAppStore = defineStore(
     const postViewWide = ref<boolean>(true);
     /** 帖子网格/列表视图 */
     const postGridMode = ref<boolean>(true);
+    /** 祈愿记录网格/列表视图 */
+    const gachaGridMode = ref<boolean>(false);
     /** 是否取消点赞 */
     const cancelLike = ref<boolean>(true);
     /** 关闭窗口时最小化到托盘 */
@@ -120,6 +122,7 @@ const useAppStore = defineStore(
       hideUid.value = false;
       postViewWide.value = true;
       postGridMode.value = true;
+      gachaGridMode.value = false;
       cancelLike.value = true;
       closeToTray.value = false;
       showFeedback.value = true;
@@ -192,6 +195,7 @@ const useAppStore = defineStore(
       hideUid,
       postViewWide,
       postGridMode,
+      gachaGridMode,
       cancelLike,
       closeToTray,
       showFeedback,
@@ -227,6 +231,7 @@ const useAppStore = defineStore(
           "sidebar",
           "postViewWide",
           "postGridMode",
+          "gachaGridMode",
           "cancelLike",
           "closeToTray",
           "showFeedback",

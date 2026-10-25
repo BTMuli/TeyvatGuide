@@ -13,7 +13,6 @@
     <SwiperSlide>
       <GroDataView
         :data-val="normalData"
-        :gridMode
         :periodEnd
         :periodStart
         :versionFilter
@@ -23,7 +22,6 @@
     <SwiperSlide>
       <GroDataView
         :data-val="avatarData"
-        :gridMode
         :periodEnd
         :periodStart
         :versionFilter
@@ -33,7 +31,6 @@
     <SwiperSlide>
       <GroDataView
         :data-val="weaponData"
-        :gridMode
         :periodEnd
         :periodStart
         :versionFilter
@@ -41,24 +38,10 @@
       />
     </SwiperSlide>
     <SwiperSlide v-if="mixData.length !== 0">
-      <GroDataView
-        :data-val="mixData"
-        :gridMode
-        :periodEnd
-        :periodStart
-        :versionFilter
-        data-type="mix"
-      />
+      <GroDataView :data-val="mixData" :periodEnd :periodStart :versionFilter data-type="mix" />
     </SwiperSlide>
     <SwiperSlide v-if="newData.length !== 0">
-      <GroDataView
-        :data-val="newData"
-        :gridMode
-        :periodEnd
-        :periodStart
-        :versionFilter
-        data-type="new"
-      />
+      <GroDataView :data-val="newData" :periodEnd :periodStart :versionFilter data-type="new" />
     </SwiperSlide>
   </Swiper>
 </template>
@@ -77,7 +60,6 @@ import GroDataView from "./gro-data-view.vue";
  * @since Beta v0.13.0
  */
 type GachaOverviewProps = {
-  gridMode?: boolean;
   modelValue: Array<TGApp.Sqlite.Gacha.Gacha>;
   versionFilter?: string | null;
   periodStart?: string;
@@ -85,7 +67,6 @@ type GachaOverviewProps = {
 };
 
 const {
-  gridMode = false,
   modelValue,
   versionFilter = null,
   periodStart = "",

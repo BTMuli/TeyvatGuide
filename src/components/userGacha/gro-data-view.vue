@@ -55,10 +55,29 @@
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gro-bottom">
-      <v-tabs v-model="tab" density="compact">
-        <v-tab value="5">5☆</v-tab>
-        <v-tab value="4">4☆</v-tab>
-      </v-tabs>
+      <div class="gro-bottom-toolbar">
+        <v-tabs v-model="tab" density="compact">
+          <v-tab value="5">5☆</v-tab>
+          <v-tab value="4">4☆</v-tab>
+        </v-tabs>
+        <v-btn-toggle
+          v-model="gachaGridMode"
+          :mandatory="true"
+          aria-label="记录布局"
+          class="gro-view-toggle"
+          color="var(--tgc-od-blue)"
+          density="compact"
+          title="切换记录布局"
+          variant="outlined"
+        >
+          <v-btn aria-label="网格布局" :value="true" size="small" title="网格布局">
+            <v-icon size="16">mdi-view-grid</v-icon>
+          </v-btn>
+          <v-btn aria-label="列表布局" :value="false" size="small" title="列表布局">
+            <v-icon size="18">mdi-view-list</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </div>
       <div ref="groWindowRef" class="gro-bottom-window">
         <v-virtual-scroll
           v-if="activeRecords.length !== 0"
@@ -71,7 +90,7 @@
         >
           <template #default="{ item }">
             <div
-              :class="{ 'gro-record-row--grid': gridMode }"
+              :class="{ 'gro-record-row--grid': gachaGridMode }"
               :style="gridRowStyle"
               class="gro-record-row"
             >
@@ -80,7 +99,7 @@
                 :key="record.data.id"
                 :count="record.count"
                 :data="record.data"
-                :gridMode
+                :gridMode="gachaGridMode"
                 :is-up="record.isUp"
               />
             </div>
@@ -93,9 +112,11 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
+import useAppStore from "@store/app.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { chunkGachaRecords, getGachaRecordColumns } from "@utils/gacha/recordGrid.js";
 import { matchGachaDisplayScope } from "@utils/gacha/version.js";
+import { storeToRefs } from "pinia";
 import {
   computed,
   nextTick,
@@ -119,7 +140,6 @@ import { AppGachaData } from "@/data/index.js";
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
   dataVal: Array<TGApp.Sqlite.Gacha.Gacha>;
-  gridMode?: boolean;
   versionFilter?: string | null;
   periodStart?: string;
   periodEnd?: string;
@@ -128,11 +148,11 @@ type GachaDataViewProps = {
 const {
   dataType,
   dataVal,
-  gridMode = false,
   versionFilter = null,
   periodStart = "",
   periodEnd = "",
 } = defineProps<GachaDataViewProps>();
+const { gachaGridMode } = storeToRefs(useAppStore());
 
 /**
  * 虚拟滚动中的祈愿记录行
@@ -175,7 +195,7 @@ const activeRecords = computed<Array<GroDataLineProps>>(() =>
   tab.value === "5" ? star5List.value : star4List.value,
 );
 const recordColumns = computed<number>(() =>
-  gridMode ? getGachaRecordColumns(recordWindowWidth.value) : 1,
+  gachaGridMode.value ? getGachaRecordColumns(recordWindowWidth.value) : 1,
 );
 const recordRows = computed<Array<GachaRecordRow>>(() => {
   const rows = chunkGachaRecords(activeRecords.value, recordColumns.value);
@@ -184,10 +204,10 @@ const recordRows = computed<Array<GachaRecordRow>>(() => {
     records,
   }));
 });
-const virtualItemHeight = computed<number>(() => (gridMode ? 104 : 56));
+const virtualItemHeight = computed<number>(() => (gachaGridMode.value ? 104 : 56));
 const virtualScrollKey = computed<string>(
   () =>
-    `${dataType}-${tab.value}-${gridMode ? "grid" : "list"}-${recordColumns.value}-${viewRevision.value}`,
+    `${dataType}-${tab.value}-${gachaGridMode.value ? "grid" : "list"}-${recordColumns.value}-${viewRevision.value}`,
 );
 const gridRowStyle = computed<Record<string, string>>(() => ({
   "--gro-record-columns": String(recordColumns.value),
@@ -233,7 +253,7 @@ watch(
     applyDisplayFilter();
   },
 );
-watch([tab, () => gridMode, viewRevision], async () => {
+watch([tab, gachaGridMode, viewRevision], async () => {
   await nextTick();
   updateRecordWindowWidth();
 });
@@ -581,15 +601,30 @@ function getPg(star: "5" | "4" | "3"): string {
   gap: 8px;
 }
 
+.gro-bottom-toolbar {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-end;
+  column-gap: 8px;
+}
+
+.gro-bottom-toolbar :deep(.v-tabs) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.gro-view-toggle.v-btn-toggle {
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+}
+
 .gro-bottom-window {
   position: relative;
   overflow: hidden;
   min-height: 0;
   flex: 1 1 auto;
-}
-
-.gro-bottom :deep(.v-tabs) {
-  flex: 0 0 auto;
 }
 
 .gro-record-scroll {
