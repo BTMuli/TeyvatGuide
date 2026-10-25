@@ -224,6 +224,25 @@
         >
           检测数据
         </v-btn>
+        <v-spacer v-if="tab === 'overview'" />
+        <v-btn-toggle
+          v-if="tab === 'overview'"
+          v-model="gridMode"
+          :mandatory="true"
+          aria-label="记录布局"
+          class="gacha-view-toggle"
+          color="var(--tgc-od-blue)"
+          density="compact"
+          title="切换记录布局"
+          variant="outlined"
+        >
+          <v-btn aria-label="网格布局" :value="true" size="small" title="网格布局">
+            <v-icon size="16">mdi-view-grid</v-icon>
+          </v-btn>
+          <v-btn aria-label="列表布局" :value="false" size="small" title="列表布局">
+            <v-icon size="18">mdi-view-list</v-icon>
+          </v-btn>
+        </v-btn-toggle>
       </div>
     </template>
   </v-app-bar>
@@ -239,6 +258,7 @@
       <v-window-item class="gacha-window-item" value="overview">
         <GroOverview
           v-model="gachaListCur"
+          :gridMode
           :periodEnd="periodRange.end"
           :periodStart="periodRange.start"
           :versionFilter
@@ -302,6 +322,7 @@ const { account } = storeToRefs(useUserStore());
 
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
+const gridMode = ref<boolean>(false);
 const uidList = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const yattaData = shallowRef<Array<TGApp.Plugins.Yatta.ConvertData>>([]);
@@ -494,9 +515,19 @@ async function toBeyond(): Promise<void> {
 
 .gacha-top-btns {
   display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+  margin-right: 16px;
   margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
+}
+
+.gacha-view-toggle.v-btn-toggle {
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 4px;
 }
 
 .gacha-top-period {

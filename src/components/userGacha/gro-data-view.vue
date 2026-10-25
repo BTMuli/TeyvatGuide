@@ -1,7 +1,7 @@
 <!-- 祈愿数据概览 -->
 <template>
-  <div ref="groDvBoxRef" class="gro-dv-container">
-    <div ref="headerRef" class="gro-dv-header">
+  <div class="gro-dv-container">
+    <div class="gro-dv-header">
       <div class="gro-dvt-title">
         <span class="gro-dvt-name">{{ title }}</span>
         <div v-if="dataType !== 'new'" class="gro-dvt-pity">
@@ -59,40 +59,42 @@
         <v-tab value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
-      <v-window v-model="tab" class="gro-bottom-window">
-        <v-window-item class="gro-b-window-item" value="5">
-          <v-virtual-scroll :item-height="48" :items="star5List">
-            <template #default="{ item }">
+      <div ref="groWindowRef" class="gro-bottom-window">
+        <v-virtual-scroll
+          v-if="activeRecords.length !== 0"
+          :key="virtualScrollKey"
+          :item-height="virtualItemHeight"
+          :items="recordRows"
+          class="gro-record-scroll"
+          height="100%"
+          item-key="key"
+        >
+          <template #default="{ item }">
+            <div
+              :class="{ 'gro-record-row--grid': gridMode }"
+              :style="gridRowStyle"
+              class="gro-record-row"
+            >
               <GroDataLine
-                :key="item.data.id"
-                :count="item.count"
-                :data="item.data"
-                :is-up="item.isUp"
+                v-for="record in item.records"
+                :key="record.data.id"
+                :count="record.count"
+                :data="record.data"
+                :gridMode
+                :is-up="record.isUp"
               />
-            </template>
-          </v-virtual-scroll>
-        </v-window-item>
-        <v-window-item class="gro-b-window-item" value="4">
-          <v-virtual-scroll :item-height="48" :items="star4List">
-            <template #default="{ item }">
-              <GroDataLine
-                :key="item.data.id"
-                :count="item.count"
-                :data="item.data"
-                :is-up="item.isUp"
-              />
-            </template>
-          </v-virtual-scroll>
-        </v-window-item>
-      </v-window>
+            </div>
+          </template>
+        </v-virtual-scroll>
+        <div v-else class="gro-record-empty">暂无数据</div>
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { UnlistenFn } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import fmtUtil from "@utils/display/fmtUtil.js";
+import { chunkGachaRecords, getGachaRecordColumns } from "@utils/gacha/recordGrid.js";
 import { matchGachaDisplayScope } from "@utils/gacha/version.js";
 import {
   computed,
@@ -110,9 +112,14 @@ import GroResetCard from "./gro-reset-card.vue";
 
 import { AppGachaData } from "@/data/index.js";
 
+/**
+ * 祈愿数据概览参数
+ * @since Beta v0.13.0
+ */
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
   dataVal: Array<TGApp.Sqlite.Gacha.Gacha>;
+  gridMode?: boolean;
   versionFilter?: string | null;
   periodStart?: string;
   periodEnd?: string;
@@ -121,22 +128,25 @@ type GachaDataViewProps = {
 const {
   dataType,
   dataVal,
+  gridMode = false,
   versionFilter = null,
   periodStart = "",
   periodEnd = "",
 } = defineProps<GachaDataViewProps>();
-let resizeListener: UnlistenFn | null = null;
 
-// Template refs for dynamic height calculation
-const groDvBoxEl = useTemplateRef<HTMLElement>("groDvBoxRef");
-const headerEl = useTemplateRef<HTMLElement>("headerRef");
+/**
+ * 虚拟滚动中的祈愿记录行
+ * @since Beta v0.13.0
+ */
+type GachaRecordRow = {
+  key: string;
+  records: Array<GroDataLineProps>;
+};
 
-// Dynamic heights
-const bottomHeight = ref<string>("auto");
-const windowHeight = ref<string>("auto");
+const groWindowEl = useTemplateRef<HTMLElement>("groWindowRef");
+let windowResizeObserver: ResizeObserver | null = null;
 
 // data
-const loading = ref<boolean>(true); // 是否加载完
 const title = ref<string>(""); // 卡片标题
 const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
@@ -152,6 +162,8 @@ const star5UpAvg = ref<string>(""); // 5星UP平均抽数
 const star4avg = ref<string>(""); // 4星平均抽数
 const star4UpAvg = ref<string>(""); // 4星UP平均抽数
 const tab = ref<string>("5"); // tab
+const recordWindowWidth = ref<number>(0);
+const viewRevision = ref<number>(0);
 const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
@@ -159,61 +171,72 @@ const isUpPool = computed<boolean>(() => dataType !== "new" && dataType !== "nor
 const dateRangeLabel = computed<string>(() => `${startDate.value} ~ ${endDate.value}`);
 const displayPeriod = computed(() => ({ start: periodStart, end: periodEnd }));
 
-// Calculate dynamic heights
-function calculateHeights(): void {
-  if (!groDvBoxEl.value || !headerEl.value) return;
-  const containerHeight = groDvBoxEl.value.clientHeight;
-  const headerHeight = headerEl.value.clientHeight;
-  const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
-  const tabsHeight = 36; // v-tabs compact height
-  const gap = 8; // gap between tabs and window
-  const bottomHeightPx = containerHeight - headerHeight - padding;
-  const windowHeightPx = bottomHeightPx - tabsHeight - gap;
-  bottomHeight.value = `${bottomHeightPx}px`;
-  windowHeight.value = `${windowHeightPx}px`;
+const activeRecords = computed<Array<GroDataLineProps>>(() =>
+  tab.value === "5" ? star5List.value : star4List.value,
+);
+const recordColumns = computed<number>(() =>
+  gridMode ? getGachaRecordColumns(recordWindowWidth.value) : 1,
+);
+const recordRows = computed<Array<GachaRecordRow>>(() => {
+  const rows = chunkGachaRecords(activeRecords.value, recordColumns.value);
+  return rows.map((records) => ({
+    key: records[0].data.id,
+    records,
+  }));
+});
+const virtualItemHeight = computed<number>(() => (gridMode ? 104 : 56));
+const virtualScrollKey = computed<string>(
+  () =>
+    `${dataType}-${tab.value}-${gridMode ? "grid" : "list"}-${recordColumns.value}-${viewRevision.value}`,
+);
+const gridRowStyle = computed<Record<string, string>>(() => ({
+  "--gro-record-columns": String(recordColumns.value),
+}));
+
+function updateRecordWindowWidth(): void {
+  const windowElement = groWindowEl.value;
+  if (!windowElement) return;
+  const virtualScrollElement = windowElement.querySelector<HTMLElement>(".gro-record-scroll");
+  const viewportWidth = virtualScrollElement?.clientWidth ?? 0;
+  recordWindowWidth.value = viewportWidth > 0 ? viewportWidth : windowElement.clientWidth;
 }
 
 onMounted(async () => {
   loadData();
-  loading.value = false;
   await nextTick();
-  calculateHeights();
-  resizeListener = await getCurrentWindow().onResized(async () => {
-    await nextTick();
-    calculateHeights();
+  updateRecordWindowWidth();
+  if (typeof ResizeObserver === "undefined" || !groWindowEl.value) return;
+  windowResizeObserver = new ResizeObserver(([entry]) => {
+    if (entry.contentRect.width === 0) {
+      recordWindowWidth.value = 0;
+      return;
+    }
+    updateRecordWindowWidth();
   });
+  windowResizeObserver.observe(groWindowEl.value);
 });
 onUnmounted(() => {
-  if (resizeListener) {
-    resizeListener();
-    resizeListener = null;
-  }
+  windowResizeObserver?.disconnect();
+  windowResizeObserver = null;
 });
 // 监听数据变化
 watch(
   () => dataVal,
-  async () => {
+  () => {
     resetViewState();
     loadData();
-    await nextTick();
-    calculateHeights();
   },
 );
 watch(
   () => <const>[versionFilter, periodStart, periodEnd],
-  async () => {
+  () => {
     applyDisplayFilter();
-    await nextTick();
-    calculateHeights();
   },
 );
-watch(
-  () => [dataVal, dataType],
-  async () => {
-    await nextTick();
-    calculateHeights();
-  },
-);
+watch([tab, () => gridMode, viewRevision], async () => {
+  await nextTick();
+  updateRecordWindowWidth();
+});
 
 function resetViewState(): void {
   star5CalcList.value = [];
@@ -234,7 +257,7 @@ function resetViewState(): void {
 
 function loadData(): void {
   title.value = getTitle();
-  const tempData = dataVal;
+  const tempData = [...dataVal];
   const temp5Data: Array<GroDataLineProps> = [];
   const temp4Data: Array<GroDataLineProps> = [];
   // 按照 id 升序
@@ -275,6 +298,7 @@ function applyDisplayFilter(): void {
   star4List.value = star4CalcList.value.filter((item) =>
     matchGachaDisplayScope(item.data, versionFilter, displayPeriod.value),
   );
+  viewRevision.value++;
 }
 
 // 获取标题
@@ -377,8 +401,11 @@ function getPg(star: "5" | "4" | "3"): string {
 <style lang="scss" scoped>
 .gro-dv-container {
   position: relative;
+  display: flex;
   height: 100%;
+  min-height: 0;
   box-sizing: border-box;
+  flex-direction: column;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
@@ -386,6 +413,7 @@ function getPg(star: "5" | "4" | "3"): string {
 
 .gro-dv-header {
   position: relative;
+  flex: 0 0 auto;
 }
 
 .gro-dvt-title {
@@ -546,31 +574,52 @@ function getPg(star: "5" | "4" | "3"): string {
   position: relative;
   display: flex;
   width: 100%;
-  height: v-bind(bottomHeight); /* stylelint-disable-line value-keyword-case */
+  min-height: 0;
   box-sizing: border-box;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 8px;
 }
 
 .gro-bottom-window {
   position: relative;
-  height: v-bind(windowHeight); /* stylelint-disable-line value-keyword-case */
-  overflow-y: auto;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
-.gro-b-window-item {
-  position: relative;
+.gro-bottom :deep(.v-tabs) {
+  flex: 0 0 auto;
+}
+
+.gro-record-scroll {
   width: 100%;
   height: 100%;
+  scrollbar-gutter: stable;
+}
+
+.gro-record-row {
+  display: grid;
+  width: 100%;
+  height: 56px;
   box-sizing: border-box;
-  padding-right: 4px;
+  padding-bottom: 8px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-/* stylelint-disable selector-class-pattern */
-
-:deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
-  margin-top: 8px;
+.gro-record-row--grid {
+  height: 104px;
+  column-gap: 8px;
+  grid-template-columns: repeat(var(--gro-record-columns), minmax(0, 1fr));
 }
 
-/* stylelint-enable selector-class-pattern */
+.gro-record-empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-4);
+  font-size: 14px;
+  line-height: 20px;
+}
 </style>
