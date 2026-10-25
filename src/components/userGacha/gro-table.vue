@@ -103,8 +103,8 @@
             </div>
           </div>
         </template>
-        <template v-slot:[`item.uigfType`]="{ item }">
-          <span class="gro-t-pool">{{ getPoolLabel(item.uigfType) }}</span>
+        <template v-slot:[`item.gachaType`]="{ item }">
+          <span class="gro-t-pool">{{ getPoolLabel(item.gachaType) }}</span>
         </template>
         <template v-slot:[`item.poolName`]="{ item }">
           <span class="gro-t-pool-name" :title="item.poolName || undefined">
@@ -145,12 +145,13 @@ const POOL_LABELS: Record<string, string> = {
   [gameEnum.gachaType.Newbie]: "新手祈愿",
   [gameEnum.gachaType.Normal]: "常驻祈愿",
   [gameEnum.gachaType.AvatarUp]: "角色祈愿",
-  [gameEnum.gachaType.AvatarUp2]: "角色祈愿",
+  [gameEnum.gachaType.AvatarUp2]: "角色祈愿-2",
   [gameEnum.gachaType.WeaponUp]: "武器祈愿",
   [gameEnum.gachaType.MixUp]: "集录祈愿",
 };
 const POOL_ORDER: Array<string> = [
   gameEnum.gachaType.AvatarUp,
+  gameEnum.gachaType.AvatarUp2,
   gameEnum.gachaType.WeaponUp,
   gameEnum.gachaType.Normal,
   gameEnum.gachaType.MixUp,
@@ -178,7 +179,7 @@ const itemsPerPage = ref<number>(50);
 const sortBy = ref<Array<GroTableSortItem>>([{ key: "time", order: "desc" }]);
 const headers: Array<DataTableHeader<GroTableRow>> = [
   { title: "物品", align: "start", key: "name", sortable: true, nowrap: true },
-  { title: "卡池", align: "center", key: "uigfType", sortable: true, width: 128, nowrap: true },
+  { title: "卡池", align: "center", key: "gachaType", sortable: true, width: 128, nowrap: true },
   {
     title: "卡池名称",
     align: "start",
@@ -243,7 +244,7 @@ const tableRows = computed<Array<GroTableRow>>(() => {
 });
 const filteredItems = computed<Array<GroTableRow>>(() => {
   return tableRows.value.filter((item) => {
-    if (poolFilter.value !== null && item.uigfType !== poolFilter.value) return false;
+    if (poolFilter.value !== null && item.gachaType !== poolFilter.value) return false;
     if (rankFilter.value !== null && item.rank !== rankFilter.value) return false;
     if (typeFilter.value !== null && item.type !== typeFilter.value) return false;
     if (normalizedSearch.value === "") return true;
