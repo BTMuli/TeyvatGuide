@@ -251,7 +251,7 @@ import {
   uidItemValue,
 } from "@utils/display/TGUid.js";
 import { getUidServerTimezone } from "@utils/game/cultivationPlan.js";
-import userCalc from "@utils/game/userCalc.js";
+import userCalc, { hasCompleteWeaponMaterialData } from "@utils/game/userCalc.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGShare from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
@@ -734,6 +734,7 @@ function createBatchWeaponPlanInput(
   const weapon = role.weapon;
   const wiki = wwWeapon.find((item) => item.id === weapon.id);
   if (!wiki) return undefined;
+  if (!hasCompleteWeaponMaterialData(wiki)) return undefined;
   const currentPromoteLevel = weapon.promote_level;
   const currentAscended = userCalc.isAscendedAtThreshold(weapon.level, currentPromoteLevel);
   const weaponMaxLevel = userCalc.weaponMaxLevel(wiki.star);
@@ -791,6 +792,16 @@ async function saveBatchToPlan(target: BatchTarget): Promise<void> {
   batchSaving.value = true;
   try {
     const rolesToSave = roleList.value.filter((role) => batchSelectedIds.value.has(role.cid));
+    if (
+      target.weapon.enabled &&
+      rolesToSave.some((role) => {
+        const wiki = wwWeapon.find((item) => item.id === role.weapon.id);
+        return wiki === undefined || !hasCompleteWeaponMaterialData(wiki);
+      })
+    ) {
+      showSnackbar.warn("所选武器存在不完整材料数据，批量保存已取消");
+      return;
+    }
     const avatarInputs = (
       await Promise.all(rolesToSave.map(async (role) => await createBatchPlanInput(role, target)))
     ).filter((input): input is TGApp.Sqlite.Cultivation.SaveEntryInput => input !== undefined);

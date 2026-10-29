@@ -15,6 +15,7 @@ import {
   mergeCultivationResults,
   mergePlanInventory,
 } from "@utils/game/cultivationPlan.js";
+import { hasCompleteWeaponMaterialData } from "@utils/game/userCalc.js";
 import type { CultivationMaterial } from "@utils/game/userCalc.js";
 import { computed, onScopeDispose, ref, watch } from "vue";
 import type { ComputedRef, Ref } from "vue";
@@ -108,6 +109,12 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
     selectedWeapon,
   } = deps;
 
+  const localWeaponDataIncomplete = computed<boolean>(
+    () =>
+      !useApiCalculation.value &&
+      selectedWeapon.value !== undefined &&
+      !hasCompleteWeaponMaterialData(selectedWeapon.value.wiki),
+  );
   const canApiCalculate = computed<boolean>(
     () =>
       !apiLoading.value &&
@@ -210,7 +217,13 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
     ),
   );
   const conversionOptions = computed<Array<TGApp.App.UserCalc.ConversionOption>>(() => {
-    if (!planContextReady.value || planLoading.value || loading.value || apiLoading.value)
+    if (
+      localWeaponDataIncomplete.value ||
+      !planContextReady.value ||
+      planLoading.value ||
+      loading.value ||
+      apiLoading.value
+    )
       return [];
     if (useApiCalculation.value && !apiCalculated.value) return [];
     return getConversionOptions(
@@ -290,7 +303,7 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
     };
   });
   const canSaveToPlan = computed<boolean>(() => {
-    if (planLoading.value) return false;
+    if (planLoading.value || localWeaponDataIncomplete.value) return false;
     if (useApiCalculation.value) {
       return (
         apiCalculated.value &&
@@ -307,9 +320,10 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
       ? apiResultMaterials.value
       : localResultMaterials.value;
   });
-  const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-    getConversionResultMaterials(rawDisplayResultMaterials.value, conversionOptions.value),
-  );
+  const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
+    if (localWeaponDataIncomplete.value) return [];
+    return getConversionResultMaterials(rawDisplayResultMaterials.value, conversionOptions.value);
+  });
   const missingKinds = computed<number>(
     () => displayResultMaterials.value.filter((material) => material.missing > 0).length,
   );
@@ -317,6 +331,7 @@ export function useCultivationSummary(deps: CultivationSummaryDeps) {
     ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>
   >(() => (useApiCalculation.value ? EMPTY_BAG_MATERIAL_DETAILS : bagMaterialDetails.value));
   const resultEmptyText = computed<string>(() => {
+    if (localWeaponDataIncomplete.value) return "本地材料数据不完整，可手动尝试接口计算";
     if (!useApiCalculation.value) return "请选择角色或武器，并设置培养目标";
     if (apiCalculated.value) return "当前养成目标无需额外材料";
     return canApiCalculate.value

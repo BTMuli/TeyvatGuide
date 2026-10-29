@@ -17,6 +17,7 @@ import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useCultivationConversionStore from "@store/cultivationConversion.js";
 import { maskUid } from "@utils/display/TGUid.js";
 import { getCultivationEntryKey } from "@utils/game/cultivationPlan.js";
+import { hasCompleteWeaponMaterialData } from "@utils/game/userCalc.js";
 import userCalc from "@utils/game/userCalc.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { computed, watch } from "vue";
@@ -836,7 +837,7 @@ async function createAvatarRefreshInput(
  * @since Beta v0.13.0
  * @param entry - 计划目标条目
  * @param options - 武器选项列表
- * @returns 刷新输入；未匹配到武器时为 undefined
+ * @returns 刷新输入；未匹配或武器材料 Wiki 不完整时为 undefined
  */
 function createWeaponRefreshInput(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
@@ -851,6 +852,7 @@ function createWeaponRefreshInput(
         option.key === entry.instanceKey),
   );
   if (!weapon) return undefined;
+  if (!hasCompleteWeaponMaterialData(weapon.wiki)) return undefined;
   const requirements = userCalc.weapon(
     weapon.wiki,
     weapon.level,

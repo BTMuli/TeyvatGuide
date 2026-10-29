@@ -5,12 +5,14 @@
 
 import {
   calculateCraftingAllocation,
+  calculateWeaponMaterials,
   createCraftingCalculator,
   createOwnedInventoryCraftingCalculator,
+  hasCompleteWeaponMaterialData,
 } from "@utils/game/userCalc.js";
 import { describe, expect, it } from "vitest";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { WikiMaterialData, wwWeapon } from "@/data/index.js";
 
 /**
  * 创建指定星级与配方的材料 Wiki 测试数据。
@@ -165,6 +167,57 @@ function createRollbackBundle(): {
   ]);
   return { materials, inventory, ids };
 }
+
+describe("calculateWeaponMaterials", () => {
+  it("完整材料的低星武器保持原有突破计算", () => {
+    const weapon = wwWeapon.find((item) => item.id === 11101);
+    expect(weapon).toBeDefined();
+    if (!weapon) throw new Error("缺少无锋剑 Wiki 测试数据");
+
+    expect(calculateWeaponMaterials(weapon, 1, 0, 70)).toStrictEqual([
+      { id: 104013, count: 70 },
+      { id: 202, count: 92080 },
+      { id: 104012, count: 9 },
+      { id: 104011, count: 7 },
+      { id: 114001, count: 1 },
+      { id: 112014, count: 5 },
+      { id: 112011, count: 3 },
+      { id: 114002, count: 3 },
+      { id: 112015, count: 6 },
+      { id: 112012, count: 5 },
+      { id: 114003, count: 1 },
+    ]);
+  });
+
+  it("完整材料谓词区分普通武器与空材料特殊武器", () => {
+    const normalWeapon = wwWeapon.find((item) => item.id === 11101);
+    const specialWeapon = wwWeapon.find((item) => item.id === 11521);
+    expect(normalWeapon).toBeDefined();
+    expect(specialWeapon).toBeDefined();
+    if (!normalWeapon || !specialWeapon) throw new Error("缺少武器 Wiki 测试数据");
+
+    expect(hasCompleteWeaponMaterialData(normalWeapon)).toBe(true);
+    expect(hasCompleteWeaponMaterialData(specialWeapon)).toBe(false);
+  });
+
+  it("突破材料为空时阻止整项武器计算", () => {
+    const weapon = wwWeapon.find((item) => item.id === 11521);
+    expect(weapon).toBeDefined();
+    if (!weapon) throw new Error("缺少星锋剑 Wiki 测试数据");
+
+    expect(calculateWeaponMaterials(weapon, 1, 0, 90)).toStrictEqual([]);
+  });
+
+  it("低星武器材料列表截断时阻止整项武器计算", () => {
+    const weapon = wwWeapon.find((item) => item.id === 11101);
+    expect(weapon).toBeDefined();
+    if (!weapon) throw new Error("缺少无锋剑 Wiki 测试数据");
+
+    expect(
+      calculateWeaponMaterials({ ...weapon, materials: weapon.materials.slice(0, 2) }, 1, 4, 70),
+    ).toStrictEqual([]);
+  });
+});
 
 describe("calculateCraftingAllocation", () => {
   it("首个配方失败后恢复已消耗来源，再尝试备用配方", () => {

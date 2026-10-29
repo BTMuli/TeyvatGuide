@@ -436,6 +436,16 @@ const WEAPON_MONSTER_B_COUNTS: Readonly<Record<number, ReadonlyArray<OffsetCount
   ],
 };
 
+/**
+ * 判断武器 Wiki 是否包含普通突破计算所需的三类材料。
+ * @since Beta v0.13.0
+ * @param weapon - 武器 Wiki 数据
+ * @returns 是否包含完整的武器突破材料数据
+ */
+export function hasCompleteWeaponMaterialData(weapon: TGApp.App.Weapon.WikiItem): boolean {
+  return weapon.materials.length >= 3;
+}
+
 const AVATAR_LEVEL_EXP = [
   0, 1000, 1325, 1700, 2150, 2625, 3150, 3725, 4350, 5000, 5700, 6450, 7225, 8050, 8925, 9825,
   10750, 11725, 12725, 13775, 14875, 16800, 18000, 19250, 20550, 21875, 23250, 24650, 26100, 27575,
@@ -839,7 +849,8 @@ export function calculateAvatarMaterials(
 
 /**
  * 计算武器等级与突破所需的材料。
- * @since Beta v0.12.2
+ * 材料 Wiki 数据不足三类时不计算该武器，避免保存不完整的材料需求。
+ * @since Beta v0.13.0
  * @param weapon - 武器 Wiki 数据
  * @param currentLevel - 当前等级
  * @param currentPromoteLevel - 已完成的突破次数
@@ -854,6 +865,7 @@ export function calculateWeaponMaterials(
   targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
   const items = new Map<number, number>();
+  if (!hasCompleteWeaponMaterialData(weapon)) return [];
   const experience = WEAPON_LEVEL_EXP[weapon.star];
   if (!experience) return [];
   addExperienceMaterials(items, experience, currentLevel, targetLevel, WEAPON_EXP_MATERIALS, 10);
