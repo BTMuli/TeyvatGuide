@@ -1,6 +1,6 @@
 /**
  * 负责米游社客户端的 callback 处理
- * @since Beta v0.11.3
+ * @since Beta v0.13.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -45,13 +45,19 @@ class Client {
 
   /**
    * 运行米游社客户端
-   * @since Beta v0.3.4
+   * @since Beta v0.13.0
    * @returns Promise<void>
    */
   async run(): Promise<void> {
     if (this.listener === undefined) {
       this.listener = await event.listen<string>("post_mhy_client", async (arg: Event<string>) => {
-        await this.handleCallback(arg);
+        try {
+          await this.handleCallback(arg);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (message !== "未找到窗口：mhy_client") throw error;
+          await TGLogger.Warn("[TGClient][run] 米游社窗口已关闭，取消未完成的桥接回调", false);
+        }
       });
     } else {
       console.warn("[TGClient][run] 监听器已存在");
