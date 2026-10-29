@@ -1,5 +1,5 @@
 //! DLL 注入相关功能
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 #![cfg(target_os = "windows")]
 
 use std::ptr;
@@ -8,7 +8,7 @@ use std::time::Duration;
 use widestring::U16CString;
 use windows_sys::Win32::Foundation::{
   CloseHandle, ERROR_BAD_LENGTH, ERROR_SUCCESS, FreeLibrary, GetLastError, HANDLE,
-  INVALID_HANDLE_VALUE, SetLastError,
+  INVALID_HANDLE_VALUE, SetLastError, WAIT_FAILED,
 };
 use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
@@ -19,7 +19,9 @@ use windows_sys::Win32::System::Diagnostics::ToolHelp::{
 use windows_sys::Win32::System::LibraryLoader::{
   DONT_RESOLVE_DLL_REFERENCES, GetModuleHandleA, GetProcAddress, LoadLibraryExW,
 };
-use windows_sys::Win32::System::Memory::{MEM_COMMIT, PAGE_READWRITE, VirtualAllocEx};
+use windows_sys::Win32::System::Memory::{
+  MEM_COMMIT, MEM_RELEASE, PAGE_READWRITE, VirtualAllocEx, VirtualFreeEx,
+};
 use windows_sys::Win32::System::Pipes::{
   CreateNamedPipeW, PIPE_READMODE_MESSAGE, PIPE_TYPE_MESSAGE, PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
 };
@@ -28,10 +30,36 @@ use windows_sys::Win32::System::Threading::{
   WaitForSingleObject,
 };
 
+/// 将当前线程的 Windows 错误转换为包含错误码和描述的可读消息。
+///
+/// @since Beta v0.13.0
+fn format_windows_error(operation: &str) -> String {
+  let error_code = unsafe { GetLastError() };
+  let error = std::io::Error::from_raw_os_error(error_code as i32);
+  format!("{operation} 失败（Windows 错误码 {error_code}）：{error}")
+}
+
+/// 释放由启动目标进程产生的进程和主线程句柄。
+///
+/// @since Beta v0.13.0
+pub(super) fn close_process_handles(pi: &PROCESS_INFORMATION) {
+  unsafe {
+    if !pi.hProcess.is_null() {
+      CloseHandle(pi.hProcess);
+    }
+    if !pi.hThread.is_null() {
+      CloseHandle(pi.hThread);
+    }
+  }
+}
+
 /// 创建命名管道，失败时返回 Windows 错误码和描述。
+///
+/// @since Beta v0.13.0
 pub fn create_named_pipe(pipe_name: &str) -> Result<HANDLE, String> {
   let full_pipe_name = format!(r"\\.\pipe\{}", pipe_name);
-  let wide = U16CString::from_str(&full_pipe_name).expect("invalid pipe name");
+  let wide = U16CString::from_str(&full_pipe_name)
+    .map_err(|error| format!("命名管道名称无效（包含 NUL 字符）：{error}"))?;
 
   unsafe {
     let handle = CreateNamedPipeW(
@@ -45,11 +73,7 @@ pub fn create_named_pipe(pipe_name: &str) -> Result<HANDLE, String> {
       ptr::null_mut(),
     );
     if handle == INVALID_HANDLE_VALUE {
-      let error_code = GetLastError();
-      let error = std::io::Error::from_raw_os_error(error_code as i32);
-      let message = format!(
-        "CreateNamedPipeW 创建 {full_pipe_name} 失败（Windows 错误码 {error_code}）：{error}"
-      );
+      let message = format_windows_error(&format!("CreateNamedPipeW 创建 {full_pipe_name}"));
       log::error!("{message}");
       return Err(message);
     }
@@ -57,19 +81,30 @@ pub fn create_named_pipe(pipe_name: &str) -> Result<HANDLE, String> {
   }
 }
 
-/// 启动目标进程，附加 cwd 或 ticket
-pub fn spawn_process(path: &str, ticket: Option<String>) -> PROCESS_INFORMATION {
-  let wide_path = U16CString::from_str(path).expect("invalid path");
+/// 启动目标进程，附加 cwd 或 ticket。
+///
+/// @since Beta v0.13.0
+pub fn spawn_process(path: &str, ticket: Option<String>) -> Result<PROCESS_INFORMATION, String> {
+  let wide_path = U16CString::from_str(path)
+    .map_err(|error| format!("游戏路径无效（包含 NUL 字符）：{error}"))?;
 
-  let wide_cmd = ticket.as_ref().map(|t| {
-    let cmdline = format!("{} login_auth_ticket={}", path, t);
-    U16CString::from_str(&cmdline).expect("invalid cmdline")
-  });
+  let wide_cmd = ticket
+    .as_ref()
+    .map(|t| {
+      let cmdline = format!("{} login_auth_ticket={}", path, t);
+      U16CString::from_str(&cmdline)
+        .map_err(|error| format!("游戏启动参数无效（包含 NUL 字符）：{error}"))
+    })
+    .transpose()?;
 
   let wide_cwd: Option<U16CString> = if ticket.is_none() {
     std::path::Path::new(path)
       .parent()
-      .and_then(|p| Some(U16CString::from_os_str(p.as_os_str()).unwrap()))
+      .map(|parent| {
+        U16CString::from_os_str(parent.as_os_str())
+          .map_err(|error| format!("游戏工作目录无效（包含 NUL 字符）：{error}"))
+      })
+      .transpose()?
   } else {
     None
   };
@@ -93,38 +128,47 @@ pub fn spawn_process(path: &str, ticket: Option<String>) -> PROCESS_INFORMATION 
     );
 
     if success == 0 {
-      panic!("CreateProcessW failed");
+      return Err(format_windows_error("CreateProcessW 启动游戏进程"));
     }
 
-    pi
+    Ok(pi)
   }
 }
 
-/// 注入 DLL
-pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
-  let dll_utf16 = U16CString::from_str(dll_path).expect("invalid dll path");
-  let size = dll_utf16.len() * 2;
+/// 将 DLL 路径写入目标进程并启动远程加载线程。
+///
+/// @since Beta v0.13.0
+pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) -> Result<(), String> {
+  let dll_utf16 = U16CString::from_str(dll_path)
+    .map_err(|error| format!("DLL 路径无效（包含 NUL 字符）：{error}"))?;
+  let size = dll_utf16.as_slice_with_nul().len() * std::mem::size_of::<u16>();
 
   unsafe {
     let addr = VirtualAllocEx(pi.hProcess, ptr::null_mut(), size, MEM_COMMIT, PAGE_READWRITE);
     if addr.is_null() {
-      panic!("VirtualAllocEx failed");
+      return Err(format_windows_error("VirtualAllocEx 为 DLL 路径分配远程内存"));
     }
 
     let success =
       WriteProcessMemory(pi.hProcess, addr, dll_utf16.as_ptr() as *const _, size, ptr::null_mut());
     if success == 0 {
-      panic!("WriteProcessMemory failed");
+      let error = format_windows_error("WriteProcessMemory 写入 DLL 路径");
+      release_remote_memory(pi.hProcess, addr);
+      return Err(error);
     }
 
     let k32 = GetModuleHandleA(b"kernel32.dll\0".as_ptr());
     if k32.is_null() {
-      panic!("GetModuleHandleA failed");
+      let error = format_windows_error("GetModuleHandleA 获取 kernel32.dll");
+      release_remote_memory(pi.hProcess, addr);
+      return Err(error);
     }
 
     let loadlib = GetProcAddress(k32, b"LoadLibraryW\0".as_ptr());
     if loadlib.is_none() {
-      panic!("GetProcAddress failed");
+      let error = format_windows_error("GetProcAddress 获取 LoadLibraryW");
+      release_remote_memory(pi.hProcess, addr);
+      return Err(error);
     }
 
     let thread = CreateRemoteThread(
@@ -137,10 +181,36 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
       ptr::null_mut(),
     );
     if thread.is_null() {
-      panic!("CreateRemoteThread failed");
+      let error = format_windows_error("CreateRemoteThread 加载 DLL");
+      release_remote_memory(pi.hProcess, addr);
+      return Err(error);
     }
 
-    WaitForSingleObject(thread, INFINITE);
+    let wait_result = WaitForSingleObject(thread, INFINITE);
+    let wait_error = if wait_result == WAIT_FAILED {
+      Some(format_windows_error("WaitForSingleObject 等待 DLL 加载线程"))
+    } else {
+      None
+    };
+    CloseHandle(thread);
+    if let Some(error) = wait_error {
+      log::warn!("{error}；为避免线程仍在使用路径，保留 DLL 路径远程内存");
+      return Err(error);
+    }
+    release_remote_memory(pi.hProcess, addr);
+
+    Ok(())
+  }
+}
+
+/// 释放 DLL 注入过程中分配的远程内存，并记录清理失败。
+///
+/// @since Beta v0.13.0
+fn release_remote_memory(process: HANDLE, address: *mut std::ffi::c_void) {
+  unsafe {
+    if VirtualFreeEx(process, address, 0, MEM_RELEASE) == 0 {
+      log::warn!("{}", format_windows_error("VirtualFreeEx 释放 DLL 路径远程内存"));
+    }
   }
 }
 
@@ -239,18 +309,28 @@ pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
   }
 }
 
-/// 执行 YaeMain
-pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) {
-  let dll_path_wide = U16CString::from_str(dll_path).expect("invalid dll path");
+/// 在目标进程中执行 YaeMain。
+///
+/// @since Beta v0.13.0
+pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) -> Result<(), String> {
+  let dll_path_wide = U16CString::from_str(dll_path)
+    .map_err(|error| format!("DLL 路径无效（包含 NUL 字符）：{error}"))?;
 
   unsafe {
     let local =
       LoadLibraryExW(dll_path_wide.as_ptr(), ptr::null_mut(), DONT_RESOLVE_DLL_REFERENCES);
     if local.is_null() {
-      panic!("LoadLibraryExW failed");
+      return Err(format_windows_error("LoadLibraryExW 加载 DLL 以定位 YaeMain"));
     }
 
-    let proc = GetProcAddress(local, b"YaeMain\0".as_ptr()).expect("无法找到 YaeMain");
+    let proc = match GetProcAddress(local, b"YaeMain\0".as_ptr()) {
+      Some(proc) => proc,
+      None => {
+        let error = format_windows_error("GetProcAddress 获取 YaeMain");
+        FreeLibrary(local);
+        return Err(error);
+      }
+    };
 
     let proc_addr = proc as usize;
     let rva = proc_addr - local as usize;
@@ -259,7 +339,7 @@ pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) {
     FreeLibrary(local);
 
     let remote_yaemain = (base + rva) as *mut std::ffi::c_void;
-    CreateRemoteThread(
+    let thread = CreateRemoteThread(
       pi.hProcess,
       ptr::null_mut(),
       0,
@@ -268,5 +348,58 @@ pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) {
       0,
       ptr::null_mut(),
     );
+    if thread.is_null() {
+      return Err(format_windows_error("CreateRemoteThread 执行 YaeMain"));
+    }
+    CloseHandle(thread);
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  /// 验证游戏路径包含 NUL 字符时返回错误而不是 panic。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn spawn_process_rejects_embedded_nul_path() {
+    let result = spawn_process("C:\\TeyvatGuide\\game\0.exe", None);
+    let Err(error) = result else {
+      panic!("包含 NUL 字符的游戏路径应返回错误");
+    };
+    assert!(error.contains("游戏路径无效"));
+  }
+
+  /// 验证无效进程句柄使 DLL 注入返回错误而不是 panic。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn inject_dll_rejects_zero_process_information() {
+    let process_info: PROCESS_INFORMATION = unsafe { std::mem::zeroed() };
+    let result = inject_dll(&process_info, "YaeAchievementLib.dll");
+    let Err(error) = result else {
+      panic!("全零 PROCESS_INFORMATION 应返回错误");
+    };
+    assert!(error.contains("VirtualAllocEx"));
+  }
+
+  /// 验证缺失的 DLL 路径使 YaeMain 调用返回错误而不是 panic。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn call_yaemain_rejects_missing_dll_path() {
+    let missing_dll =
+      std::env::temp_dir().join(format!("teyvatguide-missing-yae-{}.dll", std::process::id()));
+    assert!(!missing_dll.exists(), "测试所需的缺失 DLL 路径已存在");
+    let missing_dll = missing_dll.to_string_lossy().into_owned();
+    let process_info: PROCESS_INFORMATION = unsafe { std::mem::zeroed() };
+
+    let result = call_yaemain(&process_info, 0, &missing_dll);
+    let Err(error) = result else {
+      panic!("缺失 DLL 路径应返回错误");
+    };
+    assert!(error.contains("LoadLibraryExW"));
   }
 }

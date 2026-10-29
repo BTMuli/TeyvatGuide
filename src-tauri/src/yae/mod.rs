@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 #![cfg(target_os = "windows")]
 
 pub mod cmd_parse;
@@ -12,15 +12,17 @@ use cmd_parse::{
   handle_packet_notify, handle_packet_tasks_write, handle_prop_list, handle_prop_notify,
   handle_prop_tasks_write, handle_rva_write,
 };
-use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
+use inject::{
+  call_yaemain, close_process_handles, create_named_pipe, find_module_base, inject_dll,
+  spawn_process,
+};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use std::os::windows::io::{FromRawHandle, RawHandle};
+use std::os::windows::io::{AsRawHandle, FromRawHandle, IntoRawHandle, OwnedHandle, RawHandle};
 use std::sync::Arc;
 use tauri::{AppHandle, Manager};
-use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
 
 /// 读取 `nativeConfig.methodRva.chinese` 下指定键的 RVA 配置值。
@@ -62,7 +64,19 @@ pub fn read_conf(path: &str) -> i32 {
   current.as_i64().unwrap_or(0) as i32
 }
 
-/// 调用 dll
+/// 启动游戏并注入 Yae DLL，通过现有命名管道处理 DLL 通知。
+///
+/// @since Beta v0.13.0
+///
+/// # 参数
+/// - `app_handle`: Tauri 应用句柄，用于解析 DLL 路径。
+/// - `game_path`: 游戏可执行文件路径。
+/// - `uid`: 当前用户标识，用于处理 DLL 通知。
+/// - `ticket`: 可选的登录票据。
+/// - `is_msix`: 是否使用 MSIX 文档目录中的 DLL。
+///
+/// # 返回
+/// 成功启动注入流程时返回 `Ok(())`，路径、进程、注入或管道资源失败时返回可读错误。
 #[tauri::command]
 pub fn call_yae_dll(
   app_handle: AppHandle,
@@ -71,10 +85,17 @@ pub fn call_yae_dll(
   ticket: Option<String>,
   is_msix: bool,
 ) -> Result<(), String> {
-  let mut dll_path =
-    app_handle.path().resource_dir().unwrap().join("resources\\YaeAchievementLib.dll");
+  let mut dll_path = app_handle
+    .path()
+    .resource_dir()
+    .map_err(|error| format!("无法获取应用资源目录：{error}"))?
+    .join("resources\\YaeAchievementLib.dll");
   if is_msix {
-    dll_path = app_handle.path().document_dir().unwrap().join("TeyvatGuide\\YaeAchievementLib.dll");
+    dll_path = app_handle
+      .path()
+      .document_dir()
+      .map_err(|error| format!("无法获取应用文档目录：{error}"))?
+      .join("TeyvatGuide\\YaeAchievementLib.dll");
   }
   log::info!("Resolved DLL path: {}", dll_path.display());
 
@@ -83,31 +104,48 @@ pub fn call_yae_dll(
     let msg = format!("未检测到 DLL，路径: {}", dll_path.display());
     return Err(msg);
   }
+  let dll_path_str = dll_path
+    .to_str()
+    .ok_or_else(|| format!("DLL 路径无法转换为 Windows 字符串：{}", dll_path.display()))?;
 
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
   dbg!("开始启动 YaeAchievementPipe 命名管道");
-  let _pipe_handle = create_named_pipe("YaeAchievementPipe")?;
+  let raw_pipe_handle = create_named_pipe("YaeAchievementPipe")?;
+  let pipe_handle = unsafe { OwnedHandle::from_raw_handle(raw_pipe_handle as RawHandle) };
 
   // 1. 启动游戏进程
-  let pi = spawn_process(&game_path, ticket);
+  let pi = spawn_process(&game_path, ticket)?;
   dbg!("游戏进程启动完成");
 
   // 2. 注入 DLL
-  inject_dll(&pi, dll_path.to_str().unwrap());
+  if let Err(error) = inject_dll(&pi, dll_path_str) {
+    close_process_handles(&pi);
+    return Err(error);
+  }
   dbg!("DLL 注入完成");
 
   // 3. 找到 DLL 基址
-  let base = find_module_base(pi.dwProcessId, "YaeAchievementLib.dll").expect("找不到 DLL 基址");
+  let base = match find_module_base(pi.dwProcessId, "YaeAchievementLib.dll") {
+    Some(base) => base,
+    None => {
+      close_process_handles(&pi);
+      return Err("找不到已注入 DLL 的基址，请确认游戏进程仍在运行".to_string());
+    }
+  };
   dbg!("找到 DLL 基址: {:X}", base);
 
   // 4. 调用 YaeMain
-  call_yaemain(&pi, base, dll_path.to_str().unwrap());
+  if let Err(error) = call_yaemain(&pi, base, dll_path_str) {
+    close_process_handles(&pi);
+    return Err(error);
+  }
   dbg!("YaeMain 调用完成");
 
   // 根据句柄等待命名管道连接
   let retry_count = 50;
   for _ in 0..retry_count {
-    let result = unsafe { ConnectNamedPipe(_pipe_handle, std::ptr::null_mut()) };
+    let result =
+      unsafe { ConnectNamedPipe(pipe_handle.as_raw_handle() as _, std::ptr::null_mut()) };
     if result != 0 {
       dbg!("命名管道连接成功");
       break;
@@ -116,14 +154,20 @@ pub fn call_yae_dll(
     }
   }
   // 5. 读取命名管道数据,循环读取，根据接受字节进行通信
-  let file = unsafe { File::from_raw_handle(_pipe_handle as RawHandle) };
+  let file = unsafe { File::from_raw_handle(pipe_handle.into_raw_handle()) };
   let file = Arc::new(file);
 
   // No raw HANDLE captured in the closure. Only Arc<File>.
-  std::thread::spawn({
+  let reader_result = std::thread::Builder::new().name("yae-pipe-reader".to_string()).spawn({
     let file = file.clone();
     move || {
-      let mut file = file.try_clone().expect("Failed to clone pipe file");
+      let mut file = match file.try_clone() {
+        Ok(file) => file,
+        Err(error) => {
+          log::error!("克隆 YAE 命名管道失败：{error}");
+          return;
+        }
+      };
       let mut cmd = [0u8; 1];
       // 处理Prop
       let mut prop_map: HashMap<u32, f64> = HashMap::new();
@@ -166,9 +210,10 @@ pub fn call_yae_dll(
       }
     }
   });
-  unsafe {
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+  if let Err(error) = reader_result {
+    close_process_handles(&pi);
+    return Err(format!("启动 YAE 命名管道读取线程失败：{error}"));
   }
+  close_process_handles(&pi);
   Ok(())
 }
