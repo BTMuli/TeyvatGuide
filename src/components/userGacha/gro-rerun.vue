@@ -13,6 +13,7 @@
         v-model="category"
         class="rerun-category"
         color="var(--tgc-od-blue)"
+        mandatory
         size="default"
         variant="outlined"
       >
