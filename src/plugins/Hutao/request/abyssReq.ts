@@ -1,6 +1,6 @@
 /**
  * 深渊相关请求
- * @since Beta v0.12.2
+ * @since Beta v0.13.0
  */
 import TGHttps from "@utils/network/TGHttps.js";
 
@@ -139,6 +139,22 @@ function transData(data: TGApp.Sqlite.Abyss.TableTrans): TGApp.Plugins.Hutao.Aby
 }
 
 /**
+ * 检查深渊上传所需的排行数据是否完整。
+ * @since Beta v0.13.0
+ * @param data - 本地深渊数据
+ * @returns 是否包含全部上传所需的排行数据
+ */
+function hasCompleteRankData(data: TGApp.Sqlite.Abyss.TableTrans): boolean {
+  return [
+    data.defeatRank,
+    data.energySkillRank,
+    data.normalSkillRank,
+    data.damageRank,
+    data.takeDamageRank,
+  ].every((rank) => rank.length > 0);
+}
+
+/**
  * 转换深渊数据
  * @since Beta v0.6.3
  * @param data - 本地数据
@@ -240,6 +256,7 @@ const AbyssReq = {
   team: getTeamCollect,
   upload: uploadData,
   utils: {
+    hasCompleteRankData,
     transData,
     transAvatars,
   },
