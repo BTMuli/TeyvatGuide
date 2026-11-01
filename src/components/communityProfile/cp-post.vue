@@ -14,6 +14,7 @@
             <v-icon size="20">{{ selected ? "mdi-check-circle" : "mdi-circle-outline" }}</v-icon>
           </span>
           <CpTypeBadge v-if="typeLabel" :icon="typeIcon" :label="typeLabel" />
+          <CpTypeBadge class="cp-post-id" :label="`PID:${post.post.post_id}`" />
           <CpChannelTag
             v-if="game"
             :aria-label="`进入分区：${game.name}`"
@@ -40,7 +41,7 @@
         </time>
       </div>
       <button
-        v-if="post.user"
+        v-if="showAuthor && post.user"
         :title="`查看 ${post.user.nickname} 的米游社主页`"
         class="cp-post-author"
         type="button"
@@ -131,6 +132,7 @@ import {
   getPostTypeIcon,
   getPostTypeLabel,
 } from "@utils/community/profile.js";
+import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
@@ -143,11 +145,15 @@ type PostGame = { name: string; icon?: string };
 
 const {
   post,
+  game: gameOverride,
+  showAuthor = true,
   viewedAt,
   selectable = false,
   selected = false,
 } = defineProps<{
   post: TGApp.BBS.Post.FullData;
+  game?: PostGame;
+  showAuthor?: boolean;
   viewedAt?: number;
   selectable?: boolean;
   selected?: boolean;
@@ -160,6 +166,7 @@ const emit = defineEmits<{
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
 const game = computed<PostGame | undefined>(() => {
+  if (gameOverride) return gameOverride;
   const find = gameList.value.find((item) => item.id === post.post.game_id);
   return find ? { name: find.name, icon: find.app_icon || find.icon } : undefined;
 });
@@ -171,6 +178,9 @@ const timeText = computed<string>(() =>
 );
 const typeLabel = computed<string | undefined>(() => getPostTypeLabel(post));
 const typeIcon = computed<string | undefined>(() => getPostTypeIcon(post));
+const idBg = computed<string>(() =>
+  str2Color(post.post.post_id, 0).replace(/^rgb\((.+)\)$/, "rgba($1, 0.45)"),
+);
 const images = computed<Array<string>>(() => getPostPreviewImages(post));
 const remainingImages = computed<number>(() =>
   Math.max(getPostImageCount(post) - images.value.length, 0),
@@ -251,6 +261,13 @@ function handleCardClick(event: MouseEvent): void {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.cp-post-channels .cp-post-id {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: v-bind(idBg); /* stylelint-disable-line value-keyword-case */
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
 .cp-post-author {
@@ -431,5 +448,16 @@ function handleCardClick(event: MouseEvent): void {
   align-items: center;
   margin-left: auto;
   gap: 8px;
+}
+
+@media (width <= 640px) {
+  .cp-post {
+    padding: 12px;
+  }
+
+  .cp-post-footer,
+  .cp-post-stats {
+    gap: 8px;
+  }
 }
 </style>

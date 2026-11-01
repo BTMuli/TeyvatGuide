@@ -242,7 +242,7 @@
           <v-btn variant="tonal" @click="retryPosts">重新加载</v-btn>
         </div>
         <div
-          v-else-if="currentPosts.length === 0 && searchKeyword"
+          v-else-if="posts.length === 0 && searchKeyword"
           class="community-profile-state"
           role="status"
         >
@@ -250,7 +250,7 @@
           <p>未找到与“{{ searchKeyword }}”相关的帖子</p>
           <span>换个关键词试试</span>
         </div>
-        <div v-else-if="currentPosts.length === 0" class="community-profile-state" role="status">
+        <div v-else-if="posts.length === 0" class="community-profile-state" role="status">
           <v-icon size="32">mdi-post-off</v-icon>
           <p>{{ isOwnProfile ? "暂未发布帖子" : "暂无公开帖子" }}</p>
           <span>{{
@@ -258,128 +258,42 @@
           }}</span>
         </div>
         <div v-else class="community-profile-post-list">
-          <article
-            v-for="post in currentPosts"
+          <CpPost
+            v-for="post in posts"
             :key="post.post.post_id"
-            class="community-profile-post"
+            :game="getPostGame(post)"
+            :post
+            :showAuthor="false"
+            @open-post="openPost"
           >
-            <header class="community-profile-post-meta">
-              <div class="community-profile-post-channels">
-                <CpTypeBadge v-if="post.typeLabel" :icon="post.typeIcon" :label="post.typeLabel" />
-                <CpChannelTag
-                  v-if="post.game"
-                  :aria-label="`进入分区：${post.game.name}`"
-                  :icon="post.game.icon"
-                  kind="game"
-                  :name="post.game.name"
-                  :to="`/posts/forum/${post.post.game_id}`"
-                />
-                <CpChannelTag
-                  v-if="post.forum"
-                  :aria-label="`进入版块：${post.forum.name}`"
-                  :icon="post.forumIcon"
-                  kind="forum"
-                  :name="post.forum.name"
-                  :to="`/posts/forum/${post.post.game_id}/${post.forum.id}`"
-                />
-              </div>
-              <time
-                class="community-profile-post-time"
-                :title="`发布于 ${fmtUtil.dateTime(post.post.created_at * 1000)}`"
+            <template v-if="isEditablePost(post) || isDeletablePost(post)" #actions>
+              <v-btn
+                v-if="isEditablePost(post)"
+                class="community-profile-edit-button"
+                prepend-icon="mdi-pencil-outline"
+                size="small"
+                title="编辑这篇帖子"
+                variant="tonal"
+                @click="editPost(post)"
               >
-                <v-icon size="16" aria-hidden="true">mdi-clock-outline</v-icon>
-                {{ fmtUtil.dateTime(post.post.created_at * 1000) }}
-              </time>
-            </header>
-            <h3 class="community-profile-post-title">
-              <button type="button" @click="openPost(post)">
-                <TpTitle :text="post.post.subject || '无标题帖子'" />
-              </button>
-            </h3>
-            <div v-if="post.images.length" class="community-profile-post-images">
-              <span
-                v-for="(image, index) in post.images"
-                :key="`${index}:${image}`"
-                class="community-profile-post-image"
+                编辑
+              </v-btn>
+              <v-btn
+                v-if="isDeletablePost(post)"
+                :disabled="deletingPostId !== ''"
+                :loading="deletingPostId === post.post.post_id"
+                class="community-profile-delete-button"
+                prepend-icon="mdi-delete-outline"
+                size="small"
+                title="删除这篇帖子"
+                variant="tonal"
+                @click="deletePost(post)"
               >
-                <TMiImg :alt="`第 ${index + 1} 张帖子图片`" :src="image" />
-                <span
-                  v-if="index === post.images.length - 1 && post.remainingImages > 0"
-                  class="community-profile-post-image-more"
-                >
-                  <v-icon aria-hidden="true" size="10">mdi-folder-multiple-image</v-icon>
-                  +{{ fmtUtil.num(post.remainingImages) }}
-                </span>
-              </span>
-            </div>
-            <div v-if="post.topics.length" class="community-profile-post-topics">
-              <RouterLink
-                v-for="topic in post.topics"
-                :key="topic.id"
-                class="community-profile-post-topic"
-                :to="`/posts/topic/${post.post.game_id}/${topic.id}`"
-              >
-                <TpcTag :tag="topic.name" />
-              </RouterLink>
-            </div>
-            <footer class="community-profile-post-footer">
-              <div v-if="post.stat" aria-label="帖子统计" class="community-profile-post-stats">
-                <span :title="`浏览 ${fmtUtil.num(post.stat.view_num)}`">
-                  <v-icon size="16" aria-hidden="true">mdi-eye-outline</v-icon>
-                  {{ fmtUtil.num(post.stat.view_num) }}
-                </span>
-                <span :title="`回复 ${fmtUtil.num(post.stat.reply_num)}`">
-                  <v-icon size="16" aria-hidden="true">mdi-comment-outline</v-icon>
-                  {{ fmtUtil.num(post.stat.reply_num) }}
-                </span>
-                <span :title="`点赞 ${fmtUtil.num(post.stat.like_num)}`">
-                  <v-icon size="16" aria-hidden="true">mdi-thumb-up-outline</v-icon>
-                  {{ fmtUtil.num(post.stat.like_num) }}
-                </span>
-                <span
-                  v-if="post.stat.bookmark_num > 0"
-                  :title="`收藏 ${fmtUtil.num(post.stat.bookmark_num)}`"
-                >
-                  <v-icon size="16" aria-hidden="true">mdi-star-outline</v-icon>
-                  {{ fmtUtil.num(post.stat.bookmark_num) }}
-                </span>
-                <span
-                  v-if="post.stat.forward_num > 0"
-                  :title="`转发 ${fmtUtil.num(post.stat.forward_num)}`"
-                >
-                  <v-icon size="16" aria-hidden="true">mdi-share-variant-outline</v-icon>
-                  {{ fmtUtil.num(post.stat.forward_num) }}
-                </span>
-              </div>
-              <div class="community-profile-post-actions">
-                <v-btn
-                  v-if="isEditablePost(post)"
-                  class="community-profile-edit-button"
-                  prepend-icon="mdi-pencil-outline"
-                  size="small"
-                  title="编辑这篇帖子"
-                  variant="tonal"
-                  @click="editPost(post)"
-                >
-                  编辑
-                </v-btn>
-                <v-btn
-                  v-if="isDeletablePost(post)"
-                  :disabled="deletingPostId !== ''"
-                  :loading="deletingPostId === post.post.post_id"
-                  class="community-profile-delete-button"
-                  prepend-icon="mdi-delete-outline"
-                  size="small"
-                  title="删除这篇帖子"
-                  variant="tonal"
-                  @click="deletePost(post)"
-                >
-                  删除
-                </v-btn>
-              </div>
-            </footer>
-          </article>
-          <footer v-if="currentPosts.length" class="community-profile-post-list-footer">
+                删除
+              </v-btn>
+            </template>
+          </CpPost>
+          <footer v-if="posts.length" class="community-profile-post-list-footer">
             <template v-if="loadMoreError">
               <span :title="loadMoreError">加载失败</span>
               <v-btn :disabled="loadingMore" size="small" variant="tonal" @click="loadMorePosts">
@@ -439,18 +353,14 @@
 </template>
 
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
-import CpChannelTag from "@comp/communityProfile/cp-channel-tag.vue";
 import CpContent from "@comp/communityProfile/cp-content.vue";
 import CpNotifications from "@comp/communityProfile/cp-notifications.vue";
 import CpNotifySettings from "@comp/communityProfile/cp-notify-settings.vue";
+import CpPost from "@comp/communityProfile/cp-post.vue";
 import CpSettings from "@comp/communityProfile/cp-settings.vue";
-import CpTypeBadge from "@comp/communityProfile/cp-type-badge.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TpTitle from "@comp/viewPost/tp-title.vue";
-import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
 import postEditReq from "@req/postEditReq.js";
@@ -462,11 +372,6 @@ import { createPost } from "@utils/app/TGWindow.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
 import {
-  getPostForumIcon,
-  getPostImageCount,
-  getPostPreviewImages,
-  getPostTypeIcon,
-  getPostTypeLabel,
   hasNextProfile,
   hasPreviousProfile,
   parseCommunityProfileGid,
@@ -537,15 +442,6 @@ type ProfileGameOption = Pick<TGApp.BBS.Game.Item, "id" | "name"> & {
   icon?: string;
 };
 
-type ProfilePost = TGApp.BBS.Post.FullData & {
-  forumIcon?: string;
-  game?: ProfileGameOption;
-  images: Array<string>;
-  remainingImages: number;
-  typeIcon?: string;
-  typeLabel?: string;
-};
-
 const defaultProfileGame: ProfileGameOption = {
   id: 2,
   name: "原神",
@@ -567,7 +463,7 @@ const router = useRouter();
 const route = useRoute();
 const { isLogin } = storeToRefs(useAppStore());
 const bbsStore = useBBSStore();
-const { gameList, forumList } = storeToRefs(bbsStore);
+const { gameList } = storeToRefs(bbsStore);
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const profileUid = computed<string>(() => {
   const targetUid = route.params.uid;
@@ -731,20 +627,6 @@ const followState = computed<FollowState | undefined>(() => {
   return { icon: "mdi-account-plus-outline", label: "未关注，点击关注" };
 });
 const gameMenuVisible = ref<boolean>(false);
-const currentPosts = computed<Array<ProfilePost>>(() =>
-  posts.value.map((post) => {
-    const images = getPostPreviewImages(post);
-    return {
-      ...post,
-      forumIcon: getPostForumIcon(post, forumList.value),
-      game: getPostGame(post),
-      images,
-      remainingImages: getPostImageCount(post) - images.length,
-      typeIcon: getPostTypeIcon(post),
-      typeLabel: getPostTypeLabel(post),
-    };
-  }),
-);
 let requestVersion = 0;
 let unreadVersion = 0;
 let headerRequestVersion = 0;
@@ -1346,8 +1228,8 @@ function getPostGame(post: TGApp.BBS.Post.FullData): ProfileGameOption | undefin
   return gameOptions.value.find((game) => game.id === post.post.game_id);
 }
 
-async function openPost(post: TGApp.BBS.Post.FullData): Promise<void> {
-  await createPost(post.post.post_id, post.post.subject);
+async function openPost(postId: string, title: string): Promise<void> {
+  await createPost(postId, title);
 }
 
 async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
@@ -1885,193 +1767,6 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   height: 1px;
 }
 
-.community-profile-post {
-  position: relative;
-  z-index: 0;
-  display: flex;
-  min-width: 0;
-  flex: 0 0 auto;
-  flex-direction: column;
-  padding: 16px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-1);
-  gap: 12px;
-  transition: background-color 120ms ease;
-
-  &:hover {
-    background: var(--box-bg-2);
-  }
-}
-
-.community-profile-post-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--box-text-4);
-  font-size: 12px;
-  gap: 8px 12px;
-}
-
-.community-profile-post-channels {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.community-profile-post-time {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  margin-left: auto;
-  gap: 4px;
-  white-space: nowrap;
-}
-
-.community-profile-post-title {
-  margin: 0;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 18px;
-  font-weight: normal;
-  line-height: 28px;
-  overflow-wrap: anywhere;
-
-  button {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
-    text-align: left;
-
-    &::after {
-      position: absolute;
-      z-index: 1;
-      content: "";
-      inset: 0;
-    }
-
-    &:focus-visible {
-      outline: none;
-
-      &::after {
-        border-radius: 8px;
-        outline: 2px solid var(--common-text-title);
-        outline-offset: 2px;
-      }
-    }
-  }
-}
-
-.community-profile-post-images {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  gap: 8px;
-  text-align: left;
-}
-
-.community-profile-post-image {
-  position: relative;
-  display: grid;
-  overflow: hidden;
-  width: 160px;
-  max-width: 100%;
-  height: auto;
-  flex: 0 1 160px;
-  border-radius: 4px;
-  aspect-ratio: 1;
-  background: var(--box-bg-2);
-  place-items: center;
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.community-profile-post:hover .community-profile-post-image {
-  background: var(--box-bg-1);
-}
-
-.community-profile-post-image-more {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-right: 4px;
-  padding-left: 8px;
-  background: var(--tgc-od-blue);
-  border-top-left-radius: 12px;
-  box-shadow: -1px -1px 6px var(--tgc-dark-1);
-  color: var(--tgc-white-1);
-  column-gap: 2px;
-  font-size: 12px;
-  line-height: 18px;
-}
-
-.community-profile-post-topics {
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 12px;
-  gap: 4px;
-}
-
-.community-profile-post-topic {
-  position: relative;
-  z-index: 2;
-  display: inline-flex;
-  border-radius: 12px;
-  text-decoration: none;
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
-  }
-}
-
-.community-profile-post-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-}
-
-.community-profile-post-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-.community-profile-post-stats {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 auto;
-  flex-wrap: wrap;
-  color: var(--box-text-4);
-  font-size: 12px;
-  gap: 16px;
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-}
-
 .community-profile-edit-button {
   position: relative;
   z-index: 2;
@@ -2176,20 +1871,8 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
     gap: 8px;
   }
 
-  .community-profile-post {
-    padding: 12px;
-  }
-
   .community-profile-posts-header {
     align-items: flex-start;
-  }
-
-  .community-profile-post-footer {
-    gap: 8px;
-  }
-
-  .community-profile-post-stats {
-    gap: 8px;
   }
 }
 </style>
