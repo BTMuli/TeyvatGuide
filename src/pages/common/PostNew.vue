@@ -115,7 +115,10 @@ const accountName = computed<string>(() => briefInfo.value.nickname || uid.value
 const fromTopic = computed<boolean>(
   () => route.query.from === "topic" || (route.query.from !== "forum" && !!initialTopic.value),
 );
-const backLabel = computed<string>(() => (fromTopic.value ? "返回话题" : "返回版块"));
+const fromProfile = computed<boolean>(() => route.query.from === "profile");
+const backLabel = computed<string>(() =>
+  fromProfile.value ? "返回我的主页" : fromTopic.value ? "返回话题" : "返回版块",
+);
 const pageTitle = computed<string>(() => (viewType.value === 2 ? "发布图片帖" : "发布长文"));
 const currentForum = computed<TGApp.BBS.Forum.GameForumItem | undefined>(() => {
   if (initialForumId.value === undefined || initialForumId.value === 0) return undefined;
@@ -147,6 +150,13 @@ onBeforeRouteUpdate(() => !editorBusy.value);
 
 async function goBack(): Promise<void> {
   if (editorBusy.value) return;
+  if (fromProfile.value) {
+    await router.push({
+      name: "个人信息",
+      query: { gid: String(gid.value) },
+    });
+    return;
+  }
   if (!Number.isSafeInteger(gid.value) || gid.value <= 0) {
     await router.push({ name: "酒馆" });
     return;
