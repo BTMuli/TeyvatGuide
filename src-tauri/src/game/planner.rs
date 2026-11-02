@@ -1,5 +1,5 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 
 use super::hoyoplay::get_channel_sdk;
 use super::{
@@ -346,6 +346,8 @@ pub(crate) struct PlanParts {
 }
 
 /// 请求远端清单，生成可执行的 patch 或 manifest-diff 计划并原子写入应用数据目录。
+///
+/// @since Beta v0.13.0
 pub async fn create_and_persist_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -390,19 +392,22 @@ pub async fn create_and_persist_plan(
   .await?;
   report_plan_progress(on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
 
-  persist_plan_parts(
+  persist_plan_parts_blocking(
     installation,
     scheme,
     target,
-    source_tag,
-    &target_branch.tag,
+    source_tag.to_string(),
+    target_branch.tag.clone(),
     parts,
-    &app_data_dir.join("game-tasks"),
+    app_data_dir.join("game-tasks"),
     None,
   )
+  .await
 }
 
 /// 为当前正式版本生成只改变官方语音分类的 manifest-diff 计划。
+///
+/// @since Beta v0.13.0
 pub async fn create_and_persist_audio_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -433,16 +438,18 @@ pub async fn create_and_persist_audio_plan(
     return Err("所选语音包没有产生可执行的文件变化".to_string());
   }
   report_plan_progress(on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
-  persist_plan_parts(
+  let source_tag = source_tag.to_string();
+  persist_plan_parts_blocking(
     installation,
     scheme,
     PackagePlanTarget::Audio,
-    source_tag,
+    source_tag.clone(),
     source_tag,
     parts,
-    &app_data_dir.join("game-tasks"),
+    app_data_dir.join("game-tasks"),
     Some(selection),
   )
+  .await
 }
 
 /// 读取当前安装版本的完整目标清单，供完整性校验扫描。
@@ -464,6 +471,50 @@ pub(crate) async fn load_verify_target(
       .await?;
   let inventory = collect_inventory(&collect_assets(&target)?)?;
   Ok((target, inventory))
+}
+
+/// 在阻塞线程池中计算缓存命中、空间预算并持久化计划。
+///
+/// @since Beta v0.13.0
+///
+/// # 参数
+/// - `installation`: 安装信息。
+/// - `scheme`: 渠道方案。
+/// - `target`: 计划目标。
+/// - `source_tag`: 源版本标签。
+/// - `target_tag`: 目标版本标签。
+/// - `parts`: 计划部件。
+/// - `task_root`: 任务根目录。
+/// - `audio_selection`: 可选语音选择。
+///
+/// # 返回
+/// - `Ok(PackagePlanSummary)`: 计划摘要。
+/// - `Err(String)`: 持久化失败的错误描述。
+async fn persist_plan_parts_blocking(
+  installation: &GameInstallation,
+  scheme: SchemeId,
+  target: PackagePlanTarget,
+  source_tag: String,
+  target_tag: String,
+  parts: PlanParts,
+  task_root: PathBuf,
+  audio_selection: Option<PlanAudioSelection>,
+) -> Result<PackagePlanSummary, String> {
+  let installation = installation.clone();
+  tauri::async_runtime::spawn_blocking(move || {
+    persist_plan_parts(
+      &installation,
+      scheme,
+      target,
+      &source_tag,
+      &target_tag,
+      parts,
+      &task_root,
+      audio_selection,
+    )
+  })
+  .await
+  .map_err(|error| format!("等待资源计划持久化任务异常退出：{error}"))?
 }
 
 /// 将计划部件持久化并生成计划摘要。
@@ -3610,5 +3661,87 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
     0 => Ok(PayloadEncoding::Raw),
     1 => Ok(PayloadEncoding::Zstd),
     _ => Err(format!("Sophon 资源载荷使用了不支持的压缩方式：{compression}")),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::super::model::InstallationStatus;
+  use super::*;
+
+  /// 验证计划持久化 helper 在阻塞线程池中保留成功输出与错误传播。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn persist_plan_parts_blocking_persists_and_propagates_errors() {
+    let root = std::env::temp_dir().join(format!("teyvatguide-planner-{}", Uuid::new_v4()));
+    let task_root = root.join("tasks-root");
+    let game_root = root.join("game-root");
+    fs::create_dir_all(&game_root).expect("创建测试游戏目录失败");
+    let installation = GameInstallation {
+      id: "test-installation".to_string(),
+      executable_path: game_root.join("YuanShen.exe").to_string_lossy().into_owned(),
+      root_path: game_root.to_string_lossy().into_owned(),
+      scheme_id: Some(SchemeId::CnOfficial),
+      preferred_scheme: None,
+      status: InstallationStatus::Known,
+      status_message: String::new(),
+      version: Some("1.0.0".to_string()),
+      channel: None,
+      sub_channel: None,
+      has_channel_sdk: false,
+      audio_languages: vec!["Chinese".to_string()],
+      is_chosen: false,
+      last_seen: String::new(),
+    };
+    let parts = || PlanParts {
+      strategy: PackagePlanStrategy::ManifestDiff,
+      manifest_digest: "a".repeat(64),
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory: vec![PlanFile {
+        name: "target.bin".to_string(),
+        size: 1,
+        md5: "00000000000000000000000000000000".to_string(),
+      }],
+      fallback: None,
+    };
+    let runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .expect("创建测试运行时失败");
+    let summary = runtime
+      .block_on(persist_plan_parts_blocking(
+        &installation,
+        SchemeId::CnOfficial,
+        PackagePlanTarget::Main,
+        "1.0.0".to_string(),
+        "2.0.0".to_string(),
+        parts(),
+        task_root.clone(),
+        None,
+      ))
+      .expect("阻塞计划持久化应成功");
+    assert_eq!(summary.download_count, 0);
+    assert!(task_root.join("tasks").join(&summary.plan_id).join("plan.json").is_file());
+
+    let blocked_root = root.join("blocked-root");
+    fs::write(&blocked_root, b"not a directory").expect("创建错误传播测试文件失败");
+    let error = runtime
+      .block_on(persist_plan_parts_blocking(
+        &installation,
+        SchemeId::CnOfficial,
+        PackagePlanTarget::Main,
+        "1.0.0".to_string(),
+        "2.0.0".to_string(),
+        parts(),
+        blocked_root,
+        None,
+      ))
+      .expect_err("阻塞计划持久化应返回目录创建错误");
+    assert!(error.contains("创建资源缓存目录失败"));
+
+    let _ = fs::remove_dir_all(root);
   }
 }
