@@ -6,6 +6,7 @@ mod events;
 mod metrics;
 mod progress;
 mod spool;
+mod workers;
 
 use events::{TaskEventDispatcher, emit_progress, emit_state, should_emit_progress};
 use metrics::{InstallPipelineMetrics, duration_micros};
@@ -13,6 +14,7 @@ use progress::{
   AudioLiveAssemblyOverlay, overlay_audio_summary, overlay_install_download_progress,
   start_assembly_write_progress_monitor, start_install_download_progress_monitor,
 };
+use workers::{drain_assembly_workers, has_active_assembly_workers, spawn_assembly_worker};
 
 use spool::{
   InstallCompletionSnapshot, InstallSpoolTracker, install_tracker_spool_bytes,
@@ -55,7 +57,7 @@ use std::{
   path::{Path, PathBuf},
   sync::{
     Arc, LazyLock, Mutex,
-    atomic::{AtomicBool, AtomicUsize, Ordering},
+    atomic::{AtomicBool, Ordering},
   },
   time::{Duration, Instant},
 };
@@ -102,6 +104,8 @@ const MAIN_UPDATE_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到下载写入或资源组装持续停滞，请检查磁盘状态后手动继续。";
 const MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍未收到下载数据，请检查网络后手动继续。";
+const AUDIO_WORKER_DRAIN_MESSAGE: &str =
+  "上一轮配音组装仍在退出，任务保持暂停；请等待磁盘操作结束后再次恢复。";
 const AUDIO_STALL_PAUSE_MESSAGE: &str =
   "检测到配音包下载或资源组装持续停滞，任务已自动暂停；可从任务记录继续。详情见运行日志。";
 const AUDIO_NETWORK_STALL_PAUSE_MESSAGE: &str =
@@ -739,54 +743,10 @@ fn audio_pipeline_window(pipeline_concurrency: usize) -> usize {
     .saturating_add(AUDIO_DOWNLOAD_PREFETCH)
 }
 
-/// 组装 worker 完成栅栏：看门狗中止流水线后，下一次运行会等待旧 worker 结束，
-/// 避免旧 worker 在磁盘恢复后继续写 staging 与新一轮组装互相覆盖。
-struct AssemblyWorkerSlot {
-  active: AtomicUsize,
-  finished: tokio::sync::Notify,
-}
-
-static ASSEMBLY_WORKER_SLOTS: LazyLock<Mutex<HashMap<String, Arc<AssemblyWorkerSlot>>>> =
-  LazyLock::new(|| Mutex::new(HashMap::new()));
-
-struct AssemblyWorkerDoneGuard {
-  slot: Arc<AssemblyWorkerSlot>,
-}
-
-impl Drop for AssemblyWorkerDoneGuard {
-  /// 释放组装 worker 槽位并唤醒等待者。
-  ///
-  /// @since Beta v0.12.0
-  fn drop(&mut self) {
-    if self.slot.active.fetch_sub(1, Ordering::AcqRel) == 1 {
-      self.slot.finished.notify_waiters();
-    }
-  }
-}
-
-/// 取得计划对应的组装 worker 槽位。
-///
-/// @since Beta v0.12.0
-///
-/// # 参数
-/// - `plan_id`: 计划 ID。
-///
-/// # 返回
-/// worker 槽位。
-fn assembly_worker_slot(plan_id: &str) -> Arc<AssemblyWorkerSlot> {
-  let mut slots = ASSEMBLY_WORKER_SLOTS.lock().unwrap();
-  Arc::clone(slots.entry(plan_id.to_string()).or_insert_with(|| {
-    Arc::new(AssemblyWorkerSlot {
-      active: AtomicUsize::new(0),
-      finished: tokio::sync::Notify::new(),
-    })
-  }))
-}
-
 #[allow(clippy::too_many_arguments)]
 /// 派生安装组装 worker。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `plan_id`: 计划 ID。
@@ -812,11 +772,7 @@ fn spawn_install_assembly_worker(
   canceled: Arc<AtomicBool>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
 ) -> tauri::async_runtime::JoinHandle<(Result<(), String>, assembler::AssemblyTiming)> {
-  let slot = assembly_worker_slot(plan_id);
-  slot.active.fetch_add(1, Ordering::AcqRel);
-  let worker_slot = Arc::clone(&slot);
-  tauri::async_runtime::spawn_blocking(move || {
-    let _done = AssemblyWorkerDoneGuard { slot: worker_slot };
+  spawn_assembly_worker(plan_id, move || {
     let mut timing = assembler::AssemblyTiming::default();
     let result = assembler::assemble_full_install_asset_with_observers(
       &plan,
@@ -835,6 +791,7 @@ fn spawn_install_assembly_worker(
 
 /// 派生正式更新组装 worker，并登记到中止后的退出栅栏。
 #[allow(clippy::too_many_arguments)]
+/// @since Beta v0.13.0
 fn spawn_main_update_assembly_worker(
   plan: Arc<PersistedPlan>,
   asset_index: usize,
@@ -845,11 +802,8 @@ fn spawn_main_update_assembly_worker(
   canceled: Arc<AtomicBool>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
 ) -> tauri::async_runtime::JoinHandle<Result<assembler::AssetAssemblyOutcome, String>> {
-  let slot = assembly_worker_slot(&plan.plan_id);
-  slot.active.fetch_add(1, Ordering::AcqRel);
-  let worker_slot = Arc::clone(&slot);
-  tauri::async_runtime::spawn_blocking(move || {
-    let _done = AssemblyWorkerDoneGuard { slot: worker_slot };
+  let plan_id = plan.plan_id.clone();
+  spawn_assembly_worker(&plan_id, move || {
     let fallback_plan = fallback.then(|| fallback_asset_plan(&plan, asset_index)).transpose()?;
     let outcome = assembler::assemble_plan_asset_with_source_outcome(
       fallback_plan.as_ref().unwrap_or(&plan),
@@ -865,31 +819,6 @@ fn spawn_main_update_assembly_worker(
     }
     Ok(outcome)
   })
-}
-
-/// 等待上一次中止流水线遗留的组装 worker 结束；全部结束时返回 true。
-async fn drain_assembly_workers(plan_id: &str, timeout: Duration) -> bool {
-  let Some(slot) = ASSEMBLY_WORKER_SLOTS.lock().unwrap().get(plan_id).cloned() else {
-    return true;
-  };
-  let deadline = Instant::now() + timeout;
-  loop {
-    // 先注册等待再检查计数：worker 在“检查”与“注册”之间完成时，
-    // notify_waiters 已发出，直接等待会错过唤醒而空耗整个超时（恢复安装看起来卡住）。
-    let notified = slot.finished.notified();
-    if slot.active.load(Ordering::Acquire) == 0 {
-      ASSEMBLY_WORKER_SLOTS.lock().unwrap().remove(plan_id);
-      return true;
-    }
-    let remaining = deadline.saturating_duration_since(Instant::now());
-    if remaining.is_zero() {
-      return false;
-    }
-    if tokio::time::timeout(remaining, notified).await.is_err() {
-      // 超时仍未结束：保留 slot，避免下一次恢复跳过等待、与僵尸 worker 并发写同一批文件。
-      return slot.active.load(Ordering::Acquire) == 0;
-    }
-  }
 }
 
 /// 把当前活跃组装数写回任务日志并发布进度。
@@ -1162,22 +1091,45 @@ impl TaskReservation {
   }
 }
 
+/// 只释放仍指向同一取消令牌的安装互斥，避免旧任务误删后继任务。
+/// @since Beta v0.13.0
+fn release_task_reservation(
+  active: &Arc<Mutex<ActiveTasks>>,
+  installation_id: &str,
+  task_id: &str,
+  canceled: &Arc<AtomicBool>,
+) {
+  let Ok(mut active) = active.lock() else {
+    return;
+  };
+  if active.by_task.get(task_id).is_some_and(|task| {
+    task.installation_id == installation_id && Arc::ptr_eq(&task.canceled, canceled)
+  }) {
+    active.by_task.remove(task_id);
+  }
+  if active.by_installation.get(installation_id).is_some_and(|reservation| {
+    reservation.task_id == task_id && Arc::ptr_eq(&reservation.canceled, canceled)
+  }) {
+    active.by_installation.remove(installation_id);
+  }
+}
+
 impl Drop for TaskReservation {
-  /// 释放安装运行互斥，并清理仍指向本 reservation 的任务记录。
+  /// 等所有组装 worker 退出后再释放互斥，保护恢复、回滚、记录和缓存清理。
+  /// @since Beta v0.13.0
   fn drop(&mut self) {
-    let Ok(mut active) = self.active.lock() else {
+    if !has_active_assembly_workers(&self.task_id) {
+      release_task_reservation(&self.active, &self.installation_id, &self.task_id, &self.canceled);
       return;
-    };
-    if active.by_task.get(&self.task_id).is_some_and(|task| {
-      task.installation_id == self.installation_id && Arc::ptr_eq(&task.canceled, &self.canceled)
-    }) {
-      active.by_task.remove(&self.task_id);
     }
-    if active.by_installation.get(&self.installation_id).is_some_and(|reservation| {
-      reservation.task_id == self.task_id && Arc::ptr_eq(&reservation.canceled, &self.canceled)
-    }) {
-      active.by_installation.remove(&self.installation_id);
-    }
+    let active = Arc::clone(&self.active);
+    let installation_id = self.installation_id.clone();
+    let task_id = self.task_id.clone();
+    let canceled = Arc::clone(&self.canceled);
+    tauri::async_runtime::spawn(async move {
+      while !drain_assembly_workers(&task_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {}
+      release_task_reservation(&active, &installation_id, &task_id, &canceled);
+    });
   }
 }
 
@@ -1211,6 +1163,7 @@ impl GamePackageManager {
 
   /// 启动资源下载。Main / Audio 边下边组装到 incoming；PreDownload 只写分片缓存。
   /// 游戏运行时仍允许开始；提交仍须游戏未在运行。
+  /// @since Beta v0.13.0
   pub(crate) async fn start(
     &self,
     app_handle: AppHandle,
@@ -1253,11 +1206,19 @@ impl GamePackageManager {
     let reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
     let canceled = reservation.canceled_flag();
+    let mut journal = journal::load_or_create(&task_root, &plan)?;
+    if let Err(error) =
+      drain_audio_workers_before_start(&task_root, &mut journal, INSTALL_ABORT_DRAIN_TIMEOUT).await
+    {
+      let summary = journal.summary();
+      emit_state(&app_handle, &summary);
+      emit_progress(&app_handle, &summary);
+      return Err(error);
+    }
     let cache_root = prepare_cache_root(&task_root)?;
     let download_client = create_http_client()?;
     let scan_task_id = plan.plan_id.clone();
     let scan_cache_root = cache_root.clone();
-    let mut journal = journal::load_or_create(&task_root, &plan)?;
     let active_downloads = active_update_downloads(&plan, &journal.fallback_assets)?;
     update_download_totals(&mut journal, &active_downloads)?;
     journal.fallback_download_bytes = journal
@@ -1439,6 +1400,14 @@ impl GamePackageManager {
               "[game-audio-update][{}] 停滞中止后的组装 worker 未在超时内结束",
               plan.plan_id
             );
+            persist_prepare_paused_message(
+              &app_handle,
+              &task_root,
+              &shared_journal,
+              AUDIO_WORKER_DRAIN_MESSAGE,
+            )
+            .await;
+            return;
           }
         }
         if let Some(installation) = main_apply {
@@ -3043,7 +3012,7 @@ async fn assemble_audio_asset(
     let worker_output_root = output_root;
     let worker_canceled = Arc::clone(&canceled);
     let worker_telemetry = Arc::clone(&telemetry);
-    tauri::async_runtime::spawn_blocking(move || {
+    spawn_assembly_worker(&plan.plan_id, move || {
       assembler::assemble_plan_asset_to_root(
         &worker_plan,
         asset_index,
@@ -3397,14 +3366,9 @@ fn discover_audio_delete_progress(
   Ok((pending, completed_bytes))
 }
 
-/// 把正式更新任务保持为可恢复暂停，并向前端发布原因。
-async fn persist_main_update_paused_message(
-  app_handle: &AppHandle,
-  task_root: &Path,
-  journal: &Arc<AsyncMutex<TaskJournal>>,
-  message: &str,
-) {
-  let mut value = journal.lock().await;
+/// 把准备阶段暂停原因与实时字段作为同一份日志快照更新。
+/// @since Beta v0.13.0
+fn mark_prepare_paused(value: &mut TaskJournal, message: &str) {
   value.state = PackageTaskState::Paused;
   value.error_message = Some(message.to_string());
   value.auto_retry_message = None;
@@ -3417,8 +3381,38 @@ async fn persist_main_update_paused_message(
   value.assembly_bytes_per_second = 0;
   value.assembly_eta_seconds = None;
   value.touch();
+}
+
+/// 在配音新运行或恢复前等待旧组装退出，超时保留可恢复暂停与输出目录。
+/// @since Beta v0.13.0
+async fn drain_audio_workers_before_start(
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  timeout: Duration,
+) -> Result<(), String> {
+  if journal.target != PackagePlanTarget::Audio
+    || drain_assembly_workers(&journal.plan_id, timeout).await
+  {
+    return Ok(());
+  }
+  mark_prepare_paused(journal, AUDIO_WORKER_DRAIN_MESSAGE);
+  journal::persist(task_root, journal)
+    .map_err(|error| format!("{AUDIO_WORKER_DRAIN_MESSAGE} 持久化暂停状态失败：{error}"))?;
+  Err(AUDIO_WORKER_DRAIN_MESSAGE.to_string())
+}
+
+/// 把资源准备任务保持为可恢复暂停，并向前端发布原因。
+/// @since Beta v0.13.0
+async fn persist_prepare_paused_message(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  message: &str,
+) {
+  let mut value = journal.lock().await;
+  mark_prepare_paused(&mut value, message);
   if let Err(error) = journal::persist(task_root, &value) {
-    log::error!("[game-main-update][{}] 持久化暂停状态失败：{error}", value.plan_id);
+    log::error!("[game-package][{}] 持久化暂停状态失败：{error}", value.plan_id);
   }
   let _ = journal::forget_progress(task_root, &value.task_id);
   let summary = value.summary();
@@ -3429,6 +3423,7 @@ async fn persist_main_update_paused_message(
 
 #[allow(clippy::too_many_arguments)]
 /// 监督正式更新准备流水线，停滞时安全退出旧 worker 并自动重试一次。
+/// @since Beta v0.13.0
 async fn run_main_streaming_prepare_supervisor(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -3454,7 +3449,7 @@ async fn run_main_streaming_prepare_supervisor(
     };
     if !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {
       log::error!("[game-main-update][{}] 上一次正式更新组装 worker 未在超时内结束", plan.plan_id);
-      persist_main_update_paused_message(
+      persist_prepare_paused_message(
         &app_handle,
         &task_root,
         &journal,
@@ -3507,7 +3502,7 @@ async fn run_main_streaming_prepare_supervisor(
         "[game-main-update][{}] 停滞中止后的组装 worker 未在超时内结束，取消自动重试",
         plan.plan_id
       );
-      persist_main_update_paused_message(
+      persist_prepare_paused_message(
         &app_handle,
         &task_root,
         &journal,
@@ -6071,6 +6066,7 @@ async fn run_install_asset_job(
 
 #[allow(dead_code)]
 /// 按批次串行下载并组装安装资源的备用流水线。
+/// @since Beta v0.13.0
 async fn run_install_streaming_asset_pipeline(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -6157,13 +6153,14 @@ async fn run_install_streaming_asset_pipeline(
     let assembly_tasks = stream::iter(asset_cursor..batch_end)
       .map(|asset_index| {
         let assemble_plan = Arc::clone(plan);
+        let assemble_plan_id = plan.plan_id.clone();
         let assemble_download_index = Arc::clone(download_index);
         let assemble_staging = staging_root.to_path_buf();
         let assemble_shared = shared_cache_root.to_path_buf();
         let assemble_spool = spool_root.to_path_buf();
         let assemble_canceled = Arc::clone(canceled);
         async move {
-          tauri::async_runtime::spawn_blocking(move || {
+          spawn_assembly_worker(&assemble_plan_id, move || {
             assembler::assemble_full_install_asset(
               &assemble_plan,
               &assemble_download_index,
@@ -7494,6 +7491,205 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  /// 测试专用输出目录，删除前确认仍位于本任务创建的临时根下。
+  /// @since Beta v0.13.0
+  struct AudioDrainFixture(PathBuf);
+
+  impl Drop for AudioDrainFixture {
+    /// 仅清理此测试创建的目录。
+    /// @since Beta v0.13.0
+    fn drop(&mut self) {
+      assert_eq!(self.0.parent(), Some(std::env::temp_dir().as_path()));
+      assert!(
+        self.0.file_name().unwrap().to_string_lossy().starts_with("teyvatguide-audio-drain-")
+      );
+      let _ = fs::remove_dir_all(&self.0);
+    }
+  }
+
+  /// 展开断言失败时仍释放模拟阻塞写入的 worker。
+  /// @since Beta v0.13.0
+  struct AudioWorkerRelease(Option<std::sync::mpsc::Sender<()>>);
+
+  impl Drop for AudioWorkerRelease {
+    /// 通知 worker 退出，避免测试失败后遗留阻塞线程。
+    /// @since Beta v0.13.0
+    fn drop(&mut self) {
+      if let Some(sender) = self.0.take() {
+        let _ = sender.send(());
+      }
+    }
+  }
+
+  /// 构造不依赖真实应用或安装目录的运行任务身份。
+  /// @since Beta v0.13.0
+  fn active_task_for_test(task_id: &str, canceled: Arc<AtomicBool>) -> ActiveTask {
+    ActiveTask {
+      installation_id: "install-a".to_string(),
+      canceled,
+      paused: Arc::new(Mutex::new(Arc::new(AtomicBool::new(true)))),
+      manual_pause_requested: Arc::new(AtomicBool::new(false)),
+      journal: Arc::new(AsyncMutex::new(TaskJournal::from_switch(
+        task_id.to_string(),
+        "install-a".to_string(),
+        super::super::model::SchemeId::CnOfficial,
+        super::super::model::SchemeId::CnOfficial,
+        "a".repeat(64),
+        0,
+        0,
+      ))),
+    }
+  }
+
+  /// 流水线已退出但组装仍阻塞时，既有互斥必须继续保护回滚、清理与恢复。
+  /// @since Beta v0.13.0
+  #[test]
+  fn reservation_survives_until_blocking_worker_finishes() {
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let reservation = TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &task_id)
+      .expect("预留安装互斥失败");
+    manager
+      .active
+      .lock()
+      .unwrap()
+      .by_task
+      .insert(task_id.clone(), active_task_for_test(&task_id, reservation.canceled_flag()));
+    let (release_sender, release_receiver) = std::sync::mpsc::channel();
+    let release = AudioWorkerRelease(Some(release_sender));
+    let worker = spawn_assembly_worker(&task_id, move || {
+      release_receiver.recv().expect("等待组装退出信号失败");
+    });
+    drop(reservation);
+    assert!(manager.is_task_running(&task_id, "install-a").unwrap());
+    assert!(manager.active.lock().unwrap().by_task.contains_key(&task_id));
+    assert!(TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &task_id).is_err());
+    assert!(manager.reserve_cache_clear().is_err());
+    let unused_root =
+      std::env::temp_dir().join(format!("teyvatguide-audio-drain-{}", Uuid::new_v4()));
+    assert!(manager.request_or_reap_cancel(&unused_root, &task_id).unwrap().is_none());
+    assert_eq!(
+      manager.remove_task(&unused_root, &task_id).err().as_deref(),
+      Some("任务仍在运行，无法删除任务记录"),
+    );
+    let runtime = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    runtime.block_on(async {
+      assert!(
+        tokio::time::timeout(Duration::from_millis(20), manager.wait_for_task_idle(&task_id),)
+          .await
+          .is_err()
+      );
+    });
+    drop(release);
+    runtime.block_on(worker).expect("组装 worker 异常退出");
+    runtime.block_on(async {
+      tokio::time::timeout(Duration::from_secs(2), manager.wait_for_task_idle(&task_id))
+        .await
+        .expect("组装结束后安装互斥未释放")
+        .expect("等待安装空闲失败");
+    });
+    assert!(manager.active.lock().unwrap().by_task.is_empty());
+    assert!(manager.reserve_cache_clear().is_ok());
+  }
+
+  /// 旧任务延迟释放不能清除使用同一 key、但取消令牌已更换的新任务。
+  /// @since Beta v0.13.0
+  #[test]
+  fn reservation_release_preserves_replacement_identity() {
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let reservation = TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &task_id)
+      .expect("预留安装互斥失败");
+    let replacement = Arc::new(AtomicBool::new(false));
+    {
+      let mut active = manager.active.lock().unwrap();
+      active.by_installation.get_mut("install-a").unwrap().canceled = Arc::clone(&replacement);
+      active
+        .by_task
+        .insert(task_id.clone(), active_task_for_test(&task_id, Arc::clone(&replacement)));
+    }
+    drop(reservation);
+    assert!(manager.is_task_running(&task_id, "install-a").unwrap());
+    assert!(manager.active.lock().unwrap().by_task.contains_key(&task_id));
+    release_task_reservation(&manager.active, "install-a", &task_id, &replacement);
+    assert!(!manager.is_task_running(&task_id, "install-a").unwrap());
+    let reservation = TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &task_id)
+      .expect("释放旧身份后应能再次预留");
+    drop(reservation);
+    assert!(!manager.is_task_running(&task_id, "install-a").unwrap());
+  }
+
+  /// 配音恢复入口不能越过仍在写盘的上一轮 worker，超时须保存暂停并保留输出。
+  /// @since Beta v0.13.0
+  #[test]
+  fn audio_recovery_waits_for_worker_and_preserves_paused_output() {
+    let fixture = AudioDrainFixture(
+      std::env::temp_dir().join(format!("teyvatguide-audio-drain-{}", Uuid::new_v4())),
+    );
+    fs::create_dir_all(&fixture.0).expect("创建配音恢复测试目录失败");
+    let output = fixture.0.join("unfinished-output");
+    fs::write(&output, b"keep previous output").expect("写入未完成输出失败");
+    let mut value = TaskJournal::from_switch(
+      Uuid::new_v4().to_string(),
+      "install-a".to_string(),
+      super::super::model::SchemeId::CnOfficial,
+      super::super::model::SchemeId::CnOfficial,
+      "a".repeat(64),
+      0,
+      0,
+    );
+    value.target = PackagePlanTarget::Audio;
+    value.operation = "audio".to_string();
+    value.state = PackageTaskState::Paused;
+    value.assembly_total_count = 3;
+    value.assembly_completed_count = 1;
+    value.assembly_total_bytes = 300;
+    value.assembly_completed_bytes = 100;
+    value.assembly_completed_bytes_total = 100;
+    value.completed_asset_cursor = 1;
+    value.active_assembly_count = 1;
+    value.bytes_per_second = 1024;
+    value.eta_seconds = Some(2);
+    value.assembly_bytes_per_second = 2048;
+    value.assembly_eta_seconds = Some(3);
+    value.assembly_current_file = Some("unfinished-output".to_string());
+
+    let (release_sender, release_receiver) = std::sync::mpsc::channel();
+    let release = AudioWorkerRelease(Some(release_sender));
+    let worker = spawn_assembly_worker(&value.plan_id, move || {
+      release_receiver.recv().expect("等待配音 worker 退出信号失败");
+    });
+    let runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .expect("创建配音恢复测试运行时失败");
+    let result =
+      runtime.block_on(drain_audio_workers_before_start(&fixture.0, &mut value, Duration::ZERO));
+    assert_eq!(result, Err(AUDIO_WORKER_DRAIN_MESSAGE.to_string()));
+    let persisted =
+      journal::load(&fixture.0.join("tasks").join(&value.task_id).join("journal.json"))
+        .expect("读取暂停日志失败");
+    assert_eq!(persisted.state, PackageTaskState::Paused);
+    assert_eq!(persisted.error_message.as_deref(), Some(AUDIO_WORKER_DRAIN_MESSAGE));
+    assert_eq!(persisted.active_assembly_count, 0);
+    assert_eq!(persisted.bytes_per_second, 0);
+    assert_eq!(persisted.eta_seconds, None);
+    assert_eq!(persisted.assembly_bytes_per_second, 0);
+    assert_eq!(persisted.assembly_eta_seconds, None);
+    assert_eq!(persisted.assembly_current_file, None);
+    assert_eq!(persisted.assembly_completed_bytes, 100);
+    assert_eq!(persisted.completed_asset_cursor, 1);
+    assert_eq!(fs::read(&output).expect("未完成输出不应被清理"), b"keep previous output");
+
+    drop(release);
+    runtime.block_on(worker).expect("配音 worker 异常退出");
+    assert!(
+      runtime
+        .block_on(drain_audio_workers_before_start(&fixture.0, &mut value, Duration::from_secs(2),))
+        .is_ok()
+    );
+  }
 
   /// 验证任务展示使用容错扫描，同时保留有效任务与 Invalid 历史记录。
   ///
