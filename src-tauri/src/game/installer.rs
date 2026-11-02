@@ -2,7 +2,7 @@
 //!
 //! An installation draft is deliberately kept outside `GameInstallation` until
 //! the final tree has been published and inspected successfully.
-//! @since Beta v0.12.3
+//! @since Beta v0.13.0
 
 use super::{
   assembler,
@@ -1342,6 +1342,7 @@ pub(crate) fn restore_published_marker(
 
 /// 放弃未发布的安装草稿；`keep_downloads` 为真时先把任务 spool 中已下载且
 /// 校验通过的分片转入共享缓存，再清理暂存目录与 spool。
+/// @since Beta v0.13.0
 pub(crate) fn cancel_draft(
   task_root: &Path,
   draft_id: &str,
@@ -1360,16 +1361,13 @@ pub(crate) fn cancel_draft(
   ) {
     return Err("安装已经发布，不能取消或删除最终目录".to_string());
   }
-  let staging = PathBuf::from(&draft.staging_root);
-  if path_occupied(&staging)? {
-    remove_owned_staging(&staging, &draft)?;
-  }
   let spool = Path::new(&draft.library_root).join(format!(
     ".teyvatguide-spool-{}-{}",
     draft.draft_id,
     &draft.marker_nonce[..12]
   ));
-  if path_occupied(&spool)? {
+  let has_spool = path_occupied(&spool)?;
+  if has_spool {
     if directory_identity(spool.parent().ok_or_else(|| "任务 spool 缺少父目录".to_string())?)?
       != (draft.library_volume_serial, draft.library_file_id)
     {
@@ -1379,6 +1377,12 @@ pub(crate) fn cancel_draft(
       let _ = preserve_spool_downloads(task_root, &draft, &spool, progress)?;
     }
     validate_no_links(&spool)?;
+  }
+  let staging = PathBuf::from(&draft.staging_root);
+  if path_occupied(&staging)? {
+    remove_owned_staging(&staging, &draft)?;
+  }
+  if has_spool {
     fs::remove_dir_all(spool).map_err(|error| format!("清理安装任务 spool 失败：{error}"))?;
   }
   let draft = set_draft_state_unlocked(task_root, draft_id, InstallDraftState::Canceled)?;
@@ -1390,6 +1394,7 @@ pub(crate) fn cancel_draft(
 /// 只处理与计划下载对象一致的普通文件：大小或哈希不符、已是共享缓存同名对象、
 /// 或文件不存在的条目会被跳过并随 spool 一起删除；复制失败则中止放弃，避免
 /// 静默丢失已下载内容。
+/// @since Beta v0.13.0
 fn preserve_spool_downloads(
   task_root: &Path,
   draft: &InstallDraft,
@@ -1403,7 +1408,17 @@ fn preserve_spool_downloads(
   if plan.target != PackagePlanTarget::Install {
     return Ok(0);
   }
-  let shared_cache_root = task_root.join("cache/chunks");
+  let shared_cache_root = super::downloader::prepare_cache_root(task_root)?;
+  let same_volume = directory_identity(&shared_cache_root)?.0 == directory_identity(spool)?.0;
+  let required =
+    preserve_download_space_bytes(&plan.downloads, &shared_cache_root, spool, same_volume)?;
+  let available = fs2::available_space(&shared_cache_root)
+    .map_err(|error| format!("读取共享缓存磁盘剩余空间失败：{error}"))?;
+  if required > available {
+    return Err(format!(
+      "保留下载所需缓存空间不足：需要 {required} 字节，可用 {available} 字节，请释放空间或选择删除下载"
+    ));
+  }
   let mut preserved = 0_u64;
   let total = plan.downloads.len();
   let mut completed = 0_usize;
@@ -1421,7 +1436,43 @@ fn preserve_spool_downloads(
   Ok(preserved)
 }
 
+/// 预算保留分片的复制峰值；同卷复制后立即释放源文件，跨卷则累计占用缓存盘。
+/// @since Beta v0.13.0
+fn preserve_download_space_bytes(
+  downloads: &[super::planner::PlanDownload],
+  shared_cache_root: &Path,
+  spool: &Path,
+  same_volume: bool,
+) -> Result<u64, String> {
+  let mut required = 0_u64;
+  for download in downloads {
+    if path_occupied(&shared_cache_root.join(&download.cache_key))? {
+      continue;
+    }
+    let metadata = match fs::symlink_metadata(spool.join(&download.cache_key)) {
+      Ok(metadata) => metadata,
+      Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+      Err(error) => return Err(format!("读取待保留分片失败：{error}")),
+    };
+    if metadata.file_type().is_symlink() || is_reparse_point(&metadata) || !metadata.is_file() {
+      return Err("待保留分片不是安全的普通文件".to_string());
+    }
+    if metadata.len() != download.compressed_size {
+      continue;
+    }
+    required = if same_volume {
+      required.max(download.compressed_size)
+    } else {
+      required
+        .checked_add(download.compressed_size)
+        .ok_or_else(|| "保留下载空间预算溢出".to_string())?
+    };
+  }
+  Ok(required)
+}
+
 /// 把单个已校验的 spool 分片并入共享缓存；跳过缺失、冲突或校验不通过的条目。
+/// @since Beta v0.13.0
 pub(crate) fn adopt_spool_chunk(
   shared_cache_root: &Path,
   spool: &Path,
@@ -1439,11 +1490,19 @@ pub(crate) fn adopt_spool_chunk(
   if !super::planner::cache_file_matches(&spool_path, download) {
     return Ok(0);
   }
-  let partial = shared_cache_root.join(format!("{}.adopt.{}.part", download.cache_key, draft_id));
+  let partial = shared_cache_root.join(format!(
+    "{}.adopt.{}.{}.part",
+    download.cache_key,
+    draft_id,
+    Uuid::new_v4()
+  ));
   match fs::copy(&spool_path, &partial) {
     Ok(_) => {}
-    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(0),
     Err(error) => {
+      let _ = fs::remove_file(&partial);
+      if error.kind() == std::io::ErrorKind::NotFound && !path_occupied(&spool_path)? {
+        return Ok(0);
+      }
       return Err(format!("复制安装分片到共享缓存失败：{error}"));
     }
   }
@@ -4055,4 +4114,121 @@ fn atomic_write(path: &Path, content: &[u8]) -> Result<(), String> {
   #[cfg(not(target_os = "windows"))]
   fs::rename(&temporary, path).map_err(|error| format!("原子替换持久化文件失败：{error}"))?;
   Ok(())
+}
+
+#[cfg(test)]
+mod preserve_tests {
+  use super::*;
+  use crate::game::planner::{PayloadEncoding, PlanDownload, PlanDownloadHashKind};
+
+  /// 本模块只读写独立的临时分片目录。
+  /// @since Beta v0.13.0
+  struct Fixture {
+    root: PathBuf,
+    cache: PathBuf,
+    spool: PathBuf,
+  }
+
+  impl Fixture {
+    /// 创建与真实安装目录隔离的夹具。
+    /// @since Beta v0.13.0
+    fn new() -> Self {
+      let root = std::env::temp_dir().join(format!("teyvatguide-preserve-{}", Uuid::new_v4()));
+      let cache = root.join("cache");
+      let spool = root.join("spool");
+      fs::create_dir_all(&cache).unwrap();
+      fs::create_dir_all(&spool).unwrap();
+      Self { root, cache, spool }
+    }
+
+    /// 写入与下载元数据对应的真实小分片。
+    /// @since Beta v0.13.0
+    fn download(&self, name: &str, bytes: &[u8]) -> PlanDownload {
+      fs::write(self.spool.join(name), bytes).unwrap();
+      PlanDownload {
+        id: name.to_string(),
+        cache_key: name.to_string(),
+        hash_kind: PlanDownloadHashKind::Md5,
+        expected_hash: hex::encode(Md5::digest(bytes)),
+        compressed_size: bytes.len() as u64,
+        decompressed_size: bytes.len() as u64,
+        encoding: PayloadEncoding::Raw,
+        url_prefix: String::new(),
+        url_suffix: String::new(),
+        range_start: None,
+        range_length: None,
+      }
+    }
+  }
+
+  impl Drop for Fixture {
+    /// 只清理本测试创建的临时目录。
+    /// @since Beta v0.13.0
+    fn drop(&mut self) {
+      assert_eq!(self.root.parent(), Some(std::env::temp_dir().as_path()));
+      assert!(
+        self.root.file_name().unwrap().to_string_lossy().starts_with("teyvatguide-preserve-")
+      );
+      let _ = fs::remove_dir_all(&self.root);
+    }
+  }
+
+  /// 同卷只需单分片峰值，跨卷需累计新增缓存空间。
+  /// @since Beta v0.13.0
+  #[test]
+  fn preserve_space_tracks_peak_and_excludes_existing_or_partial_chunks() {
+    let fixture = Fixture::new();
+    let downloads =
+      vec![fixture.download("first", b"first"), fixture.download("second", b"second")];
+    assert_eq!(
+      preserve_download_space_bytes(&downloads, &fixture.cache, &fixture.spool, true).unwrap(),
+      6
+    );
+    assert_eq!(
+      preserve_download_space_bytes(&downloads, &fixture.cache, &fixture.spool, false).unwrap(),
+      11
+    );
+    fs::write(fixture.cache.join("first"), b"first").unwrap();
+    fs::write(fixture.spool.join("second"), b"partial").unwrap();
+    assert_eq!(
+      preserve_download_space_bytes(&downloads, &fixture.cache, &fixture.spool, false).unwrap(),
+      0
+    );
+  }
+
+  /// 校验成功后才发布缓存并删除源分片。
+  /// @since Beta v0.13.0
+  #[test]
+  fn adoption_preserves_verified_bytes_and_releases_source() {
+    let fixture = Fixture::new();
+    let download = fixture.download("chunk", b"verified");
+    assert_eq!(adopt_spool_chunk(&fixture.cache, &fixture.spool, &download, "draft").unwrap(), 8);
+    assert_eq!(fs::read(fixture.cache.join("chunk")).unwrap(), b"verified");
+    assert!(!fixture.spool.join("chunk").exists());
+    assert_eq!(fs::read_dir(&fixture.cache).unwrap().count(), 1);
+  }
+
+  /// 损坏分片不会污染共享缓存。
+  /// @since Beta v0.13.0
+  #[test]
+  fn adoption_rejects_corrupt_chunks_without_deleting_source() {
+    let fixture = Fixture::new();
+    let download = fixture.download("chunk", b"good");
+    fs::write(fixture.spool.join("chunk"), b"oops").unwrap();
+    assert_eq!(adopt_spool_chunk(&fixture.cache, &fixture.spool, &download, "draft").unwrap(), 0);
+    assert!(fixture.spool.join("chunk").exists());
+    assert_eq!(fs::read_dir(&fixture.cache).unwrap().count(), 0);
+  }
+
+  /// 目标目录缺失属于复制错误，不能误报为源分片不存在。
+  /// @since Beta v0.13.0
+  #[test]
+  fn adoption_propagates_copy_errors_and_retains_source() {
+    let fixture = Fixture::new();
+    let download = fixture.download("chunk", b"good");
+    let result =
+      adopt_spool_chunk(&fixture.root.join("missing"), &fixture.spool, &download, "draft");
+    assert!(result.unwrap_err().contains("复制安装分片到共享缓存失败"));
+    assert!(fixture.spool.join("chunk").exists());
+  }
 }
