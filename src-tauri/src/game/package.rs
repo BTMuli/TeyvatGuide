@@ -1,7 +1,11 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
+//! 分片回收与资源作废由编排任务串行推进；资源 worker 不得并发作废回收候选。
 //! @since Beta v0.13.0
 
+mod events;
 mod spool;
+
+use events::{TaskEventDispatcher, emit_progress, emit_state, should_emit_progress};
 
 use spool::{
   InstallCompletionSnapshot, InstallSpoolTracker, install_tracker_spool_bytes,
@@ -45,11 +49,10 @@ use std::{
   sync::{
     Arc, LazyLock, Mutex,
     atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
-    mpsc::{SyncSender, sync_channel},
   },
   time::{Duration, Instant},
 };
-use tauri::{AppHandle, Emitter, ipc::Channel};
+use tauri::{AppHandle, ipc::Channel};
 use tauri_plugin_notification::NotificationExt;
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 use uuid::Uuid;
@@ -61,8 +64,6 @@ const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 // 中止后等待上一轮组装 worker 收尾的上限。卡在磁盘 syscall 的 worker 无法被中断，
 // 等待过长会让恢复安装长时间停在“正在准备”；30 秒足够健康的 worker 完成当前分块。
 const INSTALL_ABORT_DRAIN_TIMEOUT: Duration = Duration::from_secs(30);
-const UI_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(150);
-const UI_PROGRESS_EMIT_SLOT_TTL: Duration = Duration::from_secs(60);
 const INSTALL_STALL_THRESHOLD: Duration = Duration::from_secs(45);
 const INSTALL_STALL_POLL_INTERVAL: Duration = Duration::from_secs(5);
 const INSTALL_STALL_CONFIRMATIONS: usize = 3;
@@ -143,9 +144,10 @@ fn spawn_apply_heartbeat(
 }
 
 /// 安装流水线停滞看门狗：独立线程联合检查 journal 与下载/组装阶段心跳。
+/// @since Beta v0.13.0
 fn spawn_install_stall_watchdog(
   app_handle: AppHandle,
-  events: InstallEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   plan_id: String,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -386,7 +388,7 @@ fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool 
 
 /// 持久化看门狗暂停状态。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `events`: 事件分发器。
@@ -396,7 +398,7 @@ fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool 
 /// - `message`: 暂停信息。
 /// - `runtime`: Tokio 运行时句柄。
 fn persist_install_watchdog_pause(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   plan_id: &str,
   journal: &Arc<AsyncMutex<TaskJournal>>,
@@ -745,252 +747,6 @@ impl AudioLiveAssemblyOverlay {
   }
 }
 
-/// 容量固定为 1 的后台事件派发器：生产者只覆盖尚未消费的旧值，永不等待事件接收端。
-struct LatestEventDispatcher<T> {
-  pending: Arc<Mutex<Option<T>>>,
-  wake: SyncSender<()>,
-}
-
-impl<T> Clone for LatestEventDispatcher<T> {
-  /// 克隆事件派发器。
-  ///
-  /// @since Beta v0.12.0
-  fn clone(&self) -> Self {
-    Self { pending: Arc::clone(&self.pending), wake: self.wake.clone() }
-  }
-}
-
-impl<T: Send + 'static> LatestEventDispatcher<T> {
-  /// 创建后台事件派发器。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `thread_name`: 线程名。
-  /// - `sink`: 事件接收器。
-  ///
-  /// # 返回
-  /// - `Ok(Self)`: 派发器。
-  /// - `Err(String)`: 创建线程失败的错误描述。
-  fn new<F>(thread_name: String, mut sink: F) -> Result<Self, String>
-  where
-    F: FnMut(T) + Send + 'static,
-  {
-    let pending = Arc::new(Mutex::new(None));
-    let pending_for_worker = Arc::clone(&pending);
-    let (wake, wake_receiver) = sync_channel(1);
-    std::thread::Builder::new()
-      .name(thread_name)
-      .spawn(move || {
-        let mut drain_pending = || {
-          loop {
-            let event = match pending_for_worker.lock() {
-              Ok(mut pending) => pending.take(),
-              Err(_) => return,
-            };
-            let Some(event) = event else {
-              break;
-            };
-            sink(event);
-          }
-        };
-        while wake_receiver.recv().is_ok() {
-          drain_pending();
-        }
-        // 所有发送端已释放：最后一次排空残留事件，避免收尾时丢失状态事件
-        // （例如看门狗暂停后立即中止任务，派发线程还未来得及消费）。
-        drain_pending();
-      })
-      .map_err(|error| format!("创建配音任务事件派发线程失败：{error}"))?;
-    Ok(Self { pending, wake })
-  }
-
-  /// 更新并发布最新事件。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `update`: 事件更新函数。
-  fn publish_with<F>(&self, update: F)
-  where
-    F: FnOnce(Option<T>) -> T,
-  {
-    let Ok(mut pending) = self.pending.lock() else {
-      return;
-    };
-    *pending = Some(update(pending.take()));
-    drop(pending);
-    let _ = self.wake.try_send(());
-  }
-}
-
-struct AudioTaskEvent {
-  summary: PackageTaskSummary,
-  emit_state: bool,
-}
-
-#[derive(Clone)]
-struct AudioEventDispatcher {
-  events: LatestEventDispatcher<AudioTaskEvent>,
-}
-
-impl AudioEventDispatcher {
-  /// 创建音频事件派发器。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `app_handle`: 应用句柄。
-  /// - `task_id`: 任务 ID。
-  ///
-  /// # 返回
-  /// - `Ok(Self)`: 派发器。
-  /// - `Err(String)`: 创建失败的错误描述。
-  fn new(app_handle: AppHandle, task_id: &str) -> Result<Self, String> {
-    let thread_name = format!("tg-audio-events-{}", task_id.chars().take(8).collect::<String>());
-    let events = LatestEventDispatcher::new(thread_name, move |event: AudioTaskEvent| {
-      if event.emit_state {
-        emit_state(&app_handle, &event.summary);
-      }
-      emit_progress(&app_handle, &event.summary);
-    })?;
-    Ok(Self { events })
-  }
-
-  /// 发布音频进度。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  fn publish_progress(&self, summary: PackageTaskSummary) {
-    self.publish(summary, false);
-  }
-
-  /// 发布音频状态。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  fn publish_state(&self, summary: PackageTaskSummary) {
-    self.publish(summary, true);
-  }
-
-  /// 发布音频事件。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  /// - `emit_state`: 是否发布状态。
-  fn publish(&self, summary: PackageTaskSummary, emit_state: bool) {
-    self.events.publish_with(|pending| newest_audio_event(pending, summary, emit_state));
-  }
-}
-
-struct InstallTaskEvent {
-  summary: PackageTaskSummary,
-  emit_state: bool,
-}
-
-#[derive(Clone)]
-struct InstallEventDispatcher {
-  events: LatestEventDispatcher<InstallTaskEvent>,
-}
-
-impl InstallEventDispatcher {
-  /// 创建安装事件派发器。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `app_handle`: 应用句柄。
-  /// - `task_id`: 任务 ID。
-  ///
-  /// # 返回
-  /// - `Ok(Self)`: 派发器。
-  /// - `Err(String)`: 创建失败的错误描述。
-  fn new(app_handle: AppHandle, task_id: &str) -> Result<Self, String> {
-    let thread_name = format!("tg-install-events-{}", task_id.chars().take(8).collect::<String>());
-    let events = LatestEventDispatcher::new(thread_name, move |event: InstallTaskEvent| {
-      if event.emit_state {
-        emit_state(&app_handle, &event.summary);
-      }
-      emit_progress(&app_handle, &event.summary);
-    })?;
-    Ok(Self { events })
-  }
-
-  /// 发布安装进度。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  fn publish_progress(&self, summary: PackageTaskSummary) {
-    self.publish(summary, false);
-  }
-
-  /// 发布安装状态。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  fn publish_state(&self, summary: PackageTaskSummary) {
-    self.publish(summary, true);
-  }
-
-  /// 发布安装事件。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `summary`: 任务摘要。
-  /// - `emit_state`: 是否发布状态。
-  fn publish(&self, summary: PackageTaskSummary, emit_state: bool) {
-    self.events.publish_with(|pending| newest_install_event(pending, summary, emit_state));
-  }
-}
-
-/// latest-wins 槽合并：低 revision 的迟到快照不得覆盖更高 revision 的待发值，
-/// 保证发送给前端的事件 revision 单调递增（前端按 revision 拒绝旧包）。
-fn newest_audio_event(
-  pending: Option<AudioTaskEvent>,
-  summary: PackageTaskSummary,
-  emit_state: bool,
-) -> AudioTaskEvent {
-  match pending {
-    Some(pending) if pending.summary.revision > summary.revision => pending,
-    Some(pending) => AudioTaskEvent { summary, emit_state: emit_state || pending.emit_state },
-    None => AudioTaskEvent { summary, emit_state },
-  }
-}
-
-/// 合并最新安装事件，保证 revision 单调递增。
-///
-/// @since Beta v0.12.0
-///
-/// # 参数
-/// - `pending`: 待发布事件。
-/// - `summary`: 任务摘要。
-/// - `emit_state`: 是否发布状态。
-///
-/// # 返回
-/// 最新安装事件。
-fn newest_install_event(
-  pending: Option<InstallTaskEvent>,
-  summary: PackageTaskSummary,
-  emit_state: bool,
-) -> InstallTaskEvent {
-  match pending {
-    Some(pending) if pending.summary.revision > summary.revision => pending,
-    Some(pending) => InstallTaskEvent { summary, emit_state: emit_state || pending.emit_state },
-    None => InstallTaskEvent { summary, emit_state },
-  }
-}
-
 struct AudioAssetJob {
   asset_index: usize,
   pending: Vec<(usize, PlanDownload)>,
@@ -1032,25 +788,6 @@ fn audio_pipeline_window(pipeline_concurrency: usize) -> usize {
   install_assembly_concurrency(pipeline_concurrency)
     .saturating_add(AUDIO_DOWNLOAD_FOCUS)
     .saturating_add(AUDIO_DOWNLOAD_PREFETCH)
-}
-
-#[derive(Default)]
-struct ProgressEmitRegistry {
-  slots: HashMap<String, Instant>,
-}
-
-static PROGRESS_EMIT_REGISTRY: LazyLock<Mutex<ProgressEmitRegistry>> =
-  LazyLock::new(|| Mutex::new(ProgressEmitRegistry::default()));
-
-/// 清理过期进度发布槽。
-///
-/// @since Beta v0.12.0
-///
-/// # 参数
-/// - `registry`: 发布注册表。
-/// - `now`: 当前时间。
-fn prune_progress_emit_slots(registry: &mut ProgressEmitRegistry, now: Instant) {
-  registry.slots.retain(|_, last| now.saturating_duration_since(*last) < UI_PROGRESS_EMIT_SLOT_TTL);
 }
 
 /// 组装 worker 完成栅栏：看门狗中止流水线后，下一次运行会等待旧 worker 结束，
@@ -1447,8 +1184,9 @@ fn apply_assembly_write_bandwidth(journal: &mut TaskJournal, speed: u64) -> bool
 }
 
 /// 启动安装流水线进度采样，定期把下载/组装带宽与 ETA 写回任务日志。
+/// @since Beta v0.13.0
 fn start_install_download_progress_monitor(
-  events: InstallEventDispatcher,
+  events: TaskEventDispatcher,
   journal: Arc<AsyncMutex<TaskJournal>>,
   metrics: Arc<InstallPipelineMetrics>,
 ) -> InstallDownloadProgressMonitor {
@@ -1535,8 +1273,9 @@ fn start_install_download_progress_monitor(
 }
 
 /// 启动配音组装写盘进度采样，实时把组装增量叠加到任务摘要。
+/// @since Beta v0.13.0
 fn start_assembly_write_progress_monitor(
-  events: AudioEventDispatcher,
+  events: TaskEventDispatcher,
   journal: Arc<AsyncMutex<TaskJournal>>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
   overlay: Arc<AudioLiveAssemblyOverlay>,
@@ -1585,8 +1324,9 @@ fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u
 }
 
 /// 把当前活跃组装数写回任务日志并发布进度。
+/// @since Beta v0.13.0
 async fn emit_active_assembly_count(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   metrics: &InstallPipelineMetrics,
 ) {
@@ -1993,8 +1733,9 @@ async fn persist_install_checkpoint_async(
 }
 
 /// 在 journal 锁内应用下载进度更新、异步持久化，并按节流规则发布进度。
+/// @since Beta v0.13.0
 async fn commit_install_download_progress(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   metrics: &Arc<InstallPipelineMetrics>,
@@ -4019,8 +3760,9 @@ fn overlay_audio_summary(
 
 #[allow(clippy::too_many_arguments)]
 /// 占用组装槽并在后台完成单个配音资源组装与证据落盘。
+/// @since Beta v0.13.0
 async fn assemble_audio_asset(
-  events: AudioEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   game_root: PathBuf,
   output_root: PathBuf,
@@ -4108,9 +3850,10 @@ async fn assemble_audio_asset(
 
 #[allow(clippy::too_many_arguments)]
 /// 下载并组装单个配音资源，返回该资源任务的完成结果。
+/// @since Beta v0.13.0
 async fn run_audio_asset_job(
   job: AudioAssetJob,
-  events: AudioEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   cache_root: PathBuf,
   game_root: PathBuf,
@@ -4604,8 +4347,9 @@ async fn run_main_streaming_prepare_supervisor(
 /// 并发删除单个待移除配音资源：把文件移入备份目录并累计删除进度。
 #[allow(clippy::too_many_arguments)]
 /// 把单个待删除配音文件移入备份目录并累计删除进度。
+/// @since Beta v0.13.0
 async fn delete_audio_resource(
-  events: &AudioEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   game_root: &Path,
   plan: &Arc<PersistedPlan>,
@@ -4649,6 +4393,7 @@ async fn delete_audio_resource(
 }
 #[allow(clippy::too_many_arguments)]
 /// 执行配音/更新边下边组装准备流水线，包含删除 staging 与证据恢复。
+/// @since Beta v0.13.0
 async fn run_streaming_prepare_task(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -4832,7 +4577,7 @@ async fn run_streaming_prepare_task(
     (Vec::new(), 0)
   };
   let plan = Arc::new(plan);
-  let events = match AudioEventDispatcher::new(app_handle.clone(), &plan.plan_id) {
+  let events = match TaskEventDispatcher::for_audio(app_handle.clone(), &plan.plan_id) {
     Ok(events) => events,
     Err(error) => {
       persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
@@ -5410,6 +5155,7 @@ async fn apply_audio_after_download(
 
 #[allow(clippy::too_many_arguments)]
 /// 监督全新安装流水线，处理停滞自动重试与 Defender 清理。
+/// @since Beta v0.13.0
 async fn run_install_streaming_supervisor(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -5426,7 +5172,7 @@ async fn run_install_streaming_supervisor(
   context: InstallContext,
   mut retry_budget_exhausted: bool,
 ) {
-  let events = match InstallEventDispatcher::new(app_handle.clone(), &plan.plan_id) {
+  let events = match TaskEventDispatcher::for_install(app_handle.clone(), &plan.plan_id) {
     Ok(events) => events,
     Err(error) => {
       log::error!("[game-install][{}] 创建安装事件派发线程失败：{error}", plan.plan_id);
@@ -5593,9 +5339,10 @@ async fn run_install_streaming_supervisor(
 
 #[allow(clippy::too_many_arguments)]
 /// 执行全新安装下载、组装与发布的主流水线。
+/// @since Beta v0.13.0
 async fn run_install_streaming_task(
   app_handle: AppHandle,
-  events: InstallEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   shared_cache_root: PathBuf,
   spool_root: PathBuf,
@@ -6326,8 +6073,9 @@ fn reserve_install_repair_attempt(
 
 #[allow(clippy::too_many_arguments)]
 /// 发布前反复校验并修复失败的安装资源，直到全部通过或重试额度耗尽。
+/// @since Beta v0.13.0
 async fn run_install_prepublish_repair(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   shared_cache_root: &Path,
   spool_root: &Path,
@@ -6480,8 +6228,9 @@ async fn run_install_prepublish_repair(
 }
 
 /// 以 spool 预算约束调度安装资源下载与组装。
+/// @since Beta v0.13.0
 async fn run_install_bounded_asset_pipeline(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   shared_cache_root: &Path,
   spool_root: &Path,
@@ -6798,8 +6547,9 @@ async fn download_install_chunk(
 }
 
 /// 汇总一批下载结果：递增下载字节、提交进度并记账，任一失败即返回首个错误。
+/// @since Beta v0.13.0
 async fn apply_install_download_results(
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   task_root: &Path,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   metrics: &Arc<InstallPipelineMetrics>,
@@ -6887,9 +6637,10 @@ fn invalidate_install_chunk_caches(
 
 #[allow(clippy::too_many_arguments)]
 /// 执行单个安装资源的下载与组装，支持缓存复验失败后的自动重下。
+/// @since Beta v0.13.0
 async fn run_install_asset_job(
   job: InstallAssetJob,
-  events: InstallEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   shared_cache_root: PathBuf,
   spool_root: PathBuf,
@@ -7218,9 +6969,10 @@ async fn run_install_streaming_asset_pipeline(
 }
 
 /// 把安装流水线错误写入任务日志，并按暂停/取消/失败发布终态。
+/// @since Beta v0.13.0
 async fn persist_install_stream_error(
   task_root: &Path,
-  events: &InstallEventDispatcher,
+  events: &TaskEventDispatcher,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   error: String,
   paused_requested: bool,
@@ -7759,6 +7511,7 @@ pub(crate) async fn retry_audio_registration(
 }
 
 /// 执行纯下载型资源任务；预下载在缓存完成后终止，其他目标推进到待提交状态。
+/// @since Beta v0.13.0
 async fn run_task(
   app_handle: AppHandle,
   task_root: &Path,
@@ -7773,7 +7526,7 @@ async fn run_task(
   max_bytes_per_second: Option<u64>,
   install_context: Option<InstallContext>,
 ) {
-  let events = match InstallEventDispatcher::new(app_handle.clone(), &plan.plan_id) {
+  let events = match TaskEventDispatcher::for_install(app_handle.clone(), &plan.plan_id) {
     Ok(events) => events,
     Err(error) => {
       log::error!("[game-package][install][{}] 创建安装事件派发线程失败：{error}", plan.plan_id);
@@ -8000,8 +7753,9 @@ async fn run_task(
 }
 
 /// 执行下载完成后的安装提交与游戏登记。
+/// @since Beta v0.13.0
 async fn run_install_task(
-  events: InstallEventDispatcher,
+  events: TaskEventDispatcher,
   task_root: PathBuf,
   plan: Arc<PersistedPlan>,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -8389,49 +8143,6 @@ fn log_install_failure(journal: &TaskJournal) {
     journal.task_id,
     journal.error_message.as_deref().unwrap_or("未提供错误信息")
   );
-}
-
-/// 发送任务状态事件。
-fn emit_state(app_handle: &AppHandle, summary: &PackageTaskSummary) {
-  if let Err(error) = app_handle.emit("game-package://state", summary) {
-    log::warn!("[game-package] 发送任务状态事件失败：{error}");
-  }
-}
-
-/// 发送任务进度事件并登记发布槽位。
-fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
-  remember_progress_emit(&summary.task_id);
-  if let Err(error) = app_handle.emit("game-package://progress", summary) {
-    log::warn!("[game-package] 发送任务进度事件失败：{error}");
-  }
-}
-
-/// 记录任务进度发布槽位并清理过期槽位。
-fn remember_progress_emit(task_id: &str) {
-  let now = Instant::now();
-  let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
-    return;
-  };
-  prune_progress_emit_slots(&mut registry, now);
-  registry.slots.insert(task_id.to_string(), now);
-}
-
-/// 按 UI 发布间隔判断当前任务是否允许再次发布进度。
-fn should_emit_progress(task_id: &str) -> bool {
-  let now = Instant::now();
-  let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
-    return true;
-  };
-  prune_progress_emit_slots(&mut registry, now);
-  if registry
-    .slots
-    .get(task_id)
-    .is_some_and(|last| now.saturating_duration_since(*last) < UI_PROGRESS_EMIT_INTERVAL)
-  {
-    return false;
-  }
-  registry.slots.insert(task_id.to_string(), now);
-  true
 }
 
 #[cfg(target_os = "windows")]
