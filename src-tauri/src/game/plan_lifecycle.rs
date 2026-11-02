@@ -1,7 +1,7 @@
 //! 资源计划的轻量归属元数据与安全目录识别。
-//! @since Beta v0.12.0
+//! @since Beta v0.13.0
 
-use super::model::PackagePlanTarget;
+use super::{installer::is_reparse_point, model::PackagePlanTarget, planner::load_persisted_plan};
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -14,6 +14,70 @@ use uuid::Uuid;
 const PLAN_METADATA_SCHEMA_VERSION: u32 = 1;
 const PLAN_METADATA_FILE_NAME: &str = "plan-meta.json";
 const MAX_PLAN_METADATA_BYTES: u64 = 16 * 1024;
+
+/// 解析任务归属；优先使用可信元数据，旧任务仅在元数据缺失时回退到计划。
+///
+/// @since Beta v0.13.0
+///
+/// # 参数
+/// - `task_root`: 游戏资源任务根目录。
+/// - `task_id`: 任务 ID，同时必须是计划目录名。
+///
+/// # 返回
+/// - `Ok(Some(String))`: 解析到的安装 ID。
+/// - `Ok(None)`: 元数据和旧计划均不存在，归属未知。
+/// - `Err(String)`: 任务目录、元数据或旧计划不安全/无效。
+pub(crate) fn resolve_plan_installation_id(
+  task_root: &Path,
+  task_id: &str,
+) -> Result<Option<String>, String> {
+  if Uuid::parse_str(task_id).is_err() {
+    return Err("游戏资源任务 ID 无效".to_string());
+  }
+  let directory = task_root.join("tasks").join(task_id);
+  let directory_metadata = match fs::symlink_metadata(&directory) {
+    Ok(metadata) => metadata,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+    Err(error) => return Err(format!("读取游戏资源任务目录失败：{error}")),
+  };
+  if directory_metadata.file_type().is_symlink()
+    || is_reparse_point(&directory_metadata)
+    || !directory_metadata.is_dir()
+  {
+    return Err("游戏资源任务目录不是普通目录".to_string());
+  }
+
+  let metadata_path = directory.join(PLAN_METADATA_FILE_NAME);
+  match fs::symlink_metadata(&metadata_path) {
+    Ok(metadata)
+      if metadata.file_type().is_symlink()
+        || is_reparse_point(&metadata)
+        || !metadata.is_file() =>
+    {
+      return Err("游戏资源计划元数据不是普通文件".to_string());
+    }
+    Ok(_) => {}
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+    Err(error) => return Err(format!("读取游戏资源计划元数据失败：{error}")),
+  }
+  if let Some(metadata) = load_metadata(task_root, task_id)? {
+    return Ok(Some(metadata.installation_id));
+  }
+
+  let plan_path = directory.join("plan.json");
+  let plan_metadata = match fs::symlink_metadata(&plan_path) {
+    Ok(metadata) => metadata,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+    Err(error) => return Err(format!("读取游戏资源计划失败：{error}")),
+  };
+  if plan_metadata.file_type().is_symlink()
+    || is_reparse_point(&plan_metadata)
+    || !plan_metadata.is_file()
+  {
+    return Err("游戏资源计划文件不是普通文件".to_string());
+  }
+  Ok(Some(load_persisted_plan(task_root, task_id)?.installation_id))
+}
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -217,4 +281,121 @@ fn validate_metadata(metadata: &PlanMetadata, plan_id: &str) -> Result<(), Strin
     return Err("游戏资源计划元数据字段无效".to_string());
   }
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::super::{
+    model::SchemeId,
+    planner::{PersistedPlan, PlanFile, persist_validated_plan},
+  };
+  use super::*;
+
+  /// 验证归属解析优先可信元数据、严格拒绝损坏元数据，并回退旧计划。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn resolve_plan_installation_id_scopes_metadata_and_legacy_plan() {
+    let task_root = std::env::temp_dir().join(format!("teyvatguide-lifecycle-{}", Uuid::new_v4()));
+    let valid_metadata_id = Uuid::new_v4().to_string();
+    let valid_metadata_dir = task_root.join("tasks").join(&valid_metadata_id);
+    fs::create_dir_all(&valid_metadata_dir).expect("创建元数据任务目录失败");
+    persist_metadata(
+      &task_root,
+      &valid_metadata_id,
+      "other-installation",
+      PackagePlanTarget::Main,
+      "2026-01-01T00:00:00Z",
+    )
+    .expect("写入元数据失败");
+    assert_eq!(
+      resolve_plan_installation_id(&task_root, &valid_metadata_id).expect("读取元数据失败"),
+      Some("other-installation".to_string())
+    );
+
+    let unknown_id = Uuid::new_v4().to_string();
+    fs::create_dir_all(task_root.join("tasks").join(&unknown_id)).expect("创建未知任务目录失败");
+    assert_eq!(
+      resolve_plan_installation_id(&task_root, &unknown_id).expect("未知归属不应失败"),
+      None
+    );
+
+    let legacy_id = Uuid::new_v4().to_string();
+    let legacy_plan = PersistedPlan {
+      schema_version: 7,
+      plan_id: legacy_id.clone(),
+      installation_id: "legacy-installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::PreDownload,
+      source_tag: Some("1.0.0".to_string()),
+      target_tag: "2.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: super::super::model::PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory: vec![PlanFile {
+        name: "target.bin".to_string(),
+        size: 1,
+        md5: "00000000000000000000000000000000".to_string(),
+      }],
+      fallback: None,
+      install_overlay: None,
+      audio_selection: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    persist_validated_plan(&task_root, &legacy_plan).expect("写入旧计划失败");
+    let _ = fs::remove_file(task_root.join("tasks").join(&legacy_id).join("plan-meta.json"));
+    assert_eq!(
+      resolve_plan_installation_id(&task_root, &legacy_id).expect("回退旧计划失败"),
+      Some("legacy-installation".to_string())
+    );
+
+    let corrupt_id = Uuid::new_v4().to_string();
+    let corrupt_dir = task_root.join("tasks").join(&corrupt_id);
+    fs::create_dir_all(&corrupt_dir).expect("创建损坏元数据目录失败");
+    fs::write(corrupt_dir.join("plan-meta.json"), b"not-json").expect("写入损坏元数据失败");
+    let corrupt_plan = PersistedPlan { plan_id: corrupt_id.clone(), ..legacy_plan };
+    persist_validated_plan(&task_root, &corrupt_plan).expect("写入损坏元数据对应的旧计划失败");
+    fs::write(corrupt_dir.join("plan-meta.json"), b"not-json").expect("恢复损坏元数据失败");
+    let error =
+      resolve_plan_installation_id(&task_root, &corrupt_id).expect_err("损坏元数据不应回退旧计划");
+    assert!(error.contains("解析游戏资源计划元数据失败"));
+
+    let _ = fs::remove_dir_all(task_root);
+  }
+
+  /// 验证任务目录链接被拒绝；Windows 无创建链接权限时仅跳过该环境测试。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn resolve_plan_installation_id_rejects_linked_task_directory() {
+    let task_root =
+      std::env::temp_dir().join(format!("teyvatguide-lifecycle-link-{}", Uuid::new_v4()));
+    let task_id = Uuid::new_v4().to_string();
+    let target = task_root.join("outside");
+    let link = task_root.join("tasks").join(&task_id);
+    fs::create_dir_all(&target).expect("创建链接目标目录失败");
+    fs::create_dir_all(link.parent().expect("链接父目录缺失")).expect("创建链接父目录失败");
+    let result = {
+      #[cfg(unix)]
+      {
+        std::os::unix::fs::symlink(&target, &link)
+      }
+      #[cfg(windows)]
+      {
+        std::os::windows::fs::symlink_dir(&target, &link)
+      }
+    };
+    if let Err(error) = result {
+      eprintln!("跳过链接安全测试，当前环境无法创建目录链接：{error}");
+      let _ = fs::remove_dir_all(task_root);
+      return;
+    }
+    let error =
+      resolve_plan_installation_id(&task_root, &task_id).expect_err("任务目录链接必须被拒绝");
+    assert!(error.contains("普通目录"));
+    let _ = fs::remove_dir_all(task_root);
+  }
 }

@@ -1,5 +1,5 @@
 //! 游戏资源任务写前日志与重启恢复投影。
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
@@ -1100,7 +1100,7 @@ fn persist_file(
 
 /// 列出任务目录中的全部任务日志。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `task_root`: 任务根目录。
@@ -1132,15 +1132,64 @@ pub(crate) fn list(
     if !path.exists() {
       continue;
     }
-    let journal = load(&path)?;
-    if directory_task_id == journal.task_id
-      && installation_id.is_none_or(|id| id == journal.installation_id)
-    {
+    let journal = match load(&path) {
+      Ok(journal) => journal,
+      Err(error) => {
+        match belongs_to_other_installation(task_root, &directory_task_id, installation_id) {
+          Ok(true) => continue,
+          Ok(false) => {
+            return Err(format!(
+              "读取游戏资源任务日志失败（task_id={directory_task_id}）：{error}"
+            ));
+          }
+          Err(ownership_error) => {
+            return Err(format!(
+              "读取游戏资源任务日志失败（task_id={directory_task_id}）：{error}；归属解析失败：{ownership_error}"
+            ));
+          }
+        }
+      }
+    };
+    if directory_task_id != journal.task_id {
+      match belongs_to_other_installation(task_root, &directory_task_id, installation_id) {
+        Ok(true) => continue,
+        Ok(false) => {
+          return Err(format!(
+            "游戏资源任务目录与 journal 身份不匹配（task_id={directory_task_id}）：journal.task_id={}",
+            journal.task_id
+          ));
+        }
+        Err(ownership_error) => {
+          return Err(format!(
+            "游戏资源任务目录与 journal 身份不匹配（task_id={directory_task_id}）：journal.task_id={}；归属解析失败：{ownership_error}",
+            journal.task_id
+          ));
+        }
+      }
+    }
+    if installation_id.is_none_or(|id| id == journal.installation_id) {
       journals.push(journal);
     }
   }
   journals.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
   Ok(journals)
+}
+
+/// 仅当可信计划归属明确属于其他安装时跳过损坏任务。
+///
+/// @since Beta v0.13.0
+fn belongs_to_other_installation(
+  task_root: &Path,
+  task_id: &str,
+  installation_id: Option<&str>,
+) -> Result<bool, String> {
+  let Some(installation_id) = installation_id else {
+    return Ok(false);
+  };
+  Ok(
+    plan_lifecycle::resolve_plan_installation_id(task_root, task_id)?
+      .is_some_and(|owner| owner != installation_id),
+  )
 }
 
 /// 扫描任务目录中的每个条目；异常条目作为记录返回，不阻断其他任务展示。
@@ -2023,5 +2072,123 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
     std::fs::File::open(directory)
       .and_then(|file| file.sync_all())
       .map_err(|error| format!("刷新游戏资源任务目录失败：{error}"))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  /// 验证损坏日志只在可信归属明确属于其他安装时被 scoped 查询隔离。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn list_scopes_corrupt_and_mismatched_journals_safely() {
+    let other_root =
+      std::env::temp_dir().join(format!("teyvatguide-journal-other-{}", Uuid::new_v4()));
+    let other_id = Uuid::new_v4().to_string();
+    let other_dir = other_root.join("tasks").join(&other_id);
+    fs::create_dir_all(&other_dir).expect("创建其他安装任务目录失败");
+    fs::write(other_dir.join("journal.json"), b"not-json").expect("写入损坏日志失败");
+    plan_lifecycle::persist_metadata(
+      &other_root,
+      &other_id,
+      "other-installation",
+      PackagePlanTarget::Main,
+      "2026-01-01T00:00:00Z",
+    )
+    .expect("写入其他安装元数据失败");
+    assert!(
+      list(&other_root, Some("current-installation")).expect("其他安装损坏日志不应阻断").is_empty()
+    );
+    let global_error = list(&other_root, None).err().expect("全局查询必须严格失败");
+    assert!(global_error.contains(&other_id));
+    assert!(global_error.contains("解析游戏资源任务日志失败"));
+    let _ = fs::remove_dir_all(other_root);
+
+    let same_root =
+      std::env::temp_dir().join(format!("teyvatguide-journal-same-{}", Uuid::new_v4()));
+    let same_id = Uuid::new_v4().to_string();
+    let same_dir = same_root.join("tasks").join(&same_id);
+    fs::create_dir_all(&same_dir).expect("创建同安装任务目录失败");
+    fs::write(same_dir.join("journal.json"), b"not-json").expect("写入同安装损坏日志失败");
+    plan_lifecycle::persist_metadata(
+      &same_root,
+      &same_id,
+      "current-installation",
+      PackagePlanTarget::Main,
+      "2026-01-01T00:00:00Z",
+    )
+    .expect("写入同安装元数据失败");
+    let same_error =
+      list(&same_root, Some("current-installation")).err().expect("同安装损坏日志必须失败");
+    assert!(same_error.contains(&same_id));
+    assert!(same_error.contains("解析游戏资源任务日志失败"));
+    let _ = fs::remove_dir_all(same_root);
+
+    let unknown_root =
+      std::env::temp_dir().join(format!("teyvatguide-journal-unknown-{}", Uuid::new_v4()));
+    let unknown_id = Uuid::new_v4().to_string();
+    let unknown_dir = unknown_root.join("tasks").join(&unknown_id);
+    fs::create_dir_all(&unknown_dir).expect("创建未知任务目录失败");
+    fs::write(unknown_dir.join("journal.json"), b"not-json").expect("写入未知损坏日志失败");
+    let unknown_error =
+      list(&unknown_root, Some("current-installation")).err().expect("未知归属损坏日志必须失败");
+    assert!(unknown_error.contains(&unknown_id));
+    assert!(unknown_error.contains("解析游戏资源任务日志失败"));
+    let _ = fs::remove_dir_all(unknown_root);
+
+    let corrupt_metadata_root =
+      std::env::temp_dir().join(format!("teyvatguide-journal-meta-{}", Uuid::new_v4()));
+    let corrupt_metadata_id = Uuid::new_v4().to_string();
+    let corrupt_metadata_dir = corrupt_metadata_root.join("tasks").join(&corrupt_metadata_id);
+    fs::create_dir_all(&corrupt_metadata_dir).expect("创建损坏元数据任务目录失败");
+    fs::write(corrupt_metadata_dir.join("journal.json"), b"not-json")
+      .expect("写入损坏元数据日志失败");
+    fs::write(corrupt_metadata_dir.join("plan-meta.json"), b"not-json")
+      .expect("写入损坏元数据失败");
+    fs::write(corrupt_metadata_dir.join("plan.json"), b"legacy-plan")
+      .expect("写入旧计划占位文件失败");
+    let corrupt_metadata_error = list(&corrupt_metadata_root, Some("current-installation"))
+      .err()
+      .expect("损坏元数据不能回退旧计划");
+    assert!(corrupt_metadata_error.contains(&corrupt_metadata_id));
+    assert!(corrupt_metadata_error.contains("解析游戏资源任务日志失败"));
+    let _ = fs::remove_dir_all(corrupt_metadata_root);
+
+    let mismatch_root =
+      std::env::temp_dir().join(format!("teyvatguide-journal-mismatch-{}", Uuid::new_v4()));
+    let directory_id = Uuid::new_v4().to_string();
+    let journal_id = Uuid::new_v4().to_string();
+    let mismatch_dir = mismatch_root.join("tasks").join(&directory_id);
+    fs::create_dir_all(&mismatch_dir).expect("创建身份不匹配任务目录失败");
+    let mismatch = TaskJournal::from_switch(
+      journal_id,
+      "other-installation".to_string(),
+      SchemeId::CnOfficial,
+      SchemeId::CnOfficial,
+      "a".repeat(64),
+      0,
+      0,
+    );
+    fs::write(
+      mismatch_dir.join("journal.json"),
+      serde_json::to_vec(&mismatch).expect("序列化身份不匹配日志失败"),
+    )
+    .expect("写入身份不匹配日志失败");
+    plan_lifecycle::persist_metadata(
+      &mismatch_root,
+      &directory_id,
+      "other-installation",
+      PackagePlanTarget::Main,
+      "2026-01-01T00:00:00Z",
+    )
+    .expect("写入身份不匹配元数据失败");
+    assert!(
+      list(&mismatch_root, Some("current-installation"))
+        .expect("其他安装身份不匹配日志不应阻断")
+        .is_empty()
+    );
+    let _ = fs::remove_dir_all(mismatch_root);
   }
 }

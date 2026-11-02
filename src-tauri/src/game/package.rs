@@ -1,5 +1,5 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
-//! @since Beta v0.12.5
+//! @since Beta v0.13.0
 
 use super::{
   assembler, committer, defender,
@@ -3642,12 +3642,21 @@ impl GamePackageManager {
   }
 
   /// 列出指定安装的资源任务安全投影。
+  ///
+  /// @since Beta v0.13.0
   pub(crate) async fn list(
     &self,
     task_root: &Path,
     installation_id: Option<&str>,
   ) -> Result<Vec<PackageTaskSummary>, String> {
-    let journals = journal::list(task_root, installation_id)?;
+    let journals = journal::scan_records(task_root)?
+      .into_iter()
+      .filter_map(|record| match record {
+        journal::TaskDirectoryRecord::Journal(journal) => Some(journal),
+        _ => None,
+      })
+      .filter(|journal| installation_id.is_none_or(|id| id == journal.installation_id))
+      .collect();
     self.list_from_journals(journals, installation_id).await
   }
 
@@ -8879,4 +8888,54 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
     }
   }
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  /// 验证任务展示使用容错扫描，同时保留有效任务与 Invalid 历史记录。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn list_uses_scan_records_without_cross_task_failure() {
+    let task_root =
+      std::env::temp_dir().join(format!("teyvatguide-package-list-{}", Uuid::new_v4()));
+    let valid_id = Uuid::new_v4().to_string();
+    let valid = TaskJournal::from_switch(
+      valid_id.clone(),
+      "install-a".to_string(),
+      super::super::model::SchemeId::CnOfficial,
+      super::super::model::SchemeId::CnOfficial,
+      "a".repeat(64),
+      0,
+      0,
+    );
+    journal::persist(&task_root, &valid).expect("写入有效任务日志失败");
+    fs::write(task_root.join("tasks").join(&valid_id).join("plan.json"), b"{}")
+      .expect("写入有效计划占位文件失败");
+
+    let invalid_id = Uuid::new_v4().to_string();
+    let invalid_dir = task_root.join("tasks").join(&invalid_id);
+    fs::create_dir_all(&invalid_dir).expect("创建无效任务目录失败");
+    fs::write(invalid_dir.join("journal.json"), b"not-json").expect("写入无效日志失败");
+    fs::write(invalid_dir.join("plan.json"), b"{}").expect("写入无效计划占位文件失败");
+
+    let runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .expect("创建任务列表测试运行时失败");
+    let manager = GamePackageManager::new();
+    let summaries = runtime
+      .block_on(manager.list(&task_root, Some("install-a")))
+      .expect("有效任务不应被无效历史记录阻断");
+    assert_eq!(summaries.len(), 1);
+    assert_eq!(summaries[0].task_id, valid_id);
+
+    let records = runtime.block_on(manager.record_list(&task_root)).expect("历史任务扫描不应失败");
+    assert!(records.iter().any(|record| matches!(record.kind, PackageTaskRecordKind::Task)));
+    assert!(records.iter().any(|record| matches!(record.kind, PackageTaskRecordKind::Invalid)));
+
+    let _ = fs::remove_dir_all(task_root);
+  }
 }
