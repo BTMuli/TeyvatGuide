@@ -1,5 +1,5 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 
 use super::{
   cache, defender,
@@ -808,6 +808,8 @@ pub async fn game_install_draft_dirs(
 /// 将全新安装涉及的目标目录、临时 spool、暂存目录、下载缓存与任务 journal
 /// 加入 Windows Defender 排除列表。
 /// 需要 UAC 授权；成功后目录路径会打印到终端，并在安装结束后自动移出。
+///
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_defender_exclude_add(
   app_handle: AppHandle,
@@ -820,7 +822,7 @@ pub async fn game_install_defender_exclude_add(
 
 /// 解析并登记安装目录，随后提权加入 Windows Defender 排除列表。
 ///
-/// @since Beta v0.12.2
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `task_root`: 任务根目录。
@@ -835,24 +837,73 @@ async fn add_install_defender_exclusions(
   install_id: &str,
   plan_id: &str,
 ) -> Result<Vec<String>, String> {
-  let dirs = defender::resolve_install_dirs(task_root, install_id)?;
-  defender::print_dirs("添加 Windows Defender 排除：", &dirs);
-  defender::persist_registry(task_root, plan_id, &dirs)?;
-  let paths = dirs.paths();
-  let added = {
-    let operation_paths = paths.clone();
-    tauri::async_runtime::spawn_blocking(move || defender::add_exclusions(&operation_paths))
-      .await
-      .map_err(|error| format!("排除任务异常退出：{error}"))?
-  };
-  if let Err(error) = added {
-    defender::remove_registry(task_root, plan_id);
-    return Err(error);
-  }
-  Ok(paths)
+  let task_root = task_root.to_path_buf();
+  let install_id = install_id.to_string();
+  let plan_id = plan_id.to_string();
+  tauri::async_runtime::spawn_blocking(move || {
+    let _guard = defender::lock_exclusion_mutation()?;
+    let dirs = defender::resolve_install_dirs(&task_root, &install_id)?;
+    defender::print_dirs("添加 Windows Defender 排除：", &dirs);
+    let previous = defender::load_registry(&task_root, &plan_id)?;
+    let previous_owned = previous.map_or_else(Vec::new, |registry| registry.owned_paths);
+    // 在任何 Defender 变更前验证其它登记；损坏登记不能被忽略，否则可能误删共享排除。
+    defender::validate_other_registries(&task_root, &plan_id)?;
+    let paths = dirs.paths();
+
+    // 先写 pending，提权回执不完整时也保留登记，避免误删或丢失本轮所有权。
+    defender::persist_registry(
+      &task_root,
+      &plan_id,
+      &dirs,
+      &previous_owned,
+      defender::DefenderRegistryState::Pending,
+    )?;
+    let receipt = defender::add_exclusions(&paths);
+    let mut known_owned = previous_owned;
+    if receipt.is_complete() {
+      known_owned.extend(receipt.owned_present.iter().cloned());
+      // 在提升为 active 前先保存拥有路径 checkpoint；即使后续状态写入失败也不能丢账。
+      defender::persist_registry(
+        &task_root,
+        &plan_id,
+        &dirs,
+        &known_owned,
+        defender::DefenderRegistryState::Pending,
+      )?;
+    }
+    if receipt.is_success() {
+      defender::persist_registry(
+        &task_root,
+        &plan_id,
+        &dirs,
+        &known_owned,
+        defender::DefenderRegistryState::Active,
+      )?;
+      return Ok(paths);
+    }
+
+    let state = if receipt.is_complete() && !known_owned.is_empty() {
+      defender::DefenderRegistryState::CleanupRequired
+    } else {
+      defender::DefenderRegistryState::Pending
+    };
+    if let Err(persist_error) =
+      defender::persist_registry(&task_root, &plan_id, &dirs, &known_owned, state)
+    {
+      return Err(format!(
+        "{}；保存 Defender 登记失败：{persist_error}",
+        receipt.error_message("添加")
+      ));
+    }
+    Err(receipt.error_message("添加"))
+  })
+  .await
+  .map_err(|error| format!("排除任务异常退出：{error}"))?
 }
 
 /// 查询指定安装计划是否已成功登记 Defender 排除。
+///
+/// @since Beta v0.13.0
 #[tauri::command]
 pub fn game_install_defender_exclude_status(
   app_handle: AppHandle,
@@ -863,22 +914,20 @@ pub fn game_install_defender_exclude_status(
 }
 
 /// 将全新安装临时加入白名单的目录移出 Windows Defender 排除列表（UAC 提权）。
+/// 清理统一依据登记中的 owned_paths；旧版登记只删除登记文件，不移除系统排除。
+///
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_defender_exclude_remove(
   app_handle: AppHandle,
   plan_id: String,
 ) -> Result<(), String> {
   let task_root = game_task_root(&app_handle)?;
-  let Some(dirs) = defender::load_registry(&task_root, &plan_id) else {
-    return Ok(());
-  };
-  let paths = dirs.paths();
-  defender::print_paths("移出 Windows Defender 排除：", &paths);
-  tauri::async_runtime::spawn_blocking(move || defender::remove_exclusions(&paths))
-    .await
-    .map_err(|error| format!("排除清理任务异常退出：{error}"))??;
-  defender::remove_registry(&task_root, &plan_id);
-  Ok(())
+  tauri::async_runtime::spawn_blocking(move || {
+    defender::cleanup_install_exclusions(&task_root, &plan_id)
+  })
+  .await
+  .map_err(|error| format!("排除清理任务异常退出：{error}"))?
 }
 
 /// 读取尚未登记安装的任务投影。
