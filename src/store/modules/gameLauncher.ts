@@ -645,38 +645,82 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  /**
+   * 注册全部后端事件监听，并在部分注册失败时清理已成功注册的监听。
+   * @param generation - 本次监听生命周期的代数。
+   * @since Beta v0.13.0
+   */
+  async function createListeners(generation: number): Promise<Array<UnlistenFn>> {
+    const results = await Promise.allSettled([
+      listen<TGApp.Game.Package.TaskSummary>("game-package://state", (event) => {
+        if (generation !== listenerGeneration) return;
+        mergeTask(event.payload);
+      }),
+      listen<TGApp.Game.Package.TaskSummary>("game-package://progress", (event) => {
+        if (generation !== listenerGeneration) return;
+        queueTaskProgress(event.payload);
+      }),
+      listen<TGApp.Game.Package.VerifySummary>("game-package://verify", (event) => {
+        if (generation !== listenerGeneration) return;
+        mergeVerify(event.payload);
+      }),
+    ]);
+    const created: Array<UnlistenFn> = [];
+    let failure: { reason: unknown } | undefined;
+    for (const result of results) {
+      if (result.status === "fulfilled") created.push(result.value);
+      else if (failure === undefined) failure = result;
+    }
+    if (failure !== undefined) {
+      clearListeners(created);
+      throw failure.reason;
+    }
+    return created;
+  }
+
+  /**
+   * 清理一组后端事件监听。
+   * @since Beta v0.13.0
+   */
+  function clearListeners(listeners: ReadonlyArray<UnlistenFn>): void {
+    for (const unlisten of listeners) unlisten();
+  }
+
+  /**
+   * 启动后端事件监听；每次生命周期只接受本轮注册结果。
+   * @since Beta v0.13.0
+   */
   async function startListening(): Promise<void> {
     if (unlisteners.length > 0) return;
     if (listenerPromise !== null) return await listenerPromise;
     const generation = ++listenerGeneration;
-    listenerPromise = (async () => {
-      const created = await Promise.all([
-        listen<TGApp.Game.Package.TaskSummary>("game-package://state", (event) => {
-          mergeTask(event.payload);
-        }),
-        listen<TGApp.Game.Package.TaskSummary>("game-package://progress", (event) => {
-          queueTaskProgress(event.payload);
-        }),
-        listen<TGApp.Game.Package.VerifySummary>("game-package://verify", (event) => {
-          mergeVerify(event.payload);
-        }),
-      ]);
+    const promise = (async () => {
+      const created = await createListeners(generation);
       if (generation !== listenerGeneration) {
-        for (const unlisten of created) unlisten();
+        clearListeners(created);
         return;
       }
       unlisteners = created;
     })();
+    listenerPromise = promise;
     try {
-      await listenerPromise;
+      await promise;
+    } catch (error) {
+      if (generation === listenerGeneration) listenerGeneration += 1;
+      throw error;
     } finally {
-      listenerPromise = null;
+      if (listenerPromise === promise) listenerPromise = null;
     }
   }
 
+  /**
+   * 停止当前监听生命周期，并使尚未完成的注册结果失效。
+   * @since Beta v0.13.0
+   */
   function stopListening(): void {
     listenerGeneration += 1;
-    for (const unlisten of unlisteners) unlisten();
+    listenerPromise = null;
+    clearListeners(unlisteners);
     unlisteners = [];
     pendingProgressByInstallation.clear();
     clearProgressTimer();

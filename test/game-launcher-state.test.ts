@@ -4,13 +4,17 @@
  */
 
 import useGameLauncherStore from "@store/gameLauncher.js";
-import type { EventCallback } from "@tauri-apps/api/event";
+import type { EventCallback, UnlistenFn } from "@tauri-apps/api/event";
 import { createPinia, disposePinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   listTasks: vi.fn<() => Promise<Array<TGApp.Game.Package.TaskSummary>>>(),
   startTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
+  listen:
+    vi.fn<
+      (name: string, callback: EventCallback<TGApp.Game.Package.TaskSummary>) => Promise<UnlistenFn>
+    >(),
   listeners: new Map<string, EventCallback<TGApp.Game.Package.TaskSummary>>(),
 }));
 
@@ -19,10 +23,7 @@ vi.mock("@utils/game/TGGameLauncher.js", () => ({
   startGamePackageTask: mocks.startTask,
 }));
 vi.mock("@tauri-apps/api/event", () => ({
-  listen: vi.fn(async (name: string, callback: EventCallback<TGApp.Game.Package.TaskSummary>) => {
-    mocks.listeners.set(name, callback);
-    return () => mocks.listeners.delete(name);
-  }),
+  listen: mocks.listen,
 }));
 
 let pinia: ReturnType<typeof createPinia>;
@@ -106,6 +107,13 @@ beforeEach(async () => {
   vi.stubGlobal("window", globalThis);
   mocks.listTasks.mockReset();
   mocks.startTask.mockReset();
+  mocks.listen.mockReset();
+  mocks.listen.mockImplementation(async (name, callback) => {
+    mocks.listeners.set(name, callback);
+    return () => {
+      if (mocks.listeners.get(name) === callback) mocks.listeners.delete(name);
+    };
+  });
   mocks.listeners.clear();
   pinia = createPinia();
   setActivePinia(pinia);
@@ -203,5 +211,106 @@ describe("游戏任务状态对账", () => {
     emitTask(createTask({ state: "completed" }));
     vi.advanceTimersByTime(5000);
     expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("监听初始化部分失败时清理已注册的监听", async () => {
+    store.stopListening();
+    mocks.listen.mockRejectedValueOnce(new Error("state listen failed"));
+
+    await expect(store.startListening()).rejects.toThrow("state listen failed");
+    expect(mocks.listeners.size).toBe(0);
+  });
+
+  it("监听初始化失败后忽略已排队回调", async () => {
+    store.stopListening();
+    mocks.listen.mockRejectedValueOnce(new Error("state listen failed"));
+    const callsBeforeStart = mocks.listen.mock.calls.length;
+    await expect(store.startListening()).rejects.toThrow("state listen failed");
+    const staleProgress = mocks.listen.mock.calls[callsBeforeStart + 1][1];
+    staleProgress({
+      event: "game-package://progress",
+      id: 1,
+      payload: createTask({ state: "paused" }),
+    });
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("停止后立即重新启动不会复用旧初始化结果", async () => {
+    store.stopListening();
+    let resolveFirstListen: (unlisten: UnlistenFn) => void = () => {};
+    const firstListen = new Promise<UnlistenFn>((resolve) => {
+      resolveFirstListen = resolve;
+    });
+    mocks.listen.mockImplementationOnce(() => firstListen);
+
+    const firstStart = store.startListening();
+    await Promise.resolve();
+    store.stopListening();
+
+    const secondStart = store.startListening();
+    await Promise.resolve();
+    const listenCallsBeforeFirstResolve = mocks.listen.mock.calls.length;
+
+    resolveFirstListen(() => {});
+    await firstStart;
+    await secondStart;
+    expect(listenCallsBeforeFirstResolve).toBe(9);
+    expect(mocks.listeners.size).toBe(3);
+  });
+
+  it("旧监听初始化完成后不会清空新一轮初始化Promise", async () => {
+    store.stopListening();
+    let resolveFirstListen: (unlisten: UnlistenFn) => void = () => {};
+    const firstListen = new Promise<UnlistenFn>((resolve) => {
+      resolveFirstListen = resolve;
+    });
+    mocks.listen.mockImplementationOnce(() => firstListen);
+
+    const firstStart = store.startListening();
+    await Promise.resolve();
+    store.stopListening();
+
+    let resolveSecondListen: (unlisten: UnlistenFn) => void = () => {};
+    const secondListen = new Promise<UnlistenFn>((resolve) => {
+      resolveSecondListen = resolve;
+    });
+    mocks.listen.mockImplementationOnce(() => secondListen);
+    const secondStart = store.startListening();
+    await Promise.resolve();
+    const listenCallsBeforeFirstResolve = mocks.listen.mock.calls.length;
+
+    resolveFirstListen(() => {});
+    await firstStart;
+    const thirdStart = store.startListening();
+    await Promise.resolve();
+    expect(mocks.listen).toHaveBeenCalledTimes(listenCallsBeforeFirstResolve);
+
+    resolveSecondListen(() => {});
+    await secondStart;
+    await thirdStart;
+  });
+
+  it("停止后的迟到旧回调不会写入新生命周期投影", async () => {
+    const oldStateListener = mocks.listeners.get("game-package://state");
+    if (oldStateListener === undefined) throw new Error("旧任务监听未注册");
+
+    store.stopListening();
+    await store.startListening();
+    const newStateListener = mocks.listeners.get("game-package://state");
+    if (newStateListener === undefined) throw new Error("新任务监听未注册");
+
+    oldStateListener({
+      event: "game-package://state",
+      id: 1,
+      payload: createTask({ revision: 10 }),
+    });
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+
+    newStateListener({
+      event: "game-package://state",
+      id: 2,
+      payload: createTask({ revision: 11 }),
+    });
+    expect(store.tasksByInstallation["install-a"]?.revision).toBe(11);
   });
 });
