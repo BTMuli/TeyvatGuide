@@ -4,10 +4,15 @@
 
 mod events;
 mod metrics;
+mod progress;
 mod spool;
 
 use events::{TaskEventDispatcher, emit_progress, emit_state, should_emit_progress};
 use metrics::{InstallPipelineMetrics, duration_micros};
+use progress::{
+  AudioLiveAssemblyOverlay, overlay_audio_summary, overlay_install_download_progress,
+  start_assembly_write_progress_monitor, start_install_download_progress_monitor,
+};
 
 use spool::{
   InstallCompletionSnapshot, InstallSpoolTracker, install_tracker_spool_bytes,
@@ -50,7 +55,7 @@ use std::{
   path::{Path, PathBuf},
   sync::{
     Arc, LazyLock, Mutex,
-    atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
+    atomic::{AtomicBool, AtomicUsize, Ordering},
   },
   time::{Duration, Instant},
 };
@@ -691,62 +696,6 @@ fn persist_prepare_watchdog_pause(
   emit_progress(app_handle, &summary);
 }
 
-/// 组装进度条用写出增量叠加已完成成品，不把预分配或会话写出写进 journal。
-struct AudioLiveAssemblyOverlay {
-  accounted_written: AtomicU64,
-}
-
-impl AudioLiveAssemblyOverlay {
-  /// 创建组装进度叠加器。
-  ///
-  /// @since Beta v0.12.0
-  fn new() -> Self {
-    Self { accounted_written: AtomicU64::new(0) }
-  }
-
-  /// 计算展示用已完成字节数。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `durable_completed`: 持久完成字节数。
-  /// - `total`: 总字节数。
-  /// - `written`: 已写字节数。
-  /// - `accounted`: 已入账字节数。
-  ///
-  /// # 返回
-  /// 展示字节数。
-  fn display_bytes(durable_completed: u64, total: u64, written: u64, accounted: u64) -> u64 {
-    durable_completed.saturating_add(written.saturating_sub(accounted)).min(total)
-  }
-
-  /// 叠加写出进度到任务摘要。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `journal`: 任务日志。
-  /// - `written`: 已写字节数。
-  ///
-  /// # 返回
-  /// 叠加后的摘要。
-  fn overlay(&self, journal: &TaskJournal, written: u64) -> PackageTaskSummary {
-    let mut summary = journal.summary();
-    summary.assembly_completed_bytes = Self::display_bytes(
-      journal.assembly_completed_bytes,
-      journal.assembly_total_bytes,
-      written,
-      self.accounted_written.load(Ordering::Relaxed),
-    );
-    summary
-  }
-
-  /// 只把该成品大小入账，保留其他正在写盘资源的会话增量。
-  fn account_completed(&self, asset_size: u64) {
-    self.accounted_written.fetch_add(asset_size, Ordering::Relaxed);
-  }
-}
-
 struct AudioAssetJob {
   asset_index: usize,
   pending: Vec<(usize, PlanDownload)>,
@@ -943,211 +892,6 @@ async fn drain_assembly_workers(plan_id: &str, timeout: Duration) -> bool {
   }
 }
 
-struct InstallDownloadProgressMonitor {
-  stopped: Arc<AtomicBool>,
-}
-
-impl Drop for InstallDownloadProgressMonitor {
-  /// 停止下载进度监控任务。
-  fn drop(&mut self) {
-    self.stopped.store(true, Ordering::Release);
-  }
-}
-
-struct AssemblyWriteProgressMonitor {
-  stopped: Arc<AtomicBool>,
-}
-
-impl Drop for AssemblyWriteProgressMonitor {
-  /// 停止组装写盘进度监控任务。
-  fn drop(&mut self) {
-    self.stopped.store(true, Ordering::Release);
-  }
-}
-
-/// 1 秒写盘带宽采样：多路 `write_all` 增量合计，再按下载侧同一套 EMA 平滑。
-struct AssemblyWriteBandwidthTracker {
-  last_written_bytes: u64,
-  last_sample_at: Instant,
-  smoothed_bytes_per_second: f64,
-}
-
-impl AssemblyWriteBandwidthTracker {
-  /// 以当前已写字节数初始化组装带宽采样器。
-  fn new(written_bytes: u64) -> Self {
-    Self {
-      last_written_bytes: written_bytes,
-      last_sample_at: Instant::now(),
-      smoothed_bytes_per_second: 0.0,
-    }
-  }
-
-  /// 采样最近窗口的组装写盘带宽，并用 EMA 平滑。
-  fn sample(&mut self, written_bytes: u64, active_assemblies: usize, now: Instant) -> u64 {
-    let elapsed = now.saturating_duration_since(self.last_sample_at).as_secs_f64().max(0.001);
-    let delta = written_bytes.saturating_sub(self.last_written_bytes);
-    self.last_written_bytes = written_bytes;
-    self.last_sample_at = now;
-    if active_assemblies == 0 {
-      self.smoothed_bytes_per_second = 0.0;
-    } else if delta > 0 {
-      let sample = delta as f64 / elapsed;
-      self.smoothed_bytes_per_second = if self.smoothed_bytes_per_second > 0.0 {
-        self.smoothed_bytes_per_second * 0.7 + sample * 0.3
-      } else {
-        sample
-      };
-    }
-    self.smoothed_bytes_per_second.max(0.0) as u64
-  }
-}
-
-/// 把组装写盘带宽写回任务日志；数值未变化时返回 false。
-fn apply_assembly_write_bandwidth(journal: &mut TaskJournal, speed: u64) -> bool {
-  let remaining = journal.assembly_total_bytes.saturating_sub(journal.assembly_completed_bytes);
-  let eta = download_eta_seconds(remaining, speed);
-  if journal.assembly_bytes_per_second == speed && journal.assembly_eta_seconds == eta {
-    return false;
-  }
-  journal.assembly_bytes_per_second = speed;
-  journal.assembly_eta_seconds = eta;
-  journal.touch();
-  true
-}
-
-/// 启动安装流水线进度采样，定期把下载/组装带宽与 ETA 写回任务日志。
-/// @since Beta v0.13.0
-fn start_install_download_progress_monitor(
-  events: TaskEventDispatcher,
-  journal: Arc<AsyncMutex<TaskJournal>>,
-  metrics: Arc<InstallPipelineMetrics>,
-) -> InstallDownloadProgressMonitor {
-  let stopped = Arc::new(AtomicBool::new(false));
-  let stopped_for_task = Arc::clone(&stopped);
-  tauri::async_runtime::spawn(async move {
-    let mut last_received_bytes = metrics.download_snapshot().received_bytes;
-    let mut last_sample = Instant::now();
-    let mut last_in_flight_bytes = 0_u64;
-    let mut smoothed_bytes_per_second = 0_f64;
-    let mut assembly_tracker =
-      AssemblyWriteBandwidthTracker::new(metrics.assembly_snapshot().written_bytes);
-    loop {
-      tokio::time::sleep(Duration::from_secs(1)).await;
-      if stopped_for_task.load(Ordering::Acquire) || metrics.is_stall_pause_requested() {
-        break;
-      }
-      let snapshot = metrics.download_snapshot();
-      let received_bytes = snapshot.received_bytes;
-      let elapsed = last_sample.elapsed().as_secs_f64().max(0.001);
-      let received_delta = received_bytes.saturating_sub(last_received_bytes);
-      last_received_bytes = received_bytes;
-      last_sample = Instant::now();
-      let active_downloads = metrics.active_downloads();
-      if active_downloads > 0 && received_delta > 0 {
-        let sample = received_delta as f64 / elapsed;
-        smoothed_bytes_per_second = if smoothed_bytes_per_second > 0.0 {
-          smoothed_bytes_per_second * 0.7 + sample * 0.3
-        } else {
-          sample
-        };
-      } else if active_downloads == 0 {
-        smoothed_bytes_per_second = 0.0;
-      } else {
-        smoothed_bytes_per_second *= 0.5;
-      }
-      let assembly_written = metrics.assembly_snapshot().written_bytes;
-      let active_assemblies = metrics.active_assemblies();
-      let sampled_assembly_speed =
-        assembly_tracker.sample(assembly_written, active_assemblies, Instant::now());
-
-      let mut value = journal.lock().await;
-      if stopped_for_task.load(Ordering::Acquire) || metrics.is_stall_pause_requested() {
-        break;
-      }
-      let speed = if value.state == PackageTaskState::Downloading {
-        smoothed_bytes_per_second.max(0.0) as u64
-      } else {
-        0
-      };
-      let remaining = metrics.remaining_bytes().saturating_sub(snapshot.in_flight_bytes);
-      let eta = download_eta_seconds(remaining, speed);
-      let in_flight_changed = last_in_flight_bytes != snapshot.in_flight_bytes;
-      last_in_flight_bytes = snapshot.in_flight_bytes;
-      let speed_changed = value.bytes_per_second != speed || value.eta_seconds != eta;
-      if speed_changed {
-        value.bytes_per_second = speed;
-        value.eta_seconds = eta;
-        value.touch();
-      }
-      let assembly_speed =
-        if matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
-          sampled_assembly_speed
-        } else {
-          0
-        };
-      let assembly_changed = apply_assembly_write_bandwidth(&mut value, assembly_speed);
-      if !speed_changed && !in_flight_changed && !assembly_changed {
-        continue;
-      }
-      let summary = overlay_install_download_progress(&value, &metrics);
-      drop(value);
-      events.publish_progress(summary);
-    }
-  });
-  InstallDownloadProgressMonitor { stopped }
-}
-
-/// 启动配音组装写盘进度采样，实时把组装增量叠加到任务摘要。
-/// @since Beta v0.13.0
-fn start_assembly_write_progress_monitor(
-  events: TaskEventDispatcher,
-  journal: Arc<AsyncMutex<TaskJournal>>,
-  telemetry: Arc<assembler::AssemblyTelemetry>,
-  overlay: Arc<AudioLiveAssemblyOverlay>,
-  canceled: Arc<AtomicBool>,
-  paused: Arc<AtomicBool>,
-) -> AssemblyWriteProgressMonitor {
-  let stopped = Arc::new(AtomicBool::new(false));
-  let stopped_for_task = Arc::clone(&stopped);
-  tauri::async_runtime::spawn(async move {
-    let mut tracker = AssemblyWriteBandwidthTracker::new(telemetry.snapshot().written_bytes);
-    let mut last_display_bytes = 0_u64;
-    loop {
-      tokio::time::sleep(Duration::from_secs(1)).await;
-      if stopped_for_task.load(Ordering::Acquire)
-        || canceled.load(Ordering::Acquire)
-        || paused.load(Ordering::Acquire)
-      {
-        break;
-      }
-      let written_bytes = telemetry.snapshot().written_bytes;
-      let mut value = journal.lock().await;
-      if stopped_for_task.load(Ordering::Acquire)
-        || canceled.load(Ordering::Acquire)
-        || paused.load(Ordering::Acquire)
-        || !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling)
-      {
-        break;
-      }
-      let speed = tracker.sample(written_bytes, value.active_assembly_count, Instant::now());
-      let speed_changed = apply_assembly_write_bandwidth(&mut value, speed);
-      let summary = overlay.overlay(&value, written_bytes);
-      drop(value);
-      if !speed_changed && summary.assembly_completed_bytes == last_display_bytes {
-        continue;
-      }
-      last_display_bytes = summary.assembly_completed_bytes;
-      events.publish_progress(summary);
-    }
-  });
-  AssemblyWriteProgressMonitor { stopped }
-}
-
-/// 按剩余字节与当前带宽计算下载 ETA。
-fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u64> {
-  (remaining_bytes > 0 && bytes_per_second > 0).then(|| remaining_bytes.div_ceil(bytes_per_second))
-}
-
 /// 把当前活跃组装数写回任务日志并发布进度。
 /// @since Beta v0.13.0
 async fn emit_active_assembly_count(
@@ -1207,22 +951,6 @@ fn persist_install_progress(
   let result = journal::persist_progress_timed(task_root, journal_value, &mut timing);
   metrics.record_journal(&timing);
   result
-}
-
-/// 把下载中的 in-flight 字节叠加到任务摘要的已下载量。
-/// @since Beta v0.13.0
-fn overlay_install_download_progress(
-  journal: &TaskJournal,
-  metrics: &InstallPipelineMetrics,
-) -> PackageTaskSummary {
-  let mut summary = journal.summary();
-  if !matches!(journal.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
-    return summary;
-  }
-  let in_flight = metrics.download_snapshot().in_flight_bytes;
-  summary.downloaded_bytes =
-    journal.downloaded_bytes.saturating_add(in_flight).min(journal.total_bytes);
-  summary
 }
 
 /// 在 blocking 线程池中异步持久化安装进度。
@@ -3268,15 +2996,6 @@ fn prepare_audio_asset_job(
   AudioAssetJob { asset_index, pending }
 }
 
-/// 用配音组装写盘叠加器生成展示摘要。
-fn overlay_audio_summary(
-  journal: &TaskJournal,
-  telemetry: &assembler::AssemblyTelemetry,
-  overlay: &AudioLiveAssemblyOverlay,
-) -> PackageTaskSummary {
-  overlay.overlay(journal, telemetry.snapshot().written_bytes)
-}
-
 #[allow(clippy::too_many_arguments)]
 /// 占用组装槽并在后台完成单个配音资源组装与证据落盘。
 /// @since Beta v0.13.0
@@ -4283,7 +4002,6 @@ async fn run_streaming_prepare_task(
           Ok(()) => {
             completed_assets.insert(completion.asset_index);
             if let Some(asset) = plan.assets.get(completion.asset_index) {
-              assembly_overlay.account_completed(asset.size);
               release_update_space(&plan.plan_id, 0, asset.size);
             }
             let completed_bytes = completed_assets
@@ -4296,6 +4014,9 @@ async fn run_streaming_prepare_task(
             }
             let summary = {
               let mut value = journal.lock().await;
+              if let Some(asset) = plan.assets.get(completion.asset_index) {
+                assembly_overlay.account_completed(asset.size);
+              }
               value.completed_asset_cursor = cursor.min(plan.assets.len());
               value.assembly_completed_bytes_total = completed_bytes;
               let assembly_total_bytes = value.assembly_total_bytes;
