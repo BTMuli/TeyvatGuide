@@ -1,6 +1,6 @@
 /**
  * 游戏资源长任务的非权威前端投影。
- * @since Beta v0.12.4
+ * @since Beta v0.13.0
  */
 
 import gameEnum from "@enum/game.js";
@@ -61,26 +61,14 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     return true;
   }
 
-  function isInterruptState(state: TGApp.Game.Package.TaskStateEnum): boolean {
-    return (
-      state === gameEnum.package.taskState.PAUSED ||
-      state === gameEnum.package.taskState.FAILED ||
-      state === gameEnum.package.taskState.CANCELED ||
-      state === gameEnum.package.taskState.ABANDONED ||
-      state === gameEnum.package.taskState.RECOVERY_REQUIRED
-    );
-  }
-
+  /**
+   * 按修订号和更新时间拒绝迟到的任务快照。
+   * @since Beta v0.13.0
+   */
   function shouldReplaceTask(
     current: TGApp.Game.Package.TaskSummary | undefined,
     task: TGApp.Game.Package.TaskSummary,
   ): boolean {
-    if (current !== undefined && current.taskId === task.taskId) {
-      if (isInterruptState(task.state) && !isInterruptState(current.state)) return true;
-      if (isInterruptState(current.state) && !isInterruptState(task.state)) {
-        return current.revision < task.revision && current.updatedAt < task.updatedAt;
-      }
-    }
     return !(
       current !== undefined &&
       ((current.taskId === task.taskId && current.revision > task.revision) ||
@@ -341,26 +329,61 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     dismissedVerifyInstallations.value = next;
   }
 
+  /**
+   * 用后端任务列表对账，保留查询期间到达的新事件和仍在启动的任务。
+   * @since Beta v0.13.0
+   */
   async function hydrateTasks(installationId?: string): Promise<void> {
+    const previous = tasksByInstallation.value;
+    const previousPending = new Map(pendingProgressByInstallation);
     const tasks = await listGamePackageTasks(installationId);
     const next = { ...tasksByInstallation.value };
+    const selected = new Map<string, TGApp.Game.Package.TaskSummary>();
+    const latest = new Map<string, TGApp.Game.Package.TaskSummary>();
     const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
     // 后端按更新时间倒序返回：每个安装只投影最新的「需要展示」任务。
-    const selectedInstallationIds = new Set<string>();
-    let changed = false;
     for (const task of tasks) {
-      if (selectedInstallationIds.has(task.installationId)) continue;
-      // 自动隐藏的终态任务不占位：若最新任务已完成或已放弃，同一安装下更旧的暂停、
-      // 失败或待恢复任务仍必须展示，否则刷新页面后会出现「任务存在但面板不显示」，
-      // 只能靠重启应用恢复。
+      if (!latest.has(task.installationId)) latest.set(task.installationId, task);
+      if (selected.has(task.installationId)) continue;
       if (shouldHideAbandonedTask(task) || shouldOmitCompletedInstall(task)) continue;
-      selectedInstallationIds.add(task.installationId);
-      const pending = pendingProgressByInstallation.get(task.installationId);
-      if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
-      if (pending !== undefined) pendingProgressByInstallation.delete(task.installationId);
-      next[task.installationId] = task;
+      selected.set(task.installationId, task);
+    }
+    let changed = false;
+    const installationIds = new Set([
+      ...Object.keys(next),
+      ...latest.keys(),
+      ...pendingProgressByInstallation.keys(),
+    ]);
+    for (const id of installationIds) {
+      if (installationId !== undefined && installationId !== id) continue;
+      const current = next[id];
+      const pending = pendingProgressByInstallation.get(id);
+      const task = selected.get(id);
+      const updatedDuringRequest = current !== previous[id] || pending !== previousPending.get(id);
+      if (task === undefined) {
+        if (
+          updatedDuringRequest ||
+          pendingActions.value[id] ||
+          (current !== undefined && pendingActions.value[current.taskId])
+        )
+          continue;
+        const terminal = latest.get(id);
+        if (terminal !== undefined && !shouldReplaceTask(pending ?? current, terminal)) continue;
+        pendingProgressByInstallation.delete(id);
+        if (current === undefined) continue;
+        delete next[id];
+      } else {
+        const existing = pending ?? current;
+        if (
+          (updatedDuringRequest || existing?.taskId === task.taskId) &&
+          !shouldReplaceTask(existing, task)
+        )
+          continue;
+        pendingProgressByInstallation.delete(id);
+        next[id] = task;
+        if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
+      }
       changed = true;
-      if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
     }
     if (!changed) return;
     tasksByInstallation.value = next;
