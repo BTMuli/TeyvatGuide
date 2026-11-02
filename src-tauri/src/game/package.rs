@@ -11,7 +11,7 @@ mod workers;
 use events::{TaskEventDispatcher, emit_progress, emit_state, should_emit_progress};
 use metrics::{InstallPipelineMetrics, duration_micros};
 use progress::{
-  AudioLiveAssemblyOverlay, overlay_audio_summary, overlay_install_download_progress,
+  AudioLiveAssemblyOverlay, overlay_install_download_progress,
   start_assembly_write_progress_monitor, start_install_download_progress_monitor,
 };
 use workers::{drain_assembly_workers, has_active_assembly_workers, spawn_assembly_worker};
@@ -2986,15 +2986,17 @@ async fn assemble_audio_asset(
     Ok(permit) => permit,
     Err(error) => return Err(format!("获取配音组装并发槽位失败：{error}")),
   };
-  let summary = {
+  let (summary, write_progress) = {
     let mut value = journal.lock().await;
+    let write_progress = overlay.begin_attempt(asset_index, plan.assets[asset_index].size);
     value.active_assembly_count = value.active_assembly_count.saturating_add(1);
     value.assembly_current_file = Some(plan.assets[asset_index].name.clone());
     value.current_file = value.assembly_current_file.clone();
     value.touch();
-    overlay_audio_summary(&value, &telemetry, &overlay)
+    (overlay.overlay(&value), write_progress)
   };
   events.publish_progress(summary);
+  let attempt_telemetry = telemetry.with_write_progress(write_progress);
   let worker = if plan.target == PackagePlanTarget::Main {
     spawn_main_update_assembly_worker(
       Arc::clone(&plan),
@@ -3004,14 +3006,14 @@ async fn assemble_audio_asset(
       task_root.clone(),
       output_root,
       Arc::clone(&canceled),
-      Arc::clone(&telemetry),
+      Arc::clone(&attempt_telemetry),
     )
   } else {
     let worker_plan = Arc::clone(&plan);
     let worker_task_root = task_root.clone();
     let worker_output_root = output_root;
     let worker_canceled = Arc::clone(&canceled);
-    let worker_telemetry = Arc::clone(&telemetry);
+    let worker_telemetry = Arc::clone(&attempt_telemetry);
     spawn_assembly_worker(&plan.plan_id, move || {
       assembler::assemble_plan_asset_to_root(
         &worker_plan,
@@ -3039,6 +3041,9 @@ async fn assemble_audio_asset(
   let summary = {
     let mut value = journal.lock().await;
     value.active_assembly_count = value.active_assembly_count.saturating_sub(1);
+    if !matches!(result, Ok(assembler::AssetAssemblyOutcome::Assembled)) {
+      overlay.clear_asset(asset_index);
+    }
     if matches!(result, Ok(assembler::AssetAssemblyOutcome::AlreadyTarget)) {
       if !value.already_target_assets.contains(&asset_index) {
         value.already_target_assets.push(asset_index);
@@ -3049,7 +3054,7 @@ async fn assemble_audio_asset(
       journal::persist(&task_root, &value)?;
     }
     value.touch();
-    overlay_audio_summary(&value, &telemetry, &overlay)
+    overlay.overlay(&value)
   };
   events.publish_progress(summary);
   result
@@ -3162,7 +3167,7 @@ async fn run_audio_asset_job(
               if let Err(error) = journal::persist(&task_root, &value) {
                 return Err(error);
               }
-              overlay_audio_summary(&value, &telemetry, &overlay)
+              overlay.overlay(&value)
             };
             events.publish_progress(summary);
           }
@@ -3263,7 +3268,7 @@ async fn run_audio_asset_job(
         }
         let mut value = journal.lock().await;
         value.download_current_file = Some(format!("回退下载：{}", plan.assets[asset_index].name));
-        events.publish_progress(overlay_audio_summary(&value, &telemetry, &overlay));
+        events.publish_progress(overlay.overlay(&value));
       }
       log::info!("[game-update] 文件回退：{} reason={reason:?}", plan.assets[asset_index].name);
       let _focus = download_focus
@@ -3310,7 +3315,7 @@ async fn run_audio_asset_job(
         }
         value.touch();
         journal::persist(&task_root, &value)?;
-        events.publish_progress(overlay_audio_summary(&value, &telemetry, &overlay));
+        events.publish_progress(overlay.overlay(&value));
       }
       drop(_focus);
       match assemble_audio_asset(
@@ -3589,7 +3594,6 @@ async fn delete_audio_resource(
   journal: &Arc<AsyncMutex<TaskJournal>>,
   canceled: &Arc<AtomicBool>,
   paused: &Arc<AtomicBool>,
-  telemetry: &assembler::AssemblyTelemetry,
   overlay: &AudioLiveAssemblyOverlay,
   deleted: &PlanDelete,
 ) -> Result<(), String> {
@@ -3619,7 +3623,7 @@ async fn delete_audio_resource(
   if let Err(error) = journal::persist(task_root, &value) {
     return Err(error);
   }
-  let summary = overlay_audio_summary(&value, telemetry, overlay);
+  let summary = overlay.overlay(&value);
   drop(value);
   events.publish_state(summary);
   Ok(())
@@ -3910,7 +3914,6 @@ async fn run_streaming_prepare_task(
     let journal = Arc::clone(&journal);
     let canceled = Arc::clone(&canceled);
     let paused = Arc::clone(&paused);
-    let telemetry = Arc::clone(&assembly_telemetry);
     let overlay = Arc::clone(&assembly_overlay);
     let deletion_blocked = deletion_blocked;
     async move {
@@ -3918,8 +3921,7 @@ async fn run_streaming_prepare_task(
         return Err("检测到游戏进程，暂时不能删除配音文件，请退出游戏后恢复任务".to_string());
       }
       delete_audio_resource(
-        &events, &task_root, &game_root, &plan, &journal, &canceled, &paused, &telemetry, &overlay,
-        &deleted,
+        &events, &task_root, &game_root, &plan, &journal, &canceled, &paused, &overlay, &deleted,
       )
       .await
     }
@@ -4009,9 +4011,7 @@ async fn run_streaming_prepare_task(
             }
             let summary = {
               let mut value = journal.lock().await;
-              if let Some(asset) = plan.assets.get(completion.asset_index) {
-                assembly_overlay.account_completed(asset.size);
-              }
+              assembly_overlay.clear_asset(completion.asset_index);
               value.completed_asset_cursor = cursor.min(plan.assets.len());
               value.assembly_completed_bytes_total = completed_bytes;
               let assembly_total_bytes = value.assembly_total_bytes;
@@ -4026,7 +4026,7 @@ async fn run_streaming_prepare_task(
               if let Err(error) = journal::persist(&task_root, &value) {
                 pipeline_error = Some(error);
               }
-              overlay_audio_summary(&value, &assembly_telemetry, &assembly_overlay)
+              assembly_overlay.overlay(&value)
             };
             events.publish_progress(summary);
           }

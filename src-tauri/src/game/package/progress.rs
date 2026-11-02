@@ -1,4 +1,5 @@
 //! 资源任务的实时进度叠加、带宽采样与采样任务生命周期。
+//! 同一资源的尝试由资源 job 串行调度；登记表只读取原子进度，不等待磁盘操作。
 //! @since Beta v0.13.0
 
 use super::{events::TaskEventDispatcher, metrics::InstallPipelineMetrics};
@@ -8,18 +9,26 @@ use crate::game::{
   model::{PackageTaskState, PackageTaskSummary},
 };
 use std::{
+  collections::HashMap,
   sync::{
-    Arc,
-    atomic::{AtomicBool, AtomicU64, Ordering},
+    Arc, Mutex,
+    atomic::{AtomicBool, Ordering},
   },
   time::{Duration, Instant},
 };
 use tokio::sync::Mutex as AsyncMutex;
 
-/// 配音与正式更新的写入进度叠加器。
+/// 单次组装尝试的写入进度；展示量不超过该资源目标大小。
+/// @since Beta v0.13.0
+struct AssetWriteProgress {
+  progress: Arc<assembler::AssemblyWriteProgress>,
+  total_bytes: u64,
+}
+
+/// 按资源归属叠加实时写入，调用方在 journal 锁内登记、移除与读取快照。
 /// @since Beta v0.13.0
 pub(super) struct AudioLiveAssemblyOverlay {
-  accounted_written: AtomicU64,
+  assets: Mutex<HashMap<usize, AssetWriteProgress>>,
 }
 
 impl AudioLiveAssemblyOverlay {
@@ -27,50 +36,44 @@ impl AudioLiveAssemblyOverlay {
   ///
   /// @since Beta v0.13.0
   pub(super) fn new() -> Self {
-    Self { accounted_written: AtomicU64::new(0) }
+    Self { assets: Mutex::new(HashMap::new()) }
   }
 
-  /// 计算展示用已完成字节数。
-  ///
+  /// 登记本资源的新尝试；回退前须先清除上一尝试的实时量。
   /// @since Beta v0.13.0
-  ///
-  /// # 参数
-  /// - `durable_completed`: 持久完成字节数。
-  /// - `total`: 总字节数。
-  /// - `written`: 已写字节数。
-  /// - `accounted`: 已入账字节数。
-  ///
-  /// # 返回
-  /// 展示字节数。
-  fn display_bytes(durable_completed: u64, total: u64, written: u64, accounted: u64) -> u64 {
-    durable_completed.saturating_add(written.saturating_sub(accounted)).min(total)
+  pub(super) fn begin_attempt(
+    &self,
+    asset_index: usize,
+    total_bytes: u64,
+  ) -> Arc<assembler::AssemblyWriteProgress> {
+    let progress = assembler::AssemblyWriteProgress::new();
+    self
+      .assets
+      .lock()
+      .unwrap()
+      .insert(asset_index, AssetWriteProgress { progress: Arc::clone(&progress), total_bytes });
+    progress
   }
 
-  /// 叠加写出进度到任务摘要。
-  ///
+  /// 叠加尚未入账或丢弃的资源写入；暂停和终态只显示持久完成量。
   /// @since Beta v0.13.0
-  ///
-  /// # 参数
-  /// - `journal`: 任务日志。
-  /// - `written`: 已写字节数。
-  ///
-  /// # 返回
-  /// 叠加后的摘要。
-  pub(super) fn overlay(&self, journal: &TaskJournal, written: u64) -> PackageTaskSummary {
+  pub(super) fn overlay(&self, journal: &TaskJournal) -> PackageTaskSummary {
     let mut summary = journal.summary();
-    summary.assembly_completed_bytes = Self::display_bytes(
-      journal.assembly_completed_bytes,
-      journal.assembly_total_bytes,
-      written,
-      self.accounted_written.load(Ordering::Relaxed),
-    );
+    if !matches!(journal.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+      return summary;
+    }
+    let live_bytes = self.assets.lock().unwrap().values().fold(0_u64, |total, asset| {
+      total.saturating_add(asset.progress.written_bytes().min(asset.total_bytes))
+    });
+    summary.assembly_completed_bytes =
+      journal.assembly_completed_bytes.saturating_add(live_bytes).min(journal.assembly_total_bytes);
     summary
   }
 
-  /// 在 journal 锁内与持久完成量同步入账，保留其他资源的会话增量。
+  /// 在 journal 锁内移除失败、跳过或已计入持久完成量的资源，保留其他资源的实时量。
   /// @since Beta v0.13.0
-  pub(super) fn account_completed(&self, asset_size: u64) {
-    self.accounted_written.fetch_add(asset_size, Ordering::Relaxed);
+  pub(super) fn clear_asset(&self, asset_index: usize) {
+    self.assets.lock().unwrap().remove(&asset_index);
   }
 }
 
@@ -239,7 +242,7 @@ pub(super) fn start_assembly_write_progress_monitor(
       }
       let speed = tracker.sample(written_bytes, value.active_assembly_count, Instant::now());
       let speed_changed = apply_assembly_write_bandwidth(&mut value, speed);
-      let summary = overlay.overlay(&value, written_bytes);
+      let summary = overlay.overlay(&value);
       drop(value);
       if !speed_changed && summary.assembly_completed_bytes == last_display_bytes {
         continue;
@@ -273,63 +276,5 @@ pub(super) fn overlay_install_download_progress(
   summary
 }
 
-/// 从共享遥测生成配音与正式更新的实时组装摘要。
-/// @since Beta v0.13.0
-pub(super) fn overlay_audio_summary(
-  journal: &TaskJournal,
-  telemetry: &assembler::AssemblyTelemetry,
-  overlay: &AudioLiveAssemblyOverlay,
-) -> PackageTaskSummary {
-  overlay.overlay(journal, telemetry.snapshot().written_bytes)
-}
-
 #[cfg(test)]
-mod tests {
-  use super::{BandwidthTracker, apply_assembly_write_bandwidth};
-  use crate::game::{journal::TaskJournal, model::SchemeId};
-  use std::time::{Duration, Instant};
-
-  /// 无写入时旧速度必须衰减，最终清空没有依据的剩余时间。
-  /// @since Beta v0.13.0
-  #[test]
-  fn stalled_writes_decay_and_expire_eta() {
-    let now = Instant::now();
-    let mut tracker = BandwidthTracker::new(100, now);
-    let mut journal = TaskJournal::from_switch(
-      "task".to_string(),
-      "installation".to_string(),
-      SchemeId::CnOfficial,
-      SchemeId::CnOfficial,
-      "a".repeat(64),
-      0,
-      0,
-    );
-    journal.assembly_total_bytes = 4096;
-    let speed = tracker.sample(2148, 1, now + Duration::from_secs(2));
-    assert_eq!(speed, 1024);
-    assert!(apply_assembly_write_bandwidth(&mut journal, speed));
-    assert_eq!(journal.assembly_eta_seconds, Some(4));
-    let speed = tracker.sample(2148, 1, now + Duration::from_secs(3));
-    assert_eq!(speed, 512);
-    apply_assembly_write_bandwidth(&mut journal, speed);
-    assert_eq!(journal.assembly_eta_seconds, Some(8));
-    for seconds in 4..=14 {
-      let speed = tracker.sample(2148, 1, now + Duration::from_secs(seconds));
-      apply_assembly_write_bandwidth(&mut journal, speed);
-    }
-    assert_eq!(journal.assembly_bytes_per_second, 0);
-    assert_eq!(journal.assembly_eta_seconds, None);
-  }
-
-  /// 采样使用实际窗口并保留平滑；并发数归零后清除上一轮速度。
-  /// @since Beta v0.13.0
-  #[test]
-  fn bandwidth_uses_elapsed_time_and_resets_after_workers_finish() {
-    let now = Instant::now();
-    let mut tracker = BandwidthTracker::new(0, now);
-    assert_eq!(tracker.sample(2000, 2, now + Duration::from_secs(2)), 1000);
-    assert_eq!(tracker.sample(6000, 2, now + Duration::from_secs(4)), 1300);
-    assert_eq!(tracker.sample(7000, 0, now + Duration::from_secs(5)), 0);
-    assert_eq!(tracker.sample(9000, 1, now + Duration::from_secs(7)), 1000);
-  }
-}
+mod tests;

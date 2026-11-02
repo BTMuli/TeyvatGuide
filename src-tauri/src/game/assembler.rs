@@ -1,5 +1,5 @@
 //! 将已验证的 manifest-diff 计划流式组装到任务 staging 目录。
-//! @since Beta v0.12.4
+//! @since Beta v0.13.0
 
 use super::{
   model::PackagePlanStrategy,
@@ -214,11 +214,39 @@ impl AssemblyTiming {
   }
 }
 
-/// Live stage counters for one install pipeline.
+/// Per-attempt counter for bytes successfully written to staging output.
 ///
-/// Unlike [`AssemblyTiming`], these counters are updated at operation boundaries so a watchdog
-/// can distinguish an active read, write, hash, or file sync that has stopped returning.
-pub(crate) struct AssemblyTelemetry {
+/// @since Beta v0.13.0
+pub(crate) struct AssemblyWriteProgress {
+  written_bytes: AtomicU64,
+}
+
+impl AssemblyWriteProgress {
+  /// 创建一个空的组装写入进度计数器。
+  ///
+  /// @since Beta v0.13.0
+  ///
+  /// # 返回
+  /// 可共享的写入进度计数器。
+  pub(crate) fn new() -> Arc<Self> {
+    Arc::new(Self { written_bytes: AtomicU64::new(0) })
+  }
+
+  /// 返回当前组装尝试已成功写入的字节数。
+  ///
+  /// @since Beta v0.13.0
+  ///
+  /// # 返回
+  /// 已成功写入的字节数。
+  pub(crate) fn written_bytes(&self) -> u64 {
+    self.written_bytes.load(Ordering::Relaxed)
+  }
+}
+
+/// Shared live stage counters for telemetry views of one install pipeline.
+///
+/// @since Beta v0.13.0
+struct AssemblyTelemetryCounters {
   started_at: Instant,
   heartbeat_count: AtomicU64,
   last_heartbeat_micros: AtomicU64,
@@ -241,6 +269,49 @@ pub(crate) struct AssemblyTelemetry {
   max_write_micros: AtomicU64,
   max_hash_micros: AtomicU64,
   max_sync_micros: AtomicU64,
+}
+
+impl Default for AssemblyTelemetryCounters {
+  /// 创建空的组装遥测计数器。
+  ///
+  /// @since Beta v0.13.0
+  fn default() -> Self {
+    Self {
+      started_at: Instant::now(),
+      heartbeat_count: AtomicU64::new(0),
+      last_heartbeat_micros: AtomicU64::new(0),
+      active_reads: AtomicUsize::new(0),
+      active_writes: AtomicUsize::new(0),
+      active_hashes: AtomicUsize::new(0),
+      active_syncs: AtomicUsize::new(0),
+      read_operations: AtomicU64::new(0),
+      write_operations: AtomicU64::new(0),
+      hash_operations: AtomicU64::new(0),
+      sync_operations: AtomicU64::new(0),
+      read_bytes: AtomicU64::new(0),
+      written_bytes: AtomicU64::new(0),
+      hashed_bytes: AtomicU64::new(0),
+      read_micros: AtomicU64::new(0),
+      write_micros: AtomicU64::new(0),
+      hash_micros: AtomicU64::new(0),
+      sync_micros: AtomicU64::new(0),
+      max_read_micros: AtomicU64::new(0),
+      max_write_micros: AtomicU64::new(0),
+      max_hash_micros: AtomicU64::new(0),
+      max_sync_micros: AtomicU64::new(0),
+    }
+  }
+}
+
+/// Live stage counters for one install pipeline.
+///
+/// Unlike [`AssemblyTiming`], these counters are updated at operation boundaries so a watchdog
+/// can distinguish an active read, write, hash, or file sync that has stopped returning.
+///
+/// @since Beta v0.13.0
+pub(crate) struct AssemblyTelemetry {
+  counters: Arc<AssemblyTelemetryCounters>,
+  write_progress: Option<Arc<AssemblyWriteProgress>>,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -271,32 +342,9 @@ pub(crate) struct AssemblyTelemetrySnapshot {
 impl Default for AssemblyTelemetry {
   /// 创建空的组装遥测计数器。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   fn default() -> Self {
-    Self {
-      started_at: Instant::now(),
-      heartbeat_count: AtomicU64::new(0),
-      last_heartbeat_micros: AtomicU64::new(0),
-      active_reads: AtomicUsize::new(0),
-      active_writes: AtomicUsize::new(0),
-      active_hashes: AtomicUsize::new(0),
-      active_syncs: AtomicUsize::new(0),
-      read_operations: AtomicU64::new(0),
-      write_operations: AtomicU64::new(0),
-      hash_operations: AtomicU64::new(0),
-      sync_operations: AtomicU64::new(0),
-      read_bytes: AtomicU64::new(0),
-      written_bytes: AtomicU64::new(0),
-      hashed_bytes: AtomicU64::new(0),
-      read_micros: AtomicU64::new(0),
-      write_micros: AtomicU64::new(0),
-      hash_micros: AtomicU64::new(0),
-      sync_micros: AtomicU64::new(0),
-      max_read_micros: AtomicU64::new(0),
-      max_write_micros: AtomicU64::new(0),
-      max_hash_micros: AtomicU64::new(0),
-      max_sync_micros: AtomicU64::new(0),
-    }
+    Self { counters: Arc::new(AssemblyTelemetryCounters::default()), write_progress: None }
   }
 }
 
@@ -317,7 +365,7 @@ struct AssemblyLiveStageGuard<'a> {
 impl AssemblyTelemetry {
   /// 创建共享组装遥测实例。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   ///
   /// # 返回
   /// 遥测实例。
@@ -325,43 +373,59 @@ impl AssemblyTelemetry {
     Arc::new(Self::default())
   }
 
+  /// 为当前遥测创建一个绑定独立写入进度的视图。
+  ///
+  /// 视图共享全局阶段计数器，但仅把成功的写阶段字节数写入给定的尝试计数器。
+  ///
+  /// @since Beta v0.13.0
+  ///
+  /// # 参数
+  /// - `progress`: 当前组装尝试的写入进度计数器。
+  ///
+  /// # 返回
+  /// 绑定了写入进度的遥测视图。
+  pub(crate) fn with_write_progress(&self, progress: Arc<AssemblyWriteProgress>) -> Arc<Self> {
+    Arc::new(Self { counters: Arc::clone(&self.counters), write_progress: Some(progress) })
+  }
+
   /// 生成当前遥测快照。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   ///
   /// # 返回
   /// 遥测快照。
   pub(crate) fn snapshot(&self) -> AssemblyTelemetrySnapshot {
-    let now_micros = duration_micros(self.started_at.elapsed());
-    let last_heartbeat_micros = self.last_heartbeat_micros.load(Ordering::Acquire);
+    let counters = &self.counters;
+    let now_micros = duration_micros(counters.started_at.elapsed());
+    let last_heartbeat_micros = counters.last_heartbeat_micros.load(Ordering::Acquire);
     AssemblyTelemetrySnapshot {
-      heartbeat_count: self.heartbeat_count.load(Ordering::Acquire),
+      heartbeat_count: counters.heartbeat_count.load(Ordering::Acquire),
       last_activity_age_millis: now_micros.saturating_sub(last_heartbeat_micros) / 1_000,
-      active_reads: self.active_reads.load(Ordering::Acquire),
-      active_writes: self.active_writes.load(Ordering::Acquire),
-      active_hashes: self.active_hashes.load(Ordering::Acquire),
-      active_syncs: self.active_syncs.load(Ordering::Acquire),
-      read_operations: self.read_operations.load(Ordering::Relaxed),
-      write_operations: self.write_operations.load(Ordering::Relaxed),
-      hash_operations: self.hash_operations.load(Ordering::Relaxed),
-      sync_operations: self.sync_operations.load(Ordering::Relaxed),
-      read_bytes: self.read_bytes.load(Ordering::Relaxed),
-      written_bytes: self.written_bytes.load(Ordering::Relaxed),
-      hashed_bytes: self.hashed_bytes.load(Ordering::Relaxed),
-      read_micros: self.read_micros.load(Ordering::Relaxed),
-      write_micros: self.write_micros.load(Ordering::Relaxed),
-      hash_micros: self.hash_micros.load(Ordering::Relaxed),
-      sync_micros: self.sync_micros.load(Ordering::Relaxed),
-      max_read_micros: self.max_read_micros.load(Ordering::Relaxed),
-      max_write_micros: self.max_write_micros.load(Ordering::Relaxed),
-      max_hash_micros: self.max_hash_micros.load(Ordering::Relaxed),
-      max_sync_micros: self.max_sync_micros.load(Ordering::Relaxed),
+      active_reads: counters.active_reads.load(Ordering::Acquire),
+      active_writes: counters.active_writes.load(Ordering::Acquire),
+      active_hashes: counters.active_hashes.load(Ordering::Acquire),
+      active_syncs: counters.active_syncs.load(Ordering::Acquire),
+      read_operations: counters.read_operations.load(Ordering::Relaxed),
+      write_operations: counters.write_operations.load(Ordering::Relaxed),
+      hash_operations: counters.hash_operations.load(Ordering::Relaxed),
+      sync_operations: counters.sync_operations.load(Ordering::Relaxed),
+      read_bytes: counters.read_bytes.load(Ordering::Relaxed),
+      written_bytes: counters.written_bytes.load(Ordering::Relaxed),
+      hashed_bytes: counters.hashed_bytes.load(Ordering::Relaxed),
+      read_micros: counters.read_micros.load(Ordering::Relaxed),
+      write_micros: counters.write_micros.load(Ordering::Relaxed),
+      hash_micros: counters.hash_micros.load(Ordering::Relaxed),
+      sync_micros: counters.sync_micros.load(Ordering::Relaxed),
+      max_read_micros: counters.max_read_micros.load(Ordering::Relaxed),
+      max_write_micros: counters.max_write_micros.load(Ordering::Relaxed),
+      max_hash_micros: counters.max_hash_micros.load(Ordering::Relaxed),
+      max_sync_micros: counters.max_sync_micros.load(Ordering::Relaxed),
     }
   }
 
   /// 开始一个组装阶段并返回守卫。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   ///
   /// # 参数
   /// - `stage`: 组装阶段。
@@ -369,11 +433,12 @@ impl AssemblyTelemetry {
   /// # 返回
   /// 阶段守卫。
   fn begin(&self, stage: AssemblyLiveStage) -> AssemblyLiveStageGuard<'_> {
+    let counters = &self.counters;
     match stage {
-      AssemblyLiveStage::Read => self.active_reads.fetch_add(1, Ordering::AcqRel),
-      AssemblyLiveStage::Write => self.active_writes.fetch_add(1, Ordering::AcqRel),
-      AssemblyLiveStage::Hash => self.active_hashes.fetch_add(1, Ordering::AcqRel),
-      AssemblyLiveStage::Sync => self.active_syncs.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Read => counters.active_reads.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Write => counters.active_writes.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Hash => counters.active_hashes.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Sync => counters.active_syncs.fetch_add(1, Ordering::AcqRel),
     };
     self.heartbeat();
     AssemblyLiveStageGuard { telemetry: self, stage, started_at: Instant::now() }
@@ -381,45 +446,52 @@ impl AssemblyTelemetry {
 
   /// 更新心跳时间与计数。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   fn heartbeat(&self) {
-    self.last_heartbeat_micros.store(duration_micros(self.started_at.elapsed()), Ordering::Release);
-    self.heartbeat_count.fetch_add(1, Ordering::AcqRel);
+    self
+      .counters
+      .last_heartbeat_micros
+      .store(duration_micros(self.counters.started_at.elapsed()), Ordering::Release);
+    self.counters.heartbeat_count.fetch_add(1, Ordering::AcqRel);
   }
 }
 
 impl AssemblyLiveStageGuard<'_> {
   /// 结束阶段并记录耗时与字节数。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   ///
   /// # 参数
   /// - `bytes`: 本阶段处理字节数。
   fn finish(self, bytes: u64) {
     let elapsed_micros = duration_micros(self.started_at.elapsed());
+    let counters = &self.telemetry.counters;
     match self.stage {
       AssemblyLiveStage::Read => {
-        self.telemetry.read_operations.fetch_add(1, Ordering::Relaxed);
-        self.telemetry.read_bytes.fetch_add(bytes, Ordering::Relaxed);
-        self.telemetry.read_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
-        self.telemetry.max_read_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+        counters.read_operations.fetch_add(1, Ordering::Relaxed);
+        counters.read_bytes.fetch_add(bytes, Ordering::Relaxed);
+        counters.read_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        counters.max_read_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
       }
       AssemblyLiveStage::Write => {
-        self.telemetry.write_operations.fetch_add(1, Ordering::Relaxed);
-        self.telemetry.written_bytes.fetch_add(bytes, Ordering::Relaxed);
-        self.telemetry.write_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
-        self.telemetry.max_write_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+        counters.write_operations.fetch_add(1, Ordering::Relaxed);
+        counters.written_bytes.fetch_add(bytes, Ordering::Relaxed);
+        counters.write_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        counters.max_write_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+        if let Some(progress) = self.telemetry.write_progress.as_ref() {
+          progress.written_bytes.fetch_add(bytes, Ordering::Relaxed);
+        }
       }
       AssemblyLiveStage::Hash => {
-        self.telemetry.hash_operations.fetch_add(1, Ordering::Relaxed);
-        self.telemetry.hashed_bytes.fetch_add(bytes, Ordering::Relaxed);
-        self.telemetry.hash_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
-        self.telemetry.max_hash_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+        counters.hash_operations.fetch_add(1, Ordering::Relaxed);
+        counters.hashed_bytes.fetch_add(bytes, Ordering::Relaxed);
+        counters.hash_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        counters.max_hash_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
       }
       AssemblyLiveStage::Sync => {
-        self.telemetry.sync_operations.fetch_add(1, Ordering::Relaxed);
-        self.telemetry.sync_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
-        self.telemetry.max_sync_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+        counters.sync_operations.fetch_add(1, Ordering::Relaxed);
+        counters.sync_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        counters.max_sync_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
       }
     }
   }
@@ -428,13 +500,14 @@ impl AssemblyLiveStageGuard<'_> {
 impl Drop for AssemblyLiveStageGuard<'_> {
   /// 释放阶段并回退活跃计数。
   ///
-  /// @since Beta v0.12.3
+  /// @since Beta v0.13.0
   fn drop(&mut self) {
+    let counters = &self.telemetry.counters;
     match self.stage {
-      AssemblyLiveStage::Read => self.telemetry.active_reads.fetch_sub(1, Ordering::AcqRel),
-      AssemblyLiveStage::Write => self.telemetry.active_writes.fetch_sub(1, Ordering::AcqRel),
-      AssemblyLiveStage::Hash => self.telemetry.active_hashes.fetch_sub(1, Ordering::AcqRel),
-      AssemblyLiveStage::Sync => self.telemetry.active_syncs.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Read => counters.active_reads.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Write => counters.active_writes.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Hash => counters.active_hashes.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Sync => counters.active_syncs.fetch_sub(1, Ordering::AcqRel),
     };
     self.telemetry.heartbeat();
   }
@@ -2708,5 +2781,71 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
     Err("游戏资源组装已取消".to_string())
   } else {
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{AssemblyLiveStage, AssemblyTelemetry, AssemblyWriteProgress};
+  use std::panic::{AssertUnwindSafe, catch_unwind};
+
+  /// 不同尝试独立计数写入，所有视图仍共享同一份阶段遥测。
+  /// @since Beta v0.13.0
+  #[test]
+  fn write_progress_isolated_while_telemetry_remains_shared() {
+    let telemetry = AssemblyTelemetry::new();
+    let first_progress = AssemblyWriteProgress::new();
+    let second_progress = AssemblyWriteProgress::new();
+    let first_view = telemetry.with_write_progress(first_progress.clone());
+    let second_view = telemetry.with_write_progress(second_progress.clone());
+
+    first_view.begin(AssemblyLiveStage::Read).finish(13);
+    first_view.begin(AssemblyLiveStage::Write).finish(7);
+    first_view.begin(AssemblyLiveStage::Hash).finish(17);
+    first_view.begin(AssemblyLiveStage::Sync).finish(19);
+    second_view.begin(AssemblyLiveStage::Write).finish(11);
+
+    let snapshot = telemetry.snapshot();
+    assert_eq!(first_progress.written_bytes(), 7);
+    assert_eq!(second_progress.written_bytes(), 11);
+    assert_eq!(snapshot.read_bytes, 13);
+    assert_eq!(snapshot.written_bytes, 18);
+    assert_eq!(snapshot.hashed_bytes, 17);
+    assert_eq!(snapshot.write_operations, 2);
+    assert_eq!(snapshot.sync_operations, 1);
+    assert_eq!(snapshot.active_reads, 0);
+    assert_eq!(snapshot.active_writes, 0);
+    assert_eq!(snapshot.active_hashes, 0);
+    assert_eq!(snapshot.active_syncs, 0);
+  }
+
+  /// 错误和 panic 展开后释放活跃计数，不把未完成阶段计入写入量。
+  /// @since Beta v0.13.0
+  #[test]
+  fn stage_guards_release_active_writes_on_error_and_panic() {
+    let telemetry = AssemblyTelemetry::new();
+    let progress = AssemblyWriteProgress::new();
+    let view = telemetry.with_write_progress(progress.clone());
+
+    {
+      let write = view.begin(AssemblyLiveStage::Write);
+      let result: Result<(), &str> = Err("write failed");
+      write.finish(result.as_ref().map_or(0, |_| 9));
+    }
+    let snapshot = telemetry.snapshot();
+    assert_eq!(snapshot.active_writes, 0);
+    assert_eq!(snapshot.write_operations, 1);
+    assert_eq!(progress.written_bytes(), 0);
+
+    let panic_result = catch_unwind(AssertUnwindSafe(|| {
+      let _write = view.begin(AssemblyLiveStage::Write);
+      panic!("simulated assembly panic");
+    }));
+    assert!(panic_result.is_err());
+
+    let snapshot = telemetry.snapshot();
+    assert_eq!(snapshot.active_writes, 0);
+    assert_eq!(snapshot.write_operations, 1);
+    assert_eq!(progress.written_bytes(), 0);
   }
 }
