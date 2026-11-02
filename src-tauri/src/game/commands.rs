@@ -720,6 +720,7 @@ pub async fn game_install_plan(
 /// 取消仅完成评估、尚未启动任务的安装草稿。
 /// 若该安装仍有资源任务在运行，先请求取消并等待其完全退出，再清理草稿，
 /// 避免任务尚未收尾时取消草稿报“该游戏安装已有资源任务正在运行”。
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_draft_cancel(
   app_handle: AppHandle,
@@ -741,7 +742,11 @@ pub async fn game_install_draft_cancel(
   {
     return Err("该安装已有未完成任务，请先取消或恢复原任务".to_string());
   }
-  installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
+  tauri::async_runtime::spawn_blocking(move || {
+    installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
+  })
+  .await
+  .map_err(|error| format!("等待安装草稿清理失败：{error}"))?
 }
 
 /// 启动全新安装下载；资源下载完成后自动进入 staging、发布和最终登记。
@@ -948,6 +953,7 @@ pub async fn game_install_status(
 
 /// 恢复全新安装的下载、发布或最终登记阶段；回滚时 `keep_downloads` 决定是否
 /// 把已下载分片转入共享缓存而不是随任务删除。
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_recover(
   app_handle: AppHandle,
@@ -1011,21 +1017,27 @@ pub async fn game_install_recover(
         last_emit = Instant::now();
       }
     };
-    match published_state {
-      installer::PublishedInstallationState::Published => {
-        let machine_uid = read_machine_uid(&app_handle)?;
-        installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
-        let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
+    let worker_root = task_root.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+      match published_state {
+        installer::PublishedInstallationState::Published => {
+          let machine_uid = read_machine_uid(&app_handle)?;
+          installer::verify_published_installation(&worker_root, &plan, &machine_uid)?;
+          let _ = installer::abandon_published_draft(&worker_root, &draft_id)?;
+        }
+        installer::PublishedInstallationState::MissingMarker
+        | installer::PublishedInstallationState::MissingDirectory => {
+          // 缺少 marker 或最终目录已不存在时无法安全复验；放弃只结束草稿，不触碰最终目录。
+          let _ = installer::abandon_published_draft(&worker_root, &draft_id)?;
+        }
+        installer::PublishedInstallationState::NotPublished => {
+          let _ = installer::cancel_draft(&worker_root, &draft_id, keep_downloads, &mut progress)?;
+        }
       }
-      installer::PublishedInstallationState::MissingMarker
-      | installer::PublishedInstallationState::MissingDirectory => {
-        // 缺少 marker 或最终目录已不存在时无法安全复验；放弃只结束草稿，不触碰最终目录。
-        let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
-      }
-      installer::PublishedInstallationState::NotPublished => {
-        let _ = installer::cancel_draft(&task_root, &draft_id, keep_downloads, &mut progress)?;
-      }
-    }
+      Ok::<(), String>(())
+    })
+    .await
+    .map_err(|error| format!("等待安装回滚与下载缓存保留失败：{error}"))??;
     let mut canceled = journal_value;
     canceled.state = PackageTaskState::Canceled;
     canceled.error_message = None;
@@ -1114,6 +1126,7 @@ pub async fn game_install_recover(
 }
 
 /// 请求取消未发布的全新安装任务，并在安全边界外清理草稿暂存目录。
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_cancel(
   app_handle: AppHandle,
@@ -1136,7 +1149,11 @@ pub async fn game_install_cancel(
   if journal_value.state.is_active() || journal_value.state.blocks_launch() {
     return Ok(journal_value.summary());
   }
-  let _ = installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})?;
+  tauri::async_runtime::spawn_blocking(move || {
+    installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
+  })
+  .await
+  .map_err(|error| format!("等待取消安装任务清理失败：{error}"))??;
   Ok(journal_value.summary())
 }
 
