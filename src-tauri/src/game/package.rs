@@ -3,9 +3,11 @@
 //! @since Beta v0.13.0
 
 mod events;
+mod metrics;
 mod spool;
 
 use events::{TaskEventDispatcher, emit_progress, emit_state, should_emit_progress};
+use metrics::{InstallPipelineMetrics, duration_micros};
 
 use spool::{
   InstallCompletionSnapshot, InstallSpoolTracker, install_tracker_spool_bytes,
@@ -174,8 +176,8 @@ fn spawn_install_stall_watchdog(
       if !matches!(state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
         break;
       }
-      let download = metrics.download_telemetry.snapshot();
-      let assembly = metrics.assembly_telemetry.snapshot();
+      let download = metrics.download_snapshot();
+      let assembly = metrics.assembly_snapshot();
       let signature = install_watchdog_progress_signature(revision, &download, &assembly);
       if last_signature != Some(signature) {
         last_signature = Some(signature);
@@ -213,9 +215,7 @@ fn spawn_install_stall_watchdog(
         download,
         assembly,
       );
-      if confirmations >= INSTALL_STALL_CONFIRMATIONS
-        && !metrics.stall_pause_requested.swap(true, Ordering::AcqRel)
-      {
+      if confirmations >= INSTALL_STALL_CONFIRMATIONS && !metrics.request_stall_pause() {
         paused.store(true, Ordering::Release);
         log::error!("[game-install][{plan_id}] 安装流水线已连续确认停滞，自动转为可恢复暂停状态");
         if notify_on_stall {
@@ -300,7 +300,7 @@ fn install_watchdog_is_network_only_wait(
 
 /// 记录安装流水线停滞诊断信息。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `plan_id`: 计划 ID。
@@ -325,8 +325,8 @@ fn log_install_stall_diagnostics(
     journal_age_seconds,
     confirmations,
     INSTALL_STALL_CONFIRMATIONS,
-    metrics.active_downloads.load(Ordering::Relaxed),
-    metrics.active_assemblies.load(Ordering::Relaxed),
+    metrics.active_downloads(),
+    metrics.active_assemblies(),
     download.last_activity_age_millis,
     download.active_network_waits,
     download.active_local_writes,
@@ -353,7 +353,7 @@ fn log_install_stall_diagnostics(
     assembly.max_write_micros / 1_000,
     assembly.max_hash_micros / 1_000,
     assembly.max_sync_micros / 1_000,
-    metrics.queue_refill_count.load(Ordering::Relaxed),
+    metrics.queue_refills(),
   );
 }
 
@@ -943,174 +943,6 @@ async fn drain_assembly_workers(plan_id: &str, timeout: Duration) -> bool {
   }
 }
 
-#[derive(Debug)]
-struct PlanWorksetBaseline {
-  asset_count: usize,
-  download_count: usize,
-  chunk_count: usize,
-  planned_download_bytes: u64,
-  planned_output_bytes: u64,
-  asset_workset_max: u64,
-  asset_workset_p50: u64,
-  asset_workset_p95: u64,
-  asset_workset_p99: u64,
-  asset_workset_chunk_max: usize,
-  batch_union_max: u64,
-  batch_union_p95: u64,
-  max_download_consumers: usize,
-  max_download_span: usize,
-}
-
-impl PlanWorksetBaseline {
-  /// 从计划计算 workset 基线。
-  ///
-  /// @since Beta v0.12.0
-  ///
-  /// # 参数
-  /// - `plan`: 资源计划。
-  /// - `concurrency`: 并发数。
-  ///
-  /// # 返回
-  /// workset 基线。
-  fn from_plan(plan: &PersistedPlan, concurrency: usize) -> Self {
-    let mut asset_worksets = Vec::with_capacity(plan.assets.len());
-    let mut asset_workset_chunk_max = 0_usize;
-    let mut batch_unions = Vec::with_capacity(plan.assets.len().div_ceil(concurrency.max(1)));
-    let mut consumers = HashMap::<&str, (usize, usize, usize)>::new();
-    let batch_size = concurrency.max(1);
-
-    for (batch_start, batch) in plan.assets.chunks(batch_size).enumerate() {
-      let mut batch_downloads = HashSet::new();
-      let mut batch_bytes = 0_u64;
-      for (offset, asset) in batch.iter().enumerate() {
-        let asset_index = batch_start.saturating_mul(batch_size).saturating_add(offset);
-        let mut asset_downloads = HashSet::new();
-        let mut workset_bytes = 0_u64;
-        for chunk in &asset.chunks {
-          if chunk.reuse.is_some() || !asset_downloads.insert(chunk.id.as_str()) {
-            continue;
-          }
-          workset_bytes = workset_bytes.saturating_add(chunk.compressed_size);
-          let entry = consumers.entry(chunk.id.as_str()).or_insert((asset_index, asset_index, 0));
-          entry.1 = asset_index;
-          entry.2 = entry.2.saturating_add(1);
-          if batch_downloads.insert(chunk.id.as_str()) {
-            batch_bytes = batch_bytes.saturating_add(chunk.compressed_size);
-          }
-        }
-        asset_workset_chunk_max = asset_workset_chunk_max.max(asset_downloads.len());
-        asset_worksets.push(workset_bytes);
-      }
-      batch_unions.push(batch_bytes);
-    }
-
-    let asset_workset_max = asset_worksets.iter().copied().max().unwrap_or_default();
-    let batch_union_max = batch_unions.iter().copied().max().unwrap_or_default();
-    let max_download_consumers =
-      consumers.values().map(|(_, _, count)| *count).max().unwrap_or_default();
-    let max_download_span = consumers
-      .values()
-      .map(|(first, last, _)| last.saturating_sub(*first).saturating_add(1))
-      .max()
-      .unwrap_or_default();
-    Self {
-      asset_count: plan.assets.len(),
-      download_count: plan.downloads.len(),
-      chunk_count: plan.assets.iter().map(|asset| asset.chunks.len()).sum(),
-      planned_download_bytes: plan
-        .downloads
-        .iter()
-        .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
-      planned_output_bytes: plan
-        .assets
-        .iter()
-        .fold(0_u64, |total, asset| total.saturating_add(asset.size)),
-      asset_workset_max,
-      asset_workset_p50: nearest_rank(&asset_worksets, 50),
-      asset_workset_p95: nearest_rank(&asset_worksets, 95),
-      asset_workset_p99: nearest_rank(&asset_worksets, 99),
-      asset_workset_chunk_max,
-      batch_union_max,
-      batch_union_p95: nearest_rank(&batch_unions, 95),
-      max_download_consumers,
-      max_download_span,
-    }
-  }
-}
-
-/// 计算最近邻百分位值。
-///
-/// @since Beta v0.12.0
-///
-/// # 参数
-/// - `values`: 值列表。
-/// - `percentile`: 百分位。
-///
-/// # 返回
-/// 百分位值。
-fn nearest_rank(values: &[u64], percentile: usize) -> u64 {
-  if values.is_empty() {
-    return 0;
-  }
-  let mut sorted = values.to_vec();
-  sorted.sort_unstable();
-  let rank = sorted.len().saturating_mul(percentile).div_ceil(100).clamp(1, sorted.len());
-  sorted[rank - 1]
-}
-
-struct InstallPipelineMetrics {
-  plan_id: String,
-  started_at: Instant,
-  index_build_micros: u64,
-  baseline: PlanWorksetBaseline,
-  queue_refill_count: AtomicUsize,
-  active_downloads: AtomicUsize,
-  peak_active_downloads: AtomicUsize,
-  active_assemblies: AtomicUsize,
-  peak_active_assemblies: AtomicUsize,
-  download_micros: AtomicU64,
-  assembly_micros: AtomicU64,
-  checkpoint_count: AtomicUsize,
-  checkpoint_micros: AtomicU64,
-  unique_download_bytes: AtomicU64,
-  duplicate_wait_bytes: AtomicU64,
-  peak_spool_bytes: AtomicU64,
-  peak_logical_staging_bytes: AtomicU64,
-  eta_remaining_bytes: AtomicU64,
-  download_telemetry: Arc<DownloadTelemetry>,
-  assembly_telemetry: Arc<assembler::AssemblyTelemetry>,
-  stall_pause_requested: Arc<AtomicBool>,
-  journal_attempt_count: AtomicU64,
-  journal_write_count: AtomicU64,
-  journal_serialized_bytes: AtomicU64,
-  journal_serialize_micros: AtomicU64,
-  journal_write_micros: AtomicU64,
-  journal_file_sync_count: AtomicU64,
-  journal_file_sync_micros: AtomicU64,
-  journal_rename_micros: AtomicU64,
-  journal_directory_sync_count: AtomicU64,
-  journal_directory_sync_micros: AtomicU64,
-  journal_lock_wait_micros: AtomicU64,
-  staging_verify_count: AtomicU64,
-  staging_verify_micros: AtomicU64,
-  post_publish_verify_count: AtomicU64,
-  post_publish_verify_micros: AtomicU64,
-  zstd_decode_read_count: AtomicU64,
-  zstd_decode_read_bytes: AtomicU64,
-  zstd_decode_read_micros: AtomicU64,
-  chunk_md5_count: AtomicU64,
-  chunk_md5_bytes: AtomicU64,
-  chunk_md5_micros: AtomicU64,
-  asset_md5_count: AtomicU64,
-  asset_md5_bytes: AtomicU64,
-  asset_md5_micros: AtomicU64,
-  staging_file_sync_count: AtomicU64,
-  staging_file_sync_bytes: AtomicU64,
-  staging_file_sync_micros: AtomicU64,
-  resume_asset_cursor: AtomicUsize,
-  recovery_validate_micros: AtomicU64,
-}
-
 struct InstallDownloadProgressMonitor {
   stopped: Arc<AtomicBool>,
 }
@@ -1193,26 +1025,24 @@ fn start_install_download_progress_monitor(
   let stopped = Arc::new(AtomicBool::new(false));
   let stopped_for_task = Arc::clone(&stopped);
   tauri::async_runtime::spawn(async move {
-    let mut last_received_bytes = metrics.download_telemetry.snapshot().received_bytes;
+    let mut last_received_bytes = metrics.download_snapshot().received_bytes;
     let mut last_sample = Instant::now();
     let mut last_in_flight_bytes = 0_u64;
     let mut smoothed_bytes_per_second = 0_f64;
     let mut assembly_tracker =
-      AssemblyWriteBandwidthTracker::new(metrics.assembly_telemetry.snapshot().written_bytes);
+      AssemblyWriteBandwidthTracker::new(metrics.assembly_snapshot().written_bytes);
     loop {
       tokio::time::sleep(Duration::from_secs(1)).await;
-      if stopped_for_task.load(Ordering::Acquire)
-        || metrics.stall_pause_requested.load(Ordering::Acquire)
-      {
+      if stopped_for_task.load(Ordering::Acquire) || metrics.is_stall_pause_requested() {
         break;
       }
-      let snapshot = metrics.download_telemetry.snapshot();
+      let snapshot = metrics.download_snapshot();
       let received_bytes = snapshot.received_bytes;
       let elapsed = last_sample.elapsed().as_secs_f64().max(0.001);
       let received_delta = received_bytes.saturating_sub(last_received_bytes);
       last_received_bytes = received_bytes;
       last_sample = Instant::now();
-      let active_downloads = metrics.active_downloads.load(Ordering::Acquire);
+      let active_downloads = metrics.active_downloads();
       if active_downloads > 0 && received_delta > 0 {
         let sample = received_delta as f64 / elapsed;
         smoothed_bytes_per_second = if smoothed_bytes_per_second > 0.0 {
@@ -1225,15 +1055,13 @@ fn start_install_download_progress_monitor(
       } else {
         smoothed_bytes_per_second *= 0.5;
       }
-      let assembly_written = metrics.assembly_telemetry.snapshot().written_bytes;
-      let active_assemblies = metrics.active_assemblies.load(Ordering::Acquire);
+      let assembly_written = metrics.assembly_snapshot().written_bytes;
+      let active_assemblies = metrics.active_assemblies();
       let sampled_assembly_speed =
         assembly_tracker.sample(assembly_written, active_assemblies, Instant::now());
 
       let mut value = journal.lock().await;
-      if stopped_for_task.load(Ordering::Acquire)
-        || metrics.stall_pause_requested.load(Ordering::Acquire)
-      {
+      if stopped_for_task.load(Ordering::Acquire) || metrics.is_stall_pause_requested() {
         break;
       }
       let speed = if value.state == PackageTaskState::Downloading {
@@ -1241,10 +1069,7 @@ fn start_install_download_progress_monitor(
       } else {
         0
       };
-      let remaining = metrics
-        .eta_remaining_bytes
-        .load(Ordering::Acquire)
-        .saturating_sub(snapshot.in_flight_bytes);
+      let remaining = metrics.remaining_bytes().saturating_sub(snapshot.in_flight_bytes);
       let eta = download_eta_seconds(remaining, speed);
       let in_flight_changed = last_in_flight_bytes != snapshot.in_flight_bytes;
       last_in_flight_bytes = snapshot.in_flight_bytes;
@@ -1331,7 +1156,7 @@ async fn emit_active_assembly_count(
   metrics: &InstallPipelineMetrics,
 ) {
   let mut value = journal.lock().await;
-  value.active_assembly_count = metrics.active_assemblies.load(Ordering::Acquire);
+  value.active_assembly_count = metrics.active_assemblies();
   value.touch();
   let summary = value.summary();
   drop(value);
@@ -1351,322 +1176,14 @@ fn apply_install_completion_snapshot(
   metrics.observe_logical_staging(snapshot.completed_bytes);
 }
 
-impl InstallPipelineMetrics {
-  /// 创建安装流水线指标收集器。
-  fn new(
-    plan: &PersistedPlan,
-    concurrency: usize,
-    started_at: Instant,
-    index_build_micros: u64,
-    stall_pause_requested: Arc<AtomicBool>,
-  ) -> Self {
-    Self {
-      plan_id: plan.plan_id.clone(),
-      started_at,
-      index_build_micros,
-      baseline: PlanWorksetBaseline::from_plan(plan, concurrency),
-      queue_refill_count: AtomicUsize::new(0),
-      active_downloads: AtomicUsize::new(0),
-      peak_active_downloads: AtomicUsize::new(0),
-      active_assemblies: AtomicUsize::new(0),
-      peak_active_assemblies: AtomicUsize::new(0),
-      download_micros: AtomicU64::new(0),
-      assembly_micros: AtomicU64::new(0),
-      checkpoint_count: AtomicUsize::new(0),
-      checkpoint_micros: AtomicU64::new(0),
-      unique_download_bytes: AtomicU64::new(0),
-      duplicate_wait_bytes: AtomicU64::new(0),
-      peak_spool_bytes: AtomicU64::new(0),
-      peak_logical_staging_bytes: AtomicU64::new(0),
-      eta_remaining_bytes: AtomicU64::new(
-        plan
-          .downloads
-          .iter()
-          .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
-      ),
-      download_telemetry: DownloadTelemetry::new(),
-      assembly_telemetry: assembler::AssemblyTelemetry::new(),
-      stall_pause_requested,
-      journal_attempt_count: AtomicU64::new(0),
-      journal_write_count: AtomicU64::new(0),
-      journal_serialized_bytes: AtomicU64::new(0),
-      journal_serialize_micros: AtomicU64::new(0),
-      journal_write_micros: AtomicU64::new(0),
-      journal_file_sync_count: AtomicU64::new(0),
-      journal_file_sync_micros: AtomicU64::new(0),
-      journal_rename_micros: AtomicU64::new(0),
-      journal_directory_sync_count: AtomicU64::new(0),
-      journal_directory_sync_micros: AtomicU64::new(0),
-      journal_lock_wait_micros: AtomicU64::new(0),
-      staging_verify_count: AtomicU64::new(0),
-      staging_verify_micros: AtomicU64::new(0),
-      post_publish_verify_count: AtomicU64::new(0),
-      post_publish_verify_micros: AtomicU64::new(0),
-      zstd_decode_read_count: AtomicU64::new(0),
-      zstd_decode_read_bytes: AtomicU64::new(0),
-      zstd_decode_read_micros: AtomicU64::new(0),
-      chunk_md5_count: AtomicU64::new(0),
-      chunk_md5_bytes: AtomicU64::new(0),
-      chunk_md5_micros: AtomicU64::new(0),
-      asset_md5_count: AtomicU64::new(0),
-      asset_md5_bytes: AtomicU64::new(0),
-      asset_md5_micros: AtomicU64::new(0),
-      staging_file_sync_count: AtomicU64::new(0),
-      staging_file_sync_bytes: AtomicU64::new(0),
-      staging_file_sync_micros: AtomicU64::new(0),
-      resume_asset_cursor: AtomicUsize::new(0),
-      recovery_validate_micros: AtomicU64::new(0),
-    }
-  }
-
-  /// 记录下载开始并返回起始时刻。
-  fn begin_download(&self) -> Instant {
-    let active = self.active_downloads.fetch_add(1, Ordering::AcqRel).saturating_add(1);
-    self.peak_active_downloads.fetch_max(active, Ordering::AcqRel);
-    Instant::now()
-  }
-
-  /// 记录下载结束及耗时。
-  fn finish_download(&self, started_at: Instant) {
-    self.active_downloads.fetch_sub(1, Ordering::AcqRel);
-    self.download_micros.fetch_add(duration_micros(started_at.elapsed()), Ordering::Relaxed);
-  }
-
-  /// 记录组装开始并返回起始时刻。
-  fn begin_assembly(&self) -> Instant {
-    let active = self.active_assemblies.fetch_add(1, Ordering::AcqRel).saturating_add(1);
-    self.peak_active_assemblies.fetch_max(active, Ordering::AcqRel);
-    Instant::now()
-  }
-
-  /// 记录组装结束并返回耗时。
-  fn finish_assembly(&self, started_at: Instant) -> Duration {
-    let elapsed = started_at.elapsed();
-    self.active_assemblies.fetch_sub(1, Ordering::AcqRel);
-    self.assembly_micros.fetch_add(duration_micros(elapsed), Ordering::Relaxed);
-    elapsed
-  }
-
-  /// 记录一次检查点持久化耗时。
-  fn record_checkpoint(&self, elapsed: Duration) {
-    self.checkpoint_count.fetch_add(1, Ordering::Relaxed);
-    self.checkpoint_micros.fetch_add(duration_micros(elapsed), Ordering::Relaxed);
-  }
-
-  /// 更新 spool 峰值占用。
-  fn observe_spool(&self, bytes: u64) {
-    self.peak_spool_bytes.fetch_max(bytes, Ordering::Relaxed);
-  }
-
-  /// 更新逻辑 staging 峰值占用。
-  fn observe_logical_staging(&self, bytes: u64) {
-    self.peak_logical_staging_bytes.fetch_max(bytes, Ordering::Relaxed);
-  }
-
-  /// 汇总 journal 持久化耗时。
-  fn record_journal(&self, timing: &journal::JournalPersistTiming) {
-    self.journal_attempt_count.fetch_add(1, Ordering::Relaxed);
-    if timing.persisted {
-      self.journal_write_count.fetch_add(1, Ordering::Relaxed);
-    }
-    self.journal_serialized_bytes.fetch_add(timing.serialized_bytes, Ordering::Relaxed);
-    self.journal_serialize_micros.fetch_add(timing.serialize_micros, Ordering::Relaxed);
-    self.journal_write_micros.fetch_add(timing.write_micros, Ordering::Relaxed);
-    self.journal_file_sync_count.fetch_add(timing.file_sync_count, Ordering::Relaxed);
-    self.journal_file_sync_micros.fetch_add(timing.file_sync_micros, Ordering::Relaxed);
-    self.journal_rename_micros.fetch_add(timing.rename_micros, Ordering::Relaxed);
-    self.journal_directory_sync_count.fetch_add(timing.directory_sync_count, Ordering::Relaxed);
-    self.journal_directory_sync_micros.fetch_add(timing.directory_sync_micros, Ordering::Relaxed);
-    self.journal_lock_wait_micros.fetch_add(timing.lock_wait_micros, Ordering::Relaxed);
-  }
-
-  /// 汇总安装发布后的校验耗时。
-  fn record_validation(&self, timing: &installer::InstallValidationTiming) {
-    self.record_assembly_detail(&timing.assembly);
-    self.staging_verify_count.fetch_add(timing.staging_tree_count, Ordering::Relaxed);
-    self.staging_verify_micros.fetch_add(timing.staging_tree_micros, Ordering::Relaxed);
-    self.post_publish_verify_count.fetch_add(timing.post_publish_count, Ordering::Relaxed);
-    self.post_publish_verify_micros.fetch_add(timing.post_publish_micros, Ordering::Relaxed);
-    self.journal_attempt_count.fetch_add(timing.journal_attempt_count, Ordering::Relaxed);
-    self.journal_write_count.fetch_add(timing.journal_write_count, Ordering::Relaxed);
-    self.journal_serialized_bytes.fetch_add(timing.journal_serialized_bytes, Ordering::Relaxed);
-    self.journal_serialize_micros.fetch_add(timing.journal_serialize_micros, Ordering::Relaxed);
-    self.journal_write_micros.fetch_add(timing.journal_write_micros, Ordering::Relaxed);
-    self.journal_file_sync_count.fetch_add(timing.journal_file_sync_count, Ordering::Relaxed);
-    self.journal_file_sync_micros.fetch_add(timing.journal_file_sync_micros, Ordering::Relaxed);
-    self.journal_rename_micros.fetch_add(timing.journal_rename_micros, Ordering::Relaxed);
-    self
-      .journal_directory_sync_count
-      .fetch_add(timing.journal_directory_sync_count, Ordering::Relaxed);
-    self
-      .journal_directory_sync_micros
-      .fetch_add(timing.journal_directory_sync_micros, Ordering::Relaxed);
-    self.journal_lock_wait_micros.fetch_add(timing.journal_lock_wait_micros, Ordering::Relaxed);
-  }
-
-  /// 汇总组装阶段耗时。
-  fn record_assembly_detail(&self, timing: &assembler::AssemblyTiming) {
-    self.zstd_decode_read_count.fetch_add(timing.zstd_decode_read_count, Ordering::Relaxed);
-    self.zstd_decode_read_bytes.fetch_add(timing.zstd_decode_read_bytes, Ordering::Relaxed);
-    self.zstd_decode_read_micros.fetch_add(timing.zstd_decode_read_micros, Ordering::Relaxed);
-    self.chunk_md5_count.fetch_add(timing.chunk_md5_count, Ordering::Relaxed);
-    self.chunk_md5_bytes.fetch_add(timing.chunk_md5_bytes, Ordering::Relaxed);
-    self.chunk_md5_micros.fetch_add(timing.chunk_md5_micros, Ordering::Relaxed);
-    self.asset_md5_count.fetch_add(timing.asset_md5_count, Ordering::Relaxed);
-    self.asset_md5_bytes.fetch_add(timing.asset_md5_bytes, Ordering::Relaxed);
-    self.asset_md5_micros.fetch_add(timing.asset_md5_micros, Ordering::Relaxed);
-    self.staging_file_sync_count.fetch_add(timing.staging_file_sync_count, Ordering::Relaxed);
-    self.staging_file_sync_bytes.fetch_add(timing.staging_file_sync_bytes, Ordering::Relaxed);
-    self.staging_file_sync_micros.fetch_add(timing.staging_file_sync_micros, Ordering::Relaxed);
-  }
-
-  /// 记录恢复校验游标与耗时。
-  fn record_recovery_validation(&self, cursor: usize, elapsed: Duration) {
-    self.resume_asset_cursor.store(cursor, Ordering::Relaxed);
-    self.recovery_validate_micros.store(duration_micros(elapsed), Ordering::Relaxed);
-  }
-
-  /// 记录因并发去重而等待的字节数。
-  fn record_duplicate_wait(&self, bytes: u64) {
-    self.duplicate_wait_bytes.fetch_add(bytes, Ordering::Relaxed);
-  }
-
-  /// 记录唯一下载字节数并扣减 ETA 剩余量。
-  fn record_unique_download(&self, bytes: u64) {
-    self.unique_download_bytes.fetch_add(bytes, Ordering::Relaxed);
-    let _ = self.eta_remaining_bytes.try_update(Ordering::AcqRel, Ordering::Acquire, |remaining| {
-      Some(remaining.saturating_sub(bytes))
-    });
-  }
-
-  /// 设置 ETA 计算所用的剩余字节数。
-  fn set_eta_remaining_bytes(&self, bytes: u64) {
-    self.eta_remaining_bytes.store(bytes, Ordering::Release);
-  }
-}
-
-impl Drop for InstallPipelineMetrics {
-  /// 输出安装流水线的性能摘要。
-  fn drop(&mut self) {
-    let download = self.download_telemetry.snapshot();
-    let assembly = self.assembly_telemetry.snapshot();
-    log::info!(
-      "[game-package][install][{}][perf] totalMs={} indexBuildCount=1 indexBuildUs={} assets={} downloads={} chunks={} plannedDownloadBytes={} plannedOutputBytes={} assetWorksetMax={} assetWorksetP50={} assetWorksetP95={} assetWorksetP99={} assetWorksetChunkMax={} batchUnionMax={} batchUnionP95={} maxDownloadConsumers={} maxDownloadSpan={} queueRefills={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} downloadNetworkMs={} downloadWriteMs={} downloadHashMs={} downloadFileSyncCount={} downloadFileSyncMs={} downloadReceivedBytes={} downloadCacheHits={} downloadAttempts={} downloadAttemptSuccesses={} downloadAttemptFailures={} downloadRetries={} downloadObjectSuccesses={} downloadObjectFailures={} downloadAborts={} downloadPublishFailures={} zstdDecodeReadCount={} zstdDecodeReadBytes={} zstdDecodeReadMs={} chunkMd5Count={} chunkMd5Bytes={} chunkMd5Ms={} assetMd5Count={} assetMd5Bytes={} assetMd5Ms={} stagingFileSyncCount={} stagingFileSyncBytes={} stagingFileSyncMs={} journalAttempts={} journalWrites={} journalSerializedBytes={} journalSerializeMs={} journalWriteMs={} journalFileSyncCount={} journalFileSyncMs={} journalRenameMs={} journalDirectorySyncCount={} journalDirectorySyncMs={} journalLockWaitMs={} stagingVerifyCount={} stagingVerifyMs={} postPublishVerifyCount={} postPublishVerifyMs={} resumeAssetCursor={} recoveryValidateMs={} checkpoints={} checkpointMs={} scheduledUniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={} peakLogicalStagingBytes={}",
-      self.plan_id,
-      self.started_at.elapsed().as_millis(),
-      self.index_build_micros,
-      self.baseline.asset_count,
-      self.baseline.download_count,
-      self.baseline.chunk_count,
-      self.baseline.planned_download_bytes,
-      self.baseline.planned_output_bytes,
-      self.baseline.asset_workset_max,
-      self.baseline.asset_workset_p50,
-      self.baseline.asset_workset_p95,
-      self.baseline.asset_workset_p99,
-      self.baseline.asset_workset_chunk_max,
-      self.baseline.batch_union_max,
-      self.baseline.batch_union_p95,
-      self.baseline.max_download_consumers,
-      self.baseline.max_download_span,
-      self.queue_refill_count.load(Ordering::Relaxed),
-      self.peak_active_downloads.load(Ordering::Relaxed),
-      self.peak_active_assemblies.load(Ordering::Relaxed),
-      self.download_micros.load(Ordering::Relaxed) / 1_000,
-      self.assembly_micros.load(Ordering::Relaxed) / 1_000,
-      download.network_wait_micros / 1_000,
-      download.write_micros / 1_000,
-      download.hash_micros / 1_000,
-      download.file_sync_count,
-      download.file_sync_micros / 1_000,
-      download.received_bytes,
-      download.cache_hits,
-      download.attempts,
-      download.successful_attempts,
-      download.failed_attempts,
-      download.retries,
-      download.successful_objects,
-      download.failed_objects,
-      download.aborted_objects,
-      download.publish_failures,
-      self.zstd_decode_read_count.load(Ordering::Relaxed),
-      self.zstd_decode_read_bytes.load(Ordering::Relaxed),
-      self.zstd_decode_read_micros.load(Ordering::Relaxed) / 1_000,
-      self.chunk_md5_count.load(Ordering::Relaxed),
-      self.chunk_md5_bytes.load(Ordering::Relaxed),
-      self.chunk_md5_micros.load(Ordering::Relaxed) / 1_000,
-      self.asset_md5_count.load(Ordering::Relaxed),
-      self.asset_md5_bytes.load(Ordering::Relaxed),
-      self.asset_md5_micros.load(Ordering::Relaxed) / 1_000,
-      self.staging_file_sync_count.load(Ordering::Relaxed),
-      self.staging_file_sync_bytes.load(Ordering::Relaxed),
-      self.staging_file_sync_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_attempt_count.load(Ordering::Relaxed),
-      self.journal_write_count.load(Ordering::Relaxed),
-      self.journal_serialized_bytes.load(Ordering::Relaxed),
-      self.journal_serialize_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_write_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_file_sync_count.load(Ordering::Relaxed),
-      self.journal_file_sync_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_rename_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_directory_sync_count.load(Ordering::Relaxed),
-      self.journal_directory_sync_micros.load(Ordering::Relaxed) / 1_000,
-      self.journal_lock_wait_micros.load(Ordering::Relaxed) / 1_000,
-      self.staging_verify_count.load(Ordering::Relaxed),
-      self.staging_verify_micros.load(Ordering::Relaxed) / 1_000,
-      self.post_publish_verify_count.load(Ordering::Relaxed),
-      self.post_publish_verify_micros.load(Ordering::Relaxed) / 1_000,
-      self.resume_asset_cursor.load(Ordering::Relaxed),
-      self.recovery_validate_micros.load(Ordering::Relaxed) / 1_000,
-      self.checkpoint_count.load(Ordering::Relaxed),
-      self.checkpoint_micros.load(Ordering::Relaxed) / 1_000,
-      self.unique_download_bytes.load(Ordering::Relaxed),
-      self.duplicate_wait_bytes.load(Ordering::Relaxed),
-      self.peak_spool_bytes.load(Ordering::Relaxed),
-      self.peak_logical_staging_bytes.load(Ordering::Relaxed),
-    );
-    log::info!(
-      "[game-package][install][{}][stage-perf] downloadNetworkOps={} downloadWriteOps={} downloadWrittenBytes={} downloadNetworkMs={} downloadWriteMs={} downloadNetworkMaxMs={} downloadWriteMaxMs={} assemblyReadOps={} assemblyWriteOps={} assemblyHashOps={} assemblySyncOps={} assemblyReadBytes={} assemblyWrittenBytes={} assemblyHashedBytes={} assemblyReadMs={} assemblyWriteMs={} assemblyHashMs={} assemblySyncMs={} assemblyReadMaxMs={} assemblyWriteMaxMs={} assemblyHashMaxMs={} assemblySyncMaxMs={} watchdogPaused={}",
-      self.plan_id,
-      download.network_wait_operation_count,
-      download.local_write_operation_count,
-      download.local_written_bytes,
-      download.network_wait_micros / 1_000,
-      download.write_micros / 1_000,
-      download.max_network_wait_micros / 1_000,
-      download.max_local_write_micros / 1_000,
-      assembly.read_operations,
-      assembly.write_operations,
-      assembly.hash_operations,
-      assembly.sync_operations,
-      assembly.read_bytes,
-      assembly.written_bytes,
-      assembly.hashed_bytes,
-      assembly.read_micros / 1_000,
-      assembly.write_micros / 1_000,
-      assembly.hash_micros / 1_000,
-      assembly.sync_micros / 1_000,
-      assembly.max_read_micros / 1_000,
-      assembly.max_write_micros / 1_000,
-      assembly.max_hash_micros / 1_000,
-      assembly.max_sync_micros / 1_000,
-      self.stall_pause_requested.load(Ordering::Relaxed),
-    );
-  }
-}
-
-/// 把时长换算为微秒并钳制到 `u64` 范围。
-fn duration_micros(duration: Duration) -> u64 {
-  duration.as_micros().min(u128::from(u64::MAX)) as u64
-}
-
 /// 持久化安装检查点，并记录检查点及 journal 写入耗时指标。
+/// @since Beta v0.13.0
 fn persist_install_checkpoint(
   task_root: &Path,
   journal_value: &TaskJournal,
   metrics: &InstallPipelineMetrics,
 ) -> Result<(), String> {
-  if metrics.stall_pause_requested.load(Ordering::Acquire) {
+  if metrics.is_stall_pause_requested() {
     return Ok(());
   }
   let mut timing = journal::JournalPersistTiming::default();
@@ -1677,12 +1194,13 @@ fn persist_install_checkpoint(
 }
 
 /// 持久化安装进度，并记录 journal 写入耗时指标。
+/// @since Beta v0.13.0
 fn persist_install_progress(
   task_root: &Path,
   journal_value: &TaskJournal,
   metrics: &InstallPipelineMetrics,
 ) -> Result<(), String> {
-  if metrics.stall_pause_requested.load(Ordering::Acquire) {
+  if metrics.is_stall_pause_requested() {
     return Ok(());
   }
   let mut timing = journal::JournalPersistTiming::default();
@@ -1692,6 +1210,7 @@ fn persist_install_progress(
 }
 
 /// 把下载中的 in-flight 字节叠加到任务摘要的已下载量。
+/// @since Beta v0.13.0
 fn overlay_install_download_progress(
   journal: &TaskJournal,
   metrics: &InstallPipelineMetrics,
@@ -1700,7 +1219,7 @@ fn overlay_install_download_progress(
   if !matches!(journal.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
     return summary;
   }
-  let in_flight = metrics.download_telemetry.snapshot().in_flight_bytes;
+  let in_flight = metrics.download_snapshot().in_flight_bytes;
   summary.downloaded_bytes =
     journal.downloaded_bytes.saturating_add(in_flight).min(journal.total_bytes);
   summary
@@ -5569,7 +5088,7 @@ async fn run_install_streaming_task(
         if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
           break 'assets;
         }
-        metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
+        metrics.record_queue_refill();
         let asset = &plan.assets[asset_index];
         let mut pending = Vec::new();
         let mut seen = HashSet::new();
@@ -5643,7 +5162,7 @@ async fn run_install_streaming_task(
                   &limiter,
                   DownloadDurability::Recoverable,
                 )
-                .with_telemetry(Arc::clone(&metrics.download_telemetry)),
+                .with_telemetry(metrics.download_telemetry()),
               )
               .await;
               metrics.finish_download(started_at);
@@ -5722,7 +5241,7 @@ async fn run_install_streaming_task(
         let assemble_shared = shared_cache_root.clone();
         let assemble_spool = spool_root.clone();
         let assemble_canceled = Arc::clone(&canceled);
-        let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
+        let assemble_telemetry = metrics.assembly_telemetry();
         let assembly_started_at = metrics.begin_assembly();
         emit_active_assembly_count(&events, &journal, &metrics).await;
         let assembly_worker = spawn_install_assembly_worker(
@@ -5963,7 +5482,7 @@ async fn run_install_streaming_task(
           &limiter,
           DownloadDurability::Recoverable,
         )
-        .with_telemetry(Arc::clone(&metrics.download_telemetry)),
+        .with_telemetry(metrics.download_telemetry()),
       )
       .await;
       metrics.finish_download(sdk_download_started_at);
@@ -6364,7 +5883,7 @@ async fn run_install_bounded_asset_pipeline(
       ));
     }
     if scheduled_count > 0 {
-      metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
+      metrics.record_queue_refill();
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
       value.download_current_file = None;
@@ -6482,6 +6001,7 @@ fn prepare_install_asset_job(
 /// 单个下载对象的统一执行体：按下载 id 去重，命中共享缓存或 spool 时跳过，
 /// 否则占用下载槽下载到任务私有 spool 并记账。
 #[allow(clippy::too_many_arguments)]
+/// @since Beta v0.13.0
 async fn download_install_chunk(
   download: PlanDownload,
   client: reqwest::Client,
@@ -6517,7 +6037,7 @@ async fn download_install_chunk(
       .unwrap_or(false)
     };
     if cache_hit {
-      metrics.download_telemetry.record_cache_hit();
+      metrics.download_telemetry().record_cache_hit();
       metrics.finish_download(started_at);
       drop(permit);
       return Ok(None);
@@ -6527,7 +6047,7 @@ async fn download_install_chunk(
       &root,
       &download,
       DownloadControl::new(&task_id, &canceled, &paused, &limiter, DownloadDurability::Recoverable)
-        .with_telemetry(Arc::clone(&metrics.download_telemetry))
+        .with_telemetry(metrics.download_telemetry())
         .skip_initial_cache_check(),
     )
     .await;
@@ -6755,7 +6275,7 @@ async fn run_install_asset_job(
       let assemble_shared = shared_cache_root.clone();
       let assemble_spool = spool_root.clone();
       let assemble_canceled = Arc::clone(&canceled);
-      let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
+      let assemble_telemetry = metrics.assembly_telemetry();
       let assembly_started_at = metrics.begin_assembly();
       emit_active_assembly_count(&events, &journal, &metrics).await;
       let worker = spawn_install_assembly_worker(
