@@ -64,7 +64,7 @@
                     />
                     <span class="ton-achievement-name">{{ item.achievement.name }}</span>
                     <span v-if="item.stageCount > 1" class="ton-achievement-stage">
-                      {{ item.stageIndex }}/{{ item.stageCount }}
+                      {{ item.completedStageCount }}/{{ item.stageCount }}
                     </span>
                   </li>
                 </ul>
