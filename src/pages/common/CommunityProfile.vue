@@ -285,12 +285,19 @@
               <v-icon size="18" aria-hidden="true">{{ item.icon }}</v-icon>
               <span>{{ item.label }}</span>
               <span
-                v-if="item.badge"
-                :title="`${item.badge} 条未读`"
+                v-if="item.badge?.count"
+                :title="item.badge.label"
                 class="community-profile-nav-badge"
               >
-                {{ item.badge > 99 ? "99+" : item.badge }}
+                {{ item.badge.count > 99 ? "99+" : item.badge.count }}
               </span>
+              <span
+                v-else-if="item.badge?.dot"
+                :aria-label="item.badge.label"
+                :title="item.badge.label"
+                class="community-profile-nav-badge is-dot"
+                role="img"
+              />
             </RouterLink>
           </template>
         </nav>
@@ -450,13 +457,13 @@
         :key="`${profileUid}:${currentSection}:${refreshVersion}`"
         :category="notificationCategories[currentSection]"
         class="community-profile-panel"
-        @item-read="handleNotificationItemRead"
         @read="handleNotificationRead"
       />
       <CpNotifySettings
         v-else-if="isOwnProfile && currentSection === 'notifySettings'"
         :key="`${profileUid}:${currentSection}:${refreshVersion}`"
         class="community-profile-panel"
+        @saved="handleNotificationSettingsSaved"
       />
       <CpContent
         v-else-if="
@@ -495,6 +502,7 @@ import { createPost } from "@utils/app/TGWindow.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
+import { clearNotificationBadge, getNotificationBadge } from "@utils/community/notification.js";
 import {
   hasNextProfile,
   hasPreviousProfile,
@@ -530,12 +538,16 @@ type ProfileSection =
   | NotificationSection
   | "notifySettings";
 
+/**
+ * 个人主页导航与通知入口提醒。
+ * @since Beta v0.13.0
+ */
 type NavigationItem = {
   section: ProfileSection;
   label: string;
   icon: string;
   divided?: boolean;
-  badge?: number;
+  badge?: TGApp.BBS.Notification.Badge;
 };
 
 const notificationCategories: Readonly<
@@ -633,7 +645,8 @@ const publishForum = computed<TGApp.BBS.Forum.GameForumItem | undefined>(
     publishForums.value.find((forum) => forum.id === publishForumId.value) ??
     publishForums.value[0],
 );
-const unreadCounts = shallowRef<Partial<Record<TGApp.BBS.Notification.Category, number>>>({});
+const unreadCounts = shallowRef<TGApp.BBS.Notification.UnreadRes["count"]>({});
+const notificationSettings = shallowRef<TGApp.BBS.Notification.Settings>();
 const navigation = computed<Array<NavigationItem>>(() => {
   const prefix = isOwnProfile.value ? "我的" : "TA 的";
   const items: Array<NavigationItem> = [
@@ -645,7 +658,8 @@ const navigation = computed<Array<NavigationItem>>(() => {
     { section: "following", label: `${prefix}关注`, icon: "mdi-heart-outline" },
   ];
   if (isOwnProfile.value) {
-    const unread = unreadCounts.value;
+    const badge = (category: TGApp.BBS.Notification.Category): TGApp.BBS.Notification.Badge =>
+      getNotificationBadge(category, unreadCounts.value, notificationSettings.value);
     items.splice(1, 0, { section: "history", label: "浏览历史", icon: "mdi-history" });
     items.push(
       {
@@ -653,11 +667,16 @@ const navigation = computed<Array<NavigationItem>>(() => {
         label: "回复我的",
         icon: "mdi-comment-processing-outline",
         divided: true,
-        badge: unread.reply,
+        badge: badge("reply"),
       },
-      { section: "mention", label: "主动@我", icon: "mdi-at", badge: unread.active_mention },
-      { section: "system", label: "系统通知", icon: "mdi-bell-outline", badge: unread.system },
-      { section: "likes", label: "收到的赞", icon: "mdi-thumb-up-outline", badge: unread.comment },
+      { section: "mention", label: "主动@我", icon: "mdi-at", badge: badge("active_mention") },
+      { section: "system", label: "系统通知", icon: "mdi-bell-outline", badge: badge("system") },
+      {
+        section: "likes",
+        label: "收到的赞",
+        icon: "mdi-thumb-up-outline",
+        badge: badge("comment"),
+      },
       { section: "privacy", label: "隐私设置", icon: "mdi-shield-lock-outline", divided: true },
       { section: "notifySettings", label: "消息设置", icon: "mdi-bell-cog-outline" },
       { section: "edit", label: "编辑资料", icon: "mdi-account-edit-outline" },
@@ -1010,6 +1029,7 @@ function resetProfileData(): void {
   loading.value = false;
   unreadVersion += 1;
   unreadCounts.value = {};
+  notificationSettings.value = undefined;
 }
 
 function getAccountSnapshot(): AccountSnapshot | undefined {
@@ -1098,33 +1118,42 @@ async function loadUnreadCounts(snapshot: AccountSnapshot): Promise<void> {
   if (snapshot.profileUid !== snapshot.uid) return;
   const version = ++unreadVersion;
   readCategories.clear();
-  try {
-    const response = await communityReq.notificationUnread(snapshot.cookie);
-    if (version !== unreadVersion || !isCurrentAccount(snapshot)) return;
-    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
-    const count = response.data.count;
-    const getCount = (category: TGApp.BBS.Notification.Category): number =>
-      readCategories.has(category) ? 0 : (count[category] ?? 0);
-    unreadCounts.value = {
-      reply: getCount("reply"),
-      active_mention: getCount("active_mention"),
-      system: getCount("system"),
-      comment: getCount("comment"),
-    };
-  } catch (cause) {
-    await TGLogger.Warn(`[CommunityProfile] 获取未读消息数失败：${TGHttps.getErrMsg(cause)}`);
+  const [unreadResult, settingsResult] = await Promise.allSettled([
+    communityReq.notificationUnread(snapshot.cookie),
+    communityReq.notificationSettings(snapshot.cookie, snapshot.uid),
+  ]);
+  if (version !== unreadVersion || !isCurrentAccount(snapshot)) return;
+  if (unreadResult.status === "fulfilled" && unreadResult.value.retcode === 0) {
+    let count = unreadResult.value.data.count;
+    for (const category of readCategories) count = clearNotificationBadge(count, category);
+    unreadCounts.value = count;
+  } else {
+    const message =
+      unreadResult.status === "rejected"
+        ? TGHttps.getErrMsg(unreadResult.reason)
+        : `[${unreadResult.value.retcode}] ${unreadResult.value.message}`;
+    void TGLogger.Warn(`[CommunityProfile] 获取未读消息数失败：${message}`);
+  }
+  if (settingsResult.status === "fulfilled" && settingsResult.value.retcode === 0) {
+    notificationSettings.value = settingsResult.value.data.settings;
+  } else {
+    const message =
+      settingsResult.status === "rejected"
+        ? TGHttps.getErrMsg(settingsResult.reason)
+        : `[${settingsResult.value.retcode}] ${settingsResult.value.message}`;
+    void TGLogger.Warn(`[CommunityProfile] 获取消息设置失败：${message}`);
   }
 }
 
 function handleNotificationRead(category: TGApp.BBS.Notification.Category): void {
   readCategories.add(category);
-  unreadCounts.value = { ...unreadCounts.value, [category]: 0 };
+  unreadCounts.value = clearNotificationBadge(unreadCounts.value, category);
 }
 
-function handleNotificationItemRead(category: TGApp.BBS.Notification.Category): void {
-  const current = unreadCounts.value[category] ?? 0;
-  if (current <= 0) return;
-  unreadCounts.value = { ...unreadCounts.value, [category]: current - 1 };
+function handleNotificationSettingsSaved(settings: TGApp.BBS.Notification.Settings): void {
+  notificationSettings.value = settings;
+  const snapshot = getAccountSnapshot();
+  if (snapshot !== undefined) void loadUnreadCounts(snapshot);
 }
 
 async function loadProfile(refreshHeader: boolean = false): Promise<void> {
@@ -2025,6 +2054,14 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   font-size: 10px;
   line-height: 14px;
   text-align: center;
+
+  &.is-dot {
+    width: 8px;
+    min-width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+  }
 }
 
 .community-profile-posts {

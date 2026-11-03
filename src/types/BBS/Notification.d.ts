@@ -46,6 +46,19 @@ declare namespace TGApp.BBS.Notification {
   };
 
   /**
+   * 根据消息接收设置生成的入口提醒。
+   * @since Beta v0.13.0
+   */
+  type Badge = {
+    /** 入口显示的提醒数量，0 时不显示数字 */
+    count: number;
+    /** 是否仅显示新消息红点 */
+    dot: boolean;
+    /** 提醒的无障碍说明与悬浮文案 */
+    label: string;
+  };
+
+  /**
    * 清除未读请求参数
    * @since Beta v0.13.0
    */

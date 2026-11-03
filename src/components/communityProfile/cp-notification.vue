@@ -33,10 +33,10 @@
       </time>
       <span
         v-if="!notification.is_read"
-        aria-label="未读"
+        aria-label="打开列表时未读"
         class="cp-notification-dot"
         role="img"
-        title="未读"
+        title="打开列表时未读"
       />
     </header>
 

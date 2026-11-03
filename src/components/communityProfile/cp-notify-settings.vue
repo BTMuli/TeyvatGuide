@@ -130,6 +130,7 @@ const scopeOptions: ReadonlyArray<{ value: TGApp.BBS.Notification.SettingScope; 
 ];
 
 const { isLogin } = storeToRefs(useAppStore());
+const emit = defineEmits<{ saved: [settings: TGApp.BBS.Notification.Settings] }>();
 const { uid, cookie } = storeToRefs(useUserStore());
 const original = shallowRef<TGApp.BBS.Notification.Settings>();
 const draft = reactive<SettingsDraft>({
@@ -278,6 +279,7 @@ async function handleSave(): Promise<void> {
     if (!isCurrent(snapshot, version)) return;
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     applySettings(payload);
+    emit("saved", payload);
     saveMessage.value = "消息设置已保存。";
   } catch (cause) {
     if (isCurrent(snapshot, version)) saveError.value = TGHttps.getErrMsg(cause);

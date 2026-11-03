@@ -88,7 +88,6 @@ type AccountSnapshot = { uid: string; cookie: TGApp.App.Account.Cookie };
 const { category } = defineProps<{ category: TGApp.BBS.Notification.Category }>();
 const emit = defineEmits<{
   read: [category: TGApp.BBS.Notification.Category];
-  itemRead: [category: TGApp.BBS.Notification.Category];
 }>();
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
@@ -283,7 +282,6 @@ function hasTarget(item: TGApp.BBS.Notification.Item): boolean {
 }
 
 async function openNotification(item: TGApp.BBS.Notification.Item): Promise<void> {
-  markItemRead(item.notification_id);
   try {
     const postId = getPostId(item);
     if (postId) {
@@ -307,19 +305,6 @@ async function openNotification(item: TGApp.BBS.Notification.Item): Promise<void
   } catch (cause) {
     showSnackbar.error(`打开通知失败：${TGHttps.getErrMsg(cause)}`);
   }
-}
-
-function markItemRead(notificationId: string): void {
-  const target = notifications.value.find(
-    (notification) => notification.notification_id === notificationId,
-  );
-  if (target === undefined || target.is_read) return;
-  notifications.value = notifications.value.map((notification) =>
-    notification.notification_id === notificationId
-      ? { ...notification, is_read: true }
-      : notification,
-  );
-  emit("itemRead", category);
 }
 
 async function openProfile(userId: string, gid?: number): Promise<void> {
