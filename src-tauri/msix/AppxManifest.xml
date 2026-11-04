@@ -10,7 +10,7 @@
   <Identity
     Name="27581BTMuli.tauri-genshin"
     Publisher="CN=5FE33156-C3CE-4E71-A036-81BAA99521CB"
-    Version="0.12.5.0"
+    Version="0.13.0.0"
     ProcessorArchitecture="x64"
   />
   <Properties>

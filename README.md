@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-10-20
+Update: 2026-11-04
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-10-20 20:05:00`
+> 更新于 `2026-11-04 21:42:00`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -54,6 +54,8 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 米游社话题帖子获取（通过话题点击跳转）
+  - [x] 他人主页信息获取
+  - [x] 他人合集信息获取
   - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
   - [x] 游戏安装管理
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.2）
@@ -75,10 +77,9 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 高难挑战与统计（深境螺旋/真境剧诗/幽境危战）
   - [x] 祈愿数据获取（近一年）
   - [x] 千星奇域颂愿数据获取（近一年）
-  - [x] 用户收藏帖子获取
-  - [x] 用户关注帖子获取
+  - [x] 用户主页，支持发帖/回复
   - [x] 一键完成米游币每日任务&游戏签到
-  - [x] 原神、绝区零国服兑换码批量兑换，支持前瞻直播码一键兑换
+  - [x] 游戏兑换码兑换，支持一键兑换
 
 - Wiki 功能：
   - [x] 角色图鉴（支持名称搜索）
@@ -86,7 +87,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 名片图鉴
   - [x] 材料图鉴（支持分类筛选、排序和过滤）
   - [x] 圣遗物套装图鉴
-  - [x] 食物、食谱和书籍数据查看
+  - [x] 食物和书籍数据查看
 
 - 应用功能：
   - [x] 浅色/深色主题切换
