@@ -23,7 +23,12 @@
     </div>
 
     <div class="install-throughput-chart">
-      <svg :aria-label="chartAriaLabel" preserveAspectRatio="none" role="img" viewBox="0 0 600 120">
+      <svg
+        :aria-label="chartAriaLabel"
+        preserveAspectRatio="none"
+        role="img"
+        :viewBox="chartViewBox"
+      >
         <line
           v-for="gridY in chartGridLines"
           :key="gridY"
@@ -33,27 +38,35 @@
           :y2="gridY"
           class="install-throughput-grid"
         />
-        <path
-          v-if="downloadChartVisible"
-          :d="downloadAreaPath"
-          class="install-throughput-area download"
-        />
-        <path
-          v-if="assemblyChartVisible"
-          :d="assemblyAreaPath"
-          class="install-throughput-area assembly"
-        />
-        <path
-          v-if="downloadChartVisible"
-          :d="downloadLinePath"
-          class="install-throughput-line download"
-        />
-        <path
-          v-if="assemblyChartVisible"
-          :d="assemblyLinePath"
-          class="install-throughput-line assembly"
-        />
-        <path v-if="spoolChartVisible" :d="spoolLinePath" class="install-throughput-line spool" />
+        <g :transform="speedTransform">
+          <path
+            v-if="downloadChartVisible"
+            :d="downloadGeometry.area"
+            class="install-throughput-area download"
+          />
+          <path
+            v-if="assemblyChartVisible"
+            :d="assemblyGeometry.area"
+            class="install-throughput-area assembly"
+          />
+          <path
+            v-if="downloadChartVisible"
+            :d="downloadGeometry.line"
+            class="install-throughput-line download"
+          />
+          <path
+            v-if="assemblyChartVisible"
+            :d="assemblyGeometry.line"
+            class="install-throughput-line assembly"
+          />
+        </g>
+        <g :transform="spoolTransform">
+          <path
+            v-if="spoolChartVisible"
+            :d="spoolGeometry.line"
+            class="install-throughput-line spool"
+          />
+        </g>
       </svg>
       <span class="install-throughput-scale speed">速度 {{ speedScaleLabel }}</span>
       <span class="install-throughput-scale spool">临时 {{ spoolScaleLabel }}</span>
@@ -64,14 +77,34 @@
 
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
+import {
+  appendThroughputSample,
+  createThroughputAxis,
+  retargetThroughputAxis,
+  THROUGHPUT_CHART_BOTTOM,
+  THROUGHPUT_CHART_HEIGHT,
+  THROUGHPUT_CHART_WIDTH,
+  THROUGHPUT_MINIMUM_SPEED_BYTES,
+  THROUGHPUT_MINIMUM_SPOOL_BYTES,
+  THROUGHPUT_SAMPLE_INTERVAL_MS,
+  THROUGHPUT_WINDOW_MS,
+  throughputAxisValue,
+  throughputCeiling,
+  throughputCurveSegments,
+  throughputPaths,
+} from "@utils/game/throughputChart.js";
+import type {
+  ThroughputAxis,
+  ThroughputPaths,
+  ThroughputSample,
+} from "@utils/game/throughputChart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
 };
 
-type ThroughputSample = {
-  at: number;
+type InstallThroughputSample = ThroughputSample & {
   download: number;
   assembly: number;
   spool: number;
@@ -79,26 +112,30 @@ type ThroughputSample = {
 
 type SampleMetric = "download" | "assembly" | "spool";
 
-type ChartPoint = { x: number; y: number };
-
 const { task } = defineProps<Props>();
-const chartWidth = 600;
-const chartHeight = 120;
-const sampleLimit = 60;
-const windowMs = (sampleLimit - 1) * 1000;
-const pixelPerMs = chartWidth / windowMs;
-const chartGridLines = [0, 30, 60, 90, 120];
-const samples = ref<Array<ThroughputSample>>([]);
-const clockTick = ref<number>(0);
+const chartWidth = THROUGHPUT_CHART_WIDTH;
+const chartHeight = THROUGHPUT_CHART_HEIGHT;
+const chartBottom = THROUGHPUT_CHART_BOTTOM;
+const chartViewBox = `0 0 ${chartWidth} ${chartHeight}`;
+const chartGridLines: Array<number> = [0, 0.25, 0.5, 0.75, 1].map(
+  (ratio) => chartBottom * (1 - ratio),
+);
+const samples = ref<Array<InstallThroughputSample>>([]);
 const frameNow = ref<number>(performance.now());
-const displaySpeedMaximum = ref<number>(1);
-const displaySpoolMaximum = ref<number>(1);
+const speedAxis = ref<ThroughputAxis>(
+  createThroughputAxis(THROUGHPUT_MINIMUM_SPEED_BYTES, frameNow.value),
+);
+const spoolAxis = ref<ThroughputAxis>(
+  createThroughputAxis(THROUGHPUT_MINIMUM_SPOOL_BYTES, frameNow.value),
+);
+const reducedMotion = ref<boolean>(false);
+const clockTick = ref<number>(0);
 const downloadCompletedAt = ref<number | null>(null);
 const assemblyCompletedAt = ref<number | null>(null);
 const spoolReleasedAt = ref<number | null>(null);
 let sampleTimer: ReturnType<typeof setInterval> | null = null;
 let frameHandle: number | null = null;
-let lastFrameAt: number | null = null;
+let motionQuery: MediaQueryList | null = null;
 
 const downloadActive = computed<boolean>(
   () => task.state === gameEnum.package.taskState.DOWNLOADING,
@@ -175,33 +212,52 @@ const renderActive = computed<boolean>(() => {
 const assemblyRunning = computed<boolean>(
   () => task.state === gameEnum.package.taskState.ASSEMBLING,
 );
-const speedSampleMaximum = computed<number>(() => {
-  let value = Math.max(currentDownloadSpeed.value, currentAssemblySpeed.value);
+const speedPeak = computed<number>(() => {
+  let value = 0;
   for (const sample of samples.value) {
     value = Math.max(value, sample.download, sample.assembly);
   }
   return value;
 });
-const spoolSampleMaximum = computed<number>(() => {
-  let value = currentSpoolBytes.value;
-  for (const sample of samples.value) {
-    value = Math.max(value, sample.spool);
-  }
+const spoolPeak = computed<number>(() => {
+  let value = 0;
+  for (const sample of samples.value) value = Math.max(value, sample.spool);
   return value;
 });
-const speedTargetMaximum = computed<number>(() => chartMaximum(speedSampleMaximum.value));
-const spoolTargetMaximum = computed<number>(() => chartMaximum(spoolSampleMaximum.value));
+const speedTargetMaximum = computed<number>(() =>
+  throughputCeiling(speedPeak.value, THROUGHPUT_MINIMUM_SPEED_BYTES),
+);
+const spoolTargetMaximum = computed<number>(() =>
+  throughputCeiling(spoolPeak.value, THROUGHPUT_MINIMUM_SPOOL_BYTES),
+);
+const displaySpeedMaximum = computed<number>(() =>
+  throughputAxisValue(speedAxis.value, frameNow.value),
+);
+const displaySpoolMaximum = computed<number>(() =>
+  throughputAxisValue(spoolAxis.value, frameNow.value),
+);
 const speedScaleLabel = computed<string>(() =>
-  speedSampleMaximum.value > 0 ? formatSpeed(displaySpeedMaximum.value) : "等待采样",
+  speedPeak.value > 0 ? formatSpeed(speedTargetMaximum.value) : "等待采样",
 );
 const spoolScaleLabel = computed<string>(() =>
-  spoolSampleMaximum.value > 0 ? formatBytes(displaySpoolMaximum.value) : "等待采样",
+  spoolPeak.value > 0 ? formatBytes(spoolTargetMaximum.value) : "等待采样",
 );
-const downloadLinePath = computed<string>(() => smoothLinePath(metricPoints("download")));
-const assemblyLinePath = computed<string>(() => smoothLinePath(metricPoints("assembly")));
-const spoolLinePath = computed<string>(() => smoothLinePath(metricPoints("spool")));
-const downloadAreaPath = computed<string>(() => smoothAreaPath(metricPoints("download")));
-const assemblyAreaPath = computed<string>(() => smoothAreaPath(metricPoints("assembly")));
+const downloadGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("download", speedTargetMaximum.value),
+);
+const assemblyGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("assembly", speedTargetMaximum.value),
+);
+const spoolGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("spool", spoolTargetMaximum.value),
+);
+const latestSampleAt = computed<number | null>(() => samples.value.at(-1)?.at ?? null);
+const speedTransform = computed<string>(() =>
+  chartTransform(displaySpeedMaximum.value, speedTargetMaximum.value),
+);
+const spoolTransform = computed<string>(() =>
+  chartTransform(displaySpoolMaximum.value, spoolTargetMaximum.value),
+);
 const downloadRemaining = computed<string>(() => {
   if (downloadDone.value) return task.totalBytes === 0 ? "已使用缓存" : "下载完成";
   if (task.etaSeconds === null) {
@@ -233,12 +289,11 @@ watch(
   () => task.taskId,
   () => {
     samples.value = [];
-    displaySpeedMaximum.value = speedTargetMaximum.value;
-    displaySpoolMaximum.value = spoolTargetMaximum.value;
     downloadCompletedAt.value = downloadDone.value ? Date.now() : null;
     assemblyCompletedAt.value = assemblyDone.value ? Date.now() : null;
     spoolReleasedAt.value = currentSpoolBytes.value > 0 ? null : Date.now();
     appendSample();
+    resetAxes(performance.now());
   },
   { immediate: true },
 );
@@ -264,39 +319,65 @@ watch(
   { immediate: true },
 );
 
+watch([speedTargetMaximum, spoolTargetMaximum], ([speed, spool]) => {
+  const now = performance.now();
+  speedAxis.value = retargetThroughputAxis(speedAxis.value, speed, now, !reducedMotion.value);
+  spoolAxis.value = retargetThroughputAxis(spoolAxis.value, spool, now, !reducedMotion.value);
+});
+
 watch(renderActive, (active) => {
   if (active) startRenderLoop();
   else stopRenderLoop();
 });
 
 onMounted(() => {
+  motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  reducedMotion.value = motionQuery.matches;
+  motionQuery.addEventListener("change", handleMotionChange);
   sampleTimer = setInterval(() => {
     clockTick.value += 1;
     appendSample();
-  }, 1000);
+  }, THROUGHPUT_SAMPLE_INTERVAL_MS);
+  if (reducedMotion.value) snapAxes();
   if (renderActive.value) startRenderLoop();
 });
 
 onUnmounted(() => {
   if (sampleTimer !== null) clearInterval(sampleTimer);
+  if (motionQuery !== null) motionQuery.removeEventListener("change", handleMotionChange);
   stopRenderLoop();
 });
 
 function appendSample(): void {
   const at = performance.now();
-  const next: ThroughputSample = {
+  samples.value = appendThroughputSample(samples.value, {
     at,
     download: currentDownloadSpeed.value,
     assembly: currentAssemblySpeed.value,
     spool: currentSpoolBytes.value,
-  };
-  const cutoff = at - windowMs - 2000;
-  const retained = samples.value.filter((sample) => sample.at >= cutoff);
-  samples.value = [...retained.slice(-(sampleLimit - 1)), next];
+  });
+  frameNow.value = at;
+}
+
+function chartGeometry(metric: SampleMetric, maximum: number): ThroughputPaths {
+  return throughputPaths(
+    throughputCurveSegments(samples.value, (sample) => sample[metric], maximum),
+  );
+}
+
+// 最新采样延后一个间隔进入右边界；曲线按纵轴上限归一化，帧间只更新平移与缩放，采样更新时才重算路径。
+function chartTransform(display: number, target: number): string {
+  const factor = target > 0 && display > 0 ? target / display : 1;
+  const latest = latestSampleAt.value;
+  const offset = latest === null ? 0 : latest + THROUGHPUT_SAMPLE_INTERVAL_MS - frameNow.value;
+  const elapsed = Math.min(THROUGHPUT_SAMPLE_INTERVAL_MS, Math.max(0, offset));
+  const translateX = (elapsed / THROUGHPUT_WINDOW_MS) * chartWidth;
+  const translateY = chartBottom * (1 - factor);
+  return `matrix(1 0 0 ${factor.toFixed(4)} ${translateX.toFixed(2)} ${translateY.toFixed(2)})`;
 }
 
 function startRenderLoop(): void {
-  if (frameHandle !== null) return;
+  if (frameHandle !== null || reducedMotion.value) return;
   frameHandle = requestAnimationFrame(renderFrame);
 }
 
@@ -304,106 +385,33 @@ function stopRenderLoop(): void {
   if (frameHandle === null) return;
   cancelAnimationFrame(frameHandle);
   frameHandle = null;
-  lastFrameAt = null;
 }
 
 function renderFrame(time: number): void {
   frameHandle = null;
-  // 帧间隔截断，页面从后台恢复时 y 轴缓动不会一帧跳变。
-  const elapsed = lastFrameAt === null ? 0 : Math.min(100, time - lastFrameAt);
-  lastFrameAt = time;
   frameNow.value = time;
-  displaySpeedMaximum.value = easeMaximum(
-    displaySpeedMaximum.value,
-    speedTargetMaximum.value,
-    elapsed,
-  );
-  displaySpoolMaximum.value = easeMaximum(
-    displaySpoolMaximum.value,
-    spoolTargetMaximum.value,
-    elapsed,
-  );
   if (renderActive.value) startRenderLoop();
 }
 
-// 放大快、缩小慢：尖峰尽快腾出空间，样本滑出窗口后缓慢回落，避免来回抖动。
-function easeMaximum(current: number, target: number, elapsedMs: number): number {
-  if (target === current || elapsedMs === 0) return current;
-  const tau = target > current ? 240 : 1200;
-  const next = current + (target - current) * (1 - Math.exp(-elapsedMs / tau));
-  return Math.abs(target - next) <= target * 0.001 ? target : next;
+function resetAxes(now: number): void {
+  speedAxis.value = createThroughputAxis(speedTargetMaximum.value, now);
+  spoolAxis.value = createThroughputAxis(spoolTargetMaximum.value, now);
 }
 
-function metricPoints(metric: SampleMetric): Array<ChartPoint> {
-  const now = frameNow.value;
-  const points = samples.value.map((sample) => samplePoint(sample, metric, now));
-  points.push(headPoint(metric));
-  return points;
+function snapAxes(): void {
+  const now = performance.now();
+  frameNow.value = now;
+  resetAxes(now);
 }
 
-function samplePoint(sample: ThroughputSample, metric: SampleMetric, now: number): ChartPoint {
-  const x = chartWidth - (now - sample.at) * pixelPerMs;
-  const maximum = metric === "spool" ? displaySpoolMaximum.value : displaySpeedMaximum.value;
-  const ratio = Math.min(1, sample[metric] / maximum);
-  return { x, y: chartHeight - ratio * chartHeight };
-}
-
-// 头部点取实时值并固定在右缘，采样点随时间向左滑动，形成连续移动的曲线。
-function headPoint(metric: SampleMetric): ChartPoint {
-  const value =
-    metric === "download"
-      ? currentDownloadSpeed.value
-      : metric === "assembly"
-        ? currentAssemblySpeed.value
-        : currentSpoolBytes.value;
-  const maximum = metric === "spool" ? displaySpoolMaximum.value : displaySpeedMaximum.value;
-  const ratio = Math.min(1, value / maximum);
-  return { x: chartWidth, y: chartHeight - ratio * chartHeight };
-}
-
-// Catmull-Rom 转三次贝塞尔，让折线成为经过每个采样点的平滑曲线。
-function smoothLinePath(points: Array<ChartPoint>): string {
-  if (points.length === 0) return "";
-  let path = `M ${formatPoint(points[0])}`;
-  for (let index = 0; index < points.length - 1; index += 1) {
-    path += ` ${curveSegment(points, index)}`;
+function handleMotionChange(event: MediaQueryListEvent): void {
+  reducedMotion.value = event.matches;
+  if (event.matches) {
+    stopRenderLoop();
+    snapAxes();
+  } else if (renderActive.value) {
+    startRenderLoop();
   }
-  return path;
-}
-
-function smoothAreaPath(points: Array<ChartPoint>): string {
-  if (points.length < 2) return "";
-  const first = points[0];
-  const last = points[points.length - 1];
-  let path = `M ${first.x.toFixed(2)} ${chartHeight} L ${formatPoint(first)}`;
-  for (let index = 0; index < points.length - 1; index += 1) {
-    path += ` ${curveSegment(points, index)}`;
-  }
-  return `${path} L ${last.x.toFixed(2)} ${chartHeight} Z`;
-}
-
-function curveSegment(points: Array<ChartPoint>, index: number): string {
-  const previous = points[Math.max(0, index - 1)];
-  const current = points[index];
-  const next = points[index + 1];
-  const after = points[Math.min(points.length - 1, index + 2)];
-  const control1: ChartPoint = {
-    x: current.x + (next.x - previous.x) / 6,
-    y: current.y + (next.y - previous.y) / 6,
-  };
-  const control2: ChartPoint = {
-    x: next.x - (after.x - current.x) / 6,
-    y: next.y - (after.y - current.y) / 6,
-  };
-  return `C ${formatPoint(control1)} ${formatPoint(control2)} ${formatPoint(next)}`;
-}
-
-function formatPoint(point: ChartPoint): string {
-  return `${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-}
-
-function chartMaximum(value: number): number {
-  return value > 0 ? 2 ** Math.ceil(Math.log2(value)) : 1;
 }
 
 function formatSpeed(bytesPerSecond: number): string {
@@ -420,7 +428,7 @@ function formatBytes(bytes: number): string {
     value /= 1024;
     unit = candidate;
   }
-  return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+  return `${Number(value.toFixed(value >= 10 ? 1 : 2))} ${unit}`;
 }
 
 function formatDuration(seconds: number): string {

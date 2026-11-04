@@ -23,7 +23,12 @@
     </div>
 
     <div class="audio-throughput-chart">
-      <svg :aria-label="chartAriaLabel" preserveAspectRatio="none" role="img" viewBox="0 0 600 120">
+      <svg
+        :aria-label="chartAriaLabel"
+        preserveAspectRatio="none"
+        role="img"
+        :viewBox="chartViewBox"
+      >
         <line
           v-for="gridY in chartGridLines"
           :key="gridY"
@@ -33,20 +38,30 @@
           :y2="gridY"
           class="audio-throughput-grid"
         />
-        <path
-          v-if="downloadChartVisible"
-          :d="downloadAreaPath"
-          class="audio-throughput-area download"
-        />
-        <path :d="assemblyAreaPath" class="audio-throughput-area assembly" />
-        <path
-          v-if="downloadChartVisible"
-          :d="downloadLinePath"
-          class="audio-throughput-line download"
-        />
-        <path :d="assemblyLinePath" class="audio-throughput-line assembly" />
-        <path v-if="deleteChartVisible" :d="deleteAreaPath" class="audio-throughput-area delete" />
-        <path v-if="deleteChartVisible" :d="deleteLinePath" class="audio-throughput-line delete" />
+        <g :transform="speedTransform">
+          <path
+            v-if="downloadChartVisible"
+            :d="downloadGeometry.area"
+            class="audio-throughput-area download"
+          />
+          <path :d="assemblyGeometry.area" class="audio-throughput-area assembly" />
+          <path
+            v-if="downloadChartVisible"
+            :d="downloadGeometry.line"
+            class="audio-throughput-line download"
+          />
+          <path :d="assemblyGeometry.line" class="audio-throughput-line assembly" />
+          <path
+            v-if="deleteChartVisible"
+            :d="deleteGeometry.area"
+            class="audio-throughput-area delete"
+          />
+          <path
+            v-if="deleteChartVisible"
+            :d="deleteGeometry.line"
+            class="audio-throughput-line delete"
+          />
+        </g>
       </svg>
       <span class="audio-throughput-scale">速度 {{ speedScaleLabel }}</span>
       <span class="audio-throughput-window">最近 60 秒</span>
@@ -56,13 +71,33 @@
 
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
+import {
+  appendThroughputSample,
+  createThroughputAxis,
+  retargetThroughputAxis,
+  THROUGHPUT_CHART_BOTTOM,
+  THROUGHPUT_CHART_HEIGHT,
+  THROUGHPUT_CHART_WIDTH,
+  THROUGHPUT_MINIMUM_SPEED_BYTES,
+  THROUGHPUT_SAMPLE_INTERVAL_MS,
+  THROUGHPUT_WINDOW_MS,
+  throughputAxisValue,
+  throughputCeiling,
+  throughputCurveSegments,
+  throughputPaths,
+} from "@utils/game/throughputChart.js";
+import type {
+  ThroughputAxis,
+  ThroughputPaths,
+  ThroughputSample,
+} from "@utils/game/throughputChart.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
 };
 
-type ThroughputSample = {
+type AudioThroughputSample = ThroughputSample & {
   download: number;
   assembly: number;
   delete: number;
@@ -71,17 +106,27 @@ type ThroughputSample = {
 type SampleMetric = "download" | "assembly" | "delete";
 
 const { task } = defineProps<Props>();
-const chartWidth = 600;
-const chartHeight = 120;
-const sampleLimit = 60;
-const chartGridLines = [0, 30, 60, 90, 120];
-const samples = ref<Array<ThroughputSample>>([]);
+const chartWidth = THROUGHPUT_CHART_WIDTH;
+const chartHeight = THROUGHPUT_CHART_HEIGHT;
+const chartBottom = THROUGHPUT_CHART_BOTTOM;
+const chartViewBox = `0 0 ${chartWidth} ${chartHeight}`;
+const chartGridLines: Array<number> = [0, 0.25, 0.5, 0.75, 1].map(
+  (ratio) => chartBottom * (1 - ratio),
+);
+const samples = ref<Array<AudioThroughputSample>>([]);
+const frameNow = ref<number>(performance.now());
+const speedAxis = ref<ThroughputAxis>(
+  createThroughputAxis(THROUGHPUT_MINIMUM_SPEED_BYTES, frameNow.value),
+);
+const reducedMotion = ref<boolean>(false);
 const previousDeleteBytes = ref<number>(task.deleteCompletedBytes);
 const deleteSpeed = ref<number>(0);
 const clockTick = ref<number>(0);
 const downloadCompletedAt = ref<number | null>(null);
 const deleteCompletedAt = ref<number | null>(null);
 let sampleTimer: ReturnType<typeof setInterval> | null = null;
+let frameHandle: number | null = null;
+let motionQuery: MediaQueryList | null = null;
 
 const downloadActive = computed<boolean>(
   () => task.state === gameEnum.package.taskState.DOWNLOADING,
@@ -135,22 +180,35 @@ const deleteFacts = computed<string>(() => {
   }
   return parts.join(" · ");
 });
-const speedSampleMaximum = computed<number>(() => {
-  return samples.value.reduce(
-    (value, sample) => Math.max(value, sample.download, sample.assembly, sample.delete),
-    0,
-  );
+const speedPeak = computed<number>(() => {
+  let value = 0;
+  for (const sample of samples.value) {
+    value = Math.max(value, sample.download, sample.assembly, sample.delete);
+  }
+  return value;
 });
-const speedChartMaximum = computed<number>(() => chartMaximum(speedSampleMaximum.value));
-const speedScaleLabel = computed<string>(() =>
-  speedSampleMaximum.value > 0 ? formatSpeed(speedChartMaximum.value) : "等待采样",
+const speedTargetMaximum = computed<number>(() =>
+  throughputCeiling(speedPeak.value, THROUGHPUT_MINIMUM_SPEED_BYTES),
 );
-const downloadLinePath = computed<string>(() => createLinePath("download"));
-const assemblyLinePath = computed<string>(() => createLinePath("assembly"));
-const downloadAreaPath = computed<string>(() => createAreaPath("download"));
-const assemblyAreaPath = computed<string>(() => createAreaPath("assembly"));
-const deleteLinePath = computed<string>(() => createLinePath("delete"));
-const deleteAreaPath = computed<string>(() => createAreaPath("delete"));
+const displaySpeedMaximum = computed<number>(() =>
+  throughputAxisValue(speedAxis.value, frameNow.value),
+);
+const speedScaleLabel = computed<string>(() =>
+  speedPeak.value > 0 ? formatSpeed(speedTargetMaximum.value) : "等待采样",
+);
+const downloadGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("download", speedTargetMaximum.value),
+);
+const assemblyGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("assembly", speedTargetMaximum.value),
+);
+const deleteGeometry = computed<ThroughputPaths>(() =>
+  chartGeometry("delete", speedTargetMaximum.value),
+);
+const latestSampleAt = computed<number | null>(() => samples.value.at(-1)?.at ?? null);
+const speedTransform = computed<string>(() =>
+  chartTransform(displaySpeedMaximum.value, speedTargetMaximum.value),
+);
 const downloadRemaining = computed<string>(() => {
   if (task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes) return "下载完成";
   return task.etaSeconds === null
@@ -189,9 +247,12 @@ watch(
   () => task.taskId,
   () => {
     samples.value = [];
+    previousDeleteBytes.value = task.deleteCompletedBytes;
+    deleteSpeed.value = 0;
     downloadCompletedAt.value = null;
     deleteCompletedAt.value = null;
     appendSample();
+    resetAxes(performance.now());
   },
   { immediate: true },
 );
@@ -206,69 +267,99 @@ watch(
   { immediate: true },
 );
 
+watch(speedTargetMaximum, (target) => {
+  speedAxis.value = retargetThroughputAxis(
+    speedAxis.value,
+    target,
+    performance.now(),
+    !reducedMotion.value,
+  );
+});
+
 onMounted(() => {
+  motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  reducedMotion.value = motionQuery.matches;
+  motionQuery.addEventListener("change", handleMotionChange);
   sampleTimer = setInterval(() => {
     clockTick.value += 1;
     appendSample();
-  }, 1000);
+  }, THROUGHPUT_SAMPLE_INTERVAL_MS);
+  if (reducedMotion.value) snapAxes();
+  startRenderLoop();
 });
 
 onUnmounted(() => {
   if (sampleTimer !== null) clearInterval(sampleTimer);
+  if (motionQuery !== null) motionQuery.removeEventListener("change", handleMotionChange);
+  stopRenderLoop();
 });
 
 function appendSample(): void {
   const currentDeleteBytes = task.deleteCompletedBytes;
   deleteSpeed.value = Math.max(0, currentDeleteBytes - previousDeleteBytes.value);
   previousDeleteBytes.value = currentDeleteBytes;
-  const next: ThroughputSample = {
+  const at = performance.now();
+  samples.value = appendThroughputSample(samples.value, {
+    at,
     download: currentDownloadSpeed.value,
     assembly: currentAssemblySpeed.value,
     delete: deleteSpeed.value,
-  };
-  samples.value = [...samples.value.slice(-(sampleLimit - 1)), next];
+  });
+  frameNow.value = at;
 }
 
-function createLinePath(metric: SampleMetric): string {
-  if (samples.value.length === 0) return "";
-  return samples.value
-    .map((sample, index) => {
-      const point = samplePoint(sample, index, metric);
-      return `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-    })
-    .join(" ");
-}
-
-function createAreaPath(metric: SampleMetric): string {
-  if (samples.value.length === 0) return "";
-  const first = samplePoint(samples.value[0], 0, metric);
-  const last = samplePoint(
-    samples.value[samples.value.length - 1],
-    samples.value.length - 1,
-    metric,
+function chartGeometry(metric: SampleMetric, maximum: number): ThroughputPaths {
+  return throughputPaths(
+    throughputCurveSegments(samples.value, (sample) => sample[metric], maximum),
   );
-  const points = samples.value
-    .map((sample, index) => {
-      const point = samplePoint(sample, index, metric);
-      return `L ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-    })
-    .join(" ");
-  return `M ${first.x.toFixed(2)} ${chartHeight} ${points} L ${last.x.toFixed(2)} ${chartHeight} Z`;
 }
 
-function samplePoint(
-  sample: ThroughputSample,
-  index: number,
-  metric: SampleMetric,
-): { x: number; y: number } {
-  const step = chartWidth / (sampleLimit - 1);
-  const x = chartWidth - (samples.value.length - 1 - index) * step;
-  const ratio = Math.min(1, sample[metric] / speedChartMaximum.value);
-  return { x, y: chartHeight - ratio * chartHeight };
+// 最新采样延后一个间隔进入右边界；曲线按纵轴上限归一化，帧间只更新平移与缩放，采样更新时才重算路径。
+function chartTransform(display: number, target: number): string {
+  const factor = target > 0 && display > 0 ? target / display : 1;
+  const latest = latestSampleAt.value;
+  const offset = latest === null ? 0 : latest + THROUGHPUT_SAMPLE_INTERVAL_MS - frameNow.value;
+  const elapsed = Math.min(THROUGHPUT_SAMPLE_INTERVAL_MS, Math.max(0, offset));
+  const translateX = (elapsed / THROUGHPUT_WINDOW_MS) * chartWidth;
+  const translateY = chartBottom * (1 - factor);
+  return `matrix(1 0 0 ${factor.toFixed(4)} ${translateX.toFixed(2)} ${translateY.toFixed(2)})`;
 }
 
-function chartMaximum(value: number): number {
-  return value > 0 ? 2 ** Math.ceil(Math.log2(value)) : 1;
+function startRenderLoop(): void {
+  if (frameHandle !== null || reducedMotion.value) return;
+  frameHandle = requestAnimationFrame(renderFrame);
+}
+
+function stopRenderLoop(): void {
+  if (frameHandle === null) return;
+  cancelAnimationFrame(frameHandle);
+  frameHandle = null;
+}
+
+function renderFrame(time: number): void {
+  frameHandle = null;
+  frameNow.value = time;
+  startRenderLoop();
+}
+
+function resetAxes(now: number): void {
+  speedAxis.value = createThroughputAxis(speedTargetMaximum.value, now);
+}
+
+function snapAxes(): void {
+  const now = performance.now();
+  frameNow.value = now;
+  resetAxes(now);
+}
+
+function handleMotionChange(event: MediaQueryListEvent): void {
+  reducedMotion.value = event.matches;
+  if (event.matches) {
+    stopRenderLoop();
+    snapAxes();
+  } else {
+    startRenderLoop();
+  }
 }
 
 function formatSpeed(bytesPerSecond: number): string {
@@ -285,7 +376,7 @@ function formatBytes(bytes: number): string {
     value /= 1024;
     unit = candidate;
   }
-  return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+  return `${Number(value.toFixed(value >= 10 ? 1 : 2))} ${unit}`;
 }
 
 function formatDuration(seconds: number): string {
