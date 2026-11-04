@@ -846,61 +846,8 @@ async fn add_install_defender_exclusions(
   let install_id = install_id.to_string();
   let plan_id = plan_id.to_string();
   tauri::async_runtime::spawn_blocking(move || {
-    let _guard = defender::lock_exclusion_mutation()?;
     let dirs = defender::resolve_install_dirs(&task_root, &install_id)?;
-    defender::print_dirs("添加 Windows Defender 排除：", &dirs);
-    let previous = defender::load_registry(&task_root, &plan_id)?;
-    let previous_owned = previous.map_or_else(Vec::new, |registry| registry.owned_paths);
-    // 在任何 Defender 变更前验证其它登记；损坏登记不能被忽略，否则可能误删共享排除。
-    defender::validate_other_registries(&task_root, &plan_id)?;
-    let paths = dirs.paths();
-
-    // 先写 pending，提权回执不完整时也保留登记，避免误删或丢失本轮所有权。
-    defender::persist_registry(
-      &task_root,
-      &plan_id,
-      &dirs,
-      &previous_owned,
-      defender::DefenderRegistryState::Pending,
-    )?;
-    let receipt = defender::add_exclusions(&paths);
-    let mut known_owned = previous_owned;
-    if receipt.is_complete() {
-      known_owned.extend(receipt.owned_present.iter().cloned());
-      // 在提升为 active 前先保存拥有路径 checkpoint；即使后续状态写入失败也不能丢账。
-      defender::persist_registry(
-        &task_root,
-        &plan_id,
-        &dirs,
-        &known_owned,
-        defender::DefenderRegistryState::Pending,
-      )?;
-    }
-    if receipt.is_success() {
-      defender::persist_registry(
-        &task_root,
-        &plan_id,
-        &dirs,
-        &known_owned,
-        defender::DefenderRegistryState::Active,
-      )?;
-      return Ok(paths);
-    }
-
-    let state = if receipt.is_complete() && !known_owned.is_empty() {
-      defender::DefenderRegistryState::CleanupRequired
-    } else {
-      defender::DefenderRegistryState::Pending
-    };
-    if let Err(persist_error) =
-      defender::persist_registry(&task_root, &plan_id, &dirs, &known_owned, state)
-    {
-      return Err(format!(
-        "{}；保存 Defender 登记失败：{persist_error}",
-        receipt.error_message("添加")
-      ));
-    }
-    Err(receipt.error_message("添加"))
+    defender::add_registered_exclusions(&task_root, &plan_id, &dirs)
   })
   .await
   .map_err(|error| format!("排除任务异常退出：{error}"))?
@@ -933,6 +880,69 @@ pub async fn game_install_defender_exclude_remove(
   })
   .await
   .map_err(|error| format!("排除清理任务异常退出：{error}"))?
+}
+
+/// 解析正式 Main 更新需要临时排除 Windows Defender 扫描的目录集合。
+///
+/// 此入口仅为 Main 更新启用排除；其它资源任务返回 `None`。
+///
+/// @since Beta v0.13.0
+#[tauri::command]
+pub async fn game_package_defender_dirs(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  plan_id: String,
+) -> Result<Option<defender::InstallDefenderDirs>, String> {
+  let task_root = game_task_root(&app_handle)?;
+  load_package_defender_dirs(&app_handle, &db_instances, &task_root, &plan_id).await
+}
+
+/// 将正式 Main 更新涉及的游戏事务、下载缓存与任务 journal 目录加入 Defender 排除。
+///
+/// @since Beta v0.13.0
+#[tauri::command]
+pub async fn game_package_defender_exclude_add(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  plan_id: String,
+) -> Result<Vec<String>, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
+  let plan = load_persisted_plan(&task_root, &plan_id)?;
+  if plan.target != PackagePlanTarget::Main {
+    return Err("当前资源计划不需要 Windows Defender 排除".to_string());
+  }
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+  let dirs =
+    defender::resolve_package_dirs(&task_root, &plan_id, Path::new(&installation.root_path))?;
+  let _reservation = manager
+    .reserve_installation_operation(&installation.id, "game-package-defender-exclude-add")?;
+  let task_root_for_worker = task_root.clone();
+  tauri::async_runtime::spawn_blocking(move || {
+    defender::add_registered_exclusions(&task_root_for_worker, &plan_id, &dirs)
+  })
+  .await
+  .map_err(|error| format!("排除任务异常退出：{error}"))?
+}
+
+/// 通过可信安装登记解析正式 Main 更新的 Defender 目录。
+///
+/// @since Beta v0.13.0
+async fn load_package_defender_dirs(
+  app_handle: &AppHandle,
+  db_instances: &DbInstances,
+  task_root: &Path,
+  plan_id: &str,
+) -> Result<Option<defender::InstallDefenderDirs>, String> {
+  let plan = load_persisted_plan(task_root, plan_id)?;
+  if plan.target != PackagePlanTarget::Main {
+    return Ok(None);
+  }
+  let pool = sqlite_pool(db_instances).await?;
+  let installation = load_trusted_installation(app_handle, &pool, &plan.installation_id).await?;
+  defender::resolve_package_dirs(task_root, plan_id, Path::new(&installation.root_path)).map(Some)
 }
 
 /// 读取尚未登记安装的任务投影。
@@ -1542,6 +1552,7 @@ pub fn game_package_verify_clear(
 }
 
 /// 按不可变计划启动可恢复资源下载任务。正式更新边下边组装；预下载只写分片缓存。
+/// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_package_start(
   app_handle: AppHandle,
@@ -1552,40 +1563,49 @@ pub async fn game_package_start(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
-  let plan = load_persisted_plan(&task_root, &plan_id)?;
-  let pool = sqlite_pool(&db_instances).await?;
-  let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
-  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
-  let client = create_http_client()?;
-  let branches = get_game_branches(&client, scheme).await?;
-  let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
-  persist_validated_plan(&task_root, &plan)?;
-  let game_root = PathBuf::from(&installation.root_path);
-  let main_apply = (plan.target == PackagePlanTarget::Main
-    && plan.source_tag.as_deref() != Some(plan.target_tag.as_str()))
-  .then(|| installation.clone());
-  let audio_apply = if plan.target == PackagePlanTarget::Audio {
-    Some(AudioApplyContext {
-      installation,
-      machine_uid: read_machine_uid(&app_handle)?,
-      registration_pool: pool,
-    })
-  } else {
-    None
-  };
-  manager
-    .start(
-      app_handle,
-      task_root,
-      plan,
-      game_root,
-      options.unwrap_or_default(),
-      false,
-      audio_apply,
-      main_apply,
-      None,
-    )
-    .await
+  let result = async {
+    let plan = load_persisted_plan(&task_root, &plan_id)?;
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    let client = create_http_client()?;
+    let branches = get_game_branches(&client, scheme).await?;
+    let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
+    persist_validated_plan(&task_root, &plan)?;
+    let game_root = PathBuf::from(&installation.root_path);
+    let main_apply = (plan.target == PackagePlanTarget::Main
+      && plan.source_tag.as_deref() != Some(plan.target_tag.as_str()))
+    .then(|| installation.clone());
+    let audio_apply = if plan.target == PackagePlanTarget::Audio {
+      Some(AudioApplyContext {
+        installation,
+        machine_uid: read_machine_uid(&app_handle)?,
+        registration_pool: pool,
+      })
+    } else {
+      None
+    };
+    manager
+      .start(
+        app_handle,
+        task_root.clone(),
+        plan,
+        game_root,
+        options.unwrap_or_default(),
+        false,
+        audio_apply,
+        main_apply,
+        None,
+      )
+      .await
+  }
+  .await;
+  if result.is_err()
+    && let Err(error) = manager.cleanup_unstarted_update_exclusions(&task_root, &plan_id)
+  {
+    log::warn!("[game-package][{plan_id}] 启动失败后的 Defender 清理未执行：{error}");
+  }
+  result
 }
 
 /// 按当前游戏盘剩余空间检查应用门槛，不依赖评估时的计划摘要。

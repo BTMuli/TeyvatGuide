@@ -1,6 +1,6 @@
 //! Windows Defender 排除目录的临时管理与提权执行。
-//! 全新安装前将目标目录、临时 spool、暂存目录、下载缓存与任务 journal
-//! 加入 Defender 白名单，安装结束后自动移出，避免实时防护扫描造成磁盘 I/O 停滞。
+//! 安装与正式更新前将目标目录、暂存目录、下载缓存与任务 journal
+//! 临时加入 Defender 排除，任务结束后自动移出，避免实时防护扫描造成磁盘 I/O 停滞。
 //! @since Beta v0.13.0
 
 use serde::{Deserialize, Serialize};
@@ -10,13 +10,15 @@ use std::{
   path::{Path, PathBuf},
   sync::{Mutex, MutexGuard, OnceLock},
 };
+use uuid::Uuid;
 
 const EXCLUSION_REGISTRY_DIR: &str = "defender-exclusions";
 
 mod powershell;
 pub(crate) use self::powershell::DefenderMutationReceipt;
 
-/// 全新安装需要临时排除 Windows Defender 扫描的目录集合。
+/// 安装与正式更新需要临时排除 Windows Defender 扫描的目录集合。
+/// @since Beta v0.13.0
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct InstallDefenderDirs {
@@ -115,6 +117,31 @@ pub(crate) fn resolve_install_dirs(
     target_root: normalize_windows_path(&draft.game_root),
     spool_root: path_text(&spool_root),
     staging_root: normalize_windows_path(&draft.staging_root),
+    download_root: path_text(&download_root),
+    journal_root: path_text(&journal_root),
+  })
+}
+
+/// 解析正式更新涉及的游戏事务、下载缓存与任务 journal 目录。
+///
+/// Main 更新没有安装 spool；事务根目录覆盖其边下载边组装写入的 incoming、backup 与 config。
+///
+/// @since Beta v0.13.0
+pub(crate) fn resolve_package_dirs(
+  task_root: &Path,
+  plan_id: &str,
+  game_root: &Path,
+) -> Result<InstallDefenderDirs, String> {
+  Uuid::parse_str(plan_id).map_err(|_| "资源计划 ID 无效：必须是 UUID".to_string())?;
+  let transaction_root = super::committer::transaction_root(game_root).join(plan_id);
+  let download_root = super::downloader::prepare_cache_root(task_root)?;
+  let journal_root = super::journal::journal_path(task_root, plan_id)
+    .parent()
+    .map_or_else(|| task_root.join("tasks"), Path::to_path_buf);
+  Ok(InstallDefenderDirs {
+    target_root: normalize_windows_path(&game_root.to_string_lossy()),
+    spool_root: String::new(),
+    staging_root: path_text(&transaction_root),
     download_root: path_text(&download_root),
     journal_root: path_text(&journal_root),
   })
@@ -271,6 +298,50 @@ pub(crate) fn print_paths(action: &str, paths: &[String]) {
 /// @since Beta v0.13.0
 pub(crate) fn add_exclusions(paths: &[String]) -> DefenderMutationReceipt {
   self::powershell::add_exclusions(paths)
+}
+
+/// 按目录清单登记并加入一次 Defender 排除，复用于安装与正式更新。
+///
+/// @since Beta v0.13.0
+pub(crate) fn add_registered_exclusions(
+  task_root: &Path,
+  plan_id: &str,
+  dirs: &InstallDefenderDirs,
+) -> Result<Vec<String>, String> {
+  let _guard = lock_exclusion_mutation()?;
+  print_dirs("添加 Windows Defender 排除：", dirs);
+  let previous = load_registry(task_root, plan_id)?;
+  let previous_owned = previous.map_or_else(Vec::new, |registry| registry.owned_paths);
+  // 在任何 Defender 变更前验证其它登记；损坏登记不能被忽略，否则可能误删共享排除。
+  validate_other_registries(task_root, plan_id)?;
+  let paths = dirs.paths();
+
+  // 先写 pending，提权回执不完整时也保留登记，避免误删或丢失本轮所有权。
+  persist_registry(task_root, plan_id, dirs, &previous_owned, DefenderRegistryState::Pending)?;
+  let receipt = add_exclusions(&paths);
+  let mut known_owned = previous_owned;
+  if receipt.is_complete() {
+    known_owned.extend(receipt.owned_present.iter().cloned());
+    // 在提升为 active 前先保存拥有路径 checkpoint；即使后续状态写入失败也不能丢账。
+    persist_registry(task_root, plan_id, dirs, &known_owned, DefenderRegistryState::Pending)?;
+  }
+  if receipt.is_success() {
+    persist_registry(task_root, plan_id, dirs, &known_owned, DefenderRegistryState::Active)?;
+    return Ok(paths);
+  }
+
+  let state = if receipt.is_complete() && !known_owned.is_empty() {
+    DefenderRegistryState::CleanupRequired
+  } else {
+    DefenderRegistryState::Pending
+  };
+  if let Err(persist_error) = persist_registry(task_root, plan_id, dirs, &known_owned, state) {
+    return Err(format!(
+      "{}；保存 Defender 登记失败：{persist_error}",
+      receipt.error_message("添加")
+    ));
+  }
+  Err(receipt.error_message("添加"))
 }
 
 /// 将全新安装涉及目录移出 Windows Defender 排除列表（UAC 提权）。
@@ -585,9 +656,10 @@ mod tests {
   use super::{
     DefenderRegistryState, InstallDefenderDirs, InstallDefenderRegistry,
     normalize_registry_owned_paths, remaining_owned_paths, removable_exclusion_paths,
-    retained_owned_paths, retained_registry_path_keys, validate_registry,
+    resolve_package_dirs, retained_owned_paths, retained_registry_path_keys, validate_registry,
   };
-  use std::collections::HashSet;
+  use std::{collections::HashSet, fs, path::Path};
+  use uuid::Uuid;
 
   /// 构造纯内存测试用的安装目录集合。
   ///
@@ -600,6 +672,40 @@ mod tests {
       download_root: "C:\\Cache".to_string(),
       journal_root: "C:\\Tasks".to_string(),
     }
+  }
+
+  /// 验证 Main 更新目录解析只覆盖可信计划的事务根、下载缓存与 journal。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn package_dirs_resolve_main_update_paths() {
+    let task_root = std::env::temp_dir().join(format!("teyvatguide-defender-{}", Uuid::new_v4()));
+    let game_root = task_root.join("game");
+    let plan_id = Uuid::new_v4().to_string();
+    let dirs = resolve_package_dirs(&task_root, &plan_id, &game_root).unwrap();
+    let normalized_task_root = task_root.to_string_lossy().replace('/', "\\");
+    let normalized_game_root = game_root.to_string_lossy().replace('/', "\\");
+    assert_eq!(dirs.target_root, normalized_game_root);
+    assert!(dirs.spool_root.is_empty());
+    assert_eq!(
+      dirs.staging_root,
+      format!("{normalized_game_root}\\.teyvatguide-update\\{plan_id}")
+    );
+    assert_eq!(dirs.download_root, format!("{normalized_task_root}\\cache\\chunks"));
+    assert_eq!(dirs.journal_root, format!("{normalized_task_root}\\tasks\\{plan_id}"));
+    assert_eq!(task_root.parent(), Some(std::env::temp_dir().as_path()));
+    assert!(task_root.file_name().unwrap().to_string_lossy().starts_with("teyvatguide-defender-"));
+    let _ = fs::remove_dir_all(task_root);
+  }
+
+  /// 验证目录解析在计划 ID 不是 UUID 时 fail-closed。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn package_dirs_reject_invalid_plan_id() {
+    let error =
+      resolve_package_dirs(Path::new("C:\\Tasks"), "plan-a", Path::new("C:\\Game")).unwrap_err();
+    assert!(error.contains("资源计划 ID 无效"));
   }
 
   /// 验证旧版登记缺少新增字段时保持 legacy 且不产生拥有路径。

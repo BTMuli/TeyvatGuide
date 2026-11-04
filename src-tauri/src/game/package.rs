@@ -1014,11 +1014,14 @@ pub(crate) struct InstallContext {
   pub(crate) preserve_chunks: bool,
 }
 
+/// 安装运行互斥及正式更新的临时 Defender 排除清理责任。
+/// @since Beta v0.13.0
 pub(crate) struct TaskReservation {
   active: Arc<Mutex<ActiveTasks>>,
   installation_id: String,
   task_id: String,
   canceled: Arc<AtomicBool>,
+  defender_task_root: Option<PathBuf>,
 }
 
 pub(crate) struct TaskRecordOperation {
@@ -1055,6 +1058,7 @@ impl Drop for TaskRecordOperation {
 
 impl TaskReservation {
   /// 预留安装运行互斥。
+  /// @since Beta v0.13.0
   fn acquire(
     active: Arc<Mutex<ActiveTasks>>,
     installation_id: &str,
@@ -1082,7 +1086,17 @@ impl TaskReservation {
       installation_id: installation_id.to_string(),
       task_id: task_id.to_string(),
       canceled,
+      defender_task_root: None,
     })
+  }
+
+  /// 在释放安装互斥前清理正式更新终态拥有的临时排除。
+  /// @since Beta v0.13.0
+  fn with_defender_cleanup(mut self, task_root: &Path, target: PackagePlanTarget) -> Self {
+    if target == PackagePlanTarget::Main {
+      self.defender_task_root = Some(task_root.to_path_buf());
+    }
+    self
   }
 
   /// 返回该任务的取消标志。
@@ -1115,10 +1129,20 @@ fn release_task_reservation(
 }
 
 impl Drop for TaskReservation {
-  /// 等所有组装 worker 退出后再释放互斥，保护恢复、回滚、记录和缓存清理。
+  /// 等组装 worker 退出并完成终态排除清理后再释放互斥。
   /// @since Beta v0.13.0
   fn drop(&mut self) {
-    if !has_active_assembly_workers(&self.task_id) {
+    let cleanup_required =
+      self.defender_task_root.as_ref().is_some_and(
+        |task_root| match update_exclusions_need_cleanup(task_root, &self.task_id) {
+          Ok(required) => required,
+          Err(error) => {
+            log::warn!("[game-package][{}] 检查 Defender 清理状态失败：{error}", self.task_id);
+            false
+          }
+        },
+      );
+    if !cleanup_required && !has_active_assembly_workers(&self.task_id) {
       release_task_reservation(&self.active, &self.installation_id, &self.task_id, &self.canceled);
       return;
     }
@@ -1126,11 +1150,43 @@ impl Drop for TaskReservation {
     let installation_id = self.installation_id.clone();
     let task_id = self.task_id.clone();
     let canceled = Arc::clone(&self.canceled);
+    let defender_task_root = self.defender_task_root.take();
     tauri::async_runtime::spawn(async move {
       while !drain_assembly_workers(&task_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {}
+      if let Some(task_root) = defender_task_root {
+        let cleanup_task_id = task_id.clone();
+        if let Err(error) = tauri::async_runtime::spawn_blocking(move || {
+          if let Err(error) = cleanup_finished_update_exclusions(&task_root, &cleanup_task_id) {
+            log::warn!("[game-package][{cleanup_task_id}] 清理 Defender 排除失败：{error}");
+          }
+        })
+        .await
+        {
+          log::warn!("[game-package][{task_id}] Defender 排除清理线程异常退出：{error}");
+        }
+      }
       release_task_reservation(&active, &installation_id, &task_id, &canceled);
     });
   }
+}
+
+/// 仅清理已结束或尚未创建日志的正式更新；可恢复任务继续保留排除。
+/// @since Beta v0.13.0
+fn update_exclusions_need_cleanup(task_root: &Path, task_id: &str) -> Result<bool, String> {
+  let path = journal::journal_path(task_root, task_id);
+  if !path.try_exists().map_err(|error| format!("读取更新日志路径失败：{error}"))? {
+    return Ok(true);
+  }
+  Ok(journal::load(&path)?.state.is_history_terminal())
+}
+
+/// 核对任务日志后移除终态正式更新拥有的临时排除。
+/// @since Beta v0.13.0
+fn cleanup_finished_update_exclusions(task_root: &Path, task_id: &str) -> Result<(), String> {
+  if !update_exclusions_need_cleanup(task_root, task_id)? {
+    return Ok(());
+  }
+  defender::cleanup_install_exclusions(task_root, task_id)
 }
 
 pub(crate) struct CacheClearReservation {
@@ -1204,7 +1260,11 @@ impl GamePackageManager {
     }
     let plan = Arc::new(plan);
     let reservation =
-      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?
+        .with_defender_cleanup(&task_root, plan.target);
+    if plan.target == PackagePlanTarget::Main {
+      defender::require_registry(&task_root, &plan.plan_id)?;
+    }
     let canceled = reservation.canceled_flag();
     let mut journal = journal::load_or_create(&task_root, &plan)?;
     if let Err(error) =
@@ -1943,6 +2003,7 @@ impl GamePackageManager {
   }
 
   /// 应用已就绪的资源计划；必要时转入修复并最终同步语音包登记。
+  /// @since Beta v0.13.0
   pub(crate) fn apply(
     &self,
     app_handle: AppHandle,
@@ -1960,7 +2021,11 @@ impl GamePackageManager {
       return Err("该游戏安装正在校验完整性，请等待完成或取消后再应用更新".to_string());
     }
     let reservation =
-      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?
+        .with_defender_cleanup(&task_root, plan.target);
+    if plan.target == PackagePlanTarget::Main {
+      defender::require_registry(&task_root, &plan.plan_id)?;
+    }
     let canceled = reservation.canceled_flag();
     if is_game_running() {
       return Err("游戏仍在运行，无法应用资源更新".to_string());
@@ -2110,6 +2175,7 @@ impl GamePackageManager {
   }
 
   /// 恢复或回滚资源提交。
+  /// @since Beta v0.13.0
   pub(crate) async fn rollback_apply(
     &self,
     app_handle: AppHandle,
@@ -2122,7 +2188,8 @@ impl GamePackageManager {
   ) -> Result<PackageTaskSummary, String> {
     let active = Arc::clone(&self.active);
     tauri::async_runtime::spawn_blocking(move || {
-      let _reservation = TaskReservation::acquire(active, &plan.installation_id, &plan.plan_id)?;
+      let _reservation = TaskReservation::acquire(active, &plan.installation_id, &plan.plan_id)?
+        .with_defender_cleanup(&task_root, plan.target);
       if is_game_running() {
         return Err("游戏仍在运行，无法恢复资源提交".to_string());
       }
@@ -2232,6 +2299,23 @@ impl GamePackageManager {
     operation: &str,
   ) -> Result<TaskReservation, String> {
     TaskReservation::acquire(Arc::clone(&self.active), installation_id, operation)
+  }
+
+  /// 启动请求失败后，在安装空闲时接管未启动或终态更新的排除清理。
+  /// @since Beta v0.13.0
+  pub(crate) fn cleanup_unstarted_update_exclusions(
+    &self,
+    task_root: &Path,
+    plan_id: &str,
+  ) -> Result<(), String> {
+    let plan = load_persisted_plan(task_root, plan_id)?;
+    if plan.target != PackagePlanTarget::Main {
+      return Ok(());
+    }
+    let _reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, plan_id)?
+        .with_defender_cleanup(task_root, plan.target);
+    Ok(())
   }
 
   /// 预留游戏资源缓存清理互斥。
@@ -2620,6 +2704,7 @@ impl GamePackageManager {
   }
 
   /// 放弃仍在下载中的任务并还原相关中间状态。
+  /// @since Beta v0.13.0
   pub(crate) fn rollback_download(
     &self,
     task_root: &Path,
@@ -2629,7 +2714,8 @@ impl GamePackageManager {
     let identity = journal::load(&path)?;
     let _reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &identity.installation_id, task_id)
-        .map_err(|_| "任务仍在运行，请先请求取消并等待安全边界".to_string())?;
+        .map_err(|_| "任务仍在运行，请先请求取消并等待安全边界".to_string())?
+        .with_defender_cleanup(task_root, identity.target);
     let mut journal = journal::load(&path)?;
     if journal.state == PackageTaskState::Completed {
       return Err("资源任务已经完成".to_string());
@@ -7539,6 +7625,118 @@ mod tests {
         0,
         0,
       ))),
+    }
+  }
+
+  /// 在隔离临时目录登记没有系统拥有路径的正式更新。
+  /// @since Beta v0.13.0
+  fn update_defender_fixture(state: PackageTaskState) -> (AudioDrainFixture, TaskJournal) {
+    let fixture = AudioDrainFixture(
+      std::env::temp_dir().join(format!("teyvatguide-audio-drain-{}", Uuid::new_v4())),
+    );
+    let mut value = TaskJournal::from_switch(
+      Uuid::new_v4().to_string(),
+      "install-a".to_string(),
+      super::super::model::SchemeId::CnOfficial,
+      super::super::model::SchemeId::CnOfficial,
+      "a".repeat(64),
+      0,
+      0,
+    );
+    value.target = PackagePlanTarget::Main;
+    value.operation = "update".to_string();
+    value.state = state;
+    journal::persist(&fixture.0, &value).unwrap();
+    let dirs = defender::InstallDefenderDirs {
+      target_root: "C:\\tg-unit-game".to_string(),
+      spool_root: String::new(),
+      staging_root: String::new(),
+      download_root: "C:\\tg-unit-cache".to_string(),
+      journal_root: String::new(),
+    };
+    defender::persist_registry(
+      &fixture.0,
+      &value.plan_id,
+      &dirs,
+      &[],
+      defender::DefenderRegistryState::Active,
+    )
+    .unwrap();
+    (fixture, value)
+  }
+
+  /// 正式更新的排除必须保留到所有阻塞组装 worker 退出。
+  /// @since Beta v0.13.0
+  #[test]
+  fn update_defender_cleanup_waits_for_assembly_workers() {
+    let (fixture, value) = update_defender_fixture(PackageTaskState::Completed);
+    let manager = GamePackageManager::new();
+    let reservation =
+      TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &value.task_id)
+        .unwrap()
+        .with_defender_cleanup(&fixture.0, PackagePlanTarget::Main);
+    let (sender, receiver) = std::sync::mpsc::channel();
+    let release = AudioWorkerRelease(Some(sender));
+    let worker = spawn_assembly_worker(&value.task_id, move || {
+      receiver.recv().unwrap();
+    });
+    drop(reservation);
+    assert!(manager.is_task_running(&value.task_id, "install-a").unwrap());
+    assert!(defender::has_registry(&fixture.0, &value.plan_id));
+    assert!(
+      TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &value.task_id).is_err()
+    );
+    drop(release);
+    tauri::async_runtime::block_on(async {
+      worker.await.unwrap();
+      tokio::time::timeout(Duration::from_secs(2), manager.wait_for_task_idle(&value.task_id))
+        .await
+        .unwrap()
+        .unwrap();
+    });
+    assert!(!defender::has_registry(&fixture.0, &value.plan_id));
+  }
+
+  /// 暂停、待应用与待恢复任务继续保留排除，并同步释放运行互斥以便继续操作。
+  /// @since Beta v0.13.0
+  #[test]
+  fn update_defender_cleanup_preserves_recoverable_tasks() {
+    for state in [
+      PackageTaskState::Paused,
+      PackageTaskState::ReadyToApply,
+      PackageTaskState::RecoveryRequired,
+      PackageTaskState::RepairRequired,
+    ] {
+      let (fixture, value) = update_defender_fixture(state);
+      let manager = GamePackageManager::new();
+      let reservation =
+        TaskReservation::acquire(Arc::clone(&manager.active), "install-a", &value.task_id)
+          .unwrap()
+          .with_defender_cleanup(&fixture.0, PackagePlanTarget::Main);
+      drop(reservation);
+      assert!(!manager.is_task_running(&value.task_id, "install-a").unwrap());
+      assert!(defender::has_registry(&fixture.0, &value.plan_id));
+      assert!(!update_exclusions_need_cleanup(&fixture.0, &value.task_id).unwrap());
+    }
+  }
+
+  /// 终态和未启动计划允许清理，损坏日志不能被猜测为终态。
+  /// @since Beta v0.13.0
+  #[test]
+  fn update_defender_cleanup_requires_terminal_or_missing_journal() {
+    for state in [
+      PackageTaskState::Completed,
+      PackageTaskState::Failed,
+      PackageTaskState::Canceled,
+      PackageTaskState::Abandoned,
+    ] {
+      let (fixture, value) = update_defender_fixture(state);
+      assert!(update_exclusions_need_cleanup(&fixture.0, &value.task_id).unwrap());
+      let path = journal::journal_path(&fixture.0, &value.task_id);
+      fs::write(&path, "invalid journal").unwrap();
+      assert!(update_exclusions_need_cleanup(&fixture.0, &value.task_id).is_err());
+      fs::remove_file(&path).unwrap();
+      assert!(update_exclusions_need_cleanup(&fixture.0, &value.task_id).unwrap());
     }
   }
 

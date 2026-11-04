@@ -17,6 +17,7 @@ import {
   clearGamePackageVerify,
   cancelGameInstall,
   createGameInstallPlan,
+  ensureGamePackageDefenderExclusions,
   getGamePackageVerifyStatus,
   hasGameInstallDefenderExclusions,
   listGamePackageTasks,
@@ -433,11 +434,18 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  /**
+   * 启动游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * @since Beta v0.13.0
+   * @param plan - 已固化的资源计划
+   * @returns 启动后的任务投影
+   */
   async function startTask(
     plan: TGApp.Game.Package.PlanSummary,
   ): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(plan.installationId, true);
     try {
+      await ensureGamePackageDefenderExclusions(plan.planId);
       const task = await startGamePackageTask(plan.planId);
       mergeTask(task);
       return task;
@@ -564,9 +572,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  /**
+   * 应用已下载的游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * @since Beta v0.13.0
+   * @param taskId - 资源任务 ID
+   * @returns 应用开始后的任务投影
+   */
   async function applyTask(taskId: string): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(taskId, true);
     try {
+      await ensureGamePackageDefenderExclusions(taskId, "添加排除并应用更新");
       const task = await applyGamePackageTask(taskId);
       mergeTask(task);
       return task;
@@ -586,6 +601,13 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  /**
+   * 恢复游戏资源任务；继续动作会先完成 Defender 排除登记。
+   * @since Beta v0.13.0
+   * @param taskId - 资源任务 ID
+   * @param action - 恢复动作
+   * @returns 恢复后的任务投影
+   */
   async function recoverTask(
     taskId: string,
     action: TGApp.Game.Package.RecoveryActionEnum,
@@ -593,6 +615,9 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     setPending(taskId, true);
     setRecoveryProgress(taskId, null);
     try {
+      if (action === gameEnum.package.recoveryAction.RESUME) {
+        await ensureGamePackageDefenderExclusions(taskId, "添加排除并恢复更新");
+      }
       const task = await recoverGamePackageTask(taskId, action, (progress) => {
         setRecoveryProgress(taskId, progress);
       });

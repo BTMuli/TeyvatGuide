@@ -35,6 +35,8 @@ const gameOperationCommands = new Set<string>([
   "game_package_verify",
   "game_package_verify_cancel",
   "game_package_verify_clear",
+  "game_package_defender_dirs",
+  "game_package_defender_exclude_add",
   "game_package_start",
   "game_package_apply",
   "game_package_cancel",
@@ -458,6 +460,57 @@ export async function ensureGameInstallDefenderExclusions(
   }
 }
 
+/**
+ * 读取正式资源任务需要临时排除 Windows Defender 扫描的目录集合。
+ * @since Beta v0.13.0
+ * @param planId - 已固化的资源计划 ID
+ * @returns 需要排除的目录集合；配音包与预下载任务不需要排除时为 null
+ */
+export async function getGamePackageDefenderDirs(
+  planId: string,
+): Promise<TGApp.Game.Installation.InstallDraftDirs | null> {
+  return await invoke<TGApp.Game.Installation.InstallDraftDirs | null>(
+    "game_package_defender_dirs",
+    { planId },
+  );
+}
+
+/**
+ * 将正式资源任务涉及目录临时加入 Windows Defender 排除列表（触发 UAC 授权）。
+ * @since Beta v0.13.0
+ * @param planId - 已固化的资源计划 ID
+ * @returns 已加入白名单的目录路径列表
+ */
+export async function addGamePackageDefenderExclusions(planId: string): Promise<Array<string>> {
+  return await invoke<Array<string>>("game_package_defender_exclude_add", { planId });
+}
+
+/**
+ * 确认正式资源任务目录已加入 Windows Defender 排除。
+ * 无需排除或已有登记时直接通过；否则在确认后提权添加。
+ * @since Beta v0.13.0
+ * @param planId - 已固化的资源计划 ID
+ * @param confirmLabel - 确认按钮文案
+ */
+export async function ensureGamePackageDefenderExclusions(
+  planId: string,
+  confirmLabel = "添加排除并开始更新",
+): Promise<void> {
+  const dirs = await getGamePackageDefenderDirs(planId);
+  if (dirs === null || (await hasGameInstallDefenderExclusions(planId))) return;
+  const confirmed = await showDialog.checkF({
+    title: "添加 Windows Defender 排除",
+    text: [
+      "为避免 Defender 实时防护扫描导致更新下载与组装磁盘 I/O 停滞，开始前将临时把相关目录加入排除列表，任务完成后自动移出。",
+      "",
+      "此操作需要 UAC 管理员授权。",
+    ].join("\n"),
+    confirmLabel,
+  });
+  if (confirmed !== true) throw new Error("已取消添加 Windows Defender 排除");
+  await addGamePackageDefenderExclusions(planId);
+}
+
 export async function recoverGameInstall(
   taskId: string,
   installId: string,
@@ -608,8 +661,8 @@ export async function clearGamePackageVerify(installationId: string): Promise<vo
 }
 
 /**
- * 按不可变计划启动游戏资源下载任务；正式更新与预下载均只写入应用缓存。
- * @since Beta v0.12.0
+ * 按不可变计划启动游戏资源下载与组装任务；正式更新边下边组装到事务目录，预下载只写共享缓存。
+ * @since Beta v0.13.0
  * @param planId - 已持久化计划 ID
  * @param options - 可选并发与带宽限制
  * @returns 当前任务投影
