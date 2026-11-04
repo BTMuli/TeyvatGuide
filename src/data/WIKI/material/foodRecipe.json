@@ -9104,7 +9104,12 @@
       }
     ],
     "variants": {
-      "special": [],
+      "special": [
+        {
+          "characterId": 10000136,
+          "foodId": 132052
+        }
+      ],
       "strange": 108988,
       "normal": 108989,
       "delicious": 108990
@@ -9266,7 +9271,12 @@
       }
     ],
     "variants": {
-      "special": [],
+      "special": [
+        {
+          "characterId": 10000137,
+          "foodId": 132053
+        }
+      ],
       "strange": 132004,
       "normal": 132005,
       "delicious": 132006
@@ -9563,6 +9573,134 @@
       "strange": 132033,
       "normal": 132034,
       "delicious": 132035
+    }
+  },
+  {
+    "id": 132041,
+    "input": [
+      {
+        "id": 100064,
+        "name": "禽肉",
+        "icon": "UI_ItemIcon_100064",
+        "count": 3
+      },
+      {
+        "id": 101280,
+        "name": "雪球花",
+        "icon": "UI_ItemIcon_101280",
+        "count": 1
+      },
+      {
+        "id": 110001,
+        "name": "面粉",
+        "icon": "UI_ItemIcon_110001",
+        "count": 2
+      },
+      {
+        "id": 110004,
+        "name": "黄油",
+        "icon": "UI_ItemIcon_110004",
+        "count": 2
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132040,
+      "normal": 132041,
+      "delicious": 132042
+    }
+  },
+  {
+    "id": 132044,
+    "input": [
+      {
+        "id": 100062,
+        "name": "鸟蛋",
+        "icon": "UI_ItemIcon_100062",
+        "count": 2
+      },
+      {
+        "id": 100084,
+        "name": "鱼肉",
+        "icon": "UI_ItemIcon_100084",
+        "count": 4
+      },
+      {
+        "id": 110001,
+        "name": "面粉",
+        "icon": "UI_ItemIcon_110001",
+        "count": 2
+      },
+      {
+        "id": 110015,
+        "name": "酸奶油",
+        "icon": "UI_ItemIcon_110015",
+        "count": 1
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132043,
+      "normal": 132044,
+      "delicious": 132045
+    }
+  },
+  {
+    "id": 132047,
+    "input": [
+      {
+        "id": 100011,
+        "name": "蘑菇",
+        "icon": "UI_ItemIcon_100011",
+        "count": 2
+      },
+      {
+        "id": 100018,
+        "name": "卷心菜",
+        "icon": "UI_ItemIcon_100018",
+        "count": 3
+      },
+      {
+        "id": 100084,
+        "name": "鱼肉",
+        "icon": "UI_ItemIcon_100084",
+        "count": 3
+      },
+      {
+        "id": 110015,
+        "name": "酸奶油",
+        "icon": "UI_ItemIcon_110015",
+        "count": 2
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132046,
+      "normal": 132047,
+      "delicious": 132048
+    }
+  },
+  {
+    "id": 132050,
+    "input": [
+      {
+        "id": 100100,
+        "name": "黑麦",
+        "icon": "UI_ItemIcon_101268",
+        "count": 2
+      },
+      {
+        "id": 101285,
+        "name": "笼酸浆",
+        "icon": "UI_ItemIcon_101285",
+        "count": 3
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132049,
+      "normal": 132050,
+      "delicious": 132051
     }
   }
 ]

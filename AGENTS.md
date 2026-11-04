@@ -29,7 +29,8 @@
 - Tauri 桌面 UI：除非用户明确要求截图识别，否则不主动使用 connector 调试桥；
   需要调用时遵循 `.agents/skills/tauri-connector/SKILL.md`，并优先复用已在运行的 debug 实例。
 - Git 提交、拆分规划、提交信息或就绪审查：使用 `.agents/skills/git-workflow/SKILL.md`，并遵循
-  `.agents/rules/git-commit-rules.md`；只有明确要求创建提交才可暂存和提交。
+  `.agents/rules/git-commit-rules.md`；只有明确要求创建提交才可暂存和提交。暂存区已有无关内容时按
+  该规则的「隔离提交」执行（`git commit --only`），不要提交整份暂存区。
 
 ## 分享截图
 

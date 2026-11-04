@@ -3,8 +3,6 @@
  * @since Beta v0.13.0
  */
 
-import showDialog from "@comp/func/dialog.js";
-import showSnackbar from "@comp/func/snackbar.js";
 import { Channel, invoke as invokeTauriCommand } from "@tauri-apps/api/core";
 
 import TGLogger from "../system/TGLogger.js";
@@ -24,8 +22,6 @@ const gameOperationCommands = new Set<string>([
   "game_install_draft_cancel",
   "game_install_plan",
   "game_install_start",
-  "game_install_defender_exclude_add",
-  "game_install_defender_exclude_remove",
   "game_install_recover",
   "game_install_cancel",
   "game_install_pause",
@@ -35,8 +31,6 @@ const gameOperationCommands = new Set<string>([
   "game_package_verify",
   "game_package_verify_cancel",
   "game_package_verify_clear",
-  "game_package_defender_dirs",
-  "game_package_defender_exclude_add",
   "game_package_start",
   "game_package_apply",
   "game_package_cancel",
@@ -329,16 +323,19 @@ export async function listGameInstallDrafts(): Promise<
 
 /**
  * 取消只完成评估、尚未启动任务的安装草稿。
- * @since Beta v0.12.0
+ * @since Beta v0.13.0
  * @param installId - 安装身份
- * @returns 已取消的草稿摘要
+ * @returns 已取消的草稿摘要；草稿已被取消清理（如安装任务收尾）时为 null
  */
 export async function cancelGameInstallDraft(
   installId: string,
-): Promise<TGApp.Game.Installation.InstallDraftSummary> {
-  return await invoke<TGApp.Game.Installation.InstallDraftSummary>("game_install_draft_cancel", {
-    installId,
-  });
+): Promise<TGApp.Game.Installation.InstallDraftSummary | null> {
+  return await invoke<TGApp.Game.Installation.InstallDraftSummary | null>(
+    "game_install_draft_cancel",
+    {
+      installId,
+    },
+  );
 }
 
 export async function createGameInstallPlan(
@@ -364,151 +361,6 @@ export async function startGameInstall(
     planId,
     options,
   });
-}
-
-/**
- * 读取全新安装需要临时排除 Windows Defender 扫描的目录集合。
- * @since Beta v0.12.0
- * @param installId - 安装草案身份
- * @returns 目标目录、临时 spool、暂存目录、下载缓存与任务日志路径
- */
-export async function getGameInstallDraftDirs(
-  installId: string,
-): Promise<TGApp.Game.Installation.InstallDraftDirs> {
-  return await invoke<TGApp.Game.Installation.InstallDraftDirs>("game_install_draft_dirs", {
-    installId,
-  });
-}
-
-/**
- * 将全新安装涉及目录临时加入 Windows Defender 排除列表（触发 UAC 授权）。
- * @since Beta v0.12.0
- * @param installId - 安装草案身份
- * @param planId - 已固化的安装计划 ID
- * @returns 已加入白名单的目录路径列表
- */
-export async function addGameInstallDefenderExclusions(
-  installId: string,
-  planId: string,
-): Promise<Array<string>> {
-  return await invoke<Array<string>>("game_install_defender_exclude_add", {
-    installId,
-    planId,
-  });
-}
-
-/**
- * 查询指定安装计划是否已成功登记 Defender 排除。
- * @since Beta v0.12.0
- * @param planId - 已固化的安装计划 ID
- * @returns 已登记时为 true
- */
-export async function hasGameInstallDefenderExclusions(planId: string): Promise<boolean> {
-  return await invoke<boolean>("game_install_defender_exclude_status", { planId });
-}
-
-/**
- * 将全新安装临时加入白名单的目录移出（触发 UAC 授权）。
- * @since Beta v0.12.0
- * @param planId - 已固化的安装计划 ID
- */
-export async function removeGameInstallDefenderExclusions(planId: string): Promise<void> {
-  await invoke("game_install_defender_exclude_remove", { planId });
-}
-
-/**
- * 确认全新安装目录已加入 Windows Defender 排除。
- * 已有登记则直接通过；否则弹出确认并在已有 planId 时提权添加。
- * 草稿尚无 planId 时只完成确认，由调用方在计划固化后补登记。
- * @since Beta v0.12.0
- * @param installId - 安装草案身份
- * @param planId - 已固化的安装计划 ID；评估中草稿可为 null
- * @param confirmLabel - 确认按钮文案
- * @returns 已就绪或用户确认后为 true；取消或添加失败为 false
- */
-export async function ensureGameInstallDefenderExclusions(
-  installId: string,
-  planId: string | null,
-  confirmLabel = "添加排除并开始安装",
-): Promise<boolean> {
-  if (planId !== null && (await hasGameInstallDefenderExclusions(planId))) {
-    return true;
-  }
-  try {
-    await getGameInstallDraftDirs(installId);
-  } catch (error) {
-    showSnackbar.error(`读取安装目录失败：${error}`);
-    return false;
-  }
-  const confirmed = await showDialog.checkF({
-    title: "添加 Windows Defender 排除",
-    text: [
-      "为避免 Defender 实时防护扫描导致安装磁盘 I/O 停滞，开始安装前将临时把相关目录加入排除列表，安装完成后自动移出。",
-      "",
-      "此操作需要 UAC 管理员授权。",
-    ].join("\n"),
-    confirmLabel,
-  });
-  if (confirmed !== true) return false;
-  if (planId === null) return true;
-  try {
-    await addGameInstallDefenderExclusions(installId, planId);
-    return true;
-  } catch (error) {
-    showSnackbar.error(`添加 Defender 排除失败：${error}`);
-    return false;
-  }
-}
-
-/**
- * 读取正式资源任务需要临时排除 Windows Defender 扫描的目录集合。
- * @since Beta v0.13.0
- * @param planId - 已固化的资源计划 ID
- * @returns 需要排除的目录集合；配音包与预下载任务不需要排除时为 null
- */
-export async function getGamePackageDefenderDirs(
-  planId: string,
-): Promise<TGApp.Game.Installation.InstallDraftDirs | null> {
-  return await invoke<TGApp.Game.Installation.InstallDraftDirs | null>(
-    "game_package_defender_dirs",
-    { planId },
-  );
-}
-
-/**
- * 将正式资源任务涉及目录临时加入 Windows Defender 排除列表（触发 UAC 授权）。
- * @since Beta v0.13.0
- * @param planId - 已固化的资源计划 ID
- * @returns 已加入白名单的目录路径列表
- */
-export async function addGamePackageDefenderExclusions(planId: string): Promise<Array<string>> {
-  return await invoke<Array<string>>("game_package_defender_exclude_add", { planId });
-}
-
-/**
- * 确认正式资源任务目录已加入 Windows Defender 排除。
- * 无需排除或已有登记时直接通过；否则在确认后提权添加。
- * @since Beta v0.13.0
- * @param planId - 已固化的资源计划 ID
- * @param confirmLabel - 确认按钮文案
- */
-export async function ensureGamePackageDefenderExclusions(
-  planId: string,
-  confirmLabel = "添加排除并开始更新",
-): Promise<void> {
-  const dirs = await getGamePackageDefenderDirs(planId);
-  if (dirs === null || (await hasGameInstallDefenderExclusions(planId))) return;
-  const confirmed = await showDialog.checkF({
-    title: "添加 Windows Defender 排除",
-    text: [
-      "为避免 Defender 实时防护扫描导致更新下载与组装磁盘 I/O 停滞，开始前将临时把相关目录加入排除列表，任务完成后自动移出。",
-      "",
-      "此操作需要 UAC 管理员授权。",
-    ].join("\n"),
-    confirmLabel,
-  });
-  if (confirmed !== true) throw new Error("已取消添加 Windows Defender 排除");
-  await addGamePackageDefenderExclusions(planId);
 }
 
 export async function recoverGameInstall(

@@ -2,13 +2,18 @@
 <template>
   <div class="tp-vod-box">
     <div
+      v-if="!isPreview && highestResolution"
       :id="`tp-vod-${props.data.insert.vod.id}`"
       class="tp-vod-container"
       data-html2canvas-ignore
     ></div>
-    <div class="tp-vod-share">
-      <img v-if="coverLocal" :src="coverLocal" alt="cover" class="tp-vod-cover" />
-      <v-progress-circular v-else color="blue" indeterminate size="25" />
+    <div
+      :class="{ 'is-preview': isPreview, 'is-unavailable': !highestResolution }"
+      class="tp-vod-share"
+    >
+      <img v-if="coverSource" :src="coverSource" alt="cover" class="tp-vod-cover" />
+      <v-progress-circular v-else-if="highestResolution" color="blue" indeterminate size="25" />
+      <span v-else class="tp-vod-fallback">视频暂不可播放</span>
       <img alt="icon" class="tp-vod-icon" src="/UI/post/video_play.svg" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
@@ -31,46 +36,51 @@ import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { saveBufferFile, saveImgBlob } from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
+import {
+  getPostVodResolutions,
+  pickPostVodResolution,
+  type PostVodResolution,
+} from "@utils/bbs/postVod.js";
 import Artplayer, { type Option } from "artplayer";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
+import { usePostPreview } from "@hooks/usePostPreview.js";
+
+/** 帖子视频组件数据类型。 @since Beta v0.13.0 */
 type TpVod = {
   insert: {
     vod: {
       id: string;
       duration: number;
       cover?: string;
-      resolutions: Array<{
-        url: string;
-        definition: "480P" | "720P" | "1080P" | "2K"; // 待补充
-        height: number;
-        width: number;
-        bitrate: number;
-        codec: string;
-        size: number;
-        format: "MP4"; // 待补充
-        label: "480P" | "720P" | "1080P" | "2K"; // 待补充
-      }>;
+      resolutions?: unknown;
       view_num?: number;
-      transcode_status: number;
-      review_status: number;
     };
   };
 };
 type TpVodProps = { data: TpVod };
 const WG_COVER: Readonly<string> = "https://upload-bbs.mihoyo.com/weigui.png";
+const DEFAULT_VOD_ASPECT_RATIO: Readonly<number> = 16 / 9;
 
 const appStore = useAppStore();
 const props = defineProps<TpVodProps>();
+const isPreview = usePostPreview();
 
 const { postViewWide } = storeToRefs(appStore);
 
 const coverLocal = ref<string>();
 const coverLink = ref<string>(getCoverLink());
-const vodAspectRatio = ref<number>(16 / 9);
+const vodAspectRatio = ref<number>(DEFAULT_VOD_ASPECT_RATIO);
 const coverBuffer = shallowRef<ArrayBuffer | null>(null);
 const container = shallowRef<Artplayer | null>(null);
+const resolutions = computed<Array<PostVodResolution>>(() =>
+  getPostVodResolutions(props.data.insert.vod.resolutions),
+);
+const highestResolution = computed<PostVodResolution | undefined>(() =>
+  pickPostVodResolution(resolutions.value),
+);
+const coverSource = computed<string>(() => (isPreview ? coverLink.value : (coverLocal.value ?? "")));
 
 watch(
   () => postViewWide.value,
@@ -80,26 +90,23 @@ watch(
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
 onMounted(async () => {
-  const resolutions = props.data.insert.vod.resolutions;
-  const highestResolution = resolutions.reduce((prev, curr) =>
-    prev.size > curr.size ? prev : curr,
-  );
   vodAspectRatio.value = calcAspectRatio();
   coverLink.value = getCoverLink();
+  if (isPreview || highestResolution.value === undefined) return;
   coverLocal.value = await saveImgBlob(coverLink.value);
   const option: Option = {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
-    url: highestResolution.url,
+    url: highestResolution.value.url,
     poster: coverLocal.value ?? "",
-    type: highestResolution.format,
+    type: highestResolution.value.format,
     playbackRate: true,
     aspectRatio: false,
     setting: true,
     hotkey: true,
     pip: true,
-    quality: resolutions.map((resolution) => ({
-      default: resolution.label == highestResolution.label,
+    quality: resolutions.value.map((resolution) => ({
+      default: resolution.label === highestResolution.value?.label,
       html: resolution.label,
       url: resolution.url,
     })),
@@ -178,12 +185,10 @@ async function loadCoverBuffer(): Promise<void> {
 }
 
 function calcAspectRatio(): number {
-  const resolutions = props.data.insert.vod.resolutions;
-  const highestResolution = resolutions.reduce((prev, curr) =>
-    prev.size > curr.size ? prev : curr,
-  );
-  const width = highestResolution.width;
-  const height = highestResolution.height;
+  const resolution = highestResolution.value;
+  if (resolution === undefined) return DEFAULT_VOD_ASPECT_RATIO;
+  const width = resolution.width;
+  const height = resolution.height;
   if (!postViewWide.value) return width / height;
   if (width > height) return width / height;
   return height / width;
@@ -227,12 +232,22 @@ onUnmounted(() => {
   justify-content: center;
   border-radius: 8px;
   aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
+
+  &.is-preview,
+  &.is-unavailable {
+    z-index: 1;
+  }
 }
 
 .tp-vod-cover {
   position: absolute;
   max-width: 100%;
   object-fit: cover;
+}
+
+.tp-vod-fallback {
+  color: var(--box-text-4);
+  font-size: 14px;
 }
 
 .tp-vod-icon {

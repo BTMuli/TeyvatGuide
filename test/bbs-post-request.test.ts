@@ -350,6 +350,16 @@ describe("postEditReq mutation requests", () => {
     );
   });
 
+  it("defaults a new post AI declaration to unset when settings omit it", async () => {
+    const settings = { ...getPostEditSettings(source), cover: "" };
+    Reflect.deleteProperty(settings, "userAiContentChoice");
+
+    await expect(postEditReq.create(settings, cookie)).resolves.toEqual(successResponse);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.user_ai_content_choice).toBe(
+      "USER_AI_CONTENT_CHOICE_UNKNOWN",
+    );
+  });
+
   it("strips vote URLs from the structured payload, including nested folds", async () => {
     const title = JSON.stringify([{ insert: "标题" }, { insert: "\n" }]);
     const content = JSON.stringify([

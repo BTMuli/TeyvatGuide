@@ -13,7 +13,6 @@ const mocks = vi.hoisted(() => ({
   startTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
   applyTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
   recoverTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
-  ensureDefender: vi.fn<(planId: string, confirmLabel?: string) => Promise<void>>(),
   listen:
     vi.fn<
       (name: string, callback: EventCallback<TGApp.Game.Package.TaskSummary>) => Promise<UnlistenFn>
@@ -26,7 +25,6 @@ vi.mock("@utils/game/TGGameLauncher.js", () => ({
   startGamePackageTask: mocks.startTask,
   applyGamePackageTask: mocks.applyTask,
   recoverGamePackageTask: mocks.recoverTask,
-  ensureGamePackageDefenderExclusions: mocks.ensureDefender,
 }));
 vi.mock("@tauri-apps/api/event", () => ({
   listen: mocks.listen,
@@ -115,8 +113,6 @@ beforeEach(async () => {
   mocks.startTask.mockReset();
   mocks.applyTask.mockReset();
   mocks.recoverTask.mockReset();
-  mocks.ensureDefender.mockReset();
-  mocks.ensureDefender.mockResolvedValue(undefined);
   mocks.listen.mockReset();
   mocks.listen.mockImplementation(async (name, callback) => {
     mocks.listeners.set(name, callback);
@@ -129,99 +125,6 @@ beforeEach(async () => {
   setActivePinia(pinia);
   store = useGameLauncherStore();
   await store.startListening();
-});
-
-/**
- * 构造正式更新的可执行计划摘要。
- * @since Beta v0.13.0
- */
-function createPlan(): TGApp.Game.Package.PlanSummary {
-  return {
-    planId: "task-a",
-    installationId: "install-a",
-    target: "main",
-    sourceTag: "1.0.0",
-    targetTag: "2.0.0",
-    manifestDigest: "manifest",
-    strategy: "manifest_diff",
-    downloadBytes: 100,
-    installBytes: 100,
-    deleteBytes: 0,
-    cacheHitBytes: 0,
-    requiredFreeBytes: 200,
-    availableFreeBytes: 1000,
-    hasSufficientSpace: true,
-    cacheHasSufficientSpace: true,
-    installHasSufficientSpace: true,
-    cacheRequiredFreeBytes: 100,
-    installRequiredFreeBytes: 100,
-    cacheAvailableFreeBytes: 1000,
-    installAvailableFreeBytes: 1000,
-    cacheStorageAvailableFreeBytes: 1000,
-    sameVolume: true,
-    downloadCount: 1,
-    addCount: 1,
-    modifyCount: 0,
-    deleteCount: 0,
-    sourceAudioLanguages: ["zh-cn"],
-    targetAudioLanguages: ["zh-cn"],
-  };
-}
-
-describe("更新 Defender 排除前置检查", () => {
-  it.each(<const>["start", "apply", "resume"])("%s 等待排除登记完成后才执行", async (action) => {
-    let allowDefender: () => void = () => {};
-    mocks.ensureDefender.mockReturnValue(new Promise<void>((resolve) => (allowDefender = resolve)));
-    mocks.startTask.mockResolvedValue(createTask());
-    mocks.applyTask.mockResolvedValue(createTask());
-    mocks.recoverTask.mockResolvedValue(createTask());
-
-    const pending =
-      action === "start"
-        ? store.startTask(createPlan())
-        : action === "apply"
-          ? store.applyTask("task-a")
-          : store.recoverTask("task-a", "resume");
-    await Promise.resolve();
-    expect(mocks.ensureDefender.mock.calls[0]?.[0]).toBe("task-a");
-    expect(mocks.startTask).not.toHaveBeenCalled();
-    expect(mocks.applyTask).not.toHaveBeenCalled();
-    expect(mocks.recoverTask).not.toHaveBeenCalled();
-    allowDefender();
-    await pending;
-    const operation =
-      action === "start"
-        ? mocks.startTask
-        : action === "apply"
-          ? mocks.applyTask
-          : mocks.recoverTask;
-    expect(operation).toHaveBeenCalledOnce();
-  });
-
-  it.each(<const>["start", "apply", "resume"])(
-    "%s 排除未就绪时阻止实际任务并释放忙碌状态",
-    async (action) => {
-      mocks.ensureDefender.mockRejectedValue(new Error("UAC 已取消"));
-      const pending =
-        action === "start"
-          ? store.startTask(createPlan())
-          : action === "apply"
-            ? store.applyTask("task-a")
-            : store.recoverTask("task-a", "resume");
-      await expect(pending).rejects.toThrow("UAC 已取消");
-      expect(mocks.startTask).not.toHaveBeenCalled();
-      expect(mocks.applyTask).not.toHaveBeenCalled();
-      expect(mocks.recoverTask).not.toHaveBeenCalled();
-      expect(Object.values(store.pendingActions)).not.toContain(true);
-    },
-  );
-
-  it("回滚不要求重新添加排除", async () => {
-    mocks.recoverTask.mockResolvedValue(createTask({ state: "abandoned" }));
-    await store.recoverTask("task-a", "rollback");
-    expect(mocks.ensureDefender).not.toHaveBeenCalled();
-    expect(mocks.recoverTask).toHaveBeenCalledOnce();
-  });
 });
 
 afterEach(() => {
@@ -313,6 +216,103 @@ describe("游戏任务状态对账", () => {
   it("仍会自动隐藏监听期间完成的任务", () => {
     emitTask(createTask({ state: "completed" }));
     vi.advanceTimersByTime(5000);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("隐藏已取消的全新安装任务投影", () => {
+    emitTask(createTask({ target: "install", state: "canceled" }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后移除已有任务投影", () => {
+    emitTask(createTask({ target: "install" }));
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it.each([false, true])("取消安装后拒绝迟到快照（进度通道：%s）", (progress) => {
+    emitTask(createTask({ target: "install", state: "canceled", revision: 3 }));
+    emitTask(createTask({ target: "install", revision: 2 }), progress);
+    emitTask(createTask({ target: "install", revision: 3 }), progress);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后拒绝取消前发出的列表响应", async () => {
+    const oldTask = createTask({ target: "install" });
+    emitTask(oldTask);
+    let resolveList: (tasks: Array<TGApp.Game.Package.TaskSummary>) => void = () => {};
+    mocks.listTasks.mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      }),
+    );
+    const hydration = store.hydrateTasks();
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    resolveList([oldTask]);
+    await hydration;
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("进度通道收到取消安装时移除已有投影并拒绝旧进度", () => {
+    emitTask(createTask({ target: "install" }));
+    emitTask(createTask({ target: "install", state: "canceled", revision: 3 }), true);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+    emitTask(createTask({ target: "install", revision: 2 }), true);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("列表对账发现取消安装后拒绝旧事件", async () => {
+    emitTask(createTask({ target: "install" }));
+    mocks.listTasks.mockResolvedValue([
+      createTask({ target: "install", state: "canceled", revision: 3 }),
+    ]);
+    await store.hydrateTasks();
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+    emitTask(createTask({ target: "install", revision: 2 }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("重新监听后仍拒绝已取消安装的旧快照", async () => {
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    store.stopListening();
+    await store.startListening();
+    emitTask(createTask({ target: "install" }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后允许同一安装的新任务并保留更早的待恢复任务", async () => {
+    const canceled = createTask({ target: "install", state: "canceled", revision: 3 });
+    emitTask(canceled);
+    mocks.listTasks.mockResolvedValue([
+      canceled,
+      createTask({ taskId: "older-task", state: "paused", updatedAt: "2026-11-01T00:00:00Z" }),
+    ]);
+    await store.hydrateTasks();
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("older-task");
+    emitTask(createTask({ taskId: "new-task", target: "install", revision: 0 }));
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+    emitTask(createTask({ target: "install", revision: 2 }), true);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+    emitTask(canceled);
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+  });
+
+  it("忽略进度通道中已取消的全新安装任务", () => {
+    emitTask(createTask({ target: "install", state: "canceled" }), true);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("保留已取消的更新任务以便安全恢复", () => {
+    emitTask(createTask({ state: "canceled" }));
+    expect(store.tasksByInstallation["install-a"]?.state).toBe("canceled");
+  });
+
+  it("对账时跳过已取消的全新安装任务", async () => {
+    mocks.listTasks.mockResolvedValue([createTask({ target: "install", state: "canceled" })]);
+    await store.hydrateTasks();
     expect(store.tasksByInstallation["install-a"]).toBeUndefined();
   });
 

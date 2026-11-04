@@ -27,7 +27,8 @@ const maxSubjectLength: Readonly<number> = 30;
 const maxContentLength: Readonly<number> = 30000;
 const maxImageCount: Readonly<number> = 50;
 const maxMentionCount: Readonly<number> = 100;
-const defaultUserAiContentChoice: Readonly<string> = "USER_AI_CONTENT_CHOICE_NOT_AI";
+// 未主动声明时保持「未设置」，不替用户声明「不含 AI 生成内容」。
+const defaultUserAiContentChoice: Readonly<string> = "USER_AI_CONTENT_CHOICE_UNKNOWN";
 const collectionViewTypes: ReadonlySet<number> = new Set([
   0,
   ...Object.values(bbsEnum.post.viewType),

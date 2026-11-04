@@ -22,14 +22,23 @@
           <div v-if="titleLevelItems.length > 0" class="tur-ws-title-offerings">
             <div
               v-for="item in titleLevelItems"
-              :key="`${item.name}-${item.level}`"
+              :key="`${item.name}-${item.icon}`"
               :aria-label="item.name"
               :class="{ 'tur-ws-meta-offering--frosted': item.withBackdrop }"
               :title="item.name"
               class="tur-ws-title-offering"
             >
-              <TMiImg :alt="item.name" :ori="true" :src="item.icon" class="tur-ws-meta-icon" />
-              <strong>{{ item.level }}级</strong>
+              <div class="tur-ws-offering-icon">
+                <TMiImg :alt="item.name" :ori="true" :src="item.icon" class="tur-ws-meta-icon" />
+                <div v-if="item.locked" class="tur-ws-offering-lock">
+                  <v-icon aria-hidden="true" color="var(--tgc-od-white)" size="10px">
+                    mdi-lock
+                  </v-icon>
+                </div>
+              </div>
+              <strong :class="{ 'tur-ws-offering-locked': item.locked }">
+                {{ getOfferingLevelLabel(item) }}
+              </strong>
             </div>
           </div>
         </div>
@@ -56,14 +65,23 @@
           <div v-if="cardLevelItems.length > 0" class="tur-ws-meta-offerings">
             <div
               v-for="item in cardLevelItems"
-              :key="`${item.name}-${item.level}`"
+              :key="`${item.name}-${item.icon}`"
               :aria-label="item.name"
               :class="{ 'tur-ws-meta-offering--frosted': item.withBackdrop }"
               :title="item.name"
               class="tur-ws-meta-offering"
             >
-              <TMiImg :alt="item.name" :ori="true" :src="item.icon" class="tur-ws-meta-icon" />
-              <strong>{{ item.level }}级</strong>
+              <div class="tur-ws-offering-icon">
+                <TMiImg :alt="item.name" :ori="true" :src="item.icon" class="tur-ws-meta-icon" />
+                <div v-if="item.locked" class="tur-ws-offering-lock">
+                  <v-icon aria-hidden="true" color="var(--tgc-od-white)" size="10px">
+                    mdi-lock
+                  </v-icon>
+                </div>
+              </div>
+              <strong :class="{ 'tur-ws-offering-locked': item.locked }">
+                {{ getOfferingLevelLabel(item) }}
+              </strong>
             </div>
           </div>
         </div>
@@ -102,15 +120,22 @@
         <div class="tur-ws-progress-label">
           <div class="tur-ws-progress-label-main">
             <span>{{ item.name }}探索度</span>
-            <span v-if="item.offering !== undefined" class="tur-ws-extra-level">
-              <TMiImg
-                :alt="item.offering.name"
-                :ori="true"
-                :src="item.offering.icon"
-                class="tur-ws-extra-offering-icon"
-              />
-              <span>{{ item.offering.name }}: {{ item.offering.level }}级</span>
-            </span>
+            <div v-if="item.offering !== undefined" class="tur-ws-extra-level">
+              <div class="tur-ws-offering-icon">
+                <TMiImg
+                  :alt="item.offering.name"
+                  :ori="true"
+                  :src="item.offering.icon"
+                  class="tur-ws-extra-offering-icon"
+                />
+                <div v-if="item.offering.locked" class="tur-ws-offering-lock">
+                  <v-icon aria-hidden="true" color="var(--tgc-od-white)" size="10px">
+                    mdi-lock
+                  </v-icon>
+                </div>
+              </div>
+              <span>{{ item.offering.name }}: {{ getOfferingLevelLabel(item.offering) }}</span>
+            </div>
           </div>
           <strong>{{ formatExploration(item.explorationPercentage) }}%</strong>
         </div>
@@ -130,6 +155,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
+import gameEnum from "@enum/game.js";
 import TGShare, { type ShareProgress } from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { computed, useTemplateRef } from "vue";
@@ -144,10 +170,14 @@ type TurWorldSubProps = {
   version?: string;
 };
 
-type TurWorldCardLevelItem = {
+type TurWorldOfferingLevel = {
   name: string;
   icon: string;
   level: number;
+  locked: boolean;
+};
+
+type TurWorldCardLevelItem = TurWorldOfferingLevel & {
   withBackdrop: boolean;
 };
 
@@ -158,7 +188,7 @@ type TurWorldExtraExplorationConfig = {
 
 type TurWorldExtraExploration = TurWorldExtraExplorationConfig & {
   explorationPercentage: number;
-  offering?: TGApp.Game.Record.WorldOffering;
+  offering?: TurWorldOfferingLevel;
 };
 
 const EXTRA_EXPLORATION_CONFIG: Readonly<Record<string, Array<TurWorldExtraExplorationConfig>>> = {
@@ -201,9 +231,7 @@ const incompleteAreaItems = computed<Array<TGApp.Game.Record.AreaExploration>>((
 const titleLevelItems = computed<Array<TurWorldCardLevelItem>>(() => {
   if (!TITLE_OFFERING_REGIONS.has(world.name)) return [];
   return world.offerings.map((offering) => ({
-    name: offering.name,
-    icon: offering.icon,
-    level: offering.level,
+    ...toOfferingLevel(offering),
     withBackdrop: false,
   }));
 });
@@ -212,9 +240,7 @@ const cardLevelItems = computed<Array<TurWorldCardLevelItem>>(() => {
   if (!TITLE_OFFERING_REGIONS.has(world.name)) {
     items.push(
       ...world.offerings.map((offering) => ({
-        name: offering.name,
-        icon: offering.icon,
-        level: offering.level,
+        ...toOfferingLevel(offering),
         withBackdrop: ["至冬", "挪德卡莱"].includes(world.name),
       })),
     );
@@ -225,6 +251,7 @@ const cardLevelItems = computed<Array<TurWorldCardLevelItem>>(() => {
         name: tribe.name,
         icon: tribe.icon || tribe.image,
         level: tribe.level,
+        locked: false,
         withBackdrop: true,
       })),
     );
@@ -254,7 +281,7 @@ const extraExplorationItems = computed<Array<TurWorldExtraExploration>>(() => {
       {
         ...config,
         explorationPercentage,
-        offering,
+        offering: offering === undefined ? undefined : toOfferingLevel(offering),
       },
     ];
   });
@@ -262,6 +289,19 @@ const extraExplorationItems = computed<Array<TurWorldExtraExploration>>(() => {
 
 function formatExploration(value: number): number {
   return Math.min(Math.max(value / 10, 0), 100);
+}
+
+function toOfferingLevel(offering: TGApp.Game.Record.WorldOffering): TurWorldOfferingLevel {
+  return {
+    name: offering.name,
+    icon: offering.icon,
+    level: offering.level,
+    locked: offering.open_state === gameEnum.record.worldOfferingOpenState.LOCKED,
+  };
+}
+
+function getOfferingLevelLabel(offering: TurWorldOfferingLevel): string {
+  return offering.locked ? "未开启" : `${offering.level}级`;
 }
 
 async function shareWorldCard(): Promise<void> {
@@ -433,6 +473,12 @@ async function shareWorldCard(): Promise<void> {
   font-family: var(--font-title);
   font-size: 14px;
   font-weight: normal;
+  white-space: nowrap;
+}
+
+.tur-ws-title-offering strong.tur-ws-offering-locked,
+.tur-ws-meta strong.tur-ws-offering-locked {
+  color: var(--box-text-4);
 }
 
 .tur-ws-meta {
@@ -471,6 +517,7 @@ async function shareWorldCard(): Promise<void> {
   color: var(--tgc-yellow-1);
   font-family: var(--font-title);
   font-weight: normal;
+  white-space: nowrap;
 }
 
 .tur-ws-meta-name {
@@ -506,6 +553,25 @@ async function shareWorldCard(): Promise<void> {
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   background: var(--common-shadow-1);
+}
+
+.tur-ws-offering-icon {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.tur-ws-offering-lock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #00000080;
 }
 
 .tur-ws-incomplete-list {

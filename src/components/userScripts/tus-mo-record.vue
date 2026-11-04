@@ -3,7 +3,10 @@
   <TOverlay v-model="visible" blurVal="4px" topOffset="64px">
     <div class="tus-mr-box">
       <div class="tus-mr-top">
-        <span>米游币记录</span>
+        <span class="tus-mr-title">
+          <img alt="米游币" src="/UI/app/miyou-coin.webp" />
+          米游币记录
+        </span>
         <div class="tus-mr-actions">
           <v-btn-toggle
             v-model="isCost"
@@ -47,7 +50,8 @@
             <div class="tus-mr-item-main">
               <span :title="item.title" class="tus-mr-item-title">{{ item.title }}</span>
               <span :class="isCost ? 'cost' : 'gain'" class="tus-mr-item-num">
-                {{ isCost ? "-" : "+" }}{{ item.num }}
+                <span>{{ isCost ? "-" : "+" }}{{ item.num }}</span>
+                <img alt="米游币" src="/UI/app/miyou-coin.webp" />
               </span>
             </div>
             <div class="tus-mr-item-meta">
@@ -214,6 +218,18 @@ async function loadMore(): Promise<void> {
   line-height: 22px;
 }
 
+.tus-mr-title {
+  display: flex;
+  align-items: center;
+  column-gap: 6px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+}
+
 .tus-mr-refresh {
   position: relative;
   display: flex;
@@ -354,11 +370,20 @@ async function loadMore(): Promise<void> {
 }
 
 .tus-mr-item-num {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  column-gap: 2px;
   font-family: var(--font-title);
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
 
   &.gain {
     color: var(--tgc-od-green);

@@ -306,9 +306,7 @@ import {
   chooseGameInstallation,
   createGameInstallDraft,
   createGameInstallPlan,
-  ensureGameInstallDefenderExclusions,
   inspectGameInstallLocation,
-  removeGameInstallDefenderExclusions,
 } from "@utils/game/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
@@ -684,11 +682,6 @@ async function startInstall(): Promise<void> {
   const currentDraft = draft.value;
   const currentPlan = plan.value;
   errorMessage.value = null;
-  const ready = await ensureGameInstallDefenderExclusions(
-    currentDraft.installId,
-    currentPlan.planId,
-  );
-  if (!ready) return;
   busy.value = true;
   visible.value = false;
   emit("completed");
@@ -699,7 +692,6 @@ async function startInstall(): Promise<void> {
     reset();
     showSnackbar.success("已开始安装，进度可在游戏安装页查看");
   } catch (error) {
-    void removeGameInstallDefenderExclusions(currentPlan.planId).catch(() => {});
     showSnackbar.error(`启动游戏安装失败：${error}`);
   } finally {
     busy.value = false;

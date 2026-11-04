@@ -230,9 +230,6 @@ pub async fn init_app(app_handle: AppHandle) {
         Ok(_) => {}
         Err(error) => log::warn!("[game-package] 启动清理失效计划失败：{error}"),
       }
-      if let Err(error) = crate::game::defender::sweep_stale_exclusions(&task_root) {
-        log::warn!("[defender] 清理遗留排除失败：{error}");
-      }
     });
     match crate::game::commands::sweep_orphan_transactions(&app_handle).await {
       Ok(summary) if summary.removed_count > 0 => {

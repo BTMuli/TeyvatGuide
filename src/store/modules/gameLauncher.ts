@@ -7,7 +7,6 @@ import gameEnum from "@enum/game.js";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
-  addGameInstallDefenderExclusions,
   applyGamePackageSwitch,
   applyGamePackageTask,
   cancelGamePackageTask,
@@ -17,15 +16,12 @@ import {
   clearGamePackageVerify,
   cancelGameInstall,
   createGameInstallPlan,
-  ensureGamePackageDefenderExclusions,
   getGamePackageVerifyStatus,
-  hasGameInstallDefenderExclusions,
   listGamePackageTasks,
   pauseGameInstall,
   pauseGamePackageTask,
   recoverGamePackageTask,
   recoverGameInstall,
-  removeGameInstallDefenderExclusions,
   removeGamePackageTask,
   startGameInstall,
   startGamePackageTask,
@@ -47,6 +43,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   let listenerPromise: Promise<void> | null = null;
   let listenerGeneration = 0;
   const pendingProgressByInstallation = new Map<string, TGApp.Game.Package.TaskSummary>();
+  // 投影隐藏后仍保留修订号；离页或重连时，取消前发出的列表请求仍可能返回。
+  const hiddenTaskRevisions = new Map<string, number>();
   const PROGRESS_FLUSH_MS = 150;
   let progressTimer: number | null = null;
   const completedInstallHideTimers = new Map<string, number>();
@@ -70,6 +68,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     current: TGApp.Game.Package.TaskSummary | undefined,
     task: TGApp.Game.Package.TaskSummary,
   ): boolean {
+    const hiddenRevision = hiddenTaskRevisions.get(task.taskId);
+    if (hiddenRevision !== undefined && task.revision <= hiddenRevision) return false;
     return !(
       current !== undefined &&
       ((current.taskId === task.taskId && current.revision > task.revision) ||
@@ -99,6 +99,35 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
 
   function shouldHideAbandonedTask(task: TGApp.Game.Package.TaskSummary): boolean {
     return task.state === gameEnum.package.taskState.ABANDONED;
+  }
+
+  /**
+   * 判断任务是否不再进入任务面板。
+   *
+   * 全新安装取消时草稿与暂存目录已被删除，没有可恢复内容；继续保留投影会渲染出
+   * 依赖安装草稿的恢复与放弃入口。
+   * @since Beta v0.13.0
+   * @param task - 资源任务投影
+   * @returns 是否从任务面板隐藏
+   */
+  function shouldHideTask(task: TGApp.Game.Package.TaskSummary): boolean {
+    if (shouldHideAbandonedTask(task)) return true;
+    return (
+      task.target === gameEnum.package.planTarget.INSTALL &&
+      task.state === gameEnum.package.taskState.CANCELED
+    );
+  }
+
+  /**
+   * 保留已隐藏任务的最新修订号，避免迟到快照重新建立投影。
+   * @since Beta v0.13.0
+   * @param task - 已隐藏的资源任务快照
+   */
+  function rememberHiddenTask(task: TGApp.Game.Package.TaskSummary): void {
+    const revision = hiddenTaskRevisions.get(task.taskId);
+    if (revision === undefined || task.revision > revision) {
+      hiddenTaskRevisions.set(task.taskId, task.revision);
+    }
   }
 
   function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
@@ -137,6 +166,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     completedInstallHideTimers.clear();
   }
 
+  /**
+   * 合并单条任务快照；已结束的任务不写入投影。
+   * @since Beta v0.13.0
+   * @param task - 资源任务投影
+   */
   function mergeTask(task: TGApp.Game.Package.TaskSummary): void {
     const pending = pendingProgressByInstallation.get(task.installationId);
     if (pending !== undefined) {
@@ -149,7 +183,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
-    if (shouldHideAbandonedTask(task)) {
+    if (shouldHideTask(task)) {
+      rememberHiddenTask(task);
       removeTaskProjection(task);
       return;
     }
@@ -166,6 +201,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     progressTimer = null;
   }
 
+  /**
+   * 把缓冲的进度快照写入投影，跳过已结束的任务。
+   * @since Beta v0.13.0
+   */
   function flushTaskProgress(): void {
     progressTimer = null;
     if (pendingProgressByInstallation.size === 0) return;
@@ -173,6 +212,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
     let changed = false;
     for (const task of pendingProgressByInstallation.values()) {
+      if (shouldHideTask(task)) continue;
       if (!shouldReplaceTask(next[task.installationId], task)) continue;
       next[task.installationId] = task;
       changed = true;
@@ -184,7 +224,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
+  /**
+   * 缓冲下载进度；隐藏终态立即合并，以清理投影并保留修订号。
+   * @since Beta v0.13.0
+   * @param task - 资源任务进度快照
+   */
   function queueTaskProgress(task: TGApp.Game.Package.TaskSummary): void {
+    if (shouldHideTask(task)) {
+      mergeTask(task);
+      return;
+    }
     const pending = pendingProgressByInstallation.get(task.installationId);
     const current = pending ?? tasksByInstallation.value[task.installationId];
     if (!shouldReplaceTask(current, task)) return;
@@ -346,7 +395,12 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const task of tasks) {
       if (!latest.has(task.installationId)) latest.set(task.installationId, task);
       if (selected.has(task.installationId)) continue;
-      if (shouldHideAbandonedTask(task) || shouldOmitCompletedInstall(task)) continue;
+      if (
+        shouldHideTask(task) ||
+        shouldOmitCompletedInstall(task) ||
+        !shouldReplaceTask(undefined, task)
+      )
+        continue;
       selected.set(task.installationId, task);
     }
     let changed = false;
@@ -385,6 +439,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
       }
       changed = true;
+    }
+    // 先完成终态对账，再记录修订号，避免当前响应被自身的隐藏记录拦截。
+    for (const task of tasks) {
+      if (shouldHideTask(task)) rememberHiddenTask(task);
     }
     if (!changed) return;
     tasksByInstallation.value = next;
@@ -435,7 +493,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 启动游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * 启动游戏资源任务。
    * @since Beta v0.13.0
    * @param plan - 已固化的资源计划
    * @returns 启动后的任务投影
@@ -445,7 +503,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   ): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(plan.installationId, true);
     try {
-      await ensureGamePackageDefenderExclusions(plan.planId);
       const task = await startGamePackageTask(plan.planId);
       mergeTask(task);
       return task;
@@ -484,18 +541,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         draft.state === gameEnum.installation.draftState.PLANNED
       ) {
         const planId = draft.planId ?? (await createGameInstallPlan(draft.installId)).planId;
-        await ensureInstallDefenderRegistry(draft.installId, planId);
-        try {
-          const task = await startGameInstall(draft.installId, planId);
-          mergeTask(task);
-          return task;
-        } catch (error) {
-          void removeGameInstallDefenderExclusions(planId).catch(() => {});
-          throw error;
-        }
+        const task = await startGameInstall(draft.installId, planId);
+        mergeTask(task);
+        return task;
       }
       if (draft.planId === null) throw new Error("安装草稿缺少可恢复的安装计划");
-      await ensureInstallDefenderRegistry(draft.installId, draft.planId);
       const task = await recoverGameInstall(
         draft.planId,
         draft.installId,
@@ -508,14 +558,15 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
-  async function ensureInstallDefenderRegistry(installId: string, planId: string): Promise<void> {
-    if (await hasGameInstallDefenderExclusions(planId)) return;
-    await addGameInstallDefenderExclusions(installId, planId);
-  }
-
+  /**
+   * 取消未启动的安装草稿；草稿已被取消清理时同样视为完成。
+   * @since Beta v0.13.0
+   * @param draft - 安装草稿摘要
+   * @returns 已取消的草稿摘要；草稿已被取消清理时为 null
+   */
   async function cancelInstallDraft(
     draft: TGApp.Game.Installation.InstallDraftSummary,
-  ): Promise<TGApp.Game.Installation.InstallDraftSummary> {
+  ): Promise<TGApp.Game.Installation.InstallDraftSummary | null> {
     setPending(draft.draftId, true);
     try {
       return await cancelGameInstallDraft(draft.installId);
@@ -573,7 +624,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 应用已下载的游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * 应用已下载的游戏资源任务。
    * @since Beta v0.13.0
    * @param taskId - 资源任务 ID
    * @returns 应用开始后的任务投影
@@ -581,7 +632,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   async function applyTask(taskId: string): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(taskId, true);
     try {
-      await ensureGamePackageDefenderExclusions(taskId, "添加排除并应用更新");
       const task = await applyGamePackageTask(taskId);
       mergeTask(task);
       return task;
@@ -602,7 +652,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 恢复游戏资源任务；继续动作会先完成 Defender 排除登记。
+   * 恢复游戏资源任务。
    * @since Beta v0.13.0
    * @param taskId - 资源任务 ID
    * @param action - 恢复动作
@@ -615,9 +665,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     setPending(taskId, true);
     setRecoveryProgress(taskId, null);
     try {
-      if (action === gameEnum.package.recoveryAction.RESUME) {
-        await ensureGamePackageDefenderExclusions(taskId, "添加排除并恢复更新");
-      }
       const task = await recoverGamePackageTask(taskId, action, (progress) => {
         setRecoveryProgress(taskId, progress);
       });
