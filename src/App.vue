@@ -79,7 +79,7 @@ const vuetifyThemeApi = useTheme();
 watch(
   vuetifyTheme,
   (value) => {
-    vuetifyThemeApi.global.name.value = value;
+    void vuetifyThemeApi.change(value);
   },
   { immediate: true },
 );
