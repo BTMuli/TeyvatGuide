@@ -1,6 +1,6 @@
 /**
  * ESLint 配置文件
- * @since Beta v0.11.3
+ * @since Beta v0.13.0
  */
 import { defineConfig } from "eslint/config";
 import eslintPluginJsonc from "eslint-plugin-jsonc";
@@ -30,6 +30,7 @@ export default defineConfig([
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
       "node_modules",
+      "remotion/**",
       ".github",
     ],
   },

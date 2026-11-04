@@ -15,3 +15,6 @@ pnpm-lock.yaml
 !src/data/**/*.json
 src-tauri/gen/*.json
 !eslint
+
+# Local Remotion video templates use their own formatter
+/remotion/
