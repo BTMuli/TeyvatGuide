@@ -78,6 +78,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 用户收藏帖子获取
   - [x] 用户关注帖子获取
   - [x] 一键完成米游币每日任务&游戏签到
+  - [x] 原神、绝区零国服兑换码批量兑换，支持前瞻直播码一键兑换
 
 - Wiki 功能：
   - [x] 角色图鉴（支持名称搜索）

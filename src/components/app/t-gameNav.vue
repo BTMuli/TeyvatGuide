@@ -21,6 +21,16 @@
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
       </template>
     </TGameNavItem>
+    <v-menu v-if="!hasNav && getRedeemConfig(gid)" :closeOnContentClick="false">
+      <template #activator="{ props: menuProps }">
+        <TGameNavItem v-bind="menuProps" :mini class="tgn-nav" label="手动兑换">
+          <template #icon
+            ><v-icon color="var(--tgc-od-orange)" size="28">mdi-code-braces</v-icon></template
+          >
+        </TGameNavItem>
+      </template>
+      <div class="tgn-redeem"><TRedeemCode :gid /></div>
+    </v-menu>
     <ToLivecode v-model="showOverlay" :actId :data="codeData" :gid />
   </div>
 </template>
@@ -34,6 +44,7 @@ import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGClient from "@utils/app/TGClient.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import { getRedeemConfig } from "@utils/game/redeemConfig.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -41,6 +52,7 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TGameNavItem from "./t-gameNavItem.vue";
 import TMiImg from "./t-mi-img.vue";
+import TRedeemCode from "./t-redeem-code.vue";
 import ToLivecode from "./to-livecode.vue";
 
 type TGameNavProps = { gid: number; mini?: boolean };
@@ -88,10 +100,16 @@ async function loadNav(): Promise<void> {
 
 /**
  * 获取兑换码
+ * @since Beta v0.13.0
  * @returns {Promise<void>}
  */
 async function tryGetCode(): Promise<void> {
-  if (!hasNav.value || loadCode.value) return;
+  if (loadCode.value) return;
+  if (!hasNav.value) {
+    codeData.value = [];
+    showOverlay.value = true;
+    return;
+  }
   loadCode.value = true;
   const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
@@ -199,6 +217,13 @@ async function toBBS(link: URL): Promise<void> {
   display: flex;
   padding: 8px;
   gap: 8px;
+}
+
+.tgn-redeem {
+  width: min(440px, 90vw);
+  padding: 12px;
+  background: var(--app-page-bg);
+  color: var(--app-page-content);
 }
 
 .tgn-nav {
