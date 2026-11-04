@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.12.3
+ * @since Beta v0.13.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -35,7 +35,7 @@ import { parse } from "ini";
 import yaeConf from "../../../src-tauri/lib/conf.json" with { type: "json" };
 
 // YAE支持的游戏版本
-export const YAE_GAME_VER: Readonly<string> = "7.1.0";
+export const YAE_GAME_VER: Readonly<string> = "7.2.0";
 /**
  * 当前 Yae 配置是否支持读取角色及其装备。
  * @since Beta v0.12.3
