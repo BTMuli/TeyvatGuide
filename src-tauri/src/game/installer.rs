@@ -1389,6 +1389,24 @@ pub(crate) fn cancel_draft(
   Ok(draft.summary())
 }
 
+/// 取消安装草稿；草稿记录已被并发路径清理时返回 `None`。
+///
+/// 安装 worker 收到取消标记后会在退出收尾时自行取消同一草稿，而终态草稿文件会被
+/// 直接删除；命令层在等待任务退出后再次取消时必须容忍该竞态，不能把“已取消”
+/// 误报成“读取安装草稿失败”。
+/// @since Beta v0.13.0
+pub(crate) fn cancel_draft_if_present(
+  task_root: &Path,
+  draft_id: &str,
+  keep_downloads: bool,
+  progress: &mut dyn FnMut(usize, usize, &str),
+) -> Result<Option<InstallDraftSummary>, String> {
+  if !draft_path(task_root, draft_id).exists() {
+    return Ok(None);
+  }
+  Ok(Some(cancel_draft(task_root, draft_id, keep_downloads, progress)?))
+}
+
 /// 把安装任务 spool 中已下载且校验通过的分片并入共享缓存，返回保留的字节数。
 ///
 /// 只处理与计划下载对象一致的普通文件：大小或哈希不符、已是共享缓存同名对象、
@@ -3672,24 +3690,26 @@ fn set_task_state(
   Ok(())
 }
 
-/// 按安装 ID 查找草稿 ID。
+/// 按安装 ID 查找仍可取消的草稿 ID；草稿不存在时返回 `None`。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.13.0
 ///
 /// # 参数
 /// - `task_root`: 任务根目录。
 /// - `install_id`: 安装 ID。
 ///
 /// # 返回
-/// - `Ok(String)`: 草稿 ID。
-/// - `Err(String)`: 未找到的错误描述。
-pub(crate) fn find_draft_id(task_root: &Path, install_id: &str) -> Result<String, String> {
+/// - `Ok(Some(String))`: 草稿 ID。
+/// - `Ok(None)`: 没有匹配的未结束草稿。
+/// - `Err(String)`: 读取失败的错误描述。
+pub(crate) fn find_cancellable_draft_id(
+  task_root: &Path,
+  install_id: &str,
+) -> Result<Option<String>, String> {
   let directory = task_root.join("install-drafts");
   let entries = match fs::read_dir(directory) {
     Ok(entries) => entries,
-    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-      return Err("找不到安装草稿".to_string());
-    }
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
     Err(error) => return Err(format!("读取安装草稿目录失败：{error}")),
   };
   for entry in entries {
@@ -3704,10 +3724,25 @@ pub(crate) fn find_draft_id(task_root: &Path, install_id: &str) -> Result<String
       && draft.install_id == install_id
       && !matches!(draft.state, InstallDraftState::Canceled | InstallDraftState::Completed)
     {
-      return Ok(draft_id.to_string());
+      return Ok(Some(draft_id.to_string()));
     }
   }
-  Err("找不到安装草稿".to_string())
+  Ok(None)
+}
+
+/// 按安装 ID 查找草稿 ID。
+///
+/// @since Beta v0.13.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_id`: 安装 ID。
+///
+/// # 返回
+/// - `Ok(String)`: 草稿 ID。
+/// - `Err(String)`: 未找到的错误描述。
+pub(crate) fn find_draft_id(task_root: &Path, install_id: &str) -> Result<String, String> {
+  find_cancellable_draft_id(task_root, install_id)?.ok_or_else(|| "找不到安装草稿".to_string())
 }
 
 /// 查找可恢复的草稿 ID。
