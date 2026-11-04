@@ -36,6 +36,7 @@
         </div>
       </div>
       <div v-if="props.data.length === 0">暂无兑换码数据</div>
+      <TRedeemCode v-if="gid === 2" :liveCodes="data.map((item) => item.code)" />
     </div>
   </TOverlay>
 </template>
@@ -49,6 +50,7 @@ import { computed, useTemplateRef } from "vue";
 
 import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
+import TRedeemCode from "./t-redeem-code.vue";
 
 /**
  * 兑换码浮窗组件参数
@@ -107,7 +109,9 @@ async function shareImg(): Promise<void> {
 .tolc-box {
   position: relative;
   display: flex;
-  width: 340px;
+  overflow: auto;
+  width: min(440px, 90vw);
+  max-height: 85vh;
   flex-direction: column;
   align-items: center;
   justify-content: center;
