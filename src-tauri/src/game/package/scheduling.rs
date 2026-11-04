@@ -429,4 +429,107 @@ mod tests {
         .expect("等待创建前的名额释放通知不应丢失");
     });
   }
+
+  /// 下载完成通知先于等待创建时，仍能在原资源组装期间唤醒下一下载。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn ready_notification_admits_next_download_before_assembly_finishes() {
+    runtime().block_on(async {
+      let scheduler = PipelineScheduler::new(1, 1);
+      let (_, assembling) =
+        scheduler.try_reserve_next([(0, true)].into_iter()).expect("首个下载应可预约");
+      assert!(scheduler.try_reserve_next([(1, true)].into_iter()).is_none());
+      assembling.mark_ready();
+      tokio::time::timeout(Duration::from_secs(2), scheduler.changed())
+        .await
+        .expect("进入组装的通知不应丢失");
+      let (_, next_download) = scheduler
+        .try_reserve_next([(1, true)].into_iter())
+        .expect("原资源仍在组装时下一下载应能预约");
+      assert!(scheduler.try_reserve_next([(2, false)].into_iter()).is_none());
+      assert!(scheduler.try_reserve_next([(2, true)].into_iter()).is_none());
+      drop(next_download);
+      drop(assembling);
+    });
+  }
+
+  /// 同阶段重复通知不应消耗名额或反复唤醒调度循环。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn unchanged_stage_does_not_notify_scheduler() {
+    runtime().block_on(async {
+      let scheduler = PipelineScheduler::new(1, 1);
+      let (_, permit) =
+        scheduler.try_reserve_next([(0, true)].into_iter()).expect("首个下载应可预约");
+      permit.mark_downloading();
+      permit.mark_downloading();
+      assert!(
+        tokio::time::timeout(Duration::from_millis(20), scheduler.changed()).await.is_err(),
+        "重复进入下载阶段不应产生通知"
+      );
+      assert!(scheduler.try_reserve_next([(1, true)].into_iter()).is_none());
+      permit.mark_ready();
+      tokio::time::timeout(Duration::from_secs(2), scheduler.changed())
+        .await
+        .expect("真实阶段切换应产生通知");
+      permit.mark_ready();
+      permit.mark_ready();
+      assert!(
+        tokio::time::timeout(Duration::from_millis(20), scheduler.changed()).await.is_err(),
+        "重复进入组装阶段不应产生通知"
+      );
+      assert!(scheduler.try_reserve_next([(1, false)].into_iter()).is_none());
+    });
+  }
+
+  /// 中止下载任务或丢弃组装任务集合后，名额归还并唤醒等待中的调度器。
+  ///
+  /// @since Beta v0.13.0
+  #[test]
+  fn canceled_jobs_release_download_and_assembly_slots() {
+    runtime().block_on(async {
+      for needs_download in [true, false] {
+        let scheduler = PipelineScheduler::new(1, 1);
+        let (_, permit) =
+          scheduler.try_reserve_next([(0, true)].into_iter()).expect("首个下载应可预约");
+        if !needs_download {
+          permit.mark_ready();
+          tokio::time::timeout(Duration::from_secs(2), scheduler.changed())
+            .await
+            .expect("组装阶段通知不应丢失");
+        }
+        let (started, running) = tokio::sync::oneshot::channel();
+        let mut jobs = tokio::task::JoinSet::new();
+        jobs.spawn(async move {
+          let _permit = permit;
+          started.send(()).expect("测试任务启动接收端已退出");
+          std::future::pending::<()>().await;
+        });
+        tokio::time::timeout(Duration::from_secs(2), running)
+          .await
+          .expect("测试任务未能启动")
+          .expect("测试任务启动失败");
+        assert!(scheduler.try_reserve_next([(1, needs_download)].into_iter()).is_none());
+        if needs_download {
+          jobs.abort_all();
+          let result = tokio::time::timeout(Duration::from_secs(2), jobs.join_next())
+            .await
+            .expect("下载任务中止超时")
+            .expect("下载任务应返回中止结果");
+          assert!(result.expect_err("下载任务不应正常完成").is_cancelled());
+        } else {
+          drop(jobs);
+        }
+        tokio::time::timeout(Duration::from_secs(2), scheduler.changed())
+          .await
+          .expect("任务退出后应通知名额归还");
+        let (_, replacement) = scheduler
+          .try_reserve_next([(1, needs_download)].into_iter())
+          .expect("取消任务后同阶段名额应能再次预约");
+        drop(replacement);
+      }
+    });
+  }
 }
