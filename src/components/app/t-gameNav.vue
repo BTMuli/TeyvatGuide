@@ -13,7 +13,13 @@
         <TMiImg :ori="true" :size="28" :src="navItem.icon" alt="navIcon" />
       </template>
     </TGameNavItem>
-    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码" @click="tryGetCode">
+    <TGameNavItem
+      v-if="hasNav || getRedeemConfig(gid)"
+      :mini
+      class="tgn-nav"
+      label="兑换码"
+      @click="tryGetCode"
+    >
       <template #icon>
         <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28">
           mdi-code-tags-check
@@ -21,22 +27,6 @@
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
       </template>
     </TGameNavItem>
-    <TGameNavItem
-      v-if="gid === 2"
-      :mini
-      class="tgn-nav"
-      label="使用兑换码"
-      @click="showRedeem = true"
-    >
-      <template #icon><v-icon size="28">mdi-gift-outline</v-icon></template>
-    </TGameNavItem>
-    <TOverlay v-model="showRedeem">
-      <div class="tgn-redeem">
-        <h2>原神兑换码</h2>
-        <TRedeemCode />
-        <v-btn @click="showRedeem = false">关闭</v-btn>
-      </div>
-    </TOverlay>
     <ToLivecode v-model="showOverlay" :actId :data="codeData" :gid />
   </div>
 </template>
@@ -50,6 +40,7 @@ import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGClient from "@utils/app/TGClient.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import { getRedeemConfig } from "@utils/game/redeemConfig.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -57,8 +48,6 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TGameNavItem from "./t-gameNavItem.vue";
 import TMiImg from "./t-mi-img.vue";
-import TOverlay from "./t-overlay.vue";
-import TRedeemCode from "./t-redeem-code.vue";
 import ToLivecode from "./to-livecode.vue";
 
 type TGameNavProps = { gid: number; mini?: boolean };
@@ -67,7 +56,6 @@ const props = withDefaults(defineProps<TGameNavProps>(), { gid: 2, mini: false }
 
 const { isLogin } = storeToRefs(useAppStore());
 
-const showRedeem = ref<boolean>(false);
 const actId = ref<string>();
 const showOverlay = ref<boolean>(false);
 const loadCode = ref<boolean>(false);
@@ -107,10 +95,16 @@ async function loadNav(): Promise<void> {
 
 /**
  * 获取兑换码
+ * @since Beta v0.13.0
  * @returns {Promise<void>}
  */
 async function tryGetCode(): Promise<void> {
-  if (!hasNav.value || loadCode.value) return;
+  if (loadCode.value) return;
+  if (!hasNav.value) {
+    codeData.value = [];
+    showOverlay.value = true;
+    return;
+  }
   loadCode.value = true;
   const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
@@ -218,16 +212,6 @@ async function toBBS(link: URL): Promise<void> {
   display: flex;
   padding: 8px;
   gap: 8px;
-}
-
-.tgn-redeem {
-  overflow: auto;
-  width: min(480px, 90vw);
-  max-height: 85vh;
-  padding: 16px;
-  border-radius: 5px;
-  background: var(--app-page-bg);
-  color: var(--app-page-content);
 }
 
 .tgn-nav {

@@ -3,7 +3,7 @@
   <TOverlay v-model="visible" class="tolc-overlay">
     <div ref="TolcRef" class="tolc-box">
       <div class="tolc-title">
-        <span>{{ gameInfo?.name ?? "" }}兑换码</span>
+        <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
         <v-icon
           data-html2canvas-ignore
           icon="mdi-share-variant"
@@ -36,7 +36,12 @@
         </div>
       </div>
       <div v-if="props.data.length === 0">暂无兑换码数据</div>
-      <TRedeemCode v-if="gid === 2" :liveCodes="data.map((item) => item.code)" />
+      <TRedeemCode
+        v-if="getRedeemConfig(gid)"
+        :gid
+        :preview
+        :liveCodes="data.map((item) => item.code)"
+      />
     </div>
   </TOverlay>
 </template>
@@ -44,6 +49,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
+import { getRedeemConfig } from "@utils/game/redeemConfig.js";
 import { generateShareImg } from "@utils/share/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, useTemplateRef } from "vue";
@@ -54,6 +60,7 @@ import TRedeemCode from "./t-redeem-code.vue";
 
 /**
  * 兑换码浮窗组件参数
+ * @since Beta v0.13.0
  */
 type ToLiveCodeProps = {
   /* 兑换码数据 */
@@ -62,6 +69,7 @@ type ToLiveCodeProps = {
   actId: string | undefined;
   /* 分区ID */
   gid: number;
+  preview?: TGApp.Game.Redeem.Preview;
 };
 
 const { gameList } = storeToRefs(useBBSStore());

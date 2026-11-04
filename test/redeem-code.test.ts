@@ -114,6 +114,24 @@ describe("redeemCodes", () => {
 });
 
 describe("redeemCode", () => {
+  it("绝区零国服使用对应接口和角色参数", async () => {
+    get.mockResolvedValue({ data: { retcode: 0 } });
+    await redeemCode("ZZZCODE", { ...role, gameBiz: "nap_cn", region: "prod_gf_cn" }, cookie);
+    expect(get).toHaveBeenCalledWith(
+      "https://public-operation-nap.mihoyo.com/common/apicdkey/api/webExchangeCdkey",
+      expect.objectContaining({
+        query: expect.objectContaining({
+          game_biz: "nap_cn",
+          region: "prod_gf_cn",
+          uid: role.gameUid,
+        }),
+      }),
+    );
+    await expect(
+      redeemCode("ZZZCODE", { ...role, gameBiz: "nap_cn", region: "cn_gf01" }, cookie),
+    ).rejects.toThrow();
+  });
+
   it("使用国服地址、当前 UID 与完整凭据，禁止重定向且不回传外部消息", async () => {
     get.mockResolvedValue({ data: { retcode: 0, message: "secret" } });
     expect(await redeemCode("中文码", role, cookie)).toEqual({
