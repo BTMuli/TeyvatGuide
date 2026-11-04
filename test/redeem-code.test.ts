@@ -132,6 +132,21 @@ describe("redeemCode", () => {
     ).rejects.toThrow();
   });
 
+  it("崩铁国服使用对应接口和角色参数", async () => {
+    get.mockResolvedValue({ data: { retcode: 0 } });
+    await redeemCode("HSRCODE", { ...role, gameBiz: "hkrpg_cn", region: "prod_gf_cn" }, cookie);
+    expect(get).toHaveBeenCalledWith(
+      "https://public-operation-hkrpg.mihoyo.com/common/apicdkey/api/webExchangeCdkey",
+      expect.objectContaining({
+        query: expect.objectContaining({
+          game_biz: "hkrpg_cn",
+          region: "prod_gf_cn",
+          uid: role.gameUid,
+        }),
+      }),
+    );
+  });
+
   it("使用国服地址、当前 UID 与完整凭据，禁止重定向且不回传外部消息", async () => {
     get.mockResolvedValue({ data: { retcode: 0, message: "secret" } });
     expect(await redeemCode("中文码", role, cookie)).toEqual({

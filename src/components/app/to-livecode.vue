@@ -2,7 +2,7 @@
 <template>
   <TOverlay v-model="visible" class="tolc-overlay">
     <div ref="TolcRef" class="tolc-box">
-      <TRedeemCode :gid :preview :liveCodes="data.map((item) => item.code)">
+      <TRedeemCode :gid :liveCodes="data.map((item) => item.code)">
         <template #title>
           <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
         </template>
@@ -130,7 +130,6 @@ type ToLiveCodeProps = {
   actId: string | undefined;
   /* 分区ID */
   gid: number;
-  preview?: TGApp.Game.Redeem.Preview;
 };
 
 const { gameList } = storeToRefs(useBBSStore());

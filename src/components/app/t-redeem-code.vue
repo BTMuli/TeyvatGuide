@@ -106,28 +106,25 @@
       本次兑换角色：{{ resultTarget.nickname }}（{{ maskUid(resultTarget.gameUid) }}）
     </p>
     <TRedeemProgress v-if="liveCodes === undefined" :codes :results :currentCode :busy />
-    <p v-if="preview" class="trc-preview" data-html2canvas-ignore>模拟预览 · 不发送真实兑换请求</p>
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
 import redeemCode from "@req/redeemReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { maskUid, maskUidTail } from "@utils/display/TGUid.js";
 import { parseRedeemCodes, redeemCodes } from "@utils/game/redeemCode.js";
-import { getRedeemConfig } from "@utils/game/redeemConfig.js";
+import { getRedeemConfig, isRedeemRoleSupported } from "@utils/game/redeemConfig.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import TMiImg from "./t-mi-img.vue";
 import TRedeemProgress from "./t-redeem-progress.vue";
 
-const { liveCodes, gid, preview } = defineProps<{
+const { liveCodes, gid } = defineProps<{
   liveCodes?: Array<string>;
   gid: number;
-  preview?: TGApp.Game.Redeem.Preview;
 }>();
 defineSlots<{
   title?(): unknown;
@@ -145,7 +142,11 @@ const { gameList } = storeToRefs(useBBSStore());
 const gameIcon = computed<string>(() => {
   const icon = gameList.value.find((game) => game.id === gid)?.app_icon;
   if (icon) return icon;
+  if (gid === 1) return "/platforms/mhy/bh3.webp";
   if (gid === 2) return "/platforms/mhy/ys.webp";
+  if (gid === 3) return "/platforms/mhy/bh2.webp";
+  if (gid === 4) return "/platforms/mhy/wd.webp";
+  if (gid === 6) return "/platforms/mhy/sr.webp";
   if (gid === 8) return "/platforms/mhy/zzz.webp";
   return "/platforms/mhy/mys.webp";
 });
@@ -170,10 +171,10 @@ const actionCodes = computed<Array<string>>(() =>
   liveCodes === undefined ? codes.value : availableCodes.value,
 );
 const canRedeem = computed<boolean>(() =>
-  Boolean(selectedRole.value && (preview || cookie.value?.cookie_token)),
+  Boolean(selectedRole.value && cookie.value?.cookie_token),
 );
 watch(
-  [() => gid, uid, () => preview],
+  [() => gid, uid],
   async (_, __, onCleanup) => {
     let cancelled = false;
     onCleanup(() => {
@@ -181,14 +182,13 @@ watch(
     });
     roles.value = [];
     selectedUid.value = "";
+    results.value = [];
     try {
-      const bound =
-        preview?.roles ?? (uid.value ? await TSUserAccount.game.getAccount(uid.value) : []);
+      const bound = uid.value ? await TSUserAccount.game.getAccount(uid.value) : [];
       if (cancelled) return;
       roles.value = bound.filter(matchesGame);
       const preferred = roles.value.find((role) => role.gameUid === account.value.gameUid);
       selectedUid.value = (preferred ?? roles.value[0])?.gameUid ?? "";
-      results.value = preview?.results.map((result) => ({ ...result })) ?? [];
     } catch {
       if (!cancelled) errorMessage.value = "读取绑定角色失败，请重新打开后重试";
     }
@@ -204,19 +204,10 @@ function selectRole(gameUid: string): void {
 function matchesGame(role: TGApp.Sqlite.Account.Game): boolean {
   const game = config.value;
   if (!game) return false;
-  return role.gameBiz === game.biz && game.regions.includes(role.region);
+  return role.gameBiz === game.biz && isRedeemRoleSupported(role);
 }
 
 async function submit(selectedCodes: Array<string>): Promise<void> {
-  if (preview) {
-    showSnackbar.info("模拟预览，不发送真实兑换请求");
-    results.value = selectedCodes.map((code, index) => ({
-      code,
-      retcode: index === 1 ? -2001 : 0,
-      message: index === 1 ? "兑换码已过期（模拟）" : "兑换成功（模拟）",
-    }));
-    return;
-  }
   if (busy.value || !canRedeem.value || selectedCodes.length === 0) return;
   // 固定本次兑换的账号，避免切换账号影响进行中的批次。
   const target = selectedRole.value;
@@ -423,17 +414,11 @@ html.dark .trc-box {
   }
 }
 
-.trc-note,
-.trc-preview {
+.trc-note {
   font-size: 12px;
   line-height: 18px;
   opacity: 0.75;
   overflow-wrap: anywhere;
-}
-
-.trc-preview {
-  font-size: 11px;
-  line-height: 16px;
 }
 
 .trc-error {

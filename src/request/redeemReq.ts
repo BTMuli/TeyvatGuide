@@ -3,7 +3,7 @@
  * @since Beta v0.13.0
  */
 import { isValidRedeemCode } from "@utils/game/redeemCode.js";
-import { getRedeemConfigByBiz } from "@utils/game/redeemConfig.js";
+import { getRedeemConfigByBiz, isRedeemRoleSupported } from "@utils/game/redeemConfig.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 /**
@@ -23,8 +23,8 @@ function isNumericUid(value: string): boolean {
  * @since Beta v0.13.0
  */
 function validateAccount(role: TGApp.Sqlite.Account.Game, cookie: TGApp.App.Account.Cookie): void {
-  if (!getRedeemConfigByBiz(role.gameBiz)?.regions.includes(role.region)) {
-    throw new Error("仅支持原神或绝区零国服角色");
+  if (!isRedeemRoleSupported(role)) {
+    throw new Error("仅支持已配置的国服游戏角色");
   }
   if (
     !isNumericUid(role.gameUid) ||
