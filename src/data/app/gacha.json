@@ -3640,5 +3640,41 @@
     "postId": "78782593",
     "up5List": [11517, 13514],
     "up4List": [11430, 12403, 13407, 14402, 15403]
+  },
+  {
+    "name": "万序衍盈",
+    "version": "7.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/10/29/e7b65420c62ff398875eb880320b5a17_7049181101305483859_transformed.png",
+    "from": "2026-11-04T06:00:00+08:00",
+    "to": "2026-11-24T17:59:00+08:00",
+    "type": 301,
+    "postId": "79287292",
+    "up5List": [10000136],
+    "up4List": [10000137, 10000088, 10000045]
+  },
+  {
+    "name": "众水的颂诗",
+    "version": "7.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/10/22/044a516ed0c272772dc47a2d263623c4_8279758139993107403_transformed.png",
+    "from": "2026-11-04T06:00:00+08:00",
+    "to": "2026-11-24T17:59:00+08:00",
+    "type": 400,
+    "postId": "79287291",
+    "up5List": [10000089],
+    "up4List": [10000137, 10000088, 10000045]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "7.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/10/22/1c310d17afae82dd7bb7372cbeaed743_4075456262757058792_transformed.png",
+    "from": "2026-11-04T06:00:00+08:00",
+    "to": "2026-11-24T17:59:00+08:00",
+    "type": 302,
+    "postId": "79287289",
+    "up5List": [14525, 11513],
+    "up4List": [11427, 13427, 14434, 12405, 15405]
   }
 ]

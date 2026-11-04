@@ -1003,6 +1003,23 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "覆巢" }
   },
   {
+    "id": 10000136,
+    "contentId": 510137,
+    "dropDays": [1, 4, 7],
+    "name": "米提亚",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "雷",
+    "release": "2026-11-03 00:00:00",
+    "materials": [
+      { "id": 104365, "name": "「慈爱」的教导", "star": 2 },
+      { "id": 104366, "name": "「慈爱」的指引", "star": 3 },
+      { "id": 104367, "name": "「慈爱」的哲学", "star": 4 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "默想" }
+  },
+  {
     "id": 10000003,
     "contentId": 59,
     "dropDays": [2, 5, 7],
@@ -1885,6 +1902,23 @@
       { "id": 104370, "name": "「坚忍」的哲学", "star": 4 }
     ],
     "source": { "index": 8, "area": "至冬", "name": "隐修" }
+  },
+  {
+    "id": 10000137,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "瓦列里",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "单手剑",
+    "element": "雷",
+    "release": "2026-11-03 00:00:00",
+    "materials": [
+      { "id": 104371, "name": "「荣光」的教导", "star": 2 },
+      { "id": 104372, "name": "「荣光」的指引", "star": 3 },
+      { "id": 104373, "name": "「荣光」的哲学", "star": 4 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "共观" }
   },
   {
     "id": 10000043,
@@ -3014,6 +3048,22 @@
       { "id": 114092, "name": "藏窖灵浆的恣意", "star": 5 }
     ],
     "source": { "index": 8, "area": "至冬", "name": "链轨" }
+  },
+  {
+    "id": 14525,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "秘星典谕",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114093, "name": "凛雪帝皇的复生", "star": 2 },
+      { "id": 114094, "name": "凛雪帝皇的庆仪", "star": 3 },
+      { "id": 114095, "name": "凛雪帝皇的悲恤", "star": 4 },
+      { "id": 114096, "name": "凛雪帝皇的辞决", "star": 5 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "断钢" }
   },
   {
     "id": 13502,
