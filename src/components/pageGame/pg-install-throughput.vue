@@ -70,7 +70,6 @@
       </svg>
       <span class="install-throughput-scale speed">速度 {{ speedScaleLabel }}</span>
       <span class="install-throughput-scale spool">临时 {{ spoolScaleLabel }}</span>
-      <span class="install-throughput-window">最近 60 秒</span>
     </div>
   </section>
 </template>
@@ -563,8 +562,7 @@ function formatDuration(seconds: number): string {
   }
 }
 
-.install-throughput-scale,
-.install-throughput-window {
+.install-throughput-scale {
   position: absolute;
   padding: 1px 4px;
   border-radius: 2px;
@@ -583,14 +581,5 @@ function formatDuration(seconds: number): string {
 .install-throughput-scale.spool {
   top: 4px;
   right: 4px;
-}
-
-.install-throughput-window {
-  right: 4px;
-  bottom: 4px;
-  border: var(--game-page-cover-border, 0);
-  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
-  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
-  background: var(--game-page-cover-panel-bg, var(--box-bg-1));
 }
 </style>
