@@ -14,7 +14,9 @@ use progress::{
   AudioLiveAssemblyOverlay, overlay_install_download_progress,
   start_assembly_write_progress_monitor, start_install_download_progress_monitor,
 };
-use workers::{drain_assembly_workers, has_active_assembly_workers, spawn_assembly_worker};
+use workers::{
+  drain_assembly_workers, has_active_assembly_workers, spawn_assembly_worker, spawn_pipeline_job,
+};
 
 use spool::{
   InstallCompletionSnapshot, InstallSpoolTracker, install_tracker_spool_bytes,
@@ -63,7 +65,10 @@ use std::{
 };
 use tauri::{AppHandle, ipc::Channel};
 use tauri_plugin_notification::NotificationExt;
-use tokio::sync::{Mutex as AsyncMutex, Semaphore};
+use tokio::{
+  sync::{Mutex as AsyncMutex, Semaphore},
+  task::JoinSet,
+};
 use uuid::Uuid;
 
 const MAX_CONCURRENCY: usize = 64;
@@ -1129,7 +1134,7 @@ fn release_task_reservation(
 }
 
 impl Drop for TaskReservation {
-  /// 等组装 worker 退出并完成终态排除清理后再释放互斥。
+  /// 等资源子任务与组装 worker 退出并完成终态排除清理后再释放互斥。
   /// @since Beta v0.13.0
   fn drop(&mut self) {
     let cleanup_required =
@@ -3985,35 +3990,15 @@ async fn run_streaming_prepare_task(
   let download_slots = Arc::new(Semaphore::new(install_download_concurrency(concurrency)));
   let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
   let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
-  let mut jobs = stream::FuturesUnordered::new();
+  // 子任务必须独立调度：公平 journal 锁的队列头不能依赖正在等待同一锁的父任务继续 poll。
+  let mut jobs = JoinSet::new();
   let mut inflight_downloads = 0_usize;
   let mut pipeline_error = None;
   // 删除只移动游戏目录中待移除的语音文件（移入备份），与下载（缓存）、组装
   // （incoming）路径互不冲突；与下载/组装并发执行，避免串行拖长准备阶段。
   let deletion_blocked = is_game_running();
-  let mut deletes_done = pending_deletes.is_empty();
-  let delete_tasks = stream::iter(pending_deletes.into_iter().map(|deleted| {
-    let events = events.clone();
-    let task_root = task_root.clone();
-    let game_root = game_root.clone();
-    let plan = Arc::clone(&plan);
-    let journal = Arc::clone(&journal);
-    let canceled = Arc::clone(&canceled);
-    let paused = Arc::clone(&paused);
-    let overlay = Arc::clone(&assembly_overlay);
-    let deletion_blocked = deletion_blocked;
-    async move {
-      if deletion_blocked {
-        return Err("检测到游戏进程，暂时不能删除配音文件，请退出游戏后恢复任务".to_string());
-      }
-      delete_audio_resource(
-        &events, &task_root, &game_root, &plan, &journal, &canceled, &paused, &overlay, &deleted,
-      )
-      .await
-    }
-  }))
-  .buffer_unordered(concurrency.max(1));
-  futures_util::pin_mut!(delete_tasks);
+  let mut pending_deletes = pending_deletes.into_iter();
+  let mut delete_jobs = JoinSet::new();
   let max_assembly = install_assembly_concurrency(concurrency);
   let max_in_flight = audio_pipeline_window(concurrency);
 
@@ -4043,40 +4028,81 @@ async fn run_streaming_prepare_task(
         if needs_download {
           inflight_downloads = inflight_downloads.saturating_add(1);
         }
-        jobs.push(run_audio_asset_job(
-          job,
-          events.clone(),
-          task_root.clone(),
-          cache_root.clone(),
-          game_root.clone(),
-          output_root.clone(),
-          Arc::clone(&plan),
-          Arc::clone(&journal),
-          Arc::clone(&canceled),
-          Arc::clone(&paused),
-          Arc::clone(&limiter),
-          download_client.clone(),
-          Arc::clone(&download_focus),
-          Arc::clone(&download_slots),
-          Arc::clone(&download_guards),
-          Arc::clone(&assembly_slots),
-          download_telemetry.clone(),
-          Arc::clone(&assembly_telemetry),
-          Arc::clone(&assembly_overlay),
-          Arc::clone(&completed_cache_keys),
-          Arc::clone(&available_downloads),
-          Arc::clone(&labels),
-          download_started_at,
-        ));
+        spawn_pipeline_job(
+          &mut jobs,
+          &plan.plan_id,
+          run_audio_asset_job(
+            job,
+            events.clone(),
+            task_root.clone(),
+            cache_root.clone(),
+            game_root.clone(),
+            output_root.clone(),
+            Arc::clone(&plan),
+            Arc::clone(&journal),
+            Arc::clone(&canceled),
+            Arc::clone(&paused),
+            Arc::clone(&limiter),
+            download_client.clone(),
+            Arc::clone(&download_focus),
+            Arc::clone(&download_slots),
+            Arc::clone(&download_guards),
+            Arc::clone(&assembly_slots),
+            download_telemetry.clone(),
+            Arc::clone(&assembly_telemetry),
+            Arc::clone(&assembly_overlay),
+            Arc::clone(&completed_cache_keys),
+            Arc::clone(&available_downloads),
+            Arc::clone(&labels),
+            download_started_at,
+          ),
+        );
+      }
+      while delete_jobs.len() < concurrency.max(1) {
+        let Some(deleted) = pending_deletes.next() else {
+          break;
+        };
+        let events = events.clone();
+        let task_root = task_root.clone();
+        let game_root = game_root.clone();
+        let worker_plan = Arc::clone(&plan);
+        let journal = Arc::clone(&journal);
+        let canceled = Arc::clone(&canceled);
+        let paused = Arc::clone(&paused);
+        let overlay = Arc::clone(&assembly_overlay);
+        spawn_pipeline_job(&mut delete_jobs, &plan.plan_id, async move {
+          if deletion_blocked {
+            return Err("检测到游戏进程，暂时不能删除配音文件，请退出游戏后恢复任务".to_string());
+          }
+          delete_audio_resource(
+            &events,
+            &task_root,
+            &game_root,
+            &worker_plan,
+            &journal,
+            &canceled,
+            &paused,
+            &overlay,
+            &deleted,
+          )
+          .await
+        });
       }
     }
-    if jobs.is_empty() && deletes_done {
+    if jobs.is_empty() && delete_jobs.is_empty() {
       break;
     }
     tokio::select! {
-      completion = jobs.next(), if !jobs.is_empty() => {
+      completion = jobs.join_next(), if !jobs.is_empty() => {
         let Some(completion) = completion else {
           continue;
+        };
+        let completion = match completion {
+          Ok(completion) => completion,
+          Err(error) => {
+            pipeline_error.get_or_insert_with(|| format!("资源准备子任务异常退出：{error}"));
+            continue;
+          }
         };
         if completion.needs_download {
           inflight_downloads = inflight_downloads.saturating_sub(1);
@@ -4121,11 +4147,11 @@ async fn run_streaming_prepare_task(
           }
         }
       }
-      deletion = delete_tasks.next(), if !deletes_done => {
+      deletion = delete_jobs.join_next(), if !delete_jobs.is_empty() => {
         let Some(result) = deletion else {
-          deletes_done = true;
           continue;
         };
+        let result = result.unwrap_or_else(|error| Err(format!("资源删除子任务异常退出：{error}")));
         if let Err(error) = result {
           pipeline_error.get_or_insert(error);
         }
