@@ -1650,6 +1650,10 @@ defineExpose({ busy, canSubmit, pending });
   margin-left: auto;
 }
 
+.post-composer-topic-search :deep(.v-field) {
+  background: var(--app-page-bg);
+}
+
 .post-composer-original :deep(.v-input) {
   flex: 0 0 auto;
 }
