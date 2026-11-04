@@ -19,6 +19,7 @@
     <div class="tusm-mid">
       <div class="tusm-total">
         <span>持有米游币：</span>
+        <img alt="米游币" class="tusm-coin" src="/UI/app/miyou-coin.webp" />
         <span>{{ fmtUtil.num(userPoints) }}</span>
       </div>
     </div>
@@ -27,7 +28,10 @@
         <div class="left">
           <v-icon v-if="!mission.status" color="var(--tgc-od-white)">mdi-circle</v-icon>
           <v-icon v-else color="var(--tgc-od-green)">mdi-checkbox-marked-circle-outline</v-icon>
-          <span>{{ mission.name }} - {{ mission.reward }}米游币</span>
+          <span class="mission-text">
+            <span>{{ mission.name }} - {{ mission.reward }}</span>
+            <img alt="米游币" src="/UI/app/miyou-coin.webp" />
+          </span>
           <span v-if="mission.cycleTimes"> - Day{{ mission.cycleTimes }}</span>
         </div>
         <div class="right">
@@ -325,6 +329,21 @@ function openRecord(): void {
   font-size: 18px;
 }
 
+.tusm-total {
+  position: relative;
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+}
+
+.tusm-coin {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 .tusm-acts {
   display: flex;
   align-items: center;
@@ -386,6 +405,18 @@ function openRecord(): void {
     :first-child {
       width: 100px;
     }
+  }
+}
+
+.mission-text {
+  display: inline-flex;
+  align-items: center;
+  column-gap: 2px;
+
+  img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
   }
 }
 </style>
