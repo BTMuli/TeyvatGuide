@@ -5,6 +5,7 @@
 mod events;
 mod metrics;
 mod progress;
+mod scheduling;
 mod spool;
 mod workers;
 
@@ -14,6 +15,7 @@ use progress::{
   AudioLiveAssemblyOverlay, overlay_install_download_progress,
   start_assembly_write_progress_monitor, start_install_download_progress_monitor,
 };
+use scheduling::{PipelineScheduler, PipelineStagePermit};
 use workers::{
   drain_assembly_workers, has_active_assembly_workers, spawn_assembly_worker, spawn_pipeline_job,
 };
@@ -710,9 +712,10 @@ struct AudioAssetJob {
   pending: Vec<(usize, PlanDownload)>,
 }
 
+/// 资源组装与证据落盘后的完成结果；下载阶段容量由独立 permit 管理。
+/// @since Beta v0.13.0
 struct AudioAssetJobCompletion {
   asset_index: usize,
-  needs_download: bool,
   result: Result<(), String>,
 }
 
@@ -739,9 +742,10 @@ fn install_assembly_concurrency(pipeline_concurrency: usize) -> usize {
   pipeline_concurrency.clamp(MIN_ASSEMBLY_CONCURRENCY, MAX_CONCURRENCY)
 }
 
-/// 配音任务窗口：组装槽 + 4 路下载 + 1 路预取。
+/// 配音/更新任务总窗口：组装槽 + 4 路下载 + 1 路预取。
 ///
-/// 下载焦点仍是 4 路；窗口放大是为了组装吃满时下一波已经在下，避免组装空档。
+/// 下载和组装独立计数；总窗口继续限制在途资源以及尚未回收的完成结果。
+/// @since Beta v0.13.0
 fn audio_pipeline_window(pipeline_concurrency: usize) -> usize {
   install_assembly_concurrency(pipeline_concurrency)
     .saturating_add(AUDIO_DOWNLOAD_FOCUS)
@@ -3034,11 +3038,12 @@ fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usi
 }
 
 /// 为指定配音资源生成待下载对象列表；缓存命中或已可用时跳过。
+/// @since Beta v0.13.0
 fn prepare_audio_asset_job(
   plan: &PersistedPlan,
   asset_index: usize,
   dependencies: &[Vec<usize>],
-  available_downloads: &mut HashSet<usize>,
+  available_downloads: &HashSet<usize>,
 ) -> AudioAssetJob {
   let pending = dependencies
     .get(asset_index)
@@ -3156,6 +3161,7 @@ async fn assemble_audio_asset(
 /// @since Beta v0.13.0
 async fn run_audio_asset_job(
   job: AudioAssetJob,
+  stage: PipelineStagePermit,
   events: TaskEventDispatcher,
   task_root: PathBuf,
   cache_root: PathBuf,
@@ -3280,6 +3286,8 @@ async fn run_audio_asset_job(
         }
       }
     }
+    // 下载名额在进入组装前释放，唤醒调度器预取下一资源。
+    stage.mark_ready();
     let resumed_fallback = {
       let value = journal.lock().await;
       value.fallback_assets.contains(&asset_index)
@@ -3307,6 +3315,7 @@ async fn run_audio_asset_job(
       .await?
     };
     if let assembler::AssetAssemblyOutcome::FallbackRequired(reason) = outcome {
+      stage.mark_downloading();
       let fallback_plan = fallback_asset_plan(&plan, asset_index)?;
       {
         let activation_guard = {
@@ -3409,6 +3418,7 @@ async fn run_audio_asset_job(
         events.publish_progress(overlay.overlay(&value));
       }
       drop(_focus);
+      stage.mark_ready();
       match assemble_audio_asset(
         events,
         task_root,
@@ -3437,7 +3447,7 @@ async fn run_audio_asset_job(
     Ok(())
   }
   .await;
-  AudioAssetJobCompletion { asset_index, needs_download, result }
+  AudioAssetJobCompletion { asset_index, result }
 }
 
 /// 按磁盘现状重建配音删除进度：游戏目录已缺失的条目视为完成，仍存在的继续删除。
@@ -3992,7 +4002,6 @@ async fn run_streaming_prepare_task(
   let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
   // 子任务必须独立调度：公平 journal 锁的队列头不能依赖正在等待同一锁的父任务继续 poll。
   let mut jobs = JoinSet::new();
-  let mut inflight_downloads = 0_usize;
   let mut pipeline_error = None;
   // 删除只移动游戏目录中待移除的语音文件（移入备份），与下载（缓存）、组装
   // （incoming）路径互不冲突；与下载/组装并发执行，避免串行拖长准备阶段。
@@ -4001,38 +4010,39 @@ async fn run_streaming_prepare_task(
   let mut delete_jobs = JoinSet::new();
   let max_assembly = install_assembly_concurrency(concurrency);
   let max_in_flight = audio_pipeline_window(concurrency);
+  let scheduler = PipelineScheduler::new(
+    max_assembly,
+    AUDIO_DOWNLOAD_FOCUS.saturating_add(AUDIO_DOWNLOAD_PREFETCH),
+  );
 
   loop {
     if pipeline_error.is_none()
       && !paused.load(Ordering::Acquire)
       && !canceled.load(Ordering::Acquire)
     {
-      while let Some(asset_index) =
-        (0..plan.assets.len()).find(|index| !scheduled_assets.contains(index))
-      {
-        let job = {
-          let mut available = available_downloads.lock().unwrap();
-          prepare_audio_asset_job(&plan, asset_index, &dependencies, &mut available)
+      while jobs.len() < max_in_flight {
+        let next = {
+          let available = available_downloads.lock().unwrap();
+          let candidates =
+            (0..plan.assets.len()).filter(|index| !scheduled_assets.contains(index)).map(|index| {
+              let needs_download = dependencies[index].iter().any(|item| !available.contains(item));
+              (index, needs_download)
+            });
+          scheduler.try_reserve_next(candidates).map(|(index, stage)| {
+            (prepare_audio_asset_job(&plan, index, &dependencies, &available), stage)
+          })
         };
-        let needs_download = !job.pending.is_empty();
-        if needs_download && inflight_downloads >= max_in_flight {
+        let Some((job, stage)) = next else {
           break;
-        }
-        if !needs_download && jobs.len() >= max_assembly {
-          break;
-        }
-        if jobs.len() >= max_in_flight {
-          break;
-        }
+        };
+        let asset_index = job.asset_index;
         scheduled_assets.insert(asset_index);
-        if needs_download {
-          inflight_downloads = inflight_downloads.saturating_add(1);
-        }
         spawn_pipeline_job(
           &mut jobs,
           &plan.plan_id,
           run_audio_asset_job(
             job,
+            stage,
             events.clone(),
             task_root.clone(),
             cache_root.clone(),
@@ -4104,9 +4114,6 @@ async fn run_streaming_prepare_task(
             continue;
           }
         };
-        if completion.needs_download {
-          inflight_downloads = inflight_downloads.saturating_sub(1);
-        }
         match completion.result {
           Ok(()) => {
             completed_assets.insert(completion.asset_index);
@@ -4156,6 +4163,7 @@ async fn run_streaming_prepare_task(
           pipeline_error.get_or_insert(error);
         }
       }
+      () = scheduler.changed() => {}
     }
   }
 
