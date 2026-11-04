@@ -513,9 +513,15 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     await addGameInstallDefenderExclusions(installId, planId);
   }
 
+  /**
+   * 取消未启动的安装草稿；草稿已被取消清理时同样视为完成。
+   * @since Beta v0.13.0
+   * @param draft - 安装草稿摘要
+   * @returns 已取消的草稿摘要；草稿已被取消清理时为 null
+   */
   async function cancelInstallDraft(
     draft: TGApp.Game.Installation.InstallDraftSummary,
-  ): Promise<TGApp.Game.Installation.InstallDraftSummary> {
+  ): Promise<TGApp.Game.Installation.InstallDraftSummary | null> {
     setPending(draft.draftId, true);
     try {
       return await cancelGameInstallDraft(draft.installId);

@@ -71,6 +71,7 @@ type Props = {
 };
 
 type ThroughputSample = {
+  at: number;
   download: number;
   assembly: number;
   spool: number;
@@ -78,17 +79,26 @@ type ThroughputSample = {
 
 type SampleMetric = "download" | "assembly" | "spool";
 
+type ChartPoint = { x: number; y: number };
+
 const { task } = defineProps<Props>();
 const chartWidth = 600;
 const chartHeight = 120;
 const sampleLimit = 60;
+const windowMs = (sampleLimit - 1) * 1000;
+const pixelPerMs = chartWidth / windowMs;
 const chartGridLines = [0, 30, 60, 90, 120];
 const samples = ref<Array<ThroughputSample>>([]);
 const clockTick = ref<number>(0);
+const frameNow = ref<number>(performance.now());
+const displaySpeedMaximum = ref<number>(1);
+const displaySpoolMaximum = ref<number>(1);
 const downloadCompletedAt = ref<number | null>(null);
 const assemblyCompletedAt = ref<number | null>(null);
 const spoolReleasedAt = ref<number | null>(null);
 let sampleTimer: ReturnType<typeof setInterval> | null = null;
+let frameHandle: number | null = null;
+let lastFrameAt: number | null = null;
 
 const downloadActive = computed<boolean>(
   () => task.state === gameEnum.package.taskState.DOWNLOADING,
@@ -159,31 +169,39 @@ const assemblyChartVisible = computed<boolean>(() => {
 const spoolChartVisible = computed<boolean>(() => {
   return currentSpoolBytes.value > 0 || spoolElapsedMs.value < 5000;
 });
+const renderActive = computed<boolean>(() => {
+  return downloadChartVisible.value || assemblyChartVisible.value || spoolChartVisible.value;
+});
 const assemblyRunning = computed<boolean>(
   () => task.state === gameEnum.package.taskState.ASSEMBLING,
 );
 const speedSampleMaximum = computed<number>(() => {
-  return samples.value.reduce(
-    (value, sample) => Math.max(value, sample.download, sample.assembly),
-    0,
-  );
+  let value = Math.max(currentDownloadSpeed.value, currentAssemblySpeed.value);
+  for (const sample of samples.value) {
+    value = Math.max(value, sample.download, sample.assembly);
+  }
+  return value;
 });
 const spoolSampleMaximum = computed<number>(() => {
-  return samples.value.reduce((value, sample) => Math.max(value, sample.spool), 0);
+  let value = currentSpoolBytes.value;
+  for (const sample of samples.value) {
+    value = Math.max(value, sample.spool);
+  }
+  return value;
 });
-const speedChartMaximum = computed<number>(() => chartMaximum(speedSampleMaximum.value));
-const spoolChartMaximum = computed<number>(() => chartMaximum(spoolSampleMaximum.value));
+const speedTargetMaximum = computed<number>(() => chartMaximum(speedSampleMaximum.value));
+const spoolTargetMaximum = computed<number>(() => chartMaximum(spoolSampleMaximum.value));
 const speedScaleLabel = computed<string>(() =>
-  speedSampleMaximum.value > 0 ? formatSpeed(speedChartMaximum.value) : "等待采样",
+  speedSampleMaximum.value > 0 ? formatSpeed(displaySpeedMaximum.value) : "等待采样",
 );
 const spoolScaleLabel = computed<string>(() =>
-  spoolSampleMaximum.value > 0 ? formatBytes(spoolChartMaximum.value) : "等待采样",
+  spoolSampleMaximum.value > 0 ? formatBytes(displaySpoolMaximum.value) : "等待采样",
 );
-const downloadLinePath = computed<string>(() => createLinePath("download"));
-const assemblyLinePath = computed<string>(() => createLinePath("assembly"));
-const spoolLinePath = computed<string>(() => createLinePath("spool"));
-const downloadAreaPath = computed<string>(() => createAreaPath("download"));
-const assemblyAreaPath = computed<string>(() => createAreaPath("assembly"));
+const downloadLinePath = computed<string>(() => smoothLinePath(metricPoints("download")));
+const assemblyLinePath = computed<string>(() => smoothLinePath(metricPoints("assembly")));
+const spoolLinePath = computed<string>(() => smoothLinePath(metricPoints("spool")));
+const downloadAreaPath = computed<string>(() => smoothAreaPath(metricPoints("download")));
+const assemblyAreaPath = computed<string>(() => smoothAreaPath(metricPoints("assembly")));
 const downloadRemaining = computed<string>(() => {
   if (downloadDone.value) return task.totalBytes === 0 ? "已使用缓存" : "下载完成";
   if (task.etaSeconds === null) {
@@ -215,6 +233,8 @@ watch(
   () => task.taskId,
   () => {
     samples.value = [];
+    displaySpeedMaximum.value = speedTargetMaximum.value;
+    displaySpoolMaximum.value = spoolTargetMaximum.value;
     downloadCompletedAt.value = downloadDone.value ? Date.now() : null;
     assemblyCompletedAt.value = assemblyDone.value ? Date.now() : null;
     spoolReleasedAt.value = currentSpoolBytes.value > 0 ? null : Date.now();
@@ -244,63 +264,142 @@ watch(
   { immediate: true },
 );
 
+watch(renderActive, (active) => {
+  if (active) startRenderLoop();
+  else stopRenderLoop();
+});
+
 onMounted(() => {
   sampleTimer = setInterval(() => {
     clockTick.value += 1;
     appendSample();
   }, 1000);
+  if (renderActive.value) startRenderLoop();
 });
 
 onUnmounted(() => {
   if (sampleTimer !== null) clearInterval(sampleTimer);
+  stopRenderLoop();
 });
 
 function appendSample(): void {
+  const at = performance.now();
   const next: ThroughputSample = {
+    at,
     download: currentDownloadSpeed.value,
     assembly: currentAssemblySpeed.value,
     spool: currentSpoolBytes.value,
   };
-  samples.value = [...samples.value.slice(-(sampleLimit - 1)), next];
+  const cutoff = at - windowMs - 2000;
+  const retained = samples.value.filter((sample) => sample.at >= cutoff);
+  samples.value = [...retained.slice(-(sampleLimit - 1)), next];
 }
 
-function createLinePath(metric: SampleMetric): string {
-  if (samples.value.length === 0) return "";
-  return samples.value
-    .map((sample, index) => {
-      const point = samplePoint(sample, index, metric);
-      return `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-    })
-    .join(" ");
+function startRenderLoop(): void {
+  if (frameHandle !== null) return;
+  frameHandle = requestAnimationFrame(renderFrame);
 }
 
-function createAreaPath(metric: SampleMetric): string {
-  if (samples.value.length === 0) return "";
-  const first = samplePoint(samples.value[0], 0, metric);
-  const last = samplePoint(
-    samples.value[samples.value.length - 1],
-    samples.value.length - 1,
-    metric,
+function stopRenderLoop(): void {
+  if (frameHandle === null) return;
+  cancelAnimationFrame(frameHandle);
+  frameHandle = null;
+  lastFrameAt = null;
+}
+
+function renderFrame(time: number): void {
+  frameHandle = null;
+  // 帧间隔截断，页面从后台恢复时 y 轴缓动不会一帧跳变。
+  const elapsed = lastFrameAt === null ? 0 : Math.min(100, time - lastFrameAt);
+  lastFrameAt = time;
+  frameNow.value = time;
+  displaySpeedMaximum.value = easeMaximum(
+    displaySpeedMaximum.value,
+    speedTargetMaximum.value,
+    elapsed,
   );
-  const points = samples.value
-    .map((sample, index) => {
-      const point = samplePoint(sample, index, metric);
-      return `L ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-    })
-    .join(" ");
-  return `M ${first.x.toFixed(2)} ${chartHeight} ${points} L ${last.x.toFixed(2)} ${chartHeight} Z`;
+  displaySpoolMaximum.value = easeMaximum(
+    displaySpoolMaximum.value,
+    spoolTargetMaximum.value,
+    elapsed,
+  );
+  if (renderActive.value) startRenderLoop();
 }
 
-function samplePoint(
-  sample: ThroughputSample,
-  index: number,
-  metric: SampleMetric,
-): { x: number; y: number } {
-  const step = chartWidth / (sampleLimit - 1);
-  const x = chartWidth - (samples.value.length - 1 - index) * step;
-  const maximum = metric === "spool" ? spoolChartMaximum.value : speedChartMaximum.value;
+// 放大快、缩小慢：尖峰尽快腾出空间，样本滑出窗口后缓慢回落，避免来回抖动。
+function easeMaximum(current: number, target: number, elapsedMs: number): number {
+  if (target === current || elapsedMs === 0) return current;
+  const tau = target > current ? 240 : 1200;
+  const next = current + (target - current) * (1 - Math.exp(-elapsedMs / tau));
+  return Math.abs(target - next) <= target * 0.001 ? target : next;
+}
+
+function metricPoints(metric: SampleMetric): Array<ChartPoint> {
+  const now = frameNow.value;
+  const points = samples.value.map((sample) => samplePoint(sample, metric, now));
+  points.push(headPoint(metric));
+  return points;
+}
+
+function samplePoint(sample: ThroughputSample, metric: SampleMetric, now: number): ChartPoint {
+  const x = chartWidth - (now - sample.at) * pixelPerMs;
+  const maximum = metric === "spool" ? displaySpoolMaximum.value : displaySpeedMaximum.value;
   const ratio = Math.min(1, sample[metric] / maximum);
   return { x, y: chartHeight - ratio * chartHeight };
+}
+
+// 头部点取实时值并固定在右缘，采样点随时间向左滑动，形成连续移动的曲线。
+function headPoint(metric: SampleMetric): ChartPoint {
+  const value =
+    metric === "download"
+      ? currentDownloadSpeed.value
+      : metric === "assembly"
+        ? currentAssemblySpeed.value
+        : currentSpoolBytes.value;
+  const maximum = metric === "spool" ? displaySpoolMaximum.value : displaySpeedMaximum.value;
+  const ratio = Math.min(1, value / maximum);
+  return { x: chartWidth, y: chartHeight - ratio * chartHeight };
+}
+
+// Catmull-Rom 转三次贝塞尔，让折线成为经过每个采样点的平滑曲线。
+function smoothLinePath(points: Array<ChartPoint>): string {
+  if (points.length === 0) return "";
+  let path = `M ${formatPoint(points[0])}`;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    path += ` ${curveSegment(points, index)}`;
+  }
+  return path;
+}
+
+function smoothAreaPath(points: Array<ChartPoint>): string {
+  if (points.length < 2) return "";
+  const first = points[0];
+  const last = points[points.length - 1];
+  let path = `M ${first.x.toFixed(2)} ${chartHeight} L ${formatPoint(first)}`;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    path += ` ${curveSegment(points, index)}`;
+  }
+  return `${path} L ${last.x.toFixed(2)} ${chartHeight} Z`;
+}
+
+function curveSegment(points: Array<ChartPoint>, index: number): string {
+  const previous = points[Math.max(0, index - 1)];
+  const current = points[index];
+  const next = points[index + 1];
+  const after = points[Math.min(points.length - 1, index + 2)];
+  const control1: ChartPoint = {
+    x: current.x + (next.x - previous.x) / 6,
+    y: current.y + (next.y - previous.y) / 6,
+  };
+  const control2: ChartPoint = {
+    x: next.x - (after.x - current.x) / 6,
+    y: next.y - (after.y - current.y) / 6,
+  };
+  return `C ${formatPoint(control1)} ${formatPoint(control2)} ${formatPoint(next)}`;
+}
+
+function formatPoint(point: ChartPoint): string {
+  return `${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
 }
 
 function chartMaximum(value: number): number {

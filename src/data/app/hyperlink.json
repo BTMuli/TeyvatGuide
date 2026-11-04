@@ -505,9 +505,19 @@
     "desc": "触发星超导反应时，附近的区域会短暂变化为<color=#FFD780FF>极星辉域</color>；处于极星辉域中时，特定角色将会进入<color=#FFD780FF>辉映·星超导</color>状态，使其不同技能分别获得对应的强化效果。"
   },
   {
+    "id": 11360001,
+    "name": "递变信标",
+    "desc": "米提亚在队伍中时，触发星超导反应时，将不会创造<color=#FFD780FF>星辉棱晶</color>，而是会转而创造持续6秒的<color=#FFD780FF>递变信标</color>。米提亚可以消耗<color=#FFD780FF>递变信标</color>，触发各种各样的效果。\n<color=#FFD780FF>递变信标</color>会跟随当前场上角色，并在创造<color=#FFD780FF>递变信标</color>时将其附近更大的区域变换为<color=#FFD780FF>极星辉域</color>。米提亚可以携带多枚<color=#FFD780FF>递变信标</color>，初始最多携带4枚。创造<color=#FFD780FF>递变信标</color>时，将会重置所有<color=#FFD780FF>递变信标</color>的持续时间。"
+  },
+  {
+    "id": 11360002,
+    "name": "侦测炉心",
+    "desc": "施放元素战技后创造的能源装置。点按可以创造<color=#FFD780FF>稳态</color>的炉心，长按可以创造<color=#FFD780FF>过载</color>的炉心。\n\n<color=#FFD780FF>侦测炉心·稳态</color>\n·将持续跟随周围的敌人，并间歇性造成<color=#FFACFFFF>雷元素范围伤害</color>；\n·当米提亚<color=#FFD780FF>递变信标</color>达到可携带上限时，新生成的<color=#FFD780FF>递变信标</color>将会被该装置消耗，并造成视为星超导反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>；\n·持续时间结束时，或重新创造<color=#FFD780FF>侦测炉心</color>时，将消耗所有携带的<color=#FFD780FF>递变信标</color>，并依据消耗的数量，造成视为星超导反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n\n<color=#FFD780FF>侦测炉心·过载</color>\n·该装置存在且米提亚拥有至少一枚<color=#FFD780FF>递变信标</color>时，米提亚可以进行不消耗体力的特殊重击<color=#FFD780FF>递变聚爆</color>。"
+  },
+  {
     "id": 11400001,
     "name": "领唱",
-    "desc": "队伍中自己的当前场上角色的普通攻击、重击、下落攻击、元素战技或元素爆发造成<color=#80C0FFFF>水元素伤害</color>或<color=#99FFFFFF>冰元素伤害</color>时，将消耗一层「领唱」，提升造成的伤害；若当前场上存在流荡风旋，或处于流荡风旋引爆后的5秒内，则改为角色造成星扩散反应伤害时才会触发上述效果。\n基于沃雅妮莎生命值上限超过{PARAM#P1402201|3S1}的部分，每1000点生命值上限都会使上述效果中的星扩散反应伤害提升{PARAM#P1402201|4S1}点，<color=#80C0FFFF>水元素伤害</color>与<color=#99FFFFFF>冰元素伤害</color>提升{PARAM#P1402201|5S1}点；通过这种方式，至多使星扩散反应伤害提升{PARAM#P1402201|6S1}点，<color=#80C0FFFF>水元素伤害</color>与<color=#99FFFFFF>冰元素伤害</color>提升{PARAM#P1402201|7S1}点。"
+    "desc": "队伍中自己的当前场上角色的普通攻击、重击、下落攻击、元素战技或元素爆发造成<color=#80C0FFFF>水元素伤害</color>或<color=#99FFFFFF>冰元素伤害</color>时，将消耗一层「领唱」，提升造成的伤害；若当前场上存在流荡风旋，或处于流荡风旋引爆后的5秒内，则改为角色造成星扩散反应伤害时才会触发上述效果。\n基于沃雅妮莎生命值上限超过{PARAM#P1402201|3S1:I}的部分，每1000点生命值上限都会使上述效果中的星扩散反应伤害提升{PARAM#P1402201|4S1}点，<color=#80C0FFFF>水元素伤害</color>与<color=#99FFFFFF>冰元素伤害</color>提升{PARAM#P1402201|5S1}点；通过这种方式，至多使星扩散反应伤害提升{PARAM#P1402201|6S1:I}点，<color=#80C0FFFF>水元素伤害</color>与<color=#99FFFFFF>冰元素伤害</color>提升{PARAM#P1402201|7S1:I}点。"
   },
   {
     "id": 11400002,
@@ -568,5 +578,20 @@
     "id": 11480002,
     "name": "图加林",
     "desc": "深受阿罗夏信赖的猎犬伙伴，可以通过施放元素爆发<color=#FFD780FF>守猎进踞</color>召唤至场上，会间歇性快速移动至一名敌人附近，对其进行撕咬攻击，并激活已有的<color=#FFD780FF>弋猎印记</color>。"
+  },
+  {
+    "id": 11370001,
+    "name": "臼炮直射·抵近轰击",
+    "desc": "瓦列里的特殊重击。拥有至少40点<color=#FFD780FF>冲击势能</color>时进行重击，会消耗所有<color=#FFD780FF>冲击势能</color>，改为进行该特殊重击，对前方造成<color=#FFACFFFF>雷元素范围伤害</color>，并获得15层<color=#FFD780FF>攻斥指令</color>。\n再次施放特殊重击时，<color=#FFD780FF>攻斥指令</color>的层数将会刷新。\n施放元素战技<color=#FFD780FF>攻势防御·堡垒骤进</color>或元素爆发<color=#FFD780FF>火力焦点·雷霰急袭</color>后的0.8秒内，若瓦列里拥有至少40点<color=#FFD780FF>冲击势能</color>，则瓦列里进行的下一次普通攻击将会转为进行特殊重击<color=#FFD780FF>臼炮直射·抵近轰击</color>。"
+  },
+  {
+    "id": 11370002,
+    "name": "攻斥指令",
+    "desc": "瓦列里进行特殊重击<color=#FFD780FF>臼炮直射·抵近轰击</color>后，会获得的特殊效果。依据瓦列里是否处于<color=#FFD780FF>辉映·星超导</color>状态，提升不同类型的<color=#FFACFFFF>雷元素伤害</color>。若瓦列里：\n·处于<color=#FFD780FF>辉映·星超导</color>状态：队伍中附近的当前场上角色的普通攻击、重击、下落攻击、元素战技或元素爆发对敌人造成视为星超导反应伤害的<color=#FFACFFFF>雷元素伤害</color>时，将消耗一层<color=#FFD780FF>攻斥指令</color>，提升造成的伤害，提升值基于瓦列里的攻击力；\n·不处于<color=#FFD780FF>辉映·星超导</color>状态：队伍中附近的当前场上角色的普通攻击、重击、下落攻击、元素战技或元素爆发对敌人造成<color=#FFACFFFF>雷元素伤害</color>时，将消耗一层<color=#FFD780FF>攻斥指令</color>，提升造成的伤害，提升值基于瓦列里的攻击力。\n一次<color=#FFACFFFF>雷元素伤害</color>同时命中多名敌人时，会依据命中敌人的数量消耗<color=#FFD780FF>攻斥指令</color>的层数。"
+  },
+  {
+    "id": 11370003,
+    "name": "冲击势能",
+    "desc": "瓦列里用于强化战斗的特殊能量，初始上限为100点。拥有至少40点<color=#FFD780FF>冲击势能</color>时，可以进行特殊重击<color=#FFD780FF>臼炮直射·抵近轰击</color>。\n瓦列里可以通过以下方式获取<color=#FFD780FF>冲击势能</color>：\n·施放元素战技<color=#FFD780FF>攻势防御·堡垒骤进</color>时；\n·解锁突破天赋「与徐进弹幕为伴」后，元素爆发<color=#FFD780FF>火力焦点·雷霰急袭</color>持续期间，队伍中附近的当前场上角色的元素类型为<color=#FFACFFFF>雷元素</color>的攻击命中敌人时。"
   }
 ]

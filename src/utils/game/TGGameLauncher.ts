@@ -329,16 +329,19 @@ export async function listGameInstallDrafts(): Promise<
 
 /**
  * 取消只完成评估、尚未启动任务的安装草稿。
- * @since Beta v0.12.0
+ * @since Beta v0.13.0
  * @param installId - 安装身份
- * @returns 已取消的草稿摘要
+ * @returns 已取消的草稿摘要；草稿已被取消清理（如安装任务收尾）时为 null
  */
 export async function cancelGameInstallDraft(
   installId: string,
-): Promise<TGApp.Game.Installation.InstallDraftSummary> {
-  return await invoke<TGApp.Game.Installation.InstallDraftSummary>("game_install_draft_cancel", {
-    installId,
-  });
+): Promise<TGApp.Game.Installation.InstallDraftSummary | null> {
+  return await invoke<TGApp.Game.Installation.InstallDraftSummary | null>(
+    "game_install_draft_cancel",
+    {
+      installId,
+    },
+  );
 }
 
 export async function createGameInstallPlan(
