@@ -13,7 +13,6 @@ const mocks = vi.hoisted(() => ({
   startTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
   applyTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
   recoverTask: vi.fn<() => Promise<TGApp.Game.Package.TaskSummary>>(),
-  ensureDefender: vi.fn<(planId: string, confirmLabel?: string) => Promise<void>>(),
   listen:
     vi.fn<
       (name: string, callback: EventCallback<TGApp.Game.Package.TaskSummary>) => Promise<UnlistenFn>
@@ -26,7 +25,6 @@ vi.mock("@utils/game/TGGameLauncher.js", () => ({
   startGamePackageTask: mocks.startTask,
   applyGamePackageTask: mocks.applyTask,
   recoverGamePackageTask: mocks.recoverTask,
-  ensureGamePackageDefenderExclusions: mocks.ensureDefender,
 }));
 vi.mock("@tauri-apps/api/event", () => ({
   listen: mocks.listen,
@@ -115,8 +113,6 @@ beforeEach(async () => {
   mocks.startTask.mockReset();
   mocks.applyTask.mockReset();
   mocks.recoverTask.mockReset();
-  mocks.ensureDefender.mockReset();
-  mocks.ensureDefender.mockResolvedValue(undefined);
   mocks.listen.mockReset();
   mocks.listen.mockImplementation(async (name, callback) => {
     mocks.listeners.set(name, callback);
@@ -129,99 +125,6 @@ beforeEach(async () => {
   setActivePinia(pinia);
   store = useGameLauncherStore();
   await store.startListening();
-});
-
-/**
- * 构造正式更新的可执行计划摘要。
- * @since Beta v0.13.0
- */
-function createPlan(): TGApp.Game.Package.PlanSummary {
-  return {
-    planId: "task-a",
-    installationId: "install-a",
-    target: "main",
-    sourceTag: "1.0.0",
-    targetTag: "2.0.0",
-    manifestDigest: "manifest",
-    strategy: "manifest_diff",
-    downloadBytes: 100,
-    installBytes: 100,
-    deleteBytes: 0,
-    cacheHitBytes: 0,
-    requiredFreeBytes: 200,
-    availableFreeBytes: 1000,
-    hasSufficientSpace: true,
-    cacheHasSufficientSpace: true,
-    installHasSufficientSpace: true,
-    cacheRequiredFreeBytes: 100,
-    installRequiredFreeBytes: 100,
-    cacheAvailableFreeBytes: 1000,
-    installAvailableFreeBytes: 1000,
-    cacheStorageAvailableFreeBytes: 1000,
-    sameVolume: true,
-    downloadCount: 1,
-    addCount: 1,
-    modifyCount: 0,
-    deleteCount: 0,
-    sourceAudioLanguages: ["zh-cn"],
-    targetAudioLanguages: ["zh-cn"],
-  };
-}
-
-describe("更新 Defender 排除前置检查", () => {
-  it.each(<const>["start", "apply", "resume"])("%s 等待排除登记完成后才执行", async (action) => {
-    let allowDefender: () => void = () => {};
-    mocks.ensureDefender.mockReturnValue(new Promise<void>((resolve) => (allowDefender = resolve)));
-    mocks.startTask.mockResolvedValue(createTask());
-    mocks.applyTask.mockResolvedValue(createTask());
-    mocks.recoverTask.mockResolvedValue(createTask());
-
-    const pending =
-      action === "start"
-        ? store.startTask(createPlan())
-        : action === "apply"
-          ? store.applyTask("task-a")
-          : store.recoverTask("task-a", "resume");
-    await Promise.resolve();
-    expect(mocks.ensureDefender.mock.calls[0]?.[0]).toBe("task-a");
-    expect(mocks.startTask).not.toHaveBeenCalled();
-    expect(mocks.applyTask).not.toHaveBeenCalled();
-    expect(mocks.recoverTask).not.toHaveBeenCalled();
-    allowDefender();
-    await pending;
-    const operation =
-      action === "start"
-        ? mocks.startTask
-        : action === "apply"
-          ? mocks.applyTask
-          : mocks.recoverTask;
-    expect(operation).toHaveBeenCalledOnce();
-  });
-
-  it.each(<const>["start", "apply", "resume"])(
-    "%s 排除未就绪时阻止实际任务并释放忙碌状态",
-    async (action) => {
-      mocks.ensureDefender.mockRejectedValue(new Error("UAC 已取消"));
-      const pending =
-        action === "start"
-          ? store.startTask(createPlan())
-          : action === "apply"
-            ? store.applyTask("task-a")
-            : store.recoverTask("task-a", "resume");
-      await expect(pending).rejects.toThrow("UAC 已取消");
-      expect(mocks.startTask).not.toHaveBeenCalled();
-      expect(mocks.applyTask).not.toHaveBeenCalled();
-      expect(mocks.recoverTask).not.toHaveBeenCalled();
-      expect(Object.values(store.pendingActions)).not.toContain(true);
-    },
-  );
-
-  it("回滚不要求重新添加排除", async () => {
-    mocks.recoverTask.mockResolvedValue(createTask({ state: "abandoned" }));
-    await store.recoverTask("task-a", "rollback");
-    expect(mocks.ensureDefender).not.toHaveBeenCalled();
-    expect(mocks.recoverTask).toHaveBeenCalledOnce();
-  });
 });
 
 afterEach(() => {

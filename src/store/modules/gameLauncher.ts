@@ -7,7 +7,6 @@ import gameEnum from "@enum/game.js";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
-  addGameInstallDefenderExclusions,
   applyGamePackageSwitch,
   applyGamePackageTask,
   cancelGamePackageTask,
@@ -17,15 +16,12 @@ import {
   clearGamePackageVerify,
   cancelGameInstall,
   createGameInstallPlan,
-  ensureGamePackageDefenderExclusions,
   getGamePackageVerifyStatus,
-  hasGameInstallDefenderExclusions,
   listGamePackageTasks,
   pauseGameInstall,
   pauseGamePackageTask,
   recoverGamePackageTask,
   recoverGameInstall,
-  removeGameInstallDefenderExclusions,
   removeGamePackageTask,
   startGameInstall,
   startGamePackageTask,
@@ -497,7 +493,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 启动游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * 启动游戏资源任务。
    * @since Beta v0.13.0
    * @param plan - 已固化的资源计划
    * @returns 启动后的任务投影
@@ -507,7 +503,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   ): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(plan.installationId, true);
     try {
-      await ensureGamePackageDefenderExclusions(plan.planId);
       const task = await startGamePackageTask(plan.planId);
       mergeTask(task);
       return task;
@@ -546,18 +541,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         draft.state === gameEnum.installation.draftState.PLANNED
       ) {
         const planId = draft.planId ?? (await createGameInstallPlan(draft.installId)).planId;
-        await ensureInstallDefenderRegistry(draft.installId, planId);
-        try {
-          const task = await startGameInstall(draft.installId, planId);
-          mergeTask(task);
-          return task;
-        } catch (error) {
-          void removeGameInstallDefenderExclusions(planId).catch(() => {});
-          throw error;
-        }
+        const task = await startGameInstall(draft.installId, planId);
+        mergeTask(task);
+        return task;
       }
       if (draft.planId === null) throw new Error("安装草稿缺少可恢复的安装计划");
-      await ensureInstallDefenderRegistry(draft.installId, draft.planId);
       const task = await recoverGameInstall(
         draft.planId,
         draft.installId,
@@ -568,11 +556,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     } finally {
       setPending(draft.draftId, false);
     }
-  }
-
-  async function ensureInstallDefenderRegistry(installId: string, planId: string): Promise<void> {
-    if (await hasGameInstallDefenderExclusions(planId)) return;
-    await addGameInstallDefenderExclusions(installId, planId);
   }
 
   /**
@@ -641,7 +624,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 应用已下载的游戏资源任务，并在正式更新前完成 Defender 排除登记。
+   * 应用已下载的游戏资源任务。
    * @since Beta v0.13.0
    * @param taskId - 资源任务 ID
    * @returns 应用开始后的任务投影
@@ -649,7 +632,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   async function applyTask(taskId: string): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(taskId, true);
     try {
-      await ensureGamePackageDefenderExclusions(taskId, "添加排除并应用更新");
       const task = await applyGamePackageTask(taskId);
       mergeTask(task);
       return task;
@@ -670,7 +652,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   /**
-   * 恢复游戏资源任务；继续动作会先完成 Defender 排除登记。
+   * 恢复游戏资源任务。
    * @since Beta v0.13.0
    * @param taskId - 资源任务 ID
    * @param action - 恢复动作
@@ -683,9 +665,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     setPending(taskId, true);
     setRecoveryProgress(taskId, null);
     try {
-      if (action === gameEnum.package.recoveryAction.RESUME) {
-        await ensureGamePackageDefenderExclusions(taskId, "添加排除并恢复更新");
-      }
       const task = await recoverGamePackageTask(taskId, action, (progress) => {
         setRecoveryProgress(taskId, progress);
       });
