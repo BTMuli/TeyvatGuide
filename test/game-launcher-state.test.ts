@@ -316,6 +316,33 @@ describe("游戏任务状态对账", () => {
     expect(store.tasksByInstallation["install-a"]).toBeUndefined();
   });
 
+  it("隐藏已取消的全新安装任务投影", () => {
+    emitTask(createTask({ target: "install", state: "canceled" }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后移除已有任务投影", () => {
+    emitTask(createTask({ target: "install" }));
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("忽略进度通道中已取消的全新安装任务", () => {
+    emitTask(createTask({ target: "install", state: "canceled" }), true);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("保留已取消的更新任务以便安全恢复", () => {
+    emitTask(createTask({ state: "canceled" }));
+    expect(store.tasksByInstallation["install-a"]?.state).toBe("canceled");
+  });
+
+  it("对账时跳过已取消的全新安装任务", async () => {
+    mocks.listTasks.mockResolvedValue([createTask({ target: "install", state: "canceled" })]);
+    await store.hydrateTasks();
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
   it("监听初始化部分失败时清理已注册的监听", async () => {
     store.stopListening();
     mocks.listen.mockRejectedValueOnce(new Error("state listen failed"));

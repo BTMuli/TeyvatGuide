@@ -101,6 +101,23 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     return task.state === gameEnum.package.taskState.ABANDONED;
   }
 
+  /**
+   * 判断任务是否不再进入任务面板。
+   *
+   * 全新安装取消时草稿与暂存目录已被删除，没有可恢复内容；继续保留投影会渲染出
+   * 依赖安装草稿的恢复与放弃入口。
+   * @since Beta v0.13.0
+   * @param task - 资源任务投影
+   * @returns 是否从任务面板隐藏
+   */
+  function shouldHideTask(task: TGApp.Game.Package.TaskSummary): boolean {
+    if (shouldHideAbandonedTask(task)) return true;
+    return (
+      task.target === gameEnum.package.planTarget.INSTALL &&
+      task.state === gameEnum.package.taskState.CANCELED
+    );
+  }
+
   function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
     if (task.state !== gameEnum.package.taskState.COMPLETED) return;
     if (task.target === gameEnum.package.planTarget.AUDIO) {
@@ -137,6 +154,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     completedInstallHideTimers.clear();
   }
 
+  /**
+   * 合并单条任务快照；已结束的任务不写入投影。
+   * @since Beta v0.13.0
+   * @param task - 资源任务投影
+   */
   function mergeTask(task: TGApp.Game.Package.TaskSummary): void {
     const pending = pendingProgressByInstallation.get(task.installationId);
     if (pending !== undefined) {
@@ -149,7 +171,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
-    if (shouldHideAbandonedTask(task)) {
+    if (shouldHideTask(task)) {
       removeTaskProjection(task);
       return;
     }
@@ -166,6 +188,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     progressTimer = null;
   }
 
+  /**
+   * 把缓冲的进度快照写入投影，跳过已结束的任务。
+   * @since Beta v0.13.0
+   */
   function flushTaskProgress(): void {
     progressTimer = null;
     if (pendingProgressByInstallation.size === 0) return;
@@ -173,6 +199,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
     let changed = false;
     for (const task of pendingProgressByInstallation.values()) {
+      if (shouldHideTask(task)) continue;
       if (!shouldReplaceTask(next[task.installationId], task)) continue;
       next[task.installationId] = task;
       changed = true;
@@ -346,7 +373,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const task of tasks) {
       if (!latest.has(task.installationId)) latest.set(task.installationId, task);
       if (selected.has(task.installationId)) continue;
-      if (shouldHideAbandonedTask(task) || shouldOmitCompletedInstall(task)) continue;
+      if (shouldHideTask(task) || shouldOmitCompletedInstall(task)) continue;
       selected.set(task.installationId, task);
     }
     let changed = false;

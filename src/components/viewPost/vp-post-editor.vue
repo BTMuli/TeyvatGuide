@@ -1663,8 +1663,9 @@ defineExpose({
 
 .tgpe-editor :deep(.ql-image img) {
   display: block;
-  max-width: 100%;
+  max-width: min(100%, 640px);
   height: auto;
+  max-height: 360px;
   object-fit: contain;
 }
 
