@@ -49,6 +49,8 @@ const showRedeemPreview = ref<boolean>(false);
 const fakeCodes: Array<TGApp.BBS.Navigator.CodeData> = [
   { code: "前瞻福利模拟码", title: "原石 / 菲林 ×100", img: "", to_get_time: "1793764800" },
   { code: "PREVIEW2026", title: "养成材料补给", img: "", to_get_time: "1793764800" },
+  { code: "NETWORK", title: "结果未知", img: "", to_get_time: "1793764800" },
+  { code: "WAITING", title: "尚未发送", img: "", to_get_time: "1793764800" },
   { code: "", title: "尚未公布", img: "", to_get_time: "1793764800" },
 ];
 const fakePreview = computed<TGApp.Game.Redeem.Preview>(() => ({

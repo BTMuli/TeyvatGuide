@@ -3,63 +3,106 @@
   <TOverlay v-model="visible" class="tolc-overlay">
     <div ref="TolcRef" class="tolc-box">
       <TRedeemCode :gid :preview :liveCodes="data.map((item) => item.code)">
-        <template #title
-          ><div class="tolc-title">
-            <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
-            <v-icon
-              data-html2canvas-ignore
-              icon="mdi-share-variant"
-              size="18px"
-              title="share"
-              variant="outlined"
-              @click="shareImg()"
-            /></div
-        ></template>
+        <template #title>
+          <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
+        </template>
+        <template #actions>
+          <v-btn
+            class="tolc-share"
+            icon="mdi-share-variant-outline"
+            title="分享兑换码"
+            aria-label="分享兑换码"
+            :width="32"
+            :height="32"
+            rounded="lg"
+            variant="text"
+            @click="shareImg()"
+          />
+        </template>
         <template #default="{ submit, results, busy, canRedeem, currentCode }">
-          <div class="tolc-info">ActID:{{ props.actId }}</div>
-          <div
-            v-for="(item, index) in props.data"
-            :key="index"
-            class="tolc-list-box"
-            :class="resultClass(results.find((result) => result.code === item.code))"
-          >
-            <div class="tolc-list-icon">
-              <img v-if="item.img === ''" alt="empty" src="/UI/app/empty.webp" />
-              <TMiImg v-else :ori="true" :src="item.img" alt="award" />
-            </div>
-            <div class="tolc-list-info">
-              <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
-              <span v-html="item.title" />
-              <span role="status">{{
-                results.find((result) => result.code === item.code)?.message
-              }}</span>
-              <span title="开放时间">{{ fmtUtil.dateTime(Number(item.to_get_time) * 1000) }}</span>
-            </div>
-            <div class="tolc-list-btn">
-              <v-btn
-                v-if="getRedeemConfig(gid)"
-                data-html2canvas-ignore
-                :disabled="!item.code || busy || !canRedeem"
-                :loading="busy && currentCode === item.code"
-                icon="mdi-gift-outline"
-                title="兑换此码"
-                size="small"
-                variant="tonal"
-                @click="submit([item.code])"
-              />
-              <v-btn
-                :disabled="item.code === ''"
-                data-html2canvas-ignore
-                icon="mdi-content-copy"
-                size="small"
-                variant="outlined"
-                @click="copy(item.code)"
-              />
+          <div class="tolc-list">
+            <div
+              v-for="(item, index) in props.data"
+              :key="index"
+              class="tolc-list-box"
+              :class="resultClass(results.find((result) => result.code === item.code))"
+            >
+              <div class="tolc-list-icon">
+                <img v-if="item.img === ''" alt="" src="/UI/app/empty.webp" />
+                <TMiImg v-else :ori="true" :src="item.img" alt="奖励" />
+              </div>
+              <div class="tolc-list-info">
+                <span class="tolc-code" :title="item.code || '暂无兑换码'">{{
+                  item.code || "暂无兑换码"
+                }}</span>
+                <span class="tolc-reward" v-html="item.title" />
+              </div>
+              <div class="tolc-list-btn" data-html2canvas-ignore>
+                <v-btn
+                  v-if="getRedeemConfig(gid)"
+                  class="tolc-action"
+                  :disabled="!item.code || busy || !canRedeem"
+                  :loading="busy && currentCode === item.code"
+                  icon="mdi-gift-outline"
+                  title="兑换此码"
+                  aria-label="兑换此码"
+                  :width="32"
+                  :height="32"
+                  rounded="lg"
+                  variant="tonal"
+                  @click="submit([item.code])"
+                />
+                <v-btn
+                  class="tolc-action"
+                  :disabled="!item.code"
+                  icon="mdi-content-copy"
+                  title="复制兑换码"
+                  aria-label="复制兑换码"
+                  :width="32"
+                  :height="32"
+                  rounded="lg"
+                  variant="tonal"
+                  @click="copy(item.code)"
+                />
+              </div>
+              <div class="tolc-meta">
+                <span
+                  v-if="!results.some((result) => result.code === item.code)"
+                  class="tolc-time"
+                  title="开放时间"
+                  >{{ fmtUtil.dateTime(Number(item.to_get_time) * 1000) }}</span
+                >
+                <span
+                  v-for="result in results.filter((result) => result.code === item.code)"
+                  :key="result.code"
+                  class="tolc-result"
+                  :title="result.message"
+                  role="status"
+                >
+                  <v-icon
+                    :icon="
+                      result.retcode === 0
+                        ? 'mdi-check-circle-outline'
+                        : result.retcode === -1
+                          ? 'mdi-help-circle-outline'
+                          : result.retcode === -2
+                            ? 'mdi-minus-circle-outline'
+                            : 'mdi-alert-circle-outline'
+                    "
+                    size="14"
+                  />
+                  <span>{{ result.message }}</span>
+                </span>
+              </div>
             </div>
           </div>
-          <div v-if="props.data.length === 0">暂无兑换码数据</div>
+          <div v-if="!props.data.length" class="tolc-empty">
+            <v-icon icon="mdi-ticket-outline" size="28" />
+            <span>暂无兑换码数据</span>
+          </div>
         </template>
       </TRedeemCode>
+      <div v-if="actId" class="tolc-info">ActID: {{ actId }}</div>
     </div>
   </TOverlay>
 </template>
@@ -111,25 +154,43 @@ async function copy(code: string): Promise<void> {
 
 function resultClass(result?: TGApp.Game.Redeem.Result): string {
   if (!result) return "";
-  return result.retcode === 0 ? "tolc-success" : "tolc-failure";
+  if (result.retcode === 0) return "tolc-success";
+  if (result.retcode === -1) return "tolc-unknown";
+  if (result.retcode === -2) return "tolc-pending";
+  return "tolc-failure";
 }
 
 async function shareImg(): Promise<void> {
-  if (tolcEl.value === null) {
+  const element = tolcEl.value;
+  if (element === null) {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `LiveCode_${props.gid}_${props.actId}_${new Date().getTime()}`;
-  await generateShareImg(fileName, tolcEl.value, 4);
+  // 仅展开截图副本，屏幕上的浮窗继续保持滚动和原有位置。
+  const clone = element.cloneNode(true);
+  if (!(clone instanceof HTMLElement)) return;
+  Object.assign(clone.style, {
+    position: "fixed",
+    top: "0",
+    left: "0",
+    width: element.getBoundingClientRect().width + "px",
+    height: "auto",
+    maxHeight: "none",
+    overflow: "visible",
+    zIndex: "-1",
+    pointerEvents: "none",
+  });
+  clone.inert = true;
+  document.body.append(clone);
+  try {
+    const fileName = "LiveCode_" + props.gid + "_" + props.actId + "_" + Date.now();
+    await generateShareImg(fileName, clone, 4);
+  } finally {
+    clone.remove();
+  }
 }
 </script>
 <style lang="scss" scoped>
-/** 解决默认样式的上下 margin */
-
-:deep(p) {
-  margin-block: 0;
-}
-
 .tolc-overlay {
   position: fixed;
   z-index: 1;
@@ -138,98 +199,185 @@ async function shareImg(): Promise<void> {
 }
 
 .tolc-box {
-  position: relative;
-  display: flex;
   overflow: auto;
-  width: min(440px, 90vw);
+  width: min(440px, calc(100vw - 32px));
   max-height: 85vh;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 10px 20px;
+  box-sizing: border-box;
+  padding: 12px;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 5px;
+  border-radius: 12px;
   background: var(--app-page-bg);
-  row-gap: 12px;
-}
-
-.tolc-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--common-text-title);
-  column-gap: 5px;
-  font-family: var(--font-title);
-  font-size: 20px;
-  text-align: center;
+  box-shadow: 0 8px 32px var(--common-shadow-t-4);
 }
 
 .tolc-info {
-  position: absolute;
-  z-index: -1;
-  right: 6px;
-  bottom: 2px;
+  margin-top: 8px;
   font-size: 10px;
+  line-height: 16px;
+  opacity: 0.6;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tolc-share,
+.tolc-action {
+  min-width: 32px;
+  color: var(--app-page-content);
+
+  :deep(.v-icon) {
+    font-size: 18px;
+  }
+}
+
+.tolc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .tolc-list-box {
-  position: relative;
-  display: flex;
-  width: 100%;
-  box-sizing: border-box;
-  align-items: flex-start;
-  justify-content: flex-start;
+  display: grid;
+  min-width: 0;
+  align-items: start;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
-  column-gap: 12px;
+  gap: 4px 8px;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
 }
 
 .tolc-list-icon {
-  position: relative;
   display: flex;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
   align-items: center;
   justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 }
 
 .tolc-list-info {
-  position: relative;
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
 
-  :first-child {
-    font-family: var(--font-title);
-  }
+.tolc-code {
+  overflow: hidden;
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  :last-child {
-    font-size: 12px;
+.tolc-reward {
+  font-size: 13px;
+  line-height: 20px;
+
+  :deep(p) {
+    margin: 0;
   }
+}
+
+.tolc-meta {
+  min-width: 0;
+  height: 18px;
+  grid-column: 2 / -1;
+  line-height: 18px;
+}
+
+.tolc-time {
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
 }
 
 .tolc-list-btn {
   display: flex;
-  margin-left: auto;
   gap: 4px;
 }
 
+.tolc-result {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  height: 18px;
+  align-items: center;
+  font-size: 12px;
+  gap: 4px;
+  line-height: 18px;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .v-icon {
+    height: 18px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+}
+
 .tolc-success {
-  border-color: var(--tgc-od-green);
+  .tolc-result .v-icon {
+    color: var(--redeem-success);
+  }
 }
 
 .tolc-failure {
-  border-style: dashed;
+  .tolc-result .v-icon {
+    color: var(--redeem-failure);
+  }
+}
+
+.tolc-unknown {
+  .tolc-result .v-icon {
+    color: var(--redeem-unknown);
+  }
+}
+
+.tolc-pending {
+  .tolc-result {
+    opacity: 0.7;
+  }
+}
+
+.tolc-empty {
+  display: flex;
+  min-height: 120px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  gap: 8px;
+  opacity: 0.7;
+}
+
+@media (width <= 380px) {
+  .tolc-list-box {
+    padding: 8px;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+  }
+
+  .tolc-list-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tolc-list-btn {
+    flex-direction: column;
+  }
 }
 </style>

@@ -21,13 +21,27 @@
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
       </template>
     </TGameNavItem>
-    <v-menu v-if="!hasNav && getRedeemConfig(gid)" :closeOnContentClick="false">
+    <v-menu
+      v-if="!hasNav && getRedeemConfig(gid)"
+      :closeOnContentClick="false"
+      location="bottom start"
+      :offset="8"
+    >
       <template #activator="{ props: menuProps }">
-        <TGameNavItem v-bind="menuProps" :mini class="tgn-nav" label="手动兑换">
-          <template #icon
-            ><v-icon color="var(--tgc-od-orange)" size="28">mdi-code-braces</v-icon></template
-          >
-        </TGameNavItem>
+        <div
+          v-bind="menuProps"
+          class="tgn-redeem-anchor"
+          role="button"
+          tabindex="0"
+          @keydown.enter.prevent="menuProps.onClick"
+          @keydown.space.prevent="menuProps.onClick"
+        >
+          <TGameNavItem :mini class="tgn-nav" label="手动兑换">
+            <template #icon
+              ><v-icon color="var(--tgc-od-orange)" size="28">mdi-code-braces</v-icon></template
+            >
+          </TGameNavItem>
+        </div>
       </template>
       <div class="tgn-redeem"><TRedeemCode :gid /></div>
     </v-menu>
@@ -219,10 +233,28 @@ async function toBBS(link: URL): Promise<void> {
   gap: 8px;
 }
 
+.tgn-redeem-anchor {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--app-page-content);
+    outline-offset: 2px;
+  }
+}
+
 .tgn-redeem {
-  width: min(440px, 90vw);
+  overflow: auto;
+  width: min(380px, calc(100vw - 32px));
+  max-height: 80vh;
+  box-sizing: border-box;
   padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
   background: var(--app-page-bg);
+  box-shadow: 0 4px 16px var(--common-shadow-t-2);
   color: var(--app-page-content);
 }
 
