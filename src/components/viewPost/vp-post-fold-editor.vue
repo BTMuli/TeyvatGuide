@@ -4,6 +4,7 @@
     class="post-fold-editor"
     :class="[`is-${variant}`, { 'is-collapsed': collapsed }]"
   >
+    <span class="post-fold-editor-label">{{ label }}</span>
     <header class="post-fold-editor-header">
       <h3>
         <button
@@ -13,7 +14,13 @@
           type="button"
           @click="collapsed = !collapsed"
         >
-          <span class="post-fold-editor-label">{{ label }}</span>
+          <span
+            v-if="collapsed"
+            :title="variant === 'title' ? summary : undefined"
+            class="post-fold-editor-summary"
+          >
+            {{ summary }}
+          </span>
           <v-icon aria-hidden="true" size="20">
             {{ collapsed ? "mdi-chevron-down" : "mdi-chevron-up" }}
           </v-icon>
@@ -56,7 +63,7 @@
 
 <script lang="ts" setup>
 import { postFoldTitleMaxLength } from "@utils/bbs/postDocument.js";
-import { ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 
 import VpPostEditor from "./vp-post-editor.vue";
 import VpPostTools from "./vp-post-tools.vue";
@@ -79,6 +86,17 @@ const editor = useTemplateRef<InstanceType<typeof VpPostEditor>>("editor");
 const tools = useTemplateRef<InstanceType<typeof VpPostTools>>("tools");
 const collapsed = ref<boolean>(false);
 const uploading = ref<boolean>(false);
+const text = computed<string>(() =>
+  model.value
+    .map((node) => (typeof node.insert === "string" ? node.insert : ""))
+    .join("")
+    .replace(/\n$/u, ""),
+);
+const summary = computed<string>(() =>
+  variant === "title"
+    ? text.value.replace(/\s+/gu, " ").trim() || "未填写标题"
+    : `共 ${text.value.length} 字`,
+);
 
 function handleUploadBusy(busy: boolean): void {
   uploading.value = busy;
@@ -88,41 +106,54 @@ function handleUploadBusy(busy: boolean): void {
 
 <style lang="scss" scoped>
 .post-fold-editor {
+  position: relative;
   display: flex;
-  overflow: hidden;
   min-width: 0;
   flex-direction: column;
   border: 1px solid var(--common-shadow-2);
   border-radius: 8px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
+  isolation: isolate;
 }
 
 .post-fold-editor-header {
+  position: absolute;
+  z-index: 1;
+  top: -12px;
+  right: 8px;
   flex: none;
-  border-bottom: 1px solid var(--common-shadow-1);
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
 }
 
 .post-fold-editor.is-collapsed .post-fold-editor-header {
-  border-bottom: 0;
+  position: static;
+  border: 0;
+  background: transparent;
 }
 
 .post-fold-editor-header h3 {
   margin: 0;
   font-size: inherit;
-  font-weight: inherit;
+  font-weight: 400;
 }
 
 .post-fold-editor-toggle {
   display: flex;
-  width: 100%;
+  width: 24px;
+  min-height: 24px;
+  box-sizing: border-box;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px 4px 12px;
+  justify-content: center;
+  padding: 0;
   border: 0;
+  border-radius: 4px;
   background: transparent;
   color: var(--common-text-title);
   cursor: pointer;
-  font-family: var(--font-title);
+  font-family: var(--font-text);
+  font-weight: 400;
   gap: 8px;
   text-align: left;
 }
@@ -136,20 +167,55 @@ function handleUploadBusy(busy: boolean): void {
   outline-offset: -2px;
 }
 
+.post-fold-editor.is-collapsed .post-fold-editor-toggle {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
 .post-fold-editor-label {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  left: 12px;
+  overflow: hidden;
+  max-width: calc(100% - 56px);
+  padding: 0 4px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-fold-editor-summary {
   overflow: hidden;
   min-width: 0;
   flex: 1 1 auto;
+  color: var(--app-page-content);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.post-fold-editor-toggle :deep(.v-icon) {
+  flex: none;
+}
+
+.post-fold-editor :deep(.tgpe-editor-shell) {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
 .post-fold-editor :deep(.tgpe-editor-shell > .tgpe-toolbar) {
   min-height: 44px;
-  padding: 6px 8px;
+  padding: 12px 8px 6px;
   border-bottom: 1px solid var(--common-shadow-1);
 }
 
@@ -163,7 +229,7 @@ function handleUploadBusy(busy: boolean): void {
 }
 
 .post-fold-editor.is-title :deep(.tgpe-editor-shell .tgpe-editor .ql-editor) {
-  min-height: 80px;
+  min-height: 56px;
   max-height: 120px;
 }
 
