@@ -4,13 +4,12 @@
     :aria-labelledby="titleId"
     :persistent="locked"
     class="vpcd-dialog"
-    eager
     max-height="calc(100dvh - 48px)"
     max-width="calc(100vw - 32px)"
     width="800"
     z-index="80"
   >
-    <section v-if="visible" class="post-component-panel">
+    <section class="post-component-panel">
       <header class="post-component-header">
         <h2 :id="titleId">{{ kind === "vote" ? "投票" : "折叠内容" }}</h2>
         <v-btn
@@ -62,45 +61,54 @@
               variant="outlined"
             />
           </div>
-          <fieldset class="post-component-fieldset">
-            <legend class="post-component-label">投票选项</legend>
-            <div class="post-component-options-box">
-              <div class="post-component-options">
-                <div
-                  v-for="(option, index) in options"
-                  :key="option.id"
-                  class="post-component-option"
-                >
-                  <v-text-field
-                    v-model="option.text"
-                    :disabled="voteFormLocked"
-                    :label="`选项 ${index + 1}`"
-                    density="compact"
-                    variant="outlined"
-                    hide-details
-                  />
-                  <v-btn
-                    :disabled="voteFormLocked || options.length <= 2"
-                    :aria-label="`移除选项 ${index + 1}`"
-                    icon="mdi-close"
-                    size="32"
-                    variant="text"
-                    @click="removeOption(option.id)"
-                  />
-                </div>
-              </div>
+          <div
+            :aria-labelledby="optionsTitleId"
+            class="post-component-options-section"
+            role="group"
+          >
+            <div class="post-component-options-header">
+              <h3 :id="optionsTitleId" class="post-component-label">
+                投票选项<span class="post-component-count">共 {{ options.length }} 项</span>
+              </h3>
               <v-btn
                 :disabled="voteFormLocked"
                 class="post-component-add"
                 prepend-icon="mdi-plus"
                 size="small"
+                type="button"
                 variant="text"
                 @click="addOption"
               >
                 添加选项
               </v-btn>
             </div>
-          </fieldset>
+            <div class="post-component-options-box">
+              <div
+                v-for="(option, index) in options"
+                :key="option.id"
+                class="post-component-option"
+              >
+                <v-text-field
+                  v-model="option.text"
+                  :disabled="voteFormLocked"
+                  :label="`选项 ${index + 1}`"
+                  density="compact"
+                  variant="outlined"
+                  hide-details
+                />
+                <button
+                  v-if="!voteFormLocked && options.length > 2"
+                  :aria-label="`移除选项 ${index + 1}`"
+                  class="post-component-close"
+                  title="移除选项"
+                  type="button"
+                  @click="removeOption(option.id)"
+                >
+                  <v-icon size="14">mdi-close</v-icon>
+                </button>
+              </div>
+            </div>
+          </div>
           <v-text-field
             v-model="endTime"
             :disabled="voteFormLocked"
@@ -228,6 +236,7 @@ const emits = defineEmits<{
 }>();
 const titleId = useId();
 const formId = useId();
+const optionsTitleId = useId();
 const voteTitle = ref<string>("");
 const options = ref<Array<{ id: number; text: string }>>([]);
 const voteLimit = ref<string>("1");
@@ -408,48 +417,89 @@ function saveFold(): void {
   background: var(--app-page-bg);
 }
 
-.post-component-fieldset {
+.post-component-options-section {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  padding: 0;
-  border: 0;
-  margin: 0;
   gap: 8px;
 }
 
+.post-component-options-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .post-component-label {
+  min-width: 0;
+  flex: 1 1 auto;
   padding: 0;
-  color: var(--box-text-2);
+  margin: 0;
+  color: var(--box-text-1);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.post-component-count {
+  margin-left: 8px;
+  color: var(--box-text-4);
   font-size: 12px;
+  font-weight: 400;
   line-height: 16px;
 }
 
 .post-component-options-box {
   display: flex;
+  overflow: hidden auto;
+  max-height: min(40dvh, 320px);
+  box-sizing: border-box;
   flex-direction: column;
   padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-4);
-  gap: 8px;
-}
-
-.post-component-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  gap: 12px;
+  overscroll-behavior: contain;
 }
 
 .post-component-option {
+  position: relative;
   display: flex;
+  flex: none;
   align-items: center;
-  gap: 8px;
 }
 
 .post-component-option :deep(.v-input) {
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.post-component-close {
+  position: absolute;
+  z-index: 1;
+  top: -8px;
+  right: -8px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--box-bg-3);
+  border-radius: 50%;
+  background: var(--tgc-od-red);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    opacity: 0.82;
+  }
 }
 
 .post-component-title-row {
@@ -463,7 +513,7 @@ function saveFold(): void {
 }
 
 .post-component-add {
-  align-self: flex-start;
+  flex: none;
 }
 
 .post-component-submit {
@@ -528,7 +578,5 @@ function saveFold(): void {
 .vpcd-dialog .v-overlay__scrim {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 32%);
-  opacity: 1;
 }
 </style>
