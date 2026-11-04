@@ -13,13 +13,7 @@
         <TMiImg :ori="true" :size="28" :src="navItem.icon" alt="navIcon" />
       </template>
     </TGameNavItem>
-    <TGameNavItem
-      v-if="hasNav || getRedeemConfig(gid)"
-      :mini
-      class="tgn-nav"
-      label="兑换码"
-      @click="tryGetCode"
-    >
+    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码" @click="tryGetCode">
       <template #icon>
         <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28">
           mdi-code-tags-check
@@ -27,6 +21,16 @@
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
       </template>
     </TGameNavItem>
+    <v-menu v-if="!hasNav && getRedeemConfig(gid)" :closeOnContentClick="false">
+      <template #activator="{ props: menuProps }">
+        <TGameNavItem v-bind="menuProps" :mini class="tgn-nav" label="手动兑换">
+          <template #icon
+            ><v-icon color="var(--tgc-od-orange)" size="28">mdi-code-braces</v-icon></template
+          >
+        </TGameNavItem>
+      </template>
+      <div class="tgn-redeem"><TRedeemCode :gid /></div>
+    </v-menu>
     <ToLivecode v-model="showOverlay" :actId :data="codeData" :gid />
   </div>
 </template>
@@ -48,6 +52,7 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import TGameNavItem from "./t-gameNavItem.vue";
 import TMiImg from "./t-mi-img.vue";
+import TRedeemCode from "./t-redeem-code.vue";
 import ToLivecode from "./to-livecode.vue";
 
 type TGameNavProps = { gid: number; mini?: boolean };
@@ -212,6 +217,13 @@ async function toBBS(link: URL): Promise<void> {
   display: flex;
   padding: 8px;
   gap: 8px;
+}
+
+.tgn-redeem {
+  width: min(440px, 90vw);
+  padding: 12px;
+  background: var(--app-page-bg);
+  color: var(--app-page-content);
 }
 
 .tgn-nav {

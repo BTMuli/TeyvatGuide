@@ -1,17 +1,49 @@
 <template>
-  <div data-html2canvas-ignore class="trc-box">
+  <div class="trc-box">
     <p v-if="preview">模拟预览 · 不发送真实兑换请求</p>
-    <v-select
-      v-model="selectedUid"
-      :items="roles"
-      :itemTitle="roleTitle"
-      itemValue="gameUid"
-      label="兑换角色"
-      :disabled="busy"
-      noDataText="当前账号没有该游戏的国服角色"
-    />
+    <div class="trc-header">
+      <slot name="title"
+        ><span>{{ config?.name }}兑换码</span></slot
+      >
+      <v-btn
+        data-html2canvas-ignore
+        :disabled="!canRedeem || busy || !actionCodes.length"
+        :loading="busy"
+        :icon="liveCodes === undefined ? 'mdi-check' : 'mdi-gift-open-outline'"
+        :title="liveCodes === undefined ? '确认兑换' : '一键兑换'"
+        size="small"
+        variant="tonal"
+        @click="submit(actionCodes)"
+      />
+      <v-menu :closeOnContentClick="true">
+        <template #activator="{ props: menuProps }">
+          <v-btn
+            v-bind="menuProps"
+            data-html2canvas-ignore
+            icon="mdi-account-switch-outline"
+            title="切换兑换角色"
+            size="small"
+            variant="tonal"
+            :disabled="busy"
+          />
+        </template>
+        <v-list density="compact" aria-label="选择兑换角色">
+          <v-list-item
+            v-for="role in roles"
+            :key="role.gameUid"
+            :active="role.gameUid === selectedUid"
+            :title="role.nickname"
+            :subtitle="`${role.regionName} · ${maskUid(role.gameUid)}`"
+            @click="selectedUid = role.gameUid"
+          />
+          <v-list-item v-if="!roles.length" title="当前账号没有可用角色" />
+        </v-list>
+      </v-menu>
+    </div>
+    <p v-if="selectedRole" class="trc-target">{{ roleTitle(selectedRole) }}</p>
     <p v-if="!canRedeem">请先登录并绑定{{ config?.name }}国服角色</p>
     <v-textarea
+      v-if="liveCodes === undefined"
       v-model="input"
       :disabled="busy"
       label="兑换码"
@@ -20,18 +52,13 @@
       rows="2"
       variant="outlined"
     />
-    <div class="trc-actions">
-      <v-btn :disabled="!canRedeem || codes.length === 0 || busy" @click="submit(codes)">
-        兑换输入的兑换码
-      </v-btn>
-      <v-btn
-        v-if="liveCodes !== undefined"
-        :disabled="!canRedeem || availableCodes.length === 0 || busy"
-        @click="submit(availableCodes)"
-      >
-        一键兑换前瞻码
-      </v-btn>
-    </div>
+    <slot
+      :submit="submit"
+      :results="results"
+      :busy="busy"
+      :canRedeem="canRedeem"
+      :currentCode="currentCode"
+    />
     <p v-if="busy" role="status">
       正在逐个兑换，间隔约 5.5 秒。关闭窗口将停止后续兑换，已发送的请求仍可能成功。
     </p>
@@ -39,7 +66,7 @@
     <p v-if="resultTarget">
       本次兑换角色：{{ resultTarget.nickname }}（{{ maskUid(resultTarget.gameUid) }}）
     </p>
-    <ul aria-live="polite">
+    <ul v-if="liveCodes === undefined" aria-live="polite">
       <li v-for="result in results" :key="result.code">
         {{ result.code }}：{{
           result.retcode === 0
@@ -82,11 +109,15 @@ onBeforeUnmount(() => {
 });
 const input = ref<string>("");
 const busy = ref<boolean>(false);
+const currentCode = ref<string>("");
 const errorMessage = ref<string>("");
 const resultTarget = ref<TGApp.Sqlite.Account.Game>();
 const results = ref<Array<TGApp.Game.Redeem.Result>>([]);
 const codes = computed<Array<string>>(() => parseRedeemCodes(input.value));
 const availableCodes = computed<Array<string>>(() => parseRedeemCodes((liveCodes ?? []).join(" ")));
+const actionCodes = computed<Array<string>>(() =>
+  liveCodes === undefined ? codes.value : availableCodes.value,
+);
 const canRedeem = computed<boolean>(() =>
   Boolean(selectedRole.value && (preview || cookie.value?.cookie_token)),
 );
@@ -103,13 +134,9 @@ watch(
       const bound =
         preview?.roles ?? (uid.value ? await TSUserAccount.game.getAccount(uid.value) : []);
       if (cancelled) return;
-      roles.value = bound.filter(
-        (role) => role.gameBiz === config.value?.biz && config.value.regions.includes(role.region),
-      );
-      selectedUid.value =
-        roles.value.find((role) => role.gameUid === account.value.gameUid)?.gameUid ??
-        roles.value[0]?.gameUid ??
-        "";
+      roles.value = bound.filter(matchesGame);
+      const preferred = roles.value.find((role) => role.gameUid === account.value.gameUid);
+      selectedUid.value = (preferred ?? roles.value[0])?.gameUid ?? "";
       results.value = preview?.results.map((result) => ({ ...result })) ?? [];
     } catch {
       if (!cancelled) errorMessage.value = "读取绑定角色失败，请重新打开后重试";
@@ -117,6 +144,12 @@ watch(
   },
   { immediate: true },
 );
+
+function matchesGame(role: TGApp.Sqlite.Account.Game): boolean {
+  const game = config.value;
+  if (!game) return false;
+  return role.gameBiz === game.biz && game.regions.includes(role.region);
+}
 
 function roleTitle(role: TGApp.Sqlite.Account.Game): string {
   return `${role.nickname}（${role.regionName} · ${maskUid(role.gameUid)}）`;
@@ -132,16 +165,10 @@ async function submit(selectedCodes: Array<string>): Promise<void> {
     }));
     return;
   }
-  if (
-    busy.value ||
-    !canRedeem.value ||
-    !cookie.value ||
-    !selectedRole.value ||
-    selectedCodes.length === 0
-  )
-    return;
+  if (busy.value || !canRedeem.value || selectedCodes.length === 0) return;
   // 固定本次兑换的账号，避免切换账号影响进行中的批次。
-  const target = { ...selectedRole.value };
+  const target = selectedRole.value;
+  if (!target || !cookie.value) return;
   const credential = { ...cookie.value };
   busy.value = true;
   errorMessage.value = "";
@@ -151,16 +178,11 @@ async function submit(selectedCodes: Array<string>): Promise<void> {
     await redeemCodes(
       selectedCodes,
       async (code) => {
-        if (
-          !active ||
-          !cookie.value ||
-          selectedRole.value?.gameBiz !== target.gameBiz ||
-          selectedRole.value?.gameUid !== target.gameUid ||
-          uid.value !== target.uid ||
-          cookie.value?.account_id !== credential.account_id
-        ) {
+        currentCode.value = code;
+        if (!isCurrentTarget(target, credential.account_id)) {
           return { retcode: -2, message: "未兑换，窗口已关闭或当前账号已变更" };
         }
+        if (!cookie.value) return { retcode: -2, message: "未兑换，登录已失效" };
         return await redeemCode(code, target, { ...cookie.value });
       },
       (result) => {
@@ -171,7 +193,18 @@ async function submit(selectedCodes: Array<string>): Promise<void> {
     errorMessage.value = error instanceof Error ? error.message : "兑换未能开始，请稍后重试";
   } finally {
     busy.value = false;
+    currentCode.value = "";
   }
+}
+function isCurrentTarget(target: TGApp.Sqlite.Account.Game, accountId: string): boolean {
+  const current = selectedRole.value;
+  if (!active || !current || !cookie.value) return false;
+  return (
+    current.gameBiz === target.gameBiz &&
+    current.gameUid === target.gameUid &&
+    uid.value === target.uid &&
+    cookie.value.account_id === accountId
+  );
 }
 </script>
 <style lang="scss" scoped>
@@ -181,9 +214,13 @@ async function submit(selectedCodes: Array<string>): Promise<void> {
   overflow-wrap: anywhere;
 }
 
-.trc-actions {
+.trc-header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+
+  :first-child {
+    margin-right: auto;
+  }
 }
 </style>

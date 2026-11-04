@@ -2,46 +2,64 @@
 <template>
   <TOverlay v-model="visible" class="tolc-overlay">
     <div ref="TolcRef" class="tolc-box">
-      <div class="tolc-title">
-        <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
-        <v-icon
-          data-html2canvas-ignore
-          icon="mdi-share-variant"
-          size="18px"
-          title="share"
-          variant="outlined"
-          @click="shareImg()"
-        />
-      </div>
-      <div class="tolc-info">ActID:{{ props.actId }}</div>
-      <div v-for="(item, index) in props.data" :key="index" class="tolc-list-box">
-        <div class="tolc-list-icon">
-          <img v-if="item.img === ''" alt="empty" src="/UI/app/empty.webp" />
-          <TMiImg v-else :ori="true" :src="item.img" alt="award" />
-        </div>
-        <div class="tolc-list-info">
-          <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
-          <span v-html="item.title" />
-          <span title="开放时间">{{ fmtUtil.dateTime(Number(item.to_get_time) * 1000) }}</span>
-        </div>
-        <div class="tolc-list-btn">
-          <v-btn
-            :disabled="item.code === ''"
-            data-html2canvas-ignore
-            icon="mdi-content-copy"
-            size="small"
-            variant="outlined"
-            @click="copy(item.code)"
-          />
-        </div>
-      </div>
-      <div v-if="props.data.length === 0">暂无兑换码数据</div>
-      <TRedeemCode
-        v-if="getRedeemConfig(gid)"
-        :gid
-        :preview
-        :liveCodes="data.map((item) => item.code)"
-      />
+      <TRedeemCode :gid :preview :liveCodes="data.map((item) => item.code)">
+        <template #title
+          ><div class="tolc-title">
+            <span>{{ gameInfo?.name ?? getRedeemConfig(gid)?.name ?? "" }}兑换码</span>
+            <v-icon
+              data-html2canvas-ignore
+              icon="mdi-share-variant"
+              size="18px"
+              title="share"
+              variant="outlined"
+              @click="shareImg()"
+            /></div
+        ></template>
+        <template #default="{ submit, results, busy, canRedeem, currentCode }">
+          <div class="tolc-info">ActID:{{ props.actId }}</div>
+          <div
+            v-for="(item, index) in props.data"
+            :key="index"
+            class="tolc-list-box"
+            :class="resultClass(results.find((result) => result.code === item.code))"
+          >
+            <div class="tolc-list-icon">
+              <img v-if="item.img === ''" alt="empty" src="/UI/app/empty.webp" />
+              <TMiImg v-else :ori="true" :src="item.img" alt="award" />
+            </div>
+            <div class="tolc-list-info">
+              <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
+              <span v-html="item.title" />
+              <span role="status">{{
+                results.find((result) => result.code === item.code)?.message
+              }}</span>
+              <span title="开放时间">{{ fmtUtil.dateTime(Number(item.to_get_time) * 1000) }}</span>
+            </div>
+            <div class="tolc-list-btn">
+              <v-btn
+                v-if="getRedeemConfig(gid)"
+                data-html2canvas-ignore
+                :disabled="!item.code || busy || !canRedeem"
+                :loading="busy && currentCode === item.code"
+                icon="mdi-gift-outline"
+                title="兑换此码"
+                size="small"
+                variant="tonal"
+                @click="submit([item.code])"
+              />
+              <v-btn
+                :disabled="item.code === ''"
+                data-html2canvas-ignore
+                icon="mdi-content-copy"
+                size="small"
+                variant="outlined"
+                @click="copy(item.code)"
+              />
+            </div>
+          </div>
+          <div v-if="props.data.length === 0">暂无兑换码数据</div>
+        </template>
+      </TRedeemCode>
     </div>
   </TOverlay>
 </template>
@@ -89,6 +107,11 @@ const gameInfo = computed<TGApp.BBS.Game.Item | undefined>(() =>
 async function copy(code: string): Promise<void> {
   await navigator.clipboard.writeText(code);
   showSnackbar.success("已复制到剪贴板");
+}
+
+function resultClass(result?: TGApp.Game.Redeem.Result): string {
+  if (!result) return "";
+  return result.retcode === 0 ? "tolc-success" : "tolc-failure";
 }
 
 async function shareImg(): Promise<void> {
@@ -197,6 +220,16 @@ async function shareImg(): Promise<void> {
 }
 
 .tolc-list-btn {
+  display: flex;
   margin-left: auto;
+  gap: 4px;
+}
+
+.tolc-success {
+  border-color: var(--tgc-od-green);
+}
+
+.tolc-failure {
+  border-style: dashed;
 }
 </style>

@@ -7,17 +7,27 @@ import { getRedeemConfigByBiz } from "@utils/game/redeemConfig.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 /**
- * 校验角色与所属账号的登录凭据
+ * 检查 UID 是否仅包含数字
  * @since Beta v0.13.0
- * @param role - 当前角色
- * @param cookie - 角色所属账号的凭据
+ * @param value - UID
+ * @returns 是否为数字 UID
+ */
+function isNumericUid(value: string): boolean {
+  return (
+    value.length > 0 && Array.from(value).every((character) => character >= "0" && character <= "9")
+  );
+}
+
+/**
+ * 校验角色所属账号
+ * @since Beta v0.13.0
  */
 function validateAccount(role: TGApp.Sqlite.Account.Game, cookie: TGApp.App.Account.Cookie): void {
   if (!getRedeemConfigByBiz(role.gameBiz)?.regions.includes(role.region)) {
     throw new Error("仅支持原神或绝区零国服角色");
   }
   if (
-    !/^\d+$/.test(role.gameUid) ||
+    !isNumericUid(role.gameUid) ||
     !cookie.account_id ||
     !cookie.cookie_token ||
     cookie.account_id !== role.uid
