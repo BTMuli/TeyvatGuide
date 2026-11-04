@@ -327,6 +327,76 @@ describe("游戏任务状态对账", () => {
     expect(store.tasksByInstallation["install-a"]).toBeUndefined();
   });
 
+  it.each([false, true])("取消安装后拒绝迟到快照（进度通道：%s）", (progress) => {
+    emitTask(createTask({ target: "install", state: "canceled", revision: 3 }));
+    emitTask(createTask({ target: "install", revision: 2 }), progress);
+    emitTask(createTask({ target: "install", revision: 3 }), progress);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后拒绝取消前发出的列表响应", async () => {
+    const oldTask = createTask({ target: "install" });
+    emitTask(oldTask);
+    let resolveList: (tasks: Array<TGApp.Game.Package.TaskSummary>) => void = () => {};
+    mocks.listTasks.mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      }),
+    );
+    const hydration = store.hydrateTasks();
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    resolveList([oldTask]);
+    await hydration;
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("进度通道收到取消安装时移除已有投影并拒绝旧进度", () => {
+    emitTask(createTask({ target: "install" }));
+    emitTask(createTask({ target: "install", state: "canceled", revision: 3 }), true);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+    emitTask(createTask({ target: "install", revision: 2 }), true);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("列表对账发现取消安装后拒绝旧事件", async () => {
+    emitTask(createTask({ target: "install" }));
+    mocks.listTasks.mockResolvedValue([
+      createTask({ target: "install", state: "canceled", revision: 3 }),
+    ]);
+    await store.hydrateTasks();
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+    emitTask(createTask({ target: "install", revision: 2 }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("重新监听后仍拒绝已取消安装的旧快照", async () => {
+    emitTask(createTask({ target: "install", state: "canceled", revision: 2 }));
+    store.stopListening();
+    await store.startListening();
+    emitTask(createTask({ target: "install" }));
+    expect(store.tasksByInstallation["install-a"]).toBeUndefined();
+  });
+
+  it("取消安装后允许同一安装的新任务并保留更早的待恢复任务", async () => {
+    const canceled = createTask({ target: "install", state: "canceled", revision: 3 });
+    emitTask(canceled);
+    mocks.listTasks.mockResolvedValue([
+      canceled,
+      createTask({ taskId: "older-task", state: "paused", updatedAt: "2026-11-01T00:00:00Z" }),
+    ]);
+    await store.hydrateTasks();
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("older-task");
+    emitTask(createTask({ taskId: "new-task", target: "install", revision: 0 }));
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+    emitTask(createTask({ target: "install", revision: 2 }), true);
+    vi.advanceTimersByTime(150);
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+    emitTask(canceled);
+    expect(store.tasksByInstallation["install-a"]?.taskId).toBe("new-task");
+  });
+
   it("忽略进度通道中已取消的全新安装任务", () => {
     emitTask(createTask({ target: "install", state: "canceled" }), true);
     expect(store.tasksByInstallation["install-a"]).toBeUndefined();

@@ -47,6 +47,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   let listenerPromise: Promise<void> | null = null;
   let listenerGeneration = 0;
   const pendingProgressByInstallation = new Map<string, TGApp.Game.Package.TaskSummary>();
+  // 投影隐藏后仍保留修订号；离页或重连时，取消前发出的列表请求仍可能返回。
+  const hiddenTaskRevisions = new Map<string, number>();
   const PROGRESS_FLUSH_MS = 150;
   let progressTimer: number | null = null;
   const completedInstallHideTimers = new Map<string, number>();
@@ -70,6 +72,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     current: TGApp.Game.Package.TaskSummary | undefined,
     task: TGApp.Game.Package.TaskSummary,
   ): boolean {
+    const hiddenRevision = hiddenTaskRevisions.get(task.taskId);
+    if (hiddenRevision !== undefined && task.revision <= hiddenRevision) return false;
     return !(
       current !== undefined &&
       ((current.taskId === task.taskId && current.revision > task.revision) ||
@@ -116,6 +120,18 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       task.target === gameEnum.package.planTarget.INSTALL &&
       task.state === gameEnum.package.taskState.CANCELED
     );
+  }
+
+  /**
+   * 保留已隐藏任务的最新修订号，避免迟到快照重新建立投影。
+   * @since Beta v0.13.0
+   * @param task - 已隐藏的资源任务快照
+   */
+  function rememberHiddenTask(task: TGApp.Game.Package.TaskSummary): void {
+    const revision = hiddenTaskRevisions.get(task.taskId);
+    if (revision === undefined || task.revision > revision) {
+      hiddenTaskRevisions.set(task.taskId, task.revision);
+    }
   }
 
   function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
@@ -172,6 +188,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       [task.installationId]: task,
     };
     if (shouldHideTask(task)) {
+      rememberHiddenTask(task);
       removeTaskProjection(task);
       return;
     }
@@ -211,7 +228,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
+  /**
+   * 缓冲下载进度；隐藏终态立即合并，以清理投影并保留修订号。
+   * @since Beta v0.13.0
+   * @param task - 资源任务进度快照
+   */
   function queueTaskProgress(task: TGApp.Game.Package.TaskSummary): void {
+    if (shouldHideTask(task)) {
+      mergeTask(task);
+      return;
+    }
     const pending = pendingProgressByInstallation.get(task.installationId);
     const current = pending ?? tasksByInstallation.value[task.installationId];
     if (!shouldReplaceTask(current, task)) return;
@@ -373,7 +399,12 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const task of tasks) {
       if (!latest.has(task.installationId)) latest.set(task.installationId, task);
       if (selected.has(task.installationId)) continue;
-      if (shouldHideTask(task) || shouldOmitCompletedInstall(task)) continue;
+      if (
+        shouldHideTask(task) ||
+        shouldOmitCompletedInstall(task) ||
+        !shouldReplaceTask(undefined, task)
+      )
+        continue;
       selected.set(task.installationId, task);
     }
     let changed = false;
@@ -412,6 +443,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
       }
       changed = true;
+    }
+    // 先完成终态对账，再记录修订号，避免当前响应被自身的隐藏记录拦截。
+    for (const task of tasks) {
+      if (shouldHideTask(task)) rememberHiddenTask(task);
     }
     if (!changed) return;
     tasksByInstallation.value = next;

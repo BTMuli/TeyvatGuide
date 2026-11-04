@@ -720,16 +720,19 @@ pub async fn game_install_plan(
 /// 取消仅完成评估、尚未启动任务的安装草稿。
 /// 若该安装仍有资源任务在运行，先请求取消并等待其完全退出，再清理草稿，
 /// 避免任务尚未收尾时取消草稿报“该游戏安装已有资源任务正在运行”。
+/// 草稿已被取消清理（例如安装任务收尾时已删除）时视为取消完成，返回 `None`。
 /// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_draft_cancel(
   app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
   install_id: String,
-) -> Result<installer::InstallDraftSummary, String> {
+) -> Result<Option<installer::InstallDraftSummary>, String> {
   let task_root = game_task_root(&app_handle)?;
   installer::ensure_windows_install_platform()?;
-  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  let Some(draft_id) = installer::find_cancellable_draft_id(&task_root, &install_id)? else {
+    return Ok(None);
+  };
   if let Some(task_id) = manager.running_task_for_installation(&install_id)? {
     manager.cancel(&app_handle, &task_root, &task_id)?;
     manager.wait_for_task_idle(&task_id).await?;
@@ -743,7 +746,7 @@ pub async fn game_install_draft_cancel(
     return Err("该安装已有未完成任务，请先取消或恢复原任务".to_string());
   }
   tauri::async_runtime::spawn_blocking(move || {
-    installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
+    installer::cancel_draft_if_present(&task_root, &draft_id, false, &mut |_, _, _| {})
   })
   .await
   .map_err(|error| format!("等待安装草稿清理失败：{error}"))?
@@ -1041,7 +1044,12 @@ pub async fn game_install_recover(
           let _ = installer::abandon_published_draft(&worker_root, &draft_id)?;
         }
         installer::PublishedInstallationState::NotPublished => {
-          let _ = installer::cancel_draft(&worker_root, &draft_id, keep_downloads, &mut progress)?;
+          let _ = installer::cancel_draft_if_present(
+            &worker_root,
+            &draft_id,
+            keep_downloads,
+            &mut progress,
+          )?;
         }
       }
       Ok::<(), String>(())
@@ -1136,6 +1144,7 @@ pub async fn game_install_recover(
 }
 
 /// 请求取消未发布的全新安装任务，并在安全边界外清理草稿暂存目录。
+/// 安装任务收尾时可能已自行取消并清理草稿；此时跳过重复清理，视为取消完成。
 /// @since Beta v0.13.0
 #[tauri::command]
 pub async fn game_install_cancel(
@@ -1146,7 +1155,7 @@ pub async fn game_install_cancel(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   installer::ensure_windows_install_platform()?;
-  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  let draft_id = installer::find_cancellable_draft_id(&task_root, &install_id)?;
   manager.cancel(&app_handle, &task_root, &task_id)?;
   manager.wait_for_task_idle(&task_id).await?;
   let journal_path = journal::journal_path(&task_root, &task_id);
@@ -1159,11 +1168,13 @@ pub async fn game_install_cancel(
   if journal_value.state.is_active() || journal_value.state.blocks_launch() {
     return Ok(journal_value.summary());
   }
-  tauri::async_runtime::spawn_blocking(move || {
-    installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
-  })
-  .await
-  .map_err(|error| format!("等待取消安装任务清理失败：{error}"))??;
+  if let Some(draft_id) = draft_id {
+    tauri::async_runtime::spawn_blocking(move || {
+      installer::cancel_draft_if_present(&task_root, &draft_id, false, &mut |_, _, _| {})
+    })
+    .await
+    .map_err(|error| format!("等待取消安装任务清理失败：{error}"))??;
+  }
   Ok(journal_value.summary())
 }
 
