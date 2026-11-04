@@ -130,6 +130,22 @@ export function renderPostPreviewEmoticons(
   if (typeof document === "undefined" || Object.keys(emoticons).length === 0) return html;
   const container = document.createElement("div");
   container.innerHTML = html;
+  hydratePostPreviewEmoticons(container, emoticons);
+  return container.innerHTML;
+}
+
+/**
+ * 在现有预览 DOM 中渲染表情，保留父元素及折叠块的原始 Delta。
+ * @since Beta v0.13.0
+ * @param container - 目标预览容器
+ * @param emoticons - 已清洗的表情映射
+ */
+export function hydratePostPreviewEmoticons(
+  container: HTMLElement,
+  emoticons: Readonly<Record<string, string>>,
+): void {
+  if (Object.keys(emoticons).length === 0) return;
+  const document = container.ownerDocument;
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
   const textNodes: Array<Text> = [];
   let current = walker.nextNode();
@@ -157,5 +173,4 @@ export function renderPostPreviewEmoticons(
     }
     textNode.replaceWith(fragment);
   }
-  return container.innerHTML;
 }

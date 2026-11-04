@@ -233,6 +233,10 @@ import {
 } from "@utils/bbs/postDocument.js";
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbs/postEditor.js";
 import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
+import {
+  getMissingPostPreviewEmoticonNames,
+  hydratePostPreviewEmoticons,
+} from "@utils/bbs/postPreview.js";
 import { isRecord } from "@utils/common/typeGuards.js";
 import { normalizeHexColor } from "@utils/display/colorFunc.js";
 import Quill from "quill";
@@ -430,9 +434,6 @@ onMounted(() => {
   applyModel(model.value);
   instance.enable(!props.disabled);
   updateActiveFormats();
-  if (emoticonCandidates.some((candidate) => emoticonMap.value[candidate.name] === undefined)) {
-    void loadEmoticonMap();
-  }
 });
 
 onBeforeUnmount(() => {
@@ -656,10 +657,18 @@ async function loadEmoticonMap(): Promise<void> {
   mergeEmoticonMap(next);
 }
 
+function hydrateFoldEmoticons(current: Quill): void {
+  if (props.mode !== "article") return;
+  for (const fold of current.root.querySelectorAll<HTMLElement>(".ql-fold")) {
+    hydratePostPreviewEmoticons(fold, emoticonMap.value);
+  }
+}
+
 function hydrateCurrentEmoticons(
   current: Quill,
   emoticons: Readonly<Record<string, string>>,
 ): void {
+  hydrateFoldEmoticons(current);
   const operations = current.getContents().ops;
   const update = new DeltaClass();
   const convertedCandidates = new Set<EmoticonCandidate>();
@@ -955,6 +964,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     editVersion += 1;
     current.history.clear();
     current.setContents(delta, "silent");
+    hydrateFoldEmoticons(current);
     collectEmoticonCandidates(current.getContents().ops);
     savedSelection = clampSelection(current, selection);
     current.setSelection(savedSelection, "silent");
@@ -962,6 +972,12 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     lastSyncedNodes = toRaw(next);
     emits("validityChange", true);
     updateActiveFormats(savedSelection);
+    if (
+      props.mode === "article" &&
+      getMissingPostPreviewEmoticonNames(next, emoticonMap.value).length > 0
+    ) {
+      void loadEmoticonMap();
+    }
   } catch (error) {
     emits("validityChange", false);
     emitEditorError(error, "帖子正文加载失败");
@@ -1020,6 +1036,17 @@ function handleTextChange(change: QuillDelta, _oldChange: QuillDelta, source: st
   editVersion += 1;
   try {
     const next = readEditorNodes(current);
+    if (
+      change.ops.some(
+        (operation: QuillOperation) => isRecord(operation.insert) && "fold" in operation.insert,
+      )
+    ) {
+      mergeEmoticonMap(readCachedEmoticonMap());
+      hydrateFoldEmoticons(current);
+      if (getMissingPostPreviewEmoticonNames(next, emoticonMap.value).length > 0) {
+        void loadEmoticonMap();
+      }
+    }
     const serialized = JSON.stringify(next);
     modelSnapshot = serialized;
     if (serialized !== JSON.stringify(model.value)) {
@@ -1817,6 +1844,14 @@ defineExpose({
 .tgpe-editor :deep(.ql-fold-image) {
   display: inline-block;
   max-width: 100%;
+  vertical-align: middle;
+}
+
+.tgpe-editor :deep(.ql-fold-rich .post-preview-emoticon) {
+  width: auto;
+  max-width: 100%;
+  height: 32px;
+  object-fit: contain;
   vertical-align: middle;
 }
 
