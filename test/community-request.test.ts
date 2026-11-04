@@ -36,6 +36,11 @@ const authCookie = { account_id: cookie.account_id, cookie_token: cookie.cookie_
 const appHeaders = { "x-test-header": "app" };
 const collectionHeaders = { "x-test-header": "collection" };
 const successResponse = { retcode: 0, message: "ok", data: null };
+const collectionPageResponse = {
+  retcode: 0,
+  message: "ok",
+  data: { list: [], is_last: true, next_offset: "" },
+};
 
 beforeEach(() => {
   mocks.get.mockReset();
@@ -62,6 +67,7 @@ describe("communityReq read requests", () => {
   });
 
   it("uses the collection signature and official offset for the collection list", async () => {
+    mocks.get.mockResolvedValueOnce({ data: collectionPageResponse });
     await communityReq.collections(cookie, cookie.ltuid, "collection-offset");
 
     const query = { gids: 2, size: 20, offset: "collection-offset" };
@@ -88,6 +94,7 @@ describe("communityReq read requests", () => {
       { headers: appHeaders, query: favoritePostQuery },
     );
 
+    mocks.get.mockResolvedValueOnce({ data: collectionPageResponse });
     await communityReq.favoriteCollections(cookie, "200000002", "favorite-collection-offset");
     const favoriteCollectionQuery = {
       gids: 2,
@@ -166,6 +173,60 @@ describe("communityReq read requests", () => {
     await expect(communityReq.followers(cookie, cookie.ltuid)).rejects.toBe(transportError);
   });
 });
+
+describe.each(<const>["collections", "favoriteCollections"])(
+  "communityReq.%s collection pagination",
+  (method) => {
+    it("normalizes numeric cursors and sends the next cursor when loading another page", async () => {
+      const firstPage = {
+        retcode: 0,
+        message: "ok",
+        data: { list: [], is_last: false, next_offset: 20 },
+      };
+      const lastPage = {
+        retcode: 0,
+        message: "ok",
+        data: { list: [], is_last: true, next_offset: 0 },
+      };
+      mocks.get
+        .mockResolvedValueOnce({ data: firstPage })
+        .mockResolvedValueOnce({ data: lastPage });
+
+      const first = await communityReq[method](cookie, cookie.ltuid);
+      expect(first).toEqual({ ...firstPage, data: { ...firstPage.data, next_offset: "20" } });
+      expect(first.data.next_offset.trim()).toBe("20");
+
+      const last = await communityReq[method](cookie, cookie.ltuid, first.data.next_offset);
+      expect(mocks.get.mock.calls.at(-1)?.[1].query.offset).toBe("20");
+      expect(last).toEqual({ ...lastPage, data: { ...lastPage.data, next_offset: "0" } });
+    });
+
+    it.each([
+      { cursor: "90071992547409931234567890", expected: "90071992547409931234567890" },
+      { cursor: null, expected: "" },
+      { cursor: undefined, expected: "" },
+    ])("normalizes a terminal cursor: $cursor", async ({ cursor, expected }) => {
+      mocks.get.mockResolvedValueOnce({
+        data: {
+          retcode: 0,
+          message: "ok",
+          data: { list: [], is_last: true, next_offset: cursor },
+        },
+      });
+
+      const response = await communityReq[method](cookie, cookie.ltuid);
+      expect(response.data.next_offset).toBe(expected);
+      expect(response.data.is_last).toBe(true);
+    });
+
+    it("preserves business errors without reading pagination data", async () => {
+      const response = { retcode: 1001, message: "permission denied", data: null };
+      mocks.get.mockResolvedValueOnce({ data: response });
+
+      await expect(communityReq[method](cookie, cookie.ltuid)).resolves.toEqual(response);
+    });
+  },
+);
 
 describe("communityReq favorite write requests", () => {
   it("follows and unfollows a collection with a signed JSON body", async () => {

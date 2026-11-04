@@ -34,9 +34,12 @@
           <p>{{ selectedCollection ? selectedCollection.desc : sectionInfo.description }}</p>
         </div>
       </div>
-      <div v-if="selectedCollection" class="cp-content-actions">
+      <div
+        v-if="selectedCollection || collectionLoading || collectionError"
+        class="cp-content-actions"
+      >
         <v-btn
-          v-if="canToggleCollectionFavorite"
+          v-if="selectedCollection && canToggleCollectionFavorite"
           :aria-pressed="isSelectedCollectionFavorite"
           :class="['cp-collection-favorite', { 'is-favorite': isSelectedCollectionFavorite }]"
           :disabled="togglingCollectionFavoriteId !== undefined"
@@ -49,7 +52,7 @@
         >
           {{ isSelectedCollectionFavorite ? "已收藏" : "收藏" }}
         </v-btn>
-        <v-btn prepend-icon="mdi-arrow-left" size="small" variant="text" @click="closeCollection"
+        <v-btn prepend-icon="mdi-arrow-left" size="small" variant="text" @click="backToCollections"
           >返回合集</v-btn
         >
         <v-btn
@@ -188,7 +191,7 @@
         @keyup.enter="searchFavorites(searchInput)"
       />
     </div>
-    <div v-if="selectedCollection" class="cp-content-body">
+    <div v-if="selectedCollection || collectionLoading || collectionError" class="cp-content-body">
       <div v-if="collectionLoading" class="cp-content-state" role="status" aria-live="polite">
         <v-progress-circular indeterminate size="28" />
         <p>正在加载合集帖子…</p>
@@ -196,7 +199,7 @@
       <div v-else-if="collectionError" class="cp-content-state" role="alert">
         <v-icon size="32">mdi-alert-circle-outline</v-icon>
         <p>{{ collectionError }}</p>
-        <v-btn variant="tonal" @click="loadCollection(selectedCollection)">重新加载</v-btn>
+        <v-btn variant="tonal" @click="retryCollection">重新加载</v-btn>
       </div>
       <div v-else-if="collectionPosts.length === 0" class="cp-content-state" role="status">
         <v-icon size="32">mdi-folder-open-outline</v-icon>
@@ -412,16 +415,23 @@ import CpUser from "@comp/communityProfile/cp-user.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
+import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { createPost } from "@utils/app/TGWindow.js";
-import { matchesPostKeyword, openCommunityProfile } from "@utils/community/profile.js";
+import {
+  matchesPostKeyword,
+  openCommunityProfile,
+  parseCommunityCollectionId,
+  parseCommunityProfileGid,
+} from "@utils/community/profile.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 type ContentSection =
   "comments" | "collections" | "favorites" | "following" | "followers" | "history";
@@ -458,6 +468,14 @@ type ContentPage = {
 };
 
 const { section, profileUid } = defineProps<{ section: ContentSection; profileUid?: string }>();
+const route = useRoute();
+const router = useRouter();
+const requestedCollectionId = computed<string | undefined>(() =>
+  section === "collections" ? parseCommunityCollectionId(route.query.collection) : undefined,
+);
+const collectionGid = computed<number>(() =>
+  section === "collections" ? (parseCommunityProfileGid(route.query.gid) ?? 2) : 2,
+);
 const favoriteTab = ref<FavoriteTab>("posts");
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, cookie } = storeToRefs(useUserStore());
@@ -598,6 +616,8 @@ watch(
   [
     () => section,
     () => profileUid,
+    requestedCollectionId,
+    collectionGid,
     favoriteTab,
     isLogin,
     uid,
@@ -618,6 +638,7 @@ watch(
     exitHistorySelect();
     historyTotal.value = 0;
     void loadMore();
+    if (requestedCollectionId.value !== undefined) void loadCollection(requestedCollectionId.value);
   },
   { immediate: true },
 );
@@ -1095,6 +1116,17 @@ function closeCollection(): void {
   resetCollectionSearch();
 }
 
+async function backToCollections(): Promise<void> {
+  closeCollection();
+  if (requestedCollectionId.value !== undefined)
+    await router.replace({ query: { ...route.query, collection: undefined } });
+}
+
+function retryCollection(): void {
+  const target = requestedCollectionId.value ?? selectedCollection.value;
+  if (target !== undefined) void loadCollection(target);
+}
+
 function resetCollectionSearch(): void {
   collectionSearchInput.value = "";
   collectionKeyword.value = "";
@@ -1104,18 +1136,25 @@ function searchCollection(input: string | null): void {
   collectionKeyword.value = (input ?? "").trim();
 }
 
-async function loadCollection(entry: TGApp.BBS.Collection.Collection): Promise<void> {
+async function loadCollection(entry: TGApp.BBS.Collection.Collection | string): Promise<void> {
   const snapshot = getSnapshot();
   if (!snapshot) return;
   const version = generation;
   const collectionVersion = ++collectionGeneration;
-  selectedCollection.value = entry;
+  selectedCollection.value = typeof entry === "string" ? undefined : entry;
   collectionPosts.value = [];
   collectionError.value = "";
   collectionLoading.value = true;
   resetCollectionSearch();
   try {
-    const response = await postReq.collection(String(entry.id));
+    const collectionId = typeof entry === "string" ? entry : String(entry.id);
+    if (typeof entry === "string") {
+      const detail = await bbsReq.collection(entry, collectionGid.value, snapshot.cookie);
+      if (!isCurrent(snapshot, version) || collectionVersion !== collectionGeneration) return;
+      if (detail.retcode !== 0) throw new Error(`[${detail.retcode}] ${detail.message}`);
+      selectedCollection.value = detail.data.collection_info;
+    }
+    const response = await postReq.collection(collectionId);
     if (!isCurrent(snapshot, version) || collectionVersion !== collectionGeneration) return;
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     collectionPosts.value = response.data.posts;

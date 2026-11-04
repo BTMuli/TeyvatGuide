@@ -3,7 +3,11 @@
  * @since Beta v0.13.0
  */
 
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import {
+  getCollectionRequestHeader,
+  getCommunityCookie,
+  getRequestHeader,
+} from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 /* MysBBSBaseUrl => mbBu */
@@ -66,21 +70,26 @@ async function getOtherUserInfo(
 
 /**
  * 获取合集信息
- * @since Beta v0.10.1
- * @TODO salt计算异常
+ * @since Beta v0.13.0
  * @param cid - 合集 id
  * @param gid - gid
+ * @param cookie - 当前账户 cookie，用于获取登录态合集信息
  * @returns 合集信息响应数据
  */
 async function getCollectionDetail(
   cid: string,
   gid: number,
+  cookie?: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Collection.InfoResp> {
   const params = { gids: gid, id: cid };
   const resp = await TGHttps.get<TGApp.BBS.Collection.InfoResp>(
     `${mbBu}collection/wapi/collection/detail`,
     {
-      headers: getRequestHeader({}, "GET", params, "X4", true),
+      headers: getCollectionRequestHeader(
+        cookie === undefined ? {} : getCommunityCookie(cookie),
+        "GET",
+        params,
+      ),
       query: params,
     },
   );

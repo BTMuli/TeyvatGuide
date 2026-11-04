@@ -107,6 +107,7 @@ async function getComments(
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
  * @returns 我的合集响应数据
+ * @remarks 成功响应中的数字或空游标统一转换为字符串。
  */
 async function getCollections(
   cookie: TGApp.App.Account.Cookie,
@@ -126,6 +127,8 @@ async function getCollections(
       query: params,
     },
   );
+  if (resp.data.retcode === 0)
+    resp.data.data.next_offset = String(resp.data.data.next_offset ?? "");
   return resp.data;
 }
 
@@ -273,6 +276,7 @@ async function unfavoritePost(
  * @param uid - 用户 ID；当前用户按官网约定省略
  * @param offset - 下一页偏移量
  * @returns 收藏合集响应数据
+ * @remarks 成功响应中的数字或空游标统一转换为字符串。
  */
 async function getFavoriteCollections(
   cookie: TGApp.App.Account.Cookie,
@@ -292,6 +296,8 @@ async function getFavoriteCollections(
       query: params,
     },
   );
+  if (resp.data.retcode === 0)
+    resp.data.data.next_offset = String(resp.data.data.next_offset ?? "");
   return resp.data;
 }
 

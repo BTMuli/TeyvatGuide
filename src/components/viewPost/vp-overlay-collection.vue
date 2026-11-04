@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" blur-val="5px">
     <div class="tpoc-box">
       <div class="tpoc-top">
-        <span @click="toOuterCollect()">{{ props.collection.collection_title }}</span>
+        <span @click="toCollection">{{ props.collection.collection_title }}</span>
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
       <div ref="postListRef" class="tpoc-list">
@@ -28,8 +28,7 @@ import TPostcard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
-import { openUrl } from "@tauri-apps/plugin-opener";
-import { openCommunityProfile } from "@utils/community/profile.js";
+import { openCommunityCollection, openCommunityProfile } from "@utils/community/profile.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
@@ -99,8 +98,22 @@ async function refreshPosts(): Promise<void> {
   postList.value = resp.data.posts;
 }
 
-async function toOuterCollect(): Promise<void> {
-  await openUrl(`https://www.miyoushe.com/ys/collection/${props.collection.collection_id}`);
+async function toCollection(): Promise<void> {
+  if (!info.value) await refreshInfo();
+  if (!info.value) {
+    showSnackbar.error("无法获取合集信息，请稍后重试");
+    return;
+  }
+  try {
+    await openCommunityCollection(
+      info.value.author_info.uid,
+      props.collection.collection_id,
+      props.gid,
+    );
+    visible.value = false;
+  } catch (cause) {
+    showSnackbar.error(`打开合集失败：${TGHttps.getErrMsg(cause)}`);
+  }
 }
 
 async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
