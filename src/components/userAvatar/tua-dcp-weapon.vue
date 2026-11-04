@@ -63,6 +63,7 @@ const TpsWeaponElementMap = new Map<number, string>([
 const TpsWeaponTypeMap = new Map<string, string>([
   ["WeaponTypeRifle", "突击步枪"],
   ["WeaponTypeGrenadeLauncher", "榴弹发射器"],
+  ["WeaponTypeShotgun", "霰弹枪"],
   ["WeaponTypeGrenade", "榴晶"],
 ]);
 
