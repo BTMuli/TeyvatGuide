@@ -25,6 +25,12 @@
       </button>
     </template>
     <div ref="menuRef" :class="{ 'tur-wm-menu--sharing': isSharing }" class="tur-wm-menu">
+      <img
+        :alt="`${world.name}背景`"
+        :src="world.background_image"
+        aria-hidden="true"
+        class="tur-wm-menu-bg"
+      />
       <div class="tur-wm-menu-title">
         <div class="tur-wm-title-main">
           <div aria-hidden="true" class="tur-wm-icon tur-wm-title-icon">
@@ -82,17 +88,26 @@
           >
             <div
               v-for="offering in offeringList"
-              :key="`${offering.areaId}-${offering.name}`"
+              :key="`${offering.areaId}-${offering.name}-${offering.icon}`"
               class="tur-wm-menu-item tur-wm-offering-item"
             >
-              <TMiImg
-                :alt="offering.name"
-                :ori="true"
-                :src="offering.icon"
-                class="tur-wm-menu-icon"
-              />
+              <div class="tur-wm-offering-icon">
+                <TMiImg
+                  :alt="offering.name"
+                  :ori="true"
+                  :src="offering.icon"
+                  class="tur-wm-menu-icon"
+                />
+                <div v-if="offering.locked" class="tur-wm-offering-lock">
+                  <v-icon aria-hidden="true" color="var(--tgc-od-white)" size="10px">
+                    mdi-lock
+                  </v-icon>
+                </div>
+              </div>
               <div class="tur-wm-offering-content">
-                <strong>{{ offering.level }}级</strong>
+                <strong :class="{ 'tur-wm-offering-locked': offering.locked }">
+                  {{ getOfferingLevelLabel(offering) }}
+                </strong>
                 <span :title="offering.description" class="tur-wm-menu-name">
                   {{ offering.description }}
                 </span>
@@ -176,6 +191,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
+import gameEnum from "@enum/game.js";
 import useAppStore from "@store/app.js";
 import { maskUid } from "@utils/display/TGUid.js";
 import TGShare from "@utils/share/TGShare.js";
@@ -194,6 +210,7 @@ type TurWorldMenuProps = {
 type TurWorldMenuOffering = TGApp.Game.Record.WorldOffering & {
   areaId: number;
   description: string;
+  locked: boolean;
 };
 
 const OFFERING_AREA_NAME_ALIASES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
@@ -222,26 +239,36 @@ const statueLevelLabel = computed<string>(() =>
 const hasMenuSummary = computed<boolean>(() => hasStatueLevel.value || showReputation.value);
 const offeringList = computed<Array<TurWorldMenuOffering>>(() => {
   const list: Array<TurWorldMenuOffering> = [];
-  const descriptions = new Set<string>();
+  const dedupKeys = new Set<string>();
   const append = (
     offering: TGApp.Game.Record.WorldOffering,
     areaId: number,
     description: string,
+    dedupKey: string,
   ): void => {
-    if (descriptions.has(description)) return;
-    descriptions.add(description);
+    if (dedupKeys.has(dedupKey)) return;
+    dedupKeys.add(dedupKey);
     list.push({
       ...offering,
       areaId,
       description,
+      locked: offering.open_state === gameEnum.record.worldOfferingOpenState.LOCKED,
     });
   };
-  for (const offering of world.offerings) append(offering, world.id, offering.name);
+  // 部分锁定供奉名称为空字符串，仅按名称去重会误吞，需辅以图标区分
+  for (const offering of world.offerings) {
+    append(offering, world.id, offering.name, `${offering.name}-${offering.icon}`);
+  }
   const areaNameAliases = OFFERING_AREA_NAME_ALIASES[world.name] ?? {};
   for (const detail of world.detail_worlds) {
     const areaName = areaNameAliases[detail.name] ?? detail.name;
     for (const offering of detail.offerings) {
-      append(offering, detail.id, `${offering.name}-${areaName}`);
+      append(
+        offering,
+        detail.id,
+        `${offering.name}-${areaName}`,
+        `${offering.name}-${offering.icon}-${areaName}`,
+      );
     }
   }
   return list;
@@ -299,6 +326,10 @@ function formatExploration(value: number): number {
   return Math.min(Math.max(value / 10, 0), 100);
 }
 
+function getOfferingLevelLabel(offering: TurWorldMenuOffering): string {
+  return offering.locked ? "未开启" : `${offering.level}级`;
+}
+
 async function shareMenu(): Promise<void> {
   const menu = menuEl.value;
   if (menu === null) return;
@@ -347,6 +378,7 @@ button.tur-wm-icon:focus-visible {
 }
 
 .tur-wm-menu {
+  position: relative;
   display: flex;
   overflow: hidden;
   width: 400px;
@@ -361,6 +393,27 @@ button.tur-wm-icon:focus-visible {
   gap: 8px;
 }
 
+.tur-wm-menu-bg {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: 100% 100%;
+  pointer-events: none;
+}
+
+.tur-wm-menu-title,
+.tur-wm-menu-body,
+.tur-wm-menu-footer {
+  position: relative;
+  z-index: 1;
+}
+
 .tur-wm-menu--sharing {
   max-height: none;
   box-shadow: none;
@@ -371,8 +424,12 @@ button.tur-wm-icon:focus-visible {
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--common-shadow-1);
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--common-shadow-2);
+  margin: -16px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-1);
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 16px;
@@ -435,10 +492,15 @@ button.tur-wm-icon:focus-visible {
 }
 
 .tur-wm-menu-body {
+  top: 8px;
   display: flex;
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 8px -8px;
+  background: var(--common-shadow-1);
   gap: 16px;
   overflow-y: auto;
 
@@ -452,7 +514,12 @@ button.tur-wm-icon:focus-visible {
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--common-shadow-1);
+  padding: 4px 16px;
+  border-top: 1px solid var(--common-shadow-2);
+  margin: 0 -16px -16px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: var(--common-shadow-1);
   color: var(--tgc-od-white);
   font-size: 10px;
   gap: 8px;
@@ -572,6 +639,25 @@ button.tur-wm-icon:focus-visible {
   padding: 4px 8px;
 }
 
+.tur-wm-offering-icon {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.tur-wm-offering-lock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #00000080;
+}
+
 .tur-wm-offering-content {
   display: flex;
   min-width: 0;
@@ -586,6 +672,11 @@ button.tur-wm-icon:focus-visible {
 
 .tur-wm-offering-content strong {
   font-size: 14px;
+  white-space: nowrap;
+}
+
+.tur-wm-offering-content strong.tur-wm-offering-locked {
+  color: var(--box-text-4);
 }
 
 .tur-wm-menu-item strong {
