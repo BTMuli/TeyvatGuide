@@ -137,23 +137,42 @@
             level === 1 ? "mdi-format-header-1" : "mdi-format-header-2"
           }}</v-icon>
         </button>
-        <label class="tgpe-color-label" :title="'文字颜色 ' + selectedColor.toUpperCase()">
-          <v-icon aria-hidden="true" size="20">mdi-format-color-text</v-icon>
-          <span
-            aria-hidden="true"
-            class="tgpe-color-swatch"
-            :style="{ backgroundColor: selectedColor }"
+        <v-menu
+          v-model="colorOpen"
+          :close-on-content-click="false"
+          :disabled
+          location="bottom start"
+          offset="8"
+          @after-leave="handleColorAfterLeave"
+        >
+          <template #activator="{ props: menuProps }">
+            <button
+              v-bind="menuProps"
+              :aria-expanded="colorOpen"
+              aria-haspopup="dialog"
+              :aria-label="'文字颜色，当前 ' + selectedColor.toUpperCase()"
+              :disabled
+              :title="'文字颜色 ' + selectedColor.toUpperCase()"
+              class="tgpe-tool tgpe-color-tool"
+              type="button"
+              @click="prepareColorMenu"
+              @mousedown.prevent="rememberEditorSelection"
+            >
+              <v-icon size="20">mdi-format-color-text</v-icon>
+              <span
+                aria-hidden="true"
+                class="tgpe-color-indicator"
+                :style="{ backgroundColor: selectedColor }"
+              />
+            </button>
+          </template>
+          <VpPostColorPicker
+            v-if="colorOpen"
+            :initialColor="selectedColor"
+            @cancel="closeColorMenu()"
+            @confirm="applyColor"
           />
-          <input
-            :disabled
-            :value="selectedColor"
-            :aria-label="'文字颜色，当前 ' + selectedColor.toUpperCase()"
-            class="tgpe-color"
-            type="color"
-            @change="applyColor"
-            @mousedown="rememberEditorSelection"
-          />
-        </label>
+        </v-menu>
         <button
           v-for="alignment in alignments"
           :key="alignment.value"
@@ -215,6 +234,7 @@ import {
 import { postEditorFormats, registerPostEditorFormats } from "@utils/bbs/postEditor.js";
 import { parsePostEmoticonMap, splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
 import { isRecord } from "@utils/common/typeGuards.js";
+import { normalizeHexColor } from "@utils/display/colorFunc.js";
 import Quill from "quill";
 import type { Range } from "quill";
 import {
@@ -227,6 +247,8 @@ import {
   useTemplateRef,
   watch,
 } from "vue";
+
+import VpPostColorPicker from "./vp-post-color-picker.vue";
 
 import "quill/dist/quill.core.css";
 
@@ -297,6 +319,8 @@ const editorContainer = useTemplateRef<HTMLDivElement>("editorContainer");
 const quill = shallowRef<Quill>();
 const activeFormats = ref<Record<string, unknown>>({});
 const selectedColor = ref<string>("#000000");
+const colorOpen = ref<boolean>(false);
+const colorSelection = ref<SelectionRange>({ index: 0, length: 0 });
 const dividerOpen = ref<boolean>(false);
 const dividerOptions: ReadonlyArray<TGApp.BBS.PostEdit.Divider> = [
   "line_1",
@@ -343,6 +367,7 @@ let applyingModel = false;
 let modelSnapshot = "";
 let lastSyncedNodes: Array<TGApp.BBS.SctPost.Base> | undefined;
 let editVersion = 0;
+let colorFocusPending = false;
 let emoticonLoadVersion = 0;
 let emoticonCandidates: Array<EmoticonCandidate> = [];
 let savedSelection: SelectionRange = { index: 0, length: 0 };
@@ -363,6 +388,7 @@ watch(
     const current = quill.value;
     if (!current) return;
     if (disabled) {
+      colorOpen.value = false;
       dividerOpen.value = false;
       rememberEditorSelection();
     }
@@ -923,6 +949,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     return;
   }
   const selection = clampSelection(current, savedSelection);
+  colorOpen.value = false;
   applyingModel = true;
   try {
     editVersion += 1;
@@ -1184,26 +1211,63 @@ function formatAlignment(value: AlignFormat): void {
   updateActiveFormats(selection);
 }
 
-function applyColor(event: Event): void {
-  const target = event.target;
-  if (!(target instanceof HTMLInputElement)) return;
+/**
+ * 打开取色面板前记录选区，确认时沿用该选区。
+ * @since Beta v0.13.0
+ */
+function prepareColorMenu(): void {
   const current = quill.value;
   if (!current || props.disabled) return;
-  const value = target.value;
-  if (!/^#[\da-f]{6}$/iu.test(value)) {
+  colorSelection.value = selectionForAction(current);
+}
+
+/**
+ * 将取色面板确认的颜色应用到打开面板时的选区。
+ * @since Beta v0.13.0
+ * @param value - 十六进制颜色
+ */
+function applyColor(value: string): void {
+  const current = quill.value;
+  if (!current || props.disabled) return;
+  const color = normalizeHexColor(value);
+  if (!color) {
     emits("error", "帖子文字颜色无效");
     return;
   }
-  const selection = selectionForAction(current);
+  const selection = clampSelection(current, colorSelection.value);
+  savedSelection = selection;
+  current.setSelection(selection, "silent");
   if (selection.length === 0) {
-    current.setSelection(selection, "silent");
-    current.format("color", value, "user");
+    current.format("color", color, "user");
   } else {
-    current.formatText(selection, "color", value, "user");
+    current.formatText(selection, "color", color, "user");
   }
-  selectedColor.value = value;
+  selectedColor.value = color;
   current.setSelection(selection, "silent");
   updateActiveFormats(selection);
+  closeColorMenu(true);
+}
+
+/**
+ * 收起取色面板。
+ * @since Beta v0.13.0
+ * @param focusEditor - 是否在收起后回到编辑器
+ */
+function closeColorMenu(focusEditor: boolean = false): void {
+  colorFocusPending = focusEditor;
+  colorOpen.value = false;
+}
+
+/**
+ * 取色面板收起后按需把焦点交还编辑器。
+ * @since Beta v0.13.0
+ */
+function handleColorAfterLeave(): void {
+  if (!colorFocusPending) return;
+  colorFocusPending = false;
+  const current = quill.value;
+  if (!current || props.disabled) return;
+  current.focus();
 }
 
 async function editLink(): Promise<void> {
@@ -1476,8 +1540,7 @@ defineExpose({
   gap: 4px;
 }
 
-.tgpe-tool,
-.tgpe-color-label {
+.tgpe-tool {
   display: inline-flex;
   width: 36px;
   height: 36px;
@@ -1495,19 +1558,19 @@ defineExpose({
     color 120ms ease;
 }
 
-.tgpe-color-label {
+.tgpe-color-tool {
   position: relative;
-  width: 68px;
-  padding: 0 8px;
-  gap: 8px;
 }
 
-.tgpe-color-swatch {
-  width: 20px;
-  height: 20px;
-  flex: none;
-  border: 1px solid var(--app-page-content);
+.tgpe-color-indicator {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  left: 6px;
+  height: 4px;
   border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--common-shadow-1);
+  pointer-events: none;
 }
 
 .tgpe-divider-menu {
@@ -1582,30 +1645,14 @@ defineExpose({
   opacity: 0.45;
 }
 
-.tgpe-tool:focus-visible,
-.tgpe-color-label:focus-within {
+.tgpe-tool:focus-visible {
   outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }
 
-.tgpe-tool:hover:not(:disabled),
-.tgpe-color-label:hover {
+.tgpe-tool:hover:not(:disabled) {
   background: var(--box-bg-4);
   color: var(--common-text-title);
-}
-
-.tgpe-color {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  inset: 0;
-  opacity: 0;
-}
-
-.tgpe-color-label:has(input:disabled) {
-  cursor: not-allowed;
-  opacity: 0.45;
 }
 
 .tgpe-history {
@@ -1837,8 +1884,7 @@ defineExpose({
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tgpe-tool,
-  .tgpe-color-label {
+  .tgpe-tool {
     transition: none;
   }
 }
