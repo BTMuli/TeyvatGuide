@@ -12,9 +12,21 @@
       class="tp-vod-share"
     >
       <img v-if="coverSource" :src="coverSource" alt="cover" class="tp-vod-cover" />
-      <v-progress-circular v-else-if="highestResolution" color="blue" indeterminate size="25" />
-      <span v-else class="tp-vod-fallback">视频暂不可播放</span>
-      <img alt="icon" class="tp-vod-icon" src="/UI/post/video_play.svg" />
+      <v-progress-circular
+        v-else-if="!isPreview && highestResolution"
+        color="blue"
+        indeterminate
+        size="25"
+      />
+      <span v-if="!isPreview && !highestResolution" class="tp-vod-fallback" role="status"
+        >视频暂不可播放</span
+      >
+      <img
+        v-if="isPreview || highestResolution"
+        alt="icon"
+        class="tp-vod-icon"
+        src="/UI/post/video_play.svg"
+      />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
         <span>{{ fmtUtil.videoDuration(props.data.insert.vod.duration) }}</span>
@@ -29,23 +41,18 @@
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { usePostPreview } from "@hooks/usePostPreview.js";
 import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { getPostVodResolutions, pickPostVodResolution } from "@utils/bbs/postVod.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { saveBufferFile, saveImgBlob } from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
-import {
-  getPostVodResolutions,
-  pickPostVodResolution,
-  type PostVodResolution,
-} from "@utils/bbs/postVod.js";
 import Artplayer, { type Option } from "artplayer";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
-
-import { usePostPreview } from "@hooks/usePostPreview.js";
 
 /** 帖子视频组件数据类型。 @since Beta v0.13.0 */
 type TpVod = {
@@ -74,13 +81,16 @@ const coverLink = ref<string>(getCoverLink());
 const vodAspectRatio = ref<number>(DEFAULT_VOD_ASPECT_RATIO);
 const coverBuffer = shallowRef<ArrayBuffer | null>(null);
 const container = shallowRef<Artplayer | null>(null);
-const resolutions = computed<Array<PostVodResolution>>(() =>
+const resolutions = computed<Array<TGApp.BBS.PostVod.Resolution>>(() =>
   getPostVodResolutions(props.data.insert.vod.resolutions),
 );
-const highestResolution = computed<PostVodResolution | undefined>(() =>
+const highestResolution = computed<TGApp.BBS.PostVod.Resolution | undefined>(() =>
   pickPostVodResolution(resolutions.value),
 );
-const coverSource = computed<string>(() => (isPreview ? coverLink.value : (coverLocal.value ?? "")));
+const coverSource = computed<string>(() =>
+  isPreview || !highestResolution.value ? coverLink.value : (coverLocal.value ?? ""),
+);
+let active = true;
 
 watch(
   () => postViewWide.value,
@@ -92,14 +102,20 @@ console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 onMounted(async () => {
   vodAspectRatio.value = calcAspectRatio();
   coverLink.value = getCoverLink();
-  if (isPreview || highestResolution.value === undefined) return;
-  coverLocal.value = await saveImgBlob(coverLink.value);
+  const resolution = highestResolution.value;
+  if (isPreview || resolution === undefined) return;
+  const cover = await saveImgBlob(coverLink.value);
+  if (!active) {
+    if (cover !== coverLink.value) URL.revokeObjectURL(cover);
+    return;
+  }
+  coverLocal.value = cover;
   const option: Option = {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
-    url: highestResolution.value.url,
+    url: resolution.url,
     poster: coverLocal.value ?? "",
-    type: highestResolution.value.format,
+    type: resolution.format,
     playbackRate: true,
     aspectRatio: false,
     setting: true,
@@ -195,6 +211,7 @@ function calcAspectRatio(): number {
 }
 
 onUnmounted(() => {
+  active = false;
   container.value?.destroy();
   if (coverBuffer.value) coverBuffer.value = null;
   if (coverLocal.value && coverLocal.value !== coverLink.value) {
@@ -246,6 +263,10 @@ onUnmounted(() => {
 }
 
 .tp-vod-fallback {
+  position: relative;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
   color: var(--box-text-4);
   font-size: 14px;
 }

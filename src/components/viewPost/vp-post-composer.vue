@@ -78,7 +78,9 @@
               v-if="preview"
               class="post-composer-preview"
               aria-label="帖子预览"
-              @click.prevent
+              @click.capture="handlePostPreviewClick"
+              @auxclick.capture="handlePostPreviewClick"
+              @contextmenu.capture.stop
               v-html="previewHtml"
             />
             <div class="post-composer-content-footer">
@@ -433,6 +435,7 @@ import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbs/
 import {
   collectPostPreviewEmoticonMap,
   getMissingPostPreviewEmoticonNames,
+  handlePostPreviewClick,
   renderPostPreviewEmoticons,
 } from "@utils/bbs/postPreview.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";

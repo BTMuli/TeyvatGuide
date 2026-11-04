@@ -29,14 +29,14 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import bbsReq from "@req/bbsReq.js";
+import { getPostEmoticonNames, usePostEmoticons } from "@hooks/usePostEmoticons.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { parseLink, parsePost } from "@utils/app/linkParser.js";
+import { splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
 import { decodeRegExp } from "@utils/common/toolFunc.js";
 import { isColorSimilar } from "@utils/display/colorFunc.js";
-import TGHttps from "@utils/network/TGHttps.js";
-import TGLogger from "@utils/system/TGLogger.js";
-import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
+import type { StyleValue } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 
 export type TpText = {
   insert: string;
@@ -52,34 +52,29 @@ export type TpText = {
 type TpTextProps = { data: TpText };
 
 const props = defineProps<TpTextProps>();
-const mode = ref<string>("text");
-const localEmojis = ref<string | null>(localStorage.getItem("emojis"));
-
+const { emoticonMap, ensureEmoticons } = usePostEmoticons();
+const parsedSegments = computed<ReturnType<typeof splitPostEmoticonText>>(() =>
+  splitPostEmoticonText(props.data.insert, emoticonMap.value),
+);
+const mode = computed<"text" | "link" | "emoji" | "emojis">(() => {
+  if (props.data.attributes && "link" in props.data.attributes) return "link";
+  const segments = parsedSegments.value;
+  if (segments.length === 1 && typeof segments[0].insert !== "string") return "emoji";
+  if (segments.some((segment) => typeof segment.insert !== "string")) return "emojis";
+  return "text";
+});
+const emojis = computed<Array<TpText>>(() =>
+  parsedSegments.value.map((segment) => ({
+    insert:
+      typeof segment.insert === "string" ? segment.insert : `_(${segment.insert.emoticon.name})`,
+    attributes: props.data.attributes,
+  })),
+);
+const emoticonNames = computed<Array<string>>(() => getPostEmoticonNames(props.data.insert));
 const emojiErr = ref<boolean>(true);
 const emojiEl = useTemplateRef<HTMLImageElement>("emojiRef");
-const emojis = shallowRef<Array<TpText>>([]);
 
-console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
-
-onMounted(async () => {
-  if (props.data.attributes && "link" in props.data.attributes) {
-    mode.value = "link";
-    return;
-  }
-  // thanks, @Lightczx & webstorm
-  const reg = /(?<=\n|.+?|^)(_\(.+?\)(?=\n|.+?|$))/g;
-  const res = props.data.insert.split(reg);
-  if (res.length > 2) {
-    if (res.length === 3 && res[0] === "" && res[2] === "") {
-      mode.value = "emoji";
-      return;
-    }
-    mode.value = "emojis";
-    emojis.value = res.map((i) => ({ insert: i, attributes: props.data.attributes }));
-    return;
-  }
-  mode.value = "text";
-});
+watch(emoticonNames, (names) => void ensureEmoticons(names), { immediate: true });
 
 // 解析文本样式
 function getTextStyle(): StyleValue {
@@ -137,36 +132,9 @@ async function copyLink(): Promise<void> {
   }
 }
 
-// 解析表情链接
+/** 获取共享目录中当前表情的地址。 @since Beta v0.13.0 */
 function getEmojiUrl(): string {
-  if (localEmojis.value === null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
-    console.warn("tpEmoji unknown", getEmojiName());
-    bbsReq
-      .emojis()
-      .then((res) => {
-        if (res.retcode !== 0) {
-          console.error(res);
-          return "";
-        }
-        const emojis: Record<string, string> = {};
-        for (const series of res.data.list) {
-          for (const emoji of series.list) {
-            emojis[emoji.name] = emoji.icon;
-          }
-        }
-        localEmojis.value = JSON.stringify(emojis);
-        localStorage.setItem("emojis", localEmojis.value);
-      })
-      .catch(async (e) => {
-        const errMsg = TGHttps.getErrMsg(e);
-        await TGLogger.Error(errMsg);
-      });
-  }
-  if (localEmojis.value === null) return "";
-  const emojiName = getEmojiName();
-  const emojiMap: Record<string, string> = JSON.parse(localEmojis.value);
-  if (!Object.keys(emojiMap).includes(emojiName)) mode.value = "text";
-  return JSON.parse(localEmojis.value)[emojiName];
+  return emoticonMap.value[getEmojiName()] ?? "";
 }
 
 function getEmojiName(): string {

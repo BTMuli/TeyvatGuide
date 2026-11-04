@@ -1,9 +1,54 @@
 /**
- * 米游社帖子预览中的表情令牌渲染。
+ * 米游社帖子预览节点转换、交互与表情令牌渲染。
  * @since Beta v0.13.0
  */
 
 import { parsePostEmoticonMap, splitPostEmoticonText } from "./postEmoticon.js";
+
+/**
+ * 复制已校验的文档，递归补充详情渲染器识别折叠所需的标记。
+ * @since Beta v0.13.0
+ * @param documentNodes - 已校验的帖子节点
+ * @param images - 图片帖独立的图片列表
+ * @returns 与编辑草稿隔离的预览节点
+ */
+export function createPostPreviewNodes(
+  documentNodes: ReadonlyArray<TGApp.BBS.PostEdit.Node>,
+  images: ReadonlyArray<string> = [],
+): Array<TGApp.BBS.SctPost.Base> {
+  const nodes = <Array<TGApp.BBS.PostEdit.Node>>JSON.parse(JSON.stringify(documentNodes));
+  for (const node of nodes) {
+    if (typeof node.insert === "string" || !("fold" in node.insert)) continue;
+    const fold = node.insert.fold;
+    node.insert.backup_text ??= "折叠内容";
+    // 折叠 JSON 已在文档边界校验；这里仅转换渲染格式。
+    fold.title = JSON.stringify(
+      createPostPreviewNodes(<Array<TGApp.BBS.PostEdit.Node>>JSON.parse(fold.title)),
+    );
+    fold.content = JSON.stringify(
+      createPostPreviewNodes(<Array<TGApp.BBS.PostEdit.Node>>JSON.parse(fold.content)),
+    );
+  }
+  return [...images.map((image) => ({ insert: { image } })), ...nodes];
+}
+
+/**
+ * 在捕获阶段拦截预览中的组件动作，保留折叠摘要的原生展开行为。
+ * @since Beta v0.13.0
+ * @param event - 预览卡片收到的点击事件
+ */
+export function handlePostPreviewClick(event: Event): void {
+  event.stopPropagation();
+  if (
+    event.type === "click" &&
+    event.target instanceof Element &&
+    event.target.closest("summary") !== null &&
+    event.target.closest("a, button, input, select, textarea") === null
+  ) {
+    return;
+  }
+  event.preventDefault();
+}
 
 /**
  * 从帖子节点收集可用于预览的表情图片地址。
@@ -56,6 +101,12 @@ export function getMissingPostPreviewEmoticonNames(
         const name = match[1];
         if (emoticons[name] === undefined && name.trim() === name && name.length > 0)
           names.add(name);
+      }
+    } else if ("fold" in node.insert) {
+      const fold = <TGApp.BBS.PostEdit.Fold>node.insert.fold;
+      for (const value of [fold.title, fold.content]) {
+        const nested = <Array<TGApp.BBS.SctPost.Base>>JSON.parse(value);
+        for (const name of getMissingPostPreviewEmoticonNames(nested, emoticons)) names.add(name);
       }
     }
     if (node.children)

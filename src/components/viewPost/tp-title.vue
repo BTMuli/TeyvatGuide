@@ -16,12 +16,9 @@
   </span>
 </template>
 <script lang="ts" setup>
-import bbsReq from "@req/bbsReq.js";
-import TGHttps from "@utils/network/TGHttps.js";
-import TGLogger from "@utils/system/TGLogger.js";
-import { onMounted, shallowRef } from "vue";
-
-const EMOJI_REGEX = /(?<=\n|.+?|^)(_\(.+?\)(?=\n|.+?|$))/g;
+import { getPostEmoticonNames, usePostEmoticons } from "@hooks/usePostEmoticons.js";
+import { splitPostEmoticonText } from "@utils/bbs/postEmoticon.js";
+import { computed, watch } from "vue";
 
 type EmojiSegment = {
   type: "text" | "emoji";
@@ -36,80 +33,19 @@ type TpTitleProps = {
 
 const props = withDefaults(defineProps<TpTitleProps>(), { singleLine: false });
 
-const titleSegments = shallowRef<Array<EmojiSegment>>([]);
-
-let emojiMapCache: Record<string, string> | null = null;
-
-async function loadEmojiMap(): Promise<Record<string, string>> {
-  if (emojiMapCache !== null) return emojiMapCache;
-
-  const localEmojis = localStorage.getItem("emojis");
-  if (localEmojis !== null) {
-    const parsed = <Record<string, string>>JSON.parse(localEmojis);
-    emojiMapCache = parsed;
-    return parsed;
-  }
-
-  try {
-    const res = await bbsReq.emojis();
-    if (res.retcode !== 0) {
-      console.error("[TpTitle] Failed to load emojis:", res);
-      emojiMapCache = {};
-      return emojiMapCache;
-    }
-    const emojis: Record<string, string> = {};
-    for (const series of res.data.list) {
-      for (const emoji of series.list) {
-        emojis[emoji.name] = emoji.icon;
-      }
-    }
-    emojiMapCache = emojis;
-    localStorage.setItem("emojis", JSON.stringify(emojis));
-    return emojis;
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    await TGLogger.Error(`[TpTitle] ${errMsg}`);
-    emojiMapCache = {};
-    return emojiMapCache;
-  }
-}
-
-function getEmojiName(emojiText: string): string {
-  return emojiText.slice(2, -1);
-}
-
-async function parseEmojiText(text: string): Promise<Array<EmojiSegment>> {
-  const segments: Array<EmojiSegment> = [];
-  const parts = text.split(EMOJI_REGEX);
-
-  if (parts.length === 1) {
-    segments.push({ type: "text", content: text });
-    return segments;
-  }
-
-  const emojiMap = await loadEmojiMap();
-
-  for (const part of parts) {
-    if (part === "") continue;
-    if (EMOJI_REGEX.test(part)) {
-      const emojiName = getEmojiName(part);
-      const emojiUrl = emojiMap[emojiName] || "";
-      segments.push({
-        type: "emoji",
-        content: emojiName,
-        emojiUrl,
-      });
-    } else {
-      segments.push({ type: "text", content: part });
-    }
-  }
-
-  return segments;
-}
-
-onMounted(async () => {
-  titleSegments.value = await parseEmojiText(props.text);
-});
+const { emoticonMap, ensureEmoticons } = usePostEmoticons();
+const titleSegments = computed<Array<EmojiSegment>>(() =>
+  splitPostEmoticonText(props.text, emoticonMap.value).map((segment) => {
+    if (typeof segment.insert === "string") return { type: "text", content: segment.insert };
+    return {
+      type: "emoji",
+      content: segment.insert.emoticon.name,
+      emojiUrl: segment.insert.emoticon.src,
+    };
+  }),
+);
+const emoticonNames = computed<Array<string>>(() => getPostEmoticonNames(props.text));
+watch(emoticonNames, (names) => void ensureEmoticons(names), { immediate: true });
 
 function handleEmojiClick(e: Event, segment: EmojiSegment): void {
   if (!segment.emojiUrl) return;
