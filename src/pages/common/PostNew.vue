@@ -266,10 +266,7 @@ async function handleSaved(postId?: string): Promise<void> {
 
 .post-new-page {
   width: 100%;
-  max-width: 1200px;
   box-sizing: border-box;
-  padding: 24px 24px 48px;
-  margin: 0 auto;
 }
 
 .post-new-state {
@@ -288,10 +285,6 @@ async function handleSaved(postId?: string): Promise<void> {
   .post-new-app-bar :deep(.v-toolbar__content) {
     min-height: 56px;
     padding-inline: 4px;
-  }
-
-  .post-new-page {
-    padding: 16px 16px 24px;
   }
 
   .post-new-top {

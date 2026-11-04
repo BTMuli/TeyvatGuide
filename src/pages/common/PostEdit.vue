@@ -229,10 +229,7 @@ async function handleSaved(): Promise<void> {
 
 .post-edit-page {
   width: 100%;
-  max-width: 1200px;
   box-sizing: border-box;
-  padding: 24px 24px 48px;
-  margin: 0 auto;
 }
 
 .post-edit-state {
@@ -251,10 +248,6 @@ async function handleSaved(): Promise<void> {
   .post-edit-app-bar :deep(.v-toolbar__content) {
     min-height: 56px;
     padding-inline: 4px;
-  }
-
-  .post-edit-page {
-    padding: 16px 16px 24px;
   }
 
   .post-edit-top {

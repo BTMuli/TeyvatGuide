@@ -109,6 +109,7 @@ function handleEmoticonError(): void {
   position: relative;
   display: flex;
   width: fit-content;
+  max-width: 100%;
   align-items: center;
   justify-content: center;
   margin: 8px auto;

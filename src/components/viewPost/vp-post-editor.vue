@@ -1,6 +1,7 @@
 <template>
   <div class="tgpe-editor-shell">
-    <div aria-label="帖子格式工具" class="tgpe-toolbar" role="toolbar">
+    <!-- 折叠标题只允许纯文本，不渲染空工具栏 -->
+    <div v-if="mode !== 'fold-title'" aria-label="帖子格式工具" class="tgpe-toolbar" role="toolbar">
       <button
         v-if="mode === 'article'"
         :disabled
@@ -26,7 +27,6 @@
         <v-icon size="20">mdi-emoticon-happy-outline</v-icon>
       </button>
       <button
-        v-if="mode !== 'fold-title'"
         :disabled
         aria-label="提及用户"
         title="提及用户"
@@ -85,18 +85,81 @@
             <v-icon size="20">{{ tool.icon }}</v-icon>
           </button>
         </template>
-        <button
-          :aria-pressed="isLinkActive"
+        <v-menu
+          v-model="linkOpen"
+          :close-on-content-click="false"
           :disabled
-          aria-label="插入或编辑链接"
-          title="链接"
-          class="tgpe-tool tgpe-format-start"
-          type="button"
-          @click="editLink"
-          @mousedown.prevent="rememberEditorSelection"
+          location="bottom start"
+          offset="8"
+          @after-leave="handleLinkAfterLeave"
+          @update:model-value="handleLinkOpenChange"
         >
-          <v-icon size="20">mdi-link-variant</v-icon>
-        </button>
+          <template #activator="{ props: menuProps }">
+            <button
+              v-bind="menuProps"
+              :aria-expanded="linkOpen"
+              :aria-pressed="isLinkActive"
+              aria-haspopup="dialog"
+              :disabled
+              aria-label="插入或编辑链接"
+              title="链接"
+              class="tgpe-tool tgpe-format-start"
+              type="button"
+              @click="prepareLinkMenu"
+              @mousedown.prevent="rememberEditorSelection"
+            >
+              <v-icon size="20">mdi-link-variant</v-icon>
+            </button>
+          </template>
+          <div aria-label="链接设置" class="tgpe-link-menu" role="dialog">
+            <p class="tgpe-link-title">{{ linkMenuTitle }}</p>
+            <v-text-field
+              ref="linkInput"
+              v-model="linkUrl"
+              :error="linkError.length > 0"
+              aria-label="链接地址"
+              autocomplete="off"
+              autofocus
+              density="compact"
+              hide-details
+              placeholder="https://"
+              variant="outlined"
+              @keydown.enter.prevent="applyLink"
+              @update:model-value="linkError = ''"
+            >
+              <template #prepend-inner>
+                <v-icon size="18">mdi-link-variant</v-icon>
+              </template>
+            </v-text-field>
+            <v-text-field
+              v-if="linkNeedsText"
+              v-model="linkText"
+              aria-label="链接文字"
+              autocomplete="off"
+              density="compact"
+              hide-details
+              placeholder="链接文字（留空则显示地址）"
+              variant="outlined"
+              @keydown.enter.prevent="applyLink"
+            />
+            <p v-if="linkError" class="tgpe-link-error" role="alert">{{ linkError }}</p>
+            <p v-else class="tgpe-link-hint">{{ linkMenuHint }}</p>
+            <div class="tgpe-link-actions">
+              <v-btn size="small" variant="text" @click="linkOpen = false">取消</v-btn>
+              <v-btn v-if="linkTarget" size="small" variant="text" @click="removeLink"
+                >移除链接</v-btn
+              >
+              <v-btn
+                color="var(--tgc-btn-1)"
+                size="small"
+                type="button"
+                variant="flat"
+                @click="applyLink"
+                >应用</v-btn
+              >
+            </div>
+          </div>
+        </v-menu>
         <button
           :aria-pressed="isInlineActive('bold')"
           :disabled
@@ -219,7 +282,6 @@
 </template>
 
 <script lang="ts" setup>
-import showDialog from "@comp/func/dialog.js";
 import bbsReq from "@req/bbsReq.js";
 import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
 import {
@@ -243,6 +305,7 @@ import Quill from "quill";
 import type { Range } from "quill";
 import {
   computed,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -251,6 +314,7 @@ import {
   useTemplateRef,
   watch,
 } from "vue";
+import { VTextField } from "vuetify/components";
 
 import VpPostColorPicker from "./vp-post-color-picker.vue";
 
@@ -277,6 +341,10 @@ type PostEditorProps = {
 type SelectionRange = {
   index: number;
   length: number;
+};
+
+type LinkTarget = SelectionRange & {
+  link: string;
 };
 
 type EmoticonCandidate = {
@@ -326,6 +394,13 @@ const selectedColor = ref<string>("#000000");
 const colorOpen = ref<boolean>(false);
 const colorSelection = ref<SelectionRange>({ index: 0, length: 0 });
 const dividerOpen = ref<boolean>(false);
+const linkOpen = ref<boolean>(false);
+const linkUrl = ref<string>("");
+const linkText = ref<string>("");
+const linkError = ref<string>("");
+const linkSelection = ref<SelectionRange>({ index: 0, length: 0 });
+const linkTarget = ref<LinkTarget>();
+const linkInput = useTemplateRef<InstanceType<typeof VTextField>>("linkInput");
 const dividerOptions: ReadonlyArray<TGApp.BBS.PostEdit.Divider> = [
   "line_1",
   "line_2",
@@ -349,6 +424,18 @@ const selectedHeader = computed<string>(() => {
   return String(header);
 });
 const isLinkActive = computed<boolean>(() => typeof activeFormats.value.link === "string");
+const linkNeedsText = computed<boolean>(
+  () => linkTarget.value === undefined && linkSelection.value.length === 0,
+);
+const linkMenuTitle = computed<string>(() => {
+  if (linkTarget.value) return "编辑链接";
+  return linkSelection.value.length > 0 ? "为选中文字添加链接" : "插入链接";
+});
+const linkMenuHint = computed<string>(() => {
+  if (linkTarget.value) return "仅支持 HTTP 或 HTTPS 链接，清空后应用可移除链接";
+  if (linkNeedsText.value) return "仅支持 HTTP 或 HTTPS 链接，链接文字留空时显示地址";
+  return "仅支持 HTTP 或 HTTPS 链接";
+});
 const editorLabel = computed<string>(() => {
   if (props.ariaLabel) return props.ariaLabel;
   if (props.mode === "picture") return "图片介绍";
@@ -372,6 +459,8 @@ let modelSnapshot = "";
 let lastSyncedNodes: Array<TGApp.BBS.SctPost.Base> | undefined;
 let editVersion = 0;
 let colorFocusPending = false;
+let linkEditVersion = 0;
+let linkFocusPending = false;
 let emoticonLoadVersion = 0;
 let emoticonCandidates: Array<EmoticonCandidate> = [];
 let savedSelection: SelectionRange = { index: 0, length: 0 };
@@ -394,6 +483,7 @@ watch(
     if (disabled) {
       colorOpen.value = false;
       dividerOpen.value = false;
+      linkOpen.value = false;
       rememberEditorSelection();
     }
     current.enable(!disabled);
@@ -959,6 +1049,8 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
   }
   const selection = clampSelection(current, savedSelection);
   colorOpen.value = false;
+  linkOpen.value = false;
+  linkError.value = "";
   applyingModel = true;
   try {
     editVersion += 1;
@@ -1297,38 +1389,142 @@ function handleColorAfterLeave(): void {
   current.focus();
 }
 
-async function editLink(): Promise<void> {
+/**
+ * 查找选区所在的链接范围；选区整体带同一链接时直接返回该选区。
+ * @since Beta v0.13.0
+ * @param current - 编辑器实例
+ * @param selection - 当前选区
+ * @returns 链接范围与链接地址
+ */
+function findLinkTarget(current: Quill, selection: SelectionRange): LinkTarget | undefined {
+  const link = current.getFormat(selection).link;
+  if (typeof link !== "string") return undefined;
+  if (selection.length > 0) return { ...selection, link };
+  const limit = current.getLength() - 1;
+  let start = selection.index;
+  let end = selection.index;
+  while (start > 0 && current.getFormat({ index: start - 1, length: 1 }).link === link) start -= 1;
+  while (end < limit && current.getFormat({ index: end, length: 1 }).link === link) end += 1;
+  if (end <= start) return undefined;
+  return { index: start, length: end - start, link };
+}
+
+/**
+ * 打开链接菜单前记录选区与已有链接，供应用时复用。
+ * @since Beta v0.13.0
+ */
+function prepareLinkMenu(): void {
   const current = quill.value;
   if (!current || props.disabled) return;
   const selection = selectionForAction(current);
-  const version = editVersion;
-  const existing = current.getFormat(selection).link;
-  const result = await showDialog.inputF({
-    cancelLabel: "取消",
-    confirmLabel: "应用",
-    input: typeof existing === "string" ? existing : undefined,
-    text: "请输入 HTTP 或 HTTPS 链接，留空可移除链接",
-    title: "编辑链接",
-  });
-  if (!mounted || quill.value !== current || props.disabled || version !== editVersion) {
-    emits("error", "编辑器内容已变化，链接未应用");
+  const target = findLinkTarget(current, selection);
+  linkSelection.value = selection;
+  linkTarget.value = target;
+  linkUrl.value = target?.link ?? "";
+  linkText.value = "";
+  linkError.value = "";
+  linkEditVersion = editVersion;
+}
+
+/**
+ * 菜单展开时把焦点移入链接地址输入框。
+ * @since Beta v0.13.0
+ * @param open - 菜单是否展开
+ */
+function handleLinkOpenChange(open: boolean): void {
+  if (!open) {
+    linkError.value = "";
     return;
   }
-  if (typeof result !== "string") return;
-  const link = result.trim();
-  if (link && !isPostUrl(link)) {
-    emits("error", "帖子链接仅支持 HTTP 或 HTTPS");
+  void nextTick(() => linkInput.value?.focus());
+}
+
+/**
+ * 关闭链接菜单，应用成功后把焦点交还编辑器。
+ * @since Beta v0.13.0
+ * @param focusEditor - 是否在关闭后回到编辑器
+ */
+function closeLinkMenu(focusEditor: boolean = false): void {
+  linkFocusPending = focusEditor;
+  linkOpen.value = false;
+  linkError.value = "";
+}
+
+/**
+ * 链接菜单收起后按需把焦点交还编辑器，避免焦点停在工具栏按钮上。
+ * @since Beta v0.13.0
+ */
+function handleLinkAfterLeave(): void {
+  if (!linkFocusPending) return;
+  linkFocusPending = false;
+  const current = quill.value;
+  if (!current || props.disabled) return;
+  current.focus();
+}
+
+/**
+ * 写入链接：已有链接改地址，选中文字加链接，未选中文字时先插入链接文字。
+ * @since Beta v0.13.0
+ */
+function applyLink(): void {
+  const current = quill.value;
+  if (!current || props.disabled) return;
+  if (linkEditVersion !== editVersion) {
+    linkError.value = "正文已变化，请关闭后重新设置链接";
     return;
   }
-  const safeSelection = clampSelection(current, selection);
-  if (safeSelection.length === 0) {
-    current.setSelection(safeSelection, "silent");
-    current.format("link", link || null, "user");
-  } else {
-    current.formatText(safeSelection, "link", link || null, "user");
+  const url = linkUrl.value.trim();
+  const target = linkTarget.value;
+  if (!target && !url) {
+    linkError.value = "请输入链接地址";
+    return;
   }
-  current.setSelection(safeSelection, "silent");
-  updateActiveFormats(safeSelection);
+  if (url && !isPostUrl(url)) {
+    linkError.value = "仅支持 HTTP 或 HTTPS 链接";
+    linkInput.value?.focus();
+    return;
+  }
+  if (target) {
+    const range = clampSelection(current, target);
+    current.formatText(range, "link", url || null, "user");
+    current.setSelection(range, "silent");
+    updateActiveFormats(range);
+    closeLinkMenu(true);
+    return;
+  }
+  const selection = clampSelection(current, linkSelection.value);
+  if (selection.length > 0) {
+    current.formatText(selection, "link", url, "user");
+    current.setSelection(selection, "silent");
+    updateActiveFormats(selection);
+    closeLinkMenu(true);
+    return;
+  }
+  const text = linkText.value.trim() || url;
+  current.insertText(selection.index, text, { link: url }, "user");
+  const cursor = { index: selection.index + text.length, length: 0 };
+  current.setSelection(cursor, "silent");
+  updateActiveFormats(cursor);
+  closeLinkMenu(true);
+}
+
+/**
+ * 移除当前链接范围上的链接。
+ * @since Beta v0.13.0
+ */
+function removeLink(): void {
+  const current = quill.value;
+  const target = linkTarget.value;
+  if (!current || props.disabled || !target) return;
+  if (linkEditVersion !== editVersion) {
+    linkError.value = "正文已变化，请关闭后重新设置链接";
+    return;
+  }
+  const range = clampSelection(current, target);
+  current.formatText(range, "link", null, "user");
+  current.setSelection(range, "silent");
+  updateActiveFormats(range);
+  closeLinkMenu(true);
 }
 
 function undo(): void {
@@ -1660,6 +1856,50 @@ defineExpose({
   background: var(--box-bg-4);
 }
 
+.tgpe-link-menu {
+  display: flex;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  background: var(--app-page-bg);
+  box-shadow: 0 8px 24px var(--common-shadow-2);
+  gap: 8px;
+}
+
+.tgpe-link-title {
+  margin: 0;
+  color: var(--common-text-title);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.tgpe-link-hint,
+.tgpe-link-error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+.tgpe-link-hint {
+  color: var(--box-text-4);
+}
+
+.tgpe-link-error {
+  color: var(--tgc-od-red);
+}
+
+.tgpe-link-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
 .tgpe-tool[aria-pressed="true"],
 .tgpe-tool[aria-expanded="true"] {
   border-color: var(--common-text-title);
@@ -1892,9 +2132,9 @@ defineExpose({
 
 .tgpe-editor :deep(.quill-custom-emoticon) {
   display: inline-block;
-  width: auto;
-  max-width: 120px;
-  height: 32px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
   object-fit: contain;
   vertical-align: middle;
 }

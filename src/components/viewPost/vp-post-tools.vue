@@ -1,6 +1,6 @@
 <!-- 图文帖的图片、表情与提及工具 -->
 <template>
-  <div v-if="!hideToolbar || uploading || error || emojiOpen || mentionOpen" class="post-tools">
+  <div v-if="!hideToolbar || error || emojiOpen || mentionOpen" class="post-tools">
     <div v-if="!hideToolbar" aria-label="帖子插入工具" class="post-tools-bar" role="group">
       <button
         :disabled="disabled || uploading"
@@ -200,15 +200,6 @@
         </div>
       </div>
     </v-menu>
-    <div
-      v-if="uploading"
-      aria-live="polite"
-      class="post-tools-status post-tools-upload-status"
-      role="status"
-    >
-      <span>正在上传图片…</span>
-      <button class="post-tools-action" type="button" @click="cancelUpload">取消上传</button>
-    </div>
     <div v-if="error" class="post-tools-error" role="alert">{{ error }}</div>
   </div>
   <input
@@ -517,7 +508,7 @@ function insertMention(): void {
   closePanel();
 }
 
-defineExpose({ chooseImage, openEmoji, openMention });
+defineExpose({ cancelUpload, chooseImage, openEmoji, openMention });
 </script>
 <style lang="scss" scoped>
 .post-tools {
@@ -757,15 +748,6 @@ defineExpose({ chooseImage, openEmoji, openMention });
   font-size: 12px;
   line-height: 16px;
   overflow-wrap: anywhere;
-}
-
-.post-tools-upload-status {
-  box-sizing: border-box;
-  padding: 8px 12px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 8px;
-  border-left: 3px solid var(--tgc-od-blue);
-  background: var(--box-bg-3);
 }
 
 .post-tools-lookup > :first-child {
