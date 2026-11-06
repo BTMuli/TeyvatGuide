@@ -144,13 +144,13 @@
       </div>
     </template>
   </v-app-bar>
-  <div ref="rolesBox" :class="{ 'uc-box--sharing': loadShare }" class="uc-box">
-    <div class="uc-box-info">
-      <span>角色详情</span>
-      <span>|</span>
-      <span>TeyvatGuide v{{ version }}</span>
-      <span>|</span>
-      <span>更新于 {{ updateTimeText }}</span>
+  <div
+    ref="rolesBox"
+    :class="{ 'uc-box--sharing': loadShare, 'uc-box--compact': compactShare }"
+    class="uc-box"
+  >
+    <div v-if="loadShare" class="uc-box-info">
+      角色详情 | TeyvatGuide v{{ version }} | 更新于 {{ updateTimeText }}
     </div>
     <div class="uc-box-top">
       <div class="uc-box-title">
@@ -395,10 +395,16 @@ const displayList = computed<Array<TGApp.Sqlite.Character.TableTrans>>(() =>
   selectedList.value.slice(0, renderedCount.value),
 );
 const hasMoreRoles = computed<boolean>(() => renderedCount.value < selectedList.value.length);
+const compactShare = computed<boolean>(
+  () =>
+    loadShare.value &&
+    selectedList.value.length > 0 &&
+    selectedList.value.length < cardColumns.value,
+);
 const cardGridStyle = computed<Record<string, string>>(() => ({
   "--uc-card-column-gap": `${cardColumnGap.value}px`,
   "--uc-card-col-width": `${cardColumnWidth.value}px`,
-  "--uc-card-columns": String(cardColumns.value),
+  "--uc-card-columns": String(compactShare.value ? selectedList.value.length : cardColumns.value),
 }));
 
 onMounted(async () => {
@@ -516,7 +522,8 @@ function observeCardGrid(): void {
   if (!box) return;
   cardGridObserver = new ResizeObserver((entries) => {
     const entry = entries[0];
-    if (!entry) return;
+    // 紧凑截图的宽度不参与页面列数计算。
+    if (!entry || compactShare.value) return;
     const width = Math.floor(entry.contentRect.width);
     if (width === cardGridWidth) return;
     cardGridWidth = width;
@@ -1343,15 +1350,25 @@ function handleSwitch(next: boolean): void {
 
 .uc-box-info {
   position: absolute;
-  z-index: -1;
+  z-index: 1;
   top: 2px;
   right: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 4px;
+  overflow: hidden;
+  max-width: calc(100% - 8px);
   font-size: 14px;
   opacity: 0.8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uc-box--compact {
+  width: min-content;
+
+  .uc-box-title {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    white-space: nowrap;
+  }
 }
 
 .uc-top-btns {
