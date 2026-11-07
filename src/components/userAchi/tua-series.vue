@@ -2,7 +2,7 @@
 <template>
   <div
     v-if="series"
-    v-show="!(hideFin && progress === 100)"
+    v-show="searchCount === undefined ? !(hideFin && progress === 100) : searchCount > 0"
     :class="{
       'tuas-selected': props.cur === props.series.id,
       'tuas-radius': showCard,
@@ -29,8 +29,20 @@
       />
     </div>
     <div class="tuas-content">
-      <span :title="series.name">{{ series.name }}</span>
-      <span>{{ overview.fin }}/{{ overview.total }}</span>
+      <span :title="series.name" class="tuas-title">{{ series.name }}</span>
+      <div class="tuas-counts">
+        <span class="tuas-completion">{{ overview.fin }}/{{ overview.total }}</span>
+        <v-chip
+          v-if="searchCount !== undefined"
+          prepend-icon="mdi-magnify"
+          rounded="xs"
+          size="x-small"
+          title="搜索结果数"
+          variant="tonal"
+        >
+          {{ searchCount }}
+        </v-chip>
+      </div>
     </div>
     <button
       v-if="props.showHiddenFilter"
@@ -65,6 +77,8 @@ type TuaSeriesProps = {
   hiddenFilter: HiddenFilter;
   /** 是否显示隐藏成就筛选入口 */
   showHiddenFilter: boolean;
+  /** 搜索命中数，未搜索时为 undefined */
+  searchCount?: number;
 };
 type TuaSeriesEmits = {
   selected: [v: number];
@@ -285,13 +299,21 @@ function switchHiddenFilter(): void {
   text-align: left;
 }
 
-.tuas-content :first-child {
+.tuas-title {
   font-family: var(--font-title);
   font-size: 14px;
+  font-weight: normal;
 }
 
-.tuas-content :last-child {
+.tuas-counts {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
   font-size: 12px;
+  line-height: 16px;
+}
+
+.tuas-completion {
   opacity: 0.8;
 }
 </style>

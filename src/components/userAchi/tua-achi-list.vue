@@ -1,9 +1,22 @@
 <template>
   <div class="tua-al-container">
-    <div v-if="ncData !== undefined" class="tua-al-nc">
-      <TopNameCard :data="ncData" :finish="isFinish" @selected="showNc = true" />
+    <div v-if="nameCard && nameCardAchievements" class="tua-al-nc">
+      <TopNameCard :data="nameCard" :finish="isFinish" @selected="showNc = true" />
     </div>
-    <v-virtual-scroll :item-height="60" :items="renderAchi" class="tua-al-list">
+    <div
+      v-if="searching && achievements !== undefined && renderAchi.length === 0"
+      class="pa-4"
+      role="status"
+    >
+      没有符合当前条件的成就
+    </div>
+    <v-virtual-scroll
+      v-else
+      :key="series"
+      :item-height="60"
+      :items="renderAchi"
+      class="tua-al-list"
+    >
       <template #default="{ item }">
         <TuaAchi
           :completedStageCount="item.completedStageCount"
@@ -13,20 +26,20 @@
           :isStageChild="item.isStageChild"
           :stageCount="item.stageCount"
           :stageIndex="item.stageIndex"
-          @updated="handleAchiUpdated"
+          @updated="emits('updated')"
           @select-achi="selectAchi"
           @toggle-stages="toggleStageChain(item.stageChainId)"
         />
       </template>
     </v-virtual-scroll>
     <ToNameCard
-      v-if="ncData"
+      v-if="nameCard && nameCardAchievements"
       v-model="showNc"
-      :data="ncData"
+      :data="nameCard"
       :achievementSeries="{
         uid: props.uid,
         name: TSUserAchi.getAchievementCategoryById(series)?.name ?? '成就系列',
-        items: achievements,
+        items: nameCardAchievements,
       }"
       topOffset="112px"
     />
@@ -35,9 +48,9 @@
       v-model="showOverlay"
       :data="selectedAchi"
       @search="handleSearch"
-      @updated="handleAchiUpdated"
+      @updated="emits('updated')"
       @select-achievement="selectAchiFromOverlay"
-      @select-series="selectSeries"
+      @select-series="emits('select-series', $event)"
     >
       <template #left>
         <v-btn
@@ -79,7 +92,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 
 import TuaAchiOverlay from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";
@@ -92,10 +105,12 @@ import { AppNameCardsData } from "@/data/index.js";
  */
 type TuaAchiListProps = {
   uid: number;
+  series: number;
   hideFin: boolean;
   hiddenFilter: "all" | "hidden" | "visible";
+  achievements?: Array<TGApp.App.Achievement.RenderItem>;
   recentAchievements: ReadonlyArray<TGApp.App.Achievement.RenderItem>;
-  search?: string;
+  searching: boolean;
 };
 type AchievementListItem = {
   achievement: TGApp.App.Achievement.RenderItem;
@@ -109,12 +124,10 @@ type AchievementListItem = {
 };
 
 const props = defineProps<TuaAchiListProps>();
-const series = defineModel<number>("series", { required: true });
-const isSearch = defineModel<boolean>("isSearch", { required: true });
+const emits = defineEmits<{ updated: []; "select-series": [seriesId: number] }>();
 
 const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
-const isFinish = ref<boolean>(false);
 const searchWd = ref<string>();
 const showSearch = ref<boolean>(false);
 const showUser = ref<boolean>(false);
@@ -122,14 +135,24 @@ const curUid = ref<string>("");
 const curGid = ref<number>(2);
 const expandedStageChains = ref<Set<number>>(new Set());
 
-const ncData = shallowRef<TGApp.App.NameCard.Item>();
-const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
 const selectedAchi = shallowRef<TGApp.App.Achievement.RenderItem>();
 const recentNavigation = shallowRef<ReadonlyArray<TGApp.App.Achievement.RenderItem>>();
-let dataRequestId = 0;
+const searchSeriesAchievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>();
 
+const nameCard = computed<TGApp.App.NameCard.Item | undefined>(() => {
+  const namecardId = TSUserAchi.getAchievementCategoryById(props.series)?.namecardId;
+  return AppNameCardsData.find((item) => item.id === namecardId);
+});
+const nameCardAchievements = computed<Array<TGApp.App.Achievement.RenderItem> | undefined>(() => {
+  if (props.searching) return searchSeriesAchievements.value;
+  if (props.achievements?.[0]?.categoryId === props.series) return props.achievements;
+  return undefined;
+});
+const isFinish = computed<boolean>(
+  () => nameCardAchievements.value?.every((item) => item.isCompleted) ?? false,
+);
 const renderAchi = computed<Array<AchievementListItem>>(() =>
-  groupAchievementStages(achievements.value),
+  groupAchievementStages(props.achievements ?? []),
 );
 const navigationItems = computed<Array<TGApp.App.Achievement.RenderItem>>(() =>
   recentNavigation.value === undefined
@@ -145,22 +168,31 @@ const canNavigateNext = computed<boolean>(
   () => navigationIndex.value >= 0 && navigationIndex.value < navigationItems.value.length - 1,
 );
 
-onMounted(async () => await loadAchi());
-
-watch(() => [props.search, isSearch.value], searchAchi);
 watch(
-  () => [series.value, props.uid],
-  (next, previous) => {
-    if (previous !== undefined && next[1] !== previous[1]) {
-      dataRequestId += 1;
-      achievements.value = [];
-      expandedStageChains.value = new Set();
-      recentNavigation.value = undefined;
-      selectedAchi.value = undefined;
-      showOverlay.value = false;
-      isSearch.value = false;
+  [() => props.searching, () => props.series, () => props.uid, () => props.achievements],
+  async ([searching, series, uid], [wasSearching, previousSeries, previousUid], onCleanup) => {
+    if (searching !== wasSearching || series !== previousSeries || uid !== previousUid) {
+      showNc.value = false;
+      searchSeriesAchievements.value = undefined;
     }
-    void loadAchi();
+    if (!searching || nameCard.value === undefined) return;
+    let stale = false;
+    onCleanup(() => {
+      stale = true;
+    });
+    const items = await TSUserAchi.getAchievements(uid, series);
+    if (!stale) searchSeriesAchievements.value = items;
+  },
+  { immediate: true },
+);
+
+watch(
+  () => props.uid,
+  () => {
+    expandedStageChains.value = new Set();
+    recentNavigation.value = undefined;
+    selectedAchi.value = undefined;
+    showOverlay.value = false;
   },
 );
 watch(
@@ -229,76 +261,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   showUser.value = true;
 }
 
-async function searchAchi(): Promise<void> {
-  if (!isSearch.value) return;
-  const requestId = ++dataRequestId;
-  const uid = props.uid;
-  if (!props.search) {
-    const currentSeries = series.value;
-    const nextAchievements = await TSUserAchi.getAchievements(uid, currentSeries);
-    if (requestId !== dataRequestId || uid !== props.uid || currentSeries !== series.value) return;
-    achievements.value = nextAchievements;
-    showSnackbar.success("已重置");
-    isSearch.value = false;
-    return;
-  }
-  if (props.search === "") {
-    showSnackbar.warn("请输入搜索内容");
-    isSearch.value = false;
-    return;
-  }
-  const searchRes = await TSUserAchi.searchAchi(uid, props.search);
-  if (requestId !== dataRequestId || uid !== props.uid) return;
-  if (showOverlay.value) showOverlay.value = false;
-  if (searchRes.length > 0) {
-    ncData.value = undefined;
-    achievements.value = searchRes;
-    showSnackbar.success(`成功获取${achievements.value.length}条成就`);
-    series.value = -1;
-    await nextTick();
-  } else {
-    showSnackbar.warn("未搜索到相关成就");
-  }
-  isSearch.value = false;
-}
-
-async function loadAchi(showFeedback: boolean = true): Promise<void> {
-  if (isSearch.value) return;
-  const requestId = ++dataRequestId;
-  const uid = props.uid;
-  const currentSeries = series.value;
-  const currentSearch = props.search;
-  const nextAchievements =
-    currentSeries === -1 && currentSearch
-      ? await TSUserAchi.searchAchi(uid, currentSearch)
-      : await TSUserAchi.getAchievements(uid, currentSeries);
-  const ov = await TSUserAchi.getOverview(uid, currentSeries);
-  if (
-    requestId !== dataRequestId ||
-    uid !== props.uid ||
-    currentSeries !== series.value ||
-    currentSearch !== props.search
-  ) {
-    return;
-  }
-  achievements.value = nextAchievements;
-  isFinish.value = ov.fin === ov.total;
-  const seriesFind = TSUserAchi.getAchievementCategoryById(series.value);
-  if (!seriesFind || seriesFind.namecardId === null) {
-    ncData.value = undefined;
-  } else {
-    const ncFind = AppNameCardsData.find((item) => item.id === seriesFind.namecardId);
-    ncData.value = ncFind ?? undefined;
-  }
-  if (showFeedback) showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
-}
-
-async function handleAchiUpdated(): Promise<void> {
-  await loadAchi(false);
-}
-
 function groupAchievementStages(
-  items: Array<TGApp.App.Achievement.RenderItem>,
+  items: ReadonlyArray<TGApp.App.Achievement.RenderItem>,
 ): Array<AchievementListItem> {
   const itemMap = new Map<number, TGApp.App.Achievement.RenderItem>(
     items.map((item) => [item.id, item]),
@@ -356,7 +320,9 @@ function groupAchievementStages(
       });
     }
   }
-  if (series.value !== -1 && series.value !== 0 && series.value !== 17) return result;
+  if (!props.searching && props.series !== -1 && props.series !== 0 && props.series !== 17) {
+    return result;
+  }
   // 按显示阶段排序整组成就，避免其他阶段的完成时间影响位置或拆散展开项。
   const groups: Array<Array<AchievementListItem>> = [];
   for (const item of result) {
@@ -414,14 +380,6 @@ function selectRecentAchievement(data: TGApp.App.Achievement.RenderItem): void {
 }
 
 defineExpose({ selectRecentAchievement });
-
-function selectSeries(data: number): void {
-  if (series.value === data) {
-    showSnackbar.warn("已经选中当前系列");
-    return;
-  }
-  series.value = data;
-}
 
 function switchAchiInfo(next: boolean): void {
   if (selectedAchi.value === undefined) {

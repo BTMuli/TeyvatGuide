@@ -25,17 +25,28 @@
     </template>
     <template #append>
       <div class="achi-append">
+        <v-btn
+          v-if="searchQuery"
+          aria-label="重置搜索"
+          class="top-btn"
+          icon="mdi-restart"
+          rounded="sm"
+          size="40"
+          title="重置搜索"
+          variant="elevated"
+          @click="resetSearch"
+        />
         <v-text-field
-          v-model="search"
+          v-model="searchDraft"
           :hide-details="true"
           append-inner-icon="mdi-magnify"
           autocomplete="off"
-          @click:append-inner="isSearch = true"
-          variant="outlined"
-          :clearable="true"
+          class="achi-search-field"
           density="compact"
           label="搜索"
-          @keydown.enter="isSearch = true"
+          variant="outlined"
+          @click:append-inner="submitSearch"
+          @keydown.enter="submitSearch"
         />
       </div>
     </template>
@@ -93,9 +104,10 @@
       <TuaSeries
         v-for="item in categoryList"
         :key="item.id"
-        v-model:cur="selectedSeries"
+        :cur="activeSeries"
         :hideFin
         :hiddenFilter="getHiddenFilter(item.id)"
+        :searchCount="searchQuery ? (searchCounts.get(item.id) ?? 0) : undefined"
         :series="item"
         :showHiddenFilter="hiddenAchievementCategoryIds.has(item.id)"
         :uid="uidCur"
@@ -105,13 +117,15 @@
     </div>
     <TuaAchiList
       ref="achiList"
-      v-model:isSearch="isSearch"
-      v-model:search="search"
-      v-model:series="selectedSeries"
+      :achievements="visibleAchievements"
       :hideFin
       :hiddenFilter="activeHiddenFilter"
       :recentAchievements
+      :searching="searchQuery !== ''"
+      :series="activeSeries"
       :uid="uidCur"
+      @select-series="handleOverlaySeriesSelect"
+      @updated="loadAchievements(false)"
     />
   </div>
   <TuaOverview v-model="showOverview" :uid="uidCur" />
@@ -171,26 +185,45 @@ const { account } = storeToRefs(useUserStore());
 let achiListener: UnlistenFn | null = null;
 let overviewRequestId = 0;
 let recentRequestId = 0;
+let achievementRequestId = 0;
 
-const search = ref<string>("");
+const searchDraft = ref<string>("");
+const searchQuery = ref<string>("");
 const showOverview = ref<boolean>(false);
-const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
 const hiddenFilters = ref<Partial<Record<number, HiddenFilter>>>({});
 const uidList = ref<Array<number>>([]);
 const uidCur = ref<number>(0);
 const selectedSeries = ref<number>(-1);
 const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 1 });
+const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>();
 const recentAchievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
 const achiList = useTemplateRef<InstanceType<typeof TuaAchiList>>("achiList");
 const title = computed<string>(() => {
   const percentage = ((overview.value.fin * 100) / overview.value.total).toFixed(2);
   return `${overview.value.fin}/${overview.value.total} ${percentage}%`;
 });
-const activeHiddenFilter = computed<HiddenFilter>(() => {
-  if (!hiddenAchievementCategoryIds.has(selectedSeries.value)) return "all";
-  return getHiddenFilter(selectedSeries.value);
+const browseSeries = computed<number>(() => (searchQuery.value ? -1 : selectedSeries.value));
+const searchCounts = computed<Map<number, number>>(() => {
+  const counts = new Map<number, number>();
+  if (!searchQuery.value || achievements.value === undefined) return counts;
+  for (const item of achievements.value) {
+    if (hideFin.value && item.isCompleted) continue;
+    counts.set(item.categoryId, (counts.get(item.categoryId) ?? 0) + 1);
+  }
+  return counts;
 });
+const activeSeries = computed<number>(() => {
+  // 筛选后当前系列可能没有结果，暂时展示全部命中，保留重置搜索后的系列选择。
+  if (searchQuery.value && !searchCounts.value.has(selectedSeries.value)) return -1;
+  return selectedSeries.value;
+});
+const visibleAchievements = computed<Array<TGApp.App.Achievement.RenderItem> | undefined>(() => {
+  const series = activeSeries.value;
+  if (!searchQuery.value || series === -1) return achievements.value;
+  return achievements.value?.filter((item) => item.categoryId === series);
+});
+const activeHiddenFilter = computed<HiddenFilter>(() => getHiddenFilter(activeSeries.value));
 
 onMounted(async () => {
   await showLoading.start("正在加载成就数据");
@@ -224,6 +257,15 @@ watch(
   },
 );
 
+watch(
+  [uidCur, searchQuery, browseSeries],
+  ([uid, query], [previousUid, previousQuery]) => {
+    if (uid !== previousUid || query !== previousQuery) achievements.value = undefined;
+    return loadAchievements();
+  },
+  { immediate: true },
+);
+
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserAchi.getAllUid();
   if (uidList.value.includes(Number(account.value.gameUid))) {
@@ -242,12 +284,59 @@ function switchHideFin(): void {
 }
 
 function handleSeriesSelect(id: number): void {
-  if (selectedSeries.value === id) {
-    selectedSeries.value = -1;
-    // showSnackbar.warn("已经选中当前系列");
+  selectedSeries.value = activeSeries.value === id ? -1 : id;
+}
+
+function handleOverlaySeriesSelect(id: number): void {
+  if (activeSeries.value === id) {
+    showSnackbar.warn("已经选中当前系列");
     return;
   }
+  if (searchQuery.value && !searchCounts.value.has(id)) resetSearch();
   selectedSeries.value = id;
+}
+
+async function submitSearch(): Promise<void> {
+  const query = searchDraft.value.trim();
+  if (!query) {
+    if (searchQuery.value) resetSearch();
+    else showSnackbar.warn("请输入搜索内容");
+    return;
+  }
+  selectedSeries.value = -1;
+  if (query === searchQuery.value) {
+    await loadAchievements();
+    return;
+  }
+  searchQuery.value = query;
+}
+
+function resetSearch(): void {
+  searchDraft.value = "";
+  searchQuery.value = "";
+  showSnackbar.success("已重置搜索");
+}
+
+async function loadAchievements(showFeedback: boolean = true): Promise<void> {
+  const requestId = ++achievementRequestId;
+  const uid = uidCur.value;
+  const query = searchQuery.value;
+  const series = browseSeries.value;
+  const items = query
+    ? await TSUserAchi.searchAchi(uid, query)
+    : await TSUserAchi.getAchievements(uid, series);
+  if (
+    requestId !== achievementRequestId ||
+    uid !== uidCur.value ||
+    query !== searchQuery.value ||
+    series !== browseSeries.value
+  ) {
+    return;
+  }
+  achievements.value = items;
+  if (!showFeedback) return;
+  if (query && items.length === 0) showSnackbar.warn("未搜索到相关成就");
+  else showSnackbar.success(`已获取 ${items.length} 条成就数据`);
 }
 
 function getHiddenFilter(seriesId: number): HiddenFilter {
@@ -489,13 +578,18 @@ async function toYae(): Promise<void> {
 
 .achi-append {
   position: relative;
-  display: flex;
+  display: grid;
   width: 400px;
   height: 50px;
   align-items: center;
-  justify-content: center;
   margin: 0 10px;
   color: var(--box-text-1);
+  gap: 8px;
+  grid-template-columns: 40px minmax(0, 1fr);
+}
+
+.achi-search-field {
+  grid-column: 2;
 }
 
 .top-extension {
