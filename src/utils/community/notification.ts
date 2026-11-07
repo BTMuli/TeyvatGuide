@@ -37,6 +37,31 @@ export function getNotificationBadge(
 }
 
 /**
+ * 判断通知条目是否需要单独渲染“原内容”引用块。
+ * @since Beta v0.13.0
+ * @remarks
+ * 点赞通知的原内容就是被点赞的帖子或评论本身，正文已经呈现时再次引用会重复展示同一内容，
+ * 只在正文没有可显示内容时才回退到引用块。回复、提及等通知的原内容是被回复或被提及的内容，
+ * 与正文不同，需要独立显示。
+ * @param category - 通知分类
+ * @param origin - 通知关联的原内容
+ * @param hasBody - 正文是否已有可显示内容，含内容已删除的提示
+ * @returns 是否需要渲染引用块
+ */
+export function shouldRenderNotificationOrigin(
+  category: TGApp.BBS.Notification.Category,
+  origin: TGApp.BBS.Notification.Origin | null,
+  hasBody: boolean,
+): boolean {
+  if (origin === null) return false;
+  const hasImage = (origin.image?.image_url.trim() ?? "") !== "";
+  const originVisible =
+    origin.is_deleted || origin.origin_is_missing || origin.text.trim() !== "" || hasImage;
+  if (!originVisible) return false;
+  return category !== "comment" || !hasBody;
+}
+
+/**
  * 清除已打开分类的全部入口提醒，同时保留其他分类。
  * @since Beta v0.13.0
  * @param counts - 当前分类及关注用户提醒数

@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   clearNotificationBadge,
   getNotificationBadge,
+  shouldRenderNotificationOrigin,
 } from "../src/utils/community/notification.js";
 
 /**
@@ -35,6 +36,36 @@ function createSettings(
     ...overrides,
   };
 }
+
+/**
+ * 创建通知原内容测试数据。
+ * @since Beta v0.13.0
+ * @param overrides - 本次用例覆盖的原内容字段
+ * @returns 通知原内容
+ */
+function createOrigin(
+  overrides: Partial<TGApp.BBS.Notification.Origin> = {},
+): TGApp.BBS.Notification.Origin {
+  return {
+    text: "",
+    structured_content: "",
+    image: null,
+    is_deleted: false,
+    origin_is_missing: false,
+    ...overrides,
+  };
+}
+
+/** 被点赞评论的原内容，含正文与配图。 @since Beta v0.13.0 */
+const likedComment = createOrigin({
+  text: "帅_(得意)",
+  image: {
+    image_url: "https://upload-bbs.miyoushe.com/upload/cover.jpg",
+    width: 1280,
+    height: 720,
+    type: "jpg",
+  },
+});
 
 const interactions: Array<{
   category: TGApp.BBS.Notification.Category;
@@ -148,5 +179,52 @@ describe("clearNotificationBadge", () => {
       dot: false,
       label: "",
     });
+  });
+});
+
+describe("notification origin quote", () => {
+  it("does not repeat a liked comment that the notification body already renders", () => {
+    expect(shouldRenderNotificationOrigin("comment", likedComment, true)).toBe(false);
+  });
+
+  it("keeps the liked comment as the only content when the body is empty", () => {
+    expect(shouldRenderNotificationOrigin("comment", likedComment, false)).toBe(true);
+    expect(
+      shouldRenderNotificationOrigin("comment", createOrigin({ is_deleted: true }), false),
+    ).toBe(true);
+  });
+
+  it("keeps the quoted content that replies and mentions refer to", () => {
+    expect(shouldRenderNotificationOrigin("reply", likedComment, true)).toBe(true);
+    expect(shouldRenderNotificationOrigin("active_mention", likedComment, true)).toBe(true);
+  });
+
+  it("treats original content as visible when it only carries an image", () => {
+    const imageOnly = createOrigin({
+      image: {
+        image_url: "https://upload-bbs.miyoushe.com/upload/post.jpg",
+        width: 0,
+        height: 0,
+        type: "jpg",
+      },
+    });
+    expect(shouldRenderNotificationOrigin("reply", imageOnly, true)).toBe(true);
+    expect(shouldRenderNotificationOrigin("comment", imageOnly, true)).toBe(false);
+  });
+
+  it("skips the quote when the notification has no original content", () => {
+    expect(shouldRenderNotificationOrigin("reply", null, true)).toBe(false);
+    expect(shouldRenderNotificationOrigin("reply", createOrigin({ text: "   " }), true)).toBe(
+      false,
+    );
+  });
+
+  it("still reports deleted original content for replies", () => {
+    expect(shouldRenderNotificationOrigin("reply", createOrigin({ is_deleted: true }), true)).toBe(
+      true,
+    );
+    expect(
+      shouldRenderNotificationOrigin("reply", createOrigin({ origin_is_missing: true }), false),
+    ).toBe(true);
   });
 });

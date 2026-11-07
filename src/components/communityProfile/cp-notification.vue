@@ -49,10 +49,7 @@
     <span v-if="coverImage" class="cp-notification-cover">
       <TMiImg :src="coverImage" alt="通知配图" />
     </span>
-    <blockquote
-      v-if="originDeleted || originNodes.length || originImage"
-      class="cp-notification-origin"
-    >
+    <blockquote v-if="showOrigin" class="cp-notification-origin">
       <span v-if="originImage" class="cp-notification-origin-image">
         <TMiImg :src="originImage" alt="原内容图片" />
       </span>
@@ -68,6 +65,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
 import { getStructuredContent } from "@utils/community/comment.js";
+import { shouldRenderNotificationOrigin } from "@utils/community/notification.js";
 import { parseCommunityProfileGid } from "@utils/community/profile.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
@@ -139,6 +137,14 @@ const originNodes = computed<Array<TGApp.BBS.SctPost.Base>>(() => {
   if (!notification.origin || originDeleted.value) return [];
   return getStructuredContent("", notification.origin.text.trim());
 });
+/** 正文是否已有可显示内容，内容已删除的提示同样算作内容。 @since Beta v0.13.0 */
+const hasBody = computed<boolean>(
+  () => notification.is_content_deleted || contentNodes.value.length > 0,
+);
+/** 是否需要单独渲染原内容引用块。 @since Beta v0.13.0 */
+const showOrigin = computed<boolean>(() =>
+  shouldRenderNotificationOrigin(category, notification.origin, hasBody.value),
+);
 const openLabel = computed<string>(() =>
   user.value ? `${user.value.nickname}${actionText.value}` : `打开通知：${systemTitle.value}`,
 );
