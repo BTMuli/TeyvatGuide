@@ -93,7 +93,11 @@
       <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
-  <TurToc v-if="recordData" />
+  <TurToc
+    v-if="recordData"
+    :homeIcon="recordData.homes[0]?.comfort_level_icon"
+    :worldIcon="recordData.wed[0]?.icon"
+  />
   <div v-else class="ur-empty">
     <img alt="empty" src="/UI/app/empty.webp" />
     <span>DATA NOT FOUND</span>
