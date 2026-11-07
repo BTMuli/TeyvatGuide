@@ -34,8 +34,7 @@
       @activate="confirmUpdateDevice()"
     >
       <template #subtitle>
-        <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
-        {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ displayedDeviceFp }}
+        {{ displayedDeviceName }}({{ displayedDeviceProduct }}) - {{ displayedDeviceFp }}
       </template>
       <template #append>
         <v-btn
@@ -111,11 +110,19 @@ const homeStore = useHomeStore();
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const cacheSize = ref<number>(0);
 const deviceInfoVisible = ref<boolean>(false);
-const displayedDeviceFp = computed<string>(() => getDisplayedDeviceFp(deviceInfo.value.device_fp));
+const displayedDeviceName = computed<string>(() =>
+  getDisplayedDeviceValue(deviceInfo.value.device_name),
+);
+const displayedDeviceProduct = computed<string>(() =>
+  getDisplayedDeviceValue(deviceInfo.value.product),
+);
+const displayedDeviceFp = computed<string>(() =>
+  getDisplayedDeviceValue(deviceInfo.value.device_fp),
+);
 const showDeviceEditor = ref<boolean>(false);
 const showHutaoImport = ref<boolean>(false);
 
-function getDisplayedDeviceFp(value: string): string {
+function getDisplayedDeviceValue(value: string): string {
   return deviceInfoVisible.value ? value : maskDeviceValue(value);
 }
 
@@ -271,7 +278,7 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 开始强制更新设备信息");
     const forceCheck = await showDialog.check(
       "确认强制更新设备信息吗？",
-      `DeviceFp:${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
+      `DeviceFp:${getDisplayedDeviceValue(deviceInfo.value.device_fp)}`,
     );
     if (!forceCheck) {
       showSnackbar.cancel("已取消强制更新设备信息");
@@ -282,12 +289,12 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
     if (deviceInfo.value.device_fp === "0000000000000") {
       deviceInfo.value.device_fp = getRandomString(13, "hex");
       showSnackbar.warn(
-        `设备信息获取失败!已使用随机值${getDisplayedDeviceFp(deviceInfo.value.device_fp)}代替`,
+        `设备信息获取失败!已使用随机值${getDisplayedDeviceValue(deviceInfo.value.device_fp)}代替`,
       );
       await TGLogger.Warn("[Config][confirmUpdateDevice][force] 设备信息获取失败!已使用随机值代替");
     } else
       showSnackbar.success(
-        `设备信息已更新! DeviceFp: ${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
+        `设备信息已更新! DeviceFp: ${getDisplayedDeviceValue(deviceInfo.value.device_fp)}`,
       );
     await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
     await TGLogger.Info("[Config][confirmUpdateDevice][force] 设备信息更新完成");
@@ -298,7 +305,7 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   if (localFp !== "0000000000000") {
     const updateCheck = await showDialog.check(
       "确认更新设备信息吗？",
-      `DeviceFp:${getDisplayedDeviceFp(localFp)}`,
+      `DeviceFp:${getDisplayedDeviceValue(localFp)}`,
     );
     if (!updateCheck) {
       showSnackbar.cancel("已取消更新设备信息");
@@ -310,13 +317,13 @@ async function confirmUpdateDevice(force?: boolean): Promise<void> {
   if (deviceInfo.value.device_fp === "0000000000000") {
     deviceInfo.value.device_fp = getRandomString(13, "hex");
     showSnackbar.warn(
-      `设备信息获取失败!已使用随机值${getDisplayedDeviceFp(deviceInfo.value.device_fp)}代替`,
+      `设备信息获取失败!已使用随机值${getDisplayedDeviceValue(deviceInfo.value.device_fp)}代替`,
     );
     await TGLogger.Warn("[Config][confirmUpdateDevice] 设备信息获取失败!已使用随机值代替");
     return;
   }
   showSnackbar.success(
-    `设备信息已更新! DeviceFp: ${getDisplayedDeviceFp(deviceInfo.value.device_fp)}`,
+    `设备信息已更新! DeviceFp: ${getDisplayedDeviceValue(deviceInfo.value.device_fp)}`,
   );
   await TGSqlite.saveAppData("deviceInfo", JSON.stringify(deviceInfo.value));
   await TGLogger.Info("[Config][confirmUpdateDevice] 设备信息更新完成");
