@@ -49,8 +49,18 @@ src-tauri/target/release/bundle/msix/TeyvatGuide_<四段版本号>_x64.msix
 
 打包成功和 PNG 透明通道检查不能替代安装后的显示检查。发布前仍应在 Windows 浅色、深色主题下检查开始菜单与任务栏图标。
 
+## 桌面快捷方式
+
+清单在应用扩展中声明 `desktop7:Extension Category="windows.shortcut"`，安装时由系统部署服务在 `%USERPROFILE%\Desktop\TeyvatGuide.lnk` 创建快捷方式，卸载时随包移除。包内不需要 `.lnk` 文件，也不经过 VFS，快捷方式目标由系统绑定到包应用，升级后仍然有效。
+
+`desktop7:Shortcut` 的 `File` 只接受 `Desktop`、`Programs`、`Common Programs` 三个目录常量，因此快捷方式按用户创建，而不是 MSI 使用的公共桌面。图标取自包根 `TeyvatGuide.exe`，显示名固定为 `TeyvatGuide`。
+
+该扩展的最低系统版本是 Windows 10 build 19645（实际为 Windows 11）；清单把 `desktop7` 放进了 `IgnorableNamespaces`，Windows 10 会忽略它、不会创建快捷方式。如果需要覆盖 Windows 10，只能在应用首次启动时用 `IShellLink` 自行创建，不能依赖清单。
+
+修改清单后可以用 MakeAppx 打包验证清单结构；快捷方式是否出现仍需在 Windows 11 上安装检查，CI 只生成未签名包，安装前需要签名。
+
 ## 签名和 Packaging Tool 文件
 
 CI 产物是未签名 MSIX，手动提交 Partner Center 时不需要在 CI 中配置签名密钥；用于商店外旁加载时，需要另外使用受信任的证书签名。商店提交仍由人工完成。
 
-打包内容来自仓库模板和构建输出，不会带入 Packaging Tool 捕获的机器状态：`Registry.dat`、`User.dat`、`UserClasses.dat`、`ngen.log`、指向打包机路径的 `desktop7` 快捷方式以及 MSI 卸载快捷方式均被有意排除。MSIX 仍保留标准的应用开始菜单入口。
+打包内容来自仓库模板和构建输出，不会带入 Packaging Tool 捕获的机器状态：`Registry.dat`、`User.dat`、`UserClasses.dat`、`ngen.log`、`VFS\Common Desktop` 中指向打包机路径的快捷方式以及 MSI 卸载快捷方式均被有意排除。MSIX 仍保留标准的应用开始菜单入口，桌面入口改由清单的 `desktop7:Shortcut` 声明。
