@@ -605,6 +605,7 @@ async function selectImage(event: Event): Promise<void> {
   const requestCookie = picker.cookie;
   const version = picker.version;
   const controller = new AbortController();
+  let uploaded: TGApp.BBS.ReplyAsset.UploadedImage | undefined;
   await interaction.run(async () => {
     uploadController = controller;
     uploading.value = true;
@@ -627,7 +628,7 @@ async function selectImage(event: Event): Promise<void> {
         showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
         return;
       }
-      emits("image", execution.data);
+      uploaded = execution.data;
     } catch (error) {
       if (mounted && version === contextVersion && !controller.signal.aborted) {
         showSnackbar.error(
@@ -641,6 +642,9 @@ async function selectImage(event: Event): Promise<void> {
       }
     }
   });
+  // 交互锁释放后再通知父组件，父组件会在锁内忽略新增附件。
+  if (uploaded === undefined || !mounted || version !== contextVersion) return;
+  emits("image", uploaded);
 }
 </script>
 <style lang="scss" scoped>
