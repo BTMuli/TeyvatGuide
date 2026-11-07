@@ -51,6 +51,9 @@
       <div aria-label="表情面板" class="post-tools-panel post-tools-panel--emoji" role="region">
         <div class="post-tools-heading">
           <span class="post-tools-panel-title">选择表情</span>
+          <div class="post-tools-search">
+            <VpEmojiSearch v-model="emojiQuery" :disabled="disabled" />
+          </div>
           <button
             aria-label="收起表情"
             class="post-tools-action"
@@ -70,7 +73,7 @@
               aria-label="收藏表情"
               class="post-tools-series-item"
               type="button"
-              @click="favoriteSelected = true"
+              @click="selectFavorite"
             >
               <v-icon size="24">mdi-star-outline</v-icon>
             </button>
@@ -79,7 +82,7 @@
                 <button
                   v-bind="tooltipProps"
                   :aria-label="item.name"
-                  :aria-pressed="!favoriteSelected && selectedSeries === item.id"
+                  :aria-pressed="!searchActive && !favoriteSelected && selectedSeries === item.id"
                   :disabled="disabled"
                   class="post-tools-series-item"
                   type="button"
@@ -118,17 +121,33 @@
                 重试
               </button>
             </div>
-            <div v-else-if="emojiItems.length === 0" class="post-tools-status">暂无可用表情</div>
-            <div v-else aria-label="表情列表" class="post-tools-emoji-list">
+            <div v-else-if="displayedEmojiItems.length === 0" class="post-tools-status">
+              <span>{{ searchActive ? "未找到匹配的表情" : "暂无可用表情" }}</span>
               <button
-                v-for="emoji in emojiItems"
+                v-if="searchActive"
+                class="post-tools-action post-tools-search-clear"
+                type="button"
+                @click="clearEmojiSearch"
+              >
+                清空搜索
+              </button>
+            </div>
+            <div
+              v-else
+              :aria-label="
+                searchActive ? `表情搜索结果，共 ${displayedEmojiItems.length} 个` : '表情列表'
+              "
+              class="post-tools-emoji-list"
+            >
+              <button
+                v-for="emoji in displayedEmojiItems"
                 :key="emoji.id"
                 :aria-label="emoji.name"
                 :disabled="disabled || uploading"
                 :title="emoji.name"
                 class="post-tools-emoji"
                 type="button"
-                @click="insertEmoji(emoji.name)"
+                @click="insertEmoji(emoji)"
               >
                 <img :alt="emoji.name" :src="emoji.icon" loading="lazy" />
               </button>
@@ -214,10 +233,12 @@
 <script lang="ts" setup>
 import bbsReq from "@req/bbsReq.js";
 import replyAssetReq from "@req/replyAssetReq.js";
+import { searchEmojiItems } from "@utils/bbs/emojiSearch.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
 import VpCustomEmoticons from "./vp-custom-emoticons.vue";
+import VpEmojiSearch from "./vp-emoji-search.vue";
 
 const {
   disabled,
@@ -249,6 +270,7 @@ const mentionActivator = ref<HTMLElement>();
 const emojiSeries = ref<Array<TGApp.BBS.Emoji.Series>>([]);
 const selectedSeries = ref<number>();
 const favoriteSelected = ref<boolean>(false);
+const emojiQuery = ref<string>("");
 const emojiLoading = ref<boolean>(false);
 const emojiError = ref<string>("");
 const uploading = ref<boolean>(false);
@@ -266,6 +288,12 @@ const emojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
   (emojiSeries.value.find((item) => item.id === selectedSeries.value)?.list ?? [])
     .filter((item) => item.is_available && !!item.icon)
     .toSorted((a, b) => a.sort_order - b.sort_order),
+);
+
+const searchActive = computed<boolean>(() => emojiQuery.value.trim() !== "");
+
+const displayedEmojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
+  searchActive.value ? searchEmojiItems(emojiSeries.value, emojiQuery.value) : emojiItems.value,
 );
 
 watch(() => [contextId, gid, cookie?.ltuid, cookie?.ltoken], reset, { flush: "sync" });
@@ -286,11 +314,18 @@ watch(nickname, () => {
   mention.value = undefined;
   mentionError.value = "";
 });
+watch(emojiQuery, (query) => {
+  if (query.trim() !== "" && favoriteSelected.value) favoriteSelected.value = false;
+});
+watch(emojiOpen, (open) => {
+  if (!open) clearEmojiSearch();
+});
 onBeforeUnmount(reset);
 
 function reset(): void {
   version += 1;
   favoriteSelected.value = false;
+  emojiQuery.value = "";
   controller?.abort();
   mentionController?.abort();
   picker = undefined;
@@ -320,8 +355,18 @@ function cancelUpload(): void {
 }
 
 function selectSeries(id: number): void {
+  clearEmojiSearch();
   favoriteSelected.value = false;
   selectedSeries.value = id;
+}
+
+function selectFavorite(): void {
+  clearEmojiSearch();
+  favoriteSelected.value = true;
+}
+
+function clearEmojiSearch(): void {
+  emojiQuery.value = "";
 }
 
 function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
@@ -470,10 +515,9 @@ async function loadEmoji(): Promise<void> {
   }
 }
 
-function insertEmoji(name: string): void {
+function insertEmoji(emoji: TGApp.BBS.Emoji.Item): void {
   if (disabled || uploading.value) return;
-  const emoji = emojiItems.value.find((item) => item.name === name);
-  if (emoji) emits("emoticon", { src: emoji.icon, name });
+  emits("emoticon", { src: emoji.icon, name: emoji.name });
 }
 
 async function findUser(): Promise<void> {
@@ -634,7 +678,13 @@ defineExpose({ cancelUpload, chooseImage, openEmoji, openMention });
   padding-bottom: 4px;
 }
 
+.post-tools-search {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .post-tools-panel-title {
+  flex: none;
   color: var(--common-text-title);
   font-size: 14px;
   font-weight: 600;
@@ -795,5 +845,16 @@ defineExpose({ cancelUpload, chooseImage, openEmoji, openMention });
   font-size: 12px;
   line-height: 20px;
   overflow-wrap: anywhere;
+}
+
+.post-tools-action.post-tools-search-clear {
+  padding: 4px 10px;
+  background: var(--box-bg-3);
+  color: var(--tgc-od-red);
+
+  &:hover:not(:disabled) {
+    background: var(--box-bg-2);
+    opacity: 1;
+  }
 }
 </style>

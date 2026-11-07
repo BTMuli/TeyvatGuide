@@ -29,6 +29,9 @@
         <div aria-label="表情面板" class="vprt-panel vprt-panel--emoji" role="region">
           <div class="vprt-heading">
             <span class="vprt-panel-title">选择表情</span>
+            <div class="vprt-search">
+              <VpEmojiSearch v-model="emojiQuery" :disabled="disabled" />
+            </div>
             <button
               aria-label="收起表情"
               class="vprt-action"
@@ -48,7 +51,7 @@
                 class="vprt-series-item"
                 title="收藏表情"
                 type="button"
-                @click="favoriteSelected = true"
+                @click="selectFavorite"
               >
                 <v-icon size="24">mdi-star-outline</v-icon>
               </button>
@@ -62,7 +65,9 @@
                   <button
                     v-bind="tooltipProps"
                     :aria-label="series.name"
-                    :aria-pressed="!favoriteSelected && selectedSeries === series.id"
+                    :aria-pressed="
+                      !searchActive && !favoriteSelected && selectedSeries === series.id
+                    "
                     :disabled="disabled"
                     class="vprt-series-item"
                     type="button"
@@ -96,10 +101,26 @@
                   重试
                 </button>
               </div>
-              <div v-else-if="emojiItems.length === 0" class="vprt-status">暂无可用表情</div>
-              <div v-else aria-label="表情列表" class="vprt-grid">
+              <div v-else-if="displayedEmojiItems.length === 0" class="vprt-status">
+                <span>{{ searchActive ? "未找到匹配的表情" : "暂无可用表情" }}</span>
                 <button
-                  v-for="emoji in emojiItems"
+                  v-if="searchActive"
+                  class="vprt-action vprt-search-clear"
+                  type="button"
+                  @click="clearEmojiSearch"
+                >
+                  清空搜索
+                </button>
+              </div>
+              <div
+                v-else
+                :aria-label="
+                  searchActive ? `表情搜索结果，共 ${displayedEmojiItems.length} 个` : '表情列表'
+                "
+                class="vprt-grid"
+              >
+                <button
+                  v-for="emoji in displayedEmojiItems"
                   :key="emoji.id"
                   :aria-label="emoji.name"
                   :disabled="disabled"
@@ -277,6 +298,7 @@ import bbsReq from "@req/bbsReq.js";
 import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useBBSStore from "@store/bbs.js";
+import { searchEmojiItems } from "@utils/bbs/emojiSearch.js";
 import { getGameUidInfos, validateGameUidCookie } from "@utils/bbs/gameUid.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { storeToRefs } from "pinia";
@@ -284,6 +306,7 @@ import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 
 import TpUid from "./tp-uid.vue";
 import VpCustomEmoticons from "./vp-custom-emoticons.vue";
+import VpEmojiSearch from "./vp-emoji-search.vue";
 
 type ReplyToolsProps = {
   disabled: boolean;
@@ -325,6 +348,7 @@ const gameUidOpen = ref<boolean>(false);
 const emojiSeries = ref<Array<TGApp.BBS.Emoji.Series>>([]);
 const selectedSeries = ref<number>();
 const favoriteSelected = ref<boolean>(false);
+const emojiQuery = ref<string>("");
 const emojiLoading = ref<boolean>(false);
 const emojiError = ref<string>("");
 const mentionQuery = ref<string>("");
@@ -347,6 +371,12 @@ const emojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
     .toSorted((a, b) => a.sort_order - b.sort_order),
 );
 
+const searchActive = computed<boolean>(() => emojiQuery.value.trim() !== "");
+
+const displayedEmojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
+  searchActive.value ? searchEmojiItems(emojiSeries.value, emojiQuery.value) : emojiItems.value,
+);
+
 const gameUidInfos = computed<Array<TGApp.BBS.GameUid.Info>>(() =>
   getGameUidInfos(gameUidAccounts.value, gameList.value, props.gid),
 );
@@ -355,6 +385,14 @@ watch(mentionQuery, () => {
   cancelMention();
   mentionResult.value = undefined;
   mentionError.value = "";
+});
+
+watch(emojiQuery, (query) => {
+  if (query.trim() !== "" && favoriteSelected.value) favoriteSelected.value = false;
+});
+
+watch(emojiOpen, (open) => {
+  if (!open) clearEmojiSearch();
 });
 
 watch(
@@ -410,8 +448,18 @@ function cancelMention(): void {
 }
 
 function selectSeries(id: number): void {
+  clearEmojiSearch();
   favoriteSelected.value = false;
   selectedSeries.value = id;
+}
+
+function selectFavorite(): void {
+  clearEmojiSearch();
+  favoriteSelected.value = true;
+}
+
+function clearEmojiSearch(): void {
+  emojiQuery.value = "";
 }
 
 function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
@@ -775,7 +823,13 @@ async function selectImage(event: Event): Promise<void> {
   border-bottom: 1px solid var(--common-shadow-1);
 }
 
+.vprt-search {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .vprt-panel-title {
+  flex: none;
   color: var(--common-text-title);
   font-size: 14px;
   font-weight: 600;
@@ -963,5 +1017,16 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-series-item:hover:not(:disabled, [aria-pressed="true"]),
 .vprt-emoji:hover:not(:disabled) {
   opacity: 0.82;
+}
+
+.vprt-action.vprt-search-clear {
+  padding: 4px 10px;
+  background: var(--box-bg-3);
+  color: var(--tgc-od-red);
+
+  &:hover:not(:disabled) {
+    background: var(--box-bg-2);
+    opacity: 1;
+  }
 }
 </style>
