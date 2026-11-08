@@ -36,14 +36,17 @@
       />
     </div>
     <div class="tua-dcpw-right">
-      <div
-        v-for="(prop, idx) in props.weapon.weapon_properties"
-        :key="idx"
-        :class="{ main: prop.is_main }"
-        class="tua-dcpw-prop"
-      >
-        <span>{{ prop.property_name }}</span>
-        <span>{{ prop.property_value }}</span>
+      <div class="tua-dcpw-main-props">
+        <div v-for="(prop, idx) in mainProps" :key="idx" class="tua-dcpw-prop">
+          <span>{{ prop.property_name }}</span>
+          <span>{{ prop.property_value }}</span>
+        </div>
+      </div>
+      <div class="tua-dcpw-sub-props">
+        <div v-for="(prop, idx) in subProps" :key="idx" class="tua-dcpw-prop">
+          <span>{{ prop.property_name }}</span>
+          <span>{{ prop.property_value }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -58,7 +61,7 @@ const TpsWeaponElementMap = new Map<number, string>([
   [4, "雷"],
   [5, "冰"],
   [6, "草"],
-  [7, "岩"],
+  [8, "岩"],
 ]);
 const TpsWeaponTypeMap = new Map<string, string>([
   ["WeaponTypeRifle", "突击步枪"],
@@ -93,13 +96,19 @@ const accessDots = computed<Array<number>>(() =>
     (_, index) => index + 1,
   ),
 );
+const mainProps = computed<Array<TGApp.Game.Avatar.TpsWeaponProp>>(() =>
+  props.weapon.weapon_properties.filter((p) => p.is_main),
+);
+const subProps = computed<Array<TGApp.Game.Avatar.TpsWeaponProp>>(() =>
+  props.weapon.weapon_properties.filter((p) => !p.is_main),
+);
 </script>
 <style lang="scss" scoped>
 .tua-dcpw-box {
   position: relative;
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 8px;
   border: 1px solid #ffffff33;
@@ -201,6 +210,7 @@ const accessDots = computed<Array<number>>(() =>
   color: var(--tgc-white-1);
   font-size: 10px;
   object-fit: contain;
+  white-space: nowrap;
 }
 
 .tua-dcpw-access {
@@ -230,18 +240,31 @@ const accessDots = computed<Array<number>>(() =>
   justify-content: space-between;
 }
 
+.tua-dcpw-main-props {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 2px;
+  background: #ffffff1c;
+  row-gap: 4px;
+}
+
+.tua-dcpw-sub-props {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 4px;
+  border-radius: 2px;
+  row-gap: 4px;
+}
+
 .tua-dcpw-prop {
   position: relative;
   display: flex;
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding: 4px;
-  border-radius: 2px;
-
-  &.main {
-    background: #ffffff1c;
-  }
 
   :last-child {
     font-family: var(--font-title);

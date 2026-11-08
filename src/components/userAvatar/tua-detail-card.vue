@@ -42,7 +42,7 @@
         <!-- 配枪方案说明 -->
         <div class="tua-dcp-rt">
           <span>当前配枪方案</span>
-          <span>页面内仅展示配件装配解锁栏位，枪械图片不随配件动态变化，请以游戏内表现为准。</span>
+          <span>仅展示配件装配解锁栏位，枪械图片不随配件动态变化，请以游戏内表现为准。</span>
         </div>
         <TuaDcpWeapon
           v-for="(weapon, index) in props.avatar.avatar.tps.weapons"
