@@ -243,18 +243,20 @@ async function getFavorites(
 }
 
 /**
- * 取消收藏帖子
+ * 设置帖子收藏状态
  * @since Beta v0.13.0
  * @param cookie - 账户 Cookie
  * @param postId - 帖子 ID
- * @returns 取消收藏响应数据
+ * @param favorite - 是否收藏
+ * @returns 收藏响应数据
  */
-async function unfavoritePost(
+async function setPostFavorite(
   cookie: TGApp.App.Account.Cookie,
   postId: string,
+  favorite: boolean,
 ): Promise<TGApp.BBS.Response.Base> {
   const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
-  const body = { post_id: postId, is_cancel: 1 };
+  const body = { post_id: postId, is_cancel: favorite ? 0 : 1 };
   const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
     `${communityApiBaseUrl}post/wapi/collectPost`,
     {
@@ -267,6 +269,20 @@ async function unfavoritePost(
     },
   );
   return resp.data;
+}
+
+/**
+ * 取消收藏帖子
+ * @since Beta v0.13.0
+ * @param cookie - 账户 Cookie
+ * @param postId - 帖子 ID
+ * @returns 取消收藏响应数据
+ */
+async function unfavoritePost(
+  cookie: TGApp.App.Account.Cookie,
+  postId: string,
+): Promise<TGApp.BBS.Response.Base> {
+  return await setPostFavorite(cookie, postId, false);
 }
 
 /**
@@ -637,6 +653,7 @@ const communityReq = {
   deleteCollection,
   sortCollections,
   favorites: getFavorites,
+  setPostFavorite,
   unfavoritePost,
   favoriteCollections: getFavoriteCollections,
   followCollection,

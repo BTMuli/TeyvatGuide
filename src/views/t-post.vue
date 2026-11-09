@@ -2,7 +2,14 @@
   <TSwitchTheme />
   <TPinWin />
   <TPostWidth />
-  <VpBtnCollect :data="postData" :model-value="postId" />
+  <VpBtnCollect
+    :data="postData"
+    :miyousheCollected="isCollected"
+    :miyousheLoading="isCollecting"
+    :miyoushe="isMiyousheCollect"
+    :modelValue="postId"
+    @miyoushe-toggle="tryCollect"
+  />
   <TShareBtn :scale="postViewWide ? 1.5 : 2" :title="shareTitle" selector=".tp-post-body" />
   <VpBtnReply v-if="postData" :gid="postData.post.game_id" :post-id="postData.post.post_id" />
   <VpPostActions v-if="postData" :source="postData" @deleted="handlePostDeleted" />
@@ -34,7 +41,12 @@
             <v-icon size="16">mdi-eye</v-icon>
             <span>{{ formatStat(postData?.stat?.view_num) }}</span>
           </div>
-          <div :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`" class="mpm-item">
+          <div
+            :class="{ like: isMiyousheCollect && isCollected }"
+            :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`"
+            class="mpm-item"
+            @click="tryCollect()"
+          >
             <v-icon size="16">mdi-star</v-icon>
             <span>{{ formatStat(postData?.stat?.bookmark_num) }}</span>
           </div>
@@ -114,7 +126,12 @@
         <v-icon size="16">mdi-eye</v-icon>
         <span>{{ formatStat(postData?.stat?.view_num) }}</span>
       </div>
-      <div :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`" class="mpm-item">
+      <div
+        :class="{ like: isMiyousheCollect && isCollected }"
+        :title="`收藏数：${formatStat(postData?.stat?.bookmark_num)}`"
+        class="mpm-item"
+        @click="tryCollect()"
+      >
         <v-icon size="16">mdi-star</v-icon>
         <span>{{ formatStat(postData?.stat?.bookmark_num) }}</span>
       </div>
@@ -184,6 +201,7 @@ import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import VpPostActions from "@comp/viewPost/vp-post-actions.vue";
 import bbsEnum from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
+import communityReq from "@req/communityReq.js";
 import miscReq from "@req/miscReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
@@ -198,7 +216,7 @@ import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, shallowRef, triggerRef } from "vue";
 import { useRoute } from "vue-router";
 
 const appStore = useAppStore();
@@ -210,6 +228,8 @@ const appVersion = ref<string>();
 const postId = Number(useRoute().params.post_id);
 const showCollection = ref<boolean>(false);
 const isLike = ref<boolean>(false);
+const isCollected = ref<boolean>(false);
+const isCollecting = ref<boolean>(false);
 const shareTime = ref<number>(Math.floor(Date.now() / 1000));
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
@@ -220,6 +240,7 @@ const viewWidth = computed<string>(() => (postViewWide.value ? "800px" : "400px"
 const shareTitle = computed<string>(() =>
   postViewWide.value ? `Post_${postId}` : `Post_Thin_${postId}`,
 );
+const isMiyousheCollect = computed<boolean>(() => !incognito.value && cookie.value !== undefined);
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
@@ -295,6 +316,7 @@ onMounted(async () => {
   }
   console.log(postData.value);
   isLike.value = (postData.value.self_operation?.upvote_type ?? 0) > 0;
+  isCollected.value = postData.value.self_operation?.is_collected ?? false;
   if (incognito.value) await syncDynamic();
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);
@@ -500,6 +522,49 @@ async function syncDynamic(): Promise<void> {
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await TGLogger.Warn(`[t-post][${postId}][syncDynamic] ${errMsg}`);
+  }
+}
+
+async function tryCollect(): Promise<void> {
+  if (!isMiyousheCollect.value || isCollecting.value) return;
+  if (!cookie.value) {
+    showSnackbar.error("请先登录");
+    return;
+  }
+  if (!postData.value) {
+    showSnackbar.error("数据未加载");
+    return;
+  }
+  const favorite = !isCollected.value;
+  const currentPost = postData.value;
+  isCollecting.value = true;
+  try {
+    const resp = await communityReq.setPostFavorite(
+      cookie.value,
+      currentPost.post.post_id,
+      favorite,
+    );
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[t-post][tryCollect] 收藏失败：${resp.retcode} ${resp.message}`);
+      return;
+    }
+    isCollected.value = favorite;
+    if (currentPost.self_operation) currentPost.self_operation.is_collected = favorite;
+    if (currentPost.stat) {
+      currentPost.stat.bookmark_num = Math.max(
+        0,
+        currentPost.stat.bookmark_num + (favorite ? 1 : -1),
+      );
+    }
+    triggerRef(postData);
+    showSnackbar.success(favorite ? "收藏成功" : "取消收藏成功");
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`${favorite ? "收藏" : "取消收藏"}失败：${errMsg}`);
+    await TGLogger.Error(`[t-post][tryCollect] 收藏异常：${errMsg}`);
+  } finally {
+    isCollecting.value = false;
   }
 }
 

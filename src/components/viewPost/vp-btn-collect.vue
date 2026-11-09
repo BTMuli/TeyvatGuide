@@ -1,11 +1,14 @@
 <template>
-  <div class="tbc-box" :class="isCollected ? 'active' : ''" data-html2canvas-ignore>
-    <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
+  <div class="tbc-box" :class="isActive ? 'active' : ''" data-html2canvas-ignore>
+    <div class="tbc-btn" @click="switchCollect()" :title="collectTitle">
       <v-icon size="20">
-        {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
+        {{ isActive ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>
-    <div class="tbc-edit" title="编辑收藏" v-if="isCollected" @click="showEdit = !showEdit">
+    <div v-if="isMiyoushe" class="tbc-edit tbc-miyoushe" title="米游社收藏">
+      <img alt="米游社收藏" src="/platforms/mhy/mys.webp" />
+    </div>
+    <div v-else-if="isCollected" class="tbc-edit" title="编辑收藏" @click="showEdit = !showEdit">
       <v-icon size="8">mdi-pencil</v-icon>
     </div>
   </div>
@@ -17,18 +20,39 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserCollection from "@Sqlm/userCollect.js";
 import { event } from "@tauri-apps/api";
 import TGLogger from "@utils/system/TGLogger.js";
-import { onBeforeMount, ref, shallowRef, watch } from "vue";
+import { computed, onBeforeMount, ref, shallowRef, watch } from "vue";
 
 import VpOverlayCollect from "./vp-overlay-collect.vue";
 
-type TbCollectProps = { modelValue: number; data?: TGApp.BBS.Post.FullData };
+/**
+ * 帖子收藏按钮参数
+ * @since Beta v0.13.0
+ */
+type TbCollectProps = {
+  modelValue: number;
+  data?: TGApp.BBS.Post.FullData;
+  miyoushe?: boolean;
+  miyousheCollected?: boolean;
+  miyousheLoading?: boolean;
+};
 
 const props = defineProps<TbCollectProps>();
+const emit = defineEmits<{ miyousheToggle: [] }>();
 const isCollected = ref<boolean>(false);
 const showEdit = ref<boolean>(false);
 const collect = shallowRef<Array<TGApp.Sqlite.Collection.PcMap>>([]);
+const isMiyoushe = computed<boolean>(() => props.miyoushe === true);
+const isActive = computed<boolean>(() =>
+  isMiyoushe.value ? props.miyousheCollected === true : isCollected.value,
+);
+const collectTitle = computed<string>(() => {
+  if (isMiyoushe.value) return isActive.value ? "取消米游社收藏" : "米游社收藏";
+  return isActive.value ? "取消收藏" : "收藏";
+});
 
-onBeforeMount(async () => await refresh());
+onBeforeMount(async () => {
+  if (!isMiyoushe.value) await refresh();
+});
 
 async function refresh(): Promise<void> {
   await event.emit("refreshCollect");
@@ -45,6 +69,7 @@ async function refresh(): Promise<void> {
 watch(
   () => props.data,
   async (val) => {
+    if (isMiyoushe.value) return;
     if (!val) return;
     if (!isCollected.value) return;
     const res = await TSUserCollection.updatePostInfo(props.modelValue.toString(), val);
@@ -58,7 +83,23 @@ watch(
   },
 );
 
+watch(
+  () => props.miyoushe,
+  async (enabled) => {
+    if (enabled) {
+      showEdit.value = false;
+      return;
+    }
+    await refresh();
+  },
+);
+
 async function switchCollect(): Promise<void> {
+  if (isMiyoushe.value) {
+    if (props.miyousheLoading) return;
+    emit("miyousheToggle");
+    return;
+  }
   if (!isCollected.value) {
     if (!props.data) {
       showSnackbar.warn("未获取到帖子信息");
@@ -163,6 +204,18 @@ async function switchCollect(): Promise<void> {
   border: unset;
   border-radius: 50%;
   cursor: pointer;
+}
+
+.tbc-miyoushe {
+  padding: 3px;
+  cursor: default;
+
+  img {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
 }
 
 .dark .tbc-edit {

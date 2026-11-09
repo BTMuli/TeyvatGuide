@@ -254,6 +254,31 @@ describe("communityReq favorite write requests", () => {
     );
   });
 
+  it("adds a favorite with a signed JSON body", async () => {
+    await communityReq.setPostFavorite(cookie, "79040314", true);
+
+    const body = { post_id: "79040314", is_cancel: 0 };
+    const favoriteCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+    expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
+      favoriteCookie,
+      "POST",
+      JSON.stringify(body),
+      "K2",
+      true,
+    );
+    expect(mocks.post).toHaveBeenLastCalledWith(
+      "https://bbs-api.miyoushe.com/post/wapi/collectPost",
+      {
+        headers: {
+          ...appHeaders,
+          "x-rpc-client_type": "2",
+          "Content-Type": "application/json",
+        },
+        body,
+      },
+    );
+  });
+
   it("cancels a favorite with a signed JSON body", async () => {
     await communityReq.unfavoritePost(cookie, "79040314");
 
