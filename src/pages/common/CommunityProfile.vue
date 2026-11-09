@@ -387,41 +387,45 @@
           }}</span>
         </div>
         <div v-else class="community-profile-post-list">
-          <CpPost
-            v-for="post in posts"
-            :key="post.post.post_id"
-            :game="getPostGame(post)"
-            :post
-            :showAuthor="false"
-            @open-post="openPost"
-          >
-            <template v-if="isEditablePost(post) || isDeletablePost(post)" #actions>
-              <v-btn
-                v-if="isEditablePost(post)"
-                class="community-profile-edit-button"
-                prepend-icon="mdi-pencil-outline"
-                size="small"
-                title="编辑这篇帖子"
-                variant="tonal"
-                @click="editPost(post)"
+          <VVirtualScroll :items="posts" itemKey="post.post_id" renderless>
+            <template #default="{ item: post, index, itemRef }">
+              <div
+                :ref="itemRef"
+                :class="{
+                  'community-profile-post-row--spaced': index < posts.length - 1,
+                }"
               >
-                编辑
-              </v-btn>
-              <v-btn
-                v-if="isDeletablePost(post)"
-                :disabled="deletingPostId !== ''"
-                :loading="deletingPostId === post.post.post_id"
-                class="community-profile-delete-button"
-                prepend-icon="mdi-delete-outline"
-                size="small"
-                title="删除这篇帖子"
-                variant="tonal"
-                @click="deletePost(post)"
-              >
-                删除
-              </v-btn>
+                <CpPost :game="getPostGame(post)" :post :showAuthor="false" @open-post="openPost">
+                  <template v-if="isEditablePost(post) || isDeletablePost(post)" #actions>
+                    <v-btn
+                      v-if="isEditablePost(post)"
+                      class="community-profile-edit-button"
+                      prepend-icon="mdi-pencil-outline"
+                      size="small"
+                      title="编辑这篇帖子"
+                      variant="tonal"
+                      @click="editPost(post)"
+                    >
+                      编辑
+                    </v-btn>
+                    <v-btn
+                      v-if="isDeletablePost(post)"
+                      :disabled="deletingPostId !== ''"
+                      :loading="deletingPostId === post.post.post_id"
+                      class="community-profile-delete-button"
+                      prepend-icon="mdi-delete-outline"
+                      size="small"
+                      title="删除这篇帖子"
+                      variant="tonal"
+                      @click="deletePost(post)"
+                    >
+                      删除
+                    </v-btn>
+                  </template>
+                </CpPost>
+              </div>
             </template>
-          </CpPost>
+          </VVirtualScroll>
           <footer v-if="posts.length" class="community-profile-post-list-footer">
             <template v-if="loadMoreError">
               <span :title="loadMoreError">加载失败</span>
@@ -522,6 +526,7 @@ import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
+import { VVirtualScroll } from "vuetify/components/VVirtualScroll";
 
 type NotificationSection = "reply" | "mention" | "system" | "likes";
 
@@ -2138,14 +2143,16 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 }
 
 .community-profile-post-list {
-  display: flex;
+  position: relative;
   min-height: 0;
   flex: 1 1 auto;
-  flex-direction: column;
   padding: 4px;
-  gap: 12px;
   overflow-y: auto;
   scrollbar-gutter: stable;
+}
+
+.community-profile-post-row--spaced {
+  padding-bottom: 12px;
 }
 
 .community-profile-post-list-footer {
@@ -2154,6 +2161,7 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   align-items: center;
   justify-content: center;
   padding: 4px 0;
+  margin-top: 12px;
   color: var(--box-text-4);
   font-size: 12px;
   gap: 8px;
@@ -2265,7 +2273,14 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
 
   .community-profile-post-list {
     padding: 2px;
-    gap: 8px;
+  }
+
+  .community-profile-post-row--spaced {
+    padding-bottom: 8px;
+  }
+
+  .community-profile-post-list-footer {
+    margin-top: 8px;
   }
 
   .community-profile-posts-header {

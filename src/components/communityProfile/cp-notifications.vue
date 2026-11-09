@@ -18,15 +18,22 @@
         <v-btn :disabled="loading" variant="tonal" @click="loadMore">重新加载</v-btn>
       </div>
       <div v-if="notifications.length" class="cp-notifications-list">
-        <CpNotification
-          v-for="item in notifications"
-          :key="item.notification_id"
-          :category
-          :clickable="hasTarget(item)"
-          :notification="item"
-          @open="openNotification(item)"
-          @open-profile="openProfile"
-        />
+        <VVirtualScroll :items="notifications" itemKey="notification_id" renderless>
+          <template #default="{ item, index, itemRef }">
+            <div
+              :ref="itemRef"
+              :class="{ 'cp-notifications-row--spaced': index < notifications.length - 1 }"
+            >
+              <CpNotification
+                :category
+                :clickable="hasTarget(item)"
+                :notification="item"
+                @open="openNotification(item)"
+                @open-profile="openProfile"
+              />
+            </div>
+          </template>
+        </VVirtualScroll>
       </div>
       <div v-else-if="!loading && !error" class="cp-notifications-state" role="status">
         <v-icon size="32">{{ categoryInfo.icon }}</v-icon>
@@ -75,6 +82,7 @@ import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { VVirtualScroll } from "vuetify/components/VVirtualScroll";
 
 import CpNotification from "./cp-notification.vue";
 
@@ -363,6 +371,7 @@ async function openProfile(userId: string, gid?: number): Promise<void> {
 }
 
 .cp-notifications-body {
+  position: relative;
   min-height: 0;
   flex: 1 1 auto;
   padding: 4px;
@@ -371,9 +380,11 @@ async function openProfile(userId: string, gid?: number): Promise<void> {
 }
 
 .cp-notifications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  min-width: 0;
+}
+
+.cp-notifications-row--spaced {
+  padding-bottom: 12px;
 }
 
 .cp-notifications-state {

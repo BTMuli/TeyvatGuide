@@ -210,13 +210,16 @@
         <p>未找到与“{{ collectionKeyword }}”相关的合集帖子</p>
       </div>
       <div v-else class="cp-collection-posts">
-        <CpPost
-          v-for="post in filteredCollectionPosts"
-          :key="post.post.post_id"
-          :post
-          @open-post="openPost"
-          @open-profile="openProfile"
-        />
+        <VVirtualScroll :items="filteredCollectionPosts" itemKey="post.post_id" renderless>
+          <template #default="{ item: post, index, itemRef }">
+            <div
+              :ref="itemRef"
+              :class="{ 'cp-content-row--spaced': index < filteredCollectionPosts.length - 1 }"
+            >
+              <CpPost :post @open-post="openPost" @open-profile="openProfile" />
+            </div>
+          </template>
+        </VVirtualScroll>
       </div>
     </div>
     <div v-else class="cp-content-body">
@@ -226,128 +229,138 @@
         <v-btn :disabled="loading" variant="tonal" @click="retry">重新加载</v-btn>
       </div>
       <div v-if="entries.length" class="cp-entry-list">
-        <template v-for="entry in entries" :key="`${entry.kind}:${entry.id}`">
-          <CpComment
-            v-if="entry.kind === 'comment'"
-            :comment="entry.comment"
-            @open-post="openPost"
-          />
-          <CpUser
-            v-else-if="entry.kind === 'user'"
-            :action="getRelationAction(entry.relation)"
-            :actionDisabled="relationActionUid !== ''"
-            :actionLoading="relationActionUid === entry.relation.user.uid"
-            :relation="entry.relation"
-            @follow-back="followBack"
-            @open-profile="openProfile"
-            @unfollow="unfollowUser"
-          />
-          <CpPost
-            v-else-if="entry.kind === 'post'"
-            :post="entry.post"
-            :selectable="historySelectMode"
-            :selected="historySelectMode && isHistorySelected(entry.id)"
-            :viewedAt="entry.viewedAt"
-            @open-post="openPost"
-            @open-profile="openProfile"
-            @toggle-select="toggleHistorySelection(entry.id)"
-          >
-            <template v-if="canUnfavoritePosts" #actions>
-              <v-btn
-                :disabled="unfavoritingId !== ''"
-                :loading="unfavoritingId === entry.post.post.post_id"
-                class="cp-post-unfavorite"
-                prepend-icon="mdi-star-off-outline"
-                size="small"
-                title="取消收藏这篇帖子"
-                variant="tonal"
-                @click.stop="unfavoritePost(entry.post)"
+        <VVirtualScroll :items="entries" itemKey="id" renderless>
+          <template #default="{ item: entry, index, itemRef }">
+            <div :ref="itemRef" :class="{ 'cp-content-row--spaced': index < entries.length - 1 }">
+              <CpComment
+                v-if="entry.kind === 'comment'"
+                :comment="entry.comment"
+                @open-post="openPost"
+              />
+              <CpUser
+                v-else-if="entry.kind === 'user'"
+                :action="getRelationAction(entry.relation)"
+                :actionDisabled="relationActionUid !== ''"
+                :actionLoading="relationActionUid === entry.relation.user.uid"
+                :relation="entry.relation"
+                @follow-back="followBack"
+                @open-profile="openProfile"
+                @unfollow="unfollowUser"
+              />
+              <CpPost
+                v-else-if="entry.kind === 'post'"
+                :post="entry.post"
+                :selectable="historySelectMode"
+                :selected="historySelectMode && isHistorySelected(entry.id)"
+                :viewedAt="entry.viewedAt"
+                @open-post="openPost"
+                @open-profile="openProfile"
+                @toggle-select="toggleHistorySelection(entry.id)"
               >
-                取消收藏
-              </v-btn>
-            </template>
-          </CpPost>
-          <div v-else class="cp-entry cp-entry-card">
-            <button class="cp-entry-main" type="button" @click="loadCollection(entry.collection)">
-              <span v-if="entry.collection.cover" class="cp-entry-image">
-                <TMiImg :src="entry.collection.cover" alt="合集封面" />
-              </span>
-              <span class="cp-entry-content">
-                <span class="cp-entry-title"><TpTitle :text="entry.collection.title" /></span>
-                <span v-if="entry.collection.desc" class="cp-entry-description">{{
-                  entry.collection.desc
-                }}</span>
-                <span aria-label="合集统计" class="cp-entry-meta">
-                  <span :title="`${fmtUtil.num(entry.collection.post_num)} 篇帖子`">
-                    <v-icon aria-hidden="true" size="16">mdi-text-box-outline</v-icon>
-                    {{ fmtUtil.num(entry.collection.post_num) }}
+                <template v-if="canUnfavoritePosts" #actions>
+                  <v-btn
+                    :disabled="unfavoritingId !== ''"
+                    :loading="unfavoritingId === entry.post.post.post_id"
+                    class="cp-post-unfavorite"
+                    prepend-icon="mdi-star-off-outline"
+                    size="small"
+                    title="取消收藏这篇帖子"
+                    variant="tonal"
+                    @click.stop="unfavoritePost(entry.post)"
+                  >
+                    取消收藏
+                  </v-btn>
+                </template>
+              </CpPost>
+              <div v-else class="cp-entry cp-entry-card">
+                <button
+                  class="cp-entry-main"
+                  type="button"
+                  @click="loadCollection(entry.collection)"
+                >
+                  <span v-if="entry.collection.cover" class="cp-entry-image">
+                    <TMiImg :src="entry.collection.cover" alt="合集封面" />
                   </span>
-                  <span :title="`${fmtUtil.num(entry.collection.view_num)} 次浏览`">
-                    <v-icon aria-hidden="true" size="16">mdi-eye-outline</v-icon>
-                    {{ fmtUtil.num(entry.collection.view_num) }}
+                  <span class="cp-entry-content">
+                    <span class="cp-entry-title"><TpTitle :text="entry.collection.title" /></span>
+                    <span v-if="entry.collection.desc" class="cp-entry-description">{{
+                      entry.collection.desc
+                    }}</span>
+                    <span aria-label="合集统计" class="cp-entry-meta">
+                      <span :title="`${fmtUtil.num(entry.collection.post_num)} 篇帖子`">
+                        <v-icon aria-hidden="true" size="16">mdi-text-box-outline</v-icon>
+                        {{ fmtUtil.num(entry.collection.post_num) }}
+                      </span>
+                      <span :title="`${fmtUtil.num(entry.collection.view_num)} 次浏览`">
+                        <v-icon aria-hidden="true" size="16">mdi-eye-outline</v-icon>
+                        {{ fmtUtil.num(entry.collection.view_num) }}
+                      </span>
+                    </span>
                   </span>
-                </span>
-              </span>
-            </button>
-            <div v-if="canManageCollections" class="cp-entry-actions">
-              <v-btn
-                :aria-label="`编辑合集：${entry.collection.title}`"
-                :disabled="deletingCollectionId !== undefined"
-                icon="mdi-pencil-outline"
-                size="small"
-                title="编辑合集"
-                type="button"
-                variant="text"
-                @click="openEditCollection(entry.collection)"
-              />
-              <v-btn
-                :aria-label="`删除合集：${entry.collection.title}`"
-                :disabled="deletingCollectionId !== undefined"
-                :loading="deletingCollectionId === entry.collection.id"
-                class="cp-entry-delete-button"
-                icon="mdi-delete-outline"
-                size="small"
-                title="删除合集"
-                type="button"
-                variant="text"
-                @click="deleteCollection(entry.collection)"
-              />
+                </button>
+                <div v-if="canManageCollections" class="cp-entry-actions">
+                  <v-btn
+                    :aria-label="`编辑合集：${entry.collection.title}`"
+                    :disabled="deletingCollectionId !== undefined"
+                    icon="mdi-pencil-outline"
+                    size="small"
+                    title="编辑合集"
+                    type="button"
+                    variant="text"
+                    @click="openEditCollection(entry.collection)"
+                  />
+                  <v-btn
+                    :aria-label="`删除合集：${entry.collection.title}`"
+                    :disabled="deletingCollectionId !== undefined"
+                    :loading="deletingCollectionId === entry.collection.id"
+                    class="cp-entry-delete-button"
+                    icon="mdi-delete-outline"
+                    size="small"
+                    title="删除合集"
+                    type="button"
+                    variant="text"
+                    @click="deleteCollection(entry.collection)"
+                  />
+                </div>
+                <div v-else-if="canUnfavoriteCollection" class="cp-entry-actions">
+                  <v-btn
+                    :aria-label="`取消收藏合集：${entry.collection.title}`"
+                    :disabled="unfavoritingCollectionId !== undefined"
+                    :loading="unfavoritingCollectionId === entry.collection.id"
+                    class="cp-entry-delete-button"
+                    icon="mdi-delete-outline"
+                    size="small"
+                    title="取消收藏"
+                    type="button"
+                    variant="text"
+                    @click="unfavoriteCollection(entry.collection)"
+                  />
+                </div>
+                <div v-else-if="canToggleCollectionFavorite" class="cp-entry-actions">
+                  <v-btn
+                    :aria-label="`${isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'}合集：${entry.collection.title}`"
+                    :aria-pressed="isCollectionFavorite(entry.collection)"
+                    :class="[
+                      'cp-entry-favorite',
+                      { 'is-favorite': isCollectionFavorite(entry.collection) },
+                    ]"
+                    :disabled="togglingCollectionFavoriteId !== undefined"
+                    :icon="isCollectionFavorite(entry.collection) ? 'mdi-star' : 'mdi-star-outline'"
+                    :loading="togglingCollectionFavoriteId === entry.collection.id"
+                    :title="isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'"
+                    size="small"
+                    type="button"
+                    variant="text"
+                    @click="toggleCollectionFavorite(entry.collection)"
+                  />
+                </div>
+                <v-icon class="cp-entry-chevron" size="18" aria-hidden="true"
+                  >mdi-chevron-right</v-icon
+                >
+              </div>
             </div>
-            <div v-else-if="canUnfavoriteCollection" class="cp-entry-actions">
-              <v-btn
-                :aria-label="`取消收藏合集：${entry.collection.title}`"
-                :disabled="unfavoritingCollectionId !== undefined"
-                :loading="unfavoritingCollectionId === entry.collection.id"
-                class="cp-entry-delete-button"
-                icon="mdi-delete-outline"
-                size="small"
-                title="取消收藏"
-                type="button"
-                variant="text"
-                @click="unfavoriteCollection(entry.collection)"
-              />
-            </div>
-            <div v-else-if="canToggleCollectionFavorite" class="cp-entry-actions">
-              <v-btn
-                :aria-label="`${isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'}合集：${entry.collection.title}`"
-                :aria-pressed="isCollectionFavorite(entry.collection)"
-                :class="[
-                  'cp-entry-favorite',
-                  { 'is-favorite': isCollectionFavorite(entry.collection) },
-                ]"
-                :disabled="togglingCollectionFavoriteId !== undefined"
-                :icon="isCollectionFavorite(entry.collection) ? 'mdi-star' : 'mdi-star-outline'"
-                :loading="togglingCollectionFavoriteId === entry.collection.id"
-                :title="isCollectionFavorite(entry.collection) ? '取消收藏' : '收藏'"
-                size="small"
-                type="button"
-                variant="text"
-                @click="toggleCollectionFavorite(entry.collection)"
-              />
-            </div>
-            <v-icon class="cp-entry-chevron" size="18" aria-hidden="true">mdi-chevron-right</v-icon>
-          </div>
-        </template>
+          </template>
+        </VVirtualScroll>
       </div>
       <div v-else-if="!loading && !error && searchKeyword" class="cp-content-state" role="status">
         <v-icon size="32">mdi-text-search-variant</v-icon>
@@ -432,6 +445,7 @@ import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { VVirtualScroll } from "vuetify/components/VVirtualScroll";
 
 type ContentSection =
   "comments" | "collections" | "favorites" | "following" | "followers" | "history";
@@ -1547,6 +1561,7 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
 }
 
 .cp-content-body {
+  position: relative;
   min-height: 0;
   flex: 1 1 auto;
   padding: 4px;
@@ -1596,11 +1611,8 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
   }
 }
 
-.cp-entry-list,
-.cp-collection-posts {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.cp-content-row--spaced {
+  padding-bottom: 12px;
 }
 
 .cp-entry {
