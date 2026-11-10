@@ -1,8 +1,11 @@
 <!-- 背包材料更新记录趋势与差值图 -->
 <template>
   <div ref="chartContainer" class="pbmrc-chart">
+    <div v-if="props.daily && props.diff && records.length < 2" class="pbmrc-empty">
+      至少需要两天记录才能计算日净变化
+    </div>
     <VChart
-      v-if="colors.text"
+      v-else-if="colors.text"
       :option="options"
       :updateOptions="{ notMerge: true }"
       autoresize
@@ -16,6 +19,7 @@ import useAppStore from "@store/app.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import {
   getMaterialRecordChanges,
+  getMaterialRecordDailySnapshots,
   getMaterialRecordLogScale,
   restoreMaterialRecordLogValue,
 } from "@utils/game/materialRecord.js";
@@ -35,9 +39,10 @@ const props = withDefaults(
   defineProps<{
     records: Array<TGApp.Sqlite.UserBag.MaterialRecord>;
     diff?: boolean;
+    daily?: boolean;
     logScale?: boolean;
   }>(),
-  { diff: false, logScale: false },
+  { diff: false, daily: false, logScale: false },
 );
 const emits = defineEmits<{ selectRecord: [record: TGApp.Sqlite.UserBag.MaterialRecord] }>();
 const { theme } = storeToRefs(useAppStore());
@@ -51,10 +56,12 @@ const colors = shallowRef({
   grid: "",
 });
 const records = computed<Array<TGApp.Sqlite.UserBag.MaterialRecord>>(() =>
-  [...props.records].sort((a, b) => a.time - b.time),
+  props.daily
+    ? getMaterialRecordDailySnapshots(props.records)
+    : [...props.records].sort((a, b) => a.time - b.time),
 );
 const changes = computed<ReturnType<typeof getMaterialRecordChanges>>(() =>
-  getMaterialRecordChanges(props.records),
+  getMaterialRecordChanges(records.value),
 );
 const displayedRecords = computed<Array<TGApp.Sqlite.UserBag.MaterialRecord>>(() =>
   props.diff ? changes.value : records.value,
@@ -104,10 +111,20 @@ const options = computed<EChartsOption>(() => {
     xAxis: {
       type: "category",
       boundaryGap: props.diff,
-      data: displayedRecords.value.map((record) => fmtUtil.dateTime(record.time * 1000)),
+      data: displayedRecords.value.map((record) =>
+        props.daily
+          ? fmtUtil.dateTime(record.time * 1000).slice(0, 10)
+          : fmtUtil.dateTime(record.time * 1000),
+      ),
       axisLine: { onZero: false, lineStyle: { color: colors.value.grid, type: "solid" } },
       axisTick: { show: false },
-      axisLabel: { show: false },
+      axisLabel: {
+        color: colors.value.text,
+        fontSize: 10,
+        hideOverlap: true,
+        formatter: (value: string, index: number) =>
+          props.daily ? value : String(index + (props.diff ? 2 : 1)),
+      },
       splitLine: { show: false },
     },
     yAxis: {
@@ -219,5 +236,17 @@ watch(theme, updateColors, { flush: "post" });
   width: 100%;
   min-width: 0;
   height: 176px;
+}
+
+.pbmrc-empty {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
 }
 </style>

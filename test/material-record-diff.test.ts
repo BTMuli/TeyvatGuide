@@ -4,6 +4,7 @@
  */
 import {
   getMaterialRecordChanges,
+  getMaterialRecordDailySnapshots,
   getMaterialRecordLogScale,
   restoreMaterialRecordLogValue,
 } from "@utils/game/materialRecord.js";
@@ -29,6 +30,52 @@ describe("材料记录数量变化", () => {
   it("空记录和只有基准记录时不产生数量变化", () => {
     expect(getMaterialRecordChanges([])).toEqual([]);
     expect(getMaterialRecordChanges([{ time: 1, count: 100 }])).toEqual([]);
+  });
+});
+
+describe("材料记录按天展示", () => {
+  it("取每天最后一条库存并计算日净变化，不补造空白日期", () => {
+    const first = Object.freeze({ time: new Date(2026, 10, 8, 8).getTime() / 1000, count: 10 });
+    const firstLast = Object.freeze({
+      time: new Date(2026, 10, 8, 22).getTime() / 1000,
+      count: 20,
+      manual: true,
+    });
+    const second = Object.freeze({ time: new Date(2026, 10, 9, 9).getTime() / 1000, count: 18 });
+    const secondLast = Object.freeze({
+      time: new Date(2026, 10, 9, 20).getTime() / 1000,
+      count: 25,
+    });
+    const fourth = Object.freeze({ time: new Date(2026, 10, 11, 13).getTime() / 1000, count: 0 });
+    const records = Object.freeze([secondLast, firstLast, fourth, first, second]);
+    const daily = getMaterialRecordDailySnapshots(records);
+
+    expect(daily).toEqual([firstLast, secondLast, fourth]);
+    expect(daily[0]).toBe(firstLast);
+    expect(getMaterialRecordChanges(daily).map((record) => record.diff)).toEqual([5, -25]);
+    expect(records).toEqual([secondLast, firstLast, fourth, first, second]);
+  });
+
+  it("以本地午夜划分日期", () => {
+    const beforeMidnight = { time: new Date(2026, 10, 9, 23, 59, 59).getTime() / 1000, count: 4 };
+    const afterMidnight = { time: new Date(2026, 10, 10, 0, 0, 0).getTime() / 1000, count: 8 };
+
+    expect(getMaterialRecordDailySnapshots([afterMidnight, beforeMidnight])).toEqual([
+      beforeMidnight,
+      afterMidnight,
+    ]);
+  });
+
+  it("空记录及单日记录没有跨日净变化", () => {
+    expect(getMaterialRecordDailySnapshots([])).toEqual([]);
+    const records = [
+      { time: new Date(2026, 10, 10, 8).getTime() / 1000, count: 4 },
+      { time: new Date(2026, 10, 10, 22).getTime() / 1000, count: 8 },
+    ];
+    const daily = getMaterialRecordDailySnapshots(records);
+
+    expect(daily).toEqual([records[1]]);
+    expect(getMaterialRecordChanges(daily)).toEqual([]);
   });
 });
 

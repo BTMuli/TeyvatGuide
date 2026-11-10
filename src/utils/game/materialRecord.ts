@@ -20,6 +20,23 @@ export function getMaterialRecordChanges(
 }
 
 /**
+ * 按本地日期保留每天最后一次库存记录，不补造没有记录的日期。
+ * @since Beta v0.13.1
+ * @param records - 材料更新记录
+ * @returns 按时间升序排列的每日库存记录
+ */
+export function getMaterialRecordDailySnapshots(
+  records: ReadonlyArray<TGApp.Sqlite.UserBag.MaterialRecord>,
+): Array<TGApp.Sqlite.UserBag.MaterialRecord> {
+  const sorted = [...records].sort((a, b) => a.time - b.time);
+  const daily = new Map<string, TGApp.Sqlite.UserBag.MaterialRecord>();
+  for (const record of sorted) {
+    daily.set(new Date(record.time * 1000).toDateString(), record);
+  }
+  return Array.from(daily.values());
+}
+
+/**
  * 将材料变化幅度转换为对数值。
  * @since Beta v0.13.1
  * @param value - 材料数量变化

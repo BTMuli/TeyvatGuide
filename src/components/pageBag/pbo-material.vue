@@ -75,6 +75,18 @@
             </v-btn>
           </v-btn-toggle>
           <v-btn-toggle
+            v-model="showRecordDaily"
+            :mandatory="true"
+            aria-label="记录统计方式"
+            class="pbom-chart-toggle"
+            color="var(--tgc-od-orange)"
+            density="compact"
+            variant="outlined"
+          >
+            <v-btn :value="false" size="small" title="按每次导入记录展示">按次数</v-btn>
+            <v-btn :value="true" size="small" title="每天保留最后一次库存">按天</v-btn>
+          </v-btn-toggle>
+          <v-btn-toggle
             v-if="showRecordDiff"
             v-model="useRecordLogScale"
             :mandatory="true"
@@ -90,6 +102,7 @@
         </div>
         <PbMaterialRecordChart
           v-if="records.length > 5"
+          :daily="showRecordDaily"
           :diff="showRecordDiff"
           :logScale="useRecordLogScale"
           :records
@@ -159,6 +172,7 @@ const showRecord = computed<boolean>(() => isTrackableBagMaterial(props.data.inf
 const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
 const records = shallowRef<Array<TGApp.Sqlite.UserBag.MaterialRecord>>([]);
 const showRecordDiff = shallowRef<boolean>(false);
+const showRecordDaily = shallowRef<boolean>(false);
 const useRecordLogScale = shallowRef<boolean>(true);
 const deletingRecordTime = shallowRef<number>();
 let dbLoadVersion = 0;
