@@ -22,7 +22,7 @@ const modelValue = defineModel<string>({ default: "" });
 
 /**
  * 将输入框清空时的 null 归一为空字符串。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param value - 输入框更新的值
  */
 function handleUpdate(value: string | null): void {

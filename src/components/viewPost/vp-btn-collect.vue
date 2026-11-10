@@ -26,7 +26,7 @@ import VpOverlayCollect from "./vp-overlay-collect.vue";
 
 /**
  * 帖子收藏按钮参数
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 type TbCollectProps = {
   modelValue: number;

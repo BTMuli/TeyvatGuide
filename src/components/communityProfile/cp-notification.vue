@@ -137,11 +137,11 @@ const originNodes = computed<Array<TGApp.BBS.SctPost.Base>>(() => {
   if (!notification.origin || originDeleted.value) return [];
   return getStructuredContent("", notification.origin.text.trim());
 });
-/** 正文是否已有可显示内容，内容已删除的提示同样算作内容。 @since Beta v0.13.0 */
+/** 正文是否已有可显示内容，内容已删除的提示同样算作内容。 @since Beta v0.13.1 */
 const hasBody = computed<boolean>(
   () => notification.is_content_deleted || contentNodes.value.length > 0,
 );
-/** 是否需要单独渲染原内容引用块。 @since Beta v0.13.0 */
+/** 是否需要单独渲染原内容引用块。 @since Beta v0.13.1 */
 const showOrigin = computed<boolean>(() =>
   shouldRenderNotificationOrigin(category, notification.origin, hasBody.value),
 );

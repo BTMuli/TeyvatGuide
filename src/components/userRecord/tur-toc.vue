@@ -5,6 +5,10 @@
 import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import { computed } from "vue";
 
+/**
+ * 战绩悬浮导航组件属性。
+ * @since Beta v0.13.1
+ */
 type TurTocProps = {
   /** 世界探索首个地区图标 */
   worldIcon?: string;

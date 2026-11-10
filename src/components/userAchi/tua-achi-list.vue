@@ -101,7 +101,7 @@ import { AppNameCardsData } from "@/data/index.js";
 
 /**
  * 成就列表组件属性。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 type TuaAchiListProps = {
   uid: number;

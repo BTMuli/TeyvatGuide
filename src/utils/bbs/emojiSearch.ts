@@ -1,11 +1,11 @@
 /**
  * 米游社表情包搜索。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 /**
  * 规范化表情搜索文本。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param value - 用户搜索词或表情文本
  * @returns 去除全部空白并转为小写的搜索文本
  */
@@ -15,7 +15,7 @@ function normalizeEmojiSearchText(value: string): string {
 
 /**
  * 判断表情关键词是否可用于搜索。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param value - 服务端返回的表情关键词
  * @returns 是否为非空字符串
  */
@@ -25,7 +25,7 @@ function isUsableKeyword(value: unknown): value is string {
 
 /**
  * 计算表情与搜索词的匹配程度。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param emoji - 待匹配的表情
  * @param query - 已规范化的搜索词
  * @returns 数值越小越优先；不匹配时为 undefined
@@ -44,7 +44,7 @@ function getEmojiMatchScore(emoji: TGApp.BBS.Emoji.Item, query: string): number 
 
 /**
  * 在全部已加载系列中搜索可用表情。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param seriesList - 已加载的表情系列
  * @param query - 用户输入的搜索词
  * @returns 匹配的表情，按匹配程度、系列排序和表情排序排列

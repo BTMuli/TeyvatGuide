@@ -1,6 +1,6 @@
 /**
  * 米游社通知入口提醒规则回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { describe, expect, it } from "vitest";
@@ -39,7 +39,7 @@ function createSettings(
 
 /**
  * 创建通知原内容测试数据。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param overrides - 本次用例覆盖的原内容字段
  * @returns 通知原内容
  */
@@ -56,7 +56,7 @@ function createOrigin(
   };
 }
 
-/** 被点赞评论的原内容，含正文与配图。 @since Beta v0.13.0 */
+/** 被点赞评论的原内容，含正文与配图。 @since Beta v0.13.1 */
 const likedComment = createOrigin({
   text: "帅_(得意)",
   image: {

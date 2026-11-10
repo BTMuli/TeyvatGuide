@@ -64,6 +64,10 @@ import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 import { AppNameCardsData } from "@/data/index.js";
 
 type HiddenFilter = "all" | "hidden" | "visible";
+/**
+ * 成就系列组件属性。
+ * @since Beta v0.13.1
+ */
 type TuaSeriesProps = {
   /** 存档 UID */
   uid: number;

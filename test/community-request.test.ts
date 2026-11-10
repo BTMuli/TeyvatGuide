@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心请求契约回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

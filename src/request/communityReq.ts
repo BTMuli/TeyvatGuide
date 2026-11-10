@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import {
@@ -244,7 +244,7 @@ async function getFavorites(
 
 /**
  * 设置帖子收藏状态
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param cookie - 账户 Cookie
  * @param postId - 帖子 ID
  * @param favorite - 是否收藏
@@ -273,7 +273,7 @@ async function setPostFavorite(
 
 /**
  * 取消收藏帖子
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param cookie - 账户 Cookie
  * @param postId - 帖子 ID
  * @returns 取消收藏响应数据

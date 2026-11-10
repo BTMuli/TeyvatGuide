@@ -1,6 +1,6 @@
 /**
  * 米游社表情包搜索回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { describe, expect, it } from "vitest";
@@ -9,7 +9,7 @@ import { searchEmojiItems } from "../src/utils/bbs/emojiSearch.js";
 
 /**
  * 创建表情测试数据。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param id - 表情 ID
  * @param name - 表情名称
  * @param sortOrder - 表情排序
@@ -40,7 +40,7 @@ function createEmoji(
 
 /**
  * 创建表情系列测试数据。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param id - 系列 ID
  * @param name - 系列名称
  * @param sortOrder - 系列排序

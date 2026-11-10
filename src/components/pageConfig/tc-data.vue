@@ -271,7 +271,7 @@ async function confirmUpdate(title?: string): Promise<void> {
 
 /**
  * 更新设备信息
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 async function confirmUpdateDevice(force?: boolean): Promise<void> {
   if (force !== undefined && force) {
