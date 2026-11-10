@@ -315,7 +315,6 @@ function getBagMaterial(materialId: number): TGApp.Sqlite.UserBag.MaterialTable 
     props.bagMaterials.get(materialId) ?? {
       count: props.inventory.get(materialId) ?? 0,
       id: materialId,
-      records: [],
       uid: props.uid,
       updated: "",
     }

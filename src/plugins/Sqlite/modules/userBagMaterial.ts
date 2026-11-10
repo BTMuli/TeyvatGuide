@@ -1,6 +1,6 @@
 /**
  * 用户背包材料模块
- * @since Beta v0.12.2
+ * @since Beta v0.13.1
  */
 import { platform } from "@tauri-apps/plugin-os";
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -115,29 +115,11 @@ function getValidMIds(): Array<number> {
 }
 
 /**
- * 获取插入Sql
- * @since Beta v0.9.0
- * @param  tb -表格
- * @returns sql
- */
-function getInsertSql(tb: TGApp.Sqlite.UserBag.MaterialRaw): string {
-  return `
-      INSERT INTO UserBagMaterial(uid, id, count, records, updated)
-      VALUES (${tb.uid}, ${tb.id}, ${tb.count}, '${tb.records}', '${tb.updated}')
-      ON CONFLICT(uid, id) DO UPDATE
-          SET count   = ${tb.count},
-              records = '${tb.records}',
-              updated = '${tb.updated}';
-  `;
-}
-
-/**
  * 插入或更新材料数据
- * @since Beta v0.9.0
+ * @since Beta v0.13.1
  * @param uid - 存档UID
  * @param itemId - 材料ID
  * @param count - 材料数量
- * @param records - 更新记录
  * @param manual - 是否手动
  * @returns 无返回值
  */
@@ -145,31 +127,30 @@ async function insertMaterial(
   uid: number,
   itemId: number,
   count: number,
-  records: Array<TGApp.Sqlite.UserBag.MaterialRecord> = [],
   manual: boolean = false,
 ): Promise<void> {
   const now = Date.now();
-  const newRecord: TGApp.Sqlite.UserBag.MaterialRecord = {
-    count: count,
-    time: Math.floor(now / 1000),
-  };
-  if (manual) newRecord.manual = true;
-  const newRecords = [...records, newRecord];
-  const newTable: TGApp.Sqlite.UserBag.MaterialRaw = {
-    uid: uid,
-    id: itemId,
-    count: count,
-    records: JSON.stringify(newRecords),
-    updated: fmtUtil.dateTime(now),
-  };
-  const db = await TGSqlite.getDB();
-  const sql = getInsertSql(newTable);
-  await db.execute(sql);
+  const statements: Array<TGApp.App.Sqlite.SqlStatement> = [
+    {
+      query: `INSERT INTO UserBagMaterial(uid, id, count, updated)
+              VALUES ($1, $2, $3, $4)
+              ON CONFLICT(uid, id) DO UPDATE SET
+                count = $3,
+                updated = $4;`,
+      values: [uid, itemId, count, fmtUtil.dateTime(now)],
+    },
+    {
+      query: `INSERT INTO UserBagMaterialRecord(uid, materialId, time, count, manual)
+              VALUES ($1, $2, $3, $4, $5);`,
+      values: [uid, itemId, Math.floor(now / 1000), count, manual ? 1 : 0],
+    },
+  ];
+  await TGSqlite.executeTransaction(statements);
 }
 
 /**
  * 删除记录
- * @since Beta v0.9.1
+ * @since Beta v0.13.1
  * @param uid - 存档UID
  * @param itemId - 材料ID
  * @param count - 材料数量
@@ -177,20 +158,48 @@ async function insertMaterial(
  */
 async function deleteRecord(uid: number, itemId: number, count: number): Promise<void> {
   const now = Date.now();
-  const newRecord: TGApp.Sqlite.UserBag.MaterialRecord = {
-    count: count,
-    time: Math.floor(now / 1000),
-  };
-  const newTable: TGApp.Sqlite.UserBag.MaterialRaw = {
-    uid: uid,
-    id: itemId,
-    count: count,
-    records: JSON.stringify([newRecord]),
-    updated: fmtUtil.dateTime(now),
-  };
+  const statements: Array<TGApp.App.Sqlite.SqlStatement> = [
+    {
+      query: "DELETE FROM UserBagMaterialRecord WHERE uid = $1 AND materialId = $2;",
+      values: [uid, itemId],
+    },
+    {
+      query: `INSERT INTO UserBagMaterial(uid, id, count, updated)
+              VALUES ($1, $2, $3, $4)
+              ON CONFLICT(uid, id) DO UPDATE SET
+                count = $3,
+                updated = $4;`,
+      values: [uid, itemId, count, fmtUtil.dateTime(now)],
+    },
+    {
+      query: `INSERT INTO UserBagMaterialRecord(uid, materialId, time, count, manual)
+              VALUES ($1, $2, $3, $4, $5);`,
+      values: [uid, itemId, Math.floor(now / 1000), count, 0],
+    },
+  ];
+  await TGSqlite.executeTransaction(statements);
+}
+
+/**
+ * 删除指定时间的一条材料历史记录，至少保留一条且不修改当前库存。
+ * @since Beta v0.13.1
+ * @param uid - 存档 UID
+ * @param itemId - 材料 ID
+ * @param time - 记录时间戳（秒）
+ * @returns 是否成功删除记录
+ */
+async function deleteSingleRecord(uid: number, itemId: number, time: number): Promise<boolean> {
   const db = await TGSqlite.getDB();
-  const sql = getInsertSql(newTable);
-  await db.execute(sql);
+  const result = await db.execute(
+    `DELETE FROM UserBagMaterialRecord
+     WHERE uid = $1 AND materialId = $2 AND time = $3
+       AND EXISTS (
+         SELECT 1 FROM UserBagMaterialRecord AS other
+         WHERE other.uid = $1 AND other.materialId = $2 AND other.time <> $3
+       );`,
+    [uid, itemId, time],
+  );
+  return result.rowsAffected > 0;
 }
 
 /**
@@ -206,31 +215,24 @@ async function getAllUid(): Promise<Array<number>> {
 
 /**
  * 删除指定UID数据
- * @since Beta v0.9.0
+ * @since Beta v0.13.1
  */
 async function delUid(uid: number): Promise<void> {
-  const db = await TGSqlite.getDB();
-  await db.execute("DELETE FROM UserBagMaterial WHERE uid = ?;", [uid]);
-}
-
-/**
- * 解析表格数据
- * @since Beta v0.9.0
- * @param raw - 原始数据
- * @returns 解析数据
- */
-function parseMaterial(raw: TGApp.Sqlite.UserBag.MaterialRaw): TGApp.Sqlite.UserBag.MaterialTable {
-  return {
-    ...raw,
-    records: (<Array<TGApp.Sqlite.UserBag.MaterialRecord>>JSON.parse(raw.records)).sort(
-      (a, b) => b.time - a.time,
-    ),
-  };
+  await TGSqlite.executeTransaction([
+    {
+      query: "DELETE FROM UserBagMaterialRecord WHERE uid = $1;",
+      values: [uid],
+    },
+    {
+      query: "DELETE FROM UserBagMaterial WHERE uid = $1;",
+      values: [uid],
+    },
+  ]);
 }
 
 /**
  * 获取指定UID的材料数据
- * @since Beta v0.9.0
+ * @since Beta v0.13.1
  * @param uid - 存档UID
  * @param id - 材料ID
  * @returns 材料数据
@@ -240,31 +242,56 @@ async function getMaterial(
   id?: number,
 ): Promise<Array<TGApp.Sqlite.UserBag.MaterialTable>> {
   const db = await TGSqlite.getDB();
-  let res: Array<TGApp.Sqlite.UserBag.MaterialRaw>;
-  // TODO: 排序
+  let res: Array<TGApp.Sqlite.UserBag.MaterialTable>;
   if (id !== undefined) {
-    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialRaw>>(
-      "SELECT * FROM UserBagMaterial WHERE uid = ? AND id = ?;",
+    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialTable>>(
+      "SELECT uid, id, count, updated FROM UserBagMaterial WHERE uid = $1 AND id = $2;",
       [uid, id],
     );
   } else {
-    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialRaw>>(
-      "SELECT * FROM UserBagMaterial WHERE uid =?;",
+    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialTable>>(
+      "SELECT uid, id, count, updated FROM UserBagMaterial WHERE uid = $1;",
       [uid],
     );
   }
   const validIds = new Set<number>(getValidMIds());
-  const list = res.map(parseMaterial).filter((item) => validIds.has(item.id));
+  const list = res.filter((item) => validIds.has(item.id));
   if (id !== undefined) return list;
   const ids = new Set<number>(validIds);
   for (const item of list) if (ids.has(item.id)) ids.delete(item.id);
-  for (const item of ids) list.push({ uid: uid, id: item, count: 0, records: [], updated: "" });
+  for (const item of ids) list.push({ uid: uid, id: item, count: 0, updated: "" });
   return list;
 }
 
 /**
+ * 获取材料更新记录
+ * @since Beta v0.13.1
+ * @param uid - 存档UID
+ * @param id - 材料ID
+ * @returns 按时间倒序排列的更新记录
+ */
+async function getRecords(
+  uid: number,
+  id: number,
+): Promise<Array<TGApp.Sqlite.UserBag.MaterialRecord>> {
+  const db = await TGSqlite.getDB();
+  const rows = await db.select<Array<{ count: number; time: number; manual: number }>>(
+    `SELECT count, time, manual
+     FROM UserBagMaterialRecord
+     WHERE uid = $1 AND materialId = $2
+     ORDER BY time DESC;`,
+    [uid, id],
+  );
+  return rows.map((row) => ({
+    count: row.count,
+    time: row.time,
+    ...(row.manual === 1 ? { manual: true } : {}),
+  }));
+}
+
+/**
  * 保存Yae获取的材料数据
- * @since Beta v0.11.3
+ * @since Beta v0.13.1
  * @param uid - 存档UID
  * @param list - 材料数据
  * @returns 无返回值
@@ -294,14 +321,14 @@ async function saveYaeData(
       skip++;
       continue;
     }
-    await insertMaterial(uid, item.item_id, item.info.count, local.records);
+    await insertMaterial(uid, item.item_id, item.info.count);
   }
   return { total: newList.length, skip: skip };
 }
 
 /**
  * 保存货币数据
- * @since Beta v0.9.1
+ * @since Beta v0.13.1
  * @param uid - 存档UID
  * @param id - 货币ID
  * @param cnt - 货币数量
@@ -315,7 +342,7 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
   }
   const local = read[0];
   if (cnt === local.count) return;
-  await insertMaterial(uid, id, cnt, local.records);
+  await insertMaterial(uid, id, cnt);
 }
 
 /**
@@ -324,7 +351,7 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
  * `available_material` 会覆盖对应材料。合成产物往往只出现在 `overall_consume` 里，这里把扣掉
  * 仍可合成量后的持有量作为下界补写，避免刷新后只更新蓝/绿、紫色仍停在合成前。
  * macOS 无需已有背包存档，接口解析数量直接回写，允许减少或归零；其他平台保留下界补写。
- * @since Beta v0.12.2
+ * @since Beta v0.13.1
  * @param uid - 存档 UID
  * @param result - 接口养成计算结果
  * @returns 发生变更的材料数量
@@ -349,7 +376,7 @@ async function saveCalculateData(
       if (!validIds.has(materialId)) continue;
       const [local] = await getMaterial(uid, materialId);
       if (local?.updated && local.count === count) continue;
-      await insertMaterial(uid, materialId, count, local?.records ?? []);
+      await insertMaterial(uid, materialId, count);
       changed++;
     }
     return changed;
@@ -363,7 +390,7 @@ async function saveCalculateData(
     const read = await getMaterial(uid, material.id);
     const local = read[0];
     if (local?.updated && local.count === count) continue;
-    await insertMaterial(uid, material.id, count, local?.records ?? []);
+    await insertMaterial(uid, material.id, count);
     changed++;
   }
   for (const [materialId, count] of calculated) {
@@ -371,7 +398,7 @@ async function saveCalculateData(
     const read = await getMaterial(uid, materialId);
     const local = read[0];
     if ((local?.count ?? 0) >= count) continue;
-    await insertMaterial(uid, materialId, count, local?.records ?? []);
+    await insertMaterial(uid, materialId, count);
     changed++;
   }
   return changed;
@@ -384,8 +411,10 @@ const TSUserBagMaterial = {
   saveYaeCoin,
   saveCalculateData,
   getMaterial,
+  getRecords,
   insertMaterial,
   deleteRecord,
+  deleteSingleRecord,
   getValidMIds,
 };
 

@@ -1,5 +1,5 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.12.1
+-- @since Beta v0.13.1
 
 -- @brief 创建养成计划表
 create table if not exists CultivationProject
@@ -68,9 +68,19 @@ create table if not exists UserBagMaterial
     uid     integer not null,
     id      integer not null,
     count   integer default 0,
-    records text,
     updated text,
     primary key (uid, id)
+);
+
+-- @brief 创建背包物品材料更新记录表
+create table if not exists UserBagMaterialRecord
+(
+    uid        integer not null,
+    materialId integer not null,
+    time       integer not null,
+    count      integer not null,
+    manual     integer not null default 0 check (manual in (0, 1)),
+    primary key (uid, materialId, time)
 );
 
 -- @brief 创建背包物品武器表

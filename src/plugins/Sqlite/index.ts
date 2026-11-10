@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.12.1
+ * @since Beta v0.13.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -23,8 +23,9 @@ const CoreSchemaMigrations = <const>[
   "HardChallenge.v2",
   "UserRecordRaw.v1",
   "Achievements.v2",
+  "UserBagMaterialRecord.v1",
 ];
-const CoreSchemaVersion = "2026.08.p0.6";
+const CoreSchemaVersion = "2026.08.p0.7";
 
 const GameAccountLegacyTable = "GameAccount_legacy_v0_11_2";
 const LegacyTablesForReset = <const>[GameAccountLegacyTable, "UserRecord"];
@@ -85,6 +86,7 @@ class Sqlite {
     "UserCharacters",
     "UserRecordRaw",
     "UserBagMaterial",
+    "UserBagMaterialRecord",
     "UserBagWeapon",
     "UserBagRelic",
     "UserBagAvatar",
@@ -145,6 +147,11 @@ class Sqlite {
     }
   }
 
+  /**
+   * 创建并迁移核心数据库表结构。
+   * @since Beta v0.13.1
+   * @returns 无返回值
+   */
   private async migrateCoreSchema(): Promise<void> {
     const db = await this.getRawDB();
     try {
@@ -163,6 +170,9 @@ class Sqlite {
             break;
           case "Achievements.v2":
             await this.migrateAchievementsSchema();
+            break;
+          case "UserBagMaterialRecord.v1":
+            await this.migrateUserBagMaterialRecordSchema();
             break;
         }
       }
@@ -318,6 +328,35 @@ class Sqlite {
     if (beforeCount !== afterCount) {
       throw new Error(`Achievements 迁移前后行数不一致：${beforeCount} / ${afterCount}`);
     }
+  }
+
+  /**
+   * 将材料表中的 JSON 更新记录迁移到独立记录表。
+   * @since Beta v0.13.1
+   * @returns 无返回值
+   */
+  private async migrateUserBagMaterialRecordSchema(): Promise<void> {
+    const columns = await this.getTableColumns("UserBagMaterial");
+    if (!columns.some((column) => column.name === "records")) return;
+
+    await this.executeRawTransaction([
+      {
+        query: `INSERT INTO UserBagMaterialRecord (uid, materialId, time, count, manual)
+                SELECT material.uid,
+                       material.id,
+                       json_extract(record.value, '$.time'),
+                       json_extract(record.value, '$.count'),
+                       COALESCE(json_extract(record.value, '$.manual'), 0)
+                FROM UserBagMaterial AS material
+                JOIN json_each(
+                  CASE
+                    WHEN material.records IS NULL OR trim(material.records) = '' THEN '[]'
+                    ELSE material.records
+                  END
+                ) AS record;`,
+      },
+      { query: "ALTER TABLE UserBagMaterial DROP COLUMN records;" },
+    ]);
   }
 
   /**
@@ -567,7 +606,7 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.12.0
+   * @since Beta v0.13.1
    * @returns 无返回值
    */
   public async reset(): Promise<void> {
@@ -594,6 +633,8 @@ class Sqlite {
           }
           throw innerErr;
         }
+        this.coreSchemaUpdate = null;
+        this.cultivationEntrySchemaUpdate = null;
         await this.initDB();
         return;
       } catch (err: any) {

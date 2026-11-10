@@ -34,7 +34,7 @@
         <header class="pbom-record-header">
           <v-icon size="18">mdi-clock-edit-outline</v-icon>
           <h3>更新记录</h3>
-          <span>{{ dbInfo.records.length }} 条</span>
+          <span>{{ records.length }} 条</span>
           <div class="pbom-record-actions" data-html2canvas-ignore="true">
             <v-btn
               density="comfortable"
@@ -53,18 +53,67 @@
               variant="text"
               @click="tryDelete"
             >
-              删除记录
+              清理记录
             </v-btn>
           </div>
         </header>
-        <PbMaterialRecordChart v-if="dbInfo.records.length > 5" :records="dbInfo.records" />
+        <div v-if="records.length > 5" class="pbom-chart-controls" data-html2canvas-ignore="true">
+          <v-btn-toggle
+            v-model="showRecordDiff"
+            :mandatory="true"
+            aria-label="材料记录图表"
+            class="pbom-chart-toggle"
+            color="var(--tgc-od-orange)"
+            density="compact"
+            variant="outlined"
+          >
+            <v-btn :value="false" aria-label="数量折线图" size="small" title="数量折线图">
+              <v-icon size="16">mdi-chart-line</v-icon>
+            </v-btn>
+            <v-btn :value="true" aria-label="数量变化图" size="small" title="数量变化图">
+              <v-icon size="16">mdi-chart-bar</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+          <v-btn-toggle
+            v-if="showRecordDiff"
+            v-model="useRecordLogScale"
+            :mandatory="true"
+            aria-label="变化图刻度"
+            class="pbom-chart-toggle"
+            color="var(--tgc-od-orange)"
+            density="compact"
+            variant="outlined"
+          >
+            <v-btn :value="false" size="small" title="线性刻度">线性</v-btn>
+            <v-btn :value="true" size="small" title="带符号的对数刻度">对数</v-btn>
+          </v-btn-toggle>
+        </div>
+        <PbMaterialRecordChart
+          v-if="records.length > 5"
+          :diff="showRecordDiff"
+          :logScale="useRecordLogScale"
+          :records
+          @select-record="tryDeleteRecord"
+        />
         <div v-else class="pbom-record-list">
-          <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
+          <div v-for="record in records" :key="record.time" class="pbom-record">
             <time>{{ fmtUtil.dateTime(record.time * 1000) }}</time>
             <span>{{ record.manual ? "手动更新" : "自动导入" }}</span>
             <strong>{{ fmtUtil.num(record.count) }}</strong>
+            <v-btn
+              :aria-label="'删除 ' + fmtUtil.dateTime(record.time * 1000) + ' 的记录'"
+              :disabled="records.length <= 1 || deletingRecordTime !== undefined"
+              :loading="deletingRecordTime === record.time"
+              :title="records.length <= 1 ? '至少保留一条记录' : '删除这条记录'"
+              color="var(--tgc-od-red)"
+              data-html2canvas-ignore="true"
+              icon="mdi-delete-outline"
+              size="x-small"
+              variant="text"
+              @click="tryDeleteRecord(record)"
+            />
           </div>
-          <div v-if="dbInfo.records.length === 0" class="pbom-record-empty">暂无更新记录</div>
+          <div v-if="records.length === 0" class="pbom-record-empty">暂无更新记录</div>
         </div>
       </section>
     </template>
@@ -108,6 +157,11 @@ const visible = defineModel<boolean>();
 const slots = useSlots();
 const showRecord = computed<boolean>(() => isTrackableBagMaterial(props.data.info));
 const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
+const records = shallowRef<Array<TGApp.Sqlite.UserBag.MaterialRecord>>([]);
+const showRecordDiff = shallowRef<boolean>(false);
+const useRecordLogScale = shallowRef<boolean>(true);
+const deletingRecordTime = shallowRef<number>();
+let dbLoadVersion = 0;
 
 defineSlots<{
   "before-record"?: () => unknown;
@@ -124,20 +178,36 @@ const shareFileName = computed<string>(
 const shareScale = computed<number>(() => window.outerWidth / window.innerWidth);
 
 watch(
-  [() => props.uid, () => props.data.info.id],
-  async () => {
+  [visible, () => props.uid, () => props.data.info.id],
+  async (_value, _oldValue, onCleanup) => {
+    onCleanup(() => {
+      dbLoadVersion++;
+    });
     dbInfo.value = props.data.tb;
-    await refreshDb();
+    records.value = [];
+    if (visible.value && showRecord.value) await refreshDb();
   },
   { immediate: true },
 );
 
 async function refreshDb(): Promise<void> {
+  const loadVersion = ++dbLoadVersion;
   const uid = props.uid;
   const id = props.data.info.id;
-  const list = await TSUserBagMaterial.getMaterial(uid, id);
-  if (uid !== props.uid || id !== props.data.info.id) return;
+  const [list, materialRecords] = await Promise.all([
+    TSUserBagMaterial.getMaterial(uid, id),
+    TSUserBagMaterial.getRecords(uid, id),
+  ]);
+  if (
+    loadVersion !== dbLoadVersion ||
+    uid !== props.uid ||
+    id !== props.data.info.id ||
+    !visible.value
+  ) {
+    return;
+  }
   dbInfo.value = list[0] ?? props.data.tb;
+  records.value = materialRecords;
 }
 
 async function tryEdit(): Promise<void> {
@@ -159,7 +229,6 @@ async function tryEdit(): Promise<void> {
     Number(props.uid),
     props.data.info.id,
     Number(input),
-    dbInfo.value.records,
     true,
   );
   await refreshDb();
@@ -167,12 +236,41 @@ async function tryEdit(): Promise<void> {
   showSnackbar.success("成功更新记录");
 }
 
+async function tryDeleteRecord(record: TGApp.Sqlite.UserBag.MaterialRecord): Promise<void> {
+  if (deletingRecordTime.value !== undefined) return;
+  if (records.value.length <= 1) {
+    showSnackbar.warn("最少保留一条记录");
+    return;
+  }
+  const uid = props.uid;
+  const id = props.data.info.id;
+  const text = [
+    fmtUtil.dateTime(record.time * 1000) + " · 数量 " + fmtUtil.num(record.count),
+    "不影响当前库存。",
+  ].join("\n");
+  deletingRecordTime.value = record.time;
+  try {
+    const check = await showDialog.check("删除这条记录？", text);
+    if (!check) return;
+    const deleted = await TSUserBagMaterial.deleteSingleRecord(uid, id, record.time);
+    if (uid !== props.uid || id !== props.data.info.id || !visible.value) return;
+    await refreshDb();
+    if (deleted) showSnackbar.success("已删除这条记录");
+    else showSnackbar.warn("记录已不存在或只剩最后一条记录");
+  } catch (error) {
+    await TGLogger.Error("[pboMaterial][deleteSingleRecord] " + String(error));
+    showSnackbar.error("删除记录失败，请重试");
+  } finally {
+    deletingRecordTime.value = undefined;
+  }
+}
+
 async function tryDelete(): Promise<void> {
-  if (dbInfo.value.records.length === 0) {
+  if (records.value.length === 0) {
     showSnackbar.warn("没有可以删除的记录");
     return;
   }
-  if (dbInfo.value.records.length === 1) {
+  if (records.value.length === 1) {
     showSnackbar.warn("最少保留一条记录");
     return;
   }
@@ -214,6 +312,7 @@ async function tryDelete(): Promise<void> {
 
 .pbom-record-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   color: var(--common-text-title);
   gap: 8px;
@@ -240,6 +339,19 @@ async function tryDelete(): Promise<void> {
   column-gap: 4px;
 }
 
+.pbom-chart-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pbom-chart-toggle.v-btn-toggle {
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 4px;
+}
+
 .pbom-record-list {
   display: flex;
   max-height: 176px;
@@ -257,8 +369,9 @@ async function tryDelete(): Promise<void> {
   color: var(--box-text-2);
   font-size: 12px;
   gap: 12px;
-  grid-template-columns: minmax(160px, auto) 1fr auto;
+  grid-template-columns: minmax(160px, auto) 1fr auto auto;
   line-height: 16px;
+  white-space: nowrap;
 
   time {
     color: var(--box-text-4);

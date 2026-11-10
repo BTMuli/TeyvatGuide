@@ -318,7 +318,6 @@ function genEmptyMaterial(material: TGApp.App.Material.WikiItem): MaterialInfo {
       uid: Number(account.value.gameUid),
       id: material.id,
       count: 0,
-      records: [],
       updated: fmtUtil.dateTime(Date.now()),
     },
   };

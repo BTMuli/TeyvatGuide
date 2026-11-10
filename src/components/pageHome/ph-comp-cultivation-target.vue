@@ -116,7 +116,6 @@ async function openMaterial(materialId: number): Promise<void> {
     tb: {
       count: 0,
       id: materialId,
-      records: [],
       uid: props.uid,
       updated: "",
     },
