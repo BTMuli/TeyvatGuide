@@ -61,14 +61,13 @@ const displayedRecords = computed<Array<TGApp.Sqlite.UserBag.MaterialRecord>>(()
 );
 const options = computed<EChartsOption>(() => {
   const values = props.diff
-    ? changes.value.map((record) => record.diff)
+    ? changes.value.map((record) => Math.abs(record.diff))
     : records.value.map((record) => record.count);
   const logarithmic = props.diff && props.logScale;
   const logScale = logarithmic ? getMaterialRecordLogScale(values) : undefined;
   const minimumValue = values.reduce((min, value) => Math.min(min, value), values[0] ?? 0);
   const roundedMinimum = Math.floor(minimumValue / 5) * 5;
-  const minimum =
-    logScale?.minimum ?? (props.diff ? Math.min(0, roundedMinimum) : Math.max(0, roundedMinimum));
+  const minimum = logScale?.minimum ?? (props.diff ? 0 : Math.max(0, roundedMinimum));
   const maximum =
     logScale?.maximum ??
     Math.max(
@@ -79,7 +78,7 @@ const options = computed<EChartsOption>(() => {
   return {
     animation: false,
     backgroundColor: "transparent",
-    grid: { left: 8, right: 12, top: logarithmic ? 24 : 8, bottom: 4, containLabel: true },
+    grid: { left: 8, right: 12, top: props.diff ? 24 : 8, bottom: 4, containLabel: true },
     tooltip: {
       trigger: "axis",
       confine: true,
@@ -113,9 +112,9 @@ const options = computed<EChartsOption>(() => {
     },
     yAxis: {
       type: "value",
-      name: logarithmic ? "对数刻度" : "",
+      name: props.diff ? (logarithmic ? "变化幅度（对数）" : "变化幅度") : "",
       nameGap: 8,
-      nameTextStyle: { color: colors.value.text, fontSize: 11 },
+      nameTextStyle: { color: colors.value.text, fontSize: 11, align: "left" },
       min: minimum,
       max: maximum,
       interval: logarithmic ? undefined : step,
@@ -126,7 +125,7 @@ const options = computed<EChartsOption>(() => {
         fontSize: 11,
         customValues: logScale?.ticks,
         hideOverlap: logarithmic,
-        showMinLabel: logarithmic ? true : undefined,
+        showMinLabel: props.diff ? true : undefined,
         showMaxLabel: logarithmic,
         formatter: (value: number) => {
           const original = logarithmic ? Math.round(restoreMaterialRecordLogValue(value)) : value;
@@ -143,7 +142,7 @@ const options = computed<EChartsOption>(() => {
             type: "bar",
             barMaxWidth: 24,
             data: changes.value.map((record, index) => ({
-              value: logScale?.values[index] ?? record.diff,
+              value: logScale?.values[index] ?? Math.abs(record.diff),
               itemStyle: {
                 color: record.diff < 0 ? colors.value.decrease : colors.value.increase,
               },

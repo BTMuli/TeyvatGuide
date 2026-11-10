@@ -20,17 +20,17 @@ export function getMaterialRecordChanges(
 }
 
 /**
- * 将材料数量转换为带符号的对数值。
+ * 将材料变化幅度转换为对数值。
  * @since Beta v0.13.1
  * @param value - 材料数量变化
- * @returns 带符号的对数值
+ * @returns 非负的对数值
  */
 function toMaterialRecordLogValue(value: number): number {
-  return value === 0 ? 0 : (Math.sign(value) * Math.log1p(Math.abs(value))) / Math.LN10;
+  return Math.log1p(Math.abs(value)) / Math.LN10;
 }
 
 /**
- * 计算材料变化的带符号对数值及刻度范围，刻度使用真实数量的整数量级。
+ * 计算材料变化幅度的对数刻度，零点固定在底部，刻度使用真实数量的整数量级。
  * @since Beta v0.13.1
  * @param values - 材料数量变化
  * @returns 缩放后的数值与纵轴刻度
@@ -42,31 +42,23 @@ export function getMaterialRecordLogScale(values: ReadonlyArray<number>): {
   ticks: Array<number>;
 } {
   const scaled = values.map(toMaterialRecordLogValue);
-  const lower = scaled.reduce((min, value) => Math.min(min, value), 0);
   const upper = scaled.reduce((max, value) => Math.max(max, value), 0);
-  const padding = (upper - lower) * 0.02;
-  const minimum = lower < 0 ? lower - padding : 0;
-  const maximum = upper > 0 ? upper + padding : minimum === 0 ? 1 : 0;
-  const minimumTickDistance = (maximum - minimum) / 8;
+  const maximum = upper > 0 ? upper * 1.02 : 1;
+  const minimumTickDistance = maximum / 8;
   const ticks = [0];
-  const extremes = [
-    values.reduce((min, value) => Math.min(min, value), 0),
-    values.reduce((max, value) => Math.max(max, value), 0),
-  ];
-  for (const extreme of extremes) {
-    let previous = 0;
-    for (let magnitude = 1; magnitude <= Math.abs(extreme); magnitude *= 10) {
-      const tick = toMaterialRecordLogValue(Math.sign(extreme) * magnitude);
-      if (Math.abs(tick - previous) < minimumTickDistance) continue;
-      ticks.push(tick);
-      previous = tick;
-    }
+  const maximumMagnitude = values.reduce((max, value) => Math.max(max, Math.abs(value)), 0);
+  let previous = 0;
+  for (let magnitude = 1; magnitude <= maximumMagnitude; magnitude *= 10) {
+    const tick = toMaterialRecordLogValue(magnitude);
+    if (tick - previous < minimumTickDistance) continue;
+    ticks.push(tick);
+    previous = tick;
   }
   return {
     values: scaled,
-    minimum,
+    minimum: 0,
     maximum,
-    ticks: ticks.sort((a, b) => a - b),
+    ticks,
   };
 }
 
