@@ -1,6 +1,6 @@
 /**
  * 主路由模块
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 import { platform } from "@tauri-apps/plugin-os";
 import type { RouteRecordRaw } from "vue-router";
@@ -50,6 +50,11 @@ const mainRoutes = (<const>[
     path: "/community/profile/posts/:postId/edit",
     name: "编辑帖子",
     component: async () => await import("@/pages/common/PostEdit.vue"),
+  },
+  {
+    path: "/community/shop",
+    name: "米社商店",
+    component: async () => await import("@/pages/common/CommunityShop.vue"),
   },
   {
     path: "/achievements/:app?",

@@ -64,6 +64,16 @@
                 <img :src="userInfo.avatar" alt="userAvatar" class="side-icon-menu side-avatar" />
               </template>
             </v-list-item>
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              href="/community/shop"
+              title="米社商店"
+            >
+              <template #prepend>
+                <img alt="米社商店" class="side-icon-menu" src="/UI/nav/mybExchange.webp" />
+              </template>
+            </v-list-item>
           </v-list>
         </v-menu>
         <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
