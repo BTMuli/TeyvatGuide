@@ -1,7 +1,7 @@
 /**
  * 离线养成材料计算
  * @remarks 计算规则参考 Snap.Hutao Service/Cultivation/Offline
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 /**
@@ -84,8 +84,17 @@ type PreparedCraftingMaterial = {
 };
 
 /**
+ * 合成一个目标至少需要消耗的非媒介来源势能。
+ * @since Beta v0.13.1
+ */
+type CraftingPotential = {
+  required: number;
+  weights: ReadonlyMap<number, number>;
+};
+
+/**
  * 材料合成计算上下文
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 type CraftingContext = {
   /** 可用于合成的剩余背包材料 */
@@ -96,6 +105,8 @@ type CraftingContext = {
   useDust: boolean;
   /** 是否允许使用含异梦溶媒的配方 */
   useSolvent: boolean;
+  /** 当前媒介设置下按目标缓存的来源势能；null 表示不能安全剪枝 */
+  potentials: Map<number, CraftingPotential | null>;
 };
 
 /**
@@ -950,6 +961,85 @@ function hasUsableCraftingRecipe(
 }
 
 /**
+ * 将允许配方的最短来源倍率换算为整数势能，不满足守恒条件时放弃剪枝。
+ * @since Beta v0.13.1
+ * @param id - 目标材料 ID
+ * @param context - 当前合成上下文，媒介设置在本次计算中保持不变
+ * @returns 来源权重与合成一个目标的势能下限，无法安全计算时为 null
+ */
+function prepareCraftingPotential(id: number, context: CraftingContext): CraftingPotential | null {
+  if (id === DUST_OF_AZOTH_ID || id === DREAM_SOLVENT_ID) return null;
+  const rates = new Map<number, number>([[id, 1]]);
+  const pending = [id];
+  for (let index = 0; index < pending.length; index++) {
+    const targetId = pending[index];
+    const rate = rates.get(targetId) ?? 1;
+    for (const recipe of context.materials.get(targetId)?.recipes ?? []) {
+      if (recipe.source.length === 0) continue;
+      if (recipe.hasDust && !context.useDust) continue;
+      if (recipe.hasSolvent && !context.useSolvent) continue;
+      const sources = recipe.source.filter(
+        (source) => source.id !== DUST_OF_AZOTH_ID && source.id !== DREAM_SOLVENT_ID,
+      );
+      // 任一反向可达配方仅依赖媒介时，不能假设转换必然消耗非媒介材料。
+      if (sources.length === 0) return null;
+      for (const source of sources) {
+        if (!Number.isSafeInteger(source.count) || source.count <= 0) return null;
+        const nextRate = rate * source.count;
+        if (!Number.isSafeInteger(nextRate)) return null;
+        if (nextRate >= (rates.get(source.id) ?? Infinity)) continue;
+        rates.set(source.id, nextRate);
+        pending.push(source.id);
+      }
+    }
+  }
+
+  let required = 1;
+  for (const rate of rates.values()) {
+    let first = required;
+    let second = rate;
+    while (second !== 0) {
+      const remainder = first % second;
+      first = second;
+      second = remainder;
+    }
+    required = (required / first) * rate;
+    if (!Number.isSafeInteger(required)) return null;
+  }
+  return {
+    required,
+    weights: new Map(Array.from(rates, ([sourceId, rate]) => [sourceId, required / rate])),
+  };
+}
+
+/**
+ * 判断当前库存是否仍有可能合成一个目标，仅在来源势能确定不足时排除递归搜索。
+ * @since Beta v0.13.1
+ * @param id - 目标材料 ID
+ * @param context - 当前合成上下文，使用实时库存且不修改库存
+ * @returns 势能足够或无法安全判断时为 true
+ */
+function hasCraftingPotential(id: number, context: CraftingContext): boolean {
+  let potential = context.potentials.get(id);
+  if (potential === undefined) {
+    potential = prepareCraftingPotential(id, context);
+    context.potentials.set(id, potential);
+  }
+  if (potential === null) return true;
+  let total = 0;
+  for (const [sourceId, weight] of potential.weights) {
+    const owned = context.inventory.get(sourceId) ?? 0;
+    if (!Number.isSafeInteger(owned) || owned < 0) return true;
+    const contribution = owned * weight;
+    if (!Number.isSafeInteger(contribution) || contribution >= potential.required - total) {
+      return true;
+    }
+    total += contribution;
+  }
+  return false;
+}
+
+/**
  * 尝试消耗指定数量的材料，不足部分递归使用 Wiki 配方合成。
  *
  * @param id - 待消耗材料 ID
@@ -1009,7 +1099,7 @@ function rollbackCraftingTransaction(
 
 /**
  * 尝试使用任意一条 Wiki 配方合成一个指定材料。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param id - 材料 ID
  * @param context - 当前材料合成上下文
  * @param visiting - 当前递归链中的材料 ID
@@ -1026,6 +1116,7 @@ function tryCraftMaterial(
   const material = context.materials.get(id);
   if (!material) return undefined;
   if (!hasUsableCraftingRecipe(material, context.useDust, context.useSolvent)) return undefined;
+  if (!hasCraftingPotential(id, context)) return undefined;
   const checkpoint = transaction.length;
   visiting.add(id);
   let succeeded = false;
@@ -1079,7 +1170,7 @@ function tryCraftMaterial(
 
 /**
  * 使用延迟获取的材料索引计算合成分配。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param requirements - 本轮需要满足的材料 ID 与数量
  * @param inventory - 可用于本轮计算且由调用方拥有的材料库存
  * @param getMaterials - 按需提供本轮预解析材料索引的函数
@@ -1116,6 +1207,7 @@ function calculateCraftingAllocationWithMaterials(
     materials: getMaterials(),
     useDust,
     useSolvent,
+    potentials: new Map(),
   };
 
   const craftable = new Map<number, CraftableMaterial>();

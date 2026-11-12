@@ -1,6 +1,6 @@
 /**
  * 材料合成的事务回滚与计算器复用回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import {
@@ -13,6 +13,35 @@ import {
 import { describe, expect, it } from "vitest";
 
 import { WikiMaterialData, wwWeapon } from "@/data/index.js";
+
+const ELEMENTAL_FRAGMENT_IDS = <const>[104111, 104121, 104131, 104141, 104151, 104161, 104171];
+const DUST_OF_AZOTH_ID = 104201;
+
+/**
+ * 汇总指定材料在库存中的数量。
+ * @since Beta v0.13.1
+ * @param inventory - 材料库存
+ * @param ids - 需要汇总的材料 ID
+ * @returns 指定材料的库存总量
+ */
+function sumInventory(inventory: ReadonlyMap<number, number>, ids: ReadonlyArray<number>): number {
+  return ids.reduce((total, id) => total + (inventory.get(id) ?? 0), 0);
+}
+
+/**
+ * 汇总合成结果中指定材料的消耗数量。
+ * @since Beta v0.13.1
+ * @param consumed - 合成结果记录的实际消耗
+ * @param ids - 需要汇总的材料 ID
+ * @returns 指定材料的消耗总量
+ */
+function sumConsumed(
+  consumed: ReadonlyArray<TGApp.App.UserCalc.CultivationMaterial>,
+  ids: ReadonlyArray<number>,
+): number {
+  const idSet = new Set(ids);
+  return consumed.reduce((total, item) => (idSet.has(item.id) ? total + item.count : total), 0);
+}
 
 /**
  * 创建指定星级与配方的材料 Wiki 测试数据。
@@ -313,6 +342,153 @@ describe("calculateCraftingAllocation", () => {
       expect(result.remainingInventory.get(sourceId)).toBe(0);
     }
     expect({ requirements, inventory }).toStrictEqual(snapshot);
+  });
+
+  it("真实元素石循环配方在来源耗尽后停止并保留剩余库存", () => {
+    const inventory = new Map([
+      [104111, 8],
+      [104121, 18],
+      [104131, 6],
+      [104141, 8],
+      [104151, 26],
+      [104161, 1],
+      [104171, 12],
+      [DUST_OF_AZOTH_ID, 1057],
+    ]);
+    const inventorySnapshot = new Map(inventory);
+    const result = calculateCraftingAllocation(
+      [{ id: 104154, count: 40 }],
+      inventory,
+      WikiMaterialData,
+      true,
+      false,
+    );
+    const crafted = result.materials.get(104154);
+
+    expect(crafted?.count).toBe(2);
+    expect(sumConsumed(crafted?.consumed ?? [], ELEMENTAL_FRAGMENT_IDS)).toBe(54);
+    expect(sumInventory(result.remainingInventory, ELEMENTAL_FRAGMENT_IDS)).toBe(25);
+    expect(
+      crafted?.consumed.find((item) => item.id === DUST_OF_AZOTH_ID)?.count ?? 0,
+    ).toBeGreaterThan(0);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+  });
+
+  it("只有嬗变之尘时不能凭空合成元素石", () => {
+    const inventory = new Map([[DUST_OF_AZOTH_ID, 1057]]);
+    const inventorySnapshot = new Map(inventory);
+    const result = calculateCraftingAllocation(
+      [{ id: 104154, count: 1 }],
+      inventory,
+      WikiMaterialData,
+      true,
+      false,
+    );
+
+    expect(result.materials.get(104154)?.count ?? 0).toBe(0);
+    expect(result.remainingInventory.get(DUST_OF_AZOTH_ID)).toBe(1057);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+  });
+
+  it("来源等价二十六个碎屑时不能合成元素石", () => {
+    const inventory = new Map([
+      [104153, 2],
+      [104151, 8],
+      [DUST_OF_AZOTH_ID, 1057],
+    ]);
+    const inventorySnapshot = new Map(inventory);
+    const result = calculateCraftingAllocation(
+      [{ id: 104154, count: 1 }],
+      inventory,
+      WikiMaterialData,
+      true,
+      false,
+    );
+
+    expect(result.materials.get(104154)?.count ?? 0).toBe(0);
+    expect(result.remainingInventory.get(104153)).toBe(2);
+    expect(result.remainingInventory.get(104151)).toBe(8);
+    expect(result.remainingInventory.get(DUST_OF_AZOTH_ID)).toBe(1057);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+  });
+
+  it("来源等价二十七个碎屑时请求两个只合成一个", () => {
+    const inventory = new Map([
+      [104153, 2],
+      [104151, 9],
+      [DUST_OF_AZOTH_ID, 1057],
+    ]);
+    const inventorySnapshot = new Map(inventory);
+    const result = calculateCraftingAllocation(
+      [{ id: 104154, count: 2 }],
+      inventory,
+      WikiMaterialData,
+      true,
+      false,
+    );
+
+    expect(result.materials.get(104154)?.count).toBe(1);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+  });
+
+  it("Wiki 中没有终端来源但库存有该来源时仍可合成", () => {
+    const target = 910001;
+    const terminalSource = 910002;
+    const materials = [
+      makeMaterial(target, 5, [makeRecipe("unknown-terminal", [[terminalSource, 1]])]),
+    ];
+    const inventory = new Map([[terminalSource, 1]]);
+    const inventorySnapshot = new Map(inventory);
+    const result = calculateCraftingAllocation([{ id: target, count: 1 }], inventory, materials);
+
+    expect(result.materials.get(target)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: terminalSource, count: 1 }],
+    });
+    expect(result.remainingInventory.get(terminalSource)).toBe(0);
+    expect(inventory).toStrictEqual(inventorySnapshot);
+  });
+
+  it("仅消耗媒介的直接及中间配方不应被势能剪枝", () => {
+    const directTarget = 910011;
+    const chainedTarget = 910012;
+    const mediaIntermediate = 910013;
+    const directMaterials = [
+      makeMaterial(directTarget, 5, [makeRecipe("direct-media", [[DUST_OF_AZOTH_ID, 1]])]),
+    ];
+    const directInventory = new Map([[DUST_OF_AZOTH_ID, 1]]);
+    const directResult = calculateCraftingAllocation(
+      [{ id: directTarget, count: 1 }],
+      directInventory,
+      directMaterials,
+      true,
+    );
+
+    expect(directResult.materials.get(directTarget)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: DUST_OF_AZOTH_ID, count: 1 }],
+    });
+
+    const chainedMaterials = [
+      makeMaterial(chainedTarget, 5, [
+        makeRecipe("target-from-media-intermediate", [[mediaIntermediate, 1]]),
+      ]),
+      makeMaterial(mediaIntermediate, 4, [
+        makeRecipe("media-intermediate", [[DUST_OF_AZOTH_ID, 1]]),
+      ]),
+    ];
+    const chainedInventory = new Map([[DUST_OF_AZOTH_ID, 1]]);
+    const chainedResult = calculateCraftingAllocation(
+      [{ id: chainedTarget, count: 1 }],
+      chainedInventory,
+      chainedMaterials,
+      true,
+    );
+
+    expect(chainedResult.materials.get(chainedTarget)).toStrictEqual({
+      count: 1,
+      consumed: [{ id: DUST_OF_AZOTH_ID, count: 1 }],
+    });
   });
 
   it("合成结果保留无关库存，并与调用方及其他调用保持独立", () => {
