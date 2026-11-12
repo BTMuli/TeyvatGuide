@@ -54,13 +54,48 @@ type GameServerEnum = (typeof GameServer)[keyof typeof GameServer];
   `src/plugins/<Plugin>/types/*.d.ts` 可直接沿用，目录大小写必须准确。
 - 跨文件、跨组件复用或在多处重复声明的同一类型，先检查已有声明并抽离到对应领域的 `.d.ts`；Vue
   组件之间复用也遵循此规则。仅在单个文件内使用的局部类型可就近放在 `.vue`/`.ts` 中，不要为类型
-  单独新建 `types.ts`，也不要新建大写 `Types/` 目录。
+  单独新建 `types.ts`，也不要新建大写 `Types/` 目录。Vue 宏的类型参数按下一节判定。
 - 运行时枚举常量放在 `src/enum/*.ts` 或所属插件的既有目录。
 - 新增的导出类型、函数和常量按邻近代码添加 TSDoc；版本取 `package.json.since`，格式为
   `@since Beta v<package.json.since>`。函数和 `type` 的更新、非 Vue 函数缺失注释补齐，以及 Vue
   豁免范围统一遵循源文件元数据规则；具体 TSDoc 写法见
   [TSDoc 约定](../skills/typescript-standards/references/tsdoc.md)。
 - TSDoc 语法由 `tsdoc/syntax` 检查（warn，仅 `.ts`/`.d.ts` 文件）。
+
+## Vue 宏中的内联类型
+
+`defineProps`、`defineEmits`、`defineSlots` 的类型参数按复杂度决定内联还是具名：简单类型直接写在宏里，
+复杂类型提取为同一 `.vue` 文件内的具名 `type`，再把类型名传给宏。
+
+- 内联（简单类型）需同时满足：对象字面量只有 1 个成员；成员值不含内联的非空对象字面量、对象/元组
+  联合或映射类型；Prettier 格式化后整条宏调用保持单行。例如
+  `defineProps<{ content: string }>()`、`defineProps<{ goods: TGApp.BBS.Shop.Goods }>()`、
+  `defineModel<boolean>()`、`defineEmits<{ close: [] }>()`、`defineEmits<{ select: [foodId: number] }>()`，
+  以及参数使用已命名类型的单 slot 声明 `defineSlots<{ default(props: SlotProps): unknown }>()`。
+- `ref`、`shallowRef`、`computed`、`useTemplateRef` 等响应式泛型实参始终内联，不提取为类型别名。
+- 复杂类型必须提取，满足任一条即属于此类：
+  - 对象字面量有 2 个及以上成员，如 `defineEmits<{ afterEnter: []; afterLeave: [] }>()`；
+  - 单个成员的成员值出现嵌套对象字面量、对象/元组联合或映射类型，或为满足行宽需要换行；
+  - 需要逐成员 TSDoc，或同一类型还要在脚本中再次引用（`withDefaults`、辅助函数参数、显式注解）。
+- 命名带组件语义前缀，并与同一文件的 props/emits/slots 对应：`TopOverlayProps`、`TopOverlayEmits`、
+  `TolEmits`；既有文件沿用的 `Props`/`Emits` 不强制改名。`<script setup>` 中的局部 `type` 不需要
+  `export`，宏只接收类型名，如 `const emits = defineEmits<TopOverlayEmits>();`。
+- 仅单个组件使用的类型留在该文件，不新建 `types.ts`；跨组件或跨文件复用的契约按上一节抽离到对应
+  领域 `.d.ts`。提取出的类型若已有注释，按源文件元数据规则维护其 `@since`。
+- 既有内联写法不批量迁移；改造到该组件时顺带提取，保持 diff 只覆盖本次任务范围。
+
+```typescript
+// 不推荐：复杂事件对象直接内联，宏调用被类型文本淹没
+const emits = defineEmits<{ afterEnter: []; afterLeave: [] }>();
+
+// 推荐：提取具名类型，宏调用只保留类型名
+type TopOverlayEmits = {
+  afterEnter: [];
+  afterLeave: [];
+};
+
+const emits = defineEmits<TopOverlayEmits>();
+```
 
 ## ESLint 强制限制
 

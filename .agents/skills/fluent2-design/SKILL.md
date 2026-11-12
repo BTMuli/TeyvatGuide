@@ -56,6 +56,11 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 - 列表与卡片的 hover/selected 背景使用 subtle background 档位（浅色 hover=`#f5f5f5`，深色
   hover=`#383838`），不用整块高饱和色。
 - 浮层使用 12px 圆角并配合浅阴影。
+- 消息反馈统一用 `showSnackbar`（`src/components/func/snackbar.ts`），弹层统一用 `TopOverlay`
+  （`src/components/app/top-overlay.vue`）；不使用 `v-dialog`、`v-alert`。详见
+  [界面反馈与浮层规则](../../rules/ui-components-rules.md)。
+- 可点击卡片、列表项等复合区域使用容器 + `@click`，只有单一动作才用 `button` / `v-btn`；键盘与焦点状态
+  见 [交互元素与点击区域规则](../../rules/interaction-rules.md)。
 
 ## 深浅主题
 

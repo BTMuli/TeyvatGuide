@@ -16,6 +16,11 @@
   [边界校验规则](.agents/rules/boundary-validation-rules.md)，遵守混合渐进策略，不重复校验
   内部强类型数据。
 - Vue 组件、组合式 API 或 Vue 现代化改造：使用 `.agents/skills/vue3-standards/SKILL.md`。
+- 界面消息、确认或浮层：读取 [界面反馈与浮层规则](.agents/rules/ui-components-rules.md)；不使用
+  `v-alert` / `v-dialog`（既有遗留不批量迁移），消息统一 `showSnackbar`，浮层统一 `TopOverlay`。
+- 按钮、可点击卡片或复合点击区域：读取
+  [交互元素与点击区域规则](.agents/rules/interaction-rules.md)；只有单一动作才用 `button` / `v-btn`，
+  复杂区域用容器 + `@click` 并保留键盘操作。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
 - 跨语言源代码的文件头、函数、类型与 `@since`：读取
   [源代码版本与注释元数据规则](.agents/rules/source-metadata-rules.md)。

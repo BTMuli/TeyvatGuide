@@ -53,6 +53,10 @@ onMounted(() => searchInput.value?.focus());
 
 - Declare props with `defineProps<Props>()`; use a `type`, not an `interface`, under this repository's TypeScript
   rules. Do not import compiler macros.
+- Keep only a single simple field inline, such as `defineProps<{ content: string }>()` or
+  `defineProps<{ goods: TGApp.BBS.Shop.Goods }>()`. Extract the macro type into a named local `type` once it has
+  two or more members, nests object/union/mapped types, needs per-field docs, needs more than one line, or is
+  referenced again in the script.
 - On Vue 3.5, prefer reactive props destructuring with native defaults when only selected props are needed:
   `const { title, pageSize = 20 } = defineProps<Props>()`. The destructured bindings remain reactive inside the
   same `<script setup>` block.
@@ -60,10 +64,14 @@ onMounted(() => searchInput.value?.focus());
   Use `props.foo` in script, while templates may reference declared props directly.
 - When watching a destructured prop, pass a getter: `watch(() => pageSize, callback)`. Do not pass its current
   primitive value as the source.
-- Declare emits with typed named tuples, for example
-  `defineEmits<{ saveSuccess: [recordId: number]; close: [] }>()`.
+- Declare emits with typed named tuples and extract complex declarations into a named local type:
+  `type TopOverlayEmits = { afterEnter: []; afterLeave: [] };`, then
+  `const emits = defineEmits<TopOverlayEmits>();`.
+- A single event may stay inline while the declaration remains one line, for example
+  `defineEmits<{ close: [] }>()` or `defineEmits<{ saveSuccess: [recordId: number] }>()`.
 - Declare typed slots with `defineSlots<{ default(props: SlotProps): unknown }>()` when slot props form a public
-  contract. Prefer it to `useSlots()` for TypeScript-based slot declarations.
+  contract. Prefer it to `useSlots()` for TypeScript-based slot declarations. A single simple slot may stay
+  inline; multiple slots or documented slot props become a named `XxxSlots` type.
 - Use `defineOptions()` for `inheritAttrs`, component names, or custom options. Use `defineExpose()` only for the
   smallest parent-facing imperative API; `<script setup>` components are closed by default.
 - Use `<script lang="ts" setup generic="T extends ...">` for truly reusable generic components instead of
@@ -150,6 +158,34 @@ onMounted(() => searchInput.value?.focus());
 - Choose `v-show` for frequently toggled content and `v-if` for lazy or infrequent branches.
 - Avoid legacy `.sync`, filters, event buses, `$refs`, Reactivity Transform macros, and broad `getCurrentInstance()`
   access. Modernize them only within the requested scope.
+
+## Reuse repository feedback and overlay primitives
+
+- Report user-facing results with `showSnackbar` from `@comp/func/snackbar.js` (`success`, `error`, `warn`,
+  `info`, `cancel`); do not add `v-alert` or rebuild the same feedback with `v-snackbar`.
+- Build modal panels with `TopOverlay` from `@comp/app/top-overlay.vue`: boolean `v-model`, a `#header` title
+  bound to `useId()` through `titleId`, `#footer` actions, `closeAriaLabel`, `:closeDisabled` while submitting,
+  and `:showShare="false"` when sharing does not apply. Do not add `v-dialog`.
+- Keep `showDialog` from `@comp/func/dialog.js` for lightweight confirm and input prompts. Follow
+  [the UI feedback and overlay rules](../../rules/ui-components-rules.md) for details and migration scope.
+
+## Choose the right interactive element
+
+- Use a native `<button type="button">` or `v-btn` only for a single action whose content is simple phrasing
+  content (text, an icon, inline spans). Never place `div`, `p`, headings, sections, or nested interactive
+  elements inside a button.
+- Judge custom and Vuetify components by their rendered root, not their tag name. A `div`-rooted
+  component inside a button is still invalid; `v-progress-circular` accepts `tag="span"`, while card-like
+  components should move to a container.
+- Build compound click regions such as cards, goods rows, list rows, and media tiles as a container
+  (`div`, `article`, or `li`) with `@click` and whatever block layout they need. Do not use a button as a layout
+  wrapper.
+- When the whole region is one action with no nested controls, add `role="button"`, `tabindex="0"`,
+  Enter/Space handlers, and a `:focus-visible` style. When the region contains nested controls, keep the outer
+  click as a pointer convenience, put the keyboard path on the real inner controls, and guard outer key
+  handlers with `.self` or a target check.
+- Keep real buttons for simple text and icon actions; do not replace them with `div + @click`.
+- Follow [the interaction element rules](../../rules/interaction-rules.md) for examples and migration scope.
 
 ## Validate the result
 

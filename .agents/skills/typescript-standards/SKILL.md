@@ -12,7 +12,9 @@ description: Write and review TypeScript and Vue code using TeyvatGuide's ESLint
 3. Use `Array<T>`, `type`, explicit public function types, and angle-bracket assertions where an assertion is
    unavoidable. Prefer narrowing and `unknown` first.
 4. Reuse shared types from `src/types/<Domain>/*.d.ts` (or an existing plugin `types` directory) and keep
-   file-local types near their use; do not create `Types/` or a separate `types.ts` just for types.
+   file-local types near their use; do not create `Types/` or a separate `types.ts` just for types. In Vue
+   macros, inline a single simple field and extract multi-member or nested declaration objects into a named local
+   `type` such as `TopOverlayEmits`.
 5. Do not add native TypeScript `enum`. Read [enum patterns](references/enum.md) when adding a value set or mapping
    declaration-space values to runtime objects.
 6. Read [TSDoc conventions](references/tsdoc.md) when adding or changing functions, types, or exported declarations.
