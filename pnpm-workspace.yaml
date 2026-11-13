@@ -117,7 +117,7 @@ minimumReleaseAgeExclude:
   - "@typescript/typescript-sunos-x64@7.0.2"
   - "@typescript/typescript-win32-arm64@7.0.2"
   - "@typescript/typescript-win32-x64@7.0.2"
-  - "@vitejs/plugin-vue@6.0.9"
+  - "@vitejs/plugin-vue@6.0.9 || 6.0.11"
   - "@vue/language-core@3.3.0 || 3.3.1 || 3.3.6 || 3.3.7 || 3.3.13"
   - "@zumer/snapdom@2.24.15"
   - concurrently@10.0.3 || 10.0.6
@@ -134,8 +134,13 @@ minimumReleaseAgeExclude:
   - postcss-custom-selectors@9.0.3
   - postcss-lab-function@8.0.14
   - postcss-preset-env@11.5.5
-  - prettier@3.9.4 || 3.9.8 || 3.9.10
+  - prettier@3.9.4 || 3.9.8 || 3.9.10 || 3.10.1
+  - stylelint-config-recommended-scss@18.0.0
+  - stylelint-config-standard-scss@18.0.0
+  - stylelint-declaration-block-no-ignored-properties@3.1.0
+  - stylelint-high-performance-animation@2.1.0
   - stylelint-order@8.1.2
+  - stylelint-scss@7.5.0
   - stylelint@17.16.0
   - swiper@12.2.0
   - synckit@0.11.13

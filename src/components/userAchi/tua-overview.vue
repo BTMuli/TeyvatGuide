@@ -43,16 +43,18 @@
               <div class="overview-metric">
                 <span>已完成成就</span>
                 <p>
-                  <strong>{{ fmtUtil.num(summary.fin) }}</strong
-                  ><span> / {{ fmtUtil.num(summary.total) }}</span>
+                  <strong>{{ fmtUtil.num(summary.fin) }}</strong><span>
+                    / {{ fmtUtil.num(summary.total) }}</span
+                  >
                 </p>
                 <span>剩余 {{ fmtUtil.num(summary.total - summary.fin) }} 项</span>
               </div>
               <div class="overview-metric">
                 <span>全完成系列</span>
                 <p>
-                  <strong>{{ fmtUtil.num(summary.completeSeries) }}</strong
-                  ><span> / {{ fmtUtil.num(series.length) }}</span>
+                  <strong>{{ fmtUtil.num(summary.completeSeries) }}</strong><span>
+                    / {{ fmtUtil.num(series.length) }}</span
+                  >
                 </p>
                 <span>共 {{ fmtUtil.num(series.length) }} 个系列</span>
               </div>

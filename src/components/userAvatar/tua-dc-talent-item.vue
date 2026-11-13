@@ -51,8 +51,10 @@
               :key="index"
               class="tua-dct-menu-row"
             >
-              <span class="tua-dct-menu-row-name">{{ affix.name }}</span
-              ><span class="tua-dct-menu-row-value">{{ affix.value }}</span>
+              <span class="tua-dct-menu-row-name">{{ affix.name }}</span><span
+                class="tua-dct-menu-row-value"
+                >{{ affix.value }}</span
+              >
             </div>
           </div>
           <!-- eslint-disable-next-line vue/no-v-html -->
