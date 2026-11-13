@@ -57,7 +57,13 @@
           type="button"
           @click.stop="tryLike()"
         >
-          <v-progress-circular v-if="actionBusy === 'like'" indeterminate size="14" width="2" />
+          <v-progress-circular
+            v-if="actionBusy === 'like'"
+            indeterminate
+            size="14"
+            tag="span"
+            width="2"
+          />
           <v-icon v-else size="small">mdi-thumb-up</v-icon>
           {{ likeCount }}
         </button>
@@ -146,7 +152,13 @@
         type="button"
         @click.stop="togglePin()"
       >
-        <v-progress-circular v-if="actionBusy === 'pin'" indeterminate size="14" width="2" />
+        <v-progress-circular
+          v-if="actionBusy === 'pin'"
+          indeterminate
+          size="14"
+          tag="span"
+          width="2"
+        />
         <v-icon v-else size="small">mdi-pin</v-icon>
         <span>取消置顶</span>
       </button>
@@ -165,7 +177,13 @@
         type="button"
         @click.stop="togglePin()"
       >
-        <v-progress-circular v-if="actionBusy === 'pin'" indeterminate size="14" width="2" />
+        <v-progress-circular
+          v-if="actionBusy === 'pin'"
+          indeterminate
+          size="14"
+          tag="span"
+          width="2"
+        />
         <v-icon v-else size="small">mdi-pin-outline</v-icon>
         <span>置顶回复</span>
       </button>
@@ -181,7 +199,13 @@
         type="button"
         @click.stop="deleteReply()"
       >
-        <v-progress-circular v-if="actionBusy === 'delete'" indeterminate size="14" width="2" />
+        <v-progress-circular
+          v-if="actionBusy === 'delete'"
+          indeterminate
+          size="14"
+          tag="span"
+          width="2"
+        />
         <v-icon v-else size="small">mdi-delete-outline</v-icon>
       </button>
       <button

@@ -18,13 +18,16 @@
 
     <div class="pgop-body">
       <div class="pgop-methods">
-        <button
+        <div
+          :aria-disabled="registering || discovering || undefined"
           :aria-pressed="method === 'auto'"
           :class="{ selected: method === 'auto' }"
-          :disabled="registering || discovering"
+          :tabindex="registering || discovering ? -1 : 0"
           class="pgop-method"
-          type="button"
+          role="button"
           @click="handleRescan"
+          @keydown.enter.prevent="handleRescan"
+          @keydown.space.prevent="handleRescan"
         >
           <div class="pgop-method-icon">
             <v-icon>mdi-magnify</v-icon>
@@ -33,14 +36,17 @@
             <strong>自动识别</strong>
             <span>{{ autoDetectHint }}</span>
           </div>
-        </button>
-        <button
+        </div>
+        <div
+          :aria-disabled="registering || undefined"
           :aria-pressed="method === 'manual'"
           :class="{ selected: method === 'manual' }"
-          :disabled="registering"
+          :tabindex="registering ? -1 : 0"
           class="pgop-method"
-          type="button"
+          role="button"
           @click="pickExecutable"
+          @keydown.enter.prevent="pickExecutable"
+          @keydown.space.prevent="pickExecutable"
         >
           <div class="pgop-method-icon">
             <v-icon>mdi-folder-open</v-icon>
@@ -49,7 +55,7 @@
             <strong>手动选择</strong>
             <span>指定国服 YuanShen.exe</span>
           </div>
-        </button>
+        </div>
       </div>
 
       <PgNotice v-if="degradedHint !== null" :text="degradedHint" tone="warning" />
@@ -468,9 +474,14 @@ watch(
   gap: 12px;
   text-align: left;
 
-  &:disabled {
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.64;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-orange);
+    outline-offset: 2px;
   }
 
   &.selected {

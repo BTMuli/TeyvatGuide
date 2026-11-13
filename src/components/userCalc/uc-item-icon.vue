@@ -1,10 +1,10 @@
 <!-- 养成计算-角色/武器图标 -->
 <template>
-  <div :class="{ circular }" :style="iconStyle" class="uci-box">
+  <span :class="{ circular }" :style="iconStyle" class="uci-box">
     <img :src="`/icon/bg/${star}-Star.webp`" alt="background" class="uci-bg" />
     <img :alt :src="icon" class="uci-icon" />
     <img v-if="primaryBadge" :alt :src="primaryBadge" class="uci-badge primary" />
-  </div>
+  </span>
 </template>
 
 <script lang="ts" setup>
@@ -33,6 +33,7 @@ const iconStyle = computed<Record<string, string>>(() => ({
 <style lang="scss" scoped>
 .uci-box {
   position: relative;
+  display: block;
   overflow: hidden;
   width: var(--uci-size);
   height: var(--uci-size);

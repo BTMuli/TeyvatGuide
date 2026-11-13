@@ -23,6 +23,7 @@
             aria-hidden="true"
             indeterminate
             :size="16"
+            tag="span"
             :width="2"
           />
           <v-icon v-else size="18">mdi-plus</v-icon>
@@ -115,6 +116,7 @@
                 aria-hidden="true"
                 indeterminate
                 :size="12"
+                tag="span"
                 :width="2"
               />
               <span v-else>删除</span>

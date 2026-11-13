@@ -1,14 +1,17 @@
 <!-- 角色料理 -->
 <template>
   <div v-if="foodItems.length > 0" class="twcf-box">
-    <button
+    <div
       v-for="(item, index) in foodItems"
       :key="`${item.type}-${item.material.id}`"
       :aria-label="`查看${item.label}${item.material.name}详情`"
       class="twcf-item"
+      role="button"
       :title="`查看${item.label}${item.material.name}详情`"
-      type="button"
+      tabindex="0"
       @click="showFoodDetail(item.material, index)"
+      @keydown.enter.prevent="showFoodDetail(item.material, index)"
+      @keydown.space.prevent="showFoodDetail(item.material, index)"
     >
       <div class="twcf-icon">
         <img :src="`/icon/bg/${item.material.star}-Star.webp`" alt="" aria-hidden="true" />
@@ -19,7 +22,7 @@
         <strong>{{ item.material.name }}</strong>
       </div>
       <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
-    </button>
+    </div>
   </div>
   <TwoMaterial v-if="selectedFood" v-model="showDetail" :data="selectedFood" eyebrow="角色料理">
     <template #left>

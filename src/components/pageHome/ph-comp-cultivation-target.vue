@@ -3,12 +3,8 @@
   <div
     :class="{ today: hasTodayMaterial }"
     class="phct-target"
-    role="button"
-    tabindex="0"
     title="查看养成目标"
     @click="emits('target-click', entry)"
-    @keydown.enter.prevent="emits('target-click', entry)"
-    @keydown.space.prevent="emits('target-click', entry)"
   >
     <UcItemIcon
       :alt="entry.name"
@@ -18,9 +14,14 @@
       :star="entry.star"
     />
     <div class="phct-info">
-      <div class="phct-name-row">
+      <button
+        :aria-label="`查看${entry.name}养成目标`"
+        class="phct-name-row"
+        type="button"
+        @click.stop="emits('target-click', entry)"
+      >
         <span>{{ entry.name }}</span>
-      </div>
+      </button>
       <small>
         Lv.{{ entry.currentState.level }}
         <v-icon size="12">mdi-arrow-right</v-icon>
@@ -32,12 +33,15 @@
         v-for="material in sortedMissingMaterials.slice(0, 4)"
         :key="material.id"
         :alt="material.name"
+        :aria-label="`查看${material.name}材料`"
         :icon="`/icon/material/${material.id}.webp`"
         :size="32"
         :star="material.star"
         :title="getMaterialCountTitle(material)"
         class="phct-material"
         circular
+        role="button"
+        tabindex="0"
         @click.stop="openMaterial(material.id)"
         @keydown.enter.stop.prevent="openMaterial(material.id)"
         @keydown.space.stop.prevent="openMaterial(material.id)"
@@ -157,13 +161,8 @@ async function openMaterial(materialId: number): Promise<void> {
     background: var(--common-shadow-t-1);
   }
 
-  &:focus-visible,
   &:hover {
     border-color: var(--tgc-od-orange);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-orange);
   }
 }
 
@@ -182,6 +181,19 @@ async function openMaterial(materialId: number): Promise<void> {
   display: flex;
   min-width: 0;
   align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+
+  &:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--tgc-od-orange);
+    outline-offset: 2px;
+  }
 
   span {
     overflow: hidden;
@@ -210,6 +222,12 @@ async function openMaterial(materialId: number): Promise<void> {
 
     &:hover {
       z-index: 2;
+    }
+
+    &:focus-visible {
+      border-radius: 6px;
+      outline: 2px solid var(--tgc-od-orange);
+      outline-offset: 2px;
     }
   }
 

@@ -135,15 +135,17 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <v-btn
+                <div
                   ref="rowButtons"
                   :aria-controls="detailId"
                   :aria-expanded="selectedId === row.id"
                   :data-item-id="row.id"
-                  block
                   class="rerun-name"
-                  variant="text"
+                  role="button"
+                  tabindex="0"
                   @click="selectRow(row.id)"
+                  @keydown.enter.prevent="selectRow(row.id)"
+                  @keydown.space.prevent="selectRow(row.id)"
                 >
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
                   <span class="rerun-name-text">
@@ -151,7 +153,7 @@
                     <span class="rerun-mobile-wait">{{ waitingLabel(row) }}</span>
                   </span>
                   <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
-                </v-btn>
+                </div>
               </th>
               <td>
                 <template v-if="row.lastPool">
@@ -218,15 +220,17 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <v-btn
+                <div
                   ref="rowButtons"
                   :aria-controls="detailId"
                   :aria-expanded="selectedId === row.id"
                   :data-item-id="row.id"
-                  block
                   class="rerun-name"
-                  variant="text"
+                  role="button"
+                  tabindex="0"
                   @click="selectRow(row.id)"
+                  @keydown.enter.prevent="selectRow(row.id)"
+                  @keydown.space.prevent="selectRow(row.id)"
                 >
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
                   <span class="rerun-name-text">
@@ -234,7 +238,7 @@
                     <span class="rerun-muted">{{ waitingLabel(row) }}</span>
                   </span>
                   <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
-                </v-btn>
+                </div>
               </th>
               <td v-for="vg in displayVersionGroups" :key="vg.version">
                 <GroRerunCell :itemId="row.id" :versionGroup="vg" />
@@ -410,7 +414,7 @@ const detailId = useId();
 const searchInput = useTemplateRef<InstanceType<typeof VTextField>>("searchInput");
 const tableScroll = useTemplateRef<HTMLDivElement>("tableScroll");
 const historyScroll = useTemplateRef<HTMLDivElement>("historyScroll");
-const rowButtons = useTemplateRef<Array<ButtonInstance>>("rowButtons");
+const rowButtons = useTemplateRef<Array<HTMLElement>>("rowButtons");
 const historyItems = useTemplateRef<Array<HTMLElement>>("historyItems");
 const closeButton = useTemplateRef<ButtonInstance>("closeButton");
 let clock: ReturnType<typeof setInterval> | undefined;
@@ -677,10 +681,8 @@ async function closeDetail(): Promise<void> {
   selectedId.value = null;
   selectedPoolKey.value = null;
   await nextTick();
-  const target = rowButtons.value?.find(
-    (instance) => buttonElement(instance)?.dataset.itemId === String(id),
-  );
-  focusButton(target);
+  const target = rowButtons.value?.find((element) => element.dataset.itemId === String(id));
+  target?.focus({ preventScroll: true });
 }
 
 function clearSearch(): void {
@@ -948,20 +950,29 @@ function clearSearch(): void {
 }
 
 .rerun-name {
+  display: flex;
+  width: 100%;
+  height: 44px;
+  align-items: center;
   padding: 0 8px;
+  border-radius: 4px;
   color: inherit;
+  cursor: pointer;
   font-weight: normal;
+  gap: 12px;
   text-align: left;
 
-  &.v-btn {
-    height: 44px;
+  &:hover {
+    background: var(--box-bg-4);
   }
 
-  :deep(.v-btn__content) {
-    min-width: 0;
-    flex: 1 0 auto;
-    justify-content: flex-start;
-    gap: 12px;
+  &:focus-visible {
+    outline: 2px solid var(--tgc-yellow-3);
+    outline-offset: 2px;
+  }
+
+  :deep(.tib-box) {
+    flex-shrink: 0;
   }
 }
 

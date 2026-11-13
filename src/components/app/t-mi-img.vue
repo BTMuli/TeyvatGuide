@@ -1,8 +1,8 @@
 <template>
   <img v-if="localUrl" :alt :class="props.class" :src="localUrl" :title @click="emits('click')" />
-  <div v-else class="progress">
-    <v-progress-circular :size color="blue" indeterminate />
-  </div>
+  <span v-else class="progress">
+    <v-progress-circular :size color="blue" indeterminate tag="span" />
+  </span>
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";

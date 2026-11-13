@@ -248,6 +248,7 @@
               aria-hidden="true"
               indeterminate
               size="18"
+              tag="span"
               width="2"
             /><v-icon v-else aria-hidden="true" size="18">mdi-share-variant-outline</v-icon>
           </button>
