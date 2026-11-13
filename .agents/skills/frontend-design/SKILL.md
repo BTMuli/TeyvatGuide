@@ -44,6 +44,8 @@ Spend your boldness in one place. Let the signature element be the one memorable
 
 ## More on writing in design
 
+For TeyvatGuide, follow [UI content rules](../../rules/ui-content-rules.md): let grouping, hierarchy, and placement explain the interface before adding helper labels or explanatory copy. Keep text that resolves real ambiguity or informs a decision, along with necessary labels and accessible names.
+
 Words appear in a design for one reason: to make it easier to understand, and therefore easier to use. They are design material, not decoration. Bring the same intentionality to copy that you would bring to spacing and color. Before writing anything, ask what the design needs to say, and how it can best be said to help the person navigate the experience.
 
 Write from the end user's side of the screen. Name things by what people control and recognize, never by how the system is built. A person manages notifications, not webhook config. Describe what something does in plain terms rather than selling it. Being specific is always better than being clever.

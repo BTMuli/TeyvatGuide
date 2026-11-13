@@ -15,6 +15,8 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 3. 4px 间距系统：gap、margin、padding 等间距尽量取 4 的倍数。
 4. 圆角克制：border-radius 尽量取 4 的倍数；默认 4px，小元素 2px，大面板 8px，浮层 12px，不滥用胶囊形。
 5. 深浅双主题：每个颜色同时给出浅色与深色语义值，禁止只验证浅色。
+6. 布局解释信息：避免不必要的辅助标签与说明，让分组、层级与位置表达关系；保留必要信息与可访问性，
+   详见[界面信息与辅助文案规则](../../rules/ui-content-rules.md)。
 
 ## 颜色
 
