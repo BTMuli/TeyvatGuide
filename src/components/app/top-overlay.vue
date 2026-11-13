@@ -6,6 +6,8 @@
     :outerClose="props.outerClose && !props.closeDisabled"
     :topOffset="props.topOffset"
     :zIndex="props.zIndex"
+    @after-enter="emits('afterEnter')"
+    @after-leave="emits('afterLeave')"
   >
     <div class="topo-container">
       <slot name="left" />
@@ -14,6 +16,7 @@
         :closeAriaLabel="props.closeAriaLabel"
         :closeDisabled="props.closeDisabled"
         :contentMaxHeight="props.contentMaxHeight"
+        :panelHeight="props.panelHeight"
         :panelMaxHeight="props.panelMaxHeight"
         :panelWidth="props.panelWidth"
         :shareAriaLabel="props.shareAriaLabel"
@@ -66,6 +69,8 @@ type TopOverlayProps = {
   contentMaxHeight?: string;
   /** 点击外部关闭，透传 TOverlay */
   outerClose?: boolean;
+  /** 面板固定高度 */
+  panelHeight?: string;
   /** 面板最大高度 */
   panelMaxHeight?: string;
   /** 面板宽度 */
@@ -89,8 +94,33 @@ type TopOverlayProps = {
 };
 
 type TopOverlayEmits = {
+  /** 进入动画结束 */
+  afterEnter: [];
+  /** 离开动画结束 */
+  afterLeave: [];
+  /** 关闭浮层 */
   close: [];
+  /** 请求分享 */
   share: [];
+};
+
+type TopOverlaySlots = {
+  /** 头部操作区 */
+  actions?: () => unknown;
+  /** 默认内容 */
+  default?: () => unknown;
+  /** 底部区域 */
+  footer?: () => unknown;
+  /** 头部标题 */
+  header?: () => unknown;
+  /** 左侧附加内容 */
+  left?: () => unknown;
+  /** 右侧附加内容 */
+  right?: () => unknown;
+  /** 分享署名 */
+  share?: () => unknown;
+  /** 工具栏 */
+  toolbar?: () => unknown;
 };
 
 const props = withDefaults(defineProps<TopOverlayProps>(), {
@@ -142,16 +172,7 @@ defineExpose({
   },
 });
 
-defineSlots<{
-  actions?: () => unknown;
-  default?: () => unknown;
-  footer?: () => unknown;
-  header?: () => unknown;
-  left?: () => unknown;
-  right?: () => unknown;
-  share?: () => unknown;
-  toolbar?: () => unknown;
-}>();
+defineSlots<TopOverlaySlots>();
 </script>
 
 <style lang="scss" scoped>

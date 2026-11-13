@@ -1,6 +1,12 @@
 <!-- 基础悬浮窗组件 -->
 <template>
-  <transition appear enter-from-class="tolo-enter-from" name="tolo">
+  <transition
+    appear
+    enter-from-class="tolo-enter-from"
+    name="tolo"
+    @after-enter="emits('afterEnter')"
+    @after-leave="emits('afterLeave')"
+  >
     <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick()">
       <transition appear enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
@@ -22,6 +28,13 @@ type TolProps = {
   zIndex?: number;
 };
 
+type TolEmits = {
+  /** 进入动画结束 */
+  afterEnter: [];
+  /** 离开动画结束 */
+  afterLeave: [];
+};
+
 const props = withDefaults(defineProps<TolProps>(), {
   blurVal: "20px",
   outerClose: true,
@@ -29,6 +42,7 @@ const props = withDefaults(defineProps<TolProps>(), {
   zIndex: 100,
 });
 
+const emits = defineEmits<TolEmits>();
 const model = defineModel<boolean>({ default: false });
 const showTolo = ref<boolean>(false);
 const showToli = ref<boolean>(false);
@@ -65,7 +79,7 @@ function toClick(): void {
   model.value = false;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tolo-enter-active,
 .tolo-leave-active,
 .toli-enter-active {

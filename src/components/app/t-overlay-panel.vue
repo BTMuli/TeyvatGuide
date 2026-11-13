@@ -64,7 +64,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
-import { computed, onMounted, ref, useSlots, useTemplateRef } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, useSlots, useTemplateRef } from "vue";
 
 type TolpProps = {
   /** 关闭按钮 aria-label */
@@ -76,6 +76,8 @@ type TolpProps = {
    * @remarks 传空字符串或 `none` 时不写 max-height，由面板高度 + flex 约束滚动
    */
   contentMaxHeight?: string;
+  /** 面板固定高度 */
+  panelHeight?: string;
   /** 面板最大高度 */
   panelMaxHeight?: string;
   /** 面板宽度 */
@@ -130,6 +132,8 @@ const titleIdAttr = computed<string | undefined>(() => {
 
 const panelStyle = computed<Record<string, string>>(() => {
   const style: Record<string, string> = { width: props.panelWidth };
+  const height = props.panelHeight?.trim();
+  if (height) style.height = height;
   const maxHeight = props.panelMaxHeight?.trim();
   if (maxHeight) style.maxHeight = maxHeight;
   return style;
@@ -180,8 +184,77 @@ async function handleShare(): Promise<void> {
   }
 }
 
+/**
+ * 判断当前面板是否位于同类面板栈顶部。
+ * @since Beta v0.13.1
+ * @returns 是否为最上层面板
+ */
+function isTopPanel(): boolean {
+  const panels = document.querySelectorAll<HTMLElement>(".tolp-panel");
+  return panels.length > 0 && panels[panels.length - 1] === panel.value;
+}
+
+/**
+ * 判断焦点是否在 Vuetify 浮层（菜单或对话框）内。
+ * @since Beta v0.13.1
+ * @returns 焦点是否位于 Vuetify 浮层容器
+ */
+function isFocusInVuetifyOverlay(): boolean {
+  const active = document.activeElement;
+  return active instanceof Element && active.closest(".v-overlay-container") !== null;
+}
+
+/**
+ * 判断是否存在层级高于当前面板的 Vuetify 浮层。
+ * @since Beta v0.13.1
+ * @returns 是否存在更高层的 Vuetify 浮层
+ */
+function isVuetifyOverlayAbovePanel(): boolean {
+  const overlays = Array.from(
+    document.querySelectorAll<HTMLElement>(".v-overlay-container .v-overlay--active"),
+  );
+  if (overlays.length === 0) return false;
+  const box = panel.value?.closest<HTMLElement>(".tolo-box");
+  const panelZIndex =
+    box === null || box === undefined ? 0 : Number.parseInt(getComputedStyle(box).zIndex, 10);
+  return overlays.some((overlay) => {
+    const interactive =
+      overlay.matches('[role="menu"], [role="dialog"], [role="listbox"], .v-menu, .v-dialog') ||
+      overlay.querySelector(
+        '[role="menu"], [role="dialog"], [role="listbox"], .v-menu, .v-dialog',
+      ) !== null;
+    if (!interactive) return false;
+    const overlayZIndex = Number.parseInt(getComputedStyle(overlay).zIndex, 10);
+    return (
+      Number.isFinite(overlayZIndex) &&
+      overlayZIndex >= (Number.isFinite(panelZIndex) ? panelZIndex : 0)
+    );
+  });
+}
+
+/**
+ * 处理最上层面板的 Esc 关闭，确认框显示时让出键盘事件。
+ * @since Beta v0.13.1
+ * @param event - 键盘事件
+ */
+function handlePanelEscape(event: KeyboardEvent): void {
+  if (event.key !== "Escape") return;
+  const dialog = document.querySelector<HTMLElement>("#tg-func-dialog .dialog-overlay");
+  if (dialog && dialog.getClientRects().length > 0) return;
+  if (!isTopPanel() || isFocusInVuetifyOverlay() || isVuetifyOverlayAbovePanel()) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (props.closeDisabled) return;
+  emits("close");
+}
+
 onMounted(async () => {
+  document.addEventListener("keydown", handlePanelEscape, true);
   version.value = await getVersion();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", handlePanelEscape, true);
 });
 
 defineExpose({

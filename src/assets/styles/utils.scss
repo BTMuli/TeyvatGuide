@@ -1,6 +1,6 @@
 /**
  * 一些功能集合
- * @since Beta v0.11.3
+ * @since Beta v0.13.1
  */
 @use "sass:map";
 
@@ -20,4 +20,32 @@
   }
 
   @return #e06c75ff;
+}
+
+/**
+ * 浮层底部操作区布局
+ * @since Beta v0.13.1
+ */
+@mixin overlay-footer-actions {
+  display: flex;
+  width: 100%;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/**
+ * 浮层确认按钮样式
+ * @since Beta v0.13.1
+ */
+@mixin overlay-confirm-button {
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  color: var(--box-text-4);
+
+  &:enabled {
+    background: var(--common-text-title);
+    color: var(--app-page-bg);
+  }
 }
