@@ -1,56 +1,64 @@
 <template>
-  <TOverlay v-model="visible">
-    <div class="vp-ou-box">
-      <div v-if="userInfo" class="vp-ou-user" @click="toCurrentUserProfile()">
-        <div class="vp-ouu-info">
-          <div class="left">
-            <div class="avatar">
-              <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
-              <TMiImg v-else :ori="true" :src="avatarUrl" alt="avatar" />
+  <Teleport to="body">
+    <TOverlay v-model="visible">
+      <div class="vp-ou-box">
+        <div v-if="userInfo" class="vp-ou-user" @click="toCurrentUserProfile()">
+          <div class="vp-ouu-info">
+            <div class="left">
+              <div class="avatar">
+                <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
+                <TMiImg v-else :ori="true" :src="avatarUrl" alt="avatar" />
+              </div>
+              <div v-if="userInfo.pendant !== ''" class="pendant">
+                <TMiImg :ori="true" :src="userInfo.pendant" alt="pendant" />
+              </div>
             </div>
-            <div v-if="userInfo.pendant !== ''" class="pendant">
-              <TMiImg :ori="true" :src="userInfo.pendant" alt="pendant" />
+            <div class="right">
+              <div class="title">
+                <div class="nickname">{{ userInfo.nickname }}</div>
+                <div class="level">Lv.{{ userInfo.level_exp.level }}</div>
+              </div>
+              <div v-if="userDesc" :title="userDesc" class="desc">{{ userDesc }}</div>
             </div>
           </div>
-          <div class="right">
-            <div class="title">
-              <div class="nickname">{{ userInfo.nickname }}</div>
-              <div class="level">Lv.{{ userInfo.level_exp.level }}</div>
-            </div>
-            <div v-if="userDesc" :title="userDesc" class="desc">{{ userDesc }}</div>
+        </div>
+        <div class="vp-ou-mid">
+          <div v-if="userInfo" class="vp-ouu-extra">
+            <span>ID:{{ userInfo.uid }}</span>
+            <span>IP:{{ userInfo.ip_region }}</span>
           </div>
+          <button
+            v-if="canFollow && followState"
+            :aria-label="followState.label"
+            :disabled="followLoading"
+            :title="followState.label"
+            class="vp-ou-follow"
+            type="button"
+            @click="toggleFollow()"
+          >
+            <v-progress-circular
+              v-if="followLoading"
+              indeterminate
+              size="14"
+              tag="span"
+              width="2"
+            />
+            <v-icon v-else aria-hidden="true" size="16">{{ followState.icon }}</v-icon>
+          </button>
+        </div>
+        <div class="vp-ou-divider" />
+        <div ref="listRef" class="vp-ou-list">
+          <TPostCard
+            v-for="post in results"
+            :key="post.post.post_id"
+            :post
+            class="vp-ou-item"
+            @user-click="toUserProfile"
+          />
         </div>
       </div>
-      <div class="vp-ou-mid">
-        <div v-if="userInfo" class="vp-ouu-extra">
-          <span>ID:{{ userInfo.uid }}</span>
-          <span>IP:{{ userInfo.ip_region }}</span>
-        </div>
-        <button
-          v-if="canFollow && followState"
-          :aria-label="followState.label"
-          :disabled="followLoading"
-          :title="followState.label"
-          class="vp-ou-follow"
-          type="button"
-          @click="toggleFollow()"
-        >
-          <v-progress-circular v-if="followLoading" indeterminate size="14" width="2" />
-          <v-icon v-else aria-hidden="true" size="16">{{ followState.icon }}</v-icon>
-        </button>
-      </div>
-      <div class="vp-ou-divider" />
-      <div ref="listRef" class="vp-ou-list">
-        <TPostCard
-          v-for="post in results"
-          :key="post.post.post_id"
-          :post
-          class="vp-ou-item"
-          @user-click="toUserProfile"
-        />
-      </div>
-    </div>
-  </TOverlay>
+    </TOverlay>
+  </Teleport>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
