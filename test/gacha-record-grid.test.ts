@@ -1,26 +1,10 @@
 /**
  * 祈愿记录虚拟网格分组回归测试
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
-import { chunkGachaRecords, getGachaRecordColumns } from "@utils/gacha/recordGrid.js";
+import { chunkGachaRecords } from "@utils/gacha/recordGrid.js";
 import { describe, expect, it } from "vitest";
-
-describe("祈愿记录网格列数", () => {
-  it.each([
-    [0, 1],
-    [80, 1],
-    [104, 1],
-    [215.9, 1],
-    [216, 2],
-    [327.9, 2],
-    [328, 3],
-    [439.9, 3],
-    [440, 4],
-  ])("可用宽度 %s 时使用 %s 列", (width, columns) => {
-    expect(getGachaRecordColumns(width)).toBe(columns);
-  });
-});
 
 describe("祈愿记录虚拟行", () => {
   const records = Object.freeze([

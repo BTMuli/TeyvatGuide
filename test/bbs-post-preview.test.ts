@@ -1,6 +1,6 @@
 /**
  * 米游社帖子预览转换、交互和表情映射回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -62,7 +62,7 @@ describe("createPostPreviewNodes", () => {
     const innerInsert = children[0]?.insert;
 
     expect(outerInsert.backup_text).toBe("折叠内容");
-    expect(innerInsert).toMatchObject({ backup_text: "折叠内容", fold: inner });
+    expect(innerInsert).toEqual({ backup_text: "折叠内容", fold: inner });
     expect(document).toEqual(before);
   });
 
@@ -123,13 +123,26 @@ describe("handlePostPreviewClick", () => {
     handlePostPreviewClick(<MouseEvent>(<unknown>event));
     expect(event.defaultPrevented).toBe(true);
   });
+
+  it("blocks native anchor navigation inside a summary", () => {
+    const event = new MouseEventFixture("click", new PreviewElement(true));
+    handlePostPreviewClick(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(event.cancelBubble).toBe(true);
+  });
 });
 
-/** 可选折叠摘要目标。 @since Beta v0.13.0 */
+/** 可选折叠摘要或摘要内链接目标。 @since Beta v0.13.1 */
 class PreviewElement extends EventTarget {
-  /** 返回当前目标所属的摘要。 @since Beta v0.13.0 */
+  /** 创建摘要或摘要内链接。 @since Beta v0.13.1 */
+  constructor(private readonly link: boolean = false) {
+    super();
+  }
+
+  /** 返回当前目标所属的摘要或交互元素。 @since Beta v0.13.1 */
   closest(selector: string): PreviewElement | null {
-    return selector === "summary" ? this : null;
+    if (selector === "summary") return this;
+    return this.link ? this : null;
   }
 }
 
@@ -206,6 +219,52 @@ describe("getMissingPostPreviewEmoticonNames", () => {
     const nodes: Array<TGApp.BBS.SctPost.Base> = [{ insert: "前_(unknown)中_(smile)后_(unknown)" }];
 
     expect(getMissingPostPreviewEmoticonNames(nodes, { smile: smileUrl })).toEqual(["unknown"]);
+  });
+
+  it("finds missing emoticons after adapting validated nested folds", () => {
+    const document = buildPostDocument([
+      {
+        insert: {
+          fold: {
+            title: JSON.stringify([{ insert: "_(title)\n" }]),
+            content: JSON.stringify([
+              { insert: "_(known)_(body)\n" },
+              {
+                insert: {
+                  fold: {
+                    title: JSON.stringify([{ insert: "嵌套标题\n" }]),
+                    content: JSON.stringify([{ insert: "_(nested)\n" }]),
+                  },
+                },
+              },
+            ]),
+          },
+        },
+      },
+    ]);
+    expect(
+      getMissingPostPreviewEmoticonNames(createPostPreviewNodes(document.nodes), {
+        known: "https://example.com/known.png",
+      }),
+    ).toEqual(["title", "body", "nested"]);
+  });
+
+  it("keeps empty folds and plain text from requesting emoticons", () => {
+    expect(
+      getMissingPostPreviewEmoticonNames(
+        [
+          {
+            insert: {
+              fold: {
+                title: JSON.stringify([{ insert: "标题\n" }]),
+                content: JSON.stringify([{ insert: "\n" }]),
+              },
+            },
+          },
+        ],
+        {},
+      ),
+    ).toEqual([]);
   });
 
   it("finds missing tokens inside fold titles, contents, and nested folds", () => {

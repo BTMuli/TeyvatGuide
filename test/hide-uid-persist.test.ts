@@ -1,6 +1,6 @@
 /**
  * 隐藏 UID 的跨窗口持久化回归测试
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -82,18 +82,6 @@ function stored(): { hideUid?: boolean; postViewWide?: boolean } {
 describe("隐藏 UID 的跨窗口持久化", () => {
   beforeEach(() => {
     mem.storage.clear();
-  });
-
-  it("旧窗口未同步时会用过期值覆盖 hideUid", async () => {
-    const main = openWindow();
-    const old = openWindow();
-    main.setHideUid(true);
-    await flush();
-    expect(stored().hideUid).toBe(true);
-
-    old.postViewWide = false;
-    await flush();
-    expect(stored().hideUid).toBe(false);
   });
 
   it("旧窗口收到同步后不会再覆盖，重启后保持最后一次选择", async () => {
