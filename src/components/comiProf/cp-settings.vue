@@ -265,10 +265,12 @@ import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, reactive, ref, shallowRef, watch } from "vue";
 
-type SettingsSection = "privacy" | "edit";
-
+/**
+ * 个人中心设置面板的输入。
+ * @since Beta v0.13.1
+ */
 type SettingsProps = {
-  section: SettingsSection;
+  section: TGApp.BBS.Profile.SettingsSection;
   profile: TGApp.BBS.User.Info;
   audit?: TGApp.BBS.User.InfoRes["audit_info"];
 };

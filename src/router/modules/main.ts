@@ -5,6 +5,8 @@
 import { platform } from "@tauri-apps/plugin-os";
 import type { RouteRecordRaw } from "vue-router";
 
+import { createCommunityProfileChildren } from "./communityProfile.js";
+
 const mainRoutes = (<const>[
   {
     path: "/",
@@ -38,13 +40,17 @@ const mainRoutes = (<const>[
   },
   {
     path: "/community/profile",
-    name: "个人信息",
+    redirect: { name: "个人信息" },
     component: async () => await import("@/pages/common/ComiProf.vue"),
+    meta: { communityProfile: true },
+    children: createCommunityProfileChildren({ parentName: "个人信息" }),
   },
   {
-    path: "/community/profile/:uid",
-    name: "用户信息",
+    path: "/community/profile/:uid(\\d+)",
+    redirect: { name: "用户信息" },
     component: async () => await import("@/pages/common/ComiProf.vue"),
+    meta: { communityProfile: true },
+    children: createCommunityProfileChildren({ parentName: "用户信息" }),
   },
   {
     path: "/community/profile/posts/:postId/edit",

@@ -488,8 +488,6 @@ import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, w
 import { useRoute, useRouter } from "vue-router";
 import { VVirtualScroll } from "vuetify/components/VVirtualScroll";
 
-type ContentSection =
-  "comments" | "collections" | "favorites" | "following" | "followers" | "history";
 type FavoriteTab = "posts" | "collections";
 type SectionInfo = { title: string; description: string; icon: string; empty: string };
 type ContentEntry =
@@ -522,7 +520,16 @@ type ContentPage = {
   total?: number;
 };
 
-const { section, profileUid } = defineProps<{ section: ContentSection; profileUid?: string }>();
+/**
+ * 个人中心内容面板的输入。
+ * @since Beta v0.13.1
+ */
+type ContentProps = {
+  section: TGApp.BBS.Profile.ContentSection;
+  profileUid?: string;
+};
+
+const { section, profileUid } = defineProps<ContentProps>();
 const route = useRoute();
 const router = useRouter();
 const requestedCollectionId = computed<string | undefined>(() =>

@@ -1,6 +1,6 @@
 /**
  * 米游社用户主页导航回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,11 +9,12 @@ const mocks = vi.hoisted(() => ({
   emit: vi.fn(),
   getCurrentWindow: vi.fn(),
   push: vi.fn(),
+  resolve: vi.fn(),
 }));
 
 vi.mock("@tauri-apps/api/event", () => ({ emit: mocks.emit }));
 vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: mocks.getCurrentWindow }));
-vi.mock("@/router/index.js", () => ({ default: { push: mocks.push } }));
+vi.mock("@/router/index.js", () => ({ default: { push: mocks.push, resolve: mocks.resolve } }));
 
 import {
   openCommunityCollection,
@@ -26,8 +27,10 @@ beforeEach(() => {
   mocks.emit.mockReset();
   mocks.getCurrentWindow.mockReset();
   mocks.push.mockReset();
+  mocks.resolve.mockReset();
   mocks.emit.mockResolvedValue(undefined);
   mocks.push.mockResolvedValue(undefined);
+  mocks.resolve.mockReturnValue({ fullPath: "/community/profile/123456789" });
 });
 
 describe("openCommunityProfile", () => {
@@ -68,6 +71,7 @@ describe("openCommunityProfile", () => {
 
   it("emits a deep link from a child window", async () => {
     mocks.getCurrentWindow.mockReturnValue({ label: "post_detail" });
+    mocks.resolve.mockReturnValue({ fullPath: "/community/profile/123456789" });
 
     await openCommunityProfile("123456789");
 
@@ -80,6 +84,7 @@ describe("openCommunityProfile", () => {
 
   it("keeps the source post's game section in a child-window deep link", async () => {
     mocks.getCurrentWindow.mockReturnValue({ label: "post_detail" });
+    mocks.resolve.mockReturnValue({ fullPath: "/community/profile/123456789?gid=3" });
 
     await openCommunityProfile("123456789", 3);
 
@@ -142,10 +147,9 @@ describe("openCommunityCollection", () => {
     await openCommunityCollection(" 123456789 ", " 90071992547409931234567890 ", 3);
 
     expect(mocks.push).toHaveBeenCalledWith({
-      name: "用户信息",
+      name: "用户信息-collections",
       params: { uid: "123456789" },
       query: {
-        section: "collections",
         collection: "90071992547409931234567890",
         gid: "3",
       },
@@ -155,24 +159,30 @@ describe("openCommunityCollection", () => {
 
   it("emits a collection deep link from a child window", async () => {
     mocks.getCurrentWindow.mockReturnValue({ label: "post_detail" });
+    mocks.resolve.mockReturnValue({
+      fullPath: "/community/profile/123456789/collections?collection=17723",
+    });
 
     await openCommunityCollection("123456789", "17723");
 
     expect(mocks.emit).toHaveBeenCalledWith(
       "active_deep_link",
-      "router?path=/community/profile/123456789?section=collections&collection=17723",
+      "router?path=/community/profile/123456789/collections?collection=17723",
     );
     expect(mocks.push).not.toHaveBeenCalled();
   });
 
   it("keeps the source post's game section in a child-window deep link", async () => {
     mocks.getCurrentWindow.mockReturnValue({ label: "post_detail" });
+    mocks.resolve.mockReturnValue({
+      fullPath: "/community/profile/123456789/collections?collection=17723&gid=3",
+    });
 
     await openCommunityCollection("123456789", "17723", 3);
 
     expect(mocks.emit).toHaveBeenCalledWith(
       "active_deep_link",
-      "router?path=/community/profile/123456789?section=collections&collection=17723&gid=3",
+      "router?path=/community/profile/123456789/collections?collection=17723&gid=3",
     );
     expect(mocks.push).not.toHaveBeenCalled();
   });
@@ -185,9 +195,9 @@ describe("openCommunityCollection", () => {
       await openCommunityCollection("123456789", "17723", gameId);
 
       expect(mocks.push).toHaveBeenCalledWith({
-        name: "用户信息",
+        name: "用户信息-collections",
         params: { uid: "123456789" },
-        query: { section: "collections", collection: "17723" },
+        query: { collection: "17723" },
       });
     },
   );

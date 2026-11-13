@@ -1,8 +1,9 @@
 /**
  * 路由入口
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
+import { isCommunityProfileRoute } from "@utils/community/profileRoute.js";
 import { createRouter, createWebHistory } from "vue-router";
 
 import routes from "./routes.js";
@@ -18,13 +19,10 @@ const ignoreRoutes: ReadonlyArray<string> = [
   "角色图鉴",
   "武器图鉴",
   "圣遗物图鉴",
-  "个人信息",
-  "用户信息",
 ];
 
-// TODO:路由重构 解决路由重复问题
 router.afterEach((to, from) => {
-  if (from.name === to.name) {
+  if (from.name === to.name && !isCommunityProfileRoute(to) && !isCommunityProfileRoute(from)) {
     if (from.query !== to.query && ignoreRoutes.includes(from.name?.toString() ?? "")) return;
     window.location.reload();
   }

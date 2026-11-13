@@ -1,12 +1,14 @@
 /**
  * 米游社用户主页导航
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import bbsEnum from "@enum/bbs.js";
 import { emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, ref, shallowRef } from "vue";
+
+import { getCommunityProfileRoute } from "./profileRoute.js";
 
 import router from "@/router/index.js";
 
@@ -42,7 +44,7 @@ function stepProfileTrail(step: -1 | 1): string | undefined {
 
 /**
  * 打开米游社用户主页。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param userId - 米游社用户 ID
  * @param gameId - 帖子所在分区 ID，用于让主页默认展示该分区
  * @returns 导航完成后的 Promise
@@ -51,22 +53,22 @@ async function openCommunityProfile(userId: string, gameId?: number): Promise<vo
   const normalizedUid = userId.trim();
   if (!/^[1-9]\d*$/.test(normalizedUid)) return;
   const gid = gameId !== undefined && Number.isInteger(gameId) && gameId > 0 ? gameId : undefined;
+  const route = getCommunityProfileRoute(
+    "posts",
+    normalizedUid,
+    gid === undefined ? undefined : { gid: gid.toString() },
+  );
 
   if (getCurrentWindow().label === "TeyvatGuide") {
-    await router.push(
-      gid === undefined
-        ? { name: "用户信息", params: { uid: normalizedUid } }
-        : { name: "用户信息", params: { uid: normalizedUid }, query: { gid: gid.toString() } },
-    );
+    await router.push(route);
     return;
   }
-  const suffix = gid === undefined ? "" : `?gid=${gid}`;
-  await emit("active_deep_link", `router?path=/community/profile/${normalizedUid}${suffix}`);
+  await emit("active_deep_link", `router?path=${router.resolve(route).fullPath}`);
 }
 
 /**
  * 打开米游社用户主页中的合集。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param userId - 米游社用户 ID
  * @param collectionId - 米游社合集 ID
  * @param gameId - 帖子所在分区 ID，用于让主页默认展示该分区
@@ -81,23 +83,19 @@ async function openCommunityCollection(
   const normalizedCollectionId = collectionId.trim();
   if (!/^[1-9]\d*$/.test(normalizedUid) || !/^[1-9]\d*$/.test(normalizedCollectionId)) return;
   const gid = gameId !== undefined && Number.isInteger(gameId) && gameId > 0 ? gameId : undefined;
+  const route = getCommunityProfileRoute(
+    "collections",
+    normalizedUid,
+    gid === undefined
+      ? { collection: normalizedCollectionId }
+      : { collection: normalizedCollectionId, gid: gid.toString() },
+  );
 
   if (getCurrentWindow().label === "TeyvatGuide") {
-    await router.push({
-      name: "用户信息",
-      params: { uid: normalizedUid },
-      query:
-        gid === undefined
-          ? { section: "collections", collection: normalizedCollectionId }
-          : { section: "collections", collection: normalizedCollectionId, gid: gid.toString() },
-    });
+    await router.push(route);
     return;
   }
-  const suffix = gid === undefined ? "" : `&gid=${gid}`;
-  await emit(
-    "active_deep_link",
-    `router?path=/community/profile/${normalizedUid}?section=collections&collection=${normalizedCollectionId}${suffix}`,
-  );
+  await emit("active_deep_link", `router?path=${router.resolve(route).fullPath}`);
 }
 
 /**
