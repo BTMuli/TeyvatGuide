@@ -1,6 +1,11 @@
 <!-- 帖子评论与定向回复输入框 -->
 <template>
-  <form aria-label="回复编辑器" class="vpr-composer" @submit.prevent="publishReply">
+  <form
+    aria-label="回复编辑器"
+    class="vpr-composer"
+    :class="{ 'has-context': !!$slots.context }"
+    @submit.prevent="publishReply"
+  >
     <div
       v-if="target && props.showTarget !== false"
       aria-live="polite"
@@ -23,73 +28,24 @@
         @click="cancelReply"
       />
     </div>
-    <div class="vpr-editor">
-      <VpReplyEditor
-        :key="toolContext"
-        ref="replyEditor"
-        v-model="content"
+    <div class="vpr-actions">
+      <VpReplyTools
+        ref="tools"
+        :contextId="toolContext"
+        :cookie="toolCookie"
         :disabled="busy || !canWrite"
-        :label="target ? '回复内容' : '评论内容'"
-        @error="handleEditorError"
+        :gid="props.gid"
+        @custom-emoticon="addCustomEmoticon"
+        @game-uid="addGameUid"
+        @image="addImage"
+        @emoticon="insertEmoticon"
+        @mention="insertMention"
+        @upload-end="handleUploadEnd"
+        @upload-start="handleUploadStart"
       />
-      <div class="vpr-tools-wrap">
-        <VpReplyTools
-          :contextId="toolContext"
-          :cookie="toolCookie"
-          :disabled="busy || !canWrite"
-          :gid="props.gid"
-          @custom-emoticon="addCustomEmoticon"
-          @game-uid="addGameUid"
-          @image="addImage"
-          @emoticon="insertEmoticon"
-          @mention="insertMention"
-        />
+      <div v-if="$slots.context" class="vpr-context">
+        <slot name="context" />
       </div>
-    </div>
-    <div
-      v-if="gameUid || customEmoticon || images.length"
-      aria-label="待发布附件"
-      class="vpr-images"
-      role="list"
-    >
-      <div v-if="gameUid" class="vpr-uid-card" role="listitem">
-        <TpUid :key="gameUid.game_uid" :data="getGameUidPreview()" />
-        <button
-          aria-label="移除 UID 卡片"
-          :disabled="busy || !canWrite"
-          class="vpr-image-remove"
-          type="button"
-          @click="removeGameUid"
-        >
-          <v-icon size="16">mdi-close</v-icon>
-        </button>
-      </div>
-      <div v-if="customEmoticon" class="vpr-image vpr-custom-emoticon" role="listitem">
-        <img alt="待发布收藏表情" :src="customEmoticon.url" />
-        <button
-          aria-label="移除收藏表情"
-          :disabled="busy || !canWrite"
-          class="vpr-image-remove"
-          type="button"
-          @click="removeCustomEmoticon"
-        >
-          <v-icon size="16">mdi-close</v-icon>
-        </button>
-      </div>
-      <div v-for="(image, index) in images" :key="index" class="vpr-image" role="listitem">
-        <img :alt="`待发布图片 ${index + 1}`" :src="image.url" />
-        <button
-          :aria-label="`移除图片 ${index + 1}`"
-          :disabled="busy || !canWrite"
-          class="vpr-image-remove"
-          type="button"
-          @click="images.splice(index, 1)"
-        >
-          <v-icon size="16">mdi-close</v-icon>
-        </button>
-      </div>
-    </div>
-    <div class="vpr-footer">
       <v-btn
         :disabled="!canWrite || !hasContent || busy"
         class="vpr-submit"
@@ -102,10 +58,77 @@
         {{ target ? "回复" : "发布" }}
       </v-btn>
     </div>
+    <div class="vpr-content">
+      <div class="vpr-editor">
+        <VpReplyEditor
+          :key="toolContext"
+          ref="replyEditor"
+          v-model="draft.content"
+          :disabled="busy || !canWrite"
+          :label="target ? '回复内容' : '评论内容'"
+          @error="handleEditorError"
+        />
+      </div>
+      <aside v-if="hasAttachments" aria-label="待发布附件" class="vpr-attachments" role="list">
+        <div v-if="draft.gameUid" class="vpr-uid-card" role="listitem">
+          <TpUid :key="draft.gameUid.game_uid" :data="getGameUidPreview()" />
+          <button
+            aria-label="移除 UID 卡片"
+            :disabled="busy || !canWrite"
+            class="vpr-image-remove"
+            type="button"
+            @click="removeGameUid"
+          >
+            <v-icon size="14">mdi-close</v-icon>
+          </button>
+        </div>
+        <div v-if="draft.customEmoticon" class="vpr-image vpr-custom-emoticon" role="listitem">
+          <img alt="待发布收藏表情" :src="draft.customEmoticon.url" />
+          <button
+            aria-label="移除收藏表情"
+            :disabled="busy || !canWrite"
+            class="vpr-image-remove"
+            type="button"
+            @click="removeCustomEmoticon"
+          >
+            <v-icon size="14">mdi-close</v-icon>
+          </button>
+        </div>
+        <div v-for="(image, index) in draft.images" :key="index" class="vpr-image" role="listitem">
+          <img :alt="`待发布图片 ${index + 1}`" :src="image.url" />
+          <button
+            :aria-label="`移除图片 ${index + 1}`"
+            :disabled="busy || !canWrite"
+            class="vpr-image-remove"
+            type="button"
+            @click="draft.images.splice(index, 1)"
+          >
+            <v-icon size="14">mdi-close</v-icon>
+          </button>
+        </div>
+        <div
+          v-if="imageUploading"
+          aria-label="正在上传图片"
+          class="vpr-image vpr-image-pending"
+          role="listitem"
+        >
+          <v-progress-circular indeterminate size="20" />
+          <button
+            aria-label="取消图片上传"
+            class="vpr-image-remove"
+            type="button"
+            @click="cancelImageUpload"
+          >
+            <v-icon size="14">mdi-close</v-icon>
+          </button>
+        </div>
+      </aside>
+    </div>
   </form>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import { createReplyDraft } from "@hooks/useReplyDraft.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
@@ -131,17 +154,24 @@ type ReplyComposerProps = {
   showTarget?: boolean;
 };
 
+/**
+ * 评论输入框插槽。
+ * @since Beta v0.13.1
+ */
+type ReplyComposerSlots = {
+  /** 与工具栏同行的上下文（回复时间线），提供时工具栏与提交按钮分列两侧 */
+  context?: () => unknown;
+};
+
 const props = defineProps<ReplyComposerProps>();
 const emits = defineEmits<{ cancel: []; published: [] }>();
 const interaction = useReplyInteraction();
 const busy = interaction.busy;
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
-const content = ref<string>("");
-const mentions = ref<Array<TGApp.BBS.ReplyAsset.Mention>>([]);
-const images = ref<Array<TGApp.BBS.ReplyAsset.UploadedImage>>([]);
-const customEmoticon = ref<TGApp.BBS.CustomEmoticon.Value>();
-const gameUid = ref<TGApp.BBS.GameUid.Info>();
+const draft = defineModel<TGApp.BBS.Reply.Draft>("draft", { required: true });
 const replyEditor = useTemplateRef<InstanceType<typeof VpReplyEditor>>("replyEditor");
+const tools = useTemplateRef<{ cancelUpload: () => void }>("tools");
+const imageUploading = ref<boolean>(false);
 const toolContext = ref<number>(0);
 const publishing = ref<boolean>(false);
 let contextVersion = 0;
@@ -149,10 +179,17 @@ let mounted = true;
 
 const hasContent = computed<boolean>(
   () =>
-    !!content.value.trim() ||
-    images.value.length > 0 ||
-    customEmoticon.value !== undefined ||
-    gameUid.value !== undefined,
+    !!draft.value.content.trim() ||
+    draft.value.images.length > 0 ||
+    draft.value.customEmoticon !== undefined ||
+    draft.value.gameUid !== undefined,
+);
+const hasAttachments = computed<boolean>(
+  () =>
+    draft.value.customEmoticon !== undefined ||
+    draft.value.gameUid !== undefined ||
+    draft.value.images.length > 0 ||
+    imageUploading.value,
 );
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
@@ -174,8 +211,8 @@ const accountHint = computed<string>(() => {
   return `当前账号：${briefInfo.value.nickname || "当前账号"}`;
 });
 const gameUidPreview = computed<TGApp.BBS.GameUid.Node | undefined>(() => {
-  if (gameUid.value === undefined) return undefined;
-  return { insert: { game_user_info: gameUid.value } };
+  if (draft.value.gameUid === undefined) return undefined;
+  return { insert: { game_user_info: draft.value.gameUid } };
 });
 
 watch(
@@ -199,7 +236,8 @@ watch(
   () => props.target?.reply.reply_id,
   () => {
     contextVersion += 1;
-    resetDraft();
+    imageUploading.value = false;
+    toolContext.value += 1;
   },
   { flush: "sync" },
 );
@@ -210,11 +248,8 @@ onBeforeUnmount(() => {
 });
 
 function resetDraft(): void {
-  content.value = "";
-  mentions.value = [];
-  images.value = [];
-  customEmoticon.value = undefined;
-  gameUid.value = undefined;
+  draft.value = createReplyDraft();
+  imageUploading.value = false;
   toolContext.value += 1;
 }
 
@@ -247,13 +282,17 @@ function handleEditorError(message: string): void {
 
 async function insertMention(user: TGApp.BBS.ReplyAsset.Mention): Promise<void> {
   if (busy.value || !canWrite.value) return;
-  const previous = mentions.value.find((item) => item.nickname === user.nickname);
-  if (previous && previous.uid !== user.uid && content.value.includes(`@${previous.nickname}`)) {
+  const previous = draft.value.mentions.find((item) => item.nickname === user.nickname);
+  if (
+    previous &&
+    previous.uid !== user.uid &&
+    draft.value.content.includes(`@${previous.nickname}`)
+  ) {
     showSnackbar.warn("该昵称对应的用户已变化，请移除已有提及后重新选择");
     return;
   }
-  mentions.value = [
-    ...mentions.value.filter((item) => item.nickname !== user.nickname),
+  draft.value.mentions = [
+    ...draft.value.mentions.filter((item) => item.nickname !== user.nickname),
     { ...user },
   ];
   await insertText(`@${user.nickname} `);
@@ -261,7 +300,19 @@ async function insertMention(user: TGApp.BBS.ReplyAsset.Mention): Promise<void> 
 
 function addImage(image: TGApp.BBS.ReplyAsset.UploadedImage): void {
   if (busy.value || !canWrite.value) return;
-  images.value.push({ ...image });
+  draft.value.images.push({ ...image });
+}
+
+function handleUploadStart(): void {
+  imageUploading.value = true;
+}
+
+function handleUploadEnd(): void {
+  imageUploading.value = false;
+}
+
+function cancelImageUpload(): void {
+  tools.value?.cancelUpload();
 }
 
 function addCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
@@ -269,7 +320,7 @@ function addCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
   try {
     const parsed = parseCustomEmoticon(value);
     if (parsed.is_available === false) throw new TypeError("自定义表情已失效");
-    customEmoticon.value = parsed;
+    draft.value.customEmoticon = parsed;
   } catch {
     showSnackbar.warn("该收藏表情不可用，请重新选择");
   }
@@ -278,7 +329,7 @@ function addCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
 function addGameUid(value: TGApp.BBS.GameUid.Info): void {
   if (busy.value || !canWrite.value) return;
   try {
-    gameUid.value = validateGameUidInfo(value);
+    draft.value.gameUid = validateGameUidInfo(value);
   } catch {
     showSnackbar.warn("该 UID 卡片不可用，请重新选择游戏账号");
   }
@@ -296,12 +347,12 @@ function getGameUidPreview(): TGApp.BBS.GameUid.Node {
 
 function removeGameUid(): void {
   if (busy.value || !canWrite.value) return;
-  gameUid.value = undefined;
+  draft.value.gameUid = undefined;
 }
 
 function removeCustomEmoticon(): void {
   if (busy.value || !canWrite.value) return;
-  customEmoticon.value = undefined;
+  draft.value.customEmoticon = undefined;
 }
 
 async function publishReply(): Promise<void> {
@@ -321,11 +372,11 @@ async function publishReply(): Promise<void> {
   let document: ReturnType<typeof buildReplyDocument>;
   try {
     document = buildReplyDocument(
-      content.value,
-      mentions.value,
-      images.value,
-      customEmoticon.value,
-      gameUid.value,
+      draft.value.content,
+      draft.value.mentions,
+      draft.value.images,
+      draft.value.customEmoticon,
+      draft.value.gameUid,
     );
   } catch {
     showSnackbar.warn("回复内容无效，请检查后重试");
@@ -339,7 +390,10 @@ async function publishReply(): Promise<void> {
     structuredContent: document.structuredContent,
     replyId: props.target?.reply.reply_id,
   };
-  const requestCookie = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const requestCookie = {
+    ltoken: cookie.value.ltoken,
+    ltuid: cookie.value.ltuid,
+  };
   const title = props.target ? "发布回复" : "发布评论";
   await interaction.run(async () => {
     publishing.value = true;
@@ -375,6 +429,7 @@ async function publishReply(): Promise<void> {
   });
 }
 
+defineSlots<ReplyComposerSlots>();
 defineExpose({ focusEditor });
 </script>
 <style lang="scss" scoped>
@@ -385,16 +440,19 @@ defineExpose({ focusEditor });
   max-height: min(360px, 44vh);
   flex-direction: column;
   flex-shrink: 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
+.vpr-composer.has-context {
+  overflow: visible;
+  max-height: none;
+}
+
 .vpr-target,
-.vpr-editor,
-.vpr-footer {
+.vpr-content,
+.vpr-actions {
   min-width: 0;
 }
 
@@ -434,33 +492,65 @@ defineExpose({ focusEditor });
   flex: 0 0 auto;
 }
 
+.vpr-content {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+
 .vpr-editor {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  min-width: 240px;
+  flex: 1 1 240px;
 }
 
-.vpr-tools-wrap {
-  padding-top: 4px;
-}
-
-.vpr-images {
+.vpr-editor :deep(.vpr-editor-shell) {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.vpr-editor :deep(.vpr-editor.ql-container) {
+  flex: 1 1 auto;
+}
+
+.vpr-editor :deep(.ql-editor) {
+  height: 100%;
+  max-height: 72px;
+}
+
+.vpr-attachments {
+  display: flex;
+  overflow: auto hidden;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  flex: none;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  padding: 12px 12px 0 0;
+  gap: 12px;
+  scrollbar-width: thin;
 }
 
 .vpr-image {
   position: relative;
   width: 72px;
   height: 72px;
+  flex: none;
 }
 
 .vpr-uid-card {
   position: relative;
-  overflow: hidden;
-  width: min(260px, 100%);
+  overflow: visible;
+  width: 240px;
+  max-width: 100%;
   min-height: 72px;
+  flex: none;
   border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
   background: var(--box-bg-4);
@@ -478,6 +568,17 @@ defineExpose({ focusEditor });
   object-fit: cover;
 }
 
+.vpr-image-pending {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-4);
+  color: var(--box-text-4);
+}
+
 .vpr-custom-emoticon img {
   background: var(--box-bg-4);
   object-fit: contain;
@@ -485,22 +586,19 @@ defineExpose({ focusEditor });
 
 .vpr-image-remove {
   position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  width: 24px;
-  height: 24px;
-  border: 0;
-  border-radius: 4px;
-  background: var(--app-page-bg);
-  color: var(--common-text-title);
+  top: -10px;
+  right: -10px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--box-bg-1);
+  border-radius: 50%;
+  background: var(--tgc-od-red);
+  color: var(--tgc-white-1);
   cursor: pointer;
-  place-items: center;
-}
-
-.vpr-uid-card > .vpr-image-remove {
-  right: auto;
-  left: 0;
 }
 
 .vpr-image-remove:focus-visible {
@@ -513,31 +611,53 @@ defineExpose({ focusEditor });
   opacity: 0.45;
 }
 
-.vpr-footer {
+.vpr-image-remove:hover:not(:disabled) {
+  opacity: 0.82;
+}
+
+.vpr-actions {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-top: 4px;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  order: 1;
+  gap: 8px;
+}
+
+.vpr-composer.has-context .vpr-actions {
+  display: grid;
+  align-items: end;
+  order: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px) minmax(0, 1fr);
+}
+
+.vpr-actions :deep(.vprt-tools) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.vpr-context {
+  width: 100%;
+  max-width: 360px;
+  justify-self: center;
 }
 
 .vpr-submit {
   min-width: 92px;
+  flex: none;
   border-radius: 4px;
+  margin-left: auto;
   color: var(--btn-text);
+}
+
+.vpr-composer.has-context .vpr-submit {
+  justify-self: end;
 }
 
 @media (width <= 480px) {
   .vpr-composer {
     max-height: min(340px, 48vh);
-  }
-
-  .vpr-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .vpr-submit {
-    width: 100%;
   }
 }
 </style>

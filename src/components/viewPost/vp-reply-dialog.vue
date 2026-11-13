@@ -1,62 +1,53 @@
 <!-- 回复上下文与编辑对话框 -->
 <template>
-  <v-dialog
-    v-model="visible"
-    :aria-labelledby="titleId"
-    :captureFocus="!busy"
-    :persistent="busy"
-    :retainFocus="!busy"
-    :width="dialogWidth"
-    class="vprd-dialog"
-    eager
-    max-height="calc(100dvh - 48px)"
-    max-width="calc(100vw - 32px)"
-    z-index="80"
-    @after-enter="focusComposer"
-    @after-leave="emits('closed')"
-  >
-    <section class="vprd-panel">
-      <div class="vprd-top">
-        <header class="vprd-header">
-          <h2 :id="titleId" :title="title">{{ title }}</h2>
-          <v-btn
-            :disabled="busy"
-            aria-label="关闭回复编辑器"
-            icon="mdi-close"
-            size="32"
-            title="关闭"
-            variant="text"
-            @click="visible = false"
-          />
-        </header>
-        <section
-          v-if="contextItems.length"
-          aria-label="回复上下文"
-          class="vprd-context"
-          role="region"
-        >
-          <ol ref="contextList" class="vprd-timeline">
-            <li v-for="item in contextItems" :key="item.reply.reply_id">
-              <VpReplyItem :modelValue="item" mode="sub" preview />
-            </li>
-          </ol>
-        </section>
-      </div>
+  <Teleport to="body">
+    <TopOverlay
+      v-model="visible"
+      :closeDisabled="busy"
+      :panelWidth="dialogWidth"
+      :showShare="false"
+      :titleId="titleId"
+      blurVal="10px"
+      closeAriaLabel="关闭回复编辑器"
+      contentMaxHeight="none"
+      panelMaxHeight="calc(100dvh - 48px)"
+      :zIndex="dialogZIndex"
+      @after-enter="focusComposer"
+      @after-leave="emits('closed')"
+    >
+      <template #header>
+        <h2 :id="titleId" :title="title" class="vprd-title">{{ title }}</h2>
+      </template>
       <div class="vprd-editor">
         <VpReplyComposer
+          v-model:draft="draft"
           ref="composer"
           :gid="props.gid"
           :postId="props.postId"
           :showTarget="false"
           :target="props.target"
           @published="emits('published')"
-        />
+        >
+          <template v-if="contextItems.length" #context>
+            <section aria-label="回复上下文" class="vprd-context" role="region">
+              <ol ref="contextList" class="vprd-timeline">
+                <li v-for="item in contextItems" :key="item.reply.reply_id">
+                  <VpReplyItem :modelValue="item" mode="sub" preview />
+                </li>
+              </ol>
+            </section>
+          </template>
+        </VpReplyComposer>
       </div>
-    </section>
-  </v-dialog>
+    </TopOverlay>
+  </Teleport>
 </template>
 <script lang="ts" setup>
+import TopOverlay from "@comp/app/top-overlay.vue";
+import { useReplyDraft } from "@hooks/useReplyDraft.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
+import useUserStore from "@store/user.js";
+import { storeToRefs } from "pinia";
 import { computed, nextTick, useId, useTemplateRef } from "vue";
 
 import VpReplyComposer from "./vp-reply-composer.vue";
@@ -67,16 +58,47 @@ import VpReplyItem from "./vp-reply-item.vue";
  * @since Beta v0.13.0
  */
 type ReplyDialogProps = {
+  /** 帖子 ID */
   postId: string;
+  /** 版块 ID */
   gid: number;
+  /** 当前回复目标 */
   target?: TGApp.BBS.Reply.ReplyFull;
+  /** 回复目标的上层楼中楼 */
   ancestors?: Array<TGApp.BBS.Reply.ReplyFull>;
+};
+
+type ReplyDialogEmits = {
+  /** 关闭动画结束 */
+  closed: [];
+  /** 回复发布成功 */
+  published: [];
 };
 
 const props = defineProps<ReplyDialogProps>();
 const visible = defineModel<boolean>({ required: true });
-const emits = defineEmits<{ closed: []; published: [] }>();
+const emits = defineEmits<ReplyDialogEmits>();
 const { busy } = useReplyInteraction();
+const { uid, cookie } = storeToRefs(useUserStore());
+const draft = useReplyDraft(
+  () => visible.value,
+  () => props.target?.reply.reply_id,
+  () => [
+    props.postId,
+    props.gid,
+    uid.value,
+    cookie.value?.ltoken,
+    cookie.value?.ltuid,
+    cookie.value?.account_id,
+    cookie.value?.cookie_token,
+  ],
+);
+/**
+ * 浮层 z-index。
+ * @remarks 需低于 Vuetify 菜单的全局栈步进：回复列表菜单为 60，其内部菜单从 70 起，
+ * 浮层要高于列表但低于工具栏面板，避免表情/提及面板被浮层遮住。
+ */
+const dialogZIndex = 65;
 const composer = useTemplateRef<InstanceType<typeof VpReplyComposer>>("composer");
 const contextList = useTemplateRef<HTMLOListElement>("contextList");
 const titleId = useId();
@@ -105,44 +127,7 @@ async function focusComposer(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-.vprd-panel {
-  display: flex;
-  overflow: hidden;
-  width: 100%;
-  min-height: 0;
-  max-height: calc(100dvh - 48px);
-  box-sizing: border-box;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.vprd-top {
-  display: flex;
-  overflow: hidden;
-  width: 400px;
-  max-width: 100%;
-  min-height: 0;
-  box-sizing: border-box;
-  flex: 0 1 auto;
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px 8px 0 0;
-  border-bottom: 0;
-  background: var(--box-bg-1);
-  color: var(--app-page-content);
-}
-
-.vprd-header {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  gap: 12px;
-}
-
-.vprd-header h2 {
+.vprd-title {
   overflow: hidden;
   min-width: 0;
   margin: 0;
@@ -158,14 +143,13 @@ async function focusComposer(): Promise<void> {
   display: flex;
   overflow: hidden auto;
   width: 100%;
-  min-height: 0;
+  max-width: 360px;
   max-height: 40dvh;
   box-sizing: border-box;
-  flex: 1 1 auto;
   flex-direction: column;
   align-items: center;
-  padding: 12px 16px;
-  border-top: 1px solid var(--common-shadow-1);
+  padding: 0;
+  margin: 0 auto;
   overscroll-behavior: contain;
 }
 
@@ -206,31 +190,5 @@ async function focusComposer(): Promise<void> {
   min-height: 0;
   box-sizing: border-box;
   flex: none;
-  padding: 12px 16px 16px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 0 0 8px 8px;
-  background: var(--box-bg-1);
-}
-
-.vprd-editor :deep(.vpr-composer) {
-  border-top: 0;
-}
-
-@media (width <= 480px) {
-  .vprd-header,
-  .vprd-context,
-  .vprd-editor {
-    padding: 12px;
-  }
-}
-</style>
-<style lang="scss">
-/* Vuetify 的遮罩由内部节点渲染，需使用全局选择器添加背景模糊 */
-
-.vprd-dialog .v-overlay__scrim {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 32%);
-  opacity: 1;
 }
 </style>

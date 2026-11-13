@@ -137,7 +137,8 @@
         </div>
       </v-menu>
       <button
-        :disabled="disabled || !replyAssetCapabilities.imageUpload"
+        :aria-busy="uploading"
+        :disabled="disabled || !replyAssetCapabilities.imageUpload || uploading"
         aria-label="添加图片"
         :title="replyAssetCapabilities.imageUpload ? '添加图片' : '图片暂不可用'"
         class="vprt-tool"
@@ -261,17 +262,20 @@
             当前分区暂无可用的绑定游戏账号
           </div>
           <div v-else aria-label="当前分区绑定游戏账号列表" class="vprt-game-list">
-            <button
+            <div
               v-for="card in gameUidInfos"
               :key="`${card.game_biz}:${card.game_uid}`"
+              :aria-disabled="disabled || undefined"
               :aria-label="`${card.game_name}，UID ${card.game_uid}，${card.nickname}，${card.region_name}`"
-              :disabled="disabled"
+              :tabindex="disabled ? -1 : 0"
               class="vprt-game-item"
-              type="button"
+              role="button"
               @click="insertGameUid(card)"
+              @keydown.enter.prevent="insertGameUid(card)"
+              @keydown.space.prevent="insertGameUid(card)"
             >
               <TpUid :copyable="false" :data="{ insert: { game_user_info: card } }" />
-            </button>
+            </div>
           </div>
         </div>
       </v-menu>
@@ -284,10 +288,6 @@
         @cancel="clearImagePicker"
         @change="selectImage"
       />
-    </div>
-    <div v-if="uploading" aria-live="polite" class="vprt-status vprt-upload-status" role="status">
-      <span>正在上传图片…</span>
-      <button class="vprt-action" type="button" @click="cancelUpload">取消上传</button>
     </div>
   </div>
 </template>
@@ -331,14 +331,29 @@ type ImagePickerContext = {
  */
 type GameUidCookie = TGApp.App.Account.Cookie;
 
-const props = defineProps<ReplyToolsProps>();
-const emits = defineEmits<{
+/**
+ * 回复工具栏事件。
+ * @since Beta v0.13.1
+ */
+type ReplyToolsEmits = {
+  /** 收藏表情 */
   customEmoticon: [value: TGApp.BBS.CustomEmoticon.Value];
+  /** 表情 */
   emoticon: [emoji: TGApp.BBS.Emoji.Item];
+  /** UID 卡片 */
   gameUid: [value: TGApp.BBS.GameUid.Info];
+  /** 提及用户 */
   mention: [user: TGApp.BBS.ReplyAsset.Mention];
+  /** 图片上传完成 */
   image: [image: TGApp.BBS.ReplyAsset.UploadedImage];
-}>();
+  /** 图片上传开始 */
+  uploadStart: [];
+  /** 图片上传结束 */
+  uploadEnd: [];
+};
+
+const props = defineProps<ReplyToolsProps>();
+const emits = defineEmits<ReplyToolsEmits>();
 const interaction = useReplyInteraction();
 const { gameList } = storeToRefs(useBBSStore());
 const fileInput = useTemplateRef<HTMLInputElement>("fileInput");
@@ -471,6 +486,8 @@ function insertCustomEmoticon(value: TGApp.BBS.CustomEmoticon.Value): void {
 function cancelUpload(): void {
   uploadController?.abort();
 }
+
+defineExpose({ cancelUpload });
 
 function openImagePicker(): void {
   if (props.disabled || !replyAssetCapabilities.imageUpload || !props.cookie) return;
@@ -654,45 +671,52 @@ async function selectImage(event: Event): Promise<void> {
   const version = picker.version;
   const controller = new AbortController();
   let uploaded: TGApp.BBS.ReplyAsset.UploadedImage | undefined;
-  await interaction.run(async () => {
-    uploadController = controller;
-    uploading.value = true;
-    try {
-      const execution = await executeReplyForCurrentAccount(
-        {
-          uid: requestCookie.ltuid,
-          cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
-        },
-        () => replyAssetReq.uploadImage(file, requestCookie, picker.gid, controller.signal),
-      );
-      if (!mounted || version !== contextVersion || controller.signal.aborted) return;
-      if (
-        !execution.allowed ||
-        !matchesCurrentAccount({
-          uid: requestCookie.ltuid,
-          cookie: requestCookie,
-        })
-      ) {
-        showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
-        return;
-      }
-      uploaded = execution.data;
-    } catch (error) {
-      if (mounted && version === contextVersion && !controller.signal.aborted) {
-        showSnackbar.error(
-          error instanceof Error ? error.message : "图片上传失败，请重新选择图片后重试",
+  let uploadStarted = false;
+  try {
+    const started = await interaction.run(async () => {
+      uploadStarted = true;
+      uploadController = controller;
+      uploading.value = true;
+      emits("uploadStart");
+      try {
+        const execution = await executeReplyForCurrentAccount(
+          {
+            uid: requestCookie.ltuid,
+            cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+          },
+          () => replyAssetReq.uploadImage(file, requestCookie, picker.gid, controller.signal),
         );
+        if (!mounted || version !== contextVersion || controller.signal.aborted) return;
+        if (
+          !execution.allowed ||
+          !matchesCurrentAccount({
+            uid: requestCookie.ltuid,
+            cookie: requestCookie,
+          })
+        ) {
+          showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
+          return;
+        }
+        uploaded = execution.data;
+      } catch (error) {
+        if (mounted && version === contextVersion && !controller.signal.aborted) {
+          showSnackbar.error(
+            error instanceof Error ? error.message : "图片上传失败，请重新选择图片后重试",
+          );
+        }
+      } finally {
+        if (uploadController === controller) {
+          uploadController = undefined;
+          uploading.value = false;
+        }
       }
-    } finally {
-      if (uploadController === controller) {
-        uploadController = undefined;
-        uploading.value = false;
-      }
-    }
-  });
-  // 交互锁释放后再通知父组件，父组件会在锁内忽略新增附件。
-  if (uploaded === undefined || !mounted || version !== contextVersion) return;
-  emits("image", uploaded);
+    });
+    if (!started) return;
+    // 交互锁释放后再通知父组件，父组件会在锁内忽略新增附件。
+    if (uploaded !== undefined && mounted && version === contextVersion) emits("image", uploaded);
+  } finally {
+    if (uploadStarted) emits("uploadEnd");
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -700,7 +724,6 @@ async function selectImage(event: Event): Promise<void> {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 8px;
 }
 
 .vprt-toolbar,
@@ -943,15 +966,6 @@ async function selectImage(event: Event): Promise<void> {
   overflow-wrap: anywhere;
 }
 
-.vprt-upload-status {
-  box-sizing: border-box;
-  padding: 8px 12px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 8px;
-  border-left: 3px solid var(--tgc-od-blue);
-  background: var(--box-bg-3);
-}
-
 .vprt-lookup > :first-child {
   min-width: 0;
   flex: 1;
@@ -1001,13 +1015,17 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-tool:disabled,
 .vprt-action:disabled,
 .vprt-series-item:disabled,
-.vprt-emoji:disabled,
-.vprt-game-item:disabled {
+.vprt-emoji:disabled {
   cursor: default;
   opacity: 0.45;
 }
 
-.vprt-game-item:hover:not(:disabled) {
+.vprt-game-item[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.vprt-game-item:hover:not([aria-disabled="true"]) {
   border-color: var(--common-shadow-2);
   background: var(--box-bg-3);
 }

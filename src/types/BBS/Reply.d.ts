@@ -1,6 +1,6 @@
 /**
  * 回复数据类型定义文件
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 declare namespace TGApp.BBS.Reply {
@@ -150,6 +150,23 @@ declare namespace TGApp.BBS.Reply {
     structuredContent: Array<SendNode>;
     /** 用于发布确认的预览文本 */
     preview: string;
+  };
+
+  /**
+   * 当前页面内保留的最近一次回复草稿。
+   * @since Beta v0.13.1
+   */
+  type Draft = {
+    /** 回复正文 */
+    content: string;
+    /** 正文中选择的提及用户 */
+    mentions: Array<TGApp.BBS.ReplyAsset.Mention>;
+    /** 已上传的图片 */
+    images: Array<TGApp.BBS.ReplyAsset.UploadedImage>;
+    /** 收藏表情 */
+    customEmoticon?: TGApp.BBS.CustomEmoticon.Value;
+    /** 游戏 UID 卡片 */
+    gameUid?: TGApp.BBS.GameUid.Info;
   };
 
   /**

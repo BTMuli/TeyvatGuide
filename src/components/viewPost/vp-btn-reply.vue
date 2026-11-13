@@ -30,23 +30,29 @@
       <div aria-label="回复列表与编辑器" class="tpr-main-reply">
         <div class="tpr-main-filter">
           <div class="tpr-title">
-            <button
-              :disabled="writing || loading"
-              aria-label="刷新回复列表"
-              class="tpr-title-copy"
-              type="button"
-              @click="reloadReply"
-            >
-              回复列表
-            </button>
+            <span class="tpr-title-copy">回复列表</span>
             <div class="tpr-title-actions">
+              <v-btn
+                :disabled="writing || loading"
+                :loading
+                aria-label="刷新回复列表"
+                class="tpr-title-action"
+                icon="mdi-refresh"
+                size="32"
+                title="刷新回复列表"
+                type="button"
+                variant="text"
+                @click="reloadReply"
+              />
               <v-btn
                 :disabled="writing"
                 aria-label="关闭回复列表"
-                class="tpr-btn-close"
+                class="tpr-title-action"
                 icon="mdi-close"
                 size="32"
                 title="关闭回复列表"
+                type="button"
+                variant="text"
                 @click="showOverlay = false"
               />
             </div>
@@ -65,19 +71,26 @@
               <v-icon v-else color="var(--tgc-od-white)">mdi-circle</v-icon>
               <span>只看楼主</span>
             </button>
-            <div class="tpr-select">
-              <v-select
-                v-model="orderType"
-                :disabled="writing"
-                :hide-details="true"
-                :items="orderList"
-                density="compact"
-                item-title="label"
-                item-value="value"
-                label="排序方式"
-                variant="outlined"
-              />
-            </div>
+            <v-btn-toggle
+              v-model="orderType"
+              :disabled="writing"
+              aria-label="回复排序方式"
+              class="tpr-order"
+              color="var(--common-text-title)"
+              mandatory
+              variant="outlined"
+            >
+              <v-btn
+                v-for="order in orderList"
+                :key="order.value"
+                :aria-label="order.label"
+                :title="order.label"
+                :value="order.value"
+                type="button"
+              >
+                <v-icon :icon="order.icon" aria-hidden="true" size="18" />
+              </v-btn>
+            </v-btn-toggle>
           </div>
         </div>
         <v-list aria-label="回复列表" class="tpr-reply-list" @scroll="handleListScroll">
@@ -114,6 +127,7 @@
       </div>
     </v-menu>
     <VpReplyDialog
+      :key="replyDraftVersion"
       v-model="showComposer"
       :ancestors="replyAncestors"
       :gid="props.gid"
@@ -150,13 +164,16 @@ type TprMainProps = {
 };
 
 /**
- * 选择项类型
+ * 回复排序选项。
+ * @since Beta v0.13.1
  */
 type SelectItem = {
   /* 文本 */
   label: string;
   /* 值 */
   value: TGApp.BBS.Reply.ReplyOrderTypeEnum;
+  /** 排序按钮图标 */
+  icon: string;
 };
 
 const props = defineProps<TprMainProps>();
@@ -165,16 +182,23 @@ const interaction = createReplyInteraction();
 provide(replyInteractionKey, interaction);
 const writing = interaction.busy;
 
-// 简单封装选项
-const genOrderItem = (order: TGApp.BBS.Reply.ReplyOrderTypeEnum): SelectItem => ({
-  label: bbsEnum.post.replyOrderTypeDesc(order),
-  value: order,
-});
 const orderList: Array<SelectItem> = [
-  bbsEnum.post.replyOrderType.HOT,
-  bbsEnum.post.replyOrderType.LATEST,
-  bbsEnum.post.replyOrderType.OLDEST,
-].map(genOrderItem);
+  {
+    label: bbsEnum.post.replyOrderTypeDesc(bbsEnum.post.replyOrderType.HOT),
+    value: bbsEnum.post.replyOrderType.HOT,
+    icon: "mdi-fire",
+  },
+  {
+    label: bbsEnum.post.replyOrderTypeDesc(bbsEnum.post.replyOrderType.LATEST),
+    value: bbsEnum.post.replyOrderType.LATEST,
+    icon: "mdi-sort-clock-descending-outline",
+  },
+  {
+    label: bbsEnum.post.replyOrderTypeDesc(bbsEnum.post.replyOrderType.OLDEST),
+    value: bbsEnum.post.replyOrderType.OLDEST,
+    icon: "mdi-sort-clock-ascending-outline",
+  },
+];
 
 const pinId = ref<string>("0");
 const postOwnerId = ref<string>("");
@@ -182,6 +206,7 @@ const replyTarget = shallowRef<TGApp.BBS.Reply.ReplyFull>();
 const replyAncestors = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const composerTrigger = useTemplateRef<HTMLButtonElement>("composerTrigger");
 const showComposer = ref<boolean>(false);
+const replyDraftVersion = ref<number>(0);
 const composerFocusOrigin = shallowRef<HTMLElement>();
 let requestVersion = 0;
 const lastId = ref<string>();
@@ -267,6 +292,7 @@ async function reloadReply(): Promise<void> {
 }
 
 function resetReplies(): void {
+  replyDraftVersion.value += 1;
   requestVersion += 1;
   lastId.value = undefined;
   isLast.value = false;
@@ -281,6 +307,7 @@ function openComment(): void {
   rememberComposerFocus();
   replyTarget.value = undefined;
   replyAncestors.value = [];
+  emit("closeReplySub");
   showComposer.value = true;
 }
 
@@ -292,6 +319,7 @@ function selectReply(
   if (!showComposer.value) rememberComposerFocus();
   replyTarget.value = item;
   replyAncestors.value = ancestors;
+  emit("closeReplySub");
   showComposer.value = true;
 }
 
@@ -452,42 +480,30 @@ async function loadReply(): Promise<void> {
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .tpr-title-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  margin-left: auto;
+  gap: 8px;
 }
 
 .tpr-title-copy {
   display: inline-flex;
+  height: 32px;
+  box-sizing: border-box;
   align-items: center;
-  padding: 2px 4px;
-  border: 0;
+  padding: 0 8px;
   border-radius: 4px;
   background: var(--tgc-od-blue);
   color: var(--tgc-white-1);
-  cursor: pointer;
   font-family: var(--font-title);
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
   white-space: nowrap;
-}
-
-.tpr-title-copy:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.tpr-title-copy:focus-visible {
-  outline: 2px solid var(--common-text-title);
-  outline-offset: 2px;
-}
-
-.tpr-title-actions {
-  margin-left: auto;
 }
 
 .tpr-composer-trigger {
@@ -520,8 +536,9 @@ async function loadReply(): Promise<void> {
   }
 }
 
-.tpr-btn-close {
+.tpr-title-action {
   border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -533,9 +550,17 @@ async function loadReply(): Promise<void> {
   justify-content: space-between;
 }
 
-.tpr-select {
-  position: relative;
-  width: 120px;
+.tpr-order.v-btn-toggle {
+  height: 32px;
+  flex: none;
+  border-radius: 4px;
+
+  :deep(.v-btn) {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+  }
 }
 
 .tpr-switch {
@@ -602,11 +627,6 @@ async function loadReply(): Promise<void> {
   .tpr-subtitle {
     flex-wrap: wrap;
     align-items: stretch;
-  }
-
-  .tpr-select {
-    min-width: 120px;
-    flex: 1;
   }
 }
 
