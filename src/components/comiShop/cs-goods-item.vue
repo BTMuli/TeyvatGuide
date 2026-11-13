@@ -13,13 +13,13 @@
       <h2 class="cs-good-title">{{ goods.goods_name }}</h2>
       <div class="cs-price-row">
         <CsGoodsPrice :price="goods.price" />
-        <span class="cs-stock" :title="stockText">
+        <span v-if="status !== 'upcoming'" class="cs-stock" :title="stockText">
           <v-icon aria-hidden="true" size="16">mdi-package-variant-closed</v-icon>
           <span class="cs-sr-only">当前库存</span>
           {{ goods.unlimit ? "∞" : fmtUtil.num(Math.max(0, goods.total)) }}
         </span>
       </div>
-      <CsGoodsBatch :goods nowrap />
+      <CsGoodsBatch :goods class="cs-good-batch" />
     </div>
   </div>
 </template>
@@ -28,6 +28,7 @@
 import CsGoodsBatch from "@comp/comiShop/cs-goods-batch.vue";
 import CsGoodsCover from "@comp/comiShop/cs-goods-cover.vue";
 import CsGoodsPrice from "@comp/comiShop/cs-goods-price.vue";
+import { getShopGoodsStatus } from "@utils/community/shop.js";
 import { getShopStockText, isShopBatchSoldOut } from "@utils/community/shopDisplay.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
@@ -43,6 +44,7 @@ type CsGoodsItemProps = {
 
 const { goods, disabled = false } = defineProps<CsGoodsItemProps>();
 const emit = defineEmits<{ open: [goods: TGApp.BBS.Shop.Goods] }>();
+const status = computed<TGApp.BBS.Shop.GoodsStatus>(() => getShopGoodsStatus(goods));
 const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 const stockText = computed<string>(() => getShopStockText(goods));
 
@@ -84,6 +86,7 @@ function handleOpen(): void {
 .cs-good-body {
   display: flex;
   min-width: 0;
+  flex: 1 1 auto;
   flex-direction: column;
   padding: 16px;
   gap: 8px;
@@ -96,6 +99,7 @@ function handleOpen(): void {
 
 .cs-good-title {
   min-height: 44px;
+  flex: 1 1 auto;
   margin: 0;
   color: inherit;
   font-size: 16px;
@@ -107,9 +111,15 @@ function handleOpen(): void {
 .cs-price-row {
   display: flex;
   min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
+}
+
+.cs-good-batch {
+  max-width: 100%;
+  align-self: flex-end;
+  justify-content: flex-end;
 }
 
 .cs-stock {

@@ -5,7 +5,13 @@
 
 import fmtUtil from "@utils/display/fmtUtil.js";
 
-import { getShopGoodsLimits, getShopGoodsStatus, parseShopTime } from "./shop.js";
+import {
+  getShopGoodsLimits,
+  getShopGoodsRemainingLimit,
+  getShopGoodsStatus,
+  getShopGoodsStock,
+  parseShopTime,
+} from "./shop.js";
 
 /**
  * 商品状态的展示文案。
@@ -49,13 +55,13 @@ export function getShopLimitBadge(goods: TGApp.BBS.Shop.Goods): string {
 }
 
 /**
- * 判断当前批次库存是否售罄，不影响下一批开售状态。
+ * 判断商品是否应展示售罄样式，待开售等状态优先于零库存。
  * @since Beta v0.13.1
  * @param goods - 商品信息
- * @returns 当前批次是否售罄
+ * @returns 最终商品状态是否为售罄
  */
 export function isShopBatchSoldOut(goods: TGApp.BBS.Shop.Goods): boolean {
-  return !goods.unlimit && goods.total <= 0;
+  return getShopGoodsStatus(goods) === "sold-out";
 }
 
 /**
@@ -90,8 +96,14 @@ export function getShopStockText(goods: TGApp.BBS.Shop.Goods): string {
  * 获取商品当前状态的展示文案。
  * @since Beta v0.13.1
  * @param goods - 商品信息
- * @returns 状态文案
+ * @returns 状态文案；可兑换时附带库存与剩余限购允许的最大数量
  */
 export function getShopStatusText(goods: TGApp.BBS.Shop.Goods): string {
-  return shopStatusLabels[getShopGoodsStatus(goods)];
+  const status = getShopGoodsStatus(goods);
+  if (status !== "available") return shopStatusLabels[status];
+  const count = Math.min(
+    getShopGoodsStock(goods) ?? Infinity,
+    getShopGoodsRemainingLimit(goods) ?? Infinity,
+  );
+  return `可兑换 ${Number.isFinite(count) ? fmtUtil.num(count) : "∞"}`;
 }

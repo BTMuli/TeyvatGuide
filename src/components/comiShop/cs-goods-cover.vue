@@ -11,7 +11,6 @@
       >可兑换 {{ limitBadge }}</span
     >
     <span class="cs-good-status">{{ getShopStatusText(goods) }}</span>
-    <span v-if="soldOut" class="cs-sold-out">售罄</span>
   </div>
 </template>
 <script lang="ts" setup>
@@ -32,10 +31,12 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 <style lang="scss" scoped>
 .cs-goods-cover {
   --cs-state-available: #0b4f31ff;
-  --cs-state-upcoming: #644100ff;
+  --cs-state-upcoming: var(--tgc-blue-1);
   --cs-state-limited: #7a2634ff;
   --cs-state-muted: #39424eff;
   --cs-state-color: var(--cs-state-muted);
+  --cs-limit-color: var(--cs-state-color);
+  --cs-state-opacity: 76%;
 
   position: relative;
   overflow: hidden;
@@ -50,6 +51,8 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 
   &[data-status="upcoming"] {
     --cs-state-color: var(--cs-state-upcoming);
+    --cs-limit-color: var(--cs-state-muted);
+    --cs-state-opacity: 100%;
   }
 
   &[data-status="limit-reached"] {
@@ -72,13 +75,11 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 }
 
 .cs-good-limit,
-.cs-good-status,
-.cs-sold-out {
+.cs-good-status {
   position: absolute;
   padding: 4px 8px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  background: color-mix(in srgb, var(--cs-state-color) 76%, transparent);
   color: var(--tgc-white-1);
   font-size: 12px;
   font-weight: 600;
@@ -89,6 +90,7 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 .cs-good-limit {
   top: 0;
   right: 0;
+  background: color-mix(in srgb, var(--cs-limit-color) 76%, transparent);
   border-bottom-left-radius: 8px;
   border-top-right-radius: 8px;
 }
@@ -96,15 +98,8 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 .cs-good-status {
   bottom: 0;
   left: 0;
+  background: color-mix(in srgb, var(--cs-state-color) var(--cs-state-opacity), transparent);
   border-bottom-left-radius: 8px;
   border-top-right-radius: 8px;
-}
-
-.cs-sold-out {
-  right: 0;
-  bottom: 0;
-  background: color-mix(in srgb, var(--cs-state-muted) 76%, transparent);
-  border-bottom-right-radius: 8px;
-  border-top-left-radius: 8px;
 }
 </style>

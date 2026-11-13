@@ -164,8 +164,14 @@ declare namespace TGApp.BBS.Shop {
    * @since Beta v0.13.1
    */
   type RoleOption = {
+    /** 角色选择键 */
     key: string;
+    /** 确认兑换与检索使用的完整说明 */
     label: string;
+    /** 角色昵称，展示在第一行 */
+    nickname: string;
+    /** 按隐私设置处理后的 UID 与区服，展示在第二行 */
+    subtitle: string;
   };
 
   /**

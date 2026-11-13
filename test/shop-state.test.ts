@@ -3,7 +3,7 @@
  * @since Beta v0.13.1
  */
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   buildShopExchangeParams,
@@ -12,6 +12,7 @@ import {
   getShopResponseError,
   parseShopTime,
 } from "../src/utils/community/shop.js";
+import { getShopStatusText, isShopBatchSoldOut } from "../src/utils/community/shopDisplay.js";
 
 const accountCookie: TGApp.App.Account.Cookie = {
   account_id: "398265412",
@@ -116,6 +117,63 @@ describe("shop goods status", () => {
       { scope: "role", type: "forever", limit: 2, used: 2, remaining: 0 },
     ]);
     expect(getShopGoodsStatus(goods)).toBe("limit-reached");
+  });
+});
+
+describe("shop goods display status", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("includes the quantity permitted by stock and remaining limits in the available status", () => {
+    expect(getShopStatusText(createGoods({ total: 5 }))).toBe("可兑换 5");
+    expect(
+      getShopStatusText(
+        createGoods({
+          total: 5,
+          account_cycle_type: "forever",
+          account_cycle_limit: 3,
+          account_exchange_num: 1,
+        }),
+      ),
+    ).toBe("可兑换 2");
+    expect(getShopStatusText(createGoods({ total: 0, unlimit: true }))).toBe("可兑换 ∞");
+  });
+
+  it.each<Partial<TGApp.BBS.Shop.Goods>>([
+    { total: 0, next_num: 5, next_time: 1_900_000_000 },
+    { total: 0, next_num: 0, next_time: 1_900_000_000 },
+    { total: 0, status: "not_in_sell" },
+    { total: 0, start: 1_900_000_000 },
+    { total: 0, sale_start_time: "1900000000" },
+  ])("keeps upcoming zero-stock goods in color with only the upcoming status: %j", (overrides) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_800_000_000_000);
+    const goods = createGoods(overrides);
+
+    expect(getShopGoodsStatus(goods)).toBe("upcoming");
+    expect(getShopStatusText(goods)).toBe("待开售");
+    expect(isShopBatchSoldOut(goods)).toBe(false);
+  });
+
+  it("applies the sold-out presentation only after the last batch is exhausted", () => {
+    const goods = createGoods({ total: 0, next_num: 0, next_time: 0 });
+
+    expect(getShopGoodsStatus(goods)).toBe("sold-out");
+    expect(getShopStatusText(goods)).toBe("已售罄");
+    expect(isShopBatchSoldOut(goods)).toBe(true);
+  });
+
+  it.each<Partial<TGApp.BBS.Shop.Goods>>([
+    { total: 0, unlimit: true },
+    { total: 0, end: 1_700_000_000 },
+    { total: 0, account_cycle_type: "forever", account_cycle_limit: 1, account_exchange_num: 1 },
+    { total: 0, status: "paused" },
+  ])("does not label other zero-stock states as sold out: %j", (overrides) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_800_000_000_000);
+
+    expect(isShopBatchSoldOut(createGoods(overrides))).toBe(false);
   });
 });
 

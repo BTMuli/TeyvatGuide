@@ -17,10 +17,9 @@
       <v-select
         v-if="showRoleSelect"
         v-model="roleKey"
-        :disabled="props.rolesLoading || props.exchanging"
+        :disabled="props.exchanging"
         aria-label="接收道具的角色"
         :items="props.roleOptions"
-        :loading="props.rolesLoading"
         class="cs-role-select"
         density="compact"
         hide-details
@@ -28,7 +27,17 @@
         item-value="key"
         placeholder="选择角色"
         variant="outlined"
-      />
+      >
+        <template #selection="{ item }">
+          <span class="cs-role-selection">
+            <span class="cs-role-selection-name">{{ item.nickname }}</span>
+            <span class="cs-role-selection-subtitle">{{ item.subtitle }}</span>
+          </span>
+        </template>
+        <template #item="{ props: itemProps, item }">
+          <v-list-item v-bind="itemProps" :subtitle="item.subtitle" :title="item.nickname" />
+        </template>
+      </v-select>
       <v-btn
         :disabled="props.exchanging"
         aria-label="关闭商品详情"
@@ -40,37 +49,57 @@
       />
     </template>
     <div class="cs-detail-content">
-      <v-progress-linear v-if="props.loading" aria-label="正在加载商品详情" indeterminate />
-      <p v-if="props.error" class="cs-status is-error" role="alert">{{ props.error }}</p>
       <template v-if="props.goods">
         <div class="cs-detail-summary">
-          <CsGoodsCover :goods="props.goods" class="cs-detail-cover" />
+          <img
+            :class="{ 'is-sold-out': goodsStatus === 'sold-out' }"
+            :src="props.goods.icon"
+            alt=""
+            class="cs-detail-cover"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+          />
           <div class="cs-detail-info">
             <h3>{{ props.goods.goods_name }}</h3>
             <div class="cs-price-row">
               <CsGoodsPrice :price="props.goods.price" suffix=" / 件" />
-              <span :title="stockText" class="cs-stock">
+              <span v-if="showStock" :title="stockText" class="cs-stock">
                 <v-icon aria-hidden="true" size="16">mdi-package-variant-closed</v-icon>
                 <span class="cs-sr-only">当前库存</span>
                 {{ stockCountText }}
               </span>
             </div>
-            <CsGoodsBatch class="cs-detail-batch" :goods="props.goods" />
+            <div class="cs-detail-meta">
+              <span class="cs-detail-state">{{ statusText }}</span>
+              <span v-if="limitBadge" :title="limitText" class="cs-detail-limit">
+                剩余限兑 {{ limitBadge }}
+              </span>
+              <CsGoodsBatch class="cs-detail-batch" :goods="props.goods" />
+            </div>
           </div>
         </div>
 
-        <CsDescription v-if="props.goods.goods_detail" :content="props.goods.goods_detail" />
+        <section
+          v-if="props.goods.goods_detail"
+          aria-label="商品详细说明"
+          class="cs-detail-description"
+          v-html="props.goods.goods_detail"
+        />
 
         <p v-if="props.rolesError" class="cs-status is-warning" role="alert">
-          {{ props.rolesError }}
+          <v-icon aria-hidden="true" class="cs-status-icon" size="18">mdi-alert-outline</v-icon>
+          <span>{{ props.rolesError }}</span>
         </p>
         <p v-if="props.goods.type === 1" class="cs-status is-info">
-          实物商品请前往官方商店填写收货地址。
+          <v-icon aria-hidden="true" class="cs-status-icon" size="18"
+            >mdi-information-outline</v-icon
+          >
+          <span>实物商品请前往官方商店填写收货地址。</span>
         </p>
       </template>
     </div>
     <template #footer>
-      <div class="cs-footer-start">
+      <div class="cs-footer-actions">
         <v-btn
           v-if="props.needsVerification || props.exchangeUncertain || props.goods?.type === 1"
           variant="tonal"
@@ -78,14 +107,13 @@
         >
           前往官方商店
         </v-btn>
-      </div>
-      <div class="cs-footer-actions">
         <v-btn :disabled="props.exchanging" variant="text" @click="open = false">关闭</v-btn>
         <v-btn
           v-if="props.goods && props.goods.type !== 1"
           :disabled="!props.canExchange"
           :loading="props.exchanging"
-          color="primary"
+          class="cs-primary-action"
+          color="var(--tgc-yellow-3)"
           variant="flat"
           @click="emit('exchange')"
         >
@@ -98,11 +126,15 @@
 
 <script lang="ts" setup>
 import TopOverlay from "@comp/app/top-overlay.vue";
-import CsDescription from "@comp/comiShop/cs-description.vue";
 import CsGoodsBatch from "@comp/comiShop/cs-goods-batch.vue";
-import CsGoodsCover from "@comp/comiShop/cs-goods-cover.vue";
 import CsGoodsPrice from "@comp/comiShop/cs-goods-price.vue";
-import { getShopStockText } from "@utils/community/shopDisplay.js";
+import { getShopGoodsStatus } from "@utils/community/shop.js";
+import {
+  getShopLimitBadge,
+  getShopLimitText,
+  getShopStatusText,
+  getShopStockText,
+} from "@utils/community/shopDisplay.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed, useId } from "vue";
 
@@ -113,14 +145,8 @@ import { computed, useId } from "vue";
 type CsGoodsDetailDialogProps = {
   /** 当前商品详情 */
   goods?: TGApp.BBS.Shop.Goods;
-  /** 是否正在加载商品详情 */
-  loading: boolean;
-  /** 商品详情加载错误 */
-  error: string;
   /** 可选游戏角色 */
   roleOptions: Array<TGApp.BBS.Shop.RoleOption>;
-  /** 是否正在加载游戏角色 */
-  rolesLoading: boolean;
   /** 游戏角色加载错误 */
   rolesError: string;
   /** 兑换结果是否未确认 */
@@ -152,6 +178,12 @@ const roleKey = defineModel<string | undefined>("roleKey", { required: true });
 const emit = defineEmits<CsGoodsDetailDialogEmits>();
 const titleId = useId();
 
+const goodsStatus = computed<TGApp.BBS.Shop.GoodsStatus | undefined>(() =>
+  props.goods ? getShopGoodsStatus(props.goods) : undefined,
+);
+const statusText = computed<string>(() => (props.goods ? getShopStatusText(props.goods) : ""));
+const limitBadge = computed<string>(() => (props.goods ? getShopLimitBadge(props.goods) : ""));
+const limitText = computed<string>(() => (props.goods ? getShopLimitText(props.goods) : ""));
 const stockText = computed<string>(() => (props.goods ? getShopStockText(props.goods) : ""));
 const stockCountText = computed<string>(() => {
   const goods = props.goods;
@@ -161,6 +193,7 @@ const stockCountText = computed<string>(() => {
 const showRoleSelect = computed<boolean>(
   () => !!props.goods && props.goods.type !== 1 && props.goods.game !== "bbs",
 );
+const showStock = computed<boolean>(() => !!props.goods && goodsStatus.value !== "upcoming");
 </script>
 
 <style lang="scss" scoped>
@@ -183,7 +216,36 @@ const showRoleSelect = computed<boolean>(
   line-height: 28px;
 }
 
+.cs-detail-description {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  color: var(--app-page-content);
+  font-size: 14px;
+  gap: 12px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+
+  :deep(img),
+  :deep(video),
+  :deep(table) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  :deep(p) {
+    margin: 0;
+  }
+}
+
 .cs-status {
+  display: flex;
+  align-items: flex-start;
   padding: 8px 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
@@ -191,6 +253,7 @@ const showRoleSelect = computed<boolean>(
   background: var(--box-bg-2);
   color: var(--box-text-2);
   font-size: 13px;
+  gap: 8px;
   line-height: 20px;
   overflow-wrap: anywhere;
 
@@ -203,35 +266,51 @@ const showRoleSelect = computed<boolean>(
   }
 }
 
-.cs-footer-start,
-.cs-footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.cs-status-icon {
+  flex-shrink: 0;
+}
+
+.cs-status > span {
+  min-width: 0;
+  flex: 1;
 }
 
 .cs-footer-actions {
-  margin-left: auto;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .cs-detail-summary {
   display: grid;
   align-items: start;
   gap: 16px;
-  grid-template-columns: 144px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
 }
 
 .cs-detail-cover {
-  width: 144px;
-  height: 144px;
+  width: 112px;
+  height: 112px;
   border-radius: 8px;
+  object-fit: contain;
+
+  &.is-sold-out {
+    filter: grayscale(1);
+    opacity: 0.72;
+  }
 }
 
 .cs-detail-info {
+  display: flex;
   min-width: 0;
+  flex-direction: column;
+  gap: 8px;
 
   h3 {
-    margin: 0 0 8px;
+    margin: 0;
     color: var(--common-text-title);
     font-size: 18px;
     line-height: 24px;
@@ -246,14 +325,33 @@ const showRoleSelect = computed<boolean>(
   gap: 12px;
 }
 
+.cs-detail-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  gap: 8px 12px;
+  line-height: 20px;
+}
+
+.cs-detail-state {
+  color: var(--common-text-title);
+  font-weight: 600;
+}
+
+.cs-detail-limit {
+  color: var(--app-page-content);
+}
+
 .cs-detail-batch {
-  margin-top: 8px;
+  flex: 1 1 auto;
+  justify-content: flex-end;
 }
 
 .cs-stock {
   display: inline-flex;
   align-items: center;
-  margin-left: auto;
   color: var(--app-page-content);
   font-size: 13px;
   gap: 4px;
@@ -261,8 +359,65 @@ const showRoleSelect = computed<boolean>(
 }
 
 .cs-role-select {
-  width: 220px;
-  flex: none;
+  width: clamp(132px, 38vw, 320px);
+  max-width: calc(100vw - 132px);
+
+  :deep(.v-field) {
+    background: var(--box-bg-1);
+  }
+
+  :deep(.v-field__input) {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  :deep(.v-select__selection) {
+    display: flex;
+    overflow: visible;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  :deep(.v-list-item-title),
+  :deep(.v-list-item-subtitle) {
+    overflow: visible;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
+.cs-role-selection {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cs-role-selection-name {
+  min-width: 0;
+  color: var(--app-page-content);
+  font-size: 14px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.cs-role-selection-subtitle {
+  min-width: 0;
+  color: var(--app-page-content);
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0.7;
+  overflow-wrap: anywhere;
+}
+
+.cs-primary-action {
+  color: var(--tgc-dark-2);
+
+  &:disabled {
+    background: var(--box-bg-3);
+    color: var(--box-text-2);
+  }
 }
 
 .cs-sr-only {
@@ -283,13 +438,11 @@ const showRoleSelect = computed<boolean>(
   }
 
   .cs-role-select {
-    width: 160px;
+    width: min(38vw, calc(100vw - 160px));
+    max-width: calc(100vw - 160px);
   }
 
   .cs-detail-cover {
-    width: min(100%, 240px);
-    max-width: 240px;
-    height: auto;
     justify-self: center;
   }
 }
