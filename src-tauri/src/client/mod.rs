@@ -1,5 +1,5 @@
 //! 客户端模块，负责操作米游社客户端
-//! @since Beta v0.13.0
+//! @since Beta v0.13.1
 
 mod menu;
 mod utils;
@@ -9,7 +9,7 @@ use tauri::{AppHandle, LogicalSize, Manager, Size, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 use url::Url;
 
-static BBS_VERSION: &'static str = "2.117.0";
+static BBS_VERSION: &'static str = "2.119.0";
 
 /// 创建或复用米游社客户端 WebView 窗口。
 ///

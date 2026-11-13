@@ -1,11 +1,11 @@
 /**
  * 关于 BBS 的工具函数
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import bbsEnum from "@enum/bbs.js";
 
-const BBS_VERSION: Readonly<string> = "2.117.0";
+const BBS_VERSION: Readonly<string> = "2.119.0";
 /**
  * 合集接口网页端版本号
  * @since Beta v0.13.0
@@ -23,12 +23,12 @@ const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) m
 
 /**
  * salt 值
- * @since Beta v0.13.0
- * @remarks 2.117.0
+ * @since Beta v0.13.1
+ * @remarks 2.119.0
  */
 const BBS_SALT: Readonly<Record<TGApp.BBS.Auth.SaltKeyEnum, string>> = {
-  [bbsEnum.saltKey.K2]: "9c7b896d7483e9070b27c55f1959c4d5",
-  [bbsEnum.saltKey.LK2]: "4751cb5557bfad5e249e58462c39fb0a",
+  [bbsEnum.saltKey.K2]: "24cf11fb14a84f0683e7cadf7c788ba2",
+  [bbsEnum.saltKey.LK2]: "8fb73233f73e200aa1f818b5705d4442",
   [bbsEnum.saltKey.X4]: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
   [bbsEnum.saltKey.X6]: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   [bbsEnum.saltKey.PROD]: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
