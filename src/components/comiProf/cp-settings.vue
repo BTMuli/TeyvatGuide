@@ -211,6 +211,7 @@
         :currentCrop="avatarDraft.crop"
         :currentCustomSource="avatarDraft.sourceFile"
         :currentId="avatarDraft.id"
+        :currentUrl="avatarDraft.url"
         :disabled="saving || !canWriteProfile || isAvatarInAudit"
         :dynamicAvatars="dynamicAvatars"
         :dynamicError="dynamicError"
@@ -247,9 +248,9 @@
 </template>
 
 <script lang="ts" setup>
-import CpAvatarPicker from "@comp/communityProfile/cp-avatar-picker.vue";
-import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
-import CpPendantPicker from "@comp/communityProfile/cp-pendant-picker.vue";
+import CpAvatarPicker from "@comp/comiProf/cp-avatar-picker.vue";
+import CpAvatar from "@comp/comiProf/cp-avatar.vue";
+import CpPendantPicker from "@comp/comiProf/cp-pendant-picker.vue";
 import showDialog from "@comp/func/dialog.js";
 import bbsEnum from "@enum/bbs.js";
 import communitySettingsReq, {

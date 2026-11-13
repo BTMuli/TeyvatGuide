@@ -1,106 +1,60 @@
 <!-- 米游社合集排序对话框 -->
 <template>
-  <v-dialog
+  <TopOverlay
     v-model="visible"
-    :aria-labelledby="titleId"
-    class="cpcs-dialog"
-    eager
-    max-height="calc(100dvh - 48px)"
-    max-width="calc(100vw - 32px)"
-    :persistent="props.saving"
-    :width="600"
-    z-index="80"
+    :closeDisabled="props.saving"
+    :showShare="false"
+    :titleId="titleId"
+    blurVal="10px"
+    closeAriaLabel="关闭合集排序"
+    contentMaxHeight="none"
+    panelMaxHeight="calc(100dvh - 48px)"
+    panelWidth="600px"
   >
-    <section class="cpcs-panel">
-      <header class="cpcs-header">
-        <div class="cpcs-heading">
-          <h2 :id="titleId">调整合集排序</h2>
-          <p>拖动合集或使用上下按钮调整显示顺序，保存后立即生效。</p>
-        </div>
-        <v-btn
-          aria-label="关闭合集排序"
-          :disabled="props.saving"
-          icon="mdi-close"
-          size="32"
-          title="关闭"
-          type="button"
-          variant="text"
-          @click="visible = false"
-        />
-      </header>
-
-      <div ref="bodyRef" class="cpcs-body">
-        <ol v-if="items.length > 0" ref="listRef" aria-label="合集排序列表" class="cpcs-list">
-          <TransitionGroup name="cpcs">
-            <li
-              v-for="(item, index) in items"
-              :key="item.id"
-              :class="{
-                'is-dragging': dragIndex === index,
-                'is-drop-before': dropIndex === index && !dropAfter,
-                'is-drop-after': dropIndex === index && dropAfter,
-              }"
-              class="cpcs-item"
-              @lostpointercapture="handlePointerCancel"
-              @pointercancel="handlePointerCancel"
-              @pointerdown="handlePointerDown(index, $event)"
-              @pointermove="handlePointerMove"
-              @pointerup="handlePointerUp"
-            >
-              <span aria-hidden="true" class="cpcs-handle">
-                <v-icon size="18">mdi-drag-vertical</v-icon>
-              </span>
-              <span aria-hidden="true" class="cpcs-order">{{ index + 1 }}</span>
-              <span class="cpcs-cover">
-                <TMiImg
-                  v-if="item.cover"
-                  :alt="`${item.title}封面`"
-                  :src="item.cover"
-                  draggable="false"
-                />
-                <v-icon v-else aria-hidden="true" size="24">mdi-folder-outline</v-icon>
-              </span>
-              <span class="cpcs-content">
-                <span class="cpcs-title"><TpTitle :text="item.title" /></span>
-                <span class="cpcs-meta">{{ fmtUtil.num(item.post_num) }} 篇帖子</span>
-              </span>
-              <span class="cpcs-actions">
-                <v-btn
-                  :aria-label="`上移${item.title}`"
-                  :disabled="props.saving || index === 0"
-                  icon="mdi-arrow-up"
-                  size="x-small"
-                  title="上移"
-                  type="button"
-                  variant="text"
-                  @click="moveItem(index, -1)"
-                />
-                <v-btn
-                  :aria-label="`下移${item.title}`"
-                  :disabled="props.saving || index === items.length - 1"
-                  icon="mdi-arrow-down"
-                  size="x-small"
-                  title="下移"
-                  type="button"
-                  variant="text"
-                  @click="moveItem(index, 1)"
-                />
-              </span>
-            </li>
-          </TransitionGroup>
-        </ol>
-        <div v-else class="cpcs-state" role="status">
-          <v-icon size="32">mdi-folder-open-outline</v-icon>
-          <p>暂无可排序的合集</p>
-        </div>
+    <template #header>
+      <div class="cpcs-heading">
+        <h2 :id="titleId">调整合集排序</h2>
+        <p>拖动合集或使用上下按钮调整显示顺序，保存后立即生效。</p>
       </div>
+    </template>
 
-      <div v-if="props.error" aria-live="assertive" class="cpcs-error" role="alert">
-        <v-icon size="18">mdi-alert-circle-outline</v-icon>
-        <span>{{ props.error }}</span>
-      </div>
+    <div ref="bodyRef" class="cpcs-body">
+      <ol v-if="items.length > 0" ref="listRef" aria-label="合集排序列表" class="cpcs-list">
+        <TransitionGroup name="cpcs">
+          <CpCollectionSortItem
+            v-for="(item, index) in items"
+            :key="item.id"
+            :disabled="props.saving"
+            :dragging="dragIndex === index"
+            :drop-after="dropIndex === index && dropAfter"
+            :drop-before="dropIndex === index && !dropAfter"
+            :index
+            :item
+            :total="items.length"
+            @lostpointercapture="handlePointerCancel"
+            @move="moveItem(index, $event)"
+            @pointercancel="handlePointerCancel"
+            @pointerdown="handlePointerDown(index, $event)"
+            @pointermove="handlePointerMove"
+            @pointerup="handlePointerUp"
+          />
+        </TransitionGroup>
+      </ol>
+      <TStatePanel
+        v-else
+        icon="mdi-folder-open-outline"
+        message="暂无可排序的合集"
+        variant="empty"
+      />
+    </div>
 
-      <footer class="cpcs-footer">
+    <div v-if="props.error" aria-live="assertive" class="cpcs-error" role="alert">
+      <v-icon size="18">mdi-alert-circle-outline</v-icon>
+      <span>{{ props.error }}</span>
+    </div>
+
+    <template #footer>
+      <div class="cpcs-footer-actions">
         <v-btn :disabled="props.saving" type="button" variant="text" @click="visible = false">
           取消
         </v-btn>
@@ -114,15 +68,15 @@
         >
           保存排序
         </v-btn>
-      </footer>
-    </section>
-  </v-dialog>
+      </div>
+    </template>
+  </TopOverlay>
 </template>
 
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
-import TpTitle from "@comp/viewPost/tp-title.vue";
-import fmtUtil from "@utils/display/fmtUtil.js";
+import TStatePanel from "@comp/app/t-state-panel.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
+import CpCollectionSortItem from "@comp/comiProf/cp-collection-sort-item.vue";
 import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 /**
@@ -250,6 +204,7 @@ function handlePointerDown(index: number, event: PointerEvent): void {
   if (props.saving || event.button !== 0 || !event.isPrimary) return;
   const target = event.target;
   if (!(target instanceof Element) || target.closest("button") !== null) return;
+  if (event.pointerType !== "mouse" && target.closest(".cpcs-handle") === null) return;
   const item = event.currentTarget;
   if (!(item instanceof HTMLElement)) return;
   event.preventDefault();
@@ -335,27 +290,13 @@ function handleSave(): void {
 </script>
 
 <style lang="scss" scoped>
-.cpcs-panel {
-  display: flex;
-  overflow: hidden;
-  width: 100%;
-  max-height: calc(100dvh - 48px);
-  box-sizing: border-box;
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 12px;
-  background: var(--box-bg-1);
-  color: var(--app-page-content);
-}
+@use "@styles/utils.scss" as utils;
 
-.cpcs-header {
+.cpcs-heading {
   display: flex;
-  flex: none;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  gap: 16px;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
 
   h2 {
     margin: 0;
@@ -373,18 +314,10 @@ function handleSave(): void {
   }
 }
 
-.cpcs-heading {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .cpcs-body {
   min-height: 0;
+  max-height: min(56dvh, 520px);
   box-sizing: border-box;
-  flex: 1 1 auto;
-  padding: 12px 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -398,60 +331,13 @@ function handleSave(): void {
   list-style: none;
 }
 
-.cpcs-item {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-2);
-  cursor: grab;
-  gap: 12px;
-  transition:
-    border-color 120ms ease,
-    background-color 120ms ease;
-  user-select: none;
-
-  &:hover {
-    background: var(--box-bg-3);
-  }
-
-  &.is-dragging {
-    border-style: dashed;
-    cursor: grabbing;
-    opacity: 0.45;
-  }
-
-  &.is-drop-before::before,
-  &.is-drop-after::after {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--common-text-title);
-    content: "";
-    pointer-events: none;
-  }
-
-  &.is-drop-before::before {
-    top: -5px;
-  }
-
-  &.is-drop-after::after {
-    bottom: -5px;
-  }
-}
-
 .cpcs-move {
   transition: transform 200ms ease;
 }
 
 .cpcs-ghost {
   position: fixed;
-  z-index: 90; /* 需高于 v-dialog 的 z-index 80 */
+  z-index: 120; /* 需高于 TopOverlay 的 z-index 100 */
   top: 0;
   left: 0;
   box-sizing: border-box;
@@ -465,107 +351,11 @@ function handleSave(): void {
   box-shadow: 0 8px 24px var(--common-shadow-t-4);
 }
 
-.cpcs-handle {
-  display: flex;
-  flex: none;
-  align-items: center;
-  color: var(--box-text-4);
-}
-
-.cpcs-order {
-  display: flex;
-  width: 24px;
-  height: 24px;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--box-bg-3);
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 24px;
-}
-
-.cpcs-item:hover .cpcs-order {
-  background: var(--box-bg-1);
-}
-
-.dark .cpcs-item:hover .cpcs-order {
-  background: var(--box-bg-4);
-}
-
-.cpcs-cover {
-  display: flex;
-  overflow: hidden;
-  width: 48px;
-  height: 48px;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  background: var(--box-bg-1);
-  color: var(--box-text-4);
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.cpcs-content {
-  display: flex;
-  min-width: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.cpcs-title {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 15px;
-  font-weight: normal;
-  overflow-wrap: anywhere;
-}
-
-.cpcs-meta {
-  color: var(--box-text-4);
-  font-size: 12px;
-}
-
-.cpcs-actions {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 2px;
-
-  :deep(.v-btn) {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-.cpcs-state {
-  display: flex;
-  min-height: 160px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--box-text-4);
-  gap: 8px;
-  text-align: center;
-
-  p {
-    margin: 0;
-  }
-}
-
 .cpcs-error {
   display: flex;
   flex: none;
   align-items: flex-start;
-  padding: 8px 16px;
+  padding: 8px 0 0;
   border-top: 1px solid var(--common-shadow-1);
   color: var(--tgc-od-red);
   font-size: 12px;
@@ -578,46 +368,11 @@ function handleSave(): void {
   }
 }
 
-.cpcs-footer {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 12px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 8px;
+.cpcs-footer-actions {
+  @include utils.overlay-footer-actions;
 }
 
 .cpcs-confirm {
-  border-radius: 4px;
-  background: var(--box-bg-3);
-  color: var(--box-text-4);
-
-  &:enabled {
-    background: var(--common-text-title);
-    color: var(--app-page-bg);
-  }
-}
-
-@media (width <= 640px) {
-  .cpcs-header,
-  .cpcs-body,
-  .cpcs-footer {
-    padding: 12px;
-  }
-
-  .cpcs-item {
-    gap: 8px;
-  }
-}
-</style>
-<style lang="scss">
-/* Vuetify 的遮罩由内部节点渲染，需使用全局选择器添加背景模糊 */
-
-.cpcs-dialog .v-overlay__scrim {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  background: rgb(0 0 0 / 32%);
-  opacity: 1;
+  @include utils.overlay-confirm-button;
 }
 </style>

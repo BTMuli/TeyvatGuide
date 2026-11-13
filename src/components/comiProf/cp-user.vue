@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts" setup>
-import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
+import CpAvatar from "@comp/comiProf/cp-avatar.vue";
 import { computed } from "vue";
 
 type CpUserProps = {

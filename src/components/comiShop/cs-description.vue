@@ -1,6 +1,6 @@
 <template>
   <iframe
-    class="shop-description"
+    class="cs-description"
     :srcdoc="documentHtml"
     referrerpolicy="no-referrer"
     sandbox=""
@@ -28,7 +28,7 @@ p { margin: 0 0 12px; }
 </script>
 
 <style lang="scss" scoped>
-.shop-description {
+.cs-description {
   width: 100%;
   height: 320px;
   border: 1px solid var(--common-shadow-1);

@@ -51,7 +51,7 @@
         </v-btn>
       </div>
       <div v-if="goods.length" :aria-busy="loading" class="shop-grid">
-        <ShopGoodsItem
+        <CsGoodsItem
           v-for="item in goods"
           :key="item.goods_id"
           :disabled="exchanging"
@@ -74,16 +74,12 @@
       </footer>
     </section>
 
-    <ShopGoodsDetailDialog
+    <CsGoodsDetailDialog
       v-model="detailOpen"
       v-model:roleKey="roleKey"
-      :accountName="briefInfo.nickname"
-      :accountUid="uid"
       :canExchange
       :error="detailError"
       :exchangeButtonText
-      :exchangeMessage
-      :exchangeSucceeded
       :exchangeUncertain
       :exchanging
       :goods="detail"
@@ -96,34 +92,20 @@
       @official="openOfficial"
     />
 
-    <v-dialog v-model="confirmOpen" :persistent="exchanging" max-width="440">
-      <v-card v-if="pendingExchange" class="shop-dialog" rounded="lg">
-        <v-card-title>确认兑换</v-card-title>
-        <v-card-text>
-          <p>{{ pendingExchange.goods.goods_name }} × 1</p>
-          <p class="shop-good-price">
-            花费
-            <img alt="米游币" src="/UI/app/miyou-coin.webp" />
-            {{ fmtUtil.num(pendingExchange.goods.price) }}
-          </p>
-          <p>接收账号：{{ pendingExchange.recipient }}</p>
-          <p>请确认商品和接收账号后兑换。</p>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn :disabled="exchanging" variant="text" @click="confirmOpen = false">取消</v-btn>
-          <v-btn :loading="exchanging" color="primary" variant="flat" @click="exchange">
-            确认兑换
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <CsExchangeConfirm
+      v-model="confirmOpen"
+      :exchanging
+      :goods="pendingExchange?.goods"
+      :recipient="pendingExchange?.recipient ?? ''"
+      @confirm="exchange"
+    />
   </main>
 </template>
 
 <script lang="ts" setup>
-import ShopGoodsDetailDialog from "@comp/communityShop/shop-goods-detail-dialog.vue";
-import ShopGoodsItem from "@comp/communityShop/shop-goods-item.vue";
+import CsExchangeConfirm from "@comp/comiShop/cs-exchange-confirm.vue";
+import CsGoodsDetailDialog from "@comp/comiShop/cs-goods-detail-dialog.vue";
+import CsGoodsItem from "@comp/comiShop/cs-goods-item.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import shopReq from "@req/shopReq.js";
 import takumiReq from "@req/takumiReq.js";
@@ -210,7 +192,6 @@ const uncertainGoods = ref<Array<string>>([]);
 const exchangeUncertain = computed<boolean>(
   () => !!detail.value && uncertainGoods.value.includes(`${uid.value}:${detail.value.goods_id}`),
 );
-const exchangeMessage = ref<string>("");
 const exchangeSucceeded = ref<boolean>(false);
 let sessionVersion = 0;
 let listVersion = 0;
@@ -338,7 +319,6 @@ async function openDetail(item: TGApp.BBS.Shop.Goods): Promise<void> {
   detailError.value = "";
   rolesError.value = "";
   rolesLoading.value = false;
-  exchangeMessage.value = "";
   exchangeSucceeded.value = false;
   detailOpen.value = true;
   detailLoading.value = true;
@@ -377,7 +357,7 @@ function prepareExchange(): void {
   const snapshot = getSnapshot();
   if (!snapshot || !detail.value || !canExchange.value) return;
   if (!matchesCurrentAccount(snapshot)) {
-    exchangeMessage.value = "登录账号已变更，请刷新商店后重新选择商品。";
+    showSnackbar.error("登录账号已变更，请刷新商店后重新选择商品。");
     return;
   }
   const role = selectedRole.value;
@@ -399,11 +379,10 @@ async function exchange(): Promise<void> {
   const { snapshot } = pending;
   if (!isCurrent(snapshot) || !matchesCurrentAccount(snapshot) || !canExchange.value) {
     confirmOpen.value = false;
-    exchangeMessage.value = "账号或商品状态已变更，请刷新后重新选择。";
+    showSnackbar.error("账号或商品状态已变更，请刷新后重新选择。");
     return;
   }
   exchanging.value = true;
-  exchangeMessage.value = "";
   let responseReceived = false;
   let requestSent = false;
   try {
@@ -414,18 +393,19 @@ async function exchange(): Promise<void> {
     if (!isCurrent(snapshot) || !matchesCurrentAccount(snapshot)) return;
     checkResponse(response);
     exchangeSucceeded.value = true;
-    exchangeMessage.value = `兑换成功，订单号：${response.data.order_sn}`;
-    showSnackbar.success("兑换成功");
+    showSnackbar.success(`兑换成功，订单号：${response.data.order_sn}`, 3000);
     await refresh();
   } catch (error) {
     if (requestSent && !responseReceived) {
       uncertainGoods.value = [...uncertainGoods.value, `${snapshot.uid}:${pending.goods.goods_id}`];
     }
     if (isCurrent(snapshot)) {
+      const uncertain = exchangeUncertain.value;
       const message = TGHttps.getErrMsg(error);
-      exchangeMessage.value = exchangeUncertain.value
-        ? `${message} 请求结果未确认，请先到官方商店核对兑换记录。`
-        : message;
+      showSnackbar.error(
+        uncertain ? `${message} 请求结果未确认，请先到官方商店核对兑换记录。` : message,
+        uncertain ? 3000 : undefined,
+      );
       await Promise.all([loadPoint(), loadGoods(false)]);
     }
   } finally {
@@ -607,38 +587,6 @@ onBeforeUnmount(() => {
 .shop-pagination {
   padding: 24px 0;
   text-align: center;
-}
-
-.shop-dialog {
-  background: var(--app-page-bg);
-  color: var(--app-page-content);
-
-  :deep(.v-card-text) {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  p {
-    margin: 0;
-    overflow-wrap: anywhere;
-  }
-}
-
-.shop-good-price {
-  display: inline-flex;
-  align-items: center;
-  color: var(--common-text-title);
-  font-size: 18px;
-  font-weight: 600;
-  gap: 6px;
-  line-height: 24px;
-
-  img {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-  }
 }
 
 @media (width <= 640px) {

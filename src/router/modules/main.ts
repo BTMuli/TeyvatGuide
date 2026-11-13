@@ -39,12 +39,12 @@ const mainRoutes = (<const>[
   {
     path: "/community/profile",
     name: "个人信息",
-    component: async () => await import("@/pages/common/CommunityProfile.vue"),
+    component: async () => await import("@/pages/common/ComiProf.vue"),
   },
   {
     path: "/community/profile/:uid",
     name: "用户信息",
-    component: async () => await import("@/pages/common/CommunityProfile.vue"),
+    component: async () => await import("@/pages/common/ComiProf.vue"),
   },
   {
     path: "/community/profile/posts/:postId/edit",
@@ -54,7 +54,7 @@ const mainRoutes = (<const>[
   {
     path: "/community/shop",
     name: "米社商店",
-    component: async () => await import("@/pages/common/CommunityShop.vue"),
+    component: async () => await import("@/pages/common/ComiShop.vue"),
   },
   {
     path: "/achievements/:app?",

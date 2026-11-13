@@ -23,13 +23,48 @@
               {{ fmtUtil.num(historyTotal || entries.length) }}
             </span>
             <v-btn
-              v-if="section === 'history' && entries.length && !historySelectMode"
-              class="cp-content-manage"
-              size="small"
+              v-if="section === 'history'"
+              :aria-pressed="incognito"
+              :class="['cp-history-action', 'cp-history-incognito', { 'is-active': incognito }]"
+              :disabled="switchingIncognito || deletingHistory"
+              :icon="incognito ? 'mdi-incognito' : 'mdi-incognito-off'"
+              :loading="switchingIncognito"
+              :title="
+                incognito
+                  ? '无痕浏览已开启，点击关闭并记录浏览历史'
+                  : '无痕浏览已关闭，点击开启以停止记录浏览历史'
+              "
+              aria-label="无痕浏览"
+              size="24"
+              type="button"
               variant="text"
-              @click="enterHistorySelect"
-              >管理</v-btn
-            >
+              @click="switchIncognito"
+            />
+            <template v-if="section === 'history' && entries.length && !historySelectMode">
+              <v-btn
+                :disabled="deletingHistory"
+                aria-label="管理浏览历史"
+                class="cp-history-action cp-content-manage"
+                icon="mdi-playlist-edit"
+                size="24"
+                title="管理浏览历史"
+                type="button"
+                variant="text"
+                @click="enterHistorySelect"
+              />
+              <v-btn
+                :disabled="deletingHistory"
+                :loading="deletingHistory"
+                aria-label="清空浏览历史"
+                class="cp-history-action cp-history-delete"
+                icon="mdi-delete-sweep-outline"
+                size="24"
+                title="清空浏览历史"
+                type="button"
+                variant="text"
+                @click="clearHistory"
+              />
+            </template>
           </h2>
           <p>{{ selectedCollection ? selectedCollection.desc : sectionInfo.description }}</p>
         </div>
@@ -66,7 +101,10 @@
           >取消收藏</v-btn
         >
       </div>
-      <div v-else-if="section === 'history' && entries.length" class="cp-content-actions">
+      <div
+        v-else-if="section === 'history' && entries.length"
+        class="cp-content-actions cp-history-actions"
+      >
         <template v-if="historySelectMode">
           <span aria-live="polite" class="cp-content-count">
             已选择 {{ fmtUtil.num(historySelectedCount) }} 条
@@ -81,7 +119,7 @@
             "
             :title="historySelectAll ? '取消全选' : '全选'"
             class="cp-history-action"
-            size="small"
+            size="24"
             variant="text"
             @click="toggleHistorySelectAll"
           />
@@ -92,7 +130,7 @@
             :title="`删除已选 ${fmtUtil.num(historySelectedCount)} 条`"
             class="cp-history-action cp-history-delete"
             icon="mdi-delete-outline"
-            size="small"
+            size="24"
             variant="text"
             @click="deleteSelectedHistory"
           />
@@ -101,7 +139,7 @@
             aria-label="取消管理"
             class="cp-history-action"
             icon="mdi-close"
-            size="small"
+            size="24"
             title="取消管理"
             variant="text"
             @click="exitHistorySelect"
@@ -420,11 +458,11 @@
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import CpCollectionForm from "@comp/communityProfile/cp-collection-form.vue";
-import CpCollectionSort from "@comp/communityProfile/cp-collection-sort.vue";
-import CpComment from "@comp/communityProfile/cp-comment.vue";
-import CpPost from "@comp/communityProfile/cp-post.vue";
-import CpUser from "@comp/communityProfile/cp-user.vue";
+import CpCollectionForm from "@comp/comiProf/cp-collection-form.vue";
+import CpCollectionSort from "@comp/comiProf/cp-collection-sort.vue";
+import CpComment from "@comp/comiProf/cp-comment.vue";
+import CpPost from "@comp/comiProf/cp-post.vue";
+import CpUser from "@comp/comiProf/cp-user.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpTitle from "@comp/viewPost/tp-title.vue";
@@ -433,7 +471,9 @@ import communityReq from "@req/communityReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { emitTo } from "@tauri-apps/api/event";
 import { createPost } from "@utils/app/TGWindow.js";
+import { applyHistoryDeletion } from "@utils/community/history.js";
 import {
   matchesPostKeyword,
   openCommunityProfile,
@@ -442,6 +482,7 @@ import {
 } from "@utils/community/profile.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
+import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -491,7 +532,8 @@ const collectionGid = computed<number>(() =>
   section === "collections" ? (parseCommunityProfileGid(route.query.gid) ?? 2) : 2,
 );
 const favoriteTab = ref<FavoriteTab>("posts");
-const { isLogin } = storeToRefs(useAppStore());
+const { isLogin, incognito } = storeToRefs(useAppStore());
+const switchingIncognito = ref<boolean>(false);
 const { uid, cookie } = storeToRefs(useUserStore());
 
 function getTargetUid(loginUid: string): string {
@@ -657,9 +699,16 @@ watch(
   { immediate: true },
 );
 
-watch([loading, isLast, () => entries.value.length, searchKeyword, error], () => {
+watch([loading, isLast, () => entries.value.length, searchKeyword, error, deletingHistory], () => {
   loadMoreObserver?.disconnect();
-  if (loading.value || isLast.value || searchKeyword.value !== "" || error.value !== "") return;
+  if (
+    loading.value ||
+    deletingHistory.value ||
+    isLast.value ||
+    searchKeyword.value !== "" ||
+    error.value !== ""
+  )
+    return;
   void nextTick(observeLoadMore);
 });
 
@@ -716,7 +765,7 @@ const canSortCollections = computed<boolean>(
 );
 
 async function loadMore(): Promise<void> {
-  if (loading.value || isLast.value) return;
+  if (loading.value || deletingHistory.value || isLast.value) return;
   const snapshot = getSnapshot();
   if (!snapshot) return;
   const version = generation;
@@ -751,6 +800,7 @@ function observeLoadMore(): void {
   if (
     target === null ||
     loading.value ||
+    deletingHistory.value ||
     isLast.value ||
     error.value !== "" ||
     searchKeyword.value !== ""
@@ -942,8 +992,25 @@ function retry(): void {
   else void loadMore();
 }
 
+async function switchIncognito(): Promise<void> {
+  if (switchingIncognito.value || deletingHistory.value) return;
+  switchingIncognito.value = true;
+  incognito.value = !incognito.value;
+  try {
+    // 等待持久化完成后通知帖子窗口，确保重新加载时读到最新设置。
+    await nextTick();
+    await emitTo("Sub_window", "switchIncognito");
+    showSnackbar.success(incognito.value ? "已开启无痕浏览" : "已关闭无痕浏览");
+  } catch (cause) {
+    await TGLogger.Error(`[CpContent][switchIncognito] ${TGHttps.getErrMsg(cause)}`);
+    showSnackbar.warn("无痕设置已保存，帖子窗口同步失败，请重新打开帖子。");
+  } finally {
+    switchingIncognito.value = false;
+  }
+}
+
 function enterHistorySelect(): void {
-  if (section !== "history" || entries.value.length === 0) return;
+  if (section !== "history" || entries.value.length === 0 || deletingHistory.value) return;
   historySelectMode.value = true;
   historySelectAll.value = false;
   historySelectedIds.value = new Set();
@@ -976,8 +1043,19 @@ function toggleHistorySelectAll(): void {
 }
 
 async function deleteSelectedHistory(): Promise<void> {
-  if (!historySelectMode.value || deletingHistory.value) return;
-  const selectedCount = historySelectedCount.value;
+  if (!historySelectMode.value) return;
+  await deleteHistory(false);
+}
+
+async function clearHistory(): Promise<void> {
+  await deleteHistory(true);
+}
+
+async function deleteHistory(clearAll: boolean): Promise<void> {
+  if (section !== "history" || deletingHistory.value) return;
+  const selectedCount = clearAll
+    ? historyTotal.value || historyEntries.value.length
+    : historySelectedCount.value;
   if (selectedCount === 0) return;
   const snapshot = getSnapshot();
   if (snapshot === undefined) {
@@ -989,38 +1067,57 @@ async function deleteSelectedHistory(): Promise<void> {
     return;
   }
   const version = generation;
-  const confirmed = await showDialog.checkF({
-    cancelLabel: "取消",
-    confirmLabel: "删除",
-    text: `确定删除选中的 ${fmtUtil.num(selectedCount)} 条浏览历史吗？删除后无法恢复。`,
-    title: "删除浏览历史",
-  });
-  if (!confirmed || !isCurrent(snapshot, version) || !historySelectMode.value) return;
+  const deleteAll = clearAll || historySelectAll.value;
+  const selectedIds = clearAll ? new Set<string>() : new Set(historySelectedIds.value);
   const operateList = historyEntries.value
-    .filter((entry) => historySelectedIds.value.has(entry.id))
+    .filter((entry) => selectedIds.has(entry.id))
     .map((entry) => entry.historyId);
-  if (!historySelectAll.value && operateList.length === 0) return;
+  if (!deleteAll && operateList.length === 0) return;
   const latestViewAt = historyEntries.value.reduce(
     (latest, entry) => Math.max(latest, entry.viewedAt ?? 0),
     0,
   );
   deletingHistory.value = true;
   try {
+    const confirmed = await showDialog.checkF({
+      cancelLabel: "取消",
+      confirmLabel: clearAll ? "清空" : "删除",
+      text: clearAll
+        ? "确定清空全部浏览历史吗？清空后无法恢复。"
+        : `确定删除选中的 ${fmtUtil.num(selectedCount)} 条浏览历史吗？删除后无法恢复。`,
+      title: clearAll ? "清空浏览历史" : "删除浏览历史",
+    });
+    if (!confirmed || !isCurrent(snapshot, version)) return;
     const response = await communityReq.deleteHistory(snapshot.cookie, {
-      is_delete_all: historySelectAll.value,
+      is_delete_all: deleteAll,
       operate_id_list: operateList,
       user_last_view_at: latestViewAt,
     });
     if (!isCurrent(snapshot, version)) return;
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
-    exitHistorySelect();
+    // 使删除前的分页响应失效；成功后直接同步列表，避免旧数据回填。
     generation += 1;
-    resetEntries();
-    void loadMore();
-    showSnackbar.success("已删除浏览历史");
+    const result = applyHistoryDeletion(
+      {
+        entries: entries.value,
+        total: historyTotal.value,
+        offset: offset.value,
+        isLast: isLast.value,
+      },
+      selectedIds,
+      deleteAll,
+    );
+    entries.value = result.entries;
+    historyTotal.value = result.total;
+    offset.value = result.offset;
+    isLast.value = result.isLast;
+    loading.value = false;
+    error.value = "";
+    exitHistorySelect();
+    showSnackbar.success(clearAll ? "已清空浏览历史" : "已删除浏览历史");
   } catch (cause) {
     if (!isCurrent(snapshot, version)) return;
-    showSnackbar.error(`删除失败：${TGHttps.getErrMsg(cause)}`);
+    showSnackbar.error(`${clearAll ? "清空" : "删除"}失败：${TGHttps.getErrMsg(cause)}`);
   } finally {
     deletingHistory.value = false;
   }
@@ -1425,7 +1522,7 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
   display: flex;
   flex-direction: column;
   color: var(--app-page-content);
-  gap: 16px;
+  gap: 8px;
 }
 
 .cp-content-header {
@@ -1443,7 +1540,7 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
     font-family: var(--font-title);
     font-size: 16px;
     font-weight: normal;
-    gap: 8px;
+    gap: 4px;
     overflow-wrap: anywhere;
   }
 
@@ -1460,6 +1557,10 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
   flex-shrink: 0;
   align-items: center;
   gap: 8px;
+}
+
+.cp-history-actions {
+  align-self: center;
 }
 
 .cp-collection-favorite {
@@ -1535,8 +1636,6 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
 }
 
 .cp-content-manage {
-  min-width: 0;
-  padding: 0 6px;
   color: var(--box-text-4);
   font-weight: normal;
 
@@ -1564,7 +1663,6 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
   position: relative;
   min-height: 0;
   flex: 1 1 auto;
-  padding: 4px;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
@@ -1584,9 +1682,29 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
 }
 
 .cp-history-action {
+  flex-shrink: 0;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 6px;
+  border-radius: 4px;
   background: var(--box-bg-2);
+
+  :deep(.v-icon) {
+    font-size: 16px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+}
+
+.cp-history-incognito {
+  color: var(--box-text-4);
+
+  &.is-active {
+    border-color: var(--box-text-4);
+    background: var(--box-bg-3);
+    color: var(--common-text-title);
+  }
 }
 
 .cp-history-delete {
@@ -1612,7 +1730,7 @@ async function deleteCollection(collection: TGApp.BBS.Collection.Collection): Pr
 }
 
 .cp-content-row--spaced {
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .cp-entry {

@@ -1,5 +1,5 @@
 <template>
-  <div :data-status="status" class="shop-goods-cover">
+  <div :data-status="status" class="cs-goods-cover">
     <img
       :class="{ 'is-sold-out': soldOut }"
       :src="goods.icon"
@@ -7,11 +7,11 @@
       loading="lazy"
       referrerpolicy="no-referrer"
     />
-    <span v-if="limitBadge" :title="getShopLimitText(goods)" class="shop-good-limit"
+    <span v-if="limitBadge" :title="getShopLimitText(goods)" class="cs-good-limit"
       >可兑换 {{ limitBadge }}</span
     >
-    <span class="shop-good-status">{{ getShopStatusText(goods) }}</span>
-    <span v-if="soldOut" class="shop-sold-out">售罄</span>
+    <span class="cs-good-status">{{ getShopStatusText(goods) }}</span>
+    <span v-if="soldOut" class="cs-sold-out">售罄</span>
   </div>
 </template>
 <script lang="ts" setup>
@@ -30,12 +30,12 @@ const limitBadge = computed<string>(() => getShopLimitBadge(goods));
 const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
 </script>
 <style lang="scss" scoped>
-.shop-goods-cover {
-  --shop-state-available: #0b4f31ff;
-  --shop-state-upcoming: #644100ff;
-  --shop-state-limited: #7a2634ff;
-  --shop-state-muted: #39424eff;
-  --shop-state-color: var(--shop-state-muted);
+.cs-goods-cover {
+  --cs-state-available: #0b4f31ff;
+  --cs-state-upcoming: #644100ff;
+  --cs-state-limited: #7a2634ff;
+  --cs-state-muted: #39424eff;
+  --cs-state-color: var(--cs-state-muted);
 
   position: relative;
   overflow: hidden;
@@ -45,15 +45,15 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
   aspect-ratio: 1;
 
   &[data-status="available"] {
-    --shop-state-color: var(--shop-state-available);
+    --cs-state-color: var(--cs-state-available);
   }
 
   &[data-status="upcoming"] {
-    --shop-state-color: var(--shop-state-upcoming);
+    --cs-state-color: var(--cs-state-upcoming);
   }
 
   &[data-status="limit-reached"] {
-    --shop-state-color: var(--shop-state-limited);
+    --cs-state-color: var(--cs-state-limited);
   }
 
   > img {
@@ -71,14 +71,14 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
   }
 }
 
-.shop-good-limit,
-.shop-good-status,
-.shop-sold-out {
+.cs-good-limit,
+.cs-good-status,
+.cs-sold-out {
   position: absolute;
   padding: 4px 8px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  background: color-mix(in srgb, var(--shop-state-color) 76%, transparent);
+  background: color-mix(in srgb, var(--cs-state-color) 76%, transparent);
   color: var(--tgc-white-1);
   font-size: 12px;
   font-weight: 600;
@@ -86,24 +86,24 @@ const soldOut = computed<boolean>(() => isShopBatchSoldOut(goods));
   white-space: nowrap;
 }
 
-.shop-good-limit {
+.cs-good-limit {
   top: 0;
   right: 0;
   border-bottom-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
-.shop-good-status {
+.cs-good-status {
   bottom: 0;
   left: 0;
   border-bottom-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
-.shop-sold-out {
+.cs-sold-out {
   right: 0;
   bottom: 0;
-  background: color-mix(in srgb, var(--shop-state-muted) 76%, transparent);
+  background: color-mix(in srgb, var(--cs-state-muted) 76%, transparent);
   border-bottom-right-radius: 8px;
   border-top-left-radius: 8px;
 }

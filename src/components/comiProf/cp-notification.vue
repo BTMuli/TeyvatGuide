@@ -1,13 +1,8 @@
 <template>
   <article
-    :aria-label="clickable ? openLabel : undefined"
     :class="{ 'is-clickable': clickable, 'is-unread': !notification.is_read }"
     class="cp-notification"
-    :role="clickable ? 'button' : undefined"
-    :tabindex="clickable ? 0 : undefined"
-    :title="clickable ? openLabel : undefined"
     @click="handleCardClick"
-    @keydown.enter.space="handleCardKeydown"
   >
     <header class="cp-notification-header">
       <button
@@ -20,13 +15,31 @@
         <CpAvatar :user="avatarUser" :size="32" />
         <span>{{ user.nickname }}</span>
       </button>
-      <span v-if="user" class="cp-notification-action">{{ actionText }}</span>
+      <button
+        v-if="user && clickable"
+        :aria-label="openLabel"
+        class="cp-notification-action cp-notification-open"
+        type="button"
+        @click.stop="emit('open')"
+      >
+        {{ actionText }}
+      </button>
+      <span v-else-if="user" class="cp-notification-action">{{ actionText }}</span>
       <template v-else>
         <span class="cp-notification-icon">
           <TMiImg v-if="notification.site_icon" :ori="true" :src="notification.site_icon" alt="" />
           <v-icon v-else size="20" aria-hidden="true">mdi-bell-outline</v-icon>
         </span>
-        <span class="cp-notification-title">{{ systemTitle }}</span>
+        <button
+          v-if="clickable"
+          :aria-label="openLabel"
+          class="cp-notification-title cp-notification-open"
+          type="button"
+          @click.stop="emit('open')"
+        >
+          {{ systemTitle }}
+        </button>
+        <span v-else class="cp-notification-title">{{ systemTitle }}</span>
       </template>
       <time v-if="createdAtLabel" :datetime="createdAtIso" class="cp-notification-time">
         {{ createdAtLabel }}
@@ -168,12 +181,6 @@ function handleCardClick(event: MouseEvent): void {
     return;
   emit("open");
 }
-
-function handleCardKeydown(event: KeyboardEvent): void {
-  if (!clickable || event.target !== event.currentTarget) return;
-  event.preventDefault();
-  emit("open");
-}
 </script>
 
 <style lang="scss" scoped>
@@ -200,11 +207,6 @@ function handleCardKeydown(event: KeyboardEvent): void {
     &:hover {
       border-color: var(--common-shadow-2);
       background: var(--box-bg-4);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--common-text-title);
-      outline-offset: 2px;
     }
   }
 }
@@ -249,6 +251,21 @@ function handleCardKeydown(event: KeyboardEvent): void {
     border-radius: 4px;
     outline: 2px solid var(--common-text-title);
     outline-offset: 4px;
+  }
+}
+
+.cp-notification-open {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
   }
 }
 

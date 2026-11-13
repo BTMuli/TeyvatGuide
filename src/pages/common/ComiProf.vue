@@ -114,7 +114,13 @@
               type="button"
               @click="toggleFollow"
             >
-              <v-progress-circular v-if="followLoading" indeterminate size="14" width="2" />
+              <v-progress-circular
+                v-if="followLoading"
+                indeterminate
+                size="14"
+                tag="span"
+                width="2"
+              />
               <v-icon v-else aria-hidden="true" size="16">{{ followState.icon }}</v-icon>
             </button>
           </div>
@@ -486,12 +492,12 @@
 </template>
 
 <script lang="ts" setup>
-import CpAvatar from "@comp/communityProfile/cp-avatar.vue";
-import CpContent from "@comp/communityProfile/cp-content.vue";
-import CpNotifications from "@comp/communityProfile/cp-notifications.vue";
-import CpNotifySettings from "@comp/communityProfile/cp-notify-settings.vue";
-import CpPost from "@comp/communityProfile/cp-post.vue";
-import CpSettings from "@comp/communityProfile/cp-settings.vue";
+import CpAvatar from "@comp/comiProf/cp-avatar.vue";
+import CpContent from "@comp/comiProf/cp-content.vue";
+import CpNotifications from "@comp/comiProf/cp-notifications.vue";
+import CpNotifySettings from "@comp/comiProf/cp-notify-settings.vue";
+import CpPost from "@comp/comiProf/cp-post.vue";
+import CpSettings from "@comp/comiProf/cp-settings.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import apiHubReq from "@req/apiHubReq.js";
@@ -1137,7 +1143,7 @@ async function loadUnreadCounts(snapshot: AccountSnapshot): Promise<void> {
       unreadResult.status === "rejected"
         ? TGHttps.getErrMsg(unreadResult.reason)
         : `[${unreadResult.value.retcode}] ${unreadResult.value.message}`;
-    void TGLogger.Warn(`[CommunityProfile] 获取未读消息数失败：${message}`);
+    void TGLogger.Warn(`[ComiProf] 获取未读消息数失败：${message}`);
   }
   if (settingsResult.status === "fulfilled" && settingsResult.value.retcode === 0) {
     notificationSettings.value = settingsResult.value.data.settings;
@@ -1146,7 +1152,7 @@ async function loadUnreadCounts(snapshot: AccountSnapshot): Promise<void> {
       settingsResult.status === "rejected"
         ? TGHttps.getErrMsg(settingsResult.reason)
         : `[${settingsResult.value.retcode}] ${settingsResult.value.message}`;
-    void TGLogger.Warn(`[CommunityProfile] 获取消息设置失败：${message}`);
+    void TGLogger.Warn(`[ComiProf] 获取消息设置失败：${message}`);
   }
 }
 
