@@ -6,7 +6,7 @@
           <v-icon size="20" aria-hidden="true">{{ sectionIcon }}</v-icon>
           {{ sectionTitle }}
         </h2>
-        <p>{{ sectionDescription }}</p>
+        <p v-if="props.section === 'edit'">{{ sectionDescription }}</p>
       </div>
     </header>
 
@@ -23,15 +23,21 @@
       <p>{{ loadError }}</p>
       <v-btn variant="tonal" @click="loadSection">重新加载</v-btn>
     </div>
-    <form v-else class="cp-settings-form" @submit.prevent="handleSave">
+    <form
+      v-else
+      :class="{ 'is-privacy': props.section === 'privacy' }"
+      class="cp-settings-form"
+      @submit.prevent="handleSave"
+    >
       <div v-if="props.section === 'privacy'" class="cp-settings-list">
+        <h3 class="cp-settings-group-title">社交隐私设置</h3>
         <div class="cp-settings-row">
           <div class="cp-settings-row-copy">
-            <h3>个人主页访问权限</h3>
-            <p>允许其他用户打开你的米游社个人主页。</p>
+            <h4>个人主页访问权限</h4>
           </div>
           <v-switch
             v-model="privacyDraft.showUserCenter"
+            density="compact"
             aria-label="允许访问个人主页"
             class="cp-settings-switch"
             color="var(--common-text-title)"
@@ -43,11 +49,11 @@
         </div>
         <div class="cp-settings-row">
           <div class="cp-settings-row-copy">
-            <h3>展示我发布的帖子与动态</h3>
-            <p>控制帖子和动态是否出现在个人主页中。</p>
+            <h4>在个人中心展示我发布的帖子、动态</h4>
           </div>
           <v-switch
             v-model="privacyDraft.showPosts"
+            density="compact"
             aria-label="在个人主页展示我发布的帖子与动态"
             class="cp-settings-switch"
             color="var(--common-text-title)"
@@ -59,11 +65,11 @@
         </div>
         <div class="cp-settings-row">
           <div class="cp-settings-row-copy">
-            <h3>展示我的评论</h3>
-            <p>控制评论是否出现在个人中心的评论列表中。</p>
+            <h4>在个人中心展示我的评论</h4>
           </div>
           <v-switch
             v-model="privacyDraft.showReplies"
+            density="compact"
             aria-label="在个人中心展示我的评论"
             class="cp-settings-switch"
             color="var(--common-text-title)"
@@ -75,12 +81,29 @@
         </div>
         <div class="cp-settings-row">
           <div class="cp-settings-row-copy">
-            <h3>展示我的收藏</h3>
-            <p>控制收藏是否出现在个人中心的收藏列表中。</p>
+            <h4>在个人中心展示我的收藏</h4>
           </div>
           <v-switch
             v-model="privacyDraft.showCollections"
+            density="compact"
             aria-label="在个人中心展示我的收藏"
+            class="cp-settings-switch"
+            color="var(--common-text-title)"
+            thumbColor="var(--app-page-bg)"
+            :disabled="saving"
+            hide-details
+            inset
+          />
+        </div>
+        <h3 class="cp-settings-group-title">其他隐私设置</h3>
+        <div class="cp-settings-row">
+          <div class="cp-settings-row-copy">
+            <h4>上传图片时添加水印</h4>
+          </div>
+          <v-switch
+            v-model="privacyDraft.addWatermark"
+            density="compact"
+            aria-label="上传图片时添加水印"
             class="cp-settings-switch"
             color="var(--common-text-title)"
             thumbColor="var(--app-page-bg)"
@@ -91,12 +114,12 @@
         </div>
         <div class="cp-settings-row">
           <div class="cp-settings-row-copy">
-            <h3>上传图片时添加水印</h3>
-            <p>控制发布图片时是否自动添加米游社水印。</p>
+            <h4>记录帖子、动态的浏览历史</h4>
           </div>
           <v-switch
-            v-model="privacyDraft.addWatermark"
-            aria-label="上传图片时添加水印"
+            v-model="privacyDraft.recordHistory"
+            density="compact"
+            aria-label="记录帖子、动态的浏览历史"
             class="cp-settings-switch"
             color="var(--common-text-title)"
             thumbColor="var(--app-page-bg)"
@@ -321,6 +344,7 @@ const privacyDraft = reactive({
   showCollections: true,
   addWatermark: true,
   showUserCenter: true,
+  recordHistory: true,
 });
 const privacyOriginal = reactive({
   showPosts: true,
@@ -328,6 +352,7 @@ const privacyOriginal = reactive({
   showCollections: true,
   addWatermark: true,
   showUserCenter: true,
+  recordHistory: true,
 });
 const editDraft = reactive({ nickname: "", introduce: "" });
 const editOriginal = reactive({ nickname: "", introduce: "" });
@@ -394,7 +419,8 @@ const privacyDirty = computed<boolean>(
     privacyDraft.showReplies !== privacyOriginal.showReplies ||
     privacyDraft.showCollections !== privacyOriginal.showCollections ||
     privacyDraft.addWatermark !== privacyOriginal.addWatermark ||
-    privacyDraft.showUserCenter !== privacyOriginal.showUserCenter,
+    privacyDraft.showUserCenter !== privacyOriginal.showUserCenter ||
+    privacyDraft.recordHistory !== privacyOriginal.recordHistory,
 );
 const isAvatarInAudit = computed<boolean>(() => props.audit?.is_avatar_in_audit === true);
 const avatarDirty = computed<boolean>(
@@ -1056,6 +1082,12 @@ function handleCommentConfirm(
   min-width: 0;
   flex-direction: column;
   gap: 16px;
+
+  &.is-privacy {
+    width: 100%;
+    max-width: 1040px;
+    container: cp-privacy / inline-size;
+  }
 }
 
 .cp-settings-list,
@@ -1068,13 +1100,28 @@ function handleCommentConfirm(
 .cp-settings-row {
   display: flex;
   min-width: 0;
+  min-height: 48px;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 4px 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
-  gap: 16px;
+  gap: 12px;
+}
+
+.cp-settings-list {
+  display: grid;
+  gap: 8px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cp-settings-group-title {
+  margin: 4px 0 0;
+  color: var(--box-text-4);
+  font-size: 14px;
+  font-weight: 500;
+  grid-column: 1 / -1;
 }
 
 .cp-settings-row-copy {
@@ -1083,7 +1130,7 @@ function handleCommentConfirm(
   flex-direction: column;
   gap: 4px;
 
-  h3 {
+  h4 {
     margin: 0;
     color: var(--common-text-title);
     font-size: 14px;
@@ -1097,6 +1144,10 @@ function handleCommentConfirm(
     font-size: 12px;
     overflow-wrap: anywhere;
   }
+}
+
+.cp-settings-switch {
+  flex: none;
 }
 
 .cp-settings-switch
@@ -1253,16 +1304,13 @@ function handleCommentConfirm(
   }
 }
 
+@container cp-privacy (width <= 720px) {
+  .cp-settings-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (width <= 640px) {
-  .cp-settings-row {
-    align-items: flex-start;
-    padding: 12px;
-  }
-
-  .cp-settings-row :deep(.v-switch) {
-    flex-shrink: 0;
-  }
-
   .cp-settings-identity {
     flex-wrap: wrap;
     align-items: flex-start;

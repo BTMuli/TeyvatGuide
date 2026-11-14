@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心设置类型定义文件
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 declare namespace TGApp.BBS.CommunitySettings {
@@ -25,11 +25,13 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 获取隐私设置接口返回的数据
-   * @since Beta v0.13.0
+   * @since Beta v0.13.1
    */
   type PrivacyInfo = {
     /** 隐私隐藏字段 */
     privacy_invisible?: PrivacyInvisible;
+    /** 用户功能状态，沿用社区信息响应的字段类型 */
+    user_func_status?: Pick<TGApp.BBS.User.Community["user_func_status"], "enable_history_view">;
     /** 官方未来可能增加的隐私字段 */
     [key: string]: unknown;
   };
@@ -42,7 +44,7 @@ declare namespace TGApp.BBS.CommunitySettings {
 
   /**
    * 隐私设置界面展示值
-   * @since Beta v0.13.0
+   * @since Beta v0.13.1
    */
   type PrivacyDraft = {
     /** 是否在个人中心展示帖子 */
@@ -55,11 +57,13 @@ declare namespace TGApp.BBS.CommunitySettings {
     addWatermark: boolean;
     /** 是否允许访问个人主页 */
     showUserCenter: boolean;
+    /** 是否记录帖子、动态的浏览历史 */
+    recordHistory: boolean;
   };
 
   /**
    * 隐私设置写入参数
-   * @since Beta v0.13.0
+   * @since Beta v0.13.1
    */
   type PrivacyUpdate = {
     /** 是否隐藏发帖和即时 */
@@ -72,6 +76,8 @@ declare namespace TGApp.BBS.CommunitySettings {
     privacy_visible_reply: boolean;
     /** 个人主页访问权限，1 为允许，2 为禁止 */
     privacy_user_center_view: 1 | 2;
+    /** 是否记录帖子、动态的浏览历史，与读取字段同向 */
+    privacy_enable_history_view: boolean;
   };
 
   /**

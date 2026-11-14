@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心设置请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { isRecord } from "@utils/common/typeGuards.js";
@@ -93,7 +93,7 @@ function readBoolean(value: unknown): boolean {
 
 /**
  * 将官方隐私响应转换为设置界面值
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param info - 隐私接口返回数据，缺失或无效设置会被拒绝
  * @param profileUserCenterView - 个人资料中的主页访问值，1 为允许，2 为禁止
  * @returns 设置界面值
@@ -105,6 +105,7 @@ function getPrivacyDraft(
 ): TGApp.BBS.CommunitySettings.PrivacyDraft {
   const root = getRecord(info);
   const invisible = getRecord(root?.privacy_invisible);
+  const status = getRecord(root?.user_func_status);
   if (!invisible || (profileUserCenterView !== 1 && profileUserCenterView !== 2)) {
     throw new TypeError("隐私设置数据无效，请重新加载。");
   }
@@ -114,12 +115,13 @@ function getPrivacyDraft(
     showCollections: !readBoolean(invisible.collect),
     addWatermark: !readBoolean(invisible.watermark),
     showUserCenter: profileUserCenterView === 1,
+    recordHistory: readBoolean(status?.enable_history_view),
   };
 }
 
 /**
- * 按官方请求协议生成完整的五项隐私设置
- * @since Beta v0.13.0
+ * 按官方请求协议生成完整的六项隐私设置
+ * @since Beta v0.13.1
  * @param draft - 当前界面值
  * @returns 官方隐私写入参数
  */
@@ -132,6 +134,7 @@ function buildPrivacyUpdate(
     privacy_invisible_watermark: !draft.addWatermark,
     privacy_visible_reply: draft.showReplies,
     privacy_user_center_view: draft.showUserCenter ? 1 : 2,
+    privacy_enable_history_view: draft.recordHistory,
   };
 }
 
@@ -157,9 +160,9 @@ async function getPrivacy(
 
 /**
  * 更新当前账户的隐私设置
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  * @param cookie - 账户 Cookie
- * @param settings - 完整的五项隐私设置参数
+ * @param settings - 完整的六项隐私设置参数
  * @returns 隐私设置响应数据
  */
 async function setPrivacy(

@@ -387,7 +387,6 @@ function adjustPostCount(delta: number): void {
   min-height: 0;
   box-sizing: border-box;
   flex-direction: column;
-  padding: 16px 24px 0;
   margin: 0 auto;
   color: var(--app-page-content);
   font-size: 14px;

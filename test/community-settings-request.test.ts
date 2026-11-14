@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心设置请求契约回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -41,6 +41,7 @@ const authCookie = { account_id: cookie.account_id, cookie_token: cookie.cookie_
 const successResponse = { retcode: 0, message: "ok", data: null };
 const privacyInfo = {
   privacy_invisible: { post_and_instant: true, reply: false, collect: true, watermark: false },
+  user_func_status: { enable_history_view: false },
 };
 const privacyUpdate: TGApp.BBS.CommunitySettings.PrivacyUpdate = {
   privacy_invisible_post_and_instant: true,
@@ -48,6 +49,7 @@ const privacyUpdate: TGApp.BBS.CommunitySettings.PrivacyUpdate = {
   privacy_invisible_watermark: false,
   privacy_visible_reply: true,
   privacy_user_center_view: 2,
+  privacy_enable_history_view: false,
 };
 
 beforeEach(() => {
@@ -80,17 +82,19 @@ describe("communitySettingsReq", () => {
       showCollections: false,
       addWatermark: true,
       showUserCenter: false,
+      recordHistory: false,
     });
     expect(buildPrivacyUpdate(draft)).toEqual(privacyUpdate);
   });
 
-  it.each([true, false])("maps all five display values in both directions: %s", (visible) => {
+  it.each([true, false])("maps all six display values in both directions: %s", (visible) => {
     const draft = {
       showPosts: visible,
       showReplies: visible,
       showCollections: visible,
       addWatermark: visible,
       showUserCenter: visible,
+      recordHistory: visible,
     };
     const update = buildPrivacyUpdate(draft);
     expect(update).toEqual({
@@ -99,6 +103,7 @@ describe("communitySettingsReq", () => {
       privacy_invisible_watermark: !visible,
       privacy_visible_reply: visible,
       privacy_user_center_view: visible ? 1 : 2,
+      privacy_enable_history_view: visible,
     });
     expect(
       getPrivacyDraft(
@@ -109,6 +114,7 @@ describe("communitySettingsReq", () => {
             watermark: update.privacy_invisible_watermark,
             reply: !update.privacy_visible_reply,
           },
+          user_func_status: { enable_history_view: update.privacy_enable_history_view },
         },
         update.privacy_user_center_view,
       ),
@@ -135,14 +141,35 @@ describe("communitySettingsReq", () => {
     (field) => {
       const flags: Record<string, unknown> = { ...privacyInfo.privacy_invisible };
       delete flags[field];
-      expect(() => getPrivacyDraft({ privacy_invisible: flags }, 1)).toThrow("隐私设置数据无效");
+      expect(() => getPrivacyDraft({ ...privacyInfo, privacy_invisible: flags }, 1)).toThrow(
+        "隐私设置数据无效",
+      );
       flags[field] = "false";
-      expect(() => getPrivacyDraft({ privacy_invisible: flags }, 1)).toThrow("隐私设置数据无效");
+      expect(() => getPrivacyDraft({ ...privacyInfo, privacy_invisible: flags }, 1)).toThrow(
+        "隐私设置数据无效",
+      );
     },
   );
 
   it.each([0, 3, Number.NaN])("rejects an unknown homepage permission: %s", (permission) => {
     expect(() => getPrivacyDraft(privacyInfo, permission)).toThrow("隐私设置数据无效");
+  });
+
+  it.each([undefined, null, {}, { enable_history_view: "false" }])(
+    "rejects a missing or invalid history setting: %j",
+    (status) => {
+      expect(() => getPrivacyDraft({ ...privacyInfo, user_func_status: status }, 1)).toThrow(
+        "隐私设置数据无效",
+      );
+    },
+  );
+
+  it("changes history recording without changing visibility or watermark settings", () => {
+    const draft = getPrivacyDraft(privacyInfo, 2);
+    expect(buildPrivacyUpdate({ ...draft, recordHistory: true })).toEqual({
+      ...privacyUpdate,
+      privacy_enable_history_view: true,
+    });
   });
 
   it("reads privacy settings with the official endpoint and smallest cookie", async () => {
@@ -155,7 +182,7 @@ describe("communitySettingsReq", () => {
     );
   });
 
-  it("writes the five official privacy fields through the official endpoint", async () => {
+  it("writes the six official privacy fields through the official endpoint", async () => {
     await communitySettingsReq.setPrivacy(cookie, privacyUpdate);
 
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(
