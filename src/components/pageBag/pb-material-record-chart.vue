@@ -146,9 +146,7 @@ const options = computed<EChartsOption>(() => {
         showMaxLabel: logarithmic,
         formatter: (value: number) => {
           const original = logarithmic ? Math.round(restoreMaterialRecordLogValue(value)) : value;
-          return Math.abs(original) >= 10000
-            ? fmtUtil.num(Math.round(original / 10000)) + "w"
-            : fmtUtil.num(original);
+          return fmtUtil.num(original);
         },
       },
       splitLine: { show: false },
