@@ -122,7 +122,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
     bg: `/icon/bg/${find.star}-BGC.webp`,
     clickable: false,
     icon: `/WIKI/character/${find.id}.webp`,
-    lt: `/icon/element/${find.element}元素.webp`,
+    lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,
     ltSize: "20px",
     rt: avatar.rank.toString(),
     rtSize: "20px",
