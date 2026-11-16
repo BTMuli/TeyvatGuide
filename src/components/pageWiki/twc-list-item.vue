@@ -1,7 +1,8 @@
 <!-- 角色/武器WIKI侧边栏项 -->
 <template>
   <div
-    :class="props.curItem.id === props.data.id ? 'selected' : ''"
+    :aria-label="props.dimmed ? `${props.data.name}，未拥有` : props.data.name"
+    :class="{ selected: props.curItem.id === props.data.id, 'is-unowned': props.dimmed }"
     class="twc-li-box"
     role="button"
     tabindex="0"
@@ -66,7 +67,11 @@ type TwcListItemWeapon = {
   data: TGApp.App.Weapon.WikiBriefInfo;
   curItem: TGApp.App.Weapon.WikiBriefInfo;
 };
-type TwcListItemProps = TwcListItemAvatar | TwcListItemWeapon;
+/**
+ * 图鉴列表项与持有状态显示属性。
+ * @since Beta v0.13.1
+ */
+type TwcListItemProps = (TwcListItemAvatar | TwcListItemWeapon) & { dimmed?: boolean };
 
 const props = defineProps<TwcListItemProps>();
 const idColor = computed<string>(() => getOdStarColor(props.data.star));
@@ -216,6 +221,19 @@ $twc-li-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
 
   .weapon {
     filter: var(--icon-filter);
+  }
+}
+
+.twc-li-box.is-unowned {
+  .twc-li-left,
+  .twc-li-meta {
+    filter: grayscale(1);
+    opacity: 0.4;
+  }
+
+  .twc-li-name,
+  .twc-li-id {
+    color: var(--box-text-4);
   }
 }
 </style>

@@ -1,9 +1,12 @@
 <template>
   <TwgCatalog
     v-model:search="searchKeyword"
+    v-model:showOwnership="showOwnership"
     :count="visibleCards.length"
+    :loading="ownershipLoading"
     icon="mdi-sword-cross"
     search-placeholder="搜索武器名称"
+    showOwnershipToggle
     title="武器图鉴"
     unit="件武器"
     @filter="showSelect = true"
@@ -15,6 +18,7 @@
         :key="item.id"
         v-model:curItem="curItem"
         :data="item"
+        :dimmed="showOwnership && ownershipReady && !ownedIds.has(item.id)"
         mode="weapon"
         @click="switchW(item)"
       />
@@ -30,6 +34,8 @@ import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
 import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
+import { useWikiOwnership } from "@hooks/useWikiOwnership.js";
+import useUserStore from "@store/user.js";
 import { toObcPage } from "@utils/app/TGWindow.js";
 import { computed, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -46,6 +52,13 @@ const appWData = AppWeaponData.sort((a, b) => {
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
+const {
+  showOwnership,
+  ready: ownershipReady,
+  ownedIds,
+  loading: ownershipLoading,
+} = useWikiOwnership("weapon", () => userStore.account.gameUid);
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
 const searchKeyword = ref<string | null>("");
@@ -119,6 +132,7 @@ function handleSelectW(val: SelectedWValue): void {
 
 function resetCatalog(): void {
   const hasFilter = cardsInfo.value !== appWData;
+  showOwnership.value = false;
   searchKeyword.value = "";
   cardsInfo.value = appWData;
   if (hasFilter) resetSelect.value = true;

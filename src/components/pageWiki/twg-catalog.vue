@@ -8,7 +8,13 @@
             <v-icon class="twg-title-icon" size="20">{{ props.icon }}</v-icon>
             <h1>{{ props.title }}</h1>
           </div>
-          <span class="twg-count">{{ props.count }} {{ props.unit }}</span>
+          <div class="twg-summary">
+            <span class="twg-count">{{ props.count }} {{ props.unit }}</span>
+            <label v-if="props.showOwnershipToggle" class="twg-owned-toggle" title="未拥有的置暗">
+              <input v-model="showOwnership" type="checkbox" />
+              <span>已拥有</span>
+            </label>
+          </div>
         </div>
         <div class="twg-actions">
           <v-text-field
@@ -43,7 +49,7 @@
           </v-btn>
         </div>
       </header>
-      <div class="twg-list">
+      <div :aria-busy="props.loading" class="twg-list">
         <div v-if="props.count === 0" class="twg-empty">
           <v-icon icon="mdi-text-search" size="24" />
           <span>未找到名称匹配的内容</span>
@@ -57,7 +63,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+/**
+ * 角色与武器图鉴布局属性。
+ * @since Beta v0.13.1
+ */
 type TwgCatalogProps = {
+  loading?: boolean;
+  showOwnershipToggle?: boolean;
   count: number;
   icon: string;
   title: string;
@@ -74,6 +86,7 @@ const props = withDefaults(defineProps<TwgCatalogProps>(), {
 });
 const emits = defineEmits<TwgCatalogEmits>();
 const search = defineModel<string | null>("search", { required: true });
+const showOwnership = defineModel<boolean>("showOwnership", { default: false });
 </script>
 <style lang="scss" scoped>
 .twg-shell {
@@ -96,6 +109,7 @@ const search = defineModel<string | null>("search", { required: true });
 .twg-toolbar {
   display: flex;
   min-height: 56px;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   padding: 8px 8px 8px 12px;
@@ -133,6 +147,37 @@ const search = defineModel<string | null>("search", { required: true });
 
 .twg-title-icon {
   color: var(--tgc-yellow-1);
+}
+
+.twg-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.twg-owned-toggle {
+  display: inline-flex;
+  align-items: center;
+  color: var(--box-text-4);
+  cursor: pointer;
+  font-size: 12px;
+  gap: 4px;
+  line-height: 16px;
+  white-space: nowrap;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--tgc-od-blue);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--tgc-od-blue);
+      outline-offset: 2px;
+    }
+  }
 }
 
 .twg-count {
