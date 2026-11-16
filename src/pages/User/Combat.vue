@@ -94,8 +94,46 @@
     </template>
   </v-app-bar>
   <div class="uc-box">
-    <v-tabs v-model="userTab" center-active class="uc-tabs-box" direction="vertical">
-      <v-tab v-for="item in localCombat" :key="item.id" :value="item.id"> 第{{ item.id }}期</v-tab>
+    <v-tabs
+      v-if="localCombat.length > 0"
+      v-model="userTab"
+      :height="64"
+      center-active
+      class="uc-tabs-box"
+      direction="vertical"
+    >
+      <v-tab v-for="item in localCombat" :key="item.id" :value="item.id">
+        <span class="ucc-tab">
+          <span class="ucc-tab-head">
+            <span class="ucc-tab-name">No.{{ item.id }}</span>
+            <span
+              v-if="item.hasData || item.hasDetailData"
+              :title="gameEnum.combat.diffDesc(item.stat.difficulty_id)"
+              class="ucc-tab-difficulty"
+            >
+              {{ gameEnum.combat.diffDesc(item.stat.difficulty_id) }}
+            </span>
+          </span>
+          <span
+            v-if="(item.hasData || item.hasDetailData) && item.stat.get_medal_round_list.length > 0"
+            :aria-label="`获得星章 ${item.stat.medal_num}`"
+            class="ucc-tab-medals"
+            role="img"
+          >
+            <img
+              v-for="(medal, index) in item.stat.get_medal_round_list"
+              :key="index"
+              :alt="medal === 1 ? '已获得' : '未获得'"
+              :class="{ 'is-unearned': medal === 0 }"
+              :src="`/icon/combat/${index < 10 ? 'star' : 'tarot'}_${medal}.webp`"
+              :title="index < 10 ? `第${index + 1}幕` : `圣牌${index - 9}`"
+            />
+          </span>
+          <span class="ucc-tab-time">
+            {{ item.startTime.slice(0, 10) }} ~ {{ item.endTime.slice(0, 10) }}
+          </span>
+        </span>
+      </v-tab>
     </v-tabs>
     <v-window v-model="userTab" class="uc-window">
       <v-window-item
@@ -146,6 +184,7 @@ import TucOvStat from "@comp/userCombat/tuc-ov-stat.vue";
 import TucOvTarot from "@comp/userCombat/tuc-ov-tarot.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
+import gameEnum from "@enum/game.js";
 import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
@@ -623,9 +662,70 @@ async function uploadCombat(): Promise<void> {
 }
 
 .uc-tabs-box {
+  max-width: 200px;
   max-height: 100%;
-  padding-top: 8px;
   overflow-y: auto;
+}
+
+.ucc-tab {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  row-gap: 2px;
+}
+
+.ucc-tab-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  column-gap: 4px;
+}
+
+.ucc-tab-name {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ucc-tab-difficulty {
+  flex-shrink: 0;
+  color: var(--tgc-yellow-1);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.ucc-tab-medals {
+  display: flex;
+  width: 100%;
+  align-items: center;
+
+  img {
+    width: 12px;
+    min-width: 0;
+    height: 12px;
+    object-fit: contain;
+
+    &.is-unearned {
+      filter: invert(0.4);
+    }
+  }
+}
+
+.dark .ucc-tab-medals img.is-unearned {
+  filter: unset;
+}
+
+.ucc-tab-time {
+  font-size: 10px;
+  opacity: 0.6;
+  white-space: nowrap;
 }
 
 .uc-window {

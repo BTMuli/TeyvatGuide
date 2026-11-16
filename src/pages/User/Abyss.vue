@@ -74,8 +74,36 @@
     </template>
   </v-app-bar>
   <div class="ua-box">
-    <v-tabs v-model="userTab" center-active class="ua-tabs-box" direction="vertical">
-      <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id">第{{ item.id }}期</v-tab>
+    <v-tabs
+      v-if="localAbyss.length > 0"
+      v-model="userTab"
+      center-active
+      class="ua-tabs-box"
+      direction="vertical"
+    >
+      <v-tab
+        v-for="item in localAbyss"
+        :key="item.id"
+        :aria-label="`No.${item.id}，最深抵达${getMaxFloor(item)}，获得渊星${item.totalStar}`"
+        :value="item.id"
+      >
+        <span class="ua-tab">
+          <span
+            :title="`最深抵达 · ${getMaxFloor(item)} · 获得渊星 · ${item.totalStar}`"
+            class="ua-tab-head"
+          >
+            <span class="ua-tab-name">No.{{ item.id }}</span>
+            <span class="ua-tab-floor">{{ getMaxFloor(item) }}</span>
+            <span class="ua-tab-record">
+              <img alt="获得渊星" src="/icon/star/Abyss.webp" />
+              <span>{{ item.totalStar }}</span>
+            </span>
+          </span>
+          <span class="ua-tab-time">
+            {{ item.startTime.slice(0, 10) }} ~ {{ item.endTime.slice(0, 10) }}
+          </span>
+        </span>
+      </v-tab>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
       <v-window-item
@@ -616,8 +644,61 @@ async function refreshAvatars(
 }
 
 .ua-tabs-box {
+  max-width: 200px;
   max-height: 100%;
   overflow-y: auto;
+}
+
+.ua-tab {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  row-gap: 2px;
+
+  .ua-tab-head {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    column-gap: 4px;
+  }
+
+  .ua-tab-name {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ua-tab-floor,
+  .ua-tab-record {
+    flex-shrink: 0;
+    color: var(--tgc-yellow-1);
+    font-family: var(--font-title);
+    font-size: 12px;
+    font-weight: normal;
+  }
+
+  .ua-tab-record {
+    display: flex;
+    align-items: center;
+    column-gap: 4px;
+
+    img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
+  }
+
+  .ua-tab-time {
+    font-size: 10px;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
 }
 
 .ua-window {
