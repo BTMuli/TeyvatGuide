@@ -13,15 +13,14 @@
     <template #append>
       <div class="post-new-actions">
         <v-btn
-          :aria-label="backLabel"
-          :disabled="editorBusy"
+          :disabled="editorBusy || !canWrite"
+          aria-label="打开草稿箱"
           class="post-new-back"
-          prepend-icon="mdi-arrow-left"
+          icon="mdi-file-document-edit-outline"
+          title="打开草稿箱"
           variant="text"
-          @click="goBack"
-        >
-          <span class="post-new-action-label">{{ backLabel }}</span>
-        </v-btn>
+          @click="draftsVisible = true"
+        />
         <v-btn
           v-if="!contextError && canWrite"
           :disabled="editorSaveDisabled"
@@ -29,12 +28,44 @@
           aria-label="发布帖子"
           class="post-new-save"
           color="var(--tgc-btn-1)"
-          prepend-icon="mdi-send-outline"
+          icon="mdi-send-outline"
           :loading="editorPending"
+          title="发布帖子"
           type="submit"
           variant="flat"
-          >发布</v-btn
-        >
+        />
+        <v-btn
+          v-if="!contextError && canWrite"
+          :disabled="editorSaveDisabled"
+          :loading="composer?.draftPending ?? false"
+          aria-label="保存草稿到米游社"
+          class="post-new-back"
+          icon="mdi-content-save-outline"
+          title="保存草稿到米游社"
+          variant="text"
+          @click="composer?.saveDraft()"
+        />
+        <v-btn
+          v-if="!contextError && canWrite && composer?.currentDraftId"
+          :disabled="!composer?.canDeleteDraft"
+          :loading="composer?.draftDeletePending ?? false"
+          aria-label="删除当前草稿"
+          class="post-new-back"
+          color="var(--tgc-od-red)"
+          icon="mdi-delete-outline"
+          title="删除当前草稿"
+          variant="text"
+          @click="composer?.deleteDraft()"
+        />
+        <v-btn
+          :aria-label="backLabel"
+          :disabled="editorBusy"
+          class="post-new-back"
+          icon="mdi-arrow-left"
+          :title="backLabel"
+          variant="text"
+          @click="goBack"
+        />
       </div>
     </template>
   </v-app-bar>
@@ -57,17 +88,21 @@
       :view-type="viewType === 2 ? 2 : 1"
       :forum-id="initialForumId"
       :initial-topic="initialTopic"
+      :draftId
       @saved="handleSaved"
     />
   </main>
+  <VpPostDrafts v-model="draftsVisible" :gid @deleted="composer?.forgetDraft($event)" />
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
+import VpPostDrafts from "@comp/viewPost/vp-post-drafts.vue";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
 import { storeToRefs } from "pinia";
-import { computed, useId, useTemplateRef } from "vue";
+import { computed, ref, useId, useTemplateRef, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -76,6 +111,10 @@ const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
 const { forumList } = storeToRefs(useBBSStore());
 const formId = useId();
 const composer = useTemplateRef<InstanceType<typeof VpPostComposer>>("composer");
+const draftsVisible = ref<boolean>(false);
+const draftId = computed<string | undefined>(() =>
+  typeof route.query.draft === "string" ? route.query.draft : undefined,
+);
 
 const gid = computed<number>(() => Number(route.params.gid));
 const rawViewType = computed<string>(() => String(route.params.viewType ?? ""));
@@ -100,6 +139,9 @@ const initialForumId = computed<number | undefined>(() => {
   return Number.isSafeInteger(id) ? id : undefined;
 });
 const contextError = computed<string>(() => {
+  if (route.query.draft !== undefined && (!draftId.value || !/^[1-9]\d*$/u.test(draftId.value))) {
+    return "草稿 ID 无效，请从草稿箱重新打开";
+  }
   if (!Number.isSafeInteger(gid.value) || gid.value <= 0) {
     return "社区 ID 无效，请从版块或话题页面进入发帖";
   }
@@ -119,7 +161,9 @@ const fromProfile = computed<boolean>(() => route.query.from === "profile");
 const backLabel = computed<string>(() =>
   fromProfile.value ? "返回我的主页" : fromTopic.value ? "返回话题" : "返回版块",
 );
-const pageTitle = computed<string>(() => (viewType.value === 2 ? "发布图片帖" : "发布长文"));
+const pageTitle = computed<string>(() =>
+  draftId.value ? "编辑草稿" : viewType.value === 2 ? "发布图片帖" : "发布长文",
+);
 const currentForum = computed<TGApp.BBS.Forum.GameForumItem | undefined>(() => {
   if (initialForumId.value === undefined || initialForumId.value === 0) return undefined;
   return forumList.value
@@ -139,14 +183,44 @@ const metaText = computed<string>(() => {
   return items.join(" · ") || "米游社";
 });
 const composerKey = computed<string>(() =>
-  [gid.value, viewType.value, initialForumId.value ?? "", initialTopic.value?.id ?? ""].join(":"),
+  [
+    uid.value,
+    gid.value,
+    viewType.value,
+    initialForumId.value ?? "",
+    initialTopic.value?.id ?? "",
+    draftId.value ?? "",
+  ].join(":"),
 );
-const editorPending = computed<boolean>(() => composer.value?.pending ?? false);
+const editorPending = computed<boolean>(
+  () =>
+    (composer.value?.pending ?? false) &&
+    !(composer.value?.draftPending ?? false) &&
+    !(composer.value?.draftDeletePending ?? false),
+);
 const editorBusy = computed<boolean>(() => composer.value?.busy ?? false);
 const editorSaveDisabled = computed<boolean>(() => !(composer.value?.canSubmit ?? false));
 
-onBeforeRouteLeave(() => !editorBusy.value);
-onBeforeRouteUpdate(() => !editorBusy.value);
+onBeforeRouteLeave(confirmLeave);
+onBeforeRouteUpdate(confirmLeave);
+watch(
+  () => route.fullPath,
+  () => {
+    draftsVisible.value = false;
+  },
+);
+
+async function confirmLeave(): Promise<boolean> {
+  if (editorBusy.value) return false;
+  if (!composer.value?.hasChanges) return true;
+  const confirmed = await showDialog.checkF({
+    title: "放弃未保存的修改？",
+    text: "离开后，当前未保存的内容将丢失。",
+    confirmLabel: "放弃修改",
+    cancelLabel: "继续编辑",
+  });
+  return confirmed === true;
+}
 
 async function goBack(): Promise<void> {
   if (editorBusy.value) return;
@@ -249,18 +323,21 @@ async function handleSaved(postId?: string): Promise<void> {
 
 .post-new-back,
 .post-new-save {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
   border: 1px solid var(--common-shadow-1);
+  border-radius: 4px !important;
   font-family: var(--font-title);
   font-weight: normal;
 }
 
 .post-new-back {
-  margin-right: 8px;
   color: var(--common-text-title);
 }
 
 .post-new-save {
-  min-width: 112px;
   color: var(--btn-text);
 }
 
@@ -304,29 +381,6 @@ async function handleSaved(postId?: string): Promise<void> {
   .post-new-meta {
     max-width: 42vw;
     font-size: 11px;
-  }
-
-  .post-new-back {
-    margin-right: 0;
-  }
-
-  .post-new-back .post-new-action-label {
-    display: none;
-  }
-
-  .post-new-back,
-  .post-new-save {
-    min-width: 40px;
-    padding-inline: 8px;
-  }
-
-  .post-new-back :deep(.v-btn__prepend),
-  .post-new-save :deep(.v-btn__prepend) {
-    margin-inline-end: 0;
-  }
-
-  .post-new-save :deep(.v-btn__content) {
-    display: none;
   }
 }
 

@@ -1,0 +1,10 @@
+{
+  "$id": "https://schema.local/bbs/postDraftDetail.json",
+  "type": "object",
+  "required": ["draft_id", "draft"],
+  "properties": {
+    "draft_id": { "type": ["string", "number"] },
+    "version": { "type": "number" },
+    "draft": { "type": "object" }
+  }
+}

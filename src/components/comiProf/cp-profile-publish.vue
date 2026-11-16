@@ -69,25 +69,38 @@
           </span>
         </template>
       </div>
-      <div class="community-profile-publish-types">
-        <button
-          :disabled="!canPublishType(1)"
-          class="community-profile-publish-type"
-          type="button"
-          @click="newPost(1)"
-        >
-          <v-icon aria-hidden="true" size="20">mdi-text-box-plus-outline</v-icon>
-          <span>发布长文</span>
-        </button>
-        <button
-          :disabled="!canPublishType(2)"
-          class="community-profile-publish-type"
-          type="button"
-          @click="newPost(2)"
-        >
-          <v-icon aria-hidden="true" size="20">mdi-image-plus-outline</v-icon>
-          <span>发布图文</span>
-        </button>
+      <div class="community-profile-publish-actions">
+        <div aria-label="发布" class="community-profile-publish-types" role="group">
+          <div aria-hidden="true" class="community-profile-publish-types-heading">发布</div>
+          <div class="community-profile-publish-type-list">
+            <button
+              aria-label="发布长文"
+              :disabled="!canPublishType(1)"
+              class="community-profile-publish-type"
+              type="button"
+              @click="newPost(1)"
+            >
+              <v-icon aria-hidden="true" size="20">mdi-text-box-plus-outline</v-icon>
+              <span>长文</span>
+            </button>
+            <button
+              aria-label="发布图文"
+              :disabled="!canPublishType(2)"
+              class="community-profile-publish-type"
+              type="button"
+              @click="newPost(2)"
+            >
+              <v-icon aria-hidden="true" size="20">mdi-image-plus-outline</v-icon>
+              <span>图文</span>
+            </button>
+          </div>
+        </div>
+        <div class="community-profile-publish-drafts-group">
+          <button class="community-profile-publish-drafts" type="button" @click="openDrafts">
+            <v-icon aria-hidden="true" size="20">mdi-note-edit-outline</v-icon>
+            <span>草稿箱</span>
+          </button>
+        </div>
       </div>
       <span
         v-if="canPublishType(2) && !canPublishType(1)"
@@ -98,9 +111,11 @@
       </span>
     </div>
   </v-menu>
+  <VpPostDrafts v-model="draftsVisible" :gid="publishGid" />
 </template>
 
 <script lang="ts" setup>
+import VpPostDrafts from "@comp/viewPost/vp-post-drafts.vue";
 import { useCommunityProfile } from "@hooks/useCommunityProfile.js";
 import apiHubReq from "@req/apiHubReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -115,6 +130,7 @@ const router = useRouter();
 const bbsStore = useBBSStore();
 const { forumList } = storeToRefs(bbsStore);
 const publishMenuVisible = ref<boolean>(false);
+const draftsVisible = ref<boolean>(false);
 const publishGid = ref<number>(currentGame.value.id);
 const publishForumId = ref<number>();
 const publishForumsLoading = ref<boolean>(false);
@@ -203,6 +219,11 @@ async function newPost(viewType: 1 | 2): Promise<void> {
     params: { gid: String(publishGid.value), viewType: String(viewType) },
     query: { from: "profile", forum: String(forum.id) },
   });
+}
+
+function openDrafts(): void {
+  publishMenuVisible.value = false;
+  draftsVisible.value = true;
 }
 </script>
 
@@ -360,10 +381,82 @@ async function newPost(viewType: 1 | 2): Promise<void> {
   }
 }
 
-.community-profile-publish-types {
+.community-profile-publish-actions {
   display: grid;
+  min-width: 0;
+  align-items: stretch;
   gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.community-profile-publish-types {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.community-profile-publish-types-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--box-text-4);
+  font-size: 12px;
+  gap: 8px;
+  line-height: 16px;
+
+  &::before {
+    height: 1px;
+    flex: 1;
+    background: var(--common-shadow-1);
+    content: "";
+  }
+}
+
+.community-profile-publish-type-list {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.community-profile-publish-drafts-group {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  align-self: end;
+  border-inline-start: 1px solid var(--common-shadow-1);
+  padding-inline-start: 8px;
+}
+
+.community-profile-publish-drafts {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 6px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--box-text-1);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  gap: 8px;
+  line-height: 20px;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-orange);
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    border-color: var(--common-shadow-2);
+    background: var(--box-bg-3);
+  }
 }
 
 .community-profile-publish-type {
@@ -372,7 +465,7 @@ async function newPost(viewType: 1 | 2): Promise<void> {
   min-height: 44px;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: 8px 6px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
@@ -380,7 +473,7 @@ async function newPost(viewType: 1 | 2): Promise<void> {
   cursor: pointer;
   font: inherit;
   font-size: 14px;
-  gap: 8px;
+  gap: 4px;
   line-height: 20px;
   transition:
     background-color 120ms ease,
@@ -404,6 +497,30 @@ async function newPost(viewType: 1 | 2): Promise<void> {
 
   &:active:not(:disabled) {
     background: var(--box-bg-2);
+  }
+}
+
+@media (width <= 320px) {
+  .community-profile-publish-actions {
+    gap: 4px;
+  }
+
+  .community-profile-publish-drafts-group {
+    padding-inline-start: 4px;
+  }
+
+  .community-profile-publish-drafts,
+  .community-profile-publish-type {
+    font-size: 12px;
+    gap: 4px;
+    padding-inline: 4px;
+  }
+}
+
+@media (width <= 240px) {
+  .community-profile-publish-drafts :deep(.v-icon),
+  .community-profile-publish-type :deep(.v-icon) {
+    display: none;
   }
 }
 </style>

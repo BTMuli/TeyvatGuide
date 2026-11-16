@@ -1,6 +1,6 @@
 /**
  * 米游社接口响应结构校验器
- * @since Beta v0.13.0
+ * @since Beta v0.13.1
  */
 
 import { isRecord } from "@utils/common/typeGuards.js";
@@ -8,6 +8,9 @@ import Ajv, { type ValidateFunction } from "ajv";
 
 import CollectionPostsJson from "./schema/collectionPosts.json" with { type: "json" };
 import FullDataJson from "./schema/fullData.json" with { type: "json" };
+import PostDraftDetailJson from "./schema/postDraftDetail.json" with { type: "json" };
+import PostDraftListJson from "./schema/postDraftList.json" with { type: "json" };
+import PostDraftSaveJson from "./schema/postDraftSave.json" with { type: "json" };
 import PostDynamicJson from "./schema/postDynamic.json" with { type: "json" };
 import PostFullJson from "./schema/postFull.json" with { type: "json" };
 
@@ -17,6 +20,13 @@ ajv.addSchema(FullDataJson);
 const PostFullDataValidate = ajv.compile<TGApp.BBS.Post.FullRes>(PostFullJson);
 const CollectionPostsValidate = ajv.compile<TGApp.BBS.Collection.PostsRes>(CollectionPostsJson);
 const PostDynamicValidate = ajv.compile<TGApp.BBS.Post.DynamicResp["data"]>(PostDynamicJson);
+const PostDraftListValidate =
+  ajv.compile<TGApp.BBS.PostDraft.Api.ListResp["data"]>(PostDraftListJson);
+const PostDraftDetailValidate =
+  ajv.compile<TGApp.BBS.PostDraft.Api.DetailResp["data"]>(PostDraftDetailJson);
+const PostDraftSaveValidate =
+  ajv.compile<TGApp.BBS.PostDraft.Api.SaveResp["data"]>(PostDraftSaveJson);
+const PostDraftDeleteValidate = ajv.compile<unknown>({});
 
 /**
  * 校验米游社响应外壳；非零错误码响应仅校验外壳，成功响应额外校验数据骨架。
@@ -66,4 +76,52 @@ function isPostDynamicResp(value: unknown): value is TGApp.BBS.Post.DynamicResp 
   return checkBbsResp(value, PostDynamicValidate, "getDynamicData");
 }
 
-export { isCollectionPostsResp, isPostDynamicResp, isPostFullResp };
+/**
+ * 草稿列表响应结构校验。
+ * @since Beta v0.13.1
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合草稿列表响应结构
+ */
+function isPostDraftListResp(value: unknown): value is TGApp.BBS.PostDraft.Api.ListResp {
+  return checkBbsResp(value, PostDraftListValidate, "getDraftList");
+}
+
+/**
+ * 草稿详情响应结构校验。
+ * @since Beta v0.13.1
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合草稿详情响应结构
+ */
+function isPostDraftDetailResp(value: unknown): value is TGApp.BBS.PostDraft.Api.DetailResp {
+  return checkBbsResp(value, PostDraftDetailValidate, "getDraftDetail");
+}
+
+/**
+ * 草稿保存响应结构校验。
+ * @since Beta v0.13.1
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合草稿保存响应结构
+ */
+function isPostDraftSaveResp(value: unknown): value is TGApp.BBS.PostDraft.Api.SaveResp {
+  return checkBbsResp(value, PostDraftSaveValidate, "saveDraft");
+}
+
+/**
+ * 草稿删除响应校验，成功数据无需解引用，仅约束业务响应外壳。
+ * @since Beta v0.13.1
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合草稿删除响应结构
+ */
+function isPostDraftDeleteResp(value: unknown): value is TGApp.BBS.PostDraft.DeleteResp {
+  return checkBbsResp(value, PostDraftDeleteValidate, "deleteDraft");
+}
+
+export {
+  isCollectionPostsResp,
+  isPostDraftDeleteResp,
+  isPostDraftDetailResp,
+  isPostDraftListResp,
+  isPostDraftSaveResp,
+  isPostDynamicResp,
+  isPostFullResp,
+};

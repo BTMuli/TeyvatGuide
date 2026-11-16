@@ -373,9 +373,10 @@
         <div class="post-composer-preview-head">
           <span>帖子预览</span>
         </div>
-        <div class="post-composer-preview-scroll">
-          <div class="post-composer-preview-page">
+        <div class="post-composer-preview-viewport">
+          <div class="post-composer-preview-scroll">
             <VpPostPreview
+              class="post-composer-preview-content"
               :aiContentChoice="draft.userAiContentChoice ?? ''"
               :authorDesc="briefInfo.desc"
               :authorLevel="previewLevel"
@@ -422,6 +423,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
+import postDraftReq from "@req/postDraftReq.js";
 import postEditReq, { getPostEditSettings } from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import postVoteReq from "@req/postVoteReq.js";
@@ -435,7 +437,17 @@ import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs
 import { getCommunityProfileLevel } from "@utils/community/profileLevel.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeUnmount, ref, toRaw, useId, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  shallowRef,
+  toRaw,
+  useId,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import VpPictureUploader from "./vp-picture-uploader.vue";
 import VpPostComponentDialog from "./vp-post-component-dialog.vue";
@@ -443,14 +455,16 @@ import VpPostEditor from "./vp-post-editor.vue";
 import VpPostPreview from "./vp-post-preview.vue";
 import VpPostTools from "./vp-post-tools.vue";
 
-const props = defineProps<{
+type PostComposerProps = {
   formId: string;
   gid: number;
   source?: TGApp.BBS.Post.FullData;
+  draftId?: string;
   viewType?: 1 | 2;
   forumId?: number;
   initialTopic?: { id: number; name: string };
-}>();
+};
+const props = defineProps<PostComposerProps>();
 const emits = defineEmits<{ saved: [postId: string | undefined] }>();
 const titleId = useId();
 const titleCounterId = useId();
@@ -461,6 +475,8 @@ const { forumList, gameList } = storeToRefs(bbsStore);
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
 const loading = ref<boolean>(false);
 const pending = ref<boolean>(false);
+const draftPending = ref<boolean>(false);
+const draftDeletePending = ref<boolean>(false);
 const uploading = ref<boolean>(false);
 const previewLevel = ref<number>();
 const draftCreatedAt = Math.floor(Date.now() / 1000);
@@ -482,6 +498,14 @@ const topicCovers = ref<Map<number, string>>(new Map());
 const topicDescs = ref<Map<number, string>>(new Map());
 const contextVersion = ref<number>(0);
 const draft = ref<TGApp.BBS.PostEdit.Settings>(emptyDraft());
+const savedSnapshot = ref<string>("");
+const hasChanges = computed<boolean>(
+  () =>
+    !loading.value &&
+    !loadError.value &&
+    !!savedSnapshot.value &&
+    JSON.stringify(draft.value) !== savedSnapshot.value,
+);
 type TopicOption = {
   id: number;
   name: string;
@@ -509,6 +533,8 @@ const componentDialog = ref<ComponentDialogState>({
   error: "",
 });
 let seed: TGApp.BBS.Post.FullData | undefined;
+const draftSeed = shallowRef<TGApp.BBS.PostDraft.Detail>();
+const currentDraftId = computed<string | undefined>(() => draftSeed.value?.id);
 let active = true;
 let previewLevelVersion = 0;
 
@@ -544,6 +570,16 @@ const contentLength = computed<number>(() => {
 });
 const canWrite = computed<boolean>(
   () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+);
+const canDeleteDraft = computed<boolean>(
+  () =>
+    !!currentDraftId.value &&
+    !props.source &&
+    canWrite.value &&
+    !busy.value &&
+    !loading.value &&
+    !loadError.value &&
+    !componentDialog.value.visible,
 );
 
 async function loadPreviewLevel(): Promise<void> {
@@ -587,7 +623,7 @@ const forums = computed<Array<ForumOption>>(() => {
   const items = [...eligibleForums.value];
   if (
     !props.source &&
-    props.initialTopic &&
+    (props.initialTopic || props.draftId) &&
     (props.forumId === undefined ||
       props.forumId === 0 ||
       !items.some((item) => item.id === props.forumId))
@@ -619,11 +655,11 @@ const categories = computed<Array<{ id: number; name: string }>>(() => {
       ?.forums.find((item) => item.id === draft.value.forumId)?.forum_cate_list ?? []),
   ];
   if (
-    props.source &&
+    (props.source || props.draftId) &&
     draft.value.cateId > 0 &&
     !items.some((item) => item.id === draft.value.cateId)
   ) {
-    const category = props.source.forum?.forum_cate;
+    const category = props.source?.forum?.forum_cate;
     items.push({
       id: draft.value.cateId,
       name: category?.id === draft.value.cateId ? category.name : `分类 ${draft.value.cateId}`,
@@ -694,6 +730,7 @@ const authorizationItems = [
 watch(
   () => [
     props.source,
+    props.draftId,
     props.source?.post.post_id,
     props.source?.post.uid,
     props.source?.post.subject,
@@ -804,7 +841,33 @@ async function initialize(force: boolean = false): Promise<void> {
     )
       await bbsStore.refreshForumList();
     if (!active || version !== contextVersion.value) return;
-    if (props.source) {
+    if (props.draftId) {
+      if (!cookie.value || !canWrite.value) throw new Error("请先登录米游社账号");
+      const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+        uid: cookie.value.ltuid,
+        cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+      };
+      const response = await postDraftReq.detail(props.draftId, snapshot.cookie);
+      if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
+      if (response.retcode !== 0 || !response.data)
+        throw new Error(`[${response.retcode}] ${response.message}`);
+      if (response.data.ownerUid !== undefined && response.data.ownerUid !== snapshot.uid)
+        throw new Error("仅能编辑当前账号的草稿");
+      if (
+        (response.data.settings.gid !== 0 && response.data.settings.gid !== props.gid) ||
+        response.data.settings.viewType !== getInitialViewType()
+      )
+        throw new Error("草稿分区或帖子类型与当前页面不一致，请从草稿箱重新打开");
+      seed = undefined;
+      const initial = { ...response.data.settings, gid: props.gid };
+      draftSeed.value = { ...response.data, settings: initial };
+      draft.value = structuredClone(initial);
+      maxPictureCount.value = Math.max(18, draft.value.imageUrls?.length ?? 0);
+      topicNames.value = new Map();
+      topicCovers.value = new Map();
+      topicDescs.value = new Map();
+    } else if (props.source) {
+      draftSeed.value = undefined;
       seed = structuredClone(toRaw(props.source));
       if (force && toolCookie.value) {
         const latest = await postReq.post(seed.post.post_id, toolCookie.value);
@@ -827,6 +890,7 @@ async function initialize(force: boolean = false): Promise<void> {
       topicDescs.value = new Map();
     } else {
       seed = undefined;
+      draftSeed.value = undefined;
       maxPictureCount.value = 18;
       draft.value = emptyDraft();
       topicNames.value = new Map();
@@ -835,6 +899,7 @@ async function initialize(force: boolean = false): Promise<void> {
       if (props.initialTopic) topicNames.value.set(props.initialTopic.id, props.initialTopic.name);
       normalizeForumId();
     }
+    savedSnapshot.value = JSON.stringify(draft.value);
   } catch (cause) {
     if (active && version === contextVersion.value) loadError.value = TGHttps.getErrMsg(cause);
   } finally {
@@ -1248,6 +1313,7 @@ async function savePost(): Promise<void> {
             ? rawPostId
             : undefined;
       pending.value = false;
+      savedSnapshot.value = JSON.stringify(draft.value);
       showSnackbar.success(`${action}成功`);
       emits("saved", postId);
       return;
@@ -1278,6 +1344,7 @@ async function savePost(): Promise<void> {
     const postId = source.post.post_id;
     seed = undefined;
     pending.value = false;
+    savedSnapshot.value = JSON.stringify(draft.value);
     showSnackbar.success(`${action}成功`);
     emits("saved", postId);
   } catch (cause) {
@@ -1290,7 +1357,104 @@ async function savePost(): Promise<void> {
   }
 }
 
-defineExpose({ busy, canSubmit, pending });
+async function saveDraft(): Promise<void> {
+  if (!canSubmit.value || props.source || !cookie.value) return;
+  const version = contextVersion.value;
+  const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+    uid: cookie.value.ltuid,
+    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+  };
+  const settings = structuredClone(toRaw(draft.value));
+  pending.value = true;
+  draftPending.value = true;
+  error.value = "";
+  try {
+    const execution = await executeReplyForCurrentAccount(snapshot, () =>
+      postDraftReq.save(settings, snapshot.cookie, draftSeed.value),
+    );
+    if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
+    if (!execution.allowed) throw new Error("账号状态已变化，请重新打开编辑器");
+    const response = execution.data;
+    if (response.retcode !== 0 || !response.data)
+      throw new Error(`[${response.retcode}] ${response.message}`);
+    draftSeed.value = response.data.draft ?? {
+      ...draftSeed.value,
+      id: response.data.draft_id,
+      settings,
+      updatedAt: 0,
+    };
+    savedSnapshot.value = JSON.stringify(draft.value);
+    showSnackbar.success("草稿已保存到米游社");
+  } catch (cause) {
+    if (active && version === contextVersion.value) {
+      error.value = TGHttps.getErrMsg(cause);
+      showSnackbar.error(error.value);
+    }
+  } finally {
+    pending.value = false;
+    draftPending.value = false;
+  }
+}
+
+function forgetDraft(id: string): void {
+  if (draftSeed.value?.id !== id) return;
+  draftSeed.value = undefined;
+  savedSnapshot.value = JSON.stringify(emptyDraft());
+}
+
+async function deleteDraft(): Promise<void> {
+  const id = currentDraftId.value;
+  if (!id || !canDeleteDraft.value || !cookie.value) return;
+  const version = contextVersion.value;
+  const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
+    uid: cookie.value.ltuid,
+    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+  };
+  pending.value = true;
+  draftDeletePending.value = true;
+  error.value = "";
+  try {
+    const confirmed = await showDialog.checkF({
+      title: `删除草稿「${draft.value.subject || "无标题草稿"}」？`,
+      text: "删除米游社云端草稿后不可撤销，当前编辑内容会保留。",
+      confirmLabel: "删除",
+      cancelLabel: "保留",
+    });
+    if (confirmed !== true) return;
+    if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
+    const execution = await executeReplyForCurrentAccount(snapshot, () =>
+      postDraftReq.delete(id, snapshot.cookie),
+    );
+    if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
+    if (!execution.allowed) throw new Error("账号状态已变化，请重新打开编辑器");
+    const response = execution.data;
+    if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+    forgetDraft(id);
+    showSnackbar.success("草稿已删除，编辑内容已保留");
+  } catch (cause) {
+    if (active && version === contextVersion.value) {
+      error.value = TGHttps.getErrMsg(cause);
+      showSnackbar.error(error.value);
+    }
+  } finally {
+    pending.value = false;
+    draftDeletePending.value = false;
+  }
+}
+
+defineExpose({
+  busy,
+  canSubmit,
+  pending,
+  draftPending,
+  saveDraft,
+  hasChanges,
+  forgetDraft,
+  currentDraftId,
+  canDeleteDraft,
+  draftDeletePending,
+  deleteDraft,
+});
 </script>
 <style lang="scss" scoped>
 .post-composer {
@@ -1298,7 +1462,6 @@ defineExpose({ busy, canSubmit, pending });
   width: 100%;
   box-sizing: border-box;
   align-items: start;
-  padding: 0 0 32px;
   gap: 24px;
   grid-template-columns: minmax(0, 1fr) 432px;
 }
@@ -1315,13 +1478,13 @@ defineExpose({ busy, canSubmit, pending });
 
 .post-composer-preview-side {
   position: sticky;
-  top: 80px;
+  top: calc(var(--v-layout-top, 0px) + 16px);
   display: flex;
   overflow: hidden;
   width: 432px;
   min-width: 0;
   max-width: 100%;
-  max-height: calc(100dvh - 96px);
+  height: calc(100dvh - var(--v-layout-top, 0px) - 32px);
   box-sizing: border-box;
   flex-direction: column;
   align-self: start;
@@ -1354,23 +1517,27 @@ defineExpose({ busy, canSubmit, pending });
   line-height: 20px;
 }
 
-.post-composer-preview-scroll {
+.post-composer-preview-viewport {
+  display: flex;
   min-height: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  flex-direction: column;
   padding: 8px 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  background: var(--app-page-bg);
 }
 
-.post-composer-preview-page {
-  overflow: hidden;
-  width: 416px;
-  max-width: 100%;
+.post-composer-preview-scroll {
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+}
+
+.post-composer-preview-content {
   box-sizing: border-box;
-  padding: 8px;
-  border-radius: 4px;
-  margin: 0 auto;
-  background: var(--app-page-bg);
+  padding-block: 8px;
 }
 
 .post-composer-section {
@@ -1766,19 +1933,18 @@ defineExpose({ busy, canSubmit, pending });
 
   .post-composer-preview-side {
     position: static;
+    height: auto;
     max-height: min(70dvh, 720px);
   }
-}
 
-@media (width <= 800px) {
-  .post-composer {
-    padding-bottom: 24px;
+  .post-composer-preview-viewport,
+  .post-composer-preview-scroll {
+    flex-basis: auto;
   }
 }
 
 @media (width <= 600px) {
   .post-composer {
-    padding-bottom: 16px;
     gap: 12px;
   }
 

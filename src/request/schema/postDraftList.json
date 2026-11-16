@@ -1,0 +1,27 @@
+{
+  "$id": "https://schema.local/bbs/postDraftList.json",
+  "type": "object",
+  "title": "草稿列表",
+  "required": ["list", "is_last", "next_offset"],
+  "properties": {
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["draft_id", "subject"],
+        "properties": {
+          "draft_id": { "type": ["string", "number"] },
+          "subject": { "type": "string" },
+          "view_type": { "type": "number" },
+          "game_id": { "type": "number" },
+          "version": { "type": "number" },
+          "updated_at": { "type": "number" },
+          "cover": { "type": ["string", "null"] },
+          "content": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "is_last": { "type": "boolean" },
+    "next_offset": { "type": ["number", "string"] }
+  }
+}
