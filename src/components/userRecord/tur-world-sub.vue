@@ -156,7 +156,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showLoading from "@comp/func/loading.js";
 import gameEnum from "@enum/game.js";
-import TGShare, { type ShareProgress } from "@utils/share/TGShare.js";
+import TGShare from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { computed, useTemplateRef } from "vue";
 
@@ -308,35 +308,12 @@ async function shareWorldCard(): Promise<void> {
   const card = worldCardEl.value;
   if (card === null) return;
   const fileName = `世界探索卡片-${world.name}`;
-  let progressAt = 0;
-
-  function reportShareProgress(progress: ShareProgress): void {
-    const isTail = progress.current >= progress.total;
-    const now = performance.now();
-    if (!isTail && now - progressAt < 80) return;
-    progressAt = now;
-    if (progress.phase === "snapshot") {
-      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
-      return;
-    }
-    if (progress.phase === "bake") {
-      void showLoading.update(`${progress.current}/${progress.total}`, {
-        title: "正在烘焙毛玻璃",
-        timeout: 0,
-      });
-      return;
-    }
-    void showLoading.update(`${progress.current}/${progress.total}`, {
-      title: "正在生成图片",
-      timeout: 0,
-    });
-  }
 
   await showLoading.start("正在生成世界探索分享图", fileName, 0);
   try {
     await TGShare.modern(fileName, card, 2, false, {
       bakeBackdrop: true,
-      onProgress: reportShareProgress,
+      onProgress: showLoading.share(),
     });
     await TGLogger.Info(`[UserRecord][shareWorldCard][${world.name}] 生成分享图片成功`);
   } finally {

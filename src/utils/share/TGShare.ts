@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -751,23 +751,14 @@ const SHARE_BACKDROP_ATLAS_MAX_SIZE = 2048;
 const SHARE_BACKDROP_ATLAS_GAP = 1;
 
 /**
- * 分享截图进度
- * @since Beta v0.12.0
+ * 向调用方发送当前分享截图进度
+ * @since Beta v0.13.2
+ * @param onProgress - 可选的进度回调
+ * @param progress - 当前阶段的进度
  */
-export type ShareProgress = {
-  /** snapshot 背景快照 / bake 毛玻璃 / capture 最终截图 */
-  phase: "snapshot" | "bake" | "capture";
-  /** 已完成数量 */
-  current: number;
-  /** 总数量 */
-  total: number;
-};
-
-type ShareProgressFn = (progress: ShareProgress) => void;
-
 function reportShareProgress(
-  onProgress: ShareProgressFn | undefined,
-  progress: ShareProgress,
+  onProgress: TGApp.App.Share.ProgressCallback | undefined,
+  progress: TGApp.App.Share.Progress,
 ): void {
   if (onProgress === undefined) return;
   onProgress(progress);
@@ -986,17 +977,19 @@ type ShareBackdropAtlasPage = {
 
 /**
  * 用 Worker 池并行烘焙毛玻璃区域，失败则回退主线程
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param snapshot - 根节点快照
  * @param rootRect - 根节点视口矩形
  * @param jobs - 烘焙任务
+ * @param onProgress - 毛玻璃烘焙进度回调
+ * @param allowAtlas - 是否允许通过 Worker 生成图集
  * @returns 与 jobs 对齐的填充（图集或单图）
  */
 async function renderBakedBackdropUrls(
   snapshot: HTMLImageElement,
   rootRect: DOMRect,
   jobs: Array<ShareBackdropBakeJob>,
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
   allowAtlas: boolean = true,
 ): Promise<Array<ShareBakedFill | undefined>> {
   if (jobs.length === 0) return [];
@@ -1165,17 +1158,18 @@ async function encodeShareBackdropAtlases(
 
 /**
  * 最多 16 个 Worker 批量 blur，主线程拼图集后只编码一次
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param snapshot - 根节点快照
  * @param rootRect - 根节点视口矩形
  * @param jobs - 烘焙任务
+ * @param onProgress - Worker 批量烘焙的进度回调
  * @returns 与 jobs 对齐的图集填充
  */
 async function renderBakedBackdropUrlsWithWorkers(
   snapshot: HTMLImageElement,
   rootRect: DOMRect,
   jobs: Array<ShareBackdropBakeJob>,
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
 ): Promise<Array<ShareBakedFill | undefined>> {
   const workerCount = Math.min(SHARE_BACKDROP_WORKER_MAX, jobs.length);
   const workers = Array.from({ length: workerCount }, () => new ShareBackdropWorker());
@@ -1325,15 +1319,17 @@ function resolveShareWorkerNumber(root: HTMLElement): number {
 
 /**
  * 按策略准备毛玻璃：强制时整页烘焙，自动模式下的大列表按卡片局部烘焙
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param root - 截图根节点
  * @param mode - true 强制烘焙 / false 强制 flatten / none 跳过 / auto 按数量选全局或局部烘焙
+ * @param onProgress - 背景快照和毛玻璃烘焙的进度回调
+ * @param blurScale - 毛玻璃模糊强度的缩放系数
  * @returns 还原函数
  */
 async function prepareShareBackdrops(
   root: HTMLElement,
   mode: ShareBackdropMode = "auto",
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
   blurScale: number = 1,
 ): Promise<() => void> {
   if (mode === "none") return () => {};
@@ -1419,13 +1415,17 @@ function collectNestedBackdropElementTargets(
 
 /**
  * 在外层毛玻璃已写回 DOM 后，由外到内重新烘焙嵌套毛玻璃
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
+ * @param nestedTargets - 按由外到内顺序排列的嵌套毛玻璃目标
+ * @param progressOffset - 进入嵌套烘焙前已处理的目标数
+ * @param progressTotal - 整个烘焙阶段的目标总数
+ * @param onProgress - 累计烘焙进度回调
  */
 async function rebakeNestedShareBackdropElements(
   nestedTargets: Array<ShareNestedBackdropElementTarget>,
   progressOffset: number,
   progressTotal: number,
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
 ): Promise<void> {
   for (let index = 0; index < nestedTargets.length; index += 1) {
     const { target, host } = nestedTargets[index];
@@ -1602,7 +1602,7 @@ function hideShareBackdropCloneTargets(cloned: Node): void {
 
 /**
  * 大列表局部烘焙：对每个毛玻璃节点，只截其父容器（如名片中段），有限并发
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param root - 截图根（仅用于收集目标）
  * @param onProgress - 截图进度
  * @param blurScale - blur 值
@@ -1610,7 +1610,7 @@ function hideShareBackdropCloneTargets(cloned: Node): void {
  */
 async function bakeShareBackdropFiltersLocal(
   root: HTMLElement,
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
   blurScale: number = 1,
 ): Promise<() => void> {
   const targets = collectBackdropElementTargets(root, blurScale);
@@ -1712,7 +1712,7 @@ async function bakeShareBackdropFiltersLocal(
 /**
  * 将毛玻璃烘焙为圆角背景图（foreignObject 无法正确裁切 backdrop-filter）
  * 同时处理真实节点与 ::before / ::after 伪元素。
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param root - 截图根节点
  * @param onProgress - 截图进度
  * @param blurScale - blur 值
@@ -1720,7 +1720,7 @@ async function bakeShareBackdropFiltersLocal(
  */
 async function bakeShareBackdropFilters(
   root: HTMLElement,
-  onProgress?: ShareProgressFn,
+  onProgress?: TGApp.App.Share.ProgressCallback,
   blurScale: number = 1,
 ): Promise<() => void> {
   type ElementTarget = {
@@ -1889,7 +1889,7 @@ async function bakeShareBackdropFilters(
       tint: target.tint,
     };
   });
-  const initialBakeProgress: ShareProgressFn | undefined =
+  const initialBakeProgress: TGApp.App.Share.ProgressCallback | undefined =
     nestedElementTargets.length === 0
       ? onProgress
       : (progress) => {
@@ -2042,7 +2042,7 @@ export async function generateShareImg(
 
 /**
  * modern 截图可选参数
- * @since Beta v0.12.4
+ * @since Beta v0.13.2
  */
 export type ShareModernOptions = {
   /** 毛玻璃：true 烘焙 / false flatten / none 跳过 / auto 少量烘焙、过多局部烘焙。默认 auto */
@@ -2058,7 +2058,7 @@ export type ShareModernOptions = {
    * 快照 / 毛玻璃烘焙 / 最终截图进度
    * @since Beta v0.12.0
    */
-  onProgress?: ShareProgressFn;
+  onProgress?: TGApp.App.Share.ProgressCallback;
   /**
    * 截图根节点克隆完成后的处理，仅影响截图副本
    * @since Beta v0.12.4

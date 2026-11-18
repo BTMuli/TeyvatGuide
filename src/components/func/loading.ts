@@ -3,7 +3,6 @@
  * @since Beta v0.13.2
  */
 
-import type { ShareProgress } from "@utils/share/TGShare.js";
 import type { ComponentInternalInstance, VNode } from "vue";
 import { h, render } from "vue";
 
@@ -73,8 +72,8 @@ async function showLoadingEnd(): Promise<void> {
  * @since Beta v0.13.2
  * @returns 独立的分享进度回调
  */
-export function createShareProgressReporter(): (progress: ShareProgress) => void {
-  let lastPhase: ShareProgress["phase"] | undefined;
+function createShareProgressReporter(): TGApp.App.Share.ProgressCallback {
+  let lastPhase: TGApp.App.Share.Progress["phase"] | undefined;
   let lastUpdateAt = 0;
 
   return ({ phase, current, total }) => {
@@ -94,6 +93,7 @@ const showLoading = {
   _: showLoadingFull,
   start: showLoadingStart,
   update: showLoadingUpdate,
+  share: createShareProgressReporter,
   empty: showLoadingEmpty,
   end: showLoadingEnd,
 };

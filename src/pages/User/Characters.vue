@@ -1069,33 +1069,6 @@ async function share(): Promise<void> {
   const fileName = `角色列表_${maskUidName(uidCur.value)}`;
   const prevCount = renderedCount.value;
   const total = selectedList.value.length;
-  let progressAt = 0;
-
-  function reportShareProgress(progress: {
-    phase: "snapshot" | "bake" | "capture";
-    current: number;
-    total: number;
-  }): void {
-    const isTail = progress.current >= progress.total;
-    const now = performance.now();
-    if (!isTail && now - progressAt < 80) return;
-    progressAt = now;
-    if (progress.phase === "snapshot") {
-      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
-      return;
-    }
-    if (progress.phase === "bake") {
-      void showLoading.update(`${progress.current}/${progress.total}`, {
-        title: "正在烘焙毛玻璃",
-        timeout: 0,
-      });
-      return;
-    }
-    void showLoading.update(`${progress.current}/${progress.total}`, {
-      title: "正在生成图片",
-      timeout: 0,
-    });
-  }
 
   await showLoading.start("正在准备角色卡片", fileName, 0);
   loadShare.value = true;
@@ -1115,7 +1088,7 @@ async function share(): Promise<void> {
     await showLoading.update("正在生成图片", { timeout: 0 });
     await TGShare.modern(fileName, box, 1, false, {
       bakeBackdrop: true,
-      onProgress: reportShareProgress,
+      onProgress: showLoading.share(),
     });
     await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);
   } finally {

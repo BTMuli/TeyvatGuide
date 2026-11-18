@@ -15,7 +15,7 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
-import TGShare, { generateShareImg, type ShareProgress } from "@utils/share/TGShare.js";
+import TGShare, { generateShareImg } from "@utils/share/TGShare.js";
 import { useTemplateRef } from "vue";
 
 /** 首页组件参数 */
@@ -39,34 +39,11 @@ const thcEl = useTemplateRef<HTMLDivElement>("thcRef");
 async function share(): Promise<void> {
   if (!thcEl.value) return;
   const fileName = props.shareTitle ?? `HomeComp_${props.title}`;
-  let progressAt = 0;
-
-  function reportShareProgress(progress: ShareProgress): void {
-    const isTail = progress.current >= progress.total;
-    const now = performance.now();
-    if (!isTail && now - progressAt < 80) return;
-    progressAt = now;
-    if (progress.phase === "snapshot") {
-      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
-      return;
-    }
-    if (progress.phase === "bake") {
-      void showLoading.update(`${progress.current}/${progress.total}`, {
-        title: "正在烘焙毛玻璃",
-        timeout: 0,
-      });
-      return;
-    }
-    void showLoading.update(`${progress.current}/${progress.total}`, {
-      title: "正在生成图片",
-      timeout: 0,
-    });
-  }
 
   await showLoading.start("正在生成分享图片", fileName);
   try {
     if (props.modernShare) {
-      const options = props.shareProgress ? { onProgress: reportShareProgress } : undefined;
+      const options = props.shareProgress ? { onProgress: showLoading.share() } : undefined;
       await TGShare.modern(fileName, thcEl.value, 2, false, options);
       return;
     }

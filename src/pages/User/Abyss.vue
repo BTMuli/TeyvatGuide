@@ -162,7 +162,7 @@
 import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import TSubLine from "@comp/app/t-subline.vue";
 import showDialog from "@comp/func/dialog.js";
-import showLoading, { createShareProgressReporter } from "@comp/func/loading.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOvStat from "@comp/userAbyss/tua-ov-stat.vue";
@@ -345,7 +345,7 @@ async function shareAbyss(): Promise<void> {
   try {
     await TGShare.modern(fileName, shareDom, 1.5, false, {
       ppx: 15,
-      onProgress: createShareProgressReporter(),
+      onProgress: showLoading.share(),
       onCloneNode: (cloned) => {
         if (!(cloned instanceof HTMLElement)) return;
         const attribution = cloned.querySelector<HTMLElement>(".uaw-share");

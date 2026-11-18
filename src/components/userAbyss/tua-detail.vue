@@ -30,7 +30,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import showLoading, { createShareProgressReporter } from "@comp/func/loading.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { maskUid, maskUidName } from "@utils/display/TGUid.js";
 import TGShare from "@utils/share/TGShare.js";
@@ -58,7 +58,7 @@ async function shareFloor(): Promise<void> {
     }
     await TGShare.modern(fileName, floor, 1.5, false, {
       ppx: 15,
-      onProgress: createShareProgressReporter(),
+      onProgress: showLoading.share(),
       onCloneNode: (cloned) => {
         if (!(cloned instanceof HTMLElement)) return;
         const info = cloned.querySelector<HTMLElement>(".tuad-share");

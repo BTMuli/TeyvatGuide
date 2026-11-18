@@ -296,39 +296,12 @@ async function shareRecord(): Promise<void> {
     return;
   }
   const fileName = `【原神战绩】-${maskUidName(uidCur.value)}`;
-  let progressAt = 0;
-
-  function reportShareProgress(progress: {
-    phase: "snapshot" | "bake" | "capture";
-    current: number;
-    total: number;
-  }): void {
-    const isTail = progress.current >= progress.total;
-    const now = performance.now();
-    if (!isTail && now - progressAt < 80) return;
-    progressAt = now;
-    if (progress.phase === "snapshot") {
-      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
-      return;
-    }
-    if (progress.phase === "bake") {
-      void showLoading.update(`${progress.current}/${progress.total}`, {
-        title: "正在烘焙毛玻璃",
-        timeout: 0,
-      });
-      return;
-    }
-    void showLoading.update(`${progress.current}/${progress.total}`, {
-      title: "正在生成图片",
-      timeout: 0,
-    });
-  }
 
   await showLoading.start("正在生成图片", fileName, 0);
   try {
     await TGShare.modern(fileName, recordBox, 2, false, {
       bakeBackdrop: true,
-      onProgress: reportShareProgress,
+      onProgress: showLoading.share(),
     });
     await TGLogger.Info(`[UserRecord][shareRecord][${uidCur.value}] 生成分享图片成功`);
   } finally {
