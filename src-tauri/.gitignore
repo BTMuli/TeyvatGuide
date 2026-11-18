@@ -8,3 +8,4 @@
 
 # secret
 /lib/*.json
+!/lib/conf_dev.json

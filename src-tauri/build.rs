@@ -1,12 +1,18 @@
 // 构建文件
-// @since Beta v0.9.1
+// @since Beta v0.13.2
 
-/// 构建脚本入口，执行 Tauri 构建并在 Windows 上编译本地 HDiffPatch。
+use std::path::Path;
+
+/// 执行 Tauri 构建，并在 Windows 上选择 Yae 配置、编译本地 HDiffPatch。
 ///
-/// @since Beta v0.9.1
+/// @since Beta v0.13.2
 fn main() {
   tauri_build::build();
   if std::env::var("CARGO_CFG_TARGET_OS").ok().as_deref() == Some("windows") {
+    println!("cargo:rerun-if-changed=lib");
+    let conf_file =
+      if Path::new("lib/conf.json").is_file() { "conf.json" } else { "conf_dev.json" };
+    println!("cargo:rustc-env=YAE_CONF_FILE={conf_file}");
     compile_hpatch();
   }
 }

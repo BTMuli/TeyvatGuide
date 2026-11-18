@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -31,17 +31,21 @@ import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { parse } from "ini";
 
-// 配置文件没有上传到Git，有需要的联系开发者获取
-import yaeConf from "../../../src-tauri/lib/conf.json" with { type: "json" };
+const yaeConfigs = import.meta.glob<{ nativeConfig: { avatarCmdId?: number } }>(
+  ["/src-tauri/lib/conf.json", "/src-tauri/lib/conf_dev.json"],
+  { eager: true, import: "default" },
+);
+const yaeConf =
+  yaeConfigs["/src-tauri/lib/conf.json"] ?? yaeConfigs["/src-tauri/lib/conf_dev.json"];
 
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "7.2.0";
 /**
  * 当前 Yae 配置是否支持读取角色及其装备。
- * @since Beta v0.12.3
+ * @since Beta v0.13.2
  */
 export const YAE_AVATAR_AVAILABLE: Readonly<boolean> =
-  Number(Reflect.get(yaeConf.nativeConfig, "avatarCmdId")) > 0;
+  Number(yaeConf?.nativeConfig?.avatarCmdId) > 0;
 // Yae.Lib 5.5.0 更新时间
 const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-26");
 

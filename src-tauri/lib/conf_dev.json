@@ -1,0 +1,36 @@
+{
+  "id": 0,
+  "status": 0,
+  "totalProgress": 0,
+  "currentProgress": 0,
+  "finishTimestamp": 0,
+  "nativeConfig": {
+    "storeCmdId": 0,
+    "achievementCmdId": 0,
+    "avatarCmdId": 0,
+    "methodRva": {
+      "chinese": {
+        "updateNormalProp": 0,
+        "newString": 0,
+        "findGameObject": 0,
+        "eventSystemUpdate": 0,
+        "simulatePointerClick": 0,
+        "toInt32": 0,
+        "tcpStatePtr": 0,
+        "sharedInfoPtr": 0,
+        "decompress": 0
+      },
+      "oversea": {
+        "updateNormalProp": 0,
+        "newString": 0,
+        "findGameObject": 0,
+        "eventSystemUpdate": 0,
+        "simulatePointerClick": 0,
+        "toInt32": 0,
+        "tcpStatePtr": 0,
+        "sharedInfoPtr": 0,
+        "decompress": 0
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.13.0
+//! @since Beta v0.13.2
 #![cfg(target_os = "windows")]
 
 pub mod cmd_parse;
@@ -41,7 +41,7 @@ fn read_rva(key: &str) -> i32 {
 
 /// 按点分路径从编译时嵌入的配置中读取整数值。
 ///
-/// @since Beta v0.12.0
+/// @since Beta v0.13.2
 ///
 /// # 参数
 /// - `path`: 点分隔的配置路径。
@@ -50,7 +50,7 @@ fn read_rva(key: &str) -> i32 {
 /// 配置值，缺失时返回 0。
 pub fn read_conf(path: &str) -> i32 {
   // 编译时嵌入 JSON 文件，值都是32位整数
-  let data = include_str!("../../lib/conf.json");
+  let data = include_str!(concat!("../../lib/", env!("YAE_CONF_FILE")));
   let json: Value = serde_json::from_str(data).expect("Invalid JSON");
 
   // 按 '.' 分割 key
