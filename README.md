@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-11-04
+Update: 2026-11-18
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-11-04 21:42:00`
+> 更新于 `2026-11-18 12:57:33`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -80,6 +80,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 用户主页，支持发帖/回复
   - [x] 一键完成米游币每日任务&游戏签到
   - [x] 游戏兑换码兑换，支持一键兑换
+  - [x] 兑换中心，支持米游币兑换虚拟商品
 
 - Wiki 功能：
   - [x] 角色图鉴（支持名称搜索）
