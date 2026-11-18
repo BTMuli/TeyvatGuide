@@ -8,6 +8,7 @@ import mdiWoff2Url from "@mdi/font/fonts/materialdesignicons-webfont.woff2?url";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
+import { writeImage } from "@tauri-apps/plugin-clipboard-manager";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -2226,25 +2227,47 @@ async function captureModernBlob(
 }
 
 /**
- * 复制到剪贴板
- * @since Beta v0.9.0
+ * 将浏览器可解码的图像转换为 PNG。
+ * @since Beta v0.13.2
+ * @param buffer - 原始图片数据
+ * @returns PNG 图片数据
+ */
+export async function convertImageToPng(buffer: ArrayBuffer): Promise<ArrayBuffer> {
+  const bitmap = await createImageBitmap(new Blob([buffer]));
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext("2d");
+    if (context === null) throw new Error("无法处理图片");
+    context.drawImage(bitmap, 0, 0);
+    const png = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob === null) reject(new Error("无法转换图片为 PNG"));
+        else resolve(blob);
+      }, "image/png");
+    });
+    return png.arrayBuffer();
+  } finally {
+    bitmap.close();
+  }
+}
+
+/**
+ * 复制图片到剪贴板。
+ * @since Beta v0.13.2
  * @param buffer - 图片数据
  * @returns 无返回值
  */
 export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
-  const bf = new Uint8Array(buffer);
-  const blob = new Blob([bf], { type: "image/png" });
-  const url = URL.createObjectURL(blob);
-  // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
   if (platform() === "macos") {
-    navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]).then(
-      () => URL.revokeObjectURL(url),
-      (err) => TGLogger.Error(`[copyToClipboard] 复制到剪贴板失败: ${err}`),
-    );
+    const pngSignature = 0x89504e470d0a1a0an;
+    const isPng = buffer.byteLength >= 8 && new DataView(buffer).getBigUint64(0) === pngSignature;
+    await writeImage(isPng ? buffer : await convertImageToPng(buffer));
     return;
   }
+  const blob = new Blob([buffer], { type: "image/png" });
   await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-  URL.revokeObjectURL(url);
 }
 
 /**

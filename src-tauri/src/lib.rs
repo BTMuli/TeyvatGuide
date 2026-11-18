@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.13.0
+//! @since Beta v0.13.2
 
 mod client;
 mod commands;
@@ -77,7 +77,7 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
 
 /// 配置并启动 Tauri 应用。
 ///
-/// @since Beta v0.13.0
+/// @since Beta v0.13.2
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(target_os = "windows")]
@@ -116,6 +116,10 @@ pub fn run() {
       eprintln!("emit active_deep_link failed: {}", e);
     }
   }));
+  #[cfg(target_os = "macos")]
+  {
+    builder = builder.plugin(tauri_plugin_clipboard_manager::init());
+  }
   builder
     .manage(GamePackageManager::new())
     .on_window_event(move |app, event| window_event_handler(app, event))

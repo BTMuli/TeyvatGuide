@@ -1,0 +1,8 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "TeyvatGuideMacOS",
+  "description": "Allow copying images from local macOS app windows",
+  "windows": ["TeyvatGuide", "Sub_window"],
+  "permissions": ["clipboard-manager:allow-write-image"],
+  "platforms": ["macOS"]
+}

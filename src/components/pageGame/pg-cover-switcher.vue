@@ -56,7 +56,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import { usePageCover } from "@hooks/usePageCover.js";
 import TGHttps from "@utils/network/TGHttps.js";
-import { copyToClipboard, saveBufferFile } from "@utils/share/TGShare.js";
+import { convertImageToPng, copyToClipboard, saveBufferFile } from "@utils/share/TGShare.js";
 import { computed, ref } from "vue";
 
 import PgCoverItem from "./pg-cover-item.vue";
@@ -90,25 +90,7 @@ const rotationProgressColor = computed<string>(() =>
 );
 
 async function loadCoverPng(url: string): Promise<ArrayBuffer> {
-  const source = await TGHttps.buffer(url);
-  const bitmap = await createImageBitmap(new Blob([new Uint8Array(source)]));
-  try {
-    const canvas = document.createElement("canvas");
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
-    const context = canvas.getContext("2d");
-    if (context === null) throw new Error("无法处理背景图像");
-    context.drawImage(bitmap, 0, 0);
-    const png = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (blob === null) reject(new Error("无法转换背景图像"));
-        else resolve(blob);
-      }, "image/png");
-    });
-    return png.arrayBuffer();
-  } finally {
-    bitmap.close();
-  }
+  return convertImageToPng(await TGHttps.buffer(url));
 }
 
 async function handleCopy(url: string): Promise<void> {

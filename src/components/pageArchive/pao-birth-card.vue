@@ -116,8 +116,13 @@ async function onCopy(): Promise<void> {
   await loadImageBuffer();
   if (buffer.value === null) return;
   const size = fmtUtil.size(buffer.value.byteLength);
-  await copyToClipboard(buffer.value);
-  showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
+  try {
+    await copyToClipboard(buffer.value);
+    showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
+  } catch (error) {
+    showSnackbar.error(`复制图片失败：${TGHttps.getErrMsg(error)}`);
+    await TGLogger.Error(`[PaoBirthCard][onCopy] 复制图片失败：${error}`);
+  }
 }
 
 async function onDownload(): Promise<void> {
