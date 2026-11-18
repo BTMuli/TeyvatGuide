@@ -22,184 +22,102 @@ on:
         required: true
         default: false
         type: boolean
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-mac:
-    if: inputs.build-mac
-    permissions:
-      contents: write
+  build:
+    if: (inputs.build-mac || inputs.build-win) && (inputs.build-debug || inputs.build-release)
+    name: Build ${{ matrix.os }} (${{ matrix.profile }})
     strategy:
       fail-fast: false
       matrix:
-        settings:
-          - platform: macos-latest
-            args: "--target aarch64-apple-darwin"
-            target: "macos-arm"
-            artifact: "debug-build-macos-arm"
-    runs-on: ${{ matrix.settings.platform }}
-    env:
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      COMMIT_HASH: ${{ github.sha }}
+        os: >-
+          ${{ fromJSON(inputs.build-mac && inputs.build-win && '["macos-latest", "windows-latest"]'
+              || inputs.build-mac && '["macos-latest"]' || '["windows-latest"]') }}
+        profile: >-
+          ${{ fromJSON(inputs.build-debug && inputs.build-release && '["debug", "release"]'
+              || inputs.build-debug && '["debug"]' || '["release"]') }}
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-      - name: Add Github RSA
-        run: |
-          echo "${{ secrets.KNOWN_GITHUB_RSA }}" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-      - name: Test SSH connection
-        run: ssh -T git@github.com || true
+        with:
+          fetch-depth: 0
+      - name: Use HTTPS for public Cargo dependencies
+        run: git config --global url."https://github.com/tauri-apps/".insteadOf "ssh://git@github.com/tauri-apps/"
 
-      - name: Rust setup
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin' || '' }}
+      - name: Cache Rust dependencies
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: "./src-tauri -> target"
+          workspaces: "src-tauri -> target"
+          key: ${{ matrix.profile }}
 
-      - name: Add Rust targets(macOS ARM)
-        if: matrix.settings.target == 'macos-arm'
-        run: rustup target add aarch64-apple-darwin
-      - name: Output toolchain
-        run: rustup show
-      - name: Add Offset Conf
-        run: echo '${{ secrets.YAE_CONF }}' | jq -c . > ./src-tauri/lib/conf.json
-
-      - name: setup node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 26.1.0
-      - name: setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v6
-      - name: Setup sentry-cli
-        run: npm install -g @sentry/cli
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
-
-      # Build Debug
-      - name: Build debug app
-        if: github.event.inputs.build-debug == 'true'
-        uses: tauri-apps/tauri-action@dev
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: ${{ matrix.settings.args }} --debug
-      - name: Move Debug ARM
-        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
-        run: mv src-tauri/target/aarch64-apple-darwin/debug/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_arm-debug.dmg
-      - name: Upload Debug ARM
-        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-macos-arm
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_arm-debug.dmg
-      # Build Release
-      - name: Build app
-        if: github.event.inputs.build-release == 'true'
-        uses: tauri-apps/tauri-action@dev
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: ${{ matrix.settings.args }}
-      - name: Move Release ARM
-        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
-        run: mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_arm-release.dmg
-      - name: Upload Release ARM
-        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-macos-arm
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_arm-release.dmg
-
-  build-win:
-    if: inputs.build-win
-    permissions:
-      contents: write
-    runs-on: windows-latest
-    env:
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      COMMIT_HASH: ${{ github.sha }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup SSH
+      - name: Set build metadata
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-      - name: Add Github RSA
-        run: |
-          echo "${{ secrets.KNOWN_GITHUB_RSA }}" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-      - name: Test SSH connection
-        run: ssh -T git@github.com || true
+          version="$(node -p 'require("./package.json").version')"
+          {
+            echo "VITE_SENTRY_RELEASE=TeyvatGuide@$version"
+            echo "VITE_COMMIT_HASH=${GITHUB_SHA:0:9}"
+            echo "VITE_BUILD_TIME=$(date +%s)"
+          } >> "$GITHUB_ENV"
 
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "./src-tauri -> target"
+      - name: Test share image handling
+        if: runner.os == 'macOS'
+        run: pnpm exec vitest run test/share-file.test.ts
 
-      - name: Add Offset Conf
-        run: echo '${{ secrets.YAE_CONF }}' | jq -c . > ./src-tauri/lib/conf.json
-
-      - name: setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 26.1.0
-      - name: setup pnpm
-        uses: pnpm/action-setup@v6
-      - name: Setup sentry-cli
-        run: npm install -g @sentry/cli
-      - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Build Debug
-      - name: Build debug app
-        if: github.event.inputs.build-debug == 'true'
-        uses: tauri-apps/tauri-action@dev
+      - name: Configure Windows offsets
+        if: runner.os == 'Windows'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: --debug
-      - name: Move Debug
-        if: github.event.inputs.build-debug == 'true'
-        run: mv src-tauri/target/debug/bundle/msi/*.msi TeyvatGuide_${{ env.COMMIT_HASH }}_win-debug.msi
-      - name: Upload Debug
-        if: github.event.inputs.build-debug == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-win
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_win-debug.msi
-      # Build Release
-      - name: Build app
-        if: github.event.inputs.build-release == 'true'
-        uses: tauri-apps/tauri-action@dev
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Move Release
-        if: github.event.inputs.build-release == 'true'
-        run: mv src-tauri/target/release/bundle/msi/*.msi TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
-      - name: Upload Release
-        if: github.event.inputs.build-release
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-win
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
-      - name: Upload Sentry Pdb
-        if: matrix.settings.target == 'windows'
+          YAE_CONF: ${{ secrets.YAE_CONF }}
         run: |
-          echo "Uploading release: $SENTRY_RELEASE"
-          sentry-cli releases new "$SENTRY_RELEASE"
-          sentry-cli upload-dif src-tauri/target/release/TeyvatGuide.pdb
-          sentry-cli releases finalize "$SENTRY_RELEASE"
+          if [[ -n "$YAE_CONF" ]]; then
+            node -e 'process.stdout.write(JSON.stringify(JSON.parse(process.env.YAE_CONF)))' > src-tauri/lib/conf.json
+          fi
+
+      - name: Build macOS ARM64 installer
+        if: runner.os == 'macOS'
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ env.VITE_SENTRY_RELEASE }}
+          BUILD_PROFILE: ${{ matrix.profile }}
+        run: |
+          pnpm tauri build --ci --target aarch64-apple-darwin --bundles dmg ${{ matrix.profile == 'debug' && '--debug' || '' }} -- --locked
+          mkdir -p artifacts
+          mv "src-tauri/target/aarch64-apple-darwin/$BUILD_PROFILE/bundle/dmg/"*.dmg \
+            "artifacts/TeyvatGuide_${GITHUB_SHA}_arm-$BUILD_PROFILE.dmg"
+
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          BUILD_PROFILE: ${{ matrix.profile }}
+        run: |
+          pnpm tauri build --ci --bundles msi ${{ matrix.profile == 'debug' && '--debug' || '' }} -- --locked
+          mkdir -p artifacts
+          mv "src-tauri/target/$BUILD_PROFILE/bundle/msi/"*.msi \
+            "artifacts/TeyvatGuide_${GITHUB_SHA}_win-$BUILD_PROFILE.msi"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.profile }}-${{ runner.os == 'macOS' && 'macos-arm' || 'win' }}
+          path: artifacts/
+          if-no-files-found: error
