@@ -27,10 +27,11 @@ import fmtUtil from "../display/fmtUtil.js";
 import TGHttps from "../network/TGHttps.js";
 import TGLogger from "../system/TGLogger.js";
 
-import type {
-  ShareBackdropBlurBatchRequest,
-  ShareBackdropBlurBatchResponse,
-  ShareBackdropBlurRequest,
+import {
+  drawShareBackdropBlur,
+  type ShareBackdropBlurBatchRequest,
+  type ShareBackdropBlurBatchResponse,
+  type ShareBackdropBlurRequest,
 } from "./backdropBlur.js";
 import ShareBackdropWorker from "./backdropWorker?worker";
 
@@ -779,7 +780,7 @@ function resolveBakedBackdropDraw(
 
 /**
  * 将毛玻璃区域绘制为圆角 PNG data URL
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param snapshot - 隐藏毛玻璃后的根节点快照
  * @param rootRect - 根节点视口矩形
  * @param box - 毛玻璃视口矩形
@@ -824,8 +825,7 @@ function renderBakedBackdropDataUrl(
   blurCanvas.height = sampleCanvas.height;
   const blurCtx = blurCanvas.getContext("2d");
   if (blurCtx === null) return undefined;
-  blurCtx.filter = `blur(${draw.blurDraw}px)`;
-  blurCtx.drawImage(sampleCanvas, 0, 0);
+  drawShareBackdropBlur(blurCtx, sampleCtx, draw.blurDraw);
 
   ctx.beginPath();
   ctx.moveTo(draw.radius.tl, 0);

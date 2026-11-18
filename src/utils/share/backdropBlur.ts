@@ -1,6 +1,6 @@
 /**
  * 分享图毛玻璃烘焙：Worker 与主线程共用的绘制与消息类型
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  */
 
 export type ShareBackdropCorner = { tl: number; tr: number; br: number; bl: number };
@@ -46,8 +46,113 @@ export type ShareBackdropBlurBatchResponse = {
 type BackdropDrawContext = OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
 
 /**
+ * 模糊输出所需的绘制能力，部分 WebView 无 Canvas 滤镜属性。
+ * @since Beta v0.13.2
+ */
+type BackdropBlurTarget = Pick<BackdropDrawContext, "drawImage" | "putImageData"> & {
+  filter?: string;
+};
+
+/**
+ * 沿每行进行盒式模糊，将输出转置供下一次纵向处理。
+ * @since Beta v0.13.2
+ * @param source - 预乘透明度的 RGBA 像素
+ * @param output - 转置后的输出缓冲区
+ * @param width - 输入宽度
+ * @param height - 输入高度
+ * @param radius - 盒式模糊半径
+ */
+function blurBackdropRows(
+  source: Uint8ClampedArray,
+  output: Uint8ClampedArray,
+  width: number,
+  height: number,
+  radius: number,
+): void {
+  const channels = 4;
+  const last = width - 1;
+  const diameter = radius * 2 + 1;
+  const sums = new Float64Array(channels);
+  for (let y = 0; y < height; y += 1) {
+    const row = y * width * channels;
+    sums.fill(0);
+    for (let tap = -radius; tap <= radius; tap += 1) {
+      const index = row + Math.min(last, Math.max(0, tap)) * channels;
+      for (let channel = 0; channel < channels; channel += 1) {
+        sums[channel] += source[index + channel];
+      }
+    }
+    for (let x = 0; x < width; x += 1) {
+      const out = (x * height + y) * channels;
+      const left = row + Math.max(0, x - radius) * channels;
+      const right = row + Math.min(last, x + radius + 1) * channels;
+      for (let channel = 0; channel < channels; channel += 1) {
+        output[out + channel] = sums[channel] / diameter;
+        sums[channel] += source[right + channel] - source[left + channel];
+      }
+    }
+  }
+}
+
+/**
+ * 绘制模糊采样图，Canvas 滤镜不可用时通过像素运算近似高斯模糊。
+ * @since Beta v0.13.2
+ * @param ctx - 输出画布的 2D 上下文
+ * @param sample - 带边缘采样区的 2D 上下文
+ * @param blurPx - 模糊半径，单位为画布像素
+ */
+export function drawShareBackdropBlur(
+  ctx: BackdropBlurTarget,
+  sample: Pick<BackdropDrawContext, "canvas" | "getImageData">,
+  blurPx: number,
+): void {
+  if ("filter" in ctx) {
+    ctx.filter = `blur(${blurPx}px)`;
+    if (ctx.filter?.startsWith("blur(")) {
+      ctx.drawImage(sample.canvas, 0, 0);
+      return;
+    }
+  }
+
+  // 三次盒式模糊逼近高斯。按方差选择相邻的整数半径。
+  const variance = blurPx * blurPx;
+  const lower = Math.floor(Math.sqrt(variance + 0.25) - 0.5);
+  const widerPasses = Math.round((3 * (variance - lower * (lower + 1))) / (2 * (lower + 1)));
+  if (lower === 0 && widerPasses === 0) {
+    ctx.drawImage(sample.canvas, 0, 0);
+    return;
+  }
+
+  const { width, height } = sample.canvas;
+  const image = sample.getImageData(0, 0, width, height);
+  const pixels = image.data;
+  const scratch = new Uint8ClampedArray(pixels.length);
+  // 预乘透明度，使透明像素的颜色不渗入可见内容。
+  for (let i = 0; i < pixels.length; i += 4) {
+    const alpha = pixels[i + 3] / 255;
+    pixels[i] *= alpha;
+    pixels[i + 1] *= alpha;
+    pixels[i + 2] *= alpha;
+  }
+  for (let pass = 0; pass < 3; pass += 1) {
+    const radius = lower + Number(pass < widerPasses);
+    if (radius === 0) continue;
+    blurBackdropRows(pixels, scratch, width, height, radius);
+    blurBackdropRows(scratch, pixels, height, width, radius);
+  }
+  for (let i = 0; i < pixels.length; i += 4) {
+    const alpha = pixels[i + 3] / 255;
+    if (alpha === 0) continue;
+    pixels[i] /= alpha;
+    pixels[i + 1] /= alpha;
+    pixels[i + 2] /= alpha;
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
+/**
  * 在目标画布上绘制圆角毛玻璃
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param ctx - 2D 上下文，画布尺寸应为 sw × sh
  * @param bitmap - 裁切后的快照
  * @param job - 绘制参数
@@ -67,8 +172,7 @@ export function paintShareBackdropBlur(
   const blurCanvas = new OffscreenCanvas(sampleCanvas.width, sampleCanvas.height);
   const blurCtx = blurCanvas.getContext("2d");
   if (blurCtx === null) throw new Error("毛玻璃模糊 Canvas 2d 不可用");
-  blurCtx.filter = `blur(${blurDraw}px)`;
-  blurCtx.drawImage(sampleCanvas, 0, 0);
+  drawShareBackdropBlur(blurCtx, sampleCtx, blurDraw);
 
   ctx.beginPath();
   ctx.moveTo(radius.tl, 0);

@@ -43,7 +43,6 @@ vi.mock("@/assets/fonts/HYWenHei-55W.ttf?url", () => ({ default: "genshin-light"
 vi.mock("@/assets/fonts/JetBrainsMono-Bold.ttf?url", () => ({ default: "jetbrains-bold" }));
 vi.mock("@/assets/fonts/JetBrainsMono-Regular.ttf?url", () => ({ default: "jetbrains" }));
 vi.mock("@/assets/fonts/zh-cn.ttf?url", () => ({ default: "genshin" }));
-vi.mock("../src/utils/share/backdropBlur.js", () => ({}));
 vi.mock("../src/utils/share/backdropWorker?worker", () => ({ default: "worker" }));
 vi.mock("../src/utils/network/TGHttps.js", () => ({ default: {} }));
 vi.mock("../src/utils/system/TGLogger.js", () => ({
