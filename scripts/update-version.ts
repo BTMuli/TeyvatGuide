@@ -1,11 +1,13 @@
 /**
  * 抬升版本号
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
-import fs from "fs-extra";
-import { resolve } from "path";
-import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
+
+import fs from "fs-extra";
 
 const __dirname = resolve(fileURLToPath(import.meta.url), "../");
 const rootDir = resolve(__dirname, "..");
@@ -46,16 +48,25 @@ function logError(msg: string): never {
 }
 
 // ── 参数解析 ──────────────────────────────────────────────────
-const version = process.argv[2];
-if (!version) {
-  logError("缺少版本号参数\n    用法: pnpm upv <version>\n    示例: pnpm upv 0.11.0");
+const { positionals, values } = parseArgs({
+  allowPositionals: true,
+  options: { since: { type: "string" } },
+});
+const [version] = positionals;
+if (!version || positionals.length > 1) {
+  logError("请提供一个发布版本号\n    用法: pnpm upv <version> [--since <since-version>]");
 }
 
-if (
-  !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version) ||
-  version.split(".").some((part) => Number(part) > 65535)
-) {
+const versionPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const versionParts = version.split(".");
+if (!versionPattern.test(version) || versionParts.some((part) => Number(part) > 65535)) {
   logError("版本号必须为三段数字，每段不超过 65535，例如 0.12.6");
+}
+
+const [major, minor, patch] = versionParts;
+const since = values.since ?? `${major}.${minor}.${Number(patch) + 1}`;
+if (!versionPattern.test(since)) {
+  logError("--since 必须为三段数字，例如 0.13.3");
 }
 
 const appxVersion = `${version}.0`;
@@ -85,10 +96,16 @@ logStep(1, 5, "更新 package.json");
 const pkgPath = resolve(rootDir, "package.json");
 const pkgJson = fs.readJsonSync(pkgPath);
 const pkgOldVersion = pkgJson.version;
+const pkgOldSince = pkgJson.since;
 pkgJson.version = version;
+pkgJson.since = since;
 fs.writeJsonSync(pkgPath, pkgJson);
 logOk(
   `package.json  ${color.dim}${pkgOldVersion}${color.reset} → ${color.green}${version}${color.reset}`,
+);
+logDetail(
+  "since",
+  `${color.dim}${pkgOldSince}${color.reset} → ${color.green}${since}${color.reset}`,
 );
 
 // ── Step 2: 更新 Cargo.toml ───────────────────────────────────
