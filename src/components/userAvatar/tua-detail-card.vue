@@ -1,6 +1,6 @@
 <!-- 角色详情卡片 -->
 <template>
-  <div class="tua-dc-container">
+  <div ref="shareBox" class="tua-dc-container">
     <img :src="bg" alt="bg" class="tua-dc-bg" />
     <div class="tua-dc-avatar">
       <img :src="fullIcon" alt="avatar" />
@@ -129,7 +129,7 @@ import { app } from "@tauri-apps/api";
 import { maskUid } from "@utils/display/TGUid.js";
 import wikiUtils from "@utils/game/wikiUtils.js";
 import TGShare from "@utils/share/TGShare.js";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, useTemplateRef } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
 import TuaDcProp from "./tua-dc-prop.vue";
@@ -185,21 +185,22 @@ const bg = computed<string>(() => {
 const loading = ref<boolean>(false);
 const showTps = ref<boolean>(false);
 const version = ref<string>();
+const shareBox = useTemplateRef<HTMLDivElement>("shareBox");
 
 onMounted(async () => {
   version.value = await app.getVersion();
 });
 
 async function share(): Promise<void> {
-  const shareBox = document.querySelector<HTMLElement>(".tua-dc-container");
-  if (shareBox === null) {
+  const target = shareBox.value;
+  if (target === null) {
     showSnackbar.error("分享失败，未找到分享内容");
     return;
   }
   const fileName = `【角色详情】${props.avatar.avatar.name}`;
   loading.value = true;
   try {
-    await TGShare.modern(fileName, shareBox, 2.5);
+    await TGShare.modern(fileName, target, 2.5);
   } finally {
     loading.value = false;
   }

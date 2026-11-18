@@ -411,42 +411,6 @@ function patchShareIconFonts(root: HTMLElement): () => void {
 }
 
 /**
- * 将分享字体 CSS 注入到截图 SVG / clone 根节点
- * @since Beta v0.12.0
- * @param css - \@font-face CSS
- * @returns modern-screenshot 回调
- */
-function createShareFontInjectors(css: string | undefined): {
-  onCloneNode: (cloned: Node) => void;
-  onCreateForeignObjectSvg: (svg: SVGSVGElement) => Promise<void>;
-} {
-  return {
-    onCloneNode: (cloned) => {
-      if (!(cloned instanceof HTMLElement)) return;
-      hoistShareBackdropAtlasStyles(cloned);
-      if (css === undefined) return;
-      if (cloned.dataset.tgShareFont === "1") return;
-      cloned.dataset.tgShareFont = "1";
-      const styleEl = cloned.ownerDocument.createElement("style");
-      styleEl.textContent = css;
-      cloned.insertBefore(styleEl, cloned.firstChild);
-    },
-    onCreateForeignObjectSvg: async (svg) => {
-      await embedShareBackdropAtlasStyles(svg);
-      if (css === undefined) return;
-      const styleEl = svg.querySelector("style");
-      if (styleEl !== null) {
-        styleEl.appendChild(document.createTextNode(`\n${css}\n`));
-        return;
-      }
-      const created = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      created.textContent = css;
-      svg.insertBefore(created, svg.firstChild);
-    },
-  };
-}
-
-/**
  * 将 clone 中重复的图集 URL 提升为根节点 CSS 变量
  * @since Beta v0.12.0
  * @param root - modern-screenshot 的 clone 根节点
@@ -2145,7 +2109,7 @@ function bustShareFontUrl(url: string, nonce: string): string {
 
 /**
  * 仅生成 modern-screenshot Blob（不含保存/剪贴板）
- * @since Beta v0.12.4
+ * @since Beta v0.13.2
  */
 async function captureModernBlob(
   element: HTMLElement,
@@ -2186,7 +2150,6 @@ async function captureModernBlob(
     options?.onProgress,
     options?.backdropBlurScale ?? 1,
   );
-  const injectors = createShareFontInjectors(shareCss);
   const imageCount = element.querySelectorAll("img").length;
   const workerNumber = resolveShareWorkerNumber(element);
   const captureStarted = performance.now();
@@ -2198,7 +2161,7 @@ async function captureModernBlob(
       drawImageInterval: 0,
       ...(scrollable ? { height: element.scrollHeight } : {}),
       filter: shareIgnoreFilter,
-      // 已注入分享字体时跳过页面字体扫描，大列表可明显加速
+      // 由 modern-screenshot 将已准备的字体 CSS 嵌入 SVG，避免重复注入。
       ...(shareCss !== undefined ? { font: { cssText: shareCss } } : {}),
       workerUrl,
       workerNumber,
@@ -2211,10 +2174,10 @@ async function captureModernBlob(
         fixSvgXmlDecode: false,
       },
       onCloneNode: (cloned) => {
-        injectors.onCloneNode(cloned);
+        if (cloned instanceof HTMLElement) hoistShareBackdropAtlasStyles(cloned);
         options?.onCloneNode?.(cloned);
       },
-      onCreateForeignObjectSvg: injectors.onCreateForeignObjectSvg,
+      onCreateForeignObjectSvg: embedShareBackdropAtlasStyles,
     });
     await TGLogger.Info(
       `[TGShare][captureModernBlob] ${Math.round(performance.now() - captureStarted)}ms · img ${imageCount} · worker ${workerNumber}`,
