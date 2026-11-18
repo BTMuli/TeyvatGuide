@@ -14,7 +14,12 @@ import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import type { Options } from "html2canvas";
 import html2canvas from "html2canvas";
-import { domToBlob } from "modern-screenshot";
+import {
+  createContext,
+  destroyContext,
+  domToBlob,
+  type Options as ModernScreenshotOptions,
+} from "modern-screenshot";
 import workerUrl from "modern-screenshot/worker?url&no-inline";
 import { storeToRefs } from "pinia";
 
@@ -2108,6 +2113,31 @@ function bustShareFontUrl(url: string, nonce: string): string {
 }
 
 /**
+ * 在 macOS 导出分享图时，给 SVG 内嵌图片留出解码时间。
+ * @since Beta v0.13.2
+ * @param element - 截图根节点
+ * @param options - 截图选项
+ * @returns 分享图 Blob
+ */
+async function captureMacShareBlob(
+  element: HTMLElement,
+  options: ModernScreenshotOptions,
+): Promise<Blob> {
+  const context = await createContext(element, options);
+  try {
+    const onCreateSvg = context.onCreateForeignObjectSvg;
+    context.onCreateForeignObjectSvg = async (svg) => {
+      await onCreateSvg?.(svg);
+      // 固定重绘预算，避免列表图片越多，等待越长。
+      if (context.drawImageCount > 0) context.drawImageCount = 6;
+    };
+    return await domToBlob(context);
+  } finally {
+    destroyContext(context);
+  }
+}
+
+/**
  * 仅生成 modern-screenshot Blob（不含保存/剪贴板）
  * @since Beta v0.13.2
  */
@@ -2153,12 +2183,13 @@ async function captureModernBlob(
   const imageCount = element.querySelectorAll("img").length;
   const workerNumber = resolveShareWorkerNumber(element);
   const captureStarted = performance.now();
+  const redrawOnMac = platform() === "macos";
   try {
-    const blob = await domToBlob(element, {
+    const captureOptions: ModernScreenshotOptions = {
       backgroundColor: getShareRootBgColor(element),
       scale,
       timeout: 120000,
-      drawImageInterval: 0,
+      drawImageInterval: redrawOnMac ? 100 : 0,
       ...(scrollable ? { height: element.scrollHeight } : {}),
       filter: shareIgnoreFilter,
       // 由 modern-screenshot 将已准备的字体 CSS 嵌入 SVG，避免重复注入。
@@ -2171,14 +2202,17 @@ async function captureModernBlob(
       features: {
         restoreScrollPosition: scrollable,
         copyScrollbar: false,
-        fixSvgXmlDecode: false,
+        fixSvgXmlDecode: redrawOnMac,
       },
       onCloneNode: (cloned) => {
         if (cloned instanceof HTMLElement) hoistShareBackdropAtlasStyles(cloned);
         options?.onCloneNode?.(cloned);
       },
       onCreateForeignObjectSvg: embedShareBackdropAtlasStyles,
-    });
+    };
+    const blob = redrawOnMac
+      ? await captureMacShareBlob(element, captureOptions)
+      : await domToBlob(element, captureOptions);
     await TGLogger.Info(
       `[TGShare][captureModernBlob] ${Math.round(performance.now() - captureStarted)}ms · img ${imageCount} · worker ${workerNumber}`,
     );
