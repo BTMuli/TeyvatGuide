@@ -30,9 +30,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showLoading, { createShareProgressReporter } from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { maskUid, maskUidName } from "@utils/display/TGUid.js";
-import { generateShareImg } from "@utils/share/TGShare.js";
+import TGShare from "@utils/share/TGShare.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TuaDetailLevel from "./tua-detail-level.vue";
@@ -44,15 +45,30 @@ const show = ref<boolean>(false);
 const floorRef = useTemplateRef<HTMLDivElement>("floorEl");
 
 async function shareFloor(): Promise<void> {
-  if (!floorRef.value) {
-    showSnackbar.warn("未捕获到Floor Dom");
-    return;
-  }
+  if (show.value) return;
   show.value = true;
-  await nextTick();
-  const fileName = `深境螺旋_第${props.id}期_${maskUidName(props?.uid ?? "")}_${props.floor.id}`;
-  await generateShareImg(fileName, floorRef.value);
-  show.value = false;
+  try {
+    const fileName = `深境螺旋_第${props.id}期_${maskUidName(props.uid ?? "")}_${props.floor.id}`;
+    await showLoading.start("正在生成图片", fileName, 0);
+    await nextTick();
+    const floor = floorRef.value;
+    if (!floor) {
+      showSnackbar.warn("未捕获到Floor Dom");
+      return;
+    }
+    await TGShare.modern(fileName, floor, 1.5, false, {
+      ppx: 15,
+      onProgress: createShareProgressReporter(),
+      onCloneNode: (cloned) => {
+        if (!(cloned instanceof HTMLElement)) return;
+        const info = cloned.querySelector<HTMLElement>(".tuad-share");
+        if (info) info.style.zIndex = "0";
+      },
+    });
+  } finally {
+    show.value = false;
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="css" scoped>
@@ -79,6 +95,7 @@ async function shareFloor(): Promise<void> {
   border-bottom: 1px solid var(--common-shadow-4);
   font-size: 20px;
   line-height: 24px;
+  white-space: nowrap;
 
   .title {
     cursor: pointer;
@@ -99,6 +116,7 @@ async function shareFloor(): Promise<void> {
     img {
       width: 28px;
       height: 28px;
+      flex-shrink: 0;
       padding: 2px;
       border-radius: 50%;
       background: #2c313c;
@@ -120,6 +138,7 @@ async function shareFloor(): Promise<void> {
   color: var(--box-text-1);
   font-size: 14px;
   opacity: 0.8;
+  white-space: nowrap;
 }
 
 .tuad-buff {

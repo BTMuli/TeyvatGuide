@@ -1,8 +1,9 @@
 /**
  * loading 组件封装，函数式调用
- * @since Beta v0.6.7
+ * @since Beta v0.13.2
  */
 
+import type { ShareProgress } from "@utils/share/TGShare.js";
 import type { ComponentInternalInstance, VNode } from "vue";
 import { h, render } from "vue";
 
@@ -65,6 +66,28 @@ async function showLoadingEmpty(title: string, subtitle?: string): Promise<void>
 
 async function showLoadingEnd(): Promise<void> {
   await showLoadingFull({ show: false });
+}
+
+/**
+ * 将一次分享截图的阶段进度显示在加载浮层中
+ * @since Beta v0.13.2
+ * @returns 独立的分享进度回调
+ */
+export function createShareProgressReporter(): (progress: ShareProgress) => void {
+  let lastPhase: ShareProgress["phase"] | undefined;
+  let lastUpdateAt = 0;
+
+  return ({ phase, current, total }) => {
+    const now = performance.now();
+    if (phase === lastPhase && current < total && now - lastUpdateAt < 80) return;
+    lastPhase = phase;
+    lastUpdateAt = now;
+
+    const title = phase === "capture" ? "正在生成图片" : "正在烘焙毛玻璃";
+    const progressText = total > 0 ? `${current}/${total}` : "正在渲染截图";
+    const subtitle = phase === "snapshot" ? "正在截取背景" : progressText;
+    void showLoadingUpdate(subtitle, { title, timeout: 0 });
+  };
 }
 
 const showLoading = {

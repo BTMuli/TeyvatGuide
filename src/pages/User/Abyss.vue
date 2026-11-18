@@ -124,7 +124,9 @@
             </div>
             <div class="uaw-share">深境螺旋 | Render by TeyvatGuide v{{ version }}</div>
           </div>
-          <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
+          <TSubLine class="uaw-period">
+            统计周期 {{ item.startTime }} ~ {{ item.endTime }}
+          </TSubLine>
           <div :id="`user-abyss-${item.id}-overview`" class="uaw-o-box">
             <TuaOverview :val-text="item.totalBattleTimes" title="战斗次数" />
             <TuaOverview :val-text="item.totalStar" title="获得渊星" />
@@ -160,7 +162,7 @@
 import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import TSubLine from "@comp/app/t-subline.vue";
 import showDialog from "@comp/func/dialog.js";
-import showLoading from "@comp/func/loading.js";
+import showLoading, { createShareProgressReporter } from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOvStat from "@comp/userAbyss/tua-ov-stat.vue";
@@ -182,7 +184,7 @@ import {
   uidItemValue,
 } from "@utils/display/TGUid.js";
 import TGHttps from "@utils/network/TGHttps.js";
-import { generateShareImg } from "@utils/share/TGShare.js";
+import TGShare from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -339,9 +341,20 @@ async function shareAbyss(): Promise<void> {
     await TGLogger.Error("[UserAbyss][shareAbyss] 未找到深渊数据");
     return;
   }
-  await showLoading.start("正在生成图片", fileName);
-  await generateShareImg(fileName, shareDom);
-  await showLoading.end();
+  await showLoading.start("正在生成图片", fileName, 0);
+  try {
+    await TGShare.modern(fileName, shareDom, 1.5, false, {
+      ppx: 15,
+      onProgress: createShareProgressReporter(),
+      onCloneNode: (cloned) => {
+        if (!(cloned instanceof HTMLElement)) return;
+        const attribution = cloned.querySelector<HTMLElement>(".uaw-share");
+        if (attribution) attribution.style.zIndex = "0";
+      },
+    });
+  } finally {
+    await showLoading.end();
+  }
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片成功`);
 }
 
@@ -736,6 +749,8 @@ async function refreshAvatars(
   column-gap: 4px;
   font-family: var(--font-title);
   font-size: 20px;
+  font-weight: normal;
+  white-space: nowrap;
 }
 
 .uaw-title :nth-child(2n) {
@@ -746,6 +761,11 @@ async function refreshAvatars(
   z-index: -1;
   font-size: 12px;
   opacity: 0.8;
+  white-space: nowrap;
+}
+
+.uaw-period {
+  white-space: nowrap;
 }
 
 .uaw-o-box {

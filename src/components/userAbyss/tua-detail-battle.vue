@@ -80,6 +80,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   color: var(--box-text-2);
   font-size: 12px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .tua-db-grid {
@@ -116,6 +117,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   display: flex;
   width: 28px;
   height: 28px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
@@ -138,6 +140,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
 
   span {
     line-height: 14px;
+    white-space: nowrap;
 
     &:first-child {
       font-family: var(--font-title);

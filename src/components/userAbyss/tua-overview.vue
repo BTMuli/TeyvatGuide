@@ -70,6 +70,8 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterData): TItemBoxData {
   color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 20px;
+  font-weight: normal;
+  white-space: nowrap;
 }
 
 .tuao-val-text {
@@ -77,6 +79,7 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterData): TItemBoxData {
   font-family: var(--font-text);
   font-size: 20px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .tuao-val-icons {

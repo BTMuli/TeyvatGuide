@@ -57,6 +57,7 @@ function genStarList(): Array<number> {
   .title {
     color: var(--box-text-4);
     font-size: 18px;
+    white-space: nowrap;
   }
 
   .star {
@@ -69,6 +70,7 @@ function genStarList(): Array<number> {
     img {
       width: 24px;
       height: 24px;
+      flex-shrink: 0;
       padding: 2px;
       border-radius: 50%;
       background: #2c313c;
