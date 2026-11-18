@@ -21,7 +21,6 @@ dependencies = [
  "log",
  "md-5 0.11.0",
  "prost",
- "prost-types",
  "reqwest 0.13.5",
  "sentry",
  "serde",
@@ -5018,15 +5017,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
-]
-
-[[package]]
-name = "prost-types"
-version = "0.14.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f29a7c4c7a84cef41a53d338a2d10d4f1b043ea5c3dde26db22ee2c9c1b1c75b"
-dependencies = [
- "prost",
 ]
 
 [[package]]
