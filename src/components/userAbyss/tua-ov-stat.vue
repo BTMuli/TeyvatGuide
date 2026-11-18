@@ -1,95 +1,158 @@
 <!-- 深渊统计浮窗 -->
 <template>
-  <TOverlay v-model="visible" top-offset="112px">
-    <div class="tua-ovs-box">
-      <div class="tua-ovs-top">
-        <div class="tua-ovs-title">
-          <img alt="icon" src="/platforms/other/hutao.webp" />
-          <span>深渊统计</span>
+  <TopOverlay
+    v-model="visible"
+    :showShare="false"
+    :titleId
+    class="tua-ovs"
+    contentMaxHeight="none"
+    panelHeight="min(760px, calc(100dvh - 144px))"
+    panelWidth="min(1280px, calc(100vw - clamp(24px, 8vw, 112px)))"
+    topOffset="112px"
+  >
+    <template #header>
+      <div class="tua-ovs-header">
+        <div class="tua-ovs-identity">
+          <img alt="" class="tua-ovs-icon" src="/platforms/other/hutao.webp" />
+          <div>
+            <h2 :id="titleId" class="tua-ovs-title">深渊统计</h2>
+            <v-menu
+              v-if="overview"
+              v-model="showOverview"
+              :close-on-content-click="false"
+              location="bottom start"
+              offset="8"
+            >
+              <template #activator="{ props: menuProps }">
+                <button
+                  v-bind="menuProps"
+                  class="tua-ovs-update"
+                  title="查看数据概况"
+                  type="button"
+                >
+                  <v-icon aria-hidden="true" icon="mdi-chart-box-outline" size="14" />
+                  <span>更新于 {{ fmtUtil.dateTime(overview.cur.Timestamp) }}</span>
+                </button>
+              </template>
+              <HtaOverlayOverview :data="overview" />
+            </v-menu>
+          </div>
         </div>
-        <v-btn-toggle
-          v-model="tab"
-          :mandatory="true"
-          class="tua-ovs-toggle"
-          color="var(--tgc-od-orange)"
-          density="compact"
-          variant="outlined"
-        >
-          <v-btn
-            v-for="item in abyssList"
-            :key="item.value"
-            :prepend-icon="item.icon"
-            :value="item.value"
+        <div class="tua-ovs-controls">
+          <v-btn-toggle
+            v-if="floorList.length > 0"
+            v-model="floor"
+            aria-label="楼层"
+            class="tua-ovs-toggle"
+            color="var(--common-text-title)"
+            mandatory
+            role="group"
+            size="36"
+            variant="outlined"
           >
-            {{ item.label }}
-          </v-btn>
-        </v-btn-toggle>
-        <v-btn-toggle
-          v-if="floorList.length > 0"
-          v-model="floor"
-          :mandatory="true"
-          class="tua-ovs-toggle"
-          color="var(--tgc-od-orange)"
-          density="compact"
-          variant="outlined"
-        >
-          <v-btn v-for="item in floorList" :key="item" :value="item">第{{ item }}层</v-btn>
-        </v-btn-toggle>
-        <div class="tua-ovs-actions">
-          <v-menu
-            v-if="overview"
-            v-model="showOverview"
-            :close-on-content-click="false"
-            location="bottom end"
-            offset="8"
+            <v-tooltip
+              v-for="item in floorList"
+              :key="item"
+              :text="`第${item}层`"
+              location="bottom"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="tooltipProps"
+                  :aria-label="`第${item}层`"
+                  :aria-pressed="floor === item"
+                  :value="item"
+                  icon
+                  type="button"
+                >
+                  <v-icon aria-hidden="true" icon="mdi-stairs" size="20" />
+                  <span aria-hidden="true" class="tua-ovs-floor-badge">{{ item }}</span>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
+          <v-btn-toggle
+            v-model="tab"
+            aria-label="统计类型"
+            class="tua-ovs-toggle"
+            color="var(--common-text-title)"
+            mandatory
+            role="group"
+            size="36"
+            variant="outlined"
           >
-            <template #activator="{ props: menuProps }">
-              <v-btn
-                class="tua-ovs-update"
-                prepend-icon="mdi-chart-box-outline"
-                v-bind="menuProps"
-                variant="text"
-              >
-                更新于 {{ fmtUtil.dateTime(overview.cur.Timestamp) }}
-              </v-btn>
-            </template>
-            <HtaOverlayOverview :data="overview" />
-          </v-menu>
-          <v-btn icon="mdi-close" size="36" variant="text" @click="visible = false" />
+            <v-tooltip
+              v-for="item in abyssList"
+              :key="item.value"
+              :text="item.label"
+              location="bottom"
+            >
+              <template #activator="{ props: tooltipProps }">
+                <v-btn
+                  v-bind="tooltipProps"
+                  :aria-label="item.label"
+                  :aria-pressed="tab === item.value"
+                  :disabled="isLoading && loading !== item.value"
+                  :icon="item.icon"
+                  :loading="loading === item.value"
+                  :value="item.value"
+                  type="button"
+                />
+              </template>
+            </v-tooltip>
+          </v-btn-toggle>
         </div>
       </div>
-      <div class="tua-ovs-content">
-        <HtaTabUse
-          v-if="tab === 'use' && hasTabData && abyssData.use"
-          :data="abyssData.use"
-          :floor
-        />
-        <HtaTabUp
-          v-else-if="tab === 'up' && hasTabData && abyssData.up"
-          :data="abyssData.up"
-          :floor
-        />
-        <HtaTabTeam
-          v-else-if="tab === 'team' && hasTabData && abyssData.team"
-          :floor
-          :model-value="abyssData.team"
-        />
-        <HtaTabHold
-          v-else-if="tab === 'hold' && hasTabData && abyssData.hold"
-          :data="abyssData.hold"
-        />
-        <div v-else class="tua-ovs-empty">
-          <v-icon icon="mdi-database-off-outline" size="56" />
-          <span>暂无统计数据</span>
-          <small>当前数据类型暂时没有可展示的内容</small>
-        </div>
+    </template>
+    <template #actions>
+      <v-btn
+        :disabled="isLoading && loading !== 'refresh'"
+        :loading="loading === 'refresh'"
+        aria-label="刷新深渊统计"
+        density="comfortable"
+        icon="mdi-refresh"
+        title="刷新深渊统计"
+        type="button"
+        variant="text"
+        @click="refreshData(tab, 'refresh')"
+      />
+      <v-btn
+        aria-label="关闭深渊统计"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭深渊统计"
+        type="button"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
+    <div :aria-busy="isLoading" class="tua-ovs-content">
+      <HtaTabUse v-if="tab === 'use' && hasTabData && abyssData.use" :data="abyssData.use" :floor />
+      <HtaTabUp
+        v-else-if="tab === 'up' && hasTabData && abyssData.up"
+        :data="abyssData.up"
+        :floor
+      />
+      <HtaTabTeam
+        v-else-if="tab === 'team' && hasTabData && abyssData.team"
+        :floor
+        :model-value="abyssData.team"
+      />
+      <HtaTabHold
+        v-else-if="tab === 'hold' && hasTabData && abyssData.hold"
+        :data="abyssData.hold"
+      />
+      <div v-else-if="!isLoading" class="tua-ovs-empty">
+        <v-icon icon="mdi-database-off-outline" size="56" />
+        <span>暂无统计数据</span>
+        <small>当前数据类型暂时没有可展示的内容</small>
       </div>
     </div>
-  </TOverlay>
+  </TopOverlay>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
-import showLoading from "@comp/func/loading.js";
+import TopOverlay from "@comp/app/top-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import HtaOverlayOverview from "@comp/hutaoAbyss/hta-overlay-overview.vue";
 import HtaTabHold from "@comp/hutaoAbyss/hta-tab-hold.vue";
 import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
@@ -99,7 +162,7 @@ import hutao from "@Hutao/index.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
-import { computed, reactive, ref, shallowRef, watch } from "vue";
+import { computed, reactive, ref, shallowRef, useId, watch } from "vue";
 
 type AbyssTab = "use" | "up" | "team" | "hold";
 type AbyssList = Array<{ label: string; value: AbyssTab; icon: string }>;
@@ -121,11 +184,12 @@ const abyssList: Readonly<AbyssList> = [
   { label: "角色持有", value: "hold", icon: "mdi-account-heart" },
 ];
 const visible = defineModel<boolean>();
+const titleId = useId();
 const showOverview = ref<boolean>(false);
-const isLoading = ref<boolean>(false);
+const loading = shallowRef<AbyssTab | "refresh">();
+const isLoading = computed<boolean>(() => loading.value !== undefined);
 const tab = shallowRef<AbyssTab>("use");
 const floor = ref<number>(12);
-const loadingTypes = new Set<AbyssTab>();
 const overview =
   shallowRef<TGApp.Plugins.Hutao.Abyss.PeriodData<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
 const abyssData: AbyssData = reactive({
@@ -183,64 +247,51 @@ const hasTabData = computed<boolean>(() => {
   return false;
 });
 
-watch(
-  () => visible.value,
-  async (show) => {
-    if (!show || abyssData.use !== null || isLoading.value) return;
-    isLoading.value = true;
-    loadingTypes.add("use");
-    try {
-      await getOverview();
-      await getUseData();
-    } finally {
-      loadingTypes.delete("use");
-      isLoading.value = false;
-      await showLoading.end();
-    }
-  },
-);
+watch(visible, async (show) => {
+  if (show && abyssData.use === null) await refreshData("use", "initial");
+});
 
-watch(
-  () => tab.value,
-  async () => await refreshData(tab.value),
-);
+watch(tab, async (type) => await refreshData(type));
 
 watch(floorList, (list) => {
   if (!list.includes(floor.value)) floor.value = list.includes(12) ? 12 : (list[0] ?? 12);
 });
 
-async function refreshData(type: AbyssTab): Promise<void> {
-  if (abyssData[type] !== null || loadingTypes.has(type)) return;
-  loadingTypes.add(type);
+async function refreshData(
+  type: AbyssTab,
+  mode: "tab" | "initial" | "refresh" = "tab",
+): Promise<void> {
+  if (isLoading.value || (mode === "tab" && abyssData[type] !== null)) return;
+  loading.value = mode === "refresh" ? "refresh" : type;
   try {
+    const loadedOverview = mode === "tab" || (await getOverview());
+    let loadedStats: boolean;
     switch (type) {
       case "use":
-        await getUseData();
+        loadedStats = await getUseData();
         break;
       case "up":
-        await getUpData();
+        loadedStats = await getUpData();
         break;
       case "team":
-        await getTeamData();
+        loadedStats = await getTeamData();
         break;
       case "hold":
-        await getHoldData();
+        loadedStats = await getHoldData();
         break;
     }
+    if (!loadedOverview || !loadedStats) showSnackbar.warn("深渊统计数据获取不完整");
   } finally {
-    loadingTypes.delete(type);
-    await showLoading.end();
+    loading.value = undefined;
   }
 }
 
-async function getOverview(): Promise<void> {
-  await showLoading.start("正在获取深渊概览");
+async function getOverview(): Promise<boolean> {
   let cur: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
   let last: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
   try {
     const curResp = await hutao.Abyss.overview();
     if (curResp.retcode !== 0) {
-      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getOverview] 获取本期概览失败：${curResp.retcode} ${curResp.message}`,
       );
@@ -249,13 +300,11 @@ async function getOverview(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取本期概览失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getOverview] 获取本期概览异常：${errMsg}`);
   }
   try {
     const lastResp = await hutao.Abyss.overview(true);
     if (lastResp.retcode !== 0) {
-      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getOverview] 获取上期概览失败：${lastResp.retcode} ${lastResp.message}`,
       );
@@ -264,21 +313,19 @@ async function getOverview(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取上期概览失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getOverview] 获取上期概览异常：${errMsg}`);
   }
-  if (cur && last) overview.value = { cur, last };
-  else overview.value = undefined;
+  if (!cur || !last) return false;
+  overview.value = { cur, last };
+  return true;
 }
 
-async function getUseData(): Promise<void> {
-  await showLoading.start("正在获取角色使用率数据");
-  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
-  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
+async function getUseData(): Promise<boolean> {
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> | undefined;
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> | undefined;
   try {
     const curResp = await hutao.Abyss.avatar.use();
     if (curResp.retcode !== 0) {
-      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getUseData] 获取本期使用率失败：${curResp.retcode} ${curResp.message}`,
       );
@@ -287,13 +334,11 @@ async function getUseData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取本期使用率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getUseData] 获取本期使用率异常：${errMsg}`);
   }
   try {
     const lastResp = await hutao.Abyss.avatar.use(true);
     if (lastResp.retcode !== 0) {
-      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getUseData] 获取上期使用率失败：${lastResp.retcode} ${lastResp.message}`,
       );
@@ -302,20 +347,19 @@ async function getUseData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取上期使用率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getUseData] 获取上期使用率异常：${errMsg}`);
   }
-  abyssData.use = { cur, last };
+  const loaded = cur !== undefined && last !== undefined;
+  if (loaded || abyssData.use === null) abyssData.use = { cur: cur ?? [], last: last ?? [] };
+  return loaded;
 }
 
-async function getUpData(): Promise<void> {
-  await showLoading.start("正在获取角色出场率数据");
-  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
-  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
+async function getUpData(): Promise<boolean> {
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> | undefined;
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> | undefined;
   try {
     const curResp = await hutao.Abyss.avatar.up();
     if (curResp.retcode !== 0) {
-      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getUpData] 获取本期出场率失败：${curResp.retcode} ${curResp.message}`,
       );
@@ -324,13 +368,11 @@ async function getUpData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取本期出场率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getUpData] 获取本期出场率异常：${errMsg}`);
   }
   try {
     const lastResp = await hutao.Abyss.avatar.up(true);
     if (lastResp.retcode !== 0) {
-      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getUpData] 获取上期出场率失败：${lastResp.retcode} ${lastResp.message}`,
       );
@@ -339,19 +381,18 @@ async function getUpData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取上期出场率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getUpData] 获取上期出场率异常：${errMsg}`);
   }
-  abyssData.up = { cur, last };
+  const loaded = cur !== undefined && last !== undefined;
+  if (loaded || abyssData.up === null) abyssData.up = { cur: cur ?? [], last: last ?? [] };
+  return loaded;
 }
 
-async function getTeamData(): Promise<void> {
-  await showLoading.start("正在获取队伍出场数据");
-  let data: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> = [];
+async function getTeamData(): Promise<boolean> {
+  let data: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> | undefined;
   try {
     const teamResp = await hutao.Abyss.team();
     if (teamResp.retcode !== 0) {
-      await showLoading.update(`[${teamResp.retcode}] ${teamResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getTeamData] 获取队伍数据失败：${teamResp.retcode} ${teamResp.message}`,
       );
@@ -360,20 +401,18 @@ async function getTeamData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取队伍数据失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getTeamData] 获取队伍数据异常：${errMsg}`);
   }
-  abyssData.team = data;
+  abyssData.team = data ?? abyssData.team ?? [];
+  return data !== undefined;
 }
 
-async function getHoldData(): Promise<void> {
-  await showLoading.start("正在获取角色持有数据");
-  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
-  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
+async function getHoldData(): Promise<boolean> {
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> | undefined;
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> | undefined;
   try {
     const curResp = await hutao.Abyss.avatar.hold();
     if (curResp.retcode !== 0) {
-      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getHoldData] 获取本期持有率失败：${curResp.retcode} ${curResp.message}`,
       );
@@ -382,13 +421,11 @@ async function getHoldData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取本期持有率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getHoldData] 获取本期持有率异常：${errMsg}`);
   }
   try {
     const lastResp = await hutao.Abyss.avatar.hold(true);
     if (lastResp.retcode !== 0) {
-      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
       await TGLogger.Warn(
         `[UserAbyss/Stat][getHoldData] 获取上期持有率失败：${lastResp.retcode} ${lastResp.message}`,
       );
@@ -397,71 +434,116 @@ async function getHoldData(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.update(`获取上期持有率失败：${errMsg}`);
     await TGLogger.Error(`[UserAbyss/Stat][getHoldData] 获取上期持有率异常：${errMsg}`);
   }
-  abyssData.hold = { cur, last };
+  const loaded = cur !== undefined && last !== undefined;
+  if (loaded || abyssData.hold === null) abyssData.hold = { cur: cur ?? [], last: last ?? [] };
+  return loaded;
 }
 </script>
 <style lang="scss" scoped>
-.tua-ovs-box {
-  display: flex;
-  overflow: hidden;
-  width: min(1280px, calc(100vw - 112px));
-  height: min(760px, calc(100% - 32px));
-  box-sizing: border-box;
-  flex-direction: column;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 8px;
-  background: var(--box-bg-1);
-  box-shadow: 0 8px 24px var(--common-shadow-4);
-  gap: 12px;
-}
+.tua-ovs {
+  :deep(.tolp-panel) {
+    max-width: none;
+    background: var(--box-bg-1);
+    box-shadow: 0 4px 12px var(--common-shadow-1);
+  }
 
-.tua-ovs-top {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  padding: 0 4px 12px;
-  border-bottom: 1px solid var(--common-shadow-2);
-  gap: 16px;
-}
+  :deep(.tolp-header) {
+    flex-shrink: 0;
+    padding: 12px 16px;
+  }
 
-.tua-ovs-title {
-  display: flex;
-  align-items: center;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
-  font-weight: normal;
-  gap: 4px;
-  white-space: nowrap;
-
-  img {
-    width: 32px;
-    height: 32px;
-    object-fit: cover;
+  :deep(.tolp-content) {
+    overflow: hidden;
+    padding: 12px;
   }
 }
 
-.tua-ovs-toggle {
-  flex-shrink: 0;
-  border-radius: 4px;
-}
-
-.tua-ovs-actions {
+.tua-ovs-header,
+.tua-ovs-identity,
+.tua-ovs-controls {
   display: flex;
   align-items: center;
-  margin-left: auto;
-  gap: 4px;
+}
+
+.tua-ovs-header {
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.tua-ovs-identity {
+  min-width: 0;
+  gap: 8px;
+}
+
+.tua-ovs-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.tua-ovs-title {
+  margin: 0;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: normal;
+  line-height: 24px;
 }
 
 .tua-ovs-update {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--box-text-4);
   cursor: pointer;
-  font-family: var(--font-title);
-  font-weight: normal;
-  white-space: nowrap;
+  font-size: 12px;
+  gap: 4px;
+  line-height: 16px;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--common-text-title);
+    text-decoration: underline;
+  }
+}
+
+.tua-ovs-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  margin-inline-start: auto;
+}
+
+.tua-ovs-toggle {
+  background: var(--box-bg-1);
+}
+
+.tua-ovs-floor-badge {
+  position: absolute;
+  right: 2px;
+  bottom: 4px;
+  display: flex;
+  width: 12px;
+  height: 12px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-od-orange);
+  color: var(--tgc-dark-8);
+  font-family: var(--font-text);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 12px;
+  pointer-events: none;
 }
 
 .tua-ovs-content {

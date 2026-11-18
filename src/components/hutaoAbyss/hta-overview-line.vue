@@ -1,17 +1,17 @@
 <template>
-  <div class="hta-ol-container">
-    <div class="hta-ol-title">{{ props.label }}</div>
-    <div class="hta-ol-val">
-      <div class="hta-olv-cur">{{ getNumStr(localCur) }}</div>
-      <div
+  <div class="hta-ol-card">
+    <dt class="hta-ol-title">{{ props.label }}</dt>
+    <dd class="hta-ol-values">
+      <span class="hta-olv-cur">{{ getNumStr(localCur) }}</span>
+      <span
         v-if="props.showDiff"
         :class="{ 'hta-olv-up': localCur > localLast, 'hta-olv-down': localCur < localLast }"
         :title="`上期数据：${getNumStr(localLast)}`"
         class="hta-olv-diff"
       >
         {{ getDiff(localCur, localLast) }}
-      </div>
-    </div>
+      </span>
+    </dd>
   </div>
 </template>
 <script lang="ts" setup>
@@ -34,38 +34,49 @@ function getDiff(cur: number, last: number): string {
   return `↓${getNumStr(last - cur)}`;
 }
 </script>
-<style lang="css" scoped>
-.hta-ol-container {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
+<style lang="scss" scoped>
+.hta-ol-card {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--app-page-bg);
+  gap: 4px;
 }
 
 .hta-ol-title {
-  color: var(--tgc-od-white);
-}
-
-.hta-ol-val {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hta-olv-diff {
+  color: var(--box-text-4);
   font-size: 12px;
+  line-height: 16px;
+}
+
+.hta-ol-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  gap: 0 4px;
+  line-height: 20px;
 }
 
 .hta-olv-cur {
-  color: var(--tgc-od-blue);
+  color: var(--box-text-1);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.hta-olv-diff {
+  color: var(--box-text-4);
+  font-size: 11px;
 }
 
 .hta-olv-up {
-  color: var(--tgc-od-red);
+  color: var(--hta-diff-up);
 }
 
 .hta-olv-down {
-  color: var(--tgc-od-green);
+  color: var(--hta-diff-down);
 }
 </style>

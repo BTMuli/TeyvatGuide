@@ -15,6 +15,12 @@
         {{ getDiffStr() }}
       </span>
     </div>
+    <div
+      :class="{ 'twa-progress-up': props.cur > props.last }"
+      :style="progressStyle"
+      aria-hidden="true"
+      class="twa-progress"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -34,6 +40,15 @@ type TibWikiAbyssProps = {
 
 const props = defineProps<TibWikiAbyssProps>();
 const avatar = shallowRef<TGApp.App.Character.WikiBriefInfo>();
+const progressStyle = computed<Record<string, string>>(() => {
+  const current = Math.min(1, Math.max(0, props.cur));
+  const previous = Math.min(1, Math.max(0, props.last));
+  return {
+    "--twa-current": String(current),
+    "--twa-diff-start": `${Math.min(current, previous) * 100}%`,
+    "--twa-diff-length": String(Math.abs(current - previous)),
+  };
+});
 
 const box = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${avatar.value?.star}-Star.webp`,
@@ -82,6 +97,10 @@ function getDiffStr(): string {
 </script>
 <style lang="css" scoped>
 .twa-container {
+  --twa-blue: var(--tgc-od-blue);
+  --twa-up: var(--tgc-od-green);
+  --twa-down: var(--tgc-od-red);
+
   display: flex;
   overflow: hidden;
   height: 60px;
@@ -90,8 +109,15 @@ function getDiffStr(): string {
   justify-content: flex-start;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
+  border-right: 0;
   background: var(--box-bg-1);
   column-gap: 8px;
+}
+
+html.default .twa-container {
+  --twa-blue: var(--tgc-blue-1);
+  --twa-up: #386626ff;
+  --twa-down: #a4262cff;
 }
 
 .twa-info {
@@ -111,17 +137,56 @@ function getDiffStr(): string {
   }
 
   :last-child {
-    color: var(--tgc-od-blue);
+    color: var(--twa-blue);
     font-family: var(--font-title);
     font-weight: normal;
 
     &.up {
-      color: var(--tgc-od-red);
+      color: var(--twa-up);
     }
 
     &.down {
-      color: var(--tgc-od-green);
+      color: var(--twa-down);
     }
+  }
+}
+
+.twa-progress {
+  position: relative;
+  width: 4px;
+  flex-shrink: 0;
+  align-self: stretch;
+  background: var(--common-shadow-2);
+  margin-inline-start: auto;
+
+  &::before,
+  &::after {
+    position: absolute;
+    content: "";
+    inset: 0;
+    transform-origin: bottom;
+    transition: transform var(--hta-rank-motion, 0.32s ease-out);
+  }
+
+  &::before {
+    background: var(--twa-blue);
+    transform: scaleY(var(--twa-current));
+  }
+
+  &::after {
+    background: var(--twa-down);
+    transform: translateY(calc(0% - var(--twa-diff-start))) scaleY(var(--twa-diff-length));
+  }
+
+  &.twa-progress-up::after {
+    background: var(--twa-up);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twa-progress::before,
+  .twa-progress::after {
+    transition: none;
   }
 }
 </style>

@@ -1,19 +1,11 @@
 <template>
-  <div v-if="selectedData" class="hta-tu-box">
-    <TibWikiAbyss
-      v-for="item in selectedData.Ranks"
-      :key="item.cur.Item"
-      :cur="item.cur.Rate"
-      :last="item.last.Rate"
-      :role="item.cur.Item"
-    />
-  </div>
+  <HtaAvatarRankGrid v-if="selectedData" :ranks="selectedData.Ranks" />
   <div v-else class="hta-tu-empty">暂无数据</div>
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import TibWikiAbyss from "./tib-wiki-abyss.vue";
+import HtaAvatarRankGrid from "./hta-avatar-rank-grid.vue";
 
 type HtaTabUpProps = {
   data: TGApp.Plugins.Hutao.Abyss.PeriodData<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>;
@@ -57,20 +49,6 @@ const selectedData = computed<HtaTabUpData | undefined>(() =>
 );
 </script>
 <style lang="scss" scoped>
-.hta-tu-box {
-  display: grid;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  box-sizing: border-box;
-  align-content: start;
-  align-items: center;
-  padding: 12px;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  overflow-y: auto;
-}
-
 .hta-tu-empty {
   display: flex;
   width: 100%;
