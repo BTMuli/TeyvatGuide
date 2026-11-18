@@ -12,6 +12,7 @@ import { writeImage } from "@tauri-apps/plugin-clipboard-manager";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
+import type { Options } from "html2canvas";
 import html2canvas from "html2canvas";
 import { domToBlob } from "modern-screenshot";
 import workerUrl from "modern-screenshot/worker?url&no-inline";
@@ -1991,7 +1992,7 @@ async function handleShareBuffer(
 
 /**
  * 生成分享截图
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -2004,23 +2005,23 @@ export async function generateShareImg(
   scale: number = 1.5,
   scrollable: boolean = false,
 ): Promise<void> {
-  const canvas = document.createElement("canvas");
   const maxHeight = element.style?.maxHeight;
   if (scrollable) element.style.maxHeight = "100%";
-  const width = element.clientWidth + 30;
-  const height = (scrollable ? element.scrollHeight : element.clientHeight) + 30;
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  const opts = {
+  const padding = 15;
+  const opts: Partial<Options> = {
     backgroundColor: getShareImgBgColor(),
-    windowHeight: height,
+    windowHeight: (scrollable ? element.scrollHeight : element.clientHeight) + padding * 2,
     scale,
-    width,
-    height,
+    width: element.clientWidth + padding * 2,
     useCORS: true,
-    canvas,
-    x: -15,
-    y: -15,
+    x: -padding,
+    y: -padding,
+    onclone(_document, cloned) {
+      const { height } = cloned.getBoundingClientRect();
+      const contentHeight = scrollable ? Math.max(height, cloned.scrollHeight) : height;
+      // 忽略节点已被移除，html2canvas 会在回调结束后按此高度创建画布。
+      opts.height = Math.ceil(contentHeight) + padding * 2;
+    },
   };
   let canvasData;
   try {

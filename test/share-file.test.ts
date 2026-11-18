@@ -3,6 +3,7 @@
  * @since Beta v0.13.2
  */
 
+import type { Options } from "html2canvas";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -134,7 +135,7 @@ describe("分享图文件名", () => {
   });
 });
 
-describe("macOS 分享图剪贴板", () => {
+describe("分享图画布尺寸与 macOS 剪贴板", () => {
   const png =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=";
   const pngBytes = Uint8Array.fromBase64(png);
@@ -146,6 +147,48 @@ describe("macOS 分享图剪贴板", () => {
     vi.stubGlobal("document", { createElement: vi.fn(() => ({})) });
     vi.stubGlobal("localStorage", { getItem: vi.fn(() => null) });
   });
+
+  it.each([
+    {
+      label: "忽略底部操作栏",
+      scrollable: false,
+      cloneHeight: 366.25,
+      scrollHeight: 366,
+      height: 397,
+    },
+    { label: "包含滚动区内容", scrollable: true, cloneHeight: 366, scrollHeight: 540, height: 570 },
+  ])(
+    "按克隆后的内容计算画布高度：$label",
+    async ({ scrollable, cloneHeight, scrollHeight, height }) => {
+      const panel = <HTMLElement>{
+        clientWidth: 718,
+        clientHeight: 426,
+        scrollHeight: 601,
+        style: { maxHeight: "400px" },
+      };
+      const clonedPanel = <HTMLElement>{
+        getBoundingClientRect: () => ({ height: cloneHeight }),
+        scrollHeight,
+      };
+      mocks.capture.mockImplementationOnce(
+        async (_element: HTMLElement, options: Partial<Options>) => {
+          options.onclone?.(document, clonedPanel);
+          return { toDataURL: () => `data:image/png;base64,${png}` };
+        },
+      );
+      mocks.writeImage.mockResolvedValueOnce();
+
+      await generateShareImg("share", panel, 1.5, scrollable);
+
+      expect(mocks.capture).toHaveBeenCalledWith(
+        panel,
+        expect.objectContaining({ width: 748, height, y: -15, scale: 1.5 }),
+      );
+      expect(mocks.capture.mock.calls[0][1]).not.toHaveProperty("canvas");
+      expect(panel.style.maxHeight).toBe("400px");
+      expect(mocks.writeImage).toHaveBeenCalledExactlyOnceWith(pngBytes.buffer);
+    },
+  );
 
   it("等待原生写入完成后才报告复制成功", async () => {
     const write = Promise.withResolvers<void>();
