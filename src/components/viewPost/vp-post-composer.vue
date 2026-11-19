@@ -223,7 +223,7 @@
                   </span>
                 </div>
                 <v-text-field
-                  v-model="topicQuery"
+                  :modelValue="topicQuery"
                   :clearable="true"
                   :disabled="busy || !canWrite"
                   :loading="topicLoading"
@@ -852,6 +852,20 @@ function resetTopicPicker(): void {
   topicError.value = "";
 }
 
+function applyTopicDetails(items: Array<TGApp.BBS.Topic.Summary> | undefined): void {
+  const names = new Map<number, string>();
+  const covers = new Map<number, string>();
+  const descs = new Map<number, string>();
+  for (const topic of readTopicOptions(items)) {
+    names.set(topic.id, topic.name);
+    if (topic.cover) covers.set(topic.id, topic.cover);
+    if (topic.desc) descs.set(topic.id, topic.desc);
+  }
+  topicNames.value = names;
+  topicCovers.value = covers;
+  topicDescs.value = descs;
+}
+
 async function initialize(force: boolean = false): Promise<void> {
   const version = ++contextVersion.value;
   loading.value = true;
@@ -890,9 +904,7 @@ async function initialize(force: boolean = false): Promise<void> {
       draftSeed.value = { ...response.data, settings: initial };
       draft.value = structuredClone(initial);
       maxPictureCount.value = Math.max(18, draft.value.imageUrls?.length ?? 0);
-      topicNames.value = new Map();
-      topicCovers.value = new Map();
-      topicDescs.value = new Map();
+      applyTopicDetails(response.data.topics);
     } else if (props.source) {
       draftSeed.value = undefined;
       seed = structuredClone(toRaw(props.source));
@@ -920,9 +932,7 @@ async function initialize(force: boolean = false): Promise<void> {
       draftSeed.value = undefined;
       maxPictureCount.value = 18;
       draft.value = emptyDraft();
-      topicNames.value = new Map();
-      topicCovers.value = new Map();
-      topicDescs.value = new Map();
+      applyTopicDetails(undefined);
       if (props.initialTopic) topicNames.value.set(props.initialTopic.id, props.initialTopic.name);
       normalizeForumId();
     }
@@ -1193,6 +1203,8 @@ async function loadTopicDescriptions(version: number): Promise<void> {
         const response = await topicReq.info(gid, String(id));
         if (!active || version !== contextVersion.value || response.retcode !== 0) return;
         const topic = response.data?.topic;
+        const name = readTopicText(topic?.name);
+        if (name) topicNames.value.set(id, name);
         const desc = readTopicText(topic?.desc);
         if (desc) topicDescs.value.set(id, desc);
         const cover = readTopicText(topic?.cover);
@@ -1246,12 +1258,14 @@ async function searchTopics(keyword: string, version: number): Promise<void> {
   }
 }
 
-function handleTopicSearch(value: string): void {
+function handleTopicSearch(value: string | null): void {
+  // 清空按钮会回传 null，统一归一为空字符串，避免后续 trim 抛错。
+  topicQuery.value = value ?? "";
   topicError.value = "";
   if (topicSearchTimer !== undefined) window.clearTimeout(topicSearchTimer);
   topicSearchTimer = undefined;
   const version = ++topicSearchVersion;
-  const keyword = value.trim();
+  const keyword = topicQuery.value.trim();
   if (!keyword) {
     topicSearchLoading.value = false;
     topicSearchResults.value = [];
