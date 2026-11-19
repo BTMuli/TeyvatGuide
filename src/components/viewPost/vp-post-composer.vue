@@ -277,20 +277,43 @@
               </p>
             </div>
           </div>
-          <div v-if="!isPicture && coverItems.length > 1" class="post-composer-row">
-            <span class="post-composer-label">帖子封面</span>
-            <v-select
-              v-model="draft.cover"
+          <div class="post-composer-row">
+            <span class="post-composer-label">合集</span>
+            <VpPostCollectionPicker
+              ref="collectionPicker"
+              v-model="draft.collectionId"
+              :accountCookie="canWrite ? cookie : undefined"
               :disabled="busy || !canWrite"
-              :items="coverItems"
-              item-title="title"
-              item-value="value"
-              aria-label="帖子封面"
-              variant="outlined"
-              density="compact"
-              hide-details
-              class="post-composer-select"
+              :sourceId="draft.sourceCollectionId"
+              :sourceTitle="source?.collection?.collection_title"
+              class="post-composer-collection"
             />
+          </div>
+          <div v-if="!isPicture && coverImages.length > 0" class="post-composer-row">
+            <span :id="coverLabelId" class="post-composer-label">帖子封面</span>
+            <div :aria-labelledby="coverLabelId" class="post-composer-cover-options" role="group">
+              <button
+                v-for="(image, index) in coverImages"
+                :key="image"
+                :aria-label="coverOptionLabel(image, index)"
+                :aria-pressed="draft.cover === image"
+                :class="{ 'is-selected': draft.cover === image }"
+                :disabled="busy || !canWrite"
+                :title="coverOptionLabel(image, index)"
+                class="post-composer-cover-option"
+                type="button"
+                @click="toggleCover(image)"
+              >
+                <img :src="image" alt="" decoding="async" loading="lazy" />
+                <span
+                  v-if="isCoverMarked(image)"
+                  aria-hidden="true"
+                  class="post-composer-cover-badge"
+                >
+                  {{ isAutomaticCover(image) ? "自动封面" : "封面" }}
+                </span>
+              </button>
+            </div>
           </div>
         </section>
         <section class="post-composer-section">
@@ -381,6 +404,7 @@
               :authorDesc="briefInfo.desc"
               :authorLevel="previewLevel"
               :avatar="briefInfo.avatar"
+              :collectionName="previewCollectionName"
               :createdAt="previewCreatedAt"
               :categoryName="previewCategory"
               :forumIcon="previewForum?.icon ?? ''"
@@ -450,6 +474,7 @@ import {
 } from "vue";
 
 import VpPictureUploader from "./vp-picture-uploader.vue";
+import VpPostCollectionPicker from "./vp-post-collection-picker.vue";
 import VpPostComponentDialog from "./vp-post-component-dialog.vue";
 import VpPostEditor from "./vp-post-editor.vue";
 import VpPostPreview from "./vp-post-preview.vue";
@@ -468,8 +493,11 @@ const props = defineProps<PostComposerProps>();
 const emits = defineEmits<{ saved: [postId: string | undefined] }>();
 const titleId = useId();
 const titleCounterId = useId();
+const coverLabelId = useId();
 const editor = useTemplateRef<InstanceType<typeof VpPostEditor>>("editor");
 const tools = useTemplateRef<InstanceType<typeof VpPostTools>>("tools");
+const collectionPicker =
+  useTemplateRef<InstanceType<typeof VpPostCollectionPicker>>("collectionPicker");
 const bbsStore = useBBSStore();
 const { forumList, gameList } = storeToRefs(bbsStore);
 const { uid, cookie, briefInfo } = storeToRefs(useUserStore());
@@ -544,6 +572,7 @@ let topicRecommendVersion = 0;
 let loadedTopicRecommendKey = "";
 
 const busy = computed<boolean>(() => pending.value || uploading.value);
+const collectionPickerVisible = computed<boolean>(() => collectionPicker.value?.visible ?? false);
 const topicLoading = computed<boolean>(
   () => topicRecommendLoading.value || topicSearchLoading.value,
 );
@@ -552,6 +581,7 @@ const canSubmit = computed<boolean>(
     !busy.value &&
     !componentDialog.value.visible &&
     !componentDialog.value.loading &&
+    !collectionPickerVisible.value &&
     !editorInvalid.value &&
     canWrite.value &&
     !loading.value &&
@@ -647,6 +677,7 @@ const previewGameIcon = computed<string>(
 const previewTopics = computed<Array<string>>(() =>
   draft.value.topicIds.map((id) => topicNames.value.get(id) ?? `话题 ${id}`),
 );
+const previewCollectionName = computed<string>(() => collectionPicker.value?.selectedTitle ?? "");
 const categories = computed<Array<{ id: number; name: string }>>(() => {
   const items = [
     { id: 0, name: "不选择分类" },
@@ -701,13 +732,9 @@ const topicRecommendationKey = computed<string>(() => {
   const text = previewDocument.value.text;
   return `${draft.value.gid}\u0000${draft.value.forumId}\u0000${draft.value.viewType ?? 1}\u0000${draft.value.topicIds.join(",")}\u0000${draft.value.subject}\u0000${text}`;
 });
-const coverItems = computed<Array<{ title: string; value: string }>>(() => [
-  { title: "自动选择封面", value: "" },
-  ...previewDocument.value.images.map((value, index) => ({
-    title: `正文图片 ${index + 1}`,
-    value,
-  })),
-]);
+const coverImages = computed<Array<string>>(() =>
+  Array.from(new Set(previewDocument.value.images)),
+);
 const aiContentItems = [
   { title: "未设置", value: "USER_AI_CONTENT_CHOICE_UNKNOWN", icon: "mdi-help-circle-outline" },
   {
@@ -1106,6 +1133,26 @@ function movePicture(from: number, to: number): void {
   next.splice(to, 0, image);
   draft.value.imageUrls = next;
 }
+
+function isAutomaticCover(image: string): boolean {
+  return draft.value.cover === "" && coverImages.value[0] === image;
+}
+
+function isCoverMarked(image: string): boolean {
+  return draft.value.cover === image || isAutomaticCover(image);
+}
+
+function coverOptionLabel(image: string, index: number): string {
+  if (draft.value.cover === image) return `第 ${index + 1} 张图片为当前封面，点击恢复自动选择`;
+  if (isAutomaticCover(image)) return `第 ${index + 1} 张图片为自动封面，点击指定为封面`;
+  return `将第 ${index + 1} 张图片设为封面`;
+}
+
+function toggleCover(image: string): void {
+  if (busy.value || !canWrite.value) return;
+  draft.value.cover = draft.value.cover === image ? "" : image;
+}
+
 function removeTopic(id: number): void {
   if (busy.value) return;
   draft.value.topicIds = draft.value.topicIds.filter((item) => item !== id);
@@ -1244,6 +1291,7 @@ async function savePost(): Promise<void> {
     busy.value ||
     componentDialog.value.visible ||
     componentDialog.value.loading ||
+    collectionPickerVisible.value ||
     editorInvalid.value ||
     !canWrite.value ||
     !cookie.value ||
@@ -1568,6 +1616,12 @@ defineExpose({
 .post-composer-row > :last-child {
   min-width: 0;
   flex: 1 1 auto;
+}
+
+.post-composer-row > .post-composer-collection {
+  width: fit-content;
+  max-width: 100%;
+  flex: 0 1 auto;
 }
 
 .post-composer-label {
@@ -1899,6 +1953,72 @@ defineExpose({
   max-width: 440px;
 }
 
+.post-composer-cover-options {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-composer-cover-option {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 104px;
+  max-width: 100%;
+  padding: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  aspect-ratio: 16 / 9;
+  background: var(--app-page-bg);
+  cursor: pointer;
+  line-height: 0;
+  transition: border-color 120ms ease;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &.is-selected {
+    border-color: var(--tgc-od-blue);
+    box-shadow: 0 0 0 1px var(--tgc-od-blue);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  &:hover:not(:disabled, .is-selected) {
+    border-color: var(--common-shadow-2);
+  }
+}
+
+.post-composer-cover-badge {
+  position: absolute;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: #00000099;
+  color: var(--tgc-white-1);
+  font-size: 11px;
+  inset-block-start: 4px;
+  inset-inline-start: 4px;
+  line-height: 16px;
+  pointer-events: none;
+}
+
+.post-composer-cover-option.is-selected .post-composer-cover-badge {
+  background: var(--tgc-od-blue);
+}
+
 .post-composer-error {
   min-width: 0;
   margin: 0;
@@ -1963,6 +2083,10 @@ defineExpose({
 
   .post-composer-row > :last-child {
     width: 100%;
+  }
+
+  .post-composer-row > .post-composer-collection {
+    width: fit-content;
   }
 
   .post-composer-label {

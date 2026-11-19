@@ -46,7 +46,11 @@
       <TpTitle v-if="hasTitle" :text="subject" />
       <template v-else>未填写标题</template>
     </div>
-    <div v-if="topics.length > 0" class="vp-post-preview-topics">
+    <div v-if="collectionName || topics.length > 0" class="vp-post-preview-topics">
+      <span v-if="collectionName" class="vp-post-preview-collection" :title="collectionName">
+        <v-icon aria-hidden="true" size="14">mdi-widgets</v-icon>
+        <span>{{ collectionName }}</span>
+      </span>
       <TpcTag v-for="topic in topics" :key="topic" :tag="topic" class="vp-post-preview-topic" />
     </div>
     <div class="vp-post-preview-data">
@@ -89,7 +93,7 @@ import TpcTag from "./tpc-tag.vue";
 
 /**
  * 帖子窄屏预览参数。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 type PostPreviewProps = {
   /** 帖子标题 */
@@ -106,6 +110,8 @@ type PostPreviewProps = {
   gameIcon: string;
   /** 版块分类 */
   categoryName: string;
+  /** 所属合集名称 */
+  collectionName: string;
   /** 当前账号昵称 */
   nickname: string;
   /** 当前账号头像 */
@@ -375,6 +381,26 @@ const declarations = computed<Array<PreviewDeclaration>>(() => {
   max-width: 100%;
   font-size: 12px;
   pointer-events: none;
+}
+
+.vp-post-preview-collection {
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 12px;
+  background: var(--box-bg-4);
+  color: var(--box-text-2);
+  column-gap: 2px;
+  line-height: 20px;
+
+  span {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .vp-post-preview-data {

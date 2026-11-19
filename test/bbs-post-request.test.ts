@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文帖请求契约回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -895,6 +895,48 @@ describe("postEditReq source initialization and validation", () => {
     );
     expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(largeCollectionId);
   });
+
+  it("keeps the source snapshot separate from collection assignment edits", async () => {
+    const collectionSource = structuredClone(source);
+    collectionSource.collection = structuredClone(collectionMetadata);
+    const settings = getPostEditSettings(collectionSource);
+
+    await postEditReq.update(collectionSource, settings, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe("17723");
+
+    await postEditReq.update(collectionSource, { ...settings, collectionId: "17723" }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe("17723");
+
+    const replacement = "90071992547409931234567890";
+    await postEditReq.update(collectionSource, { ...settings, collectionId: replacement }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(replacement);
+
+    await postEditReq.update(collectionSource, { ...settings, collectionId: null }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(0);
+  });
+
+  it("assigns a valid collection on create and omits an explicit empty choice", async () => {
+    const collectionId = "90071992547409931234567890";
+    await postEditReq.create({ ...getPostEditSettings(source), collectionId }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(collectionId);
+
+    await postEditReq.create({ ...getPostEditSettings(source), collectionId: null }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body).not.toHaveProperty("collection_id");
+  });
+
+  it.each(["", "0", "01", "1.5", "not-an-id"])(
+    "rejects an invalid collection target %s before edit HTTP",
+    async (collectionId) => {
+      const collectionSource = structuredClone(source);
+      collectionSource.collection = structuredClone(collectionMetadata);
+      const settings = getPostEditSettings(collectionSource);
+
+      await expect(
+        postEditReq.update(collectionSource, { ...settings, collectionId }, cookie),
+      ).rejects.toThrow("合集 ID");
+      expect(mocks.post).not.toHaveBeenCalled();
+    },
+  );
 
   it("rejects collection snapshot changes before edit HTTP", async () => {
     const collectionSource = structuredClone(source);

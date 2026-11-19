@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文帖发布、编辑与删除请求。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -41,7 +41,7 @@ const userAiContentChoices: ReadonlySet<string> = new Set([
 
 /**
  * 普通图文帖变更请求体。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 type PostMutationBody = {
   gids: string;
@@ -59,7 +59,7 @@ type PostMutationBody = {
   block_reply_img: number;
   user_ai_content_choice: string;
   post_id?: string;
-  collection_id?: string;
+  collection_id?: string | number;
 };
 
 type MutationDocument =
@@ -118,6 +118,35 @@ function getNonNegativeInteger(value: unknown, name: string): number {
     throw new TypeError(`${name}必须为非负整数`);
   }
   return value;
+}
+
+/**
+ * 校验可编辑的目标合集 ID。
+ * @since Beta v0.13.2
+ * @param value - 编辑设置中的目标合集 ID
+ * @returns 缺省、移出合集或正整数 ID
+ */
+function getCollectionSelection(value: unknown): string | null | undefined {
+  if (value === undefined || value === null) return value;
+  if (typeof value === "string" && /^[1-9]\d*$/u.test(value)) return value;
+  throw new TypeError("合集 ID 必须为正整数");
+}
+
+/**
+ * 根据来源快照和编辑选择构造目标合集字段。
+ * @since Beta v0.13.2
+ * @param sourceCollectionId - 权威来源合集 ID
+ * @param value - 编辑设置中的目标合集 ID
+ * @returns 请求体合集字段；缺省时省略
+ */
+function getEditCollectionId(
+  sourceCollectionId: string | null,
+  value: unknown,
+): string | number | undefined {
+  const selection = getCollectionSelection(value);
+  if (selection === undefined) return sourceCollectionId ?? undefined;
+  if (selection === null) return sourceCollectionId === null ? undefined : 0;
+  return selection;
 }
 
 /**
@@ -637,7 +666,7 @@ export function getPostEditSettings(source: TGApp.BBS.Post.FullData): TGApp.BBS.
 
 /**
  * 校验并构建帖子发布请求体。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param settings - 发布设置
  * @param postId - 编辑时的帖子 ID
  * @param sourceImageCount - 编辑来源图片数量
@@ -722,6 +751,10 @@ function buildMutationBody(
         : getUserAiContentChoice(settings.userAiContentChoice),
   };
   if (postId !== undefined) body.post_id = postId;
+  if (postId === undefined) {
+    const collectionId = getCollectionSelection(settings.collectionId);
+    if (collectionId !== undefined && collectionId !== null) body.collection_id = collectionId;
+  }
   return { body, document };
 }
 
@@ -784,7 +817,7 @@ export async function createPost(
 
 /**
  * 编辑作者自己的普通图文帖。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param source - 原帖子完整数据
  * @param settings - 更新后的发布设置
  * @param cookie - 用户 Cookie
@@ -816,7 +849,8 @@ export async function updatePost(
     throw new TypeError("编辑设置与来源帖子不一致");
   }
   const { body } = buildMutationBody(settings, postId, sourceDocument.images.length);
-  if (sourceCollectionId !== null) body.collection_id = sourceCollectionId;
+  const collectionId = getEditCollectionId(sourceCollectionId, settings.collectionId);
+  if (collectionId !== undefined) body.collection_id = collectionId;
   const response = await TGHttps.post<TGApp.BBS.PostEdit.MutationResponse>(
     `${postApiUrl}editPost`,
     { headers: getMutationHeaders(authCookie, body), body },

@@ -1,6 +1,6 @@
 /**
  * 米游社富文本帖子编辑类型
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 declare namespace TGApp.BBS.PostEdit {
   /**
@@ -127,7 +127,7 @@ declare namespace TGApp.BBS.PostEdit {
 
   /**
    * 图文帖发布设置
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
    */
   type Settings = {
     gid: number;
@@ -145,6 +145,8 @@ declare namespace TGApp.BBS.PostEdit {
     cover: string;
     /** 来源帖子合集 ID，仅用于编辑冲突校验，不作为可编辑字段。 */
     readonly sourceCollectionId?: string | null;
+    /** 可编辑的目标合集 ID；缺省时编辑保留来源合集，null 表示移出合集。 */
+    collectionId?: string | null;
     /** 评论图片权限标记，米游社使用 0/1 表示。 */
     blockReplyImg?: number;
     /** 米游社 AI 内容选择标记。 */

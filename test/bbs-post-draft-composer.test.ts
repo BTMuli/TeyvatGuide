@@ -1,6 +1,6 @@
 /**
  * 米游社帖子编辑器云草稿加载与保存回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { readFileSync } from "node:fs";
@@ -190,6 +190,7 @@ function mountComposer(draftId: string | null = "draft-1"): ComposerBindings {
       getErrMsg: (cause: unknown) => (cause instanceof Error ? cause.message : String(cause)),
     },
     "./vp-picture-uploader.vue": {},
+    "./vp-post-collection-picker.vue": {},
     "./vp-post-component-dialog.vue": {},
     "./vp-post-editor.vue": {},
     "./vp-post-preview.vue": {},
