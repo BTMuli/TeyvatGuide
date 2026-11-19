@@ -130,6 +130,7 @@ async function shareFloor(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .tuad-share {
@@ -143,10 +144,12 @@ async function shareFloor(): Promise<void> {
 
 .tuad-buff {
   position: relative;
-  margin-left: auto;
+  min-width: 0;
+  flex: 1;
   color: var(--box-text-1);
   font-size: 14px;
   font-style: italic;
+  text-align: right;
 }
 
 .tuad-index-box {

@@ -149,11 +149,9 @@ function loadPosInfo(): void {
   width: 100%;
   box-sizing: border-box;
   flex-direction: column;
-  align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
   color: var(--app-page-content);
-  overflow-y: auto;
   row-gap: 8px;
 }
 
@@ -217,7 +215,8 @@ function loadPosInfo(): void {
 .pb-rdt-right {
   position: relative;
   display: flex;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -252,11 +251,12 @@ function loadPosInfo(): void {
 .pb-rdt-meta {
   position: absolute;
   z-index: -1;
-  right: 0;
+  right: 8px;
   bottom: 0;
   color: var(--box-text-4);
   font-size: 10px;
   visibility: hidden;
+  white-space: nowrap;
 }
 
 .pb-rd-desc {
@@ -278,6 +278,7 @@ function loadPosInfo(): void {
   color: var(--box-text-4);
   font-size: 11px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .pb-rd-props {
@@ -325,9 +326,8 @@ function loadPosInfo(): void {
 }
 
 .pb-rdp-label {
-  min-width: 0;
   color: var(--app-page-content);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .pb-rdp-value {
@@ -360,7 +360,6 @@ function loadPosInfo(): void {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   justify-content: center;
   gap: 2px;
 }

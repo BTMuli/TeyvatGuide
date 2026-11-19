@@ -248,7 +248,15 @@ async function share(): Promise<void> {
       track.append(fill);
       progress.replaceWith(track);
     }
-    await TGShare.modern(`成就概览_${maskUidName(uid)}`, target, 2);
+    await TGShare.modern(`成就概览_${maskUidName(uid)}`, target, 2, false, {
+      onCloneNode: (cloned) => {
+        if (!(cloned instanceof HTMLElement)) return;
+        for (const title of cloned.querySelectorAll<HTMLElement>(".series-title")) {
+          title.style.width = "100%";
+          title.style.justifyContent = "center";
+        }
+      },
+    });
   } catch {
     showSnackbar.error("分享失败，请重试");
   } finally {
@@ -467,6 +475,7 @@ progress {
   color: var(--box-text-4);
   font-size: 12px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .series-stats {

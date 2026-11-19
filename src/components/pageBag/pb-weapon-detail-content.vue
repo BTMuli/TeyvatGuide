@@ -124,11 +124,9 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   display: flex;
   box-sizing: border-box;
   flex-direction: column;
-  align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
   color: var(--app-page-content);
-  overflow-y: auto;
   row-gap: 8px;
 }
 
@@ -191,7 +189,8 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 .pb-wdt-right {
   position: relative;
   display: flex;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -219,11 +218,12 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 .pb-wdt-meta {
   position: absolute;
   z-index: -1;
-  right: 0;
+  right: 8px;
   bottom: 0;
   color: var(--box-text-4);
   font-size: 10px;
   visibility: hidden;
+  white-space: nowrap;
 }
 
 .pb-wd-desc {
@@ -245,6 +245,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   color: var(--box-text-4);
   font-size: 11px;
   line-height: 16px;
+  white-space: nowrap;
 }
 
 .pb-wd-affix {
@@ -301,8 +302,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 }
 
 .pb-wd-stat-name {
-  min-width: 0;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .pb-wd-stat-val {
