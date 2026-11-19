@@ -138,7 +138,8 @@ describe("分享图画布尺寸与 macOS 剪贴板", () => {
   const png =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jR1sAAAAASUVORK5CYII=";
   const pngBytes = Uint8Array.fromBase64(png);
-  const element = <HTMLElement>{ clientWidth: 1, clientHeight: 1, style: {} };
+  const querySelector: HTMLElement["querySelector"] = () => null;
+  const element = <HTMLElement>{ clientWidth: 1, clientHeight: 1, querySelector, style: {} };
 
   beforeEach(() => {
     mocks.platform.mockReturnValue("macos");
@@ -163,6 +164,7 @@ describe("分享图画布尺寸与 macOS 剪贴板", () => {
         clientWidth: 718,
         clientHeight: 426,
         scrollHeight: 601,
+        querySelector,
         style: { maxHeight: "400px" },
       };
       const clonedPanel = <HTMLElement>{

@@ -165,6 +165,32 @@ function shareIgnoreFilter(node: Node): boolean {
   return !node.hasAttribute("data-html2canvas-ignore");
 }
 
+/**
+ * 短暂等待异步图片占位替换为 img，避免在图片挂载前克隆分享内容。
+ * @since Beta v0.13.2
+ * @param root - 截图根节点
+ */
+function waitForShareImages(root: HTMLElement): Promise<void> {
+  const pending = "[data-tg-share-image-pending]";
+  if (root.querySelector(pending) === null) return Promise.resolve();
+  return new Promise((resolve) => {
+    const observer = new MutationObserver(() => {
+      if (root.querySelector(pending) === null) finish();
+    });
+    const timeout = setTimeout(finish, 8000);
+    function finish(): void {
+      observer.disconnect();
+      clearTimeout(timeout);
+      resolve();
+    }
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributeFilter: ["data-tg-share-image-pending"],
+    });
+  });
+}
+
 /** MDI 图标字体族名 */
 const MDI_FONT_FAMILY = "Material Design Icons";
 
@@ -1974,6 +2000,7 @@ export async function generateShareImg(
   scale: number = 1.5,
   scrollable: boolean = false,
 ): Promise<void> {
+  await waitForShareImages(element);
   const maxHeight = element.style?.maxHeight;
   if (scrollable) element.style.maxHeight = "100%";
   const padding = 15;
@@ -2148,6 +2175,7 @@ async function captureModernBlob(
   fontUrlBust?: string,
   options?: ShareModernOptions,
 ): Promise<Blob> {
+  await waitForShareImages(element);
   const maxHeight = element.style?.maxHeight;
   if (scrollable) element.style.maxHeight = "100%";
 

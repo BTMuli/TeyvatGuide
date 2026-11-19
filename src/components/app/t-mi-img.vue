@@ -1,7 +1,7 @@
 <template>
   <img v-if="localUrl" :alt :class="props.class" :src="localUrl" :title @click="emits('click')" />
-  <span v-else class="progress">
-    <v-progress-circular :size color="blue" indeterminate tag="span" />
+  <span v-else :data-tg-share-image-pending="src ? '' : undefined" class="progress">
+    <v-progress-circular :size color="blue" data-html2canvas-ignore indeterminate tag="span" />
   </span>
 </template>
 <script lang="ts" setup>
