@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文草稿类型定义文件。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 declare namespace TGApp.BBS.PostDraft {
@@ -41,13 +41,15 @@ declare namespace TGApp.BBS.PostDraft {
 
   /**
    * 可编辑草稿详情。
-   * @since Beta v0.13.1
+   * @since Beta v0.13.2
    */
   type Detail = {
     /** 草稿 ID */
     id: string;
     /** 编辑器设置 */
     settings: TGApp.BBS.PostEdit.Settings;
+    /** 草稿关联的话题摘要，用于展示名称、简介与封面；接口未提供时省略 */
+    topics?: Array<TGApp.BBS.Topic.Summary>;
     /** 最近编辑时间，Unix 秒；接口未返回时为 0 */
     updatedAt: number;
     /** 服务端版本号 */

@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文草稿请求契约回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -170,6 +170,7 @@ describe("postDraftReq.detail", () => {
               view_type: 1,
               structured_content: JSON.stringify(nodes),
               content: "<p>草稿正文</p>",
+              topic_ids: [7],
               is_original: 1,
               republish_authorization: 2,
               block_reply_img: 1,
@@ -177,7 +178,16 @@ describe("postDraftReq.detail", () => {
               user_ai_content_choice: "USER_AI_CONTENT_CHOICE_UNKNOWN",
             },
             forum: { id: 29, forum_cate: { id: 3 }, name: "酒馆" },
-            topics: [{ id: 7, name: "草稿话题" }],
+            topics: [
+              {
+                id: 7,
+                name: "草稿话题",
+                desc: "草稿话题简介",
+                cover: "https://example.com/topic.png",
+              },
+              { id: "7", name: "重复话题" },
+              { id: "invalid", name: "无效话题" },
+            ],
             cover: { url: image, width: 100, height: 100, crop: { x: 0, y: 0, w: 100, h: 100 } },
             collection: { collection_id: "456" },
             contribution_act: { id: "activity-1" },
@@ -205,8 +215,17 @@ describe("postDraftReq.detail", () => {
       isOriginal: 1,
       republishAuthorization: 2,
       blockReplyImg: 1,
+      collectionId: "456",
     });
     expect(response.data.ownerUid).toBe(cookie.ltuid);
+    expect(response.data.topics).toEqual([
+      {
+        id: "7",
+        name: "草稿话题",
+        desc: "草稿话题简介",
+        cover: "https://example.com/topic.png",
+      },
+    ]);
     mocks.post.mockResolvedValueOnce({
       data: { retcode: 0, message: "OK", data: { draft_id: "123" } },
     });
@@ -243,6 +262,66 @@ describe("postDraftReq.detail", () => {
     ])
       expect(body).not.toHaveProperty(key);
   });
+
+  it("preserves a large nested collection ID without numeric truncation", async () => {
+    const collectionId = "90071992547409931234567890";
+    mocks.get.mockResolvedValueOnce({
+      data: {
+        retcode: 0,
+        message: "OK",
+        data: {
+          draft_id: "126",
+          draft: {
+            post: {
+              game_id: 2,
+              f_forum_id: 29,
+              subject: "大合集草稿",
+              view_type: 1,
+              structured_content: JSON.stringify([{ insert: "正文\n" }]),
+              content: "<p>正文</p>",
+              is_original: 0,
+              republish_authorization: 0,
+              block_reply_img: 0,
+            },
+            forum: { id: 29, forum_cate: { id: 3 } },
+            settings: { collection_id: collectionId },
+          },
+        },
+      },
+    });
+
+    const response = await postDraftReq.detail("126", cookie);
+    if (response.data === null) throw new Error("详情响应缺少数据");
+    expect(response.data.settings.collectionId).toBe(collectionId);
+    expect(response.data.raw?.collection_id).toBe(collectionId);
+
+    mocks.post.mockResolvedValueOnce({
+      data: { retcode: 0, message: "OK", data: { draft_id: "126" } },
+    });
+    const saved = await postDraftReq.save(response.data.settings, cookie, response.data);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(collectionId);
+    expect(saved.data?.draft?.settings.collectionId).toBe(collectionId);
+  });
+
+  it("saves an explicit empty collection choice as wire zero", async () => {
+    mocks.post.mockResolvedValueOnce({
+      data: { retcode: 0, message: "OK", data: { draft_id: "127" } },
+    });
+
+    const response = await postDraftReq.save({ ...settings, collectionId: null }, cookie);
+    expect(mocks.post.mock.calls.at(-1)?.[1].body.collection_id).toBe(0);
+    expect(response.data?.draft?.settings.collectionId).toBeNull();
+  });
+
+  it.each(["", "-1", "1.5", "not-an-id"])(
+    "rejects invalid draft collection target %s before HTTP",
+    async (collectionId) => {
+      await expect(postDraftReq.save({ ...settings, collectionId }, cookie)).rejects.toThrow(
+        "合集 ID",
+      );
+      expect(mocks.post).not.toHaveBeenCalled();
+    },
+  );
 
   it("loads picture drafts and keeps the image order", async () => {
     mocks.get.mockResolvedValueOnce({

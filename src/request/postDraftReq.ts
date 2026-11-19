@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文草稿读取、编辑与保存请求。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { buildPostDocument } from "@utils/bbs/postDocument.js";
@@ -104,6 +104,52 @@ function getNonNegativeInteger(value: unknown, name: string): number {
 }
 
 /**
+ * 将草稿合集 ID 归一为不丢精度的十进制字符串。
+ * @since Beta v0.13.2
+ * @param value - 接口或草稿设置中的合集 ID
+ * @param name - 字段名称
+ * @returns 非负合集 ID；缺失时省略
+ */
+function getCollectionIdText(value: unknown, name: string = "合集 ID"): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value === "number") {
+    if (!Number.isSafeInteger(value) || value < 0) throw new TypeError(`${name}无效`);
+    return String(value);
+  }
+  if (typeof value !== "string") throw new TypeError(`${name}无效`);
+  const text = value.trim();
+  if (!/^\d+$/u.test(text)) throw new TypeError(`${name}无效`);
+  return BigInt(text).toString();
+}
+
+/**
+ * 读取草稿设置中的目标合集选择。
+ * @since Beta v0.13.2
+ * @param value - 草稿设置或详情中的合集 ID
+ * @returns 缺省、移出合集或正整数 ID
+ */
+function getCollectionSelection(value: unknown): string | null | undefined {
+  if (value === undefined || value === null) return value;
+  const collectionId = getCollectionIdText(value);
+  if (collectionId === "0") return null;
+  if (collectionId === undefined) return undefined;
+  return collectionId;
+}
+
+/**
+ * 将草稿合集 ID 编码为接口兼容的数字或精确字符串。
+ * @since Beta v0.13.2
+ * @param value - 草稿合集 ID
+ * @returns 安全整数使用数字，超出范围时保留字符串
+ */
+function getCollectionIdWire(value: unknown): number | string | undefined {
+  const collectionId = getCollectionIdText(value);
+  if (collectionId === undefined) return undefined;
+  const numeric = Number(collectionId);
+  return Number.isSafeInteger(numeric) && String(numeric) === collectionId ? numeric : collectionId;
+}
+
+/**
  * 从未知值读取帖子类型。
  * @since Beta v0.13.1
  * @param value - 米游社 view_type
@@ -156,6 +202,37 @@ function getTopicIds(draft: DraftRecord): Array<number> {
 }
 
 /**
+ * 读取草稿附带的话题摘要，用于展示名称、简介与封面。
+ * @since Beta v0.13.2
+ * @param value - 草稿详情中的话题列表
+ * @returns 已归一化的话题摘要，忽略无法识别的条目
+ */
+function getDraftTopics(value: unknown): Array<TGApp.BBS.Topic.Summary> {
+  if (!Array.isArray(value)) return [];
+  const topics: Array<TGApp.BBS.Topic.Summary> = [];
+  const seen = new Set<string>();
+  for (const item of value) {
+    if (!isRecord(item)) continue;
+    const id =
+      typeof item.id === "number" && Number.isSafeInteger(item.id) && item.id > 0
+        ? String(item.id)
+        : typeof item.id === "string" && /^[1-9]\d*$/u.test(item.id.trim())
+          ? item.id.trim()
+          : undefined;
+    const name = typeof item.name === "string" ? item.name.trim() : "";
+    if (id === undefined || !name || seen.has(id)) continue;
+    seen.add(id);
+    topics.push({
+      id,
+      name,
+      ...(typeof item.desc === "string" && item.desc.trim() ? { desc: item.desc.trim() } : {}),
+      ...(typeof item.cover === "string" && item.cover.trim() ? { cover: item.cover.trim() } : {}),
+    });
+  }
+  return topics;
+}
+
+/**
  * 获取草稿封面地址。
  * @since Beta v0.13.1
  * @param value - 草稿封面字段
@@ -173,17 +250,37 @@ function getCover(value: unknown): string {
 }
 
 /**
+ * 从平铺或嵌套草稿字段中读取合集 ID。
+ * @since Beta v0.13.2
+ * @param draft - 草稿原始数据
+ * @param post - 嵌套帖子数据
+ * @returns 原始合集 ID；未声明时省略
+ */
+function getRawCollectionId(draft: DraftRecord, post: DraftRecord): unknown {
+  const draftSettings = isRecord(draft.settings) ? draft.settings : undefined;
+  const postSettings = isRecord(post.settings) ? post.settings : undefined;
+  const collection = isRecord(draft.collection) ? draft.collection : undefined;
+  for (const record of [draft, draftSettings, post, postSettings, collection]) {
+    if (record && record.collection_id !== undefined) return record.collection_id;
+  }
+  return undefined;
+}
+
+/**
  * 将官方 FullData 草稿归一化为编辑器和保存接口使用的平铺字段。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param draft - 详情中的草稿数据，兼容早期平铺格式
  * @returns 平铺字段，不包含详情响应包装
  */
 function normalizeDraftFields(draft: DraftRecord): DraftRecord {
-  if (!isRecord(draft.post)) return { ...draft };
+  if (!isRecord(draft.post)) {
+    const collectionId = getRawCollectionId(draft, draft);
+    return collectionId === undefined ? { ...draft } : { ...draft, collection_id: collectionId };
+  }
   const post = draft.post;
   const forum = isRecord(draft.forum) ? draft.forum : undefined;
   const category = isRecord(forum?.forum_cate) ? forum.forum_cate : undefined;
-  const collection = isRecord(draft.collection) ? draft.collection : undefined;
+  const collectionId = getRawCollectionId(draft, post);
   const cover = isRecord(draft.cover) ? draft.cover.url : draft.cover;
   const linkCards = Array.isArray(draft.link_card_list)
     ? draft.link_card_list.map((card) => {
@@ -203,9 +300,9 @@ function normalizeDraftFields(draft: DraftRecord): DraftRecord {
     forum_id: forum?.id ?? post.f_forum_id ?? post.forum_id,
     forum_cate_id: category?.id ?? post.cate_id ?? post.forum_cate_id,
     topic_ids: post.topic_ids,
-    topics: draft.topics,
+    topics: draft.topics ?? post.topics,
     cover: cover ?? post.cover,
-    collection_id: collection?.collection_id ?? 0,
+    ...(collectionId === undefined ? { collection_id: 0 } : { collection_id: collectionId }),
     is_original: post.is_original,
     republish_authorization: post.republish_authorization,
     block_reply_img: post.block_reply_img,
@@ -249,7 +346,7 @@ function getDraftOwnerUid(value: unknown): string | undefined {
 
 /**
  * 将草稿原始数据转换为编辑器设置。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param draft - 草稿原始数据
  * @returns 编辑器设置
  */
@@ -317,6 +414,7 @@ function getDraftSettings(draft: DraftRecord): TGApp.BBS.PostEdit.Settings {
   const blockReplyImg = getNonNegativeInteger(draft.block_reply_img ?? 0, "评论图片权限标记");
   const subject = typeof draft.subject === "string" ? draft.subject : "";
   const cover = getCover(draft.cover);
+  const collectionId = getCollectionSelection(draft.collection_id);
 
   return {
     gid,
@@ -330,6 +428,7 @@ function getDraftSettings(draft: DraftRecord): TGApp.BBS.PostEdit.Settings {
     isOriginal,
     republishAuthorization,
     cover,
+    ...(collectionId === undefined ? {} : { collectionId }),
     blockReplyImg,
     ...(typeof draft.user_ai_content_choice === "string"
       ? { userAiContentChoice: draft.user_ai_content_choice }
@@ -339,7 +438,7 @@ function getDraftSettings(draft: DraftRecord): TGApp.BBS.PostEdit.Settings {
 
 /**
  * 将接口草稿详情转换为内部详情。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param data - 接口详情数据
  * @returns 内部草稿详情
  */
@@ -357,12 +456,17 @@ function mapDetailData(data: DraftRecord): TGApp.BBS.PostDraft.Detail {
     throw new TypeError("草稿作者元数据不一致，请重新读取草稿");
   const ownerUid = postUid ?? userUid;
   const settings = getDraftSettings(fields);
+  const topics = getDraftTopics(fields.topics);
   const raw = getDraftSaveSeed(fields);
+  if (raw.collection_id !== undefined) {
+    raw.collection_id = getCollectionIdWire(raw.collection_id);
+  }
   raw.cover = settings.cover;
   if (data.lottery !== undefined && raw.lottery === undefined) raw.lottery = data.lottery;
   return {
     id,
     settings,
+    ...(topics.length === 0 ? {} : { topics }),
     updatedAt,
     ...(version > 0 ? { version } : {}),
     raw,
@@ -523,7 +627,7 @@ export async function getDraftDetail(
 
 /**
  * 构造草稿保存请求体。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param settings - 编辑器设置
  * @param source - 原始草稿详情
  * @returns 保存请求体
@@ -544,8 +648,14 @@ function buildSaveBody(
   body.subject = typeof settings.subject === "string" ? settings.subject : "";
   body.view_type = viewType;
   body.topic_ids = topicIds;
-  if (body.collection_id !== undefined)
-    body.collection_id = getNonNegativeInteger(body.collection_id, "合集 ID");
+  const collectionId = getCollectionSelection(settings.collectionId);
+  if (collectionId === null) {
+    body.collection_id = 0;
+  } else if (collectionId !== undefined) {
+    body.collection_id = getCollectionIdWire(collectionId);
+  } else if (body.collection_id !== undefined) {
+    body.collection_id = getCollectionIdWire(body.collection_id);
+  }
   body.is_original = getNonNegativeInteger(settings.isOriginal, "原创标记");
   body.republish_authorization = getNonNegativeInteger(
     settings.republishAuthorization,
@@ -583,7 +693,7 @@ function buildSaveBody(
 
 /**
  * 保存草稿。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param settings - 编辑器设置
  * @param cookie - 用户 Cookie
  * @param source - 已读取的草稿详情；缺省时创建新草稿
@@ -612,9 +722,20 @@ export async function saveDraft(
   if (response.data.data === null) throw new TypeError("草稿保存响应数据无效");
   const data: DraftRecord = { ...response.data.data };
   const draftId = getDraftId(data.draft_id);
+  const savedCollectionId =
+    settings.collectionId !== undefined
+      ? settings.collectionId
+      : body.collection_id === undefined
+        ? undefined
+        : body.collection_id === 0
+          ? null
+          : String(body.collection_id);
+  const mappedSettings =
+    savedCollectionId === undefined ? settings : { ...settings, collectionId: savedCollectionId };
   const mappedDraft: TGApp.BBS.PostDraft.Detail = {
     id: draftId,
-    settings,
+    settings: mappedSettings,
+    ...(source?.topics === undefined ? {} : { topics: source.topics }),
     updatedAt: 0,
     ...(source?.version === undefined ? {} : { version: source.version }),
     raw: { ...body },
