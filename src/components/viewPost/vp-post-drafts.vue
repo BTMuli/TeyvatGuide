@@ -14,28 +14,22 @@
     <template #header>
       <div class="post-drafts-heading">
         <h2 :id="titleId">草稿箱</h2>
+        <v-btn-toggle
+          v-model="viewType"
+          :disabled="deletingId !== undefined"
+          :mandatory="true"
+          aria-label="草稿类型"
+          class="post-drafts-types"
+          density="compact"
+          variant="outlined"
+        >
+          <v-btn :value="1" size="small">长文</v-btn>
+          <v-btn :value="2" size="small">图文</v-btn>
+        </v-btn-toggle>
       </div>
     </template>
 
     <div class="post-drafts-body">
-      <div aria-label="草稿类型" class="post-drafts-types" role="group">
-        <v-btn
-          :aria-pressed="viewType === 1"
-          :disabled="deletingId !== undefined"
-          :variant="viewType === 1 ? 'tonal' : 'text'"
-          type="button"
-          @click="viewType = 1"
-          >长文</v-btn
-        >
-        <v-btn
-          :aria-pressed="viewType === 2"
-          :disabled="deletingId !== undefined"
-          :variant="viewType === 2 ? 'tonal' : 'text'"
-          type="button"
-          @click="viewType = 2"
-          >图文</v-btn
-        >
-      </div>
       <TStatePanel
         v-if="opening || (loading && drafts.length === 0)"
         fill
@@ -63,59 +57,47 @@
           role="listitem"
           @click="openDraft(draft)"
         >
-          <div
-            :aria-label="getDraftLabel(draft)"
-            :aria-disabled="!isSupportedDraft(draft) || opening || deletingId !== undefined"
-            :tabindex="isSupportedDraft(draft) && deletingId === undefined ? 0 : -1"
-            class="post-drafts-item-action"
-            role="button"
-            @keydown.enter.stop.prevent="openDraft(draft)"
-            @keydown.space.stop.prevent="openDraft(draft)"
-          >
+          <div class="post-drafts-item-content">
             <v-icon aria-hidden="true" size="20">
               {{ draft.viewType === 2 ? "mdi-image-edit-outline" : "mdi-text-box-edit-outline" }}
             </v-icon>
             <span class="post-drafts-item-copy">
-              <span class="post-drafts-item-title">{{ draft.subject || "无标题草稿" }}</span>
-              <span class="post-drafts-item-meta">
-                {{ getDraftTypeLabel(draft) }}
-                <template v-if="draft.updatedAt > 0">
-                  · {{ formatDraftTime(draft.updatedAt) }}</template
-                >
+              <button
+                :aria-label="getDraftLabel(draft)"
+                :disabled="!isSupportedDraft(draft) || opening || deletingId !== undefined"
+                class="post-drafts-item-title"
+                type="button"
+                @click.stop="openDraft(draft)"
+              >
+                {{ draft.subject || "无标题草稿" }}
+              </button>
+              <span v-if="draft.updatedAt > 0" class="post-drafts-item-meta">
+                {{ formatDraftTime(draft.updatedAt) }}
               </span>
             </span>
             <span v-if="!isSupportedDraft(draft)" class="post-drafts-item-unsupported">
               暂不支持
             </span>
           </div>
-          <button
+          <v-btn
             :aria-label="`删除草稿：${draft.subject || '无标题草稿'}`"
+            :disabled="deletingId !== undefined || opening"
+            :loading="deletingId === draft.id"
             class="post-drafts-delete"
-            :disabled="deletingId !== undefined || opening"
+            icon="mdi-delete-outline"
+            size="small"
+            title="删除草稿"
             type="button"
+            variant="text"
             @click.stop="deleteDraft(draft)"
-          >
-            <v-progress-circular
-              v-if="deletingId === draft.id"
-              aria-hidden="true"
-              indeterminate
-              size="18"
-              tag="span"
-              width="2"
-            />
-            <v-icon v-else aria-hidden="true" size="18">mdi-delete-outline</v-icon>
-          </button>
-          <button
+          />
+          <v-icon
             v-if="isSupportedDraft(draft)"
-            :aria-label="`打开草稿：${draft.subject || '无标题草稿'}`"
-            class="post-drafts-open"
-            :disabled="deletingId !== undefined || opening"
-            title="打开草稿"
-            type="button"
-            @click.stop="openDraft(draft)"
-          >
-            <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
-          </button>
+            aria-hidden="true"
+            class="post-drafts-chevron"
+            icon="mdi-chevron-right"
+            size="18"
+          />
         </article>
         <div v-if="error" aria-live="assertive" class="post-drafts-inline-error" role="alert">
           <span>{{ error }}</span>
@@ -284,12 +266,6 @@ function isSupportedDraft(draft: TGApp.BBS.PostDraft.Item): boolean {
   return draft.viewType === 1 || draft.viewType === 2;
 }
 
-function getDraftTypeLabel(draft: TGApp.BBS.PostDraft.Item): string {
-  if (draft.viewType === 1) return "长文";
-  if (draft.viewType === 2) return "图文";
-  return "其他类型";
-}
-
 function getDraftLabel(draft: TGApp.BBS.PostDraft.Item): string {
   const title = draft.subject || "无标题草稿";
   return isSupportedDraft(draft) ? `编辑草稿：${title}` : `${title}，暂不支持编辑`;
@@ -402,6 +378,11 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
 
 <style lang="scss" scoped>
 .post-drafts-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+
   h2 {
     margin: 0;
     color: var(--common-text-title);
@@ -417,10 +398,42 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
   flex-direction: column;
 }
 
-.post-drafts-types {
-  display: flex;
-  margin-bottom: 12px;
-  gap: 8px;
+.post-drafts-types.v-btn-toggle {
+  display: inline-flex;
+  overflow: hidden;
+  height: 30px;
+  flex: none;
+  align-items: stretch;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+}
+
+.post-drafts-types :deep(.v-btn) {
+  min-width: 48px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--box-text-2);
+  font-size: 12px;
+}
+
+.post-drafts-types :deep(.v-btn + .v-btn) {
+  border-inline-start: 1px solid var(--common-shadow-1) !important;
+  margin-inline-start: 0;
+}
+
+.post-drafts-types :deep(.v-btn__overlay),
+.post-drafts-types :deep(.v-btn__underlay) {
+  opacity: 0 !important;
+}
+
+.post-drafts-types :deep(.v-btn.v-btn--active),
+.post-drafts-types :deep(.v-btn[aria-pressed="true"]) {
+  background: var(--box-bg-4);
+  color: var(--common-text-title);
 }
 
 .post-drafts-list {
@@ -430,95 +443,81 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
 }
 
 .post-drafts-item {
-  position: relative;
-  z-index: 0;
   display: flex;
   width: 100%;
   min-width: 0;
   flex-shrink: 0;
   align-items: center;
-  padding: 0 8px 0 0;
+  padding: 12px 8px 12px 16px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
-  gap: 0;
+  gap: 8px;
 
-  &:hover {
-    background: var(--box-bg-2);
+  &:has(.post-drafts-item-title:focus-visible) {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  &:has(.post-drafts-item-title:not(:disabled)) {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--box-bg-2);
+    }
+
+    &:active {
+      background: var(--box-bg-3);
+    }
   }
 }
 
-.post-drafts-item-action {
+.post-drafts-item-content {
   display: flex;
   min-width: 0;
   flex: 1 1 auto;
   align-items: center;
-  padding: 12px;
-  border: 0;
-  background: transparent;
   color: var(--box-text-1);
-  cursor: pointer;
-  font: inherit;
-  gap: 12px;
-  text-align: left;
+  gap: 8px;
 
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-orange);
-    outline-offset: -2px;
-  }
-
-  &[aria-disabled="true"] {
-    cursor: default;
+  &:has(.post-drafts-item-title:disabled) {
     opacity: 0.6;
   }
 }
 
-.post-drafts-delete,
-.post-drafts-open {
-  position: relative;
-  z-index: 2;
+.post-drafts-delete {
   display: inline-flex;
-  min-width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  flex: none;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 50%;
   background: var(--box-bg-2);
+  color: var(--tgc-od-red);
   cursor: pointer;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
-  }
 
   &:disabled {
     cursor: default;
     opacity: 0.6;
   }
 
-  &:hover:not(:disabled) {
-    border-color: var(--common-shadow-2);
-    background: var(--box-bg-3);
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
   }
 }
 
-.post-drafts-delete {
-  color: var(--tgc-od-red);
-}
-
-.post-drafts-open {
-  color: var(--box-text-1);
-}
-
-.post-drafts-item:hover .post-drafts-delete,
-.post-drafts-item:hover .post-drafts-open {
+.post-drafts-item:hover .post-drafts-delete {
   background: var(--box-bg-1);
+}
+
+.post-drafts-chevron {
+  flex: none;
+  color: var(--box-text-1);
 }
 
 .post-drafts-item-copy {
@@ -537,9 +536,18 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
 }
 
 .post-drafts-item-title {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--common-text-title);
+  cursor: inherit;
   font-size: 14px;
   line-height: 20px;
+  text-align: left;
+
+  &:focus-visible {
+    outline: none;
+  }
 }
 
 .post-drafts-item-meta {
