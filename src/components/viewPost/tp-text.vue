@@ -57,7 +57,7 @@ const parsedSegments = computed<ReturnType<typeof splitPostEmoticonText>>(() =>
   splitPostEmoticonText(props.data.insert, emoticonMap.value),
 );
 const mode = computed<"text" | "link" | "emoji" | "emojis">(() => {
-  if (props.data.attributes && "link" in props.data.attributes) return "link";
+  if (props.data.attributes?.link?.trim()) return "link";
   const segments = parsedSegments.value;
   if (segments.length === 1 && typeof segments[0].insert !== "string") return "emoji";
   if (segments.some((segment) => typeof segment.insert !== "string")) return "emojis";

@@ -1,6 +1,6 @@
 /**
  * 解析游戏内公告数据
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  */
 
 import TpText, { type TpText as TpTextType } from "@comp/viewPost/tp-text.vue";
@@ -360,7 +360,7 @@ function parseAnnoDetails(details: HTMLElement): TGApp.BBS.SctPost.Base {
 
 /**
  * 将公告节点转换为文本组件可用的数据
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param data - 公告节点
  * @returns 文本数据；非文本节点返回 null
  */
@@ -368,11 +368,12 @@ function getAnnoTextData(data: TGApp.BBS.SctPost.Base): TpTextType | null {
   if (typeof data.insert !== "string") return null;
   const attributes = data.attributes;
   if (attributes === undefined) return { insert: data.insert };
+  const link = typeof attributes.link === "string" ? attributes.link.trim() : "";
   return {
     insert: data.insert,
     attributes: {
       header: typeof attributes.header === "number" ? attributes.header : undefined,
-      link: typeof attributes.link === "string" ? attributes.link : undefined,
+      ...(link ? { link } : {}),
       bold: attributes.bold === true || attributes.bold === "true",
       color: typeof attributes.color === "string" ? attributes.color : undefined,
       align: typeof attributes.align === "string" ? attributes.align : undefined,
