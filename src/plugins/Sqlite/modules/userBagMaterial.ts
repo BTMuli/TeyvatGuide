@@ -1,6 +1,6 @@
 /**
  * 用户背包材料模块
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 import { platform } from "@tauri-apps/plugin-os";
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -115,8 +115,8 @@ function getValidMIds(): Array<number> {
 }
 
 /**
- * 插入或更新材料数据
- * @since Beta v0.13.1
+ * 更新材料库存和历史，同秒写入时以本次记录为准。
+ * @since Beta v0.13.2
  * @param uid - 存档UID
  * @param itemId - 材料ID
  * @param count - 材料数量
@@ -141,7 +141,10 @@ async function insertMaterial(
     },
     {
       query: `INSERT INTO UserBagMaterialRecord(uid, materialId, time, count, manual)
-              VALUES ($1, $2, $3, $4, $5);`,
+              VALUES ($1, $2, $3, $4, $5)
+              ON CONFLICT(uid, materialId, time) DO UPDATE SET
+                count = excluded.count,
+                manual = excluded.manual;`,
       values: [uid, itemId, Math.floor(now / 1000), count, manual ? 1 : 0],
     },
   ];

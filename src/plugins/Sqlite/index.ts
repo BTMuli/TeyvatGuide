@@ -331,8 +331,8 @@ class Sqlite {
   }
 
   /**
-   * 将材料表中的 JSON 更新记录迁移到独立记录表。
-   * @since Beta v0.13.1
+   * 按 JSON 数组顺序迁移材料历史，同秒保留最后一条记录。
+   * @since Beta v0.13.2
    * @returns 无返回值
    */
   private async migrateUserBagMaterialRecordSchema(): Promise<void> {
@@ -353,7 +353,11 @@ class Sqlite {
                     WHEN material.records IS NULL OR trim(material.records) = '' THEN '[]'
                     ELSE material.records
                   END
-                ) AS record;`,
+                ) AS record
+                ORDER BY material.uid, material.id, record.key
+                ON CONFLICT(uid, materialId, time) DO UPDATE SET
+                  count = excluded.count,
+                  manual = excluded.manual;`,
       },
       { query: "ALTER TABLE UserBagMaterial DROP COLUMN records;" },
     ]);

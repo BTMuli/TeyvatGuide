@@ -208,13 +208,14 @@ describe("UserBagMaterialRecord schema migration", () => {
     ]);
   });
 
-  it("migrates histories for every UID and is idempotent", async () => {
+  it("keeps the last legacy record for a second and is idempotent", async () => {
     createLegacyMaterialTable();
     insertLegacyMaterial(
       1001,
       101,
       12,
       JSON.stringify([
+        { count: 0, time: 1001 },
         { count: 10, time: 1000 },
         { count: 12, time: 1001, manual: true },
       ]),

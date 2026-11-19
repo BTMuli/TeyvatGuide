@@ -1,6 +1,6 @@
 /**
  * 用户背包材料存储回归测试
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
@@ -171,6 +171,19 @@ describe("user bag material storage", () => {
     await expect(TSUserBagMaterial.getRecords(1, 101)).resolves.toEqual([
       { count: 7, time: 1794268801, manual: true },
       { count: 4, time: 1794268800 },
+    ]);
+  });
+
+  it("keeps the latest inventory and history when writing twice in one second", async () => {
+    await TSUserBagMaterial.insertMaterial(1, 101, 8, true);
+    vi.advanceTimersByTime(300);
+    await TSUserBagMaterial.insertMaterial(1, 101, 7);
+
+    await expect(TSUserBagMaterial.getMaterial(1, 101)).resolves.toEqual([
+      { uid: 1, id: 101, count: 7, updated: "2026-11-10T00:00:00.300Z" },
+    ]);
+    await expect(TSUserBagMaterial.getRecords(1, 101)).resolves.toEqual([
+      { count: 7, time: 1794268800 },
     ]);
   });
 
