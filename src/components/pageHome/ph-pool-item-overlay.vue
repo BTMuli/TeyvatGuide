@@ -951,6 +951,7 @@ async function openPost(): Promise<void> {
 
 .phio-up-group {
   display: flex;
+  min-width: 0;
   align-items: center;
   padding: 6px 10px;
   border: 1px solid var(--common-shadow-1);
@@ -968,6 +969,7 @@ async function openPost(): Promise<void> {
 
 .phio-icon-list {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 2px;
 }
@@ -975,6 +977,7 @@ async function openPost(): Promise<void> {
 .phio-icon-list img {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
   object-fit: contain;
 }
 
