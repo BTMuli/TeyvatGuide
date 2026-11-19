@@ -58,7 +58,9 @@ import bbsReq from "@req/bbsReq.js";
 import communityReq from "@req/communityReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
+import { defaultCommunityGid, resolveBrowsingOption } from "@utils/bbs/browsing.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
 import { clearNotificationBadge } from "@utils/community/notification.js";
@@ -82,7 +84,7 @@ type AccountSnapshot = {
 };
 
 const defaultProfileGame: TGApp.BBS.Profile.GameOption = {
-  id: 2,
+  id: defaultCommunityGid,
   name: "原神",
   icon: "/UI/nav/paimon.webp",
 };
@@ -92,6 +94,7 @@ const route = useRoute();
 const { isLogin } = storeToRefs(useAppStore());
 const bbsStore = useBBSStore();
 const { gameList } = storeToRefs(bbsStore);
+const { recentGid } = storeToRefs(useCommunityBrowsingStore());
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const profileUid = computed<string>(() => {
   const targetUid = route.params.uid;
@@ -101,7 +104,7 @@ const isOwnProfile = computed<boolean>(
   () => profileUid.value !== "" && profileUid.value === uid.value,
 );
 const routeGid = computed<number | undefined>(() => parseCommunityProfileGid(route.query.gid));
-const selectedGid = ref<number>(routeGid.value ?? defaultProfileGame.id);
+const useBrowsingPreference = computed<boolean>(() => !route.params.uid || isOwnProfile.value);
 const gameOptions = computed<Array<TGApp.BBS.Profile.GameOption>>(() => {
   const options = gameList.value.map<TGApp.BBS.Profile.GameOption>(
     ({ id, name, app_icon, icon }) => ({
@@ -116,8 +119,16 @@ const gameOptions = computed<Array<TGApp.BBS.Profile.GameOption>>(() => {
   return options;
 });
 const currentGame = computed<TGApp.BBS.Profile.GameOption>(
-  () => gameOptions.value.find((item) => item.id === selectedGid.value) ?? defaultProfileGame,
+  () =>
+    resolveBrowsingOption(
+      gameOptions.value,
+      (game) => game.id,
+      routeGid.value,
+      useBrowsingPreference.value ? recentGid.value : undefined,
+      defaultProfileGame.id,
+    ) ?? defaultProfileGame,
 );
+const selectedGid = computed<number>(() => currentGame.value.id);
 const unreadCounts = shallowRef<TGApp.BBS.Notification.UnreadRes["count"]>({});
 const notificationSettings = shallowRef<TGApp.BBS.Notification.Settings>();
 const currentSection = computed<TGApp.BBS.Profile.Section>(
@@ -191,10 +202,6 @@ watch(
   () => void loadProfile(),
   { immediate: true },
 );
-
-watch(routeGid, (gid) => {
-  selectedGid.value = gid ?? defaultProfileGame.id;
-});
 
 void ensureGameList();
 
@@ -336,7 +343,8 @@ async function loadProfile(): Promise<void> {
 }
 
 async function selectGame(gid: number): Promise<void> {
-  selectedGid.value = gid;
+  if (!gameOptions.value.some((game) => game.id === gid)) return;
+  if (useBrowsingPreference.value) recentGid.value = gid;
   await router.replace({ query: { ...route.query, gid: String(gid) } });
 }
 

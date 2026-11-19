@@ -43,7 +43,7 @@
     </template>
     <div class="posts-switch">
       <v-select
-        v-model="curGid"
+        :modelValue="curGid"
         :disabled="isReq"
         :items="sortGameList"
         :label="gidLabel"
@@ -53,6 +53,7 @@
         item-title="text"
         item-value="gid"
         variant="outlined"
+        @update:model-value="changeGame"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -74,7 +75,7 @@
         </template>
       </v-select>
       <v-select
-        v-model="selectedForum"
+        :modelValue="selectedForum"
         :disabled="isReq"
         :items="curForums"
         :label="forumLabel"
@@ -84,6 +85,7 @@
         item-title="text"
         return-object
         variant="outlined"
+        @update:model-value="changeForum"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -106,7 +108,7 @@
       </v-select>
       <v-select
         v-if="!isDiscover"
-        v-model="curSortType"
+        :modelValue="curSortType"
         :disabled="isReq"
         :items="sortOrderList"
         :label="sortLabel"
@@ -116,6 +118,7 @@
         item-title="text"
         item-value="value"
         variant="outlined"
+        @update:model-value="changeSort"
       />
       <v-text-field
         v-model="search"
@@ -166,7 +169,7 @@
       </v-btn>
     </div>
     <template #extension>
-      <TGameNav :gid="disGid" style="margin-left: 8px" />
+      <TGameNav :key="disGid" :gid="disGid" style="margin-left: 8px" />
       <div class="posts-conf">
         <v-checkbox
           v-model="syncRefresh"
@@ -222,8 +225,14 @@ import forumRankReq from "@req/forumRankReq.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import {
+  defaultCommunityGid,
+  parseBrowsingId,
+  resolveBrowsingOption,
+} from "@utils/bbs/browsing.js";
 import { getImageRankOptions } from "@utils/bbs/forumRank.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -268,10 +277,14 @@ const sortOrderList: ReadonlyArray<SortSelectForum> = [
 
 const route = useRoute();
 const router = useRouter();
+const { recentGid, forumByGid, forumSortType } = storeToRefs(useCommunityBrowsingStore());
 
-const curGid = ref<number>(2);
-const disGid = ref<number>(2);
-const curSortType = ref<TGApp.BBS.Post.ForumSortTypeEnum>(bbsEnum.post.forumSortType.LATEST_REPLY);
+const curGid = ref<number>(defaultCommunityGid);
+const disGid = ref<number>(0);
+const curSortType = ref<TGApp.BBS.Post.ForumSortTypeEnum>(
+  resolveBrowsingOption(sortOrderList, (item) => item.value, forumSortType.value)?.value ??
+    bbsEnum.post.forumSortType.LATEST_REPLY,
+);
 
 const gidLabel = ref<string>("分区");
 const forumLabel = ref<string>("版块");
@@ -281,6 +294,8 @@ const firstLoad = ref<boolean>(false);
 const isReq = ref<boolean>(false);
 const syncRefresh = ref<boolean>(true);
 const hasPendingChange = ref<boolean>(false);
+let hasPendingRouteChange = false;
+let appliedRoute = "";
 
 const { isReachBottom } = usePageReachBottom();
 
@@ -359,22 +374,23 @@ const reqCk = computed<TGApp.App.Account.Cookie | undefined>(() => {
 onMounted(async () => {
   await showLoading.start("正在加载帖子数据");
   await loadForums();
-  await nextTick();
-  let { gid, forum } = route.query;
-  if (!gid) gid = route.params.gid;
-  if (!forum) forum = route.params.forum;
-  if (gid && typeof gid === "string") curGid.value = Number(gid);
-  if (forum && typeof forum === "string") {
-    selectedForum.value = getForum(Number(forum));
-  } else {
-    selectedForum.value = curForums.value[0];
+  if (route.name !== "酒馆" || !sortGameList.value.length) {
+    await showLoading.end();
+    return;
   }
+  applyRouteSelection();
   const gameLabel = curGame.value?.text ?? "";
   await TGLogger.Info(
     `[Posts][${gameLabel}][onMounted][${selectedForum.value?.text ?? ""}] 打开帖子列表`,
   );
   await freshPostData();
   firstLoad.value = true;
+});
+
+watch([() => route.fullPath, isReq, firstLoad], () => {
+  if (!firstLoad.value || isReq.value || route.name !== "酒馆" || route.fullPath === appliedRoute)
+    return;
+  if (applyRouteSelection()) void freshPostData();
 });
 
 watch(displayedForum, async (forum) => {
@@ -409,47 +425,8 @@ watch(
     if (!isReachBottom.value || !firstLoad.value) return;
     if (!syncRefresh.value && hasPendingChange.value) {
       await freshPostData();
-      hasPendingChange.value = false;
     } else {
       await loadMore();
-    }
-  },
-);
-watch(
-  () => curGid.value,
-  () => {
-    if (!selectedForum.value) return;
-    const forumFind = curForums.value.find((item) => item.text === selectedForum.value?.text);
-    if (!firstLoad.value) return;
-    selectedForum.value = forumFind ?? curForums.value[0];
-    if (syncRefresh.value) {
-      disGid.value = curGid.value;
-      showSnackbar.success(`已将分区切换到 ${curGame.value?.text}`);
-    }
-    hasPendingChange.value = true;
-  },
-);
-watch(
-  () => selectedForum.value,
-  async () => {
-    if (!firstLoad.value || !selectedForum.value) return;
-    if (syncRefresh.value) {
-      await freshPostData();
-      showSnackbar.success(`已将版块切换到 ${selectedForum.value.text}`);
-    } else {
-      hasPendingChange.value = true;
-    }
-  },
-);
-watch(
-  () => curSortType.value,
-  async () => {
-    if (syncRefresh.value) {
-      await freshPostData();
-      const sortLabel = getSortLabel(curSortType.value);
-      showSnackbar.success(`已将排序切换到 ${sortLabel}`);
-    } else {
-      hasPendingChange.value = true;
     }
   },
 );
@@ -471,7 +448,10 @@ watch(
 );
 // 初始化
 async function loadForums(): Promise<void> {
-  await bbsStore.refreshForumList();
+  await Promise.all([
+    bbsStore.refreshForumList(),
+    gameList.value.length ? undefined : bbsStore.refreshGameList(),
+  ]);
   const list: Array<SortSelectGame> = [];
   for (const gameForum of forumList.value) {
     const gameFind = gameList.value.find((i) => i.id === gameForum.game_id);
@@ -479,7 +459,7 @@ async function loadForums(): Promise<void> {
     const gameItem: SortSelectGame = {
       gid: gameForum.game_id,
       icon: gameFind.app_icon,
-      forum: gameForum.forums
+      forum: [...gameForum.forums]
         .sort((a, b) => a.order - b.order)
         .map((i) => ({ text: i.name, value: i.id, icon: i.icon_pure })),
       text: gameFind.name,
@@ -489,9 +469,75 @@ async function loadForums(): Promise<void> {
   sortGameList.value = list;
 }
 
-function getForum(forum: number): SortSelect {
-  const forumItem = curForums.value.find((item) => item.value === forum);
-  return forumItem ? forumItem : curForums.value[0];
+function applyRouteSelection(): boolean {
+  appliedRoute = route.fullPath;
+  const gid = parseBrowsingId(route.query.gid) ?? parseBrowsingId(route.params.gid);
+  const forumId = parseBrowsingId(route.query.forum) ?? parseBrowsingId(route.params.forum);
+  const game = resolveBrowsingOption(
+    sortGameList.value,
+    (item) => item.gid,
+    gid,
+    recentGid.value,
+    defaultCommunityGid,
+  );
+  if (!game) return false;
+  const previousGid = curGid.value;
+  const previousForum = selectedForum.value?.value;
+  const hadPendingChange = hasPendingChange.value;
+  curGid.value = game.gid;
+  selectedForum.value = getPreferredForum(forumId);
+  hasPendingRouteChange = false;
+  return (
+    hadPendingChange || previousGid !== game.gid || previousForum !== selectedForum.value?.value
+  );
+}
+
+function getPreferredForum(forumId?: number): SortSelect | undefined {
+  return resolveBrowsingOption(
+    curForums.value,
+    (forum) => forum.value,
+    forumId,
+    forumByGid.value[curGid.value],
+  );
+}
+
+async function changeGame(gid: number): Promise<void> {
+  const game = sortGameList.value.find((item) => item.gid === gid);
+  if (!game || !firstLoad.value || isReq.value) return;
+  recentGid.value = gid;
+  if (curGid.value === gid) return;
+  curGid.value = gid;
+  selectedForum.value = getPreferredForum();
+  hasPendingRouteChange = true;
+  await applyFilterChange(`已将分区切换到 ${game.text}`);
+}
+
+async function changeForum(selection: SortSelect): Promise<void> {
+  const forum = curForums.value.find((item) => item.value === selection?.value);
+  if (!forum || !firstLoad.value || isReq.value) return;
+  recentGid.value = curGid.value;
+  forumByGid.value[curGid.value] = forum.value;
+  if (selectedForum.value?.value === forum.value) return;
+  selectedForum.value = forum;
+  hasPendingRouteChange = true;
+  await applyFilterChange(`已将版块切换到 ${forum.text}`);
+}
+
+async function changeSort(sort: TGApp.BBS.Post.ForumSortTypeEnum): Promise<void> {
+  if (!firstLoad.value || isReq.value || !sortOrderList.some((item) => item.value === sort)) return;
+  forumSortType.value = sort;
+  if (curSortType.value === sort) return;
+  curSortType.value = sort;
+  await applyFilterChange(`已将排序切换到 ${getSortLabel(sort)}`);
+}
+
+async function applyFilterChange(message: string): Promise<void> {
+  if (!syncRefresh.value) {
+    hasPendingChange.value = true;
+    return;
+  }
+  await freshPostData();
+  showSnackbar.success(message);
 }
 
 function getSortLabel(value: number): string {
@@ -610,19 +656,24 @@ async function fillDiscoverPosts(maxPages: number = DISCOVER_FILL_PAGE_LIMIT): P
 
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value || isReq.value) return;
+  isReq.value = true;
   hasPendingChange.value = false;
   refreshSelect();
-  await router.replace({
-    name: "酒馆",
-    params: route.params,
-    query: { gid: curGid.value, forum: selectedForum.value.value },
-  });
-  isReq.value = true;
+  if (hasPendingRouteChange) {
+    hasPendingRouteChange = false;
+    const target = router.resolve({
+      name: "酒馆",
+      params: { gid: curGid.value, forum: selectedForum.value.value },
+      query: { ...route.query, gid: undefined, forum: undefined },
+    });
+    await router.replace(target);
+    if (route.fullPath === target.fullPath) appliedRoute = target.fullPath;
+  }
   if (showSearch.value) showSearch.value = false;
   if (showUser.value) showUser.value = false;
   const gameLabel = curGame.value?.text ?? "";
   await showLoading.start(`正在刷新${gameLabel}帖子`);
-  const forumLabel = getForum(selectedForum.value.value).text;
+  const forumLabel = selectedForum.value.text;
   const sortLabel = isDiscover.value ? "推荐" : getSortLabel(curSortType.value);
   await TGLogger.Info(
     `[Posts][${gameLabel}][freshPostData][${forumLabel}][${sortLabel}] 刷新帖子列表`,

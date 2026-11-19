@@ -16,7 +16,7 @@
       </div>
     </template>
     <template #extension>
-      <TGameNav :gid="disGid" style="margin-left: 8px" />
+      <TGameNav :key="disGid" :gid="disGid" style="margin-left: 8px" />
       <div class="post-topic-conf">
         <v-checkbox
           v-model="syncRefresh"
@@ -44,16 +44,17 @@
     </template>
     <div class="post-topic-switch">
       <v-select
-        v-model="curGame"
+        :modelValue="curGid"
         :disabled="isReq"
-        :item-value="(item) => item"
-        :items="getGameList(topicInfo?.game_info_list)"
+        :items="games"
         :label="gidLabel"
         class="post-switch-item"
         density="compact"
         hide-details
         item-title="name"
+        item-value="id"
         variant="outlined"
+        @update:model-value="changeGame"
       >
         <template #selection="{ item }">
           <div class="select-item main">
@@ -81,7 +82,7 @@
         </template>
       </v-select>
       <v-select
-        v-model="curSortType"
+        :modelValue="curSortType"
         :disabled="isReq"
         :items="sortList"
         :label="sortLabel"
@@ -91,6 +92,7 @@
         item-title="text"
         item-value="value"
         variant="outlined"
+        @update:model-value="changeSort"
       />
       <v-text-field
         v-model="search"
@@ -168,8 +170,10 @@ import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import { parseBrowsingId, resolveBrowsingOption } from "@utils/bbs/browsing.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -195,6 +199,7 @@ const router = useRouter();
 const { isReachBottom } = usePageReachBottom();
 const { sidebar, postGridMode } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
+const { recentGid, topicSortType } = storeToRefs(useCommunityBrowsingStore());
 const { cookie, uid } = storeToRefs(useUserStore());
 
 const curGid = ref<number>(0);
@@ -214,10 +219,20 @@ const isReq = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
 const syncRefresh = ref<boolean>(true);
 const hasPendingChange = ref<boolean>(false);
+let hasPendingRouteChange = false;
+let appliedRoute = "";
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
-const curGame = shallowRef<GameList>();
+const games = computed<Array<GameList>>(() =>
+  (topicInfo.value?.game_info_list ?? []).map((item) => ({
+    ...item,
+    icon: gameList.value.find((game) => game.id === item.id)?.app_icon,
+  })),
+);
+const curGame = computed<GameList | undefined>(() =>
+  games.value.find((game) => game.id === curGid.value),
+);
 const sortList = computed<Array<SortSelect<TGApp.BBS.Post.PostTopicSortTypeEnum>>>(() => {
   if (!topicInfo.value) return [];
   let sortArr: ReadonlyArray<TGApp.BBS.Post.PostTopicSortTypeEnum>;
@@ -261,44 +276,9 @@ const publishTypes = computed<Array<PublishType>>(() => {
   return items;
 });
 
-onMounted(async () => {
-  let { gid, topic } = route.query;
-  if (!gid) gid = route.params.gid;
-  if (!topic) topic = route.params.topic;
-  if (!gid || typeof gid !== "string") gid = "0";
-  if (!topic || typeof topic !== "string") topic = "0";
-  curGid.value = Number(gid);
-  disGid.value = Number(gid);
-  curTopic.value = topic;
-  await showLoading.start(`正在加载话题${topic}信息`);
-  let info: TGApp.BBS.Topic.InfoResp | undefined;
-  try {
-    info = await topicReq.info(gid, topic);
-    if (info.retcode !== 0) {
-      await showLoading.end();
-      showSnackbar.error(`[${info.retcode}] ${info.message}`);
-      await TGLogger.Warn(`[PostTopic] 获取话题信息失败：[${info.retcode}] ${info.message}`);
-      return;
-    }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    await showLoading.end();
-    showSnackbar.error(`获取话题信息失败：${errMsg}`);
-    await TGLogger.Error(`[PostTopic] 获取话题信息异常`);
-    await TGLogger.Error(`[PostTopic] ${e}`);
-    return;
-  }
-  topicInfo.value = info.data;
-  let tmpGame: GameList | undefined;
-  if (curGame.value === undefined) {
-    tmpGame = info.data.game_info_list.find((i) => i.id === curGid.value);
-  }
-  if (tmpGame === undefined) tmpGame = info.data.game_info_list[0];
-  const gameFind = gameList.value.find((i) => i.id === tmpGame?.id);
-  curGame.value = { ...tmpGame, icon: gameFind?.app_icon };
-  await freshPostData();
-  firstLoad.value = true;
-});
+onMounted(() => void loadRoute());
+
+watch([() => route.fullPath, isReq], () => void loadRoute());
 
 watch(
   () => isReachBottom.value,
@@ -306,35 +286,8 @@ watch(
     if (!isReachBottom.value || !firstLoad.value) return;
     if (!syncRefresh.value && hasPendingChange.value) {
       await freshPostData();
-      hasPendingChange.value = false;
     } else {
       await loadMore();
-    }
-  },
-);
-watch(
-  () => curGame.value,
-  async () => {
-    if (!curGame.value) return;
-    if (!firstLoad.value) return;
-    curGid.value = curGame.value.id;
-    if (syncRefresh.value) {
-      await freshPostData();
-      showSnackbar.success(`已将分区切换到 ${curGame.value.name}`);
-    } else {
-      hasPendingChange.value = true;
-    }
-  },
-);
-watch(
-  () => curSortType.value,
-  async () => {
-    if (syncRefresh.value) {
-      await freshPostData();
-      const sortLabel = getSortLabel(curSortType.value);
-      showSnackbar.success(`已将排序切换到 ${sortLabel}`);
-    } else {
-      hasPendingChange.value = true;
     }
   },
 );
@@ -355,17 +308,101 @@ watch(
   },
 );
 
+async function loadRoute(): Promise<void> {
+  const routePath = route.fullPath;
+  if (isReq.value || route.name !== "话题" || routePath === appliedRoute) return;
+  appliedRoute = routePath;
+  hasPendingRouteChange = false;
+  hasPendingChange.value = false;
+  const gid = parseBrowsingId(route.query.gid) ?? parseBrowsingId(route.params.gid);
+  const { topic } = route.query;
+  const routeTopic = typeof topic === "string" && topic ? topic : route.params.topic;
+  const topicId = typeof routeTopic === "string" && routeTopic ? routeTopic : "0";
+  if (topicId !== curTopic.value || !topicInfo.value) {
+    firstLoad.value = false;
+    posts.value = [];
+    topicInfo.value = undefined;
+    curTopic.value = topicId;
+    await loadTopicInfo(gid, topicId);
+    if (!topicInfo.value || route.fullPath !== routePath) return;
+  }
+  const defaultGid = topicInfo.value.topic.default_game_id;
+  curGid.value =
+    resolveBrowsingOption(games.value, (game) => game.id, gid, recentGid.value, defaultGid)?.id ??
+    gid ??
+    defaultGid;
+  curSortType.value =
+    resolveBrowsingOption(sortList.value, (option) => option.value, topicSortType.value)?.value ??
+    bbsEnum.post.topicSortType.LATEST;
+  await freshPostData();
+  firstLoad.value = true;
+}
+
+async function loadTopicInfo(gid: number | undefined, topicId: string): Promise<void> {
+  isReq.value = true;
+  await showLoading.start(`正在加载话题${topicId}信息`);
+  try {
+    let info = await topicReq.info(String(gid ?? 0), topicId);
+    if (info.retcode !== 0 && gid) info = await topicReq.info("0", topicId);
+    if (info.retcode !== 0) {
+      showSnackbar.error(`[${info.retcode}] ${info.message}`);
+      await TGLogger.Warn(`[PostTopic] 获取话题信息失败：[${info.retcode}] ${info.message}`);
+      return;
+    }
+    topicInfo.value = info.data;
+  } catch (e) {
+    showSnackbar.error(`获取话题信息失败：${TGHttps.getErrMsg(e)}`);
+    await TGLogger.Error(`[PostTopic] 获取话题信息异常：${e}`);
+  } finally {
+    await showLoading.end();
+    isReq.value = false;
+  }
+}
+
+async function changeGame(gid: number): Promise<void> {
+  const game = games.value.find((item) => item.id === gid);
+  if (!game || !firstLoad.value || isReq.value) return;
+  if (gid > 0) recentGid.value = gid;
+  if (gid === curGid.value) return;
+  curGid.value = gid;
+  hasPendingRouteChange = true;
+  await applyFilterChange(`已将分区切换到 ${game.name}`);
+}
+
+async function changeSort(sort: TGApp.BBS.Post.PostTopicSortTypeEnum): Promise<void> {
+  if (!firstLoad.value || isReq.value || !sortList.value.some((option) => option.value === sort))
+    return;
+  topicSortType.value = sort;
+  if (curSortType.value === sort) return;
+  curSortType.value = sort;
+  await applyFilterChange(`已将排序切换到 ${getSortLabel(sort)}`);
+}
+
+async function applyFilterChange(message: string): Promise<void> {
+  if (!syncRefresh.value) {
+    hasPendingChange.value = true;
+    return;
+  }
+  await freshPostData();
+  showSnackbar.success(message);
+}
+
 async function freshPostData(): Promise<void> {
   if (isReq.value) return;
   hasPendingChange.value = false;
   disGid.value = curGid.value;
   isReq.value = true;
+  if (hasPendingRouteChange) {
+    hasPendingRouteChange = false;
+    const target = router.resolve({
+      name: "话题",
+      params: { gid: curGid.value, topic: curTopic.value },
+      query: { ...route.query, gid: undefined, topic: undefined },
+    });
+    await router.push(target);
+    if (route.fullPath === target.fullPath) appliedRoute = target.fullPath;
+  }
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
-  await router.push({
-    name: "话题",
-    params: route.params,
-    query: { gid: curGid.value, topic: curTopic.value },
-  });
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   let postList: TGApp.BBS.Topic.PostResp | undefined;
   try {
@@ -458,14 +495,6 @@ function searchPost(): void {
     if (showUser.value) showUser.value = false;
     showSearch.value = true;
   } else createPost(search.value);
-}
-
-function getGameList(list: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<GameList> {
-  if (!list) return [];
-  return list.map((item) => {
-    const game = gameList.value.find((i) => i.id === item.id);
-    return { ...item, icon: game?.app_icon };
-  });
 }
 
 function getSortLabel(value: number): string {

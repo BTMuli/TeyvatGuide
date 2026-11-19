@@ -40,8 +40,8 @@
           </template>
           <v-list :nav="true" class="side-list-menu sub" density="compact">
             <v-list-item
-              :href="`/news/2/${recentNewsType}`"
               :link="true"
+              :to="{ name: '资讯', params: { gid: newsGid, type: '' }, query: {} }"
               class="side-item-menu"
               title="资讯"
             >
@@ -49,7 +49,12 @@
                 <img alt="mihoyo" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
               </template>
             </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/posts/forum" title="帖子">
+            <v-list-item
+              :link="true"
+              :to="{ name: '酒馆', params: { gid: '', forum: '' }, query: {} }"
+              class="side-item-menu"
+              title="帖子"
+            >
               <template #prepend>
                 <img alt="posts" class="side-icon-menu" src="/UI/nav/posts.webp" />
               </template>
@@ -66,8 +71,8 @@
             </v-list-item>
             <v-list-item
               :link="true"
+              :to="{ name: '米社商店' }"
               class="side-item-menu"
-              href="/community/shop"
               title="米社商店"
             >
               <template #prepend>
@@ -526,12 +531,15 @@ import VpOverlayFollow from "@comp/viewPost/vp-overlay-follow.vue";
 import { useLoginFlow } from "@hooks/useLoginFlow.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
+import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
 import { event, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/app/TGClient.js";
+import { defaultCommunityGid } from "@utils/bbs/browsing.js";
 import { maskUid, maskUidTail } from "@utils/display/TGUid.js";
 import { tryCallYae } from "@utils/game/TGGame.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -540,8 +548,21 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 const userStore = useUserStore();
-const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
+const { sidebar, theme, isLogin } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(useBBSStore());
+const { recentGid } = storeToRefs(useCommunityBrowsingStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
+const newsGid = computed<number>(() => {
+  const rememberedGid =
+    Number.isSafeInteger(recentGid.value) && recentGid.value > 0 ? recentGid.value : undefined;
+  if (gameList.value.length === 0) return rememberedGid ?? defaultCommunityGid;
+  return (
+    gameList.value.find((game) => game.id === rememberedGid)?.id ??
+    gameList.value.find((game) => game.id === defaultCommunityGid)?.id ??
+    gameList.value[0]?.id ??
+    defaultCommunityGid
+  );
+});
 let themeListener: UnlistenFn | null = null;
 
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.

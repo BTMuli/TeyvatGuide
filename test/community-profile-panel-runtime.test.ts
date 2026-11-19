@@ -1,8 +1,9 @@
 /**
  * 个人中心真实 Vue 面板的 setup 和渲染冒烟检查。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import { createPinia } from "pinia";
 import { describe, expect, it, vi } from "vitest";
 import { createSSRApp, defineComponent, h, ref, shallowRef } from "vue";
@@ -15,9 +16,11 @@ const mocks = vi.hoisted(() => ({ posts: vi.fn() }));
 vi.mock("@comp/comiProf/cp-post.vue", () => ({ default: {} }));
 vi.mock("@comp/comiProf/cp-avatar.vue", () => ({ default: {} }));
 vi.mock("@comp/func/dialog.js", () => ({ default: { checkF: vi.fn() } }));
+vi.mock("@comp/func/loading.js", () => ({ default: { start: vi.fn(), end: vi.fn() } }));
 vi.mock("@comp/func/snackbar.js", () => ({
   default: { success: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
+vi.mock("@comp/viewPost/vp-post-drafts.vue", () => ({ default: {} }));
 vi.mock("@req/communityReq.js", () => ({
   default: {
     posts: mocks.posts,
@@ -69,7 +72,13 @@ vi.mock("@store/bbs.js", async () => {
   const { defineStore } = await import("pinia");
   return {
     default: defineStore("profile-runtime-bbs", {
-      state: () => ({ gameList: [], forumList: [] }),
+      state: () => ({
+        gameList: [
+          { id: 3, name: "崩坏3" },
+          { id: 6, name: "崩坏：星穹铁道" },
+        ],
+        forumList: [],
+      }),
       actions: { refreshGameList: vi.fn(async () => undefined) },
     }),
   };
@@ -89,6 +98,7 @@ const panels: Array<{
   component: Component;
   props: Record<string, unknown>;
   expected: string;
+  entry?: string;
 }> = [
   { name: "posts", component: CpPostsPage, props: {}, expected: "我的发帖" },
   {
@@ -104,13 +114,25 @@ const panels: Array<{
     expected: "个人中心",
   },
   { name: "publish", component: CpProfilePublish, props: {}, expected: "发布分区" },
-  { name: "layout", component: ComiProf, props: {}, expected: "正在加载个人信息" },
+  {
+    name: "layout with the remembered partition",
+    component: ComiProf,
+    props: {},
+    expected: "当前分区：崩坏：星穹铁道",
+  },
+  {
+    name: "layout with an explicit partition",
+    component: ComiProf,
+    props: {},
+    expected: "当前分区：崩坏3",
+    entry: "/?gid=3",
+  },
 ];
 
 describe("community profile panel runtime", () => {
   it.each(panels)(
     "executes the real $name setup and initial render",
-    async ({ component, props, expected }) => {
+    async ({ component, props, expected, entry = "/" }) => {
       const game = { id: 2, name: "原神" };
       const context: TGApp.BBS.Profile.Context = {
         profileUid: ref<string>("123456789"),
@@ -133,7 +155,10 @@ describe("community profile panel runtime", () => {
           return () => h(component, props);
         },
       });
-      app.use(createPinia());
+      const pinia = createPinia();
+      app.use(pinia);
+      const browsingStore = useCommunityBrowsingStore(pinia);
+      browsingStore.recentGid = 6;
       const router = createRouter({
         history: createMemoryHistory(),
         routes: [
@@ -151,7 +176,7 @@ describe("community profile panel runtime", () => {
         ],
       });
       app.use(router);
-      await router.push("/");
+      await router.push(entry);
       const control = defineComponent({
         setup:
           (_, { slots }) =>
@@ -173,6 +198,7 @@ describe("community profile panel runtime", () => {
 
       expect(markup).toContain(expected);
       expect(mocks.posts).not.toHaveBeenCalled();
+      expect(browsingStore.recentGid).toBe(6);
     },
   );
 });

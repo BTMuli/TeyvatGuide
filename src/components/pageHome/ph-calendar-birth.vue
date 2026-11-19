@@ -42,18 +42,14 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import bbsEnum from "@enum/bbs.js";
 import TSAvatarBirth from "@Sqlm/avatarBirth.js";
-import useAppStore from "@store/app.js";
 import { parseHtmlText } from "@utils/common/toolFunc.js";
-import { storeToRefs } from "pinia";
 import { onBeforeMount, ref, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 
 import { ArcBirCalendar } from "@/data/index.js";
 
 const router = useRouter();
-const { recentNewsType } = storeToRefs(useAppStore());
 const isBirthday = ref<boolean>(false);
 const cur = shallowRef<Array<TGApp.Archive.Birth.CalendarItem>>([]);
 const next = shallowRef<Array<TGApp.Archive.Birth.RoleItem>>([]);
@@ -86,8 +82,7 @@ async function toBirth(data: TGApp.Archive.Birth.CalendarItem): Promise<void> {
 }
 
 async function toNews(): Promise<void> {
-  recentNewsType.value = bbsEnum.post.newsType.NEWS;
-  await router.push({ name: "资讯", params: { gid: 2 } });
+  await router.push({ name: "资讯", params: { gid: "2", type: "news" } });
 }
 </script>
 <style lang="scss" scoped>

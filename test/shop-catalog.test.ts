@@ -33,6 +33,9 @@ type HostNode = {
 type ShopBindings = {
   goods: Vue.ShallowRef<Array<TGApp.BBS.Shop.Goods>>;
   visibleGoods: Vue.ComputedRef<Array<TGApp.BBS.Shop.Goods>>;
+  selectedGame: Vue.Ref<string>;
+  selectedGoodsType: Vue.Ref<"all" | "physical" | "virtual">;
+  selectedStock: Vue.Ref<"all" | "available" | "upcoming" | "sold-out">;
   page: Vue.Ref<number>;
   hasMore: Vue.Ref<boolean>;
   listError: Vue.Ref<string>;
@@ -72,6 +75,11 @@ const account = {
   uid: Vue.ref("398265412"),
   cookie: Vue.ref({ ltuid: "398265412", account_id: "398265412", ltoken: "test-token" }),
   briefInfo: Vue.ref({ nickname: "旅行者" }),
+};
+const communityBrowsing = {
+  shopCategory: "all",
+  shopGoodsType: <"all" | "physical" | "virtual">"all",
+  shopStock: <"all" | "available" | "upcoming" | "sold-out">"all",
 };
 const dispose: Array<() => void> = [];
 
@@ -134,6 +142,7 @@ function mountShop(): ShopBindings {
     "@req/takumiReq.js": { bind: { gameRoles } },
     "@store/app.js": () => ({ isLogin: Vue.ref(true) }),
     "@store/bbs.js": () => ({ gameList: Vue.ref([{ name: "原神" }]) }),
+    "@store/communityBrowsing.js": () => communityBrowsing,
     "@store/user.js": () => account,
     "@utils/app/TGClient.js": {},
     "@utils/bbs/replyAccount.js": { matchesCurrentAccount: () => true },
@@ -208,12 +217,16 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
 function listResponse(
   list: Array<TGApp.BBS.Shop.Goods>,
   total: number,
+  games?: Array<TGApp.BBS.Shop.Game>,
 ): TGApp.BBS.Shop.GoodsListResp {
-  return { retcode: 0, message: "OK", data: { list, total } };
+  return { retcode: 0, message: "OK", data: { list, total, games } };
 }
 
 beforeEach(() => {
   vi.resetAllMocks();
+  communityBrowsing.shopCategory = "all";
+  communityBrowsing.shopGoodsType = "all";
+  communityBrowsing.shopStock = "all";
   account.uid.value = "398265412";
   account.cookie.value = { ltuid: "398265412", account_id: "398265412", ltoken: "test-token" };
   point.mockResolvedValue({ retcode: 0, message: "OK", data: { points: 1000 } });
@@ -225,6 +238,50 @@ afterEach(() => {
 });
 
 describe("shop catalog pagination and filters", () => {
+  it("restores the saved category and product filters", async () => {
+    communityBrowsing.shopCategory = "hk4e";
+    communityBrowsing.shopGoodsType = "physical";
+    communityBrowsing.shopStock = "sold-out";
+    goods
+      .mockResolvedValueOnce(
+        listResponse([createGoods({ goods_id: "all-item" })], 1, [
+          { key: "all", name: "全部商品" },
+          { key: "hk4e", name: "原神" },
+        ]),
+      )
+      .mockResolvedValueOnce(
+        listResponse([createGoods({ goods_id: "selected-item", type: 1, total: 0 })], 1),
+      );
+
+    const page = mountShop();
+    await settle();
+
+    expect(page.selectedGame.value).toBe("hk4e");
+    expect(page.selectedGoodsType.value).toBe("physical");
+    expect(page.selectedStock.value).toBe("sold-out");
+    expect(goods.mock.calls.map((call) => call[1])).toEqual(["all", "hk4e"]);
+    expect(page.visibleGoods.value.map((item) => item.goods_id)).toEqual(["selected-item"]);
+  });
+
+  it("uses all products when the saved category is retired", async () => {
+    communityBrowsing.shopCategory = "retired-game";
+    const allItem = createGoods({ goods_id: "all-item" });
+    goods.mockResolvedValueOnce(
+      listResponse([allItem], 1, [
+        { key: "all", name: "全部商品" },
+        { key: "hk4e", name: "原神" },
+      ]),
+    );
+
+    const page = mountShop();
+    await settle();
+
+    expect(page.selectedGame.value).toBe("all");
+    expect(communityBrowsing.shopCategory).toBe("retired-game");
+    expect(goods.mock.calls.map((call) => call[1])).toEqual(["all"]);
+    expect(page.goods.value.map((item) => item.goods_id)).toEqual(["all-item"]);
+  });
+
   it("scans empty filtered pages until a matching product is found", async () => {
     goods
       .mockResolvedValueOnce(listResponse([createGoods()], 60))

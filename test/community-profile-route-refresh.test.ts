@@ -13,7 +13,10 @@ vi.mock("vue-router", async (importOriginal) => {
 });
 vi.mock("@/pages/common/ComiProf.vue", () => ({ default: mocks.component }));
 vi.mock("@/pages/common/PageTest.vue", () => ({ default: mocks.component }));
+vi.mock("@/pages/common/PostForum.vue", () => ({ default: mocks.component }));
 vi.mock("@/pages/common/PostForumRank.vue", () => ({ default: mocks.component }));
+vi.mock("@/pages/common/PostNews.vue", () => ({ default: mocks.component }));
+vi.mock("@/pages/common/PostTopic.vue", () => ({ default: mocks.component }));
 vi.mock("@comp/comiProf/cp-posts-page.vue", () => ({ default: mocks.component }));
 vi.mock("@comp/comiProf/cp-content-page.vue", () => ({ default: mocks.component }));
 
@@ -53,6 +56,30 @@ describe("community profile route refresh", () => {
     expect(router.currentRoute.value.path).toBe("/posts/rank/2/49");
     await router.push({ name: "版块榜单", params: { gid: 3, forum: 40 } });
     expect(router.currentRoute.value.path).toBe("/posts/rank/3/40");
+    expect(mocks.reload).not.toHaveBeenCalled();
+  });
+
+  it("drops the explicit forum and partition when returning through the generic sidebar entry", async () => {
+    await router.push({ name: "酒馆", params: { gid: 3, forum: 40 }, query: { forum: "40" } });
+    await router.push({ name: "酒馆", params: { gid: "", forum: "" }, query: {} });
+
+    expect(router.currentRoute.value.fullPath).toBe("/posts/forum");
+    expect(mocks.reload).not.toHaveBeenCalled();
+  });
+
+  it("drops the explicit news type when using the sidebar while retaining the selected partition", async () => {
+    await router.push({ name: "资讯", params: { gid: 2, type: "news" } });
+    await router.push({ name: "资讯", params: { gid: 3, type: "" }, query: {} });
+
+    expect(router.currentRoute.value.fullPath).toBe("/news/3");
+    expect(mocks.reload).not.toHaveBeenCalled();
+  });
+
+  it("switches explicit topic routes without reloading", async () => {
+    await router.push({ name: "话题", params: { gid: 2, topic: "100" } });
+    await router.push({ name: "话题", params: { gid: 3, topic: "200" } });
+
+    expect(router.currentRoute.value.fullPath).toBe("/posts/topic/3/200");
     expect(mocks.reload).not.toHaveBeenCalled();
   });
 });

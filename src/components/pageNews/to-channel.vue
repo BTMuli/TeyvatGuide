@@ -3,17 +3,20 @@
     <div class="toc-box">
       <div class="toc-title">请选择要跳转的频道</div>
       <div class="toc-list">
-        <div
-          v-for="(item, index) in channelList"
-          :key="index"
+        <button
+          v-for="item in channelList"
+          :key="item.gid"
           :class="props.gid === item.gid.toString() ? 'active' : ''"
           class="toc-list-item"
+          :aria-current="props.gid === item.gid.toString() ? 'page' : undefined"
+          :aria-label="`切换到${item.title}频道`"
+          type="button"
           @click="toChannel(item)"
         >
           <img :src="item.icon" alt="icon" />
           <span class="toc-list-title">{{ item.title }}</span>
           <span class="toc-list-id">GID:{{ item.gid }}</span>
-        </div>
+        </button>
       </div>
     </div>
   </TOverlay>
@@ -24,15 +27,20 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
+import { resolveNewsType } from "@utils/bbs/newsType.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
+import { useRouter } from "vue-router";
 
 type ChannelItem = { icon: string; title: string; gid: number };
 type ToChannelProps = { gid?: string; curType?: string };
 
 const bbsStore = useBBSStore();
+const browsingStore = useCommunityBrowsingStore();
 const { recentNewsType } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
+const router = useRouter();
 const channelList = shallowRef<Array<ChannelItem>>();
 const props = defineProps<ToChannelProps>();
 const visible = defineModel<boolean>({ default: false });
@@ -48,14 +56,16 @@ async function toChannel(item: ChannelItem): Promise<void> {
     return;
   }
   visible.value = false;
-  let link = `/news/${item.gid}/{type}`;
-  if (recentNewsType.value satisfies TGApp.BBS.Post.NewsTypeEnum) {
-    link = link.replace("{type}", recentNewsType.value.toString());
-  } else {
-    link = link.replace("{type}", bbsEnum.post.newsType.NOTICE.toString());
-    recentNewsType.value = bbsEnum.post.newsType.NOTICE;
-  }
-  window.location.href = link;
+  browsingStore.recentGid = item.gid;
+  const validType =
+    resolveNewsType(props.curType) ??
+    resolveNewsType(recentNewsType.value) ??
+    bbsEnum.post.newsType.NOTICE;
+  await router.push({
+    name: "资讯",
+    params: { gid: String(item.gid), type: String(validType) },
+    query: {},
+  });
 }
 </script>
 <style lang="css" scoped>
@@ -87,13 +97,21 @@ async function toChannel(item: ChannelItem): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: start;
+  padding: 0;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
   column-gap: 8px;
   cursor: pointer;
+  font: inherit;
+  text-align: left;
   transition: all 0.5s linear;
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
 
   &.active {
     border: 1px solid var(--common-shadow-1);

@@ -108,7 +108,7 @@
     </div>
     <template #extension>
       <div class="post-rank-extension">
-        <TGameNav v-if="gid" :gid class="post-rank-games" />
+        <TGameNav v-if="gid" :key="gid" :gid class="post-rank-games" />
       </div>
     </template>
   </v-app-bar>
@@ -164,6 +164,7 @@ import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import VpRankPostFlow from "@comp/viewPost/vp-rank-post-flow.vue";
 import forumRankReq from "@req/forumRankReq.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import { getImageRankOptions } from "@utils/bbs/forumRank.js";
 import { getRankMasonryTimings } from "@utils/bbs/forumRankMasonry.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -176,7 +177,9 @@ import type { RouteLocationRaw } from "vue-router";
 const route = useRoute();
 const router = useRouter();
 const bbsStore = useBBSStore();
+const browsingStore = useCommunityBrowsingStore();
 const { forumList, gameList } = storeToRefs(bbsStore);
+const { forumByGid, rankPeriod, recentGid } = storeToRefs(browsingStore);
 
 const gid = computed<number>(() => Number(route.params.gid) || 0);
 const forumId = computed<number>(() => Number(route.params.forum) || 0);
@@ -207,17 +210,16 @@ const rankedForums = computed<Array<{ id: number; name: string; icon: string | u
 );
 const forumRoute = computed<RouteLocationRaw>(() => ({
   name: "酒馆",
-  params: gid.value && forumId.value ? { gid: gid.value, forum: forumId.value } : {},
+  params: getForumRouteParams(),
 }));
 const periods = computed<Array<{ title: string; value: number; icon: string }>>(() =>
   getImageRankOptions(rankForum.value?.typeList ?? []),
 );
-const preferredPeriod = ref<number>();
+const returnWithoutForum = ref<boolean>(getReturnWithoutForumState());
 const period = computed<number | undefined>({
   get: () =>
-    periods.value.find((item) => item.value === preferredPeriod.value)?.value ??
-    periods.value[0]?.value,
-  set: (value) => (preferredPeriod.value = value),
+    periods.value.find((item) => item.value === rankPeriod.value)?.value ?? periods.value[0]?.value,
+  set: (value) => (rankPeriod.value = value),
 });
 const posts = shallowRef<Array<TGApp.BBS.Forum.ImageRankPost>>([]);
 const nextCursor = ref<string>();
@@ -270,6 +272,10 @@ watch([gid, forumId, period], () => {
   nextCursor.value = undefined;
   postLoading.value = false;
   postFailed.value = false;
+});
+
+watch([gid, forumId], () => {
+  returnWithoutForum.value = getReturnWithoutForumState();
 });
 
 watch(
@@ -437,15 +443,66 @@ function showCoverPreview(cover: TGApp.BBS.Forum.ImageRankCover): void {
 async function changeGame(gameId: number): Promise<void> {
   if (gameId === gid.value) return;
   const forums = catalog.value.get(gameId);
-  const previousName = rankForum.value?.post_image_list_name;
-  const target = forums?.find((item) => item.post_image_list_name === previousName) ?? forums?.[0];
+  const rememberedForumId = getRememberedForumId(gameId, forums ?? []);
+  const target = forums?.find((item) => item.forum_id === rememberedForumId) ?? forums?.[0];
   if (!target) return;
-  await router.push({ name: "版块榜单", params: { gid: gameId, forum: target.forum_id } });
+  const fallback = rememberedForumId === undefined;
+  await router.push({
+    name: "版块榜单",
+    params: { gid: gameId, forum: target.forum_id },
+    state: { communityRankReturnWithoutForum: fallback },
+  });
+  if (gid.value !== gameId || forumId.value !== target.forum_id) return;
+  recentGid.value = gameId;
+  returnWithoutForum.value = fallback;
 }
 
 async function changeForum(id: number): Promise<void> {
   if (id === forumId.value || !rankedForums.value.some((item) => item.id === id)) return;
-  await router.push({ name: "版块榜单", params: { gid: gid.value, forum: id } });
+  await router.push({
+    name: "版块榜单",
+    params: { gid: gid.value, forum: id },
+    state: { communityRankReturnWithoutForum: false },
+  });
+  if (forumId.value !== id) return;
+  forumByGid.value[gid.value] = id;
+  recentGid.value = gid.value;
+  returnWithoutForum.value = false;
+}
+
+function getRememberedForumId(
+  gameId: number,
+  forums: Array<TGApp.BBS.Forum.ImageRankForum>,
+): number | undefined {
+  const savedForumId = forumByGid.value[gameId];
+  if (
+    typeof savedForumId !== "number" ||
+    !Number.isSafeInteger(savedForumId) ||
+    savedForumId <= 0 ||
+    !forums.some((item) => item.forum_id === savedForumId)
+  ) {
+    return undefined;
+  }
+  return savedForumId;
+}
+
+function getForumRouteParams(): Record<string, number | string> {
+  const params: Record<string, number | string> = {};
+  if (gid.value > 0) params.gid = gid.value;
+  if (returnWithoutForum.value) params.forum = "";
+  else if (forumId.value > 0) params.forum = forumId.value;
+  return params;
+}
+
+function getReturnWithoutForumState(): boolean {
+  if (typeof window === "undefined") return false;
+  const state = window.history?.state;
+  return (
+    typeof state === "object" &&
+    state !== null &&
+    "communityRankReturnWithoutForum" in state &&
+    state.communityRankReturnWithoutForum === true
+  );
 }
 </script>
 

@@ -2,14 +2,13 @@
 <template>
   <v-app-bar>
     <div class="pn-nav">
-      <v-tabs v-model="recentNewsType" align-tabs="center" class="pn-nav-tabs">
-        <v-tab
-          v-for="(value, index) in bbsEnum.post.newsTypeList"
-          :key="index"
-          :disabled="loading"
-          :value
-          @click="firstLoad()"
-        >
+      <v-tabs
+        :modelValue="currentNewsType"
+        align-tabs="center"
+        class="pn-nav-tabs"
+        @update:model-value="selectNewsType"
+      >
+        <v-tab v-for="value in bbsEnum.post.newsTypeList" :key="value" :disabled="loading" :value>
           {{ rawData[value].name }}
         </v-tab>
       </v-tabs>
@@ -36,8 +35,8 @@
       </div>
     </div>
   </v-app-bar>
-  <v-window v-model="recentNewsType">
-    <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value>
+  <v-window :modelValue="currentNewsType" @update:model-value="selectNewsType">
+    <v-window-item v-for="value in bbsEnum.post.newsTypeList" :key="value" :value>
       <div class="pn-grid">
         <div v-for="post in postData[value]" :key="post.post.post_id">
           <TPostCard :post />
@@ -45,10 +44,10 @@
       </div>
     </v-window-item>
   </v-window>
-  <ToChannel v-model="showList" :gid />
+  <ToChannel v-model="showList" :curType="String(currentNewsType)" :gid="String(currentGid)" />
   <VpOverlaySearch
     v-model="showSearch"
-    :gid="Number(gid)"
+    :gid="currentGid"
     :keyword="search"
     topOffset="64px"
     @user-click="handleUserClick"
@@ -67,25 +66,69 @@ import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import {
+  defaultCommunityGid,
+  parseBrowsingId,
+  resolveBrowsingOption,
+} from "@utils/bbs/browsing.js";
+import { resolveNewsType } from "@utils/bbs/newsType.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, ref, shallowRef, type ShallowRef, watch } from "vue";
-import { useRoute } from "vue-router";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  shallowRef,
+  type ShallowRef,
+  watch,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Array<TGApp.BBS.Post.FullData>>;
-type RawItem = { isLast: boolean; name: string; lastId: number };
+type RawItem = { isLast: boolean; loaded: boolean; name: string; lastId: number };
 type RawData = Record<TGApp.BBS.Post.NewsTypeEnum, RawItem>;
 
 const { recentNewsType } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
-const { gid } = <{ gid: string }>useRoute().params;
+const { recentGid } = storeToRefs(useCommunityBrowsingStore());
+const route = useRoute();
+const router = useRouter();
+const routeGid = computed<number | undefined>(() => {
+  const gid = parseBrowsingId(route.params.gid);
+  return gid !== undefined && gid > 0 ? gid : undefined;
+});
+const routeNewsType = computed<TGApp.BBS.Post.NewsTypeEnum | undefined>(() =>
+  resolveNewsType(route.params.type),
+);
+const currentGid = computed<number>(() => {
+  const rememberedGid =
+    Number.isSafeInteger(recentGid.value) && recentGid.value > 0 ? recentGid.value : undefined;
+  const preferredGid = routeGid.value ?? rememberedGid;
+  const game = resolveBrowsingOption(
+    gameList.value,
+    (item) => item.id,
+    routeGid.value,
+    rememberedGid,
+    defaultCommunityGid,
+  );
+  return game?.id ?? preferredGid ?? defaultCommunityGid;
+});
+const rememberedNewsType = computed<TGApp.BBS.Post.NewsTypeEnum>(
+  () => resolveNewsType(recentNewsType.value) ?? bbsEnum.post.newsType.NOTICE,
+);
+const currentNewsType = ref<TGApp.BBS.Post.NewsTypeEnum>(
+  routeNewsType.value ?? rememberedNewsType.value,
+);
 
 const { isReachBottom } = usePageReachBottom();
 
 const label = computed<string>(() => {
-  const game = gameList.value.find((v) => v.id.toString() === gid);
+  const game = gameList.value.find((v) => v.id === currentGid.value);
   return game?.name || "未知分区";
 });
 
@@ -94,7 +137,7 @@ const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const showUser = ref<boolean>(false);
 const curUid = ref<string>("");
-const curGid = ref<number>(Number(gid));
+const curGid = ref<number>(currentGid.value);
 const search = ref<string>("");
 
 const postData: PostData = reactive(
@@ -110,6 +153,7 @@ const rawData: RawData = reactive(
       type,
       shallowRef<RawItem>({
         isLast: false,
+        loaded: false,
         name: bbsEnum.post.newsTypeDesc(type),
         lastId: 0,
       }),
@@ -117,78 +161,82 @@ const rawData: RawData = reactive(
   ),
 );
 
-onMounted(async () => await firstLoad());
+let dataGid = currentGid.value;
+let dataGeneration = 0;
+let pendingRefresh: boolean | undefined;
+let active = false;
 
-watch(
-  () => isReachBottom.value,
-  async () => {
-    if (!isReachBottom.value) return;
-    await loadMore();
-  },
-);
+onMounted(() => {
+  active = true;
+  firstLoad();
+});
 
-async function firstLoad(refresh: boolean = false): Promise<void> {
-  if (loading.value) return;
-  loading.value = true;
-  const requestGid = gid;
-  let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
-  if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
-  if (rawData[key].lastId !== 0) {
-    if (!refresh) {
-      loading.value = false;
-      document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    postData[key] = [];
-    rawData[key].lastId = 0;
+onBeforeUnmount(() => {
+  active = false;
+  if (loading.value) void showLoading.end();
+});
+
+watch([currentGid, routeNewsType], () => {
+  if (!active || route.name !== "资讯") return;
+  const gid = currentGid.value;
+  const type = routeNewsType.value ?? rememberedNewsType.value;
+  if (gid === dataGid && type === currentNewsType.value) return;
+  if (gid !== dataGid) {
+    dataGid = gid;
+    dataGeneration += 1;
+    for (const item of bbsEnum.post.newsTypeList) resetNewsData(item);
   }
-  // 获取咨讯数据
-  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
-  let getResp: TGApp.BBS.Post.NewsResp | undefined;
-  try {
-    getResp = await painterReq.news(requestGid, key);
-    if (requestGid !== gid) {
-      loading.value = false;
-      return;
-    }
-    if (getResp.retcode !== 0) {
-      showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
-      await TGLogger.Warn(`[PostNews][firstLoad] 获取咨讯异常`);
-      await TGLogger.Warn(`[PostNews][firstLoad] [${getResp.retcode}] ${getResp.message}`);
-      await showLoading.end();
-      loading.value = false;
-      return;
-    }
-    await showLoading.update(
-      `数量：${getResp.data.list.length}，是否最后一页：${getResp.data.is_last}`,
-    );
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取${label.value}${rawData[key].name}异常：${errMsg}`);
-    await TGLogger.Error(`[PostNews][firstLoad] 获取咨讯异常`);
-    await TGLogger.Error(`[PostNews][firstLoad] ${e}`);
-    await showLoading.end();
-    loading.value = false;
+  currentNewsType.value = type;
+  curGid.value = gid;
+  showSearch.value = false;
+  showUser.value = false;
+  pendingRefresh = undefined;
+  firstLoad();
+});
+
+watch(isReachBottom, (reached) => {
+  if (reached) loadMore();
+});
+
+function firstLoad(refresh: boolean = false): void {
+  if (loading.value) {
+    pendingRefresh = refresh || pendingRefresh === true;
     return;
   }
-  if (!getResp) return;
-  // 处理咨讯数据
-  rawData[key] = {
-    isLast: getResp.data.is_last,
-    name: rawData[key].name,
-    lastId: getResp.data.list.length,
-  };
-  postData[key] = getResp.data.list;
-  await showLoading.end();
-  await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData[key].name}数据成功`);
-  showSnackbar.success(
-    `获取${label.value}${rawData[key].name}数据成功，共 ${getResp.data.list.length} 条`,
-  );
-  loading.value = false;
+  const type = currentNewsType.value;
+  if (refresh) resetNewsData(type);
+  if (rawData[type].loaded) {
+    document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  void loadNews(false);
+}
+
+function resetNewsData(type: TGApp.BBS.Post.NewsTypeEnum): void {
+  postData[type] = [];
+  rawData[type].loaded = false;
+  rawData[type].lastId = 0;
+  rawData[type].isLast = false;
+}
+
+function selectNewsType(value: unknown): void {
+  const type = resolveNewsType(value);
+  if (!active || loading.value || type === undefined || type === currentNewsType.value) return;
+  currentNewsType.value = type;
+  recentNewsType.value = type;
+  firstLoad();
+  if (route.params.type) {
+    void router.replace({
+      name: "资讯",
+      params: { gid: currentGid.value, type: "" },
+      query: route.query,
+      hash: route.hash,
+    });
+  }
 }
 
 function handleList(): void {
-  if (showSearch.value === true) showSearch.value = false;
+  if (showSearch.value) showSearch.value = false;
   showList.value = true;
 }
 
@@ -198,64 +246,64 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   showUser.value = true;
 }
 
-// 加载更多
-async function loadMore(): Promise<void> {
+function loadMore(): void {
   if (loading.value) return;
-  loading.value = true;
-  const requestGid = gid;
-  let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
-  if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
-  if (rawData[key].isLast) {
-    showSnackbar.warn("已经是最后一页了");
-    loading.value = false;
+  const item = rawData[currentNewsType.value];
+  if (!item.loaded) {
+    firstLoad();
     return;
   }
-  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
-  const mod = rawData[key].lastId % 20;
-  const pageSize = mod === 0 ? 20 : 20 - mod;
-  // 获取咨讯数据
-  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
-  let getResp: TGApp.BBS.Post.NewsResp | undefined;
+  if (item.isLast) {
+    showSnackbar.warn("已经是最后一页了");
+    return;
+  }
+  void loadNews(true);
+}
+
+async function loadNews(append: boolean): Promise<void> {
+  const gid = currentGid.value;
+  const type = currentNewsType.value;
+  const generation = dataGeneration;
+  const item = rawData[type];
+  const name = `${label.value}${item.name}`;
+  const offset = append ? item.lastId : 0;
+  const pageSize = 20 - (offset % 20);
+  const isCurrent = (): boolean => active && generation === dataGeneration;
+  loading.value = true;
   try {
-    getResp = await painterReq.news(requestGid, key, pageSize, rawData[key].lastId);
-    if (requestGid !== gid) {
-      loading.value = false;
+    await showLoading.start(`正在获取${name}数据`);
+    if (!isCurrent()) return;
+    const response = await painterReq.news(String(gid), type, pageSize, offset);
+    if (!isCurrent()) return;
+    if (response.retcode !== 0) {
+      showSnackbar.error(`[${response.retcode}] ${response.message}`);
+      await TGLogger.Warn(`[PostNews] 获取资讯失败：${response.retcode} ${response.message}`);
       return;
     }
-    if (getResp.retcode !== 0) {
-      showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
-      await TGLogger.Warn(`[PostNews][loadMore] 获取咨讯异常`);
-      await TGLogger.Warn(`[PostNews][loadMore] [${getResp.retcode}] ${getResp.message}`);
+    const { list, is_last: isLast } = response.data;
+    await showLoading.update(`数量：${list.length}，是否最后一页：${isLast}`);
+    if (!isCurrent()) return;
+    item.loaded = true;
+    item.lastId = offset + list.length;
+    item.isLast = isLast;
+    postData[type] = append ? postData[type].concat(list) : list;
+    if (currentNewsType.value !== type) return;
+    if (append && isLast) showSnackbar.warn("已经是最后一页了");
+    else showSnackbar.success(`获取${name}数据成功，共 ${list.length} 条`);
+  } catch (e) {
+    if (!isCurrent()) return;
+    const detail = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取${name}异常：${detail}`);
+    await TGLogger.Error(`[PostNews] 获取资讯异常：${detail}`);
+  } finally {
+    if (active) {
       await showLoading.end();
       loading.value = false;
-      return;
+      const refresh = pendingRefresh;
+      pendingRefresh = undefined;
+      if (active && refresh !== undefined) firstLoad(refresh);
     }
-    await showLoading.update(
-      `数量：${getResp.data.list.length}，是否最后一页：${getResp.data.is_last}`,
-    );
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取${label.value}${rawData[key].name}异常：${errMsg}`);
-    await TGLogger.Error(`[PostNews][loadMore] 获取咨讯异常`);
-    await TGLogger.Error(`[PostNews][loadMore] ${e}`);
-    await showLoading.end();
-    loading.value = false;
-    return;
   }
-  if (!getResp) return;
-  // 处理咨讯数据
-  rawData[key].lastId = rawData[key].lastId + getResp.data.list.length;
-  rawData[key].isLast = getResp.data.is_last;
-  postData[key] = postData[key].concat(getResp.data.list);
-  if (rawData[key].isLast) {
-    await showLoading.end();
-    showSnackbar.warn("已经是最后一页了");
-    loading.value = false;
-    return;
-  }
-  await showLoading.end();
-  loading.value = false;
-  showSnackbar.success(`加载成功，共加载 ${getResp.data.list.length} 条`);
 }
 
 async function searchPost(): Promise<void> {

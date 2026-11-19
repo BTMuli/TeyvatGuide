@@ -93,6 +93,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import OtherApi from "@req/otherReq.js";
 import TGSqlite from "@Sql/index.js";
 import useAppStore from "@store/app.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useHomeStore from "@store/home.js";
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -389,6 +390,7 @@ async function confirmResetApp(): Promise<void> {
   }
   appStore.init();
   homeStore.init();
+  useCommunityBrowsingStore().$reset();
   await TGLogger.Info("[Config][confirmResetApp] 恢复默认设置完成");
   showSnackbar.success("已恢复默认配置!即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));

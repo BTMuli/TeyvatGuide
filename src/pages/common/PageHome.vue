@@ -42,7 +42,7 @@
             </div>
           </template>
         </v-select>
-        <TGameNav :gid="curGid" :mini="true" />
+        <TGameNav :key="curGid" :gid="curGid" :mini="true" />
       </div>
       <div class="home-select">
         <v-select
@@ -78,16 +78,18 @@ import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useHomeStore from "@store/home.js";
 import useHutaoStore from "@store/hutao.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { defaultCommunityGid, resolveBrowsingOption } from "@utils/bbs/browsing.js";
 import { compareVersions } from "@utils/common/toolFunc.js";
 import getLrv from "@utils/network/Github.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, defineComponent, onMounted, shallowRef, watch } from "vue";
 
 /**
  * 单文件组件类型
@@ -111,10 +113,19 @@ const hutaoStore = useHutaoStore();
 
 const { devMode, isLogin, lastUcts } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
+const { recentGid } = storeToRefs(useCommunityBrowsingStore());
 
-const curGid = ref<number>(2);
-
-const games = shallowRef<Array<SelectItem>>();
+const games = computed<Array<SelectItem>>(() =>
+  gameList.value.map((game) => ({ icon: game.app_icon, title: game.name, gid: game.id })),
+);
+const curGid = computed<number>({
+  get: () =>
+    resolveBrowsingOption(games.value, (game) => game.gid, recentGid.value, defaultCommunityGid)
+      ?.gid ?? defaultCommunityGid,
+  set: (gid) => {
+    if (games.value.some((game) => game.gid === gid)) recentGid.value = gid;
+  },
+});
 const loadItems = shallowRef<Array<string>>([]);
 const components = shallowRef<Array<SFComp>>([]);
 const showItems = shallowRef<Array<string>>([]);
@@ -131,7 +142,6 @@ onMounted(async () => {
   await showLoading.start("正在加载首页小部件");
   if (isLogin.value) {
     await TSUserAccount.account.updateCk();
-    games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
     showItems.value = homeStore.getShowItems();
     showItemsAll.value = ["便笺签到", "素材日历", "限时祈愿", "近期活动"];
   } else {

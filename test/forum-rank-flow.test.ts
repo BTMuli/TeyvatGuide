@@ -7,6 +7,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
+import { createPinia, disposePinia } from "pinia";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as Vue from "vue";
 import { compileScript, compileTemplate, parse } from "vue/compiler-sfc";
@@ -307,7 +309,10 @@ describe("forum ranking flow", () => {
         setElementText() {},
       });
       const root = createNode("root");
+      const pinia = createPinia();
+      const browsingStore = useCommunityBrowsingStore(pinia);
       const app = renderer.createApp(PostForumRank);
+      app.use(pinia);
       app.provide(ssrContextKey, {});
       app.component(
         "v-app-bar",
@@ -359,6 +364,7 @@ describe("forum ranking flow", () => {
         forumMetadata.resolve();
         await vi.waitFor(() => expect(mocks.imageForums).toHaveBeenCalledTimes(2));
         selectPeriod(2);
+        expect(browsingStore.rankPeriod).toBe(2);
         await vi.waitFor(() => expect(animations.size).toBeGreaterThan(0));
         if (replyFirst) {
           week.resolve(rankedPosts("weekly-first", "weekly-second"));
@@ -375,6 +381,7 @@ describe("forum ranking flow", () => {
         await vi.waitFor(() => expect(articleIds()).toEqual(["weekly-first", "weekly-second"]));
         exitTimings.length = 0;
         selectPeriod(3);
+        expect(browsingStore.rankPeriod).toBe(3);
         await vi.waitFor(() => expect(animations.size).toBeGreaterThan(0));
         expect(exitTimings).toHaveLength(2);
         expect(exitTimings[1].delay).toBeCloseTo(exitTimings[0].duration / 2);
@@ -434,6 +441,7 @@ describe("forum ranking flow", () => {
         expect(mocks.imagePosts).toHaveBeenLastCalledWith(29, 3, "2", expect.any(AbortSignal));
       } finally {
         app.unmount();
+        disposePinia(pinia);
         forumMetadata.resolve();
         otherCatalog.resolve({ retcode: 0, message: "OK", data: { list: [] } });
       }

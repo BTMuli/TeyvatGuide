@@ -170,6 +170,7 @@ import shopReq from "@req/shopReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
 import TGClient from "@utils/app/TGClient.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
@@ -225,6 +226,7 @@ const { isLogin } = storeToRefs(useAppStore());
 const bbsStore = useBBSStore();
 const { gameList } = storeToRefs(bbsStore);
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
+const communityBrowsingStore = useCommunityBrowsingStore();
 const canLoad = computed<boolean>(
   () =>
     !!(
@@ -252,7 +254,7 @@ const categoryOptions = computed<Array<TGApp.BBS.Shop.Game>>(() =>
     return { ...category, icon };
   }),
 );
-const selectedGame = ref<string>("all");
+const selectedGame = ref<string>(communityBrowsingStore.shopCategory);
 const goodsTypeOptions: Array<FilterOption<GoodsTypeFilter>> = [
   { key: "all", label: "全部", icon: "mdi-view-grid-outline" },
   { key: "physical", label: "实物商品", icon: "mdi-package-variant-closed" },
@@ -264,8 +266,8 @@ const stockOptions: Array<FilterOption<StockFilter>> = [
   { key: "upcoming", label: "待开售", icon: "mdi-clock-outline" },
   { key: "sold-out", label: "已售罄", icon: "mdi-close-circle-outline" },
 ];
-const selectedGoodsType = ref<GoodsTypeFilter>("all");
-const selectedStock = ref<StockFilter>("all");
+const selectedGoodsType = ref<GoodsTypeFilter>(communityBrowsingStore.shopGoodsType);
+const selectedStock = ref<StockFilter>(communityBrowsingStore.shopStock);
 const goods = shallowRef<Array<TGApp.BBS.Shop.Goods>>([]);
 const page = ref<number>(0);
 const pageSize = 20;
@@ -291,6 +293,7 @@ const exchangeSucceeded = ref<boolean>(false);
 let sessionVersion = 0;
 let listVersion = 0;
 let detailVersion = 0;
+let shouldLoadCategoryCatalog = true;
 const shopCatalog = useTemplateRef<HTMLElement>("shopCatalog");
 const detailRequestGoodsId = ref<string>();
 
@@ -389,7 +392,13 @@ async function loadGoods(append: boolean): Promise<void> {
   const snapshot = getSnapshot();
   if (!snapshot || (append && loading.value)) return;
   const version = ++listVersion;
-  const game = selectedGame.value;
+  const requestedGame = selectedGame.value;
+  const loadCategoryCatalog =
+    !append &&
+    shouldLoadCategoryCatalog &&
+    categories.value.length === 0 &&
+    requestedGame !== "all";
+  const game = loadCategoryCatalog ? "all" : requestedGame;
   const targetPage = append ? page.value + 1 : 1;
   loading.value = true;
   listError.value = "";
@@ -404,7 +413,20 @@ async function loadGoods(append: boolean): Promise<void> {
     if (!isCurrent(snapshot) || version !== listVersion) return;
     checkResponse(response);
     const data = response.data;
-    if (data.games?.length) categories.value = data.games;
+    if (data.games?.length) {
+      categories.value = data.games;
+    }
+    if (loadCategoryCatalog) {
+      shouldLoadCategoryCatalog = false;
+      const categoryAvailable = data.games?.some((item) => item.key === requestedGame) ?? false;
+      if (categoryAvailable) {
+        await loadGoods(false);
+        return;
+      }
+      if (selectedGame.value === requestedGame) {
+        selectedGame.value = "all";
+      }
+    }
     const existingIds = new Set(append ? goods.value.map((item) => item.goods_id) : []);
     const nextGoods = data.list.filter((item) => {
       if (existingIds.has(item.goods_id)) return false;
@@ -431,12 +453,15 @@ async function loadGoods(append: boolean): Promise<void> {
 function selectCategory(game: string): void {
   if (selectedGame.value === game || exchanging.value) return;
   selectedGame.value = game;
+  communityBrowsingStore.shopCategory = game;
+  shouldLoadCategoryCatalog = false;
   void loadGoods(false);
 }
 
 function selectGoodsType(type: GoodsTypeFilter): void {
   if (selectedGoodsType.value === type || exchanging.value) return;
   selectedGoodsType.value = type;
+  communityBrowsingStore.shopGoodsType = type;
   listError.value = "";
   appendError.value = false;
   void nextTick(maybeLoadMore);
@@ -445,6 +470,7 @@ function selectGoodsType(type: GoodsTypeFilter): void {
 function selectStock(stock: StockFilter): void {
   if (selectedStock.value === stock || exchanging.value) return;
   selectedStock.value = stock;
+  communityBrowsingStore.shopStock = stock;
   listError.value = "";
   appendError.value = false;
   void nextTick(maybeLoadMore);
@@ -605,9 +631,8 @@ watch(
     pointError.value = "";
     goods.value = [];
     categories.value = [];
-    selectedGame.value = "all";
-    selectedGoodsType.value = "all";
-    selectedStock.value = "all";
+    selectedGame.value = communityBrowsingStore.shopCategory;
+    shouldLoadCategoryCatalog = true;
     loading.value = false;
     listError.value = "";
     appendError.value = false;
