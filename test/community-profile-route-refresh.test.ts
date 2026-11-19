@@ -1,6 +1,6 @@
 /**
- * 个人中心使用真实全局钩子时的窗口刷新回归测试。
- * @since Beta v0.13.1
+ * 页面切换使用真实全局钩子时的窗口刷新回归测试。
+ * @since Beta v0.13.2
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,7 @@ vi.mock("vue-router", async (importOriginal) => {
 });
 vi.mock("@/pages/common/ComiProf.vue", () => ({ default: mocks.component }));
 vi.mock("@/pages/common/PageTest.vue", () => ({ default: mocks.component }));
+vi.mock("@/pages/common/PostForumRank.vue", () => ({ default: mocks.component }));
 vi.mock("@comp/comiProf/cp-posts-page.vue", () => ({ default: mocks.component }));
 vi.mock("@comp/comiProf/cp-content-page.vue", () => ({ default: mocks.component }));
 
@@ -44,5 +45,14 @@ describe("community profile route refresh", () => {
     await router.push({ name: "测试页", query: { sample: "2" } });
 
     expect(mocks.reload).toHaveBeenCalledOnce();
+  });
+
+  it("switches ranked forums and partitions without reloading the application", async () => {
+    await router.push({ name: "版块榜单", params: { gid: 2, forum: 29 } });
+    await router.push({ name: "版块榜单", params: { gid: 2, forum: 49 } });
+    expect(router.currentRoute.value.path).toBe("/posts/rank/2/49");
+    await router.push({ name: "版块榜单", params: { gid: 3, forum: 40 } });
+    expect(router.currentRoute.value.path).toBe("/posts/rank/3/40");
+    expect(mocks.reload).not.toHaveBeenCalled();
   });
 });

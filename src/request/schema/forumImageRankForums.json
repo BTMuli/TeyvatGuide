@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["list"],
+  "properties": {
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["forum_id", "post_image_list_name", "typeList"],
+        "properties": {
+          "forum_id": { "type": "integer", "minimum": 1 },
+          "post_image_list_name": { "type": "string" },
+          "typeList": { "type": "array", "items": { "type": "integer" } }
+        }
+      }
+    }
+  }
+}

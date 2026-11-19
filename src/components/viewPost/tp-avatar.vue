@@ -30,15 +30,19 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
 import { computed } from "vue";
 
-type TpAvatarProps = { data: TGApp.BBS.Post.User; position: "left" | "right" };
+type TpAvatarProps = {
+  data: Pick<TGApp.BBS.Post.User, "nickname" | "avatar_url" | "pendant" | "introduce"> & {
+    avatar_ext?: TGApp.BBS.User.AvatarExt | null;
+    certification?: Pick<TGApp.BBS.User.Certification, "label"> | null;
+    level_exp?: Pick<TGApp.BBS.User.LevelExp, "level"> | null;
+  };
+  position: "left" | "right";
+};
 
 const props = defineProps<TpAvatarProps>();
 
-const avatarUrl = computed<string>(() => getUserAvatar(props.data));
-const authorDesc = computed<string>(() => {
-  if (props.data.certification.label !== "") return props.data.certification.label;
-  return props.data.introduce;
-});
+const avatarUrl = computed<string>(() => getUserAvatar(props.data) || "/UI/nav/lumine.webp");
+const authorDesc = computed<string>(() => props.data.certification?.label || props.data.introduce);
 const levelColor = computed<string>(() => {
   if (!props.data.level_exp) return "var(--tgc-od-white)";
   const level = props.data.level_exp.level;
@@ -76,6 +80,7 @@ const levelColor = computed<string>(() => {
   max-width: 100%;
   font-family: var(--font-title);
   font-size: 16px;
+  font-weight: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

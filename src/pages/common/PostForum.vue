@@ -5,6 +5,16 @@
       <div class="posts-top">
         <img alt="posts" src="/UI/nav/posts.webp" />
         <span>帖子</span>
+        <v-btn
+          v-if="rankRoute"
+          :to="rankRoute"
+          aria-label="查看版块榜单"
+          class="posts-rank-trigger"
+          icon="mdi-trophy-outline"
+          size="small"
+          title="查看版块榜单"
+          variant="flat"
+        />
         <v-menu v-if="topPosts.length > 0" location="bottom start" offset="4">
           <template #activator="{ props: menuProps }">
             <v-btn
@@ -208,17 +218,29 @@ import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import apiHubReq from "@req/apiHubReq.js";
+import forumRankReq from "@req/forumRankReq.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import { getImageRankOptions } from "@utils/bbs/forumRank.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onWatcherCleanup,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
+import type { RouteLocationRaw } from "vue-router";
 
 type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
 type SortSelectForum = Omit<SortSelect<TGApp.BBS.Post.ForumSortTypeEnum>, "icon">;
@@ -278,6 +300,15 @@ const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const topPosts = shallowRef<Array<TGApp.BBS.Forum.TopPost>>([]);
+const displayedForum = shallowRef<{ gid: number; forumId: number }>();
+const rankAvailability = shallowRef<{ gid: number; forumIds: Array<number> }>();
+const rankRoute = computed<RouteLocationRaw | undefined>(() => {
+  const forum = displayedForum.value;
+  const ranks = rankAvailability.value;
+  if (!forum || ranks?.gid !== forum.gid || !ranks.forumIds.includes(forum.forumId))
+    return undefined;
+  return { name: "版块榜单", params: { gid: forum.gid, forum: forum.forumId } };
+});
 let topPostRequestId = 0;
 const curGame = computed<SortSelectGame | undefined>(() => {
   return sortGameList.value.find((item) => item.gid === curGid.value);
@@ -344,6 +375,32 @@ onMounted(async () => {
   );
   await freshPostData();
   firstLoad.value = true;
+});
+
+watch(displayedForum, async (forum) => {
+  if (!forum || forum.forumId === discoverForumId || rankAvailability.value?.gid === forum.gid) {
+    return;
+  }
+  const controller = new AbortController();
+  onWatcherCleanup(() => controller.abort());
+  try {
+    const resp = await forumRankReq.imageForums(forum.gid, controller.signal);
+    if (controller.signal.aborted) return;
+    if (resp.retcode !== 0) {
+      await TGLogger.Warn(`[PostForum] 获取图区榜单版块失败：${resp.retcode} ${resp.message}`);
+      return;
+    }
+    rankAvailability.value = {
+      gid: forum.gid,
+      forumIds: resp.data.list
+        .filter((item) => getImageRankOptions(item.typeList).length > 0)
+        .map((item) => item.forum_id),
+    };
+  } catch (e) {
+    if (!controller.signal.aborted) {
+      await TGLogger.Warn(`[PostForum] 获取图区榜单版块异常：${TGHttps.getErrMsg(e)}`);
+    }
+  }
 });
 
 watch(
@@ -573,6 +630,10 @@ async function freshPostData(): Promise<void> {
   await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   // 获取置顶帖子与帖子列表
+  displayedForum.value = {
+    gid: curGid.value,
+    forumId: selectedForum.value.value,
+  };
   const topPostTask = loadTopPosts(selectedForum.value.value, curGid.value);
   let postsResp: PostListResp | undefined;
   try {
@@ -702,7 +763,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   }
 }
 
-.posts-pinned-trigger {
+.posts-pinned-trigger,
+.posts-rank-trigger {
   width: 32px;
   height: 32px;
   flex-shrink: 0;

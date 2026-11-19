@@ -1,6 +1,6 @@
 /**
  * 主路由模块
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 import { platform } from "@tauri-apps/plugin-os";
 import type { RouteRecordRaw } from "vue-router";
@@ -32,6 +32,11 @@ const mainRoutes = (<const>[
     path: "/posts/topic/:gid?/:topic",
     name: "话题",
     component: async () => await import("@/pages/common/PostTopic.vue"),
+  },
+  {
+    path: "/posts/rank/:gid(\\d+)/:forum(\\d+)",
+    name: "版块榜单",
+    component: async () => await import("@/pages/common/PostForumRank.vue"),
   },
   {
     path: "/posts/new/:gid?/:viewType?",

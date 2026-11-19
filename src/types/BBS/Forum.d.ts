@@ -1,6 +1,6 @@
 /**
  * 米社版块类型
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 declare namespace TGApp.BBS.Forum {
@@ -61,6 +61,73 @@ declare namespace TGApp.BBS.Forum {
     /** 是否最后一页；原生推荐流可能省略此字段 */
     is_last?: boolean;
   };
+
+  /**
+   * 分区内配置了图区榜单的版块。
+   * @since Beta v0.13.2
+   */
+  type ImageRankForum = {
+    /** 版块 ID */
+    forum_id: number;
+    /** 榜单名称 */
+    post_image_list_name: string;
+    /** 版块开放的榜单类型 */
+    typeList: Array<number>;
+  };
+
+  /**
+   * 分区的图区榜单目录响应。
+   * @since Beta v0.13.2
+   */
+  type ImageRankForumsResp = TGApp.BBS.Response.BaseWithData<{ list: Array<ImageRankForum> }>;
+
+  /**
+   * 图区榜单卡片的图片信息。
+   * @since Beta v0.13.2
+   */
+  type ImageRankCover = Pick<TGApp.BBS.Post.Image, "url" | "width" | "height">;
+
+  /**
+   * 图区榜单卡片数据。
+   * @since Beta v0.13.2
+   */
+  type ImageRankPost = {
+    /** 帖子标题、ID、发帖时间与备用封面 */
+    post: Pick<
+      TGApp.BBS.Post.Post,
+      "post_id" | "subject" | "cover" | "images" | "created_at" | "updated_at"
+    >;
+    /** 带尺寸的榜单封面 */
+    cover: ImageRankCover | null;
+    /** 帖子图片，可在缺少封面时使用 */
+    image_list: Array<ImageRankCover>;
+    /** 作者资料 */
+    user:
+      | (Pick<TGApp.BBS.Post.User, "uid" | "nickname" | "avatar_url" | "pendant" | "introduce"> & {
+          avatar_ext?: TGApp.BBS.User.AvatarExt | null;
+          certification?: Pick<TGApp.BBS.User.Certification, "label"> | null;
+          level_exp?: Pick<TGApp.BBS.User.LevelExp, "level"> | null;
+        })
+      | null;
+    /** 帖子互动统计 */
+    stat: Pick<
+      TGApp.BBS.Post.Stat,
+      "view_num" | "like_num" | "reply_num" | "bookmark_num" | "forward_num"
+    > | null;
+  };
+
+  /**
+   * 图区榜单帖子列表响应。
+   * @since Beta v0.13.2
+   */
+  type ImageRankPostsResp = TGApp.BBS.Response.BaseWithData<{
+    /** 帖子按榜单顺序返回 */
+    list: Array<ImageRankPost>;
+    /** 是否最后一页 */
+    is_last: boolean;
+    /** 下一页游标 */
+    last_id: string | number;
+  }>;
 
   /**
    * 分区版块信息

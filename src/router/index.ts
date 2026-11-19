@@ -1,6 +1,6 @@
 /**
  * 路由入口
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { isCommunityProfileRoute } from "@utils/community/profileRoute.js";
@@ -23,6 +23,7 @@ const ignoreRoutes: ReadonlyArray<string> = [
 
 router.afterEach((to, from) => {
   if (from.name === to.name && !isCommunityProfileRoute(to) && !isCommunityProfileRoute(from)) {
+    if (to.name === "版块榜单") return;
     if (from.query !== to.query && ignoreRoutes.includes(from.name?.toString() ?? "")) return;
     window.location.reload();
   }

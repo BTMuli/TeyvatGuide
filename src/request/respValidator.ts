@@ -1,12 +1,14 @@
 /**
  * 米游社接口响应结构校验器
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { isRecord } from "@utils/common/typeGuards.js";
 import Ajv, { type ValidateFunction } from "ajv";
 
 import CollectionPostsJson from "./schema/collectionPosts.json" with { type: "json" };
+import ForumImageRankForumsJson from "./schema/forumImageRankForums.json" with { type: "json" };
+import ForumImageRankPostsJson from "./schema/forumImageRankPosts.json" with { type: "json" };
 import FullDataJson from "./schema/fullData.json" with { type: "json" };
 import PostDraftDetailJson from "./schema/postDraftDetail.json" with { type: "json" };
 import PostDraftListJson from "./schema/postDraftList.json" with { type: "json" };
@@ -19,6 +21,10 @@ const ajv = new Ajv.Ajv({ allErrors: true, strictTypes: false });
 ajv.addSchema(FullDataJson);
 const PostFullDataValidate = ajv.compile<TGApp.BBS.Post.FullRes>(PostFullJson);
 const CollectionPostsValidate = ajv.compile<TGApp.BBS.Collection.PostsRes>(CollectionPostsJson);
+const ForumImageRankForumsValidate =
+  ajv.compile<TGApp.BBS.Forum.ImageRankForumsResp["data"]>(ForumImageRankForumsJson);
+const ForumImageRankPostsValidate =
+  ajv.compile<TGApp.BBS.Forum.ImageRankPostsResp["data"]>(ForumImageRankPostsJson);
 const PostDynamicValidate = ajv.compile<TGApp.BBS.Post.DynamicResp["data"]>(PostDynamicJson);
 const PostDraftListValidate =
   ajv.compile<TGApp.BBS.PostDraft.Api.ListResp["data"]>(PostDraftListJson);
@@ -64,6 +70,26 @@ function isPostFullResp(value: unknown): value is TGApp.BBS.Post.FullResp {
  */
 function isCollectionPostsResp(value: unknown): value is TGApp.BBS.Collection.PostsResp {
   return checkBbsResp(value, CollectionPostsValidate, "getPostFullInCollection");
+}
+
+/**
+ * 分区的图区榜单目录响应结构校验。
+ * @since Beta v0.13.2
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合图区榜单目录响应结构
+ */
+function isForumImageRankForumsResp(value: unknown): value is TGApp.BBS.Forum.ImageRankForumsResp {
+  return checkBbsResp(value, ForumImageRankForumsValidate, "getImagePostInfoList");
+}
+
+/**
+ * 图区榜单帖子列表响应结构校验。
+ * @since Beta v0.13.2
+ * @param value - 接口返回的原始数据
+ * @returns 是否符合图区榜单帖子列表响应结构
+ */
+function isForumImageRankPostsResp(value: unknown): value is TGApp.BBS.Forum.ImageRankPostsResp {
+  return checkBbsResp(value, ForumImageRankPostsValidate, "getImagePostList");
 }
 
 /**
@@ -118,6 +144,8 @@ function isPostDraftDeleteResp(value: unknown): value is TGApp.BBS.PostDraft.Del
 
 export {
   isCollectionPostsResp,
+  isForumImageRankForumsResp,
+  isForumImageRankPostsResp,
   isPostDraftDeleteResp,
   isPostDraftDetailResp,
   isPostDraftListResp,

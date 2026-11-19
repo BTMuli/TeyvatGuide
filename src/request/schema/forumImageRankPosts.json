@@ -1,0 +1,94 @@
+{
+  "type": "object",
+  "required": ["list", "is_last", "last_id"],
+  "properties": {
+    "list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["post", "cover", "image_list", "user", "stat"],
+        "properties": {
+          "post": {
+            "type": "object",
+            "required": ["post_id", "subject", "cover", "images", "created_at", "updated_at"],
+            "properties": {
+              "post_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+              "subject": { "type": "string" },
+              "cover": { "type": "string" },
+              "images": { "type": "array", "items": { "type": "string" } },
+              "created_at": { "type": "number" },
+              "updated_at": { "type": "number" }
+            }
+          },
+          "cover": { "anyOf": [{ "$ref": "#/definitions/image" }, { "type": "null" }] },
+          "image_list": { "type": "array", "items": { "$ref": "#/definitions/image" } },
+          "user": {
+            "type": ["object", "null"],
+            "required": ["uid", "nickname", "avatar_url", "pendant", "introduce"],
+            "properties": {
+              "uid": { "type": "string" },
+              "nickname": { "type": "string" },
+              "avatar_url": { "type": "string" },
+              "pendant": { "type": "string" },
+              "introduce": { "type": "string" },
+              "avatar_ext": {
+                "type": ["object", "null"],
+                "required": ["avatar_type", "resources", "hd_resources"],
+                "properties": {
+                  "avatar_type": { "type": "integer" },
+                  "resources": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/avatarResource" }
+                  },
+                  "hd_resources": {
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/avatarResource" }
+                  }
+                }
+              },
+              "certification": {
+                "type": ["object", "null"],
+                "required": ["label"],
+                "properties": { "label": { "type": "string" } }
+              },
+              "level_exp": {
+                "type": ["object", "null"],
+                "required": ["level"],
+                "properties": { "level": { "type": "number" } }
+              }
+            }
+          },
+          "stat": {
+            "type": ["object", "null"],
+            "required": ["view_num", "like_num", "reply_num", "bookmark_num", "forward_num"],
+            "properties": {
+              "view_num": { "type": "number" },
+              "like_num": { "type": "number" },
+              "reply_num": { "type": "number" },
+              "bookmark_num": { "type": "number" },
+              "forward_num": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "is_last": { "type": "boolean" },
+    "last_id": { "type": ["string", "integer"] }
+  },
+  "definitions": {
+    "avatarResource": {
+      "type": "object",
+      "required": ["format", "url"],
+      "properties": { "format": { "type": "integer" }, "url": { "type": "string" } }
+    },
+    "image": {
+      "type": "object",
+      "required": ["url", "width", "height"],
+      "properties": {
+        "url": { "type": "string" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    }
+  }
+}

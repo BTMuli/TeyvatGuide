@@ -166,11 +166,7 @@ const containerStyle = computed<StyleValue>(() => {
   return style;
 });
 
-const displayScale = computed<number>(() => {
-  if (isDragMode.value) return scale.value;
-  if (!containerEl.value || imgOriSize.value.width === 0) return 1;
-  return containerEl.value.getBoundingClientRect().width / imgOriSize.value.width;
-});
+const displayScale = computed<number>(() => (isDragMode.value ? scale.value : fitScale.value));
 const imgStyle = computed<StyleValue>(() => {
   if (!isDragMode.value) {
     return {
@@ -218,6 +214,17 @@ watch(
   },
 );
 
+watch(
+  imgEl,
+  (element, _, onCleanup) => {
+    if (!element) return;
+    const observer = new ResizeObserver(syncFitScale);
+    observer.observe(element);
+    onCleanup(() => observer.disconnect());
+  },
+  { flush: "post" },
+);
+
 onMounted(() => {
   document.addEventListener("mouseup", onDocumentMouseUp);
 });
@@ -252,11 +259,18 @@ function getImgOriSize(): VpoiSize {
 function onImgLoad(): void {
   const size = getImgOriSize();
   imgOriSize.value = size;
-  if (containerEl.value && size.width > 0) {
-    const fitS = containerEl.value.clientWidth / size.width;
-    fitScale.value = fitS;
-    scale.value = fitS;
+  if (size.width > 0 && containerEl.value) {
+    syncFitScale();
+    scale.value = isDragMode.value ? containerEl.value.clientWidth / size.width : fitScale.value;
     imgPos.value = { x: 0, y: 0 };
+  }
+}
+
+function syncFitScale(): void {
+  const width = imgEl.value?.clientWidth ?? 0;
+  const originalWidth = imgOriSize.value.width;
+  if (!isDragMode.value && width > 0 && originalWidth > 0) {
+    fitScale.value = width / originalWidth;
   }
 }
 
@@ -289,14 +303,13 @@ function easeOutCubic(t: number): number {
 }
 
 async function resetTransform(): Promise<void> {
-  if (!containerEl.value || !imgEl.value || imgOriSize.value.width === 0 || isResetting.value) {
+  if (isResetting.value) return;
+  if (!containerEl.value || !imgEl.value || imgOriSize.value.width === 0) {
     isDragMode.value = false;
     return;
   }
   isResetting.value = true;
-  const fitS = containerEl.value.clientWidth / imgOriSize.value.width;
-  const targetScrollTop = (-imgPos.value.y / scale.value) * fitS;
-  fitScale.value = fitS;
+  const fitS = fitScale.value;
   hasDragged.value = false;
   triggerScaleHint();
   const startScale = scale.value;
@@ -330,8 +343,9 @@ async function resetTransform(): Promise<void> {
   scale.value = fitScale.value;
   imgPos.value = { x: 0, y: 0 };
   await nextTick();
+  syncFitScale();
   if (containerEl.value) {
-    containerEl.value.scrollTop = targetScrollTop;
+    containerEl.value.scrollTop = visibleTopImgCoord * fitScale.value;
   }
 }
 
@@ -340,21 +354,26 @@ function enterDragMode(event?: MouseEvent): void {
     return;
   const iRectBefore = imgEl.value.getBoundingClientRect();
   const cRect = containerEl.value.getBoundingClientRect();
+  const { offsetWidth, offsetHeight, scrollTop } = containerEl.value;
+  syncFitScale();
   const currentScale = fitScale.value;
-  const scrollY = containerEl.value.scrollTop;
-  containerWidth.value = `${cRect.width}px`;
-  containerHeight.value = `${cRect.height}px`;
+  containerWidth.value = `${offsetWidth}px`;
+  containerHeight.value = `${offsetHeight}px`;
   isDragMode.value = true;
   scale.value = currentScale;
   nextTick(() => {
     if (!imgEl.value || !containerEl.value) return;
     containerEl.value.scrollTop = 0;
-    imgPos.value = { x: 0, y: -scrollY };
-    if (event && currentScale > 0) {
-      const imgX = (event.clientX - iRectBefore.left) / currentScale;
-      const imgY = (event.clientY - iRectBefore.top) / currentScale;
-      const cMouseX = event.clientX - cRect.left - containerEl.value.clientLeft;
-      const cMouseY = event.clientY - cRect.top - containerEl.value.clientTop;
+    imgPos.value = { x: 0, y: -scrollTop };
+    if (event && iRectBefore.width > 0 && iRectBefore.height > 0) {
+      const imgX =
+        ((event.clientX - iRectBefore.left) / iRectBefore.width) * imgOriSize.value.width;
+      const imgY =
+        ((event.clientY - iRectBefore.top) / iRectBefore.height) * imgOriSize.value.height;
+      const cMouseX =
+        ((event.clientX - cRect.left) * offsetWidth) / cRect.width - containerEl.value.clientLeft;
+      const cMouseY =
+        ((event.clientY - cRect.top) * offsetHeight) / cRect.height - containerEl.value.clientTop;
       isDragging.value = true;
       imgPos.value = {
         x: cMouseX - imgX,
@@ -576,7 +595,7 @@ async function onDownload(): Promise<void> {
 .tpoi-box {
   position: relative;
   display: flex;
-  max-width: 90%;
+  max-width: min(800px, 50vw);
   max-height: 90%;
   flex-direction: column;
   align-items: center;
@@ -589,6 +608,7 @@ async function onDownload(): Promise<void> {
   position: relative;
   overflow: hidden;
   width: 100%;
+  max-width: 100%;
   max-height: 70%;
   box-sizing: border-box;
   border: 1px solid var(--tgc-od-white);
