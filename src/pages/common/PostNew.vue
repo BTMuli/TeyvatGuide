@@ -96,11 +96,14 @@
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
 import VpPostDrafts from "@comp/viewPost/vp-post-drafts.vue";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
+import { createPost } from "@utils/app/TGWindow.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
+import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useId, useTemplateRef, watch } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from "vue-router";
@@ -256,8 +259,11 @@ async function goBack(): Promise<void> {
 
 async function handleSaved(postId?: string): Promise<void> {
   if (postId && /^[1-9]\d*$/u.test(postId)) {
-    await router.replace({ name: "帖子详情", params: { post_id: postId } });
-    return;
+    try {
+      await createPost(postId);
+    } catch (cause) {
+      showSnackbar.error(`打开帖子预览失败：${TGHttps.getErrMsg(cause)}`);
+    }
   }
   await goBack();
 }
