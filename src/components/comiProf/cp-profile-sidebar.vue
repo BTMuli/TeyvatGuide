@@ -392,7 +392,9 @@ async function toggleFollow(): Promise<void> {
   align-items: center;
   justify-content: space-between;
 
-  :deep(.v-btn) {
+  // 只约束侧栏直系的图标按钮，避免尺寸规则渗透到浮层内的 v-btn。
+
+  > :deep(.v-btn) {
     width: 24px;
     height: 28px;
   }
