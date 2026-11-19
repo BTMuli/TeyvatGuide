@@ -17,27 +17,26 @@
     <template #append>
       <div class="post-edit-actions">
         <v-btn
-          :aria-label="fromDetail ? '返回帖子' : '返回我的发帖'"
+          :aria-label="backLabel"
           :disabled="editorBusy"
           class="post-edit-back"
-          prepend-icon="mdi-arrow-left"
+          icon="mdi-arrow-left"
+          :title="backLabel"
           variant="text"
           @click="goBack"
-        >
-          <span class="post-edit-action-label">{{ fromDetail ? "返回帖子" : "返回我的发帖" }}</span>
-        </v-btn>
+        />
         <v-btn
           :disabled="editorSaveDisabled"
-          :form="formId"
           aria-label="保存修改"
           class="post-edit-save"
           color="var(--tgc-btn-1)"
-          prepend-icon="mdi-content-save-outline"
+          icon="mdi-content-save-outline"
           :loading="editorPending"
-          type="submit"
+          title="保存修改"
+          type="button"
           variant="flat"
-          >保存修改</v-btn
-        >
+          @click="composer?.savePost()"
+        />
       </div>
     </template>
   </v-app-bar>
@@ -87,6 +86,7 @@ let version = 0;
 let active = true;
 const postId = computed<string>(() => String(route.params.postId ?? ""));
 const fromDetail = computed<boolean>(() => route.query.from === "detail");
+const backLabel = computed<string>(() => (fromDetail.value ? "返回帖子" : "返回我的发帖"));
 const accountName = computed<string>(() => briefInfo.value.nickname || uid.value || "");
 const editorPending = computed<boolean>(() => composer.value?.pending ?? false);
 const canEdit = computed<boolean>(
@@ -212,18 +212,21 @@ async function handleSaved(): Promise<void> {
 
 .post-edit-back,
 .post-edit-save {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
   border: 1px solid var(--common-shadow-1);
+  border-radius: 4px !important;
   font-family: var(--font-title);
   font-weight: normal;
 }
 
 .post-edit-back {
-  margin-right: 8px;
   color: var(--common-text-title);
 }
 
 .post-edit-save {
-  min-width: 128px;
   color: var(--btn-text);
 }
 
@@ -267,29 +270,6 @@ async function handleSaved(): Promise<void> {
   .post-edit-meta {
     max-width: 42vw;
     font-size: 11px;
-  }
-
-  .post-edit-back {
-    margin-right: 0;
-  }
-
-  .post-edit-back .post-edit-action-label {
-    display: none;
-  }
-
-  .post-edit-back,
-  .post-edit-save {
-    min-width: 40px;
-    padding-inline: 8px;
-  }
-
-  .post-edit-back :deep(.v-btn__prepend),
-  .post-edit-save :deep(.v-btn__prepend) {
-    margin-inline-end: 0;
-  }
-
-  .post-edit-save :deep(.v-btn__content) {
-    display: none;
   }
 }
 

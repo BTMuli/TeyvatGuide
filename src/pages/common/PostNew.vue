@@ -24,15 +24,15 @@
         <v-btn
           v-if="!contextError && canWrite"
           :disabled="editorSaveDisabled"
-          :form="formId"
           aria-label="发布帖子"
           class="post-new-save"
           color="var(--tgc-btn-1)"
           icon="mdi-send-outline"
           :loading="editorPending"
           title="发布帖子"
-          type="submit"
+          type="button"
           variant="flat"
+          @click="composer?.savePost()"
         />
         <v-btn
           v-if="!contextError && canWrite"

@@ -1238,17 +1238,12 @@ function handleComponentDoubleClick(event: MouseEvent): void {
 }
 
 /**
- * 在选中帖子组件时用 Enter、空格或 F2 打开编辑弹窗。
- * @since Beta v0.13.0
+ * 在选中帖子组件时用 F2 打开编辑弹窗。
+ * @since Beta v0.13.2
  * @param event - 键盘事件
  */
 function handleComponentKeydown(event: KeyboardEvent): void {
-  if (
-    props.disabled ||
-    !props.allowComponents ||
-    (event.key !== "Enter" && event.key !== " " && event.key !== "F2")
-  )
-    return;
+  if (props.disabled || !props.allowComponents || event.key !== "F2") return;
   const current = quill.value;
   const selection = current?.getSelection(false);
   if (!current || !selection || selection.length > 0) return;

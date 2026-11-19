@@ -1,6 +1,6 @@
 <!-- 独立页面中的帖子发布/编辑表单 -->
 <template>
-  <form :id="formId" class="post-composer" @submit.prevent="savePost">
+  <form :id="formId" class="post-composer" @submit.prevent>
     <div v-if="loading" class="post-composer-state" role="status">正在加载帖子设置…</div>
     <div v-else-if="loadError" class="post-composer-state" role="alert">
       <p>{{ loadError }}</p>
@@ -1509,6 +1509,7 @@ defineExpose({
   canSubmit,
   pending,
   draftPending,
+  savePost,
   saveDraft,
   hasChanges,
   forgetDraft,
