@@ -24,6 +24,7 @@ type ComposerBindings = {
   currentDraftId: Vue.ComputedRef<string | undefined>;
   canDeleteDraft: Vue.ComputedRef<boolean>;
   draftDeletePending: Vue.Ref<boolean>;
+  savePost: () => Promise<void>;
   deleteDraft: () => Promise<void>;
   saveDraft: () => Promise<void>;
   forgetDraft: (id: string) => void;
@@ -48,6 +49,11 @@ const postDraftReq = {
   detail: vi.fn(),
   save: vi.fn(),
   delete: vi.fn(),
+};
+const postEditReq = {
+  getPostEditSettings: vi.fn(),
+  checkRelease: vi.fn(),
+  create: vi.fn(),
 };
 const dialogCheck = vi.fn();
 const snackbarSuccess = vi.fn();
@@ -156,7 +162,7 @@ function mountComposer(draftId: string | null = "draft-1"): ComposerBindings {
       userInfo: vi.fn().mockResolvedValue({ retcode: 1, message: "skip", data: {} }),
     },
     "@req/postDraftReq.js": postDraftReq,
-    "@req/postEditReq.js": { getPostEditSettings: vi.fn(), checkRelease: vi.fn() },
+    "@req/postEditReq.js": postEditReq,
     "@req/postReq.js": { post: vi.fn() },
     "@req/postVoteReq.js": { create: vi.fn() },
     "@req/topicReq.js": {
@@ -288,6 +294,16 @@ beforeEach(() => {
   postDraftReq.detail.mockResolvedValue(detailResponse("服务器草稿"));
   postDraftReq.save.mockResolvedValue({ retcode: 0, message: "OK", data: { draft_id: "draft-1" } });
   postDraftReq.delete.mockResolvedValue({ retcode: 0, message: "OK", data: null });
+  postEditReq.checkRelease.mockResolvedValue({
+    retcode: 0,
+    message: "OK",
+    data: { can_release: true },
+  });
+  postEditReq.create.mockResolvedValue({
+    retcode: 0,
+    message: "OK",
+    data: { post_id: "9001" },
+  });
   dialogCheck.mockResolvedValue(false);
 });
 
@@ -305,6 +321,49 @@ describe("帖子编辑器云草稿", () => {
 
     expect(composer.currentDraftId.value).toBe("draft-1");
     expect(composer.canDeleteDraft.value).toBe(true);
+  });
+
+  it("发布草稿后删除对应的云端草稿", async () => {
+    const composer = mountComposer();
+    await settle();
+
+    await composer.savePost();
+
+    expect(postEditReq.create).toHaveBeenCalledTimes(1);
+    expect(postDraftReq.delete).toHaveBeenCalledWith("draft-1", {
+      ltoken: "token-1001",
+      ltuid: "1001",
+    });
+    expect(composer.currentDraftId.value).toBeUndefined();
+    expect(composer.hasChanges.value).toBe(false);
+    expect(snackbarSuccess).toHaveBeenCalledWith("发布长文成功");
+    expect(snackbarWarn).not.toHaveBeenCalled();
+  });
+
+  it("草稿删除失败时保留草稿并提示手动处理", async () => {
+    postDraftReq.delete.mockResolvedValueOnce({ retcode: -1, message: "删除失败", data: null });
+    const composer = mountComposer();
+    await settle();
+
+    await composer.savePost();
+
+    expect(composer.currentDraftId.value).toBe("draft-1");
+    expect(snackbarWarn).toHaveBeenCalledWith(
+      "帖子已发布，但草稿未能自动删除，请到草稿箱手动删除。",
+      3000,
+    );
+    expect(snackbarSuccess).not.toHaveBeenCalled();
+  });
+
+  it("发布全新帖子不调用草稿删除", async () => {
+    const composer = mountComposer(null);
+    await settle();
+    composer.draft.value.subject = "全新帖子";
+
+    await composer.savePost();
+
+    expect(postDraftReq.delete).not.toHaveBeenCalled();
+    expect(snackbarSuccess).toHaveBeenCalledWith("发布长文成功");
   });
 
   it("删除当前云草稿后保留编辑内容，并允许另存为新草稿", async () => {

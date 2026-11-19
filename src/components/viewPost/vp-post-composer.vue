@@ -1374,9 +1374,11 @@ async function savePost(): Promise<void> {
           : typeof rawPostId === "string" && /^[1-9]\d*$/u.test(rawPostId)
             ? rawPostId
             : undefined;
+      const draftRemoved = await removePublishedDraft(snapshot);
+      if (!active || version !== contextVersion.value) return;
       pending.value = false;
       savedSnapshot.value = JSON.stringify(draft.value);
-      showSnackbar.success(`${action}成功`);
+      if (draftRemoved) showSnackbar.success(`${action}成功`);
       emits("saved", postId);
       return;
     }
@@ -1417,6 +1419,27 @@ async function savePost(): Promise<void> {
   } finally {
     pending.value = false;
   }
+}
+
+async function removePublishedDraft(snapshot: TGApp.BBS.Reply.AccountSnapshot): Promise<boolean> {
+  const draftId = draftSeed.value?.id;
+  if (!draftId) return true;
+  let removed = false;
+  try {
+    const execution = await executeReplyForCurrentAccount(snapshot, () =>
+      postDraftReq.delete(draftId, snapshot.cookie),
+    );
+    if (active && execution.allowed && execution.data.retcode === 0) {
+      draftSeed.value = undefined;
+      removed = true;
+    }
+  } catch {
+    // 发布已成功，草稿清理失败时在下方统一提示。
+  }
+  if (!removed && active) {
+    showSnackbar.warn("帖子已发布，但草稿未能自动删除，请到草稿箱手动删除。", 3000);
+  }
+  return removed;
 }
 
 async function saveDraft(): Promise<void> {
