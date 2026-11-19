@@ -2,6 +2,7 @@
   <TcConfigItem :title :subtitle :icon @activate="emit('toggle')">
     <template #append>
       <v-checkbox-btn
+        :aria-label="title"
         :model-value="modelValue"
         class="config-check"
         color="var(--tgc-od-orange)"

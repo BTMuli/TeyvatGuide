@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -15,6 +15,8 @@ const useAppStore = defineStore(
   () => {
     /** 应用打包时间 */
     const buildTime = ref<string>("");
+    /** 启动时自动更新数据库 */
+    const autoUpdateDatabase = ref<boolean>(false);
     /** 侧边栏设置 */
     const sidebar = ref({ collapse: true });
     /** 开发者模式 */
@@ -102,11 +104,12 @@ const useAppStore = defineStore(
 
     /**
      * 初始化应用状态
-     * @since Beta v0.13.0
+     * @since Beta v0.13.2
      * @remarks 用于首次运行或重置应用状态
      * @returns 无返回值
      */
     function init(): void {
+      autoUpdateDatabase.value = false;
       devMode.value = false;
       theme.value = "default";
       isLogin.value = false;
@@ -177,6 +180,7 @@ const useAppStore = defineStore(
     return {
       theme,
       buildTime,
+      autoUpdateDatabase,
       sidebar,
       devMode,
       deviceInfo,
@@ -222,6 +226,7 @@ const useAppStore = defineStore(
           "devMode",
           "loading",
           "buildTime",
+          "autoUpdateDatabase",
           "isLogin",
           "needResize",
           "shareDefaultFile",

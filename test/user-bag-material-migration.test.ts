@@ -1,6 +1,6 @@
 /**
- * 背包材料历史表迁移回归检查。
- * @since Beta v0.13.1
+ * SQLite 迁移与更新标记回归检查。
+ * @since Beta v0.13.2
  */
 
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
@@ -297,5 +297,52 @@ describe("UserBagMaterialRecord schema migration", () => {
       database.prepare("PRAGMA table_info(UserBagMaterial);").all()
     );
     expect(columns.map((column) => column.name)).toEqual(["uid", "id", "count", "updated"]);
+  });
+});
+
+describe("database update metadata", () => {
+  it("keeps the previous version after a migration fails and records a successful retry", async () => {
+    const sqlite = await loadSqlite();
+    await sqlite.saveAppData("appVersion", "0.12.0");
+    await sqlite.saveAppData("dataUpdated", "previous-build");
+    await sqlite.saveAppData("cookie", '{"existing":true}');
+    const migration = vi.spyOn(sqlite, "updateCultivationEntry");
+    migration.mockRejectedValueOnce(new Error("failed to update cultivation schema"));
+
+    await expect(sqlite.update("current-build")).rejects.toThrow(
+      "failed to update cultivation schema",
+    );
+    expect(await sqlite.checkUpdate()).toBe(true);
+    expect(await sqlite.getAppData()).toContainEqual(
+      expect.objectContaining({ key: "dataUpdated", value: "previous-build" }),
+    );
+
+    await sqlite.update("current-build");
+    expect(await sqlite.checkUpdate()).toBe(false);
+    expect(await sqlite.getAppData()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "dataUpdated", value: "current-build" }),
+        expect.objectContaining({ key: "cookie", value: '{"existing":true}' }),
+      ]),
+    );
+  });
+
+  it("does not advance the version when writing the build time fails", async () => {
+    const sqlite = await loadSqlite();
+    await sqlite.saveAppData("appVersion", "0.12.0");
+    await sqlite.saveAppData("dataUpdated", "previous-build");
+    database.exec(`
+      CREATE TRIGGER reject_build_time BEFORE UPDATE ON AppData
+      WHEN NEW.key = 'dataUpdated'
+      BEGIN
+        SELECT RAISE(ABORT, 'failed to write build time');
+      END;
+    `);
+
+    await expect(sqlite.update("current-build")).rejects.toThrow("failed to write build time");
+    expect(await sqlite.checkUpdate()).toBe(true);
+    expect(await sqlite.getAppData()).toContainEqual(
+      expect.objectContaining({ key: "dataUpdated", value: "previous-build" }),
+    );
   });
 });

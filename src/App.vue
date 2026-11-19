@@ -65,6 +65,7 @@ const {
   userDir,
   gameDir,
   buildTime,
+  autoUpdateDatabase,
   closeToTray,
   showFeedback,
   useProxy,
@@ -590,23 +591,43 @@ async function toUIAF(link: string) {
 
 // 检测更新
 async function checkUpdate(): Promise<void> {
-  // @ts-expect-error-next-line
-  const isProdEnv = import.meta.env.MODE === "production";
-  const needUpdate = await TGSqlite.checkUpdate();
-  if (needUpdate && isProdEnv) {
-    await TGLogger.Info("[App][checkUpdate] 检测到版本更新！");
-    const updateCheck = await showDialog.check("检测到版本更新", "是否更新数据库数据？");
-    if (!updateCheck) {
-      showSnackbar.error("请到设置页手动更新数据库！", 3000);
-      return;
+  // @ts-expect-error import.meta
+  if (import.meta.env.MODE !== "production") return;
+
+  let runSilently = autoUpdateDatabase.value;
+  try {
+    if (!(await TGSqlite.checkUpdate())) return;
+    void TGLogger.Info("[App][checkUpdate] 检测到版本更新！").catch(console.error);
+    if (!runSilently) {
+      const decision = await showDialog.checkF({
+        title: "检测到版本更新",
+        text: "两个选项都会更新本地数据库。自动更新可在设置中关闭。",
+        confirmLabel: "仅本次更新",
+        cancelLabel: "以后自动执行",
+      });
+      if (decision === undefined) {
+        showSnackbar.info("可在设置页手动更新数据库", 3000);
+        return;
+      }
+      if (decision === false) {
+        autoUpdateDatabase.value = true;
+        runSilently = true;
+      }
     }
     // @ts-expect-error import.meta
-    buildTime.value = import.meta.env.VITE_BUILD_TIME;
-    await TGSqlite.update(buildTime.value);
-    showFeedback.value = true;
-    showSnackbar.success("数据库已更新！", 3000);
-    await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
+    const currentBuildTime: string = import.meta.env.VITE_BUILD_TIME;
+    await TGSqlite.update(currentBuildTime);
+    buildTime.value = currentBuildTime;
+  } catch (error) {
+    showSnackbar.error("数据库更新失败，可在设置中重试", 3000);
+    void TGLogger.Error(`[App][checkUpdate] ${String(error)}`).catch(console.error);
+    return;
   }
+
+  if (runSilently) return;
+  showFeedback.value = true;
+  showSnackbar.success("数据库已更新！", 3000);
+  await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
 }
 
 /**

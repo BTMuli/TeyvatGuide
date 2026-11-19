@@ -1,52 +1,29 @@
 /**
- * Sqlite 初始化数据 sql 语句
- * @since Beta v0.9.1
+ * SQLite 应用数据初始化
+ * @since Beta v0.13.2
  */
 
 import { app } from "@tauri-apps/api";
-
-import createTable from "./createTable.sql?raw";
+import type Database from "@tauri-apps/plugin-sql";
 
 /**
- * 初始化应用表数据
- * @since Alpha v0.2.2
- * @returns sql
+ * 在同一条语句中写入更新标记，并补齐默认 Cookie 记录。
+ * @since Beta v0.13.2
+ * @param db - 数据库连接
+ * @param buildTime - 应用构建时间
  */
-async function initAppData(): Promise<Array<string>> {
-  const sqlRes: Array<string> = [];
+async function initAppData(db: Database, buildTime?: string): Promise<void> {
   const appVersion = await app.getVersion();
-  // @ts-expect-error import.meta
-  const buildTime: string = import.meta.VITE_BUILD_TIME;
-  // 初始化应用版本
-  sqlRes.push(`
-      INSERT INTO AppData (key, value, updated)
-      VALUES ('appVersion', '${appVersion}', datetime('now', 'localtime'))
-      ON CONFLICT(key) DO UPDATE SET value   = '${appVersion}',
-                                     updated = datetime('now', 'localtime');`);
-  // 初始化应用数据更新时间
-  sqlRes.push(`
-      INSERT INTO AppData (key, value, updated)
-      VALUES ('dataUpdated', '${buildTime}', datetime('now', 'localtime'))
-      ON CONFLICT(key) DO UPDATE SET value   = '${buildTime}',
-                                     updated = datetime('now', 'localtime');`);
-  // 初始化 cookie
-  sqlRes.push(`
-      INSERT INTO AppData (key, value, updated)
-      VALUES ('cookie', '{}', datetime('now', 'localtime'))
-      ON CONFLICT(key) DO NOTHING;`);
-  return sqlRes;
+  const dataUpdated: string = buildTime ?? import.meta.env.VITE_BUILD_TIME ?? "";
+  await db.execute(
+    `INSERT INTO AppData (key, value, updated)
+     VALUES ('appVersion', $1, datetime('now', 'localtime')),
+            ('dataUpdated', $2, datetime('now', 'localtime')),
+            ('cookie', '{}', datetime('now', 'localtime'))
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated = excluded.updated
+     WHERE excluded.key IN ('appVersion', 'dataUpdated');`,
+    [appVersion, dataUpdated],
+  );
 }
 
-/**
- * 初始化数据
- * @since Beta v0.7.2
- * @returns sql
- */
-async function initDataSql(): Promise<Array<string>> {
-  const sqlRes: Array<string> = [];
-  sqlRes.push(createTable);
-  sqlRes.push(...(await initAppData()));
-  return sqlRes;
-}
-
-export default initDataSql;
+export default initAppData;

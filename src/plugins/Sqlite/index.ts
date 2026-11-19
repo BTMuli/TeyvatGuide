@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -10,7 +10,7 @@ import Database from "@tauri-apps/plugin-sql";
 import TGLogger from "@utils/system/TGLogger.js";
 
 import createTable from "./sql/createTable.sql?raw";
-import initDataSql from "./sql/initData.js";
+import initAppData from "./sql/initData.js";
 
 type TableColumn = {
   name: string;
@@ -442,13 +442,13 @@ class Sqlite {
 
   /**
    * 初始化数据库
-   * @since Beta v0.4.5
+   * @since Beta v0.13.2
    * @returns 无返回值
    */
   public async initDB(): Promise<void> {
     const db = await this.getDB();
-    const sql = await initDataSql();
-    for (const item of sql) await db.execute(item);
+    await db.execute(createTable);
+    await initAppData(db);
   }
 
   /**
@@ -509,21 +509,17 @@ class Sqlite {
   }
 
   /**
-   * 已有数据表跟触发器不变的情况下，更新数据库数据
-   * @since Beta v0.10.0
-   * @param upt - updateTime 更新时间
+   * 更新本地表结构，完成后记录应用版本与构建时间。
+   * @since Beta v0.13.2
+   * @param buildTime - 应用构建时间
    * @returns 无返回值
    */
-  public async update(upt?: string): Promise<void> {
+  public async update(buildTime?: string): Promise<void> {
     const db = await this.getDB();
-    const sqlD = await initDataSql();
-    for (const item of sqlD) await db.execute(item);
-    // 检测是否存在字段
+    await db.execute(createTable);
     await this.updateAbyss();
     await this.updateCultivationEntry();
-    if (upt !== undefined) {
-      await this.saveAppData("dataUpdated", upt);
-    }
+    await initAppData(db, buildTime);
   }
 
   /**

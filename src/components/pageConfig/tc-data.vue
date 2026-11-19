@@ -28,6 +28,13 @@
       icon="mdi-database-arrow-up"
       @activate="confirmUpdate()"
     />
+    <TcConfigSwitch
+      :model-value="autoUpdateDatabase"
+      icon="mdi-database-sync"
+      subtitle="应用版本变化时，启动后直接更新本地数据库"
+      title="自动更新数据库"
+      @toggle="autoUpdateDatabase = !autoUpdateDatabase"
+    />
     <TcConfigItem
       title="设备信息"
       icon="mdi-cellphone-information"
@@ -100,11 +107,12 @@ import { computed, onMounted, ref } from "vue";
 
 import TcConfigItem from "./tc-config-item.vue";
 import TcConfigSection from "./tc-config-section.vue";
+import TcConfigSwitch from "./tc-config-switch.vue";
 import TcoDeviceInfo from "./tco-device-info.vue";
 import TcoHutaoImport from "./tco-hutao-import.vue";
 
 const appStore = useAppStore();
-const { deviceInfo, userDir, buildTime } = storeToRefs(appStore);
+const { deviceInfo, userDir, buildTime, autoUpdateDatabase } = storeToRefs(appStore);
 const homeStore = useHomeStore();
 // @ts-expect-error import.meta
 const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
@@ -258,11 +266,18 @@ async function confirmUpdate(title?: string): Promise<void> {
     return;
   }
   await showLoading.start("正在更新数据库", "");
-  // @ts-expect-error import.meta
-  await TGSqlite.update(import.meta.env.VITE_BUILD_TIME);
-  // @ts-expect-error import.meta
-  buildTime.value = import.meta.env.VITE_BUILD_TIME;
-  await showLoading.end();
+  try {
+    // @ts-expect-error import.meta
+    const currentBuildTime: string = import.meta.env.VITE_BUILD_TIME;
+    await TGSqlite.update(currentBuildTime);
+    buildTime.value = currentBuildTime;
+  } catch (error) {
+    showSnackbar.error("数据库更新失败", 3000);
+    await TGLogger.Error(`[Config][confirmUpdate] ${getErrorMessage(error)}`);
+    return;
+  } finally {
+    await showLoading.end();
+  }
   showSnackbar.success("数据库已更新!即将刷新页面");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
