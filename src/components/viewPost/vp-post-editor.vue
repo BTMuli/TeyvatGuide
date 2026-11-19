@@ -15,7 +15,7 @@
         <v-icon size="20">mdi-image-outline</v-icon>
       </button>
       <button
-        v-if="mode === 'article'"
+        v-if="mode === 'article' || mode === 'picture'"
         :disabled
         aria-label="插入表情"
         title="表情"
@@ -499,7 +499,7 @@ onMounted(() => {
   }
   registerPostEditorFormats();
   const instance = new Quill(container, {
-    formats: props.mode === "picture" ? ["mention"] : [...postEditorFormats],
+    formats: props.mode === "picture" ? ["mention", "emoticon"] : [...postEditorFormats],
     modules: {
       clipboard: false,
       history: { delay: 1000, maxStack: 100, userOnly: true },
@@ -720,11 +720,13 @@ function mergeEmoticonMap(next: Record<string, string>): void {
   if (JSON.stringify(merged) === JSON.stringify(emoticonMap.value)) return;
   emoticonMap.value = merged;
   const current = quill.value;
-  if (mounted && current && props.mode === "article") hydrateCurrentEmoticons(current, merged);
+  if (mounted && current && (props.mode === "article" || props.mode === "picture")) {
+    hydrateCurrentEmoticons(current, merged);
+  }
 }
 
 async function loadEmoticonMap(): Promise<void> {
-  if (props.mode !== "article") return;
+  if (props.mode !== "article" && props.mode !== "picture") return;
   const version = ++emoticonLoadVersion;
   let response: TGApp.BBS.Emoji.Resp;
   try {
@@ -986,12 +988,15 @@ function readEditorNodes(current: Quill): Array<TGApp.BBS.SctPost.Base> {
       continue;
     }
     if ("emoticon" in op.insert) {
-      nodes.push(
-        createNode(
-          { emoticon: normalizeEmoticon(op.insert.emoticon) },
-          normalizeAttributes(op.attributes, false),
-        ),
-      );
+      const emoticon = normalizeEmoticon(op.insert.emoticon);
+      if (props.mode === "picture") {
+        if (op.attributes !== undefined && Object.keys(op.attributes).length > 0) {
+          throw new TypeError("图片帖介绍包含暂不支持的格式属性，请在米游社网页版编辑");
+        }
+        nodes.push(createNode(`_(${emoticon.name})`));
+      } else {
+        nodes.push(createNode({ emoticon }, normalizeAttributes(op.attributes, false)));
+      }
       continue;
     }
     throw new TypeError("帖子包含暂不支持的卡片或附件，请在米游社网页版编辑");
@@ -1041,7 +1046,10 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
   if (!current) return;
   let delta: QuillDelta;
   try {
-    delta = buildEditorDelta(next, props.mode === "article" ? emoticonMap.value : {});
+    delta = buildEditorDelta(
+      next,
+      props.mode === "article" || props.mode === "picture" ? emoticonMap.value : {},
+    );
   } catch (error) {
     emits("validityChange", false);
     emitEditorError(error, "帖子正文无效");
@@ -1065,7 +1073,7 @@ function applyModel(next: Array<TGApp.BBS.SctPost.Base>): void {
     emits("validityChange", true);
     updateActiveFormats(savedSelection);
     if (
-      props.mode === "article" &&
+      (props.mode === "article" || props.mode === "picture") &&
       getMissingPostPreviewEmoticonNames(next, emoticonMap.value).length > 0
     ) {
       void loadEmoticonMap();

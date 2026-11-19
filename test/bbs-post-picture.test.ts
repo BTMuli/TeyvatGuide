@@ -39,6 +39,14 @@ describe("bbsPostPicture document", () => {
     expect(() => assertPicturePostDocument(document)).not.toThrow();
   });
 
+  it("preserves official emoticon tokens in the picture description", () => {
+    const document = buildPicturePostDocument([{ insert: "说明 _(smile)\n" }], oneImage);
+
+    expect(document.text).toBe("说明 _(smile)");
+    expect(document.length).toBe("说明 _(smile)".length);
+    expect(serializePicturePostDescribe(document.nodes)).toBe("说明 _(smile)\n");
+  });
+
   it("rejects the 501st character while accepting exactly 500", () => {
     const valid = buildPicturePostDocument([{ insert: `${"a".repeat(500)}\n` }], oneImage);
     expect(valid.length).toBe(500);
