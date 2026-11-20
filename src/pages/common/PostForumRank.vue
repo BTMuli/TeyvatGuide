@@ -151,6 +151,7 @@
       :image="previewImage"
       :link="previewCover.url"
       :ori="true"
+      style="z-index: calc(var(--tgi-loading) - 1)"
     />
   </Teleport>
 </template>
