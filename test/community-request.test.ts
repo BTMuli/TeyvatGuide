@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心请求契约回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -161,6 +161,18 @@ describe("communityReq read requests", () => {
       { headers: { referer: "https://www.miyoushe.com/" }, query: { ...firstQuery, offset: "20" } },
     );
     expect(mocks.getRequestHeader).not.toHaveBeenCalled();
+  });
+
+  it.each(<const>[1, 2])("preserves sort type %s across user post search pages", async (sort) => {
+    const url = "https://bbs-api.miyoushe.com/painter/api/user_instant/search/list";
+    const headers = { referer: "https://www.miyoushe.com/" };
+    const query = { keyword: "生日", uid: "200000002", size: 20, sort_type: sort };
+
+    await communityReq.searchPosts("200000002", "生日", undefined, sort);
+    expect(mocks.get).toHaveBeenLastCalledWith(url, { headers, query });
+
+    await communityReq.searchPosts("200000002", "生日", "20", sort);
+    expect(mocks.get).toHaveBeenLastCalledWith(url, { headers, query: { ...query, offset: "20" } });
   });
 
   it("passes through business responses and transport errors", async () => {

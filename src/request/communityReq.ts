@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心请求
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import {
@@ -505,19 +505,22 @@ async function deleteHistory(
 
 /**
  * 搜索指定用户发布的帖子
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param uid - 用户 ID
  * @param keyword - 搜索关键词
  * @param offset - 下一页偏移量
+ * @param sortType - 排序方式
  * @returns 用户帖子搜索响应数据
  */
 async function searchUserPosts(
   uid: string,
   keyword: string,
   offset?: string,
+  sortType?: TGApp.BBS.Post.SearchSortTypeEnum,
 ): Promise<TGApp.BBS.Community.PostSearchResp> {
   const params: CommunityQuery = { keyword, uid, size: communityPageSize };
   if (offset) params.offset = offset;
+  if (sortType !== undefined) params.sort_type = sortType;
   const resp = await TGHttps.get<TGApp.BBS.Community.PostSearchResp>(
     `${communityApiBaseUrl}painter/api/user_instant/search/list`,
     { headers: { referer: "https://www.miyoushe.com/" }, query: params },

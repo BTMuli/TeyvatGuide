@@ -26,6 +26,37 @@
         </p>
       </div>
       <div v-if="profile" class="community-profile-posts-actions">
+        <v-btn-toggle
+          v-if="searchKeyword"
+          :disabled="loading"
+          :modelValue="searchSortType"
+          aria-label="帖子搜索排序"
+          class="community-profile-search-sort"
+          color="var(--tgc-od-blue)"
+          density="comfortable"
+          divided
+          mandatory
+          role="group"
+          variant="outlined"
+          @update:model-value="changeSearchSort"
+        >
+          <v-btn
+            :aria-pressed="searchSortType === HOT"
+            :value="HOT"
+            aria-label="热度排序"
+            icon="mdi-fire"
+            title="热度排序"
+            type="button"
+          />
+          <v-btn
+            :aria-pressed="searchSortType === LATEST"
+            :value="LATEST"
+            aria-label="时间排序"
+            icon="mdi-clock-outline"
+            title="时间排序"
+            type="button"
+          />
+        </v-btn-toggle>
         <v-text-field
           v-model="searchInput"
           :clearable="true"
@@ -134,6 +165,7 @@
 import CpPost from "@comp/comiProf/cp-post.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsEnum from "@enum/bbs.js";
 import { useCommunityProfile } from "@hooks/useCommunityProfile.js";
 import { createCommunityProfilePostsController } from "@hooks/useCommunityProfilePosts.js";
 import communityReq from "@req/communityReq.js";
@@ -185,6 +217,8 @@ const {
 } = postsController;
 const deletingPostId = ref<string>("");
 const searchInput = ref<string | null>("");
+const { HOT, LATEST } = bbsEnum.post.searchSortType;
+const searchSortType = ref<TGApp.BBS.Post.SearchSortTypeEnum>(HOT);
 const postsLoadMoreRef = useTemplateRef<HTMLElement>("postsLoadMoreRef");
 let postsLoadMoreObserver: IntersectionObserver | undefined;
 let initializedContextKey = "";
@@ -283,7 +317,12 @@ async function fetchPostPage(
       total: 0,
     };
   } else {
-    const response = await communityReq.searchPosts(snapshot.profileUid, keyword, offset);
+    const response = await communityReq.searchPosts(
+      snapshot.profileUid,
+      keyword,
+      offset,
+      searchSortType.value,
+    );
     if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
     postPage = {
       list: response.data.list.filter((item) => item.entity_type === 1).map((item) => item.post),
@@ -298,6 +337,12 @@ async function fetchPostPage(
 
 function searchPosts(input: string | null): void {
   void postsController.search(input);
+}
+
+function changeSearchSort(sortType: TGApp.BBS.Post.SearchSortTypeEnum): void {
+  if (loading.value || sortType === searchSortType.value) return;
+  searchSortType.value = sortType;
+  if (searchKeyword.value !== "") searchPosts(searchKeyword.value);
 }
 
 function clearSearch(): void {
@@ -480,7 +525,11 @@ async function editPost(post: TGApp.BBS.Post.FullData): Promise<void> {
   flex: 1 1 auto;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 4px;
+}
+
+.community-profile-search-sort {
+  flex-shrink: 0;
 }
 
 .community-profile-search {
