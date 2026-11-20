@@ -1,6 +1,6 @@
 /**
  * 米游社消息通知类型定义文件
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 declare namespace TGApp.BBS.Notification {
@@ -10,6 +10,19 @@ declare namespace TGApp.BBS.Notification {
    * @remarks reply 为回复我的，active_mention 为主动\@我，system 为系统通知，comment 为收到的赞
    */
   type Category = "reply" | "active_mention" | "system" | "comment";
+
+  /**
+   * 通知跳转目标类型。
+   * @since Beta v0.13.2
+   */
+  type TargetKind = "post" | "web" | "internal" | "notice";
+
+  /**
+   * 通知用于展示和打开的跳转目标。
+   * @since Beta v0.13.2
+   */
+  type Target =
+    { kind: "notice" } | { kind: "post"; postId: string } | { kind: TargetKind; href: string };
 
   /**
    * 消息通知列表返回响应

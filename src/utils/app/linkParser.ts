@@ -1,55 +1,32 @@
 /**
  * 处理链接
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { emit } from "@tauri-apps/api/event";
 
+import { getEmbeddedLinkTarget } from "./linkTarget.js";
 import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
 
 /**
- * 从 uniwebview://open_url 或 uniwebview://load_url 取出目标链接
- * @since Beta v0.12.0
- * @param url - uniwebview 链接
- * @returns 目标链接
- */
-function getUniwebviewTargetUrl(url: URL): string | undefined {
-  if (url.protocol !== "uniwebview:") return undefined;
-  const host = url.hostname.toLowerCase();
-  if (host !== "open_url" && host !== "load_url") return undefined;
-  const inner = url.searchParams.get("url");
-  if (inner === null || inner.trim() === "") return undefined;
-  return inner;
-}
-
-/**
  * 处理帖子链接
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param link - 链接
  * @returns 处理情况，或者转换后的链接
  */
 export async function parsePost(link: string): Promise<false | string> {
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    const uniOpen = getUniwebviewTargetUrl(url);
-    if (uniOpen !== undefined) return await parsePost(uniOpen);
+    const embedded = getEmbeddedLinkTarget(url);
+    if (embedded !== undefined) return await parsePost(embedded);
     if (url.protocol === "mihoyobbs:") {
       if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
         if (!postId) return false;
         return postId;
-      }
-      if (url.hostname === "webview" && url.search.startsWith("?link=")) {
-        const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
-        return await parsePost(urlTransform);
-      }
-      // 不保证转换后的链接可用
-      if (url.hostname === "openURL" && url.search.startsWith("?url=")) {
-        const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
-        return await parsePost(urlTransform);
       }
     }
     return false;
@@ -70,7 +47,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * 处理链接
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param link - 链接
  * @param useInner - 是否采用内置 JSBridge 打开
  * @returns 处理情况，或者转换后的链接
@@ -81,23 +58,14 @@ export async function parseLink(
 ): Promise<boolean | string> {
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
-    const uniOpen = getUniwebviewTargetUrl(url);
-    if (uniOpen !== undefined) return await parseLink(uniOpen, useInner);
+    const embedded = getEmbeddedLinkTarget(url);
+    if (embedded !== undefined) return await parseLink(embedded, useInner);
     if (url.protocol === "mihoyobbs:") {
       if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
         if (!postId) return false;
         await createPost(postId);
         return true;
-      }
-      if (url.hostname === "webview" && url.search.startsWith("?link=")) {
-        const urlTransform = decodeURIComponent(url.search.replace("?link=", ""));
-        return await parseLink(urlTransform, useInner);
-      }
-      // 不保证转换后的链接可用
-      if (url.hostname === "openURL" && url.search.startsWith("?url=")) {
-        const urlTransform = decodeURIComponent(url.search.replace("?url=", ""));
-        return await parseLink(urlTransform, useInner);
       }
       console.log(url);
       // 处理特定路径

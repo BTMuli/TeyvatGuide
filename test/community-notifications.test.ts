@@ -1,6 +1,6 @@
 /**
- * 米游社通知入口提醒规则回归测试。
- * @since Beta v0.13.1
+ * 米游社通知入口提醒与跳转规则回归测试。
+ * @since Beta v0.13.2
  */
 
 import { describe, expect, it } from "vitest";
@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import {
   clearNotificationBadge,
   getNotificationBadge,
+  getNotificationTarget,
   shouldRenderNotificationOrigin,
 } from "../src/utils/community/notification.js";
 
@@ -179,6 +180,62 @@ describe("clearNotificationBadge", () => {
       dot: false,
       label: "",
     });
+  });
+});
+
+describe("notification destination", () => {
+  it("prioritizes an explicit post ID over the web link", () => {
+    expect(
+      getNotificationTarget({
+        ext: { post_id: " 123456 " },
+        is_web_jump_disable: true,
+        web_path: "https://www.miyoushe.com/ys/",
+      }),
+    ).toEqual({ kind: "post", postId: "123456" });
+  });
+
+  it.each([
+    ["/ys/article/123456", "post"],
+    ["mihoyobbs://article/123456", "post"],
+    ["https://www.miyoushe.com/ys/topicDetail/123", "internal"],
+    ["mihoyobbs://discussion/2?forum_id=3", "internal"],
+    ["mihoyobbs://homeForum?game_id=2&tab_type=1", "internal"],
+    ["https://act.mihoyo.com/event/example", "web"],
+    ["uniwebview://open_url?url=https%3A%2F%2Fwww.miyoushe.com%2Fys%2Farticle%2F123456", "post"],
+    ["mihoyobbs://webview?link=https%3A%2F%2Fact.mihoyo.com%2Fevent", "web"],
+    ["mihoyobbs://openURL?url=https%3A%2F%2Fwww.miyoushe.com%2Fys%2FtopicDetail%2F123", "internal"],
+  ])("classifies %s as %s", (web_path, kind) => {
+    expect(
+      getNotificationTarget({ ext: null, is_web_jump_disable: false, web_path }),
+    ).toMatchObject({
+      kind,
+    });
+  });
+
+  it("uses an extension link when the primary web path is empty", () => {
+    expect(
+      getNotificationTarget({
+        ext: { web_path: "/ys/article/123456" },
+        is_web_jump_disable: false,
+        web_path: " ",
+      }),
+    ).toEqual({ kind: "post", href: "https://www.miyoushe.com/ys/article/123456" });
+  });
+
+  it("uses a plain notice when there is no available destination", () => {
+    expect(getNotificationTarget({ ext: null, is_web_jump_disable: false, web_path: "" })).toEqual({
+      kind: "notice",
+    });
+    expect(
+      getNotificationTarget({
+        ext: null,
+        is_web_jump_disable: true,
+        web_path: "https://www.miyoushe.com/ys/",
+      }),
+    ).toEqual({ kind: "notice" });
+    expect(
+      getNotificationTarget({ ext: null, is_web_jump_disable: false, web_path: "https://[" }),
+    ).toEqual({ kind: "notice" });
   });
 });
 

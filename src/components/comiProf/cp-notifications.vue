@@ -26,8 +26,8 @@
             >
               <CpNotification
                 :category
-                :clickable="hasTarget(item)"
                 :notification="item"
+                :target="getNotificationTarget(item)"
                 @open="openNotification(item)"
                 @open-profile="openProfile"
               />
@@ -77,6 +77,7 @@ import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { parseLink, parsePost } from "@utils/app/linkParser.js";
 import { createPost } from "@utils/app/TGWindow.js";
+import { getNotificationTarget } from "@utils/community/notification.js";
 import { openCommunityProfile } from "@utils/community/profile.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
@@ -268,36 +269,15 @@ async function clearUnread(snapshot: AccountSnapshot, version: number): Promise<
   }
 }
 
-function getPostId(item: TGApp.BBS.Notification.Item): string {
-  const postId = item.ext?.post_id;
-  return typeof postId === "string" && /^[1-9]\d*$/.test(postId.trim()) ? postId.trim() : "";
-}
-
-function getWebLink(item: TGApp.BBS.Notification.Item): string {
-  if (item.is_web_jump_disable) return "";
-  const extPath = item.ext?.web_path;
-  const path = item.web_path.trim() || (typeof extPath === "string" ? extPath.trim() : "");
-  if (path === "") return "";
-  try {
-    return new URL(path, "https://www.miyoushe.com/ys/").href;
-  } catch {
-    return "";
-  }
-}
-
-function hasTarget(item: TGApp.BBS.Notification.Item): boolean {
-  return getPostId(item) !== "" || getWebLink(item) !== "";
-}
-
 async function openNotification(item: TGApp.BBS.Notification.Item): Promise<void> {
   try {
-    const postId = getPostId(item);
-    if (postId) {
-      await createPost(postId, item.subject.trim() || undefined);
+    const target = getNotificationTarget(item);
+    if ("postId" in target) {
+      await createPost(target.postId, item.subject.trim() || undefined);
       return;
     }
-    const link = getWebLink(item);
-    if (!link) return;
+    if (!("href" in target)) return;
+    const link = target.href;
     const result = await parseLink(link);
     if (result === true) return;
     if (result === false) {

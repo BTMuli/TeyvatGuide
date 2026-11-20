@@ -1,46 +1,51 @@
 <template>
   <article
+    ref="cardEl"
     :class="{ 'is-clickable': clickable, 'is-unread': !notification.is_read }"
     class="cp-notification"
     @click="handleCardClick"
   >
     <header class="cp-notification-header">
-      <button
-        v-if="user"
-        :title="`查看 ${user.nickname} 的米游社主页`"
-        class="cp-notification-author"
-        type="button"
-        @click.stop="emit('openProfile', user.uid, profileGid)"
-      >
-        <CpAvatar :user="avatarUser" :size="32" />
-        <span>{{ user.nickname }}</span>
-      </button>
-      <button
-        v-if="user && clickable"
-        :aria-label="openLabel"
-        class="cp-notification-action cp-notification-open"
-        type="button"
-        @click.stop="emit('open')"
-      >
-        {{ actionText }}
-      </button>
-      <span v-else-if="user" class="cp-notification-action">{{ actionText }}</span>
-      <template v-else>
-        <span class="cp-notification-icon">
-          <TMiImg v-if="notification.site_icon" :ori="true" :src="notification.site_icon" alt="" />
-          <v-icon v-else size="20" aria-hidden="true">mdi-bell-outline</v-icon>
-        </span>
+      <div class="cp-notification-sender-row">
         <button
-          v-if="clickable"
-          :aria-label="openLabel"
-          class="cp-notification-title cp-notification-open"
+          v-if="badge"
+          :aria-label="`分享通知：${badge.label}`"
+          :disabled="sharing"
+          class="cp-notification-tag"
+          title="分享通知"
           type="button"
-          @click.stop="emit('open')"
+          @click.stop="shareCard"
         >
-          {{ systemTitle }}
+          <CpTypeBadge :icon="badge.icon" :label="badge.label" />
         </button>
-        <span v-else class="cp-notification-title">{{ systemTitle }}</span>
-      </template>
+        <component
+          :is="senderLabel ? 'button' : 'span'"
+          :aria-label="senderLabel"
+          :type="senderLabel ? 'button' : undefined"
+          class="cp-notification-author"
+          @click="openSender"
+        >
+          <span class="cp-notification-avatar">
+            <img v-if="isGifAvatar" :src="avatarUrl" alt="" />
+            <TMiImg v-else-if="avatarUrl" :ori="true" :size="16" :src="avatarUrl" alt="" />
+            <v-icon v-else aria-hidden="true" icon="mdi-bell-outline" size="20" />
+          </span>
+          <span :title="senderName" class="cp-notification-name">{{ senderName }}</span>
+        </component>
+      </div>
+      <component
+        :is="clickable ? 'button' : 'span'"
+        v-if="headerText"
+        :aria-label="clickable ? openLabel : undefined"
+        :class="[
+          category === 'system' ? 'cp-notification-title' : 'cp-notification-action',
+          { 'cp-notification-open': clickable },
+        ]"
+        :type="clickable ? 'button' : undefined"
+        @click.stop="openTarget"
+      >
+        {{ headerText }}
+      </component>
       <time v-if="createdAtLabel" :datetime="createdAtIso" class="cp-notification-time">
         {{ createdAtLabel }}
       </time>
@@ -53,22 +58,37 @@
       />
     </header>
 
-    <p v-if="notification.is_content_deleted" class="cp-notification-content is-deleted">
-      该内容已被删除
-    </p>
-    <div v-else-if="contentNodes.length" class="cp-notification-content">
-      <TpParser :data="contentNodes" />
+    <div v-if="hasBody" :class="{ 'cp-notification-framed-content': category === 'comment' }">
+      <p v-if="notification.is_content_deleted" class="cp-notification-content is-deleted">
+        该内容已被删除
+      </p>
+      <div v-else-if="contentNodes.length" class="cp-notification-content">
+        <TpParser :data="contentNodes" :imageComponent="CpContentImage" />
+      </div>
     </div>
-    <span v-if="coverImage" class="cp-notification-cover">
-      <TMiImg :src="coverImage" alt="通知配图" />
-    </span>
-    <blockquote v-if="showOrigin" class="cp-notification-origin">
-      <span v-if="originImage" class="cp-notification-origin-image">
-        <TMiImg :src="originImage" alt="原内容图片" />
-      </span>
+    <CpImageThumbnail
+      v-if="coverImage"
+      :key="coverImage"
+      :source="coverImage"
+      alt="通知配图"
+      class="cp-notification-thumbnail"
+    />
+    <blockquote v-if="showOrigin" class="cp-notification-framed-content">
+      <CpImageThumbnail
+        v-if="originImage"
+        :key="originImage.image_url"
+        :attributes="originImage"
+        :source="originImage.image_url"
+        alt="原内容图片"
+        class="cp-notification-thumbnail"
+      />
       <span class="cp-notification-origin-text">
         <template v-if="originDeleted">原内容已删除</template>
-        <TpParser v-else-if="originNodes.length" :data="originNodes" />
+        <TpParser
+          v-else-if="originNodes.length"
+          :data="originNodes"
+          :imageComponent="CpContentImage"
+        />
       </span>
     </blockquote>
   </article>
@@ -77,50 +97,81 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
+import useAppStore from "@store/app.js";
 import { getStructuredContent } from "@utils/community/comment.js";
 import { shouldRenderNotificationOrigin } from "@utils/community/notification.js";
 import { parseCommunityProfileGid } from "@utils/community/profile.js";
+import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
-import { computed } from "vue";
+import TGShare from "@utils/share/TGShare.js";
+import { computed, ref, useTemplateRef } from "vue";
 
-import CpAvatar from "./cp-avatar.vue";
+import CpContentImage from "./cp-content-image.vue";
+import CpImageThumbnail from "./cp-image-thumbnail.vue";
+import CpTypeBadge from "./cp-type-badge.vue";
 
 type CpNotificationProps = {
   notification: TGApp.BBS.Notification.Item;
   category: TGApp.BBS.Notification.Category;
-  clickable: boolean;
+  target: TGApp.BBS.Notification.Target;
 };
 
-const { notification, category, clickable } = defineProps<CpNotificationProps>();
-const emit = defineEmits<{ open: []; openProfile: [uid: string, gid?: number] }>();
+type NotificationBadge = { label: string; icon: string };
 
-const user = computed<TGApp.BBS.Notification.OpUser | undefined>(() => {
-  if (category === "system") return undefined;
+const systemBadges: Record<TGApp.BBS.Notification.TargetKind, NotificationBadge> = {
+  post: { label: "帖子", icon: "mdi-post-outline" },
+  web: { label: "网页", icon: "mdi-web" },
+  internal: { label: "站内", icon: "mdi-link-variant" },
+  notice: { label: "通知", icon: "mdi-bell-outline" },
+};
+
+const { notification, category, target } = defineProps<CpNotificationProps>();
+const emit = defineEmits<{ open: []; openProfile: [uid: string, gid?: number] }>();
+const appStore = useAppStore();
+const clickable = computed<boolean>(() => "href" in target || "postId" in target);
+const cardEl = useTemplateRef<HTMLElement>("cardEl");
+const sharing = ref<boolean>(false);
+
+const userId = computed<string>(() => {
+  const uid = notification.op_user?.uid?.trim() ?? "";
+  if (/^[1-9]\d*$/.test(uid)) return uid;
+  const fallback = notification.op_uid?.trim() ?? "";
+  return /^[1-9]\d*$/.test(fallback) ? fallback : "";
+});
+const user = computed(() => {
   const opUser = notification.op_user;
-  return opUser && opUser.uid.trim() !== "" ? opUser : undefined;
+  if (category === "system" && (!opUser || !userId.value)) return undefined;
+  if (!opUser && !userId.value) return undefined;
+  return {
+    nickname: opUser?.nickname?.trim() || (userId.value ? `用户 ${userId.value}` : "用户"),
+    avatarUrl: opUser?.avatar_url?.trim() || "/UI/nav/lumine.webp",
+  };
 });
 const profileGid = computed<number | undefined>(() =>
   parseCommunityProfileGid(notification.game_id),
 );
-const avatarUser = computed(() => ({
-  nickname: user.value?.nickname ?? "",
-  avatar_url: user.value?.avatar_url ?? "",
-  pendant: "",
-}));
+const actionTarget = computed<"post" | "reply" | undefined>(() => {
+  const { type } = notification;
+  if ((category === "reply" && type === 1) || (category === "comment" && type === 21)) {
+    return "post";
+  }
+  if ((category === "reply" && type === 2) || (category === "comment" && type === 22)) {
+    return "reply";
+  }
+  return undefined;
+});
 const actionText = computed<string>(() => {
+  const targetText =
+    actionTarget.value === "post" ? "我的帖子" : actionTarget.value === "reply" ? "我的评论" : "我";
   switch (category) {
     case "reply":
-      if (notification.type === 1) return "回复了我的帖子";
-      if (notification.type === 2) return "回复了我的评论";
-      return "回复了我";
+      return `回复了${targetText}`;
     case "active_mention":
       return "@了我";
     case "comment": {
       const upvote = notification.ext?.upvote_content;
       if (typeof upvote === "string" && upvote.trim() !== "") return upvote;
-      if (notification.type === 21) return "赞了我的帖子";
-      if (notification.type === 22) return "赞了我的评论";
-      return "赞了我";
+      return `赞了${targetText}`;
     }
     default:
       return "";
@@ -129,6 +180,16 @@ const actionText = computed<string>(() => {
 const systemTitle = computed<string>(
   () => notification.site_title.trim() || notification.subject.trim() || "系统通知",
 );
+const senderName = computed<string>(() => user.value?.nickname ?? systemTitle.value);
+const avatarUrl = computed<string>(
+  () => user.value?.avatarUrl ?? notification.site_icon?.trim() ?? "",
+);
+const isGifAvatar = computed<boolean>(() => /\.gif(?:$|[?#])/i.test(avatarUrl.value));
+const headerText = computed<string>(() => {
+  if (!user.value) return "";
+  if (category === "system") return systemTitle.value;
+  return category === "active_mention" ? actionText.value : "";
+});
 const contentNodes = computed<Array<TGApp.BBS.SctPost.Base>>(() =>
   category === "system"
     ? getStructuredContent("", notification.site_content || notification.content)
@@ -142,9 +203,11 @@ const originDeleted = computed<boolean>(() => {
   const origin = notification.origin;
   return origin !== null && (origin.is_deleted || origin.origin_is_missing);
 });
-const originImage = computed<string>(() => {
-  if (!notification.origin || originDeleted.value) return "";
-  return notification.origin.image?.image_url.trim() ?? "";
+const originImage = computed<TGApp.BBS.Notification.OriginImage | undefined>(() => {
+  const image = notification.origin?.image;
+  if (!image || originDeleted.value) return undefined;
+  const url = image.image_url.trim();
+  return url ? { ...image, image_url: url } : undefined;
 });
 const originNodes = computed<Array<TGApp.BBS.SctPost.Base>>(() => {
   if (!notification.origin || originDeleted.value) return [];
@@ -158,9 +221,27 @@ const hasBody = computed<boolean>(
 const showOrigin = computed<boolean>(() =>
   shouldRenderNotificationOrigin(category, notification.origin, hasBody.value),
 );
-const openLabel = computed<string>(() =>
-  user.value ? `${user.value.nickname}${actionText.value}` : `打开通知：${systemTitle.value}`,
+const badge = computed<NotificationBadge | undefined>(() => {
+  if (category === "system") return systemBadges[target.kind];
+  if (category === "reply") return { label: actionText.value, icon: "mdi-reply-outline" };
+  if (category === "comment") return { label: actionText.value, icon: "mdi-thumb-up-outline" };
+  return undefined;
+});
+const isDarkMode = computed<boolean>(() => appStore.theme === "dark");
+const badgeLabel = computed<string>(() => badge.value?.label ?? "");
+const badgeColor = computed<string>(() => str2Color(badgeLabel.value, isDarkMode.value ? 80 : -40));
+const badgeTextColor = computed<string>(() =>
+  str2Color(badgeLabel.value, isDarkMode.value ? 180 : -150),
 );
+const openLabel = computed<string>(() =>
+  actionText.value
+    ? `${user.value?.nickname ?? ""}${actionText.value}`
+    : `打开通知：${systemTitle.value}`,
+);
+const senderLabel = computed<string | undefined>(() => {
+  if (user.value) return userId.value ? `查看 ${user.value.nickname} 的米游社主页` : undefined;
+  return clickable.value ? openLabel.value : undefined;
+});
 const createdAt = computed<number>(() => Number(notification.created_at));
 const createdAtLabel = computed<string>(() =>
   Number.isFinite(createdAt.value) && createdAt.value > 0
@@ -171,11 +252,35 @@ const createdAtIso = computed<string>(() =>
   createdAtLabel.value ? new Date(createdAt.value * 1000).toISOString() : "",
 );
 
+async function shareCard(): Promise<void> {
+  const card = cardEl.value;
+  if (!card || sharing.value) return;
+  sharing.value = true;
+  try {
+    await TGShare.modern(`Notification_${notification.notification_id}`, card, 2.5, false, {
+      backdropBlurScale: 0.7,
+    });
+  } finally {
+    sharing.value = false;
+  }
+}
+
+function openSender(event: MouseEvent): void {
+  if (!senderLabel.value) return;
+  event.stopPropagation();
+  if (user.value) emit("openProfile", userId.value, profileGid.value);
+  else openTarget();
+}
+
+function openTarget(): void {
+  if (clickable.value) emit("open");
+}
+
 function handleCardClick(event: MouseEvent): void {
-  if (!clickable || !(event.target instanceof Element)) return;
+  if (!clickable.value || !(event.target instanceof Element)) return;
   if (
     event.target.closest(
-      ".cp-notification-content a, .cp-notification-content button, .cp-notification-content summary, .cp-notification-content [role='button'], .cp-notification-content [role='link'], .cp-notification-content .tp-text-link, .cp-notification-content .tp-mention-box, .cp-notification-content .tp-image-box, .cp-notification-content .tp-emo-box, .cp-notification-content .tp-lc-box",
+      ".cp-notification-content a, .cp-notification-content button, .cp-notification-content summary, .cp-notification-content [role='button'], .cp-notification-content [role='link'], .cp-notification-content .tp-text-link, .cp-notification-content .tp-mention-box, .cp-notification-content .cp-content-image, .cp-notification-content .tp-emo-box, .cp-notification-content .tp-lc-box",
     ) !== null
   )
     return;
@@ -192,7 +297,7 @@ function handleCardClick(event: MouseEvent): void {
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--box-bg-1);
-  gap: 12px;
+  gap: 8px;
   transition:
     background-color 120ms ease,
     border-color 120ms ease;
@@ -220,6 +325,16 @@ function handleCardClick(event: MouseEvent): void {
   gap: 8px;
 }
 
+.cp-notification-sender-row {
+  --cp-notification-avatar-size: 32px;
+  --cp-notification-sender-gap: 8px;
+
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--cp-notification-sender-gap);
+}
+
 .cp-notification-author {
   display: flex;
   min-width: 0;
@@ -227,31 +342,48 @@ function handleCardClick(event: MouseEvent): void {
   align-items: center;
   padding: 0;
   border: 0;
+  border-radius: 4px;
   background: transparent;
   color: var(--common-text-title);
-  cursor: pointer;
+  cursor: default;
   font: inherit;
   font-size: 14px;
   gap: 8px;
   text-align: left;
 
-  span {
-    overflow: hidden;
-    max-width: 200px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &:hover span {
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  &[type="button"] {
+    cursor: pointer;
   }
 
   &:focus-visible {
-    border-radius: 4px;
     outline: 2px solid var(--common-text-title);
-    outline-offset: 4px;
+    outline-offset: 2px;
   }
+}
+
+.cp-notification-avatar {
+  display: grid;
+  overflow: hidden;
+  width: var(--cp-notification-avatar-size);
+  height: var(--cp-notification-avatar-size);
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--box-bg-2);
+  place-items: center;
+
+  :deep(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.cp-notification-name {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cp-notification-open {
@@ -272,24 +404,6 @@ function handleCardClick(event: MouseEvent): void {
 .cp-notification-action {
   flex-shrink: 0;
   white-space: nowrap;
-}
-
-.cp-notification-icon {
-  display: grid;
-  overflow: hidden;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--box-bg-2);
-  color: var(--common-text-title);
-  place-items: center;
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 }
 
 .cp-notification-title {
@@ -316,6 +430,45 @@ function handleCardClick(event: MouseEvent): void {
   background: var(--tgc-od-red);
 }
 
+.cp-notification-tag {
+  --cp-badge-tone: v-bind(badgeColor); /* stylelint-disable-line value-keyword-case */
+
+  display: inline-flex;
+  min-width: 0;
+  max-width: calc(100% - var(--cp-notification-avatar-size) - var(--cp-notification-sender-gap));
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+
+  &:disabled {
+    cursor: progress;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  :deep(.cp-type-badge) {
+    max-width: 100%;
+    height: var(--cp-notification-avatar-size);
+    box-sizing: border-box;
+    padding: 4px 8px;
+    background: color-mix(in srgb, var(--cp-badge-tone) 18%, transparent);
+    color: v-bind(badgeTextColor); /* stylelint-disable-line value-keyword-case */
+    font-size: 14px;
+
+    > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
 .cp-notification-content {
   min-width: 0;
   margin: 0;
@@ -329,21 +482,7 @@ function handleCardClick(event: MouseEvent): void {
     font-style: italic;
   }
 
-  :deep(.tp-image-box) {
-    width: fit-content;
-    max-width: min(100%, 320px);
-    justify-content: flex-start;
-    margin: 8px 0;
-  }
-
-  :deep(.tp-image-box img) {
-    width: auto;
-    max-width: min(100%, 320px);
-    max-height: 240px;
-    margin: 0;
-    object-fit: contain;
-  }
-
+  :deep(.tp-image-load),
   :deep(.tp-emo-box) {
     width: fit-content;
     max-width: min(100%, 320px);
@@ -360,25 +499,16 @@ function handleCardClick(event: MouseEvent): void {
   }
 }
 
-.cp-notification-cover {
-  display: block;
-  overflow: hidden;
-  width: fit-content;
-  max-width: min(100%, 360px);
-  border-radius: 4px;
-
-  :deep(img) {
-    display: block;
-    max-width: 100%;
-    max-height: 200px;
-    object-fit: contain;
-  }
+.cp-notification-thumbnail {
+  max-width: 100%;
+  align-self: flex-start;
 }
 
-.cp-notification-origin {
+.cp-notification-framed-content {
   display: flex;
   min-width: 0;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   padding: 8px 12px;
   border-radius: 4px;
   border-left: 3px solid var(--common-shadow-2);
@@ -387,22 +517,6 @@ function handleCardClick(event: MouseEvent): void {
   color: var(--box-text-4);
   font-size: 12px;
   gap: 8px;
-}
-
-.cp-notification-origin-image {
-  display: grid;
-  overflow: hidden;
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  border-radius: 4px;
-  place-items: center;
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 }
 
 .cp-notification-origin-text {
@@ -432,10 +546,6 @@ function handleCardClick(event: MouseEvent): void {
 @media (width <= 640px) {
   .cp-notification {
     padding: 12px;
-  }
-
-  .cp-notification-author span {
-    max-width: 120px;
   }
 }
 </style>

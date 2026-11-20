@@ -1,7 +1,72 @@
 /**
- * 米游社通知入口提醒工具。
- * @since Beta v0.13.1
+ * 米游社通知入口提醒与跳转工具。
+ * @since Beta v0.13.2
  */
+
+import { getEmbeddedLinkTarget } from "@utils/app/linkTarget.js";
+
+/**
+ * 按现有链接处理规则识别通知的最终目标类别。
+ * @since Beta v0.13.2
+ * @param url - 通知中的跳转链接
+ * @returns 帖子、网页、站内或普通通知类型
+ */
+function getNotificationLinkKind(url: URL): TGApp.BBS.Notification.TargetKind {
+  const embedded = getEmbeddedLinkTarget(url);
+  if (embedded !== undefined) return getNotificationLinkKind(new URL(embedded));
+
+  if (url.protocol === "mihoyobbs:") {
+    const id = url.pathname.split("/").pop() ?? "";
+    if (url.hostname === "article" && /^[1-9]\d*$/.test(id)) return "post";
+    if (url.hostname === "discussion" && id && url.searchParams.get("forum_id")) return "internal";
+    if (
+      url.hostname === "homeForum" &&
+      url.searchParams.get("game_id") &&
+      /^[123]$/.test(url.searchParams.get("tab_type") ?? "")
+    ) {
+      return "internal";
+    }
+    return "notice";
+  }
+
+  if (url.protocol !== "https:" && url.protocol !== "http:") return "notice";
+  if (url.hostname === "www.miyoushe.com" || url.hostname === "bbs.mihoyo.com") {
+    if (url.pathname.includes("/article/")) {
+      return /\/article\/\d+$/.test(url.pathname) ? "post" : "notice";
+    }
+    if (url.pathname.includes("/topicDetail/")) {
+      return /\/\w+\/topicDetail\/\d+/.test(url.pathname) ? "internal" : "notice";
+    }
+  }
+  return "web";
+}
+
+/**
+ * 解析通知跳转地址，供通知徽标和打开动作共用。
+ * @since Beta v0.13.2
+ * @param item - 通知中的跳转信息
+ * @returns 通知的目标类别及可用跳转信息
+ */
+export function getNotificationTarget(
+  item: Pick<TGApp.BBS.Notification.Item, "ext" | "is_web_jump_disable" | "web_path">,
+): TGApp.BBS.Notification.Target {
+  const postId = item.ext?.post_id;
+  if (typeof postId === "string" && /^[1-9]\d*$/.test(postId.trim())) {
+    return { kind: "post", postId: postId.trim() };
+  }
+  if (item.is_web_jump_disable) return { kind: "notice" };
+  const extPath = item.ext?.web_path;
+  const path = item.web_path?.trim() || (typeof extPath === "string" ? extPath.trim() : "");
+  const base = "https://www.miyoushe.com/ys/";
+  if (!path || !URL.canParse(path, base)) return { kind: "notice" };
+
+  const url = new URL(path, base);
+  try {
+    return { kind: getNotificationLinkKind(url), href: url.href };
+  } catch {
+    return { kind: "notice", href: url.href };
+  }
+}
 
 /**
  * 按官网规则，根据接收范围选择数字提醒或红点。
