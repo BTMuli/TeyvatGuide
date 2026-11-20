@@ -1,30 +1,43 @@
 /**
  * 米游社回复变更的账号一致性校验
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
+import { getLTokenCookie, normalizeAccountCookie } from "@utils/account/accountCookie.js";
 import { isNonBlankString, isRecord } from "@utils/common/typeGuards.js";
 
 const currentAccountStorageKey: Readonly<string> = "curAccount";
 
 /**
+ * 从回复快照或本地存储中提取登录凭据，兼容旧版字段名。
+ * @since Beta v0.13.2
+ * @param value - 可能包含登录凭据的对象
+ * @returns V2 登录凭据；字段缺失时返回 undefined
+ */
+function getLoginCookie(value: unknown): TGApp.App.Account.LoginCookie | undefined {
+  if (!isRecord(value)) return undefined;
+  const cookie = normalizeAccountCookie(value);
+  if (!isNonBlankString(cookie.ltoken_v2) || !isNonBlankString(cookie.ltuid_v2)) {
+    return undefined;
+  }
+  return getLTokenCookie(cookie);
+}
+
+/**
  * 校验回复变更账号快照
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param value - 待校验的快照
  * @returns 是否为可用于回复变更的快照
  */
 function isValidSnapshot(value: unknown): value is TGApp.BBS.Reply.AccountSnapshot {
   if (!isRecord(value) || !isRecord(value.cookie)) return false;
-  return (
-    isNonBlankString(value.uid) &&
-    isNonBlankString(value.cookie.ltoken) &&
-    value.cookie.ltuid === value.uid
-  );
+  const cookie = getLoginCookie(value.cookie);
+  return isNonBlankString(value.uid) && cookie !== undefined && cookie.ltuid_v2 === value.uid;
 }
 
 /**
  * 比对持久化账号与回复变更快照
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param snapshot - 回复变更账号快照
  * @param storage - 账号持久化存储
  * @returns 持久化账号是否与快照完全匹配
@@ -40,12 +53,15 @@ export function matchesCurrentAccount(
 
     const persisted: unknown = JSON.parse(serialized);
     if (!isRecord(persisted) || !isRecord(persisted.cookie)) return false;
+    const persistedCookie = getLoginCookie(persisted.cookie);
+    const snapshotCookie = getLoginCookie(snapshot.cookie);
+    if (persistedCookie === undefined || snapshotCookie === undefined) return false;
     return (
       persisted.uid === snapshot.uid &&
-      persisted.cookie.ltuid === snapshot.uid &&
-      persisted.cookie.ltuid === snapshot.cookie.ltuid &&
-      isNonBlankString(persisted.cookie.ltoken) &&
-      persisted.cookie.ltoken === snapshot.cookie.ltoken
+      persistedCookie.ltuid_v2 === snapshot.uid &&
+      persistedCookie.ltuid_v2 === snapshotCookie.ltuid_v2 &&
+      persistedCookie.ltoken_v2 === snapshotCookie.ltoken_v2 &&
+      persistedCookie.ltmid_v2 === snapshotCookie.ltmid_v2
     );
   } catch {
     return false;

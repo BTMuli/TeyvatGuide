@@ -62,10 +62,10 @@ const snackbarWarn = vi.fn();
 const account = {
   uid: Vue.ref<string>("1001"),
   cookie: Vue.ref({
-    account_id: "1001",
-    cookie_token: "cookie-1001",
-    ltoken: "token-1001",
-    ltuid: "1001",
+    account_id_v2: "1001",
+    cookie_token_v2: "cookie-1001",
+    ltoken_v2: "token-1001",
+    ltuid_v2: "1001",
     mid: "mid-1001",
     stoken: "stoken-1001",
     stuid: "1001",
@@ -183,7 +183,7 @@ function mountComposer(draftId: string | null = "draft-1"): ComposerBindings {
     "@utils/bbs/postPublish.js": { canPublishForumPost: () => true },
     "@utils/bbs/replyAccount.js": {
       executeReplyForCurrentAccount: async (
-        snapshot: { uid: string; cookie: { ltuid: string; ltoken: string } },
+        snapshot: { uid: string; cookie: { ltuid_v2: string; ltoken_v2: string } },
         action: () => Promise<unknown>,
       ) => {
         if (!matchesCurrentAccount(snapshot)) return { allowed: false };
@@ -270,12 +270,12 @@ async function settle(): Promise<void> {
  */
 function matchesCurrentAccount(snapshot: {
   uid: string;
-  cookie: { ltuid: string; ltoken: string };
+  cookie: { ltuid_v2: string; ltoken_v2: string };
 }): boolean {
   return (
     snapshot.uid === account.uid.value &&
-    snapshot.cookie.ltuid === account.cookie.value.ltuid &&
-    snapshot.cookie.ltoken === account.cookie.value.ltoken
+    snapshot.cookie.ltuid_v2 === account.cookie.value.ltuid_v2 &&
+    snapshot.cookie.ltoken_v2 === account.cookie.value.ltoken_v2
   );
 }
 
@@ -283,10 +283,10 @@ beforeEach(() => {
   vi.resetAllMocks();
   account.uid.value = "1001";
   account.cookie.value = {
-    account_id: "1001",
-    cookie_token: "cookie-1001",
-    ltoken: "token-1001",
-    ltuid: "1001",
+    account_id_v2: "1001",
+    cookie_token_v2: "cookie-1001",
+    ltoken_v2: "token-1001",
+    ltuid_v2: "1001",
     mid: "mid-1001",
     stoken: "stoken-1001",
     stuid: "1001",
@@ -331,8 +331,8 @@ describe("帖子编辑器云草稿", () => {
 
     expect(postEditReq.create).toHaveBeenCalledTimes(1);
     expect(postDraftReq.delete).toHaveBeenCalledWith("draft-1", {
-      ltoken: "token-1001",
-      ltuid: "1001",
+      ltoken_v2: "token-1001",
+      ltuid_v2: "1001",
     });
     expect(composer.currentDraftId.value).toBeUndefined();
     expect(composer.hasChanges.value).toBe(false);
@@ -395,8 +395,8 @@ describe("帖子编辑器云草稿", () => {
       title: "删除草稿「删除后仍保留的内容」？",
     });
     expect(postDraftReq.delete).toHaveBeenCalledWith("draft-1", {
-      ltoken: "token-1001",
-      ltuid: "1001",
+      ltoken_v2: "token-1001",
+      ltuid_v2: "1001",
     });
     expect(composer.draft.value.subject).toBe("删除后仍保留的内容");
     expect(composer.currentDraftId.value).toBeUndefined();
@@ -447,10 +447,10 @@ describe("帖子编辑器云草稿", () => {
 
     account.uid.value = "2002";
     account.cookie.value = {
-      account_id: "2002",
-      cookie_token: "cookie-2002",
-      ltoken: "token-2002",
-      ltuid: "2002",
+      account_id_v2: "2002",
+      cookie_token_v2: "cookie-2002",
+      ltoken_v2: "token-2002",
+      ltuid_v2: "2002",
       mid: "mid-2002",
       stoken: "stoken-2002",
       stuid: "2002",
@@ -500,8 +500,8 @@ describe("帖子编辑器云草稿", () => {
     await settle();
 
     expect(postDraftReq.detail).toHaveBeenCalledWith("draft-1", {
-      ltoken: "token-1001",
-      ltuid: "1001",
+      ltoken_v2: "token-1001",
+      ltuid_v2: "1001",
     });
     expect(composer.draft.value.subject).toBe("服务器草稿");
     expect(composer.canSubmit.value).toBe(true);
@@ -559,10 +559,10 @@ describe("帖子编辑器云草稿", () => {
 
     account.uid.value = "2002";
     account.cookie.value = {
-      account_id: "2002",
-      cookie_token: "cookie-2002",
-      ltoken: "token-2002",
-      ltuid: "2002",
+      account_id_v2: "2002",
+      cookie_token_v2: "cookie-2002",
+      ltoken_v2: "token-2002",
+      ltuid_v2: "2002",
       mid: "mid-2002",
       stoken: "stoken-2002",
       stuid: "2002",
@@ -577,8 +577,8 @@ describe("帖子编辑器云草稿", () => {
 
     expect(composer.draft.value.subject).toBe("新账号草稿");
     expect(postDraftReq.detail.mock.calls[1][1]).toEqual({
-      ltoken: "token-2002",
-      ltuid: "2002",
+      ltoken_v2: "token-2002",
+      ltuid_v2: "2002",
     });
   });
 });

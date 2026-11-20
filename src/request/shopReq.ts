@@ -1,8 +1,9 @@
 /**
  * 米游社商店请求。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
+import { getWebAccountCookies } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 const shopApiBaseUrl: Readonly<string> = "https://bbs-api.mihoyo.com/";
@@ -15,7 +16,7 @@ const shopPointSn: Readonly<"myb"> = "myb";
 
 /**
  * 构建米社商店网页请求头。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param cookie - 当前账户 Cookie
  * @param withBody - 是否为 JSON 请求体
  * @returns 商店请求头
@@ -24,12 +25,7 @@ function getShopHeaders(
   cookie: TGApp.App.Account.Cookie,
   withBody: boolean = false,
 ): Record<string, string> {
-  const cookieParts = [
-    ["account_id", cookie.account_id],
-    ["cookie_token", cookie.cookie_token],
-    ["ltoken", cookie.ltoken],
-    ["ltuid", cookie.ltuid],
-  ]
+  const cookieParts = Object.entries(getWebAccountCookies(cookie))
     .filter(([, value]) => value.trim())
     .map(([key, value]) => `${key}=${value}`);
   const headers: Record<string, string> = {

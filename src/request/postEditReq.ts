@@ -778,7 +778,7 @@ function getMutationHeaders(
 
 /**
  * 校验帖子作者与当前登录账号一致。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param source - 帖子完整数据
  * @param cookie - 用户 Cookie
  * @param editable - 是否应用普通图文帖编辑限制
@@ -792,7 +792,9 @@ function assertOwner(
   const sourceCollectionId = editable ? assertEditableSource(source) : null;
   if (!editable) assertDeletableSource(source);
   const authCookie = getReplyCookie(cookie);
-  if (String(source.post.uid) !== authCookie.ltuid) throw new Error("仅允许帖子作者执行此操作");
+  if (String(source.post.uid) !== authCookie.ltuid_v2) {
+    throw new Error("仅允许帖子作者执行此操作");
+  }
   return { authCookie, sourceCollectionId };
 }
 

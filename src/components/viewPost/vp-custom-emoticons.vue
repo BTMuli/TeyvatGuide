@@ -192,8 +192,8 @@ let mounted = true;
 watch(
   () => [
     props.contextId,
-    props.cookie?.ltuid,
-    props.cookie?.ltoken,
+    props.cookie?.ltuid_v2,
+    props.cookie?.ltoken_v2,
     props.cookie?.stuid,
     props.cookie?.stoken,
     props.cookie?.mid,
@@ -236,15 +236,15 @@ function setConfirmDeleteButton(element: unknown): void {
 
 function getCookie(): TGApp.App.Account.EditorCookie {
   const cookie = props.cookie;
-  if (!cookie?.ltoken || !cookie.ltuid) throw new Error("请先登录米游社账号");
+  if (!cookie?.ltoken_v2 || !cookie.ltuid_v2) throw new Error("请先登录米游社账号");
   const snapshot = {
-    ltoken: cookie.ltoken,
-    ltuid: cookie.ltuid,
+    ltoken_v2: cookie.ltoken_v2,
+    ltuid_v2: cookie.ltuid_v2,
     stoken: cookie.stoken,
     stuid: cookie.stuid,
     mid: cookie.mid,
   };
-  if (!matchesCurrentAccount({ uid: snapshot.ltuid, cookie: snapshot })) {
+  if (!matchesCurrentAccount({ uid: snapshot.ltuid_v2, cookie: snapshot })) {
     throw new Error("账号状态已变化，请重新打开编辑器");
   }
   return snapshot;
@@ -315,7 +315,7 @@ async function addFavorite(event: Event): Promise<void> {
     const cookie = getCookie();
     const image = await replyAssetReq.uploadImage(
       file,
-      { ltoken: cookie.ltoken, ltuid: cookie.ltuid },
+      { ltoken_v2: cookie.ltoken_v2, ltuid_v2: cookie.ltuid_v2 },
       props.gid,
       request.signal,
     );

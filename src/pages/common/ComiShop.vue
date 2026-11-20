@@ -232,9 +232,9 @@ const canLoad = computed<boolean>(
     !!(
       isLogin.value &&
       uid.value &&
-      cookie.value?.ltoken.trim() &&
-      cookie.value.ltuid === uid.value &&
-      (!cookie.value.account_id || cookie.value.account_id === uid.value)
+      cookie.value?.ltoken_v2.trim() &&
+      cookie.value.ltuid_v2 === uid.value &&
+      (!cookie.value.account_id_v2 || cookie.value.account_id_v2 === uid.value)
     ),
 );
 const point = shallowRef<TGApp.BBS.Shop.PointInfo>();

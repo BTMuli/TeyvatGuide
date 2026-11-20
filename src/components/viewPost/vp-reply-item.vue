@@ -388,24 +388,24 @@ function getReplyContent(): Array<TGApp.BBS.SctPost.Base> {
 }
 
 function getReadCookie(): TGApp.App.Account.LoginCookie | undefined {
-  if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
+  if (!uid.value || !cookie.value?.ltoken_v2.trim() || cookie.value.ltuid_v2 !== uid.value)
     return undefined;
-  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  return { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
 }
 
 function getWriteSnapshot(): WriteSnapshot | undefined {
   if (
     !uid.value ||
     !cookie.value ||
-    cookie.value.ltuid !== uid.value ||
-    !cookie.value.ltoken.trim()
+    cookie.value.ltuid_v2 !== uid.value ||
+    !cookie.value.ltoken_v2.trim()
   ) {
     showSnackbar.error("请先登录");
     return undefined;
   }
   return {
     uid: uid.value,
-    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
     postId: props.modelValue.reply.post_id,
     replyId: props.modelValue.reply.reply_id,
     gid: props.modelValue.reply.game_id,
@@ -418,8 +418,8 @@ function isWriteSnapshotCurrent(snapshot: WriteSnapshot): boolean {
     mounted &&
     actionContextVersion === snapshot.contextVersion &&
     uid.value === snapshot.uid &&
-    cookie.value?.ltuid === snapshot.cookie.ltuid &&
-    cookie.value?.ltoken === snapshot.cookie.ltoken &&
+    cookie.value?.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    cookie.value?.ltoken_v2 === snapshot.cookie.ltoken_v2 &&
     props.modelValue.reply.post_id === snapshot.postId &&
     props.modelValue.reply.reply_id === snapshot.replyId &&
     props.modelValue.reply.game_id === snapshot.gid
@@ -482,7 +482,7 @@ watch(
 );
 
 watch(
-  [uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid],
+  [uid, () => cookie.value?.ltoken_v2, () => cookie.value?.ltuid_v2],
   () => {
     actionContextVersion += 1;
     resetSubState();

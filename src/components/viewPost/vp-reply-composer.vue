@@ -192,15 +192,15 @@ const hasAttachments = computed<boolean>(
     imageUploading.value,
 );
 const canWrite = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 const toolCookie = computed<TGApp.App.Account.Cookie | undefined>(() => {
   if (!canWrite.value || !cookie.value) return undefined;
   return {
-    ltoken: cookie.value.ltoken,
-    ltuid: cookie.value.ltuid,
-    account_id: cookie.value.account_id,
-    cookie_token: cookie.value.cookie_token,
+    ltoken_v2: cookie.value.ltoken_v2,
+    ltuid_v2: cookie.value.ltuid_v2,
+    account_id_v2: cookie.value.account_id_v2,
+    cookie_token_v2: cookie.value.cookie_token_v2,
     stoken: cookie.value.stoken,
     stuid: cookie.value.stuid,
     mid: cookie.value.mid,
@@ -220,10 +220,10 @@ watch(
     props.postId,
     props.gid,
     uid.value,
-    cookie.value?.ltoken,
-    cookie.value?.ltuid,
-    cookie.value?.account_id,
-    cookie.value?.cookie_token,
+    cookie.value?.ltoken_v2,
+    cookie.value?.ltuid_v2,
+    cookie.value?.account_id_v2,
+    cookie.value?.cookie_token_v2,
   ],
   () => {
     contextVersion += 1;
@@ -391,8 +391,8 @@ async function publishReply(): Promise<void> {
     replyId: props.target?.reply.reply_id,
   };
   const requestCookie = {
-    ltoken: cookie.value.ltoken,
-    ltuid: cookie.value.ltuid,
+    ltoken_v2: cookie.value.ltoken_v2,
+    ltuid_v2: cookie.value.ltuid_v2,
   };
   const title = props.target ? "发布回复" : "发布评论";
   await interaction.run(async () => {
@@ -403,7 +403,7 @@ async function publishReply(): Promise<void> {
         return;
       }
       const execution = await executeReplyForCurrentAccount(
-        { uid: requestCookie.ltuid, cookie: requestCookie },
+        { uid: requestCookie.ltuid_v2, cookie: requestCookie },
         () => postReq.reply.create(request, requestCookie),
       );
       if (!mounted || version !== contextVersion) return;

@@ -24,15 +24,19 @@ vi.mock("@utils/network/getRequestHeader.js", async (importOriginal) => ({
 import communityReq from "../src/request/communityReq.js";
 
 const cookie = {
-  account_id: "account-id",
-  cookie_token: "cookie-token",
-  ltoken: "ltoken-value",
-  ltuid: "100000001",
+  account_id_v2: "account-id",
+  cookie_token_v2: "cookie-token",
+  ltoken_v2: "ltoken-value",
+  ltuid_v2: "100000001",
   mid: "mid-value",
   stoken: "stoken-value",
   stuid: "100000001",
 };
-const authCookie = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+const authCookie = {
+  account_id_v2: cookie.account_id_v2,
+  account_mid_v2: cookie.mid,
+  cookie_token_v2: cookie.cookie_token_v2,
+};
 const appHeaders = { "x-test-header": "app" };
 const collectionHeaders = { "x-test-header": "collection" };
 const successResponse = { retcode: 0, message: "ok", data: null };
@@ -55,7 +59,7 @@ beforeEach(() => {
 
 describe("communityReq read requests", () => {
   it("omits the current user's UID from comments and keeps the minimum cookie", async () => {
-    await communityReq.comments(cookie, cookie.ltuid);
+    await communityReq.comments(cookie, cookie.ltuid_v2);
 
     const query = { size: 20 };
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "GET", query, "X4", true);
@@ -68,7 +72,7 @@ describe("communityReq read requests", () => {
 
   it("uses the collection signature and official offset for the collection list", async () => {
     mocks.get.mockResolvedValueOnce({ data: collectionPageResponse });
-    await communityReq.collections(cookie, cookie.ltuid, "collection-offset");
+    await communityReq.collections(cookie, cookie.ltuid_v2, "collection-offset");
 
     const query = { gids: 2, size: 20, offset: "collection-offset" };
     expect(mocks.getCollectionRequestHeader).toHaveBeenLastCalledWith(authCookie, "GET", query);
@@ -80,7 +84,7 @@ describe("communityReq read requests", () => {
   });
 
   it("signs favorite posts and favorite collections with their own headers", async () => {
-    await communityReq.favorites(cookie, cookie.ltuid, "favorite-offset");
+    await communityReq.favorites(cookie, cookie.ltuid_v2, "favorite-offset");
     const favoritePostQuery = { size: 20, offset: "favorite-offset" };
     expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
       authCookie,
@@ -114,7 +118,7 @@ describe("communityReq read requests", () => {
   });
 
   it("uses the app signature and official last_id cursor for following and followers", async () => {
-    await communityReq.following(cookie, cookie.ltuid, "following-last-id");
+    await communityReq.following(cookie, cookie.ltuid_v2, "following-last-id");
     const followingQuery = {
       gids: 2,
       page_size: 20,
@@ -132,7 +136,7 @@ describe("communityReq read requests", () => {
       query: followingQuery,
     });
 
-    await communityReq.followers(cookie, cookie.ltuid);
+    await communityReq.followers(cookie, cookie.ltuid_v2);
     const followersQuery = { gids: 2, page_size: 20 };
     expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
       authCookie,
@@ -178,11 +182,11 @@ describe("communityReq read requests", () => {
   it("passes through business responses and transport errors", async () => {
     const businessError = { retcode: 1001, message: "permission denied", data: null };
     mocks.get.mockResolvedValueOnce({ data: businessError });
-    await expect(communityReq.comments(cookie, cookie.ltuid)).resolves.toEqual(businessError);
+    await expect(communityReq.comments(cookie, cookie.ltuid_v2)).resolves.toEqual(businessError);
 
     const transportError = new Error("network failure");
     mocks.get.mockRejectedValueOnce(transportError);
-    await expect(communityReq.followers(cookie, cookie.ltuid)).rejects.toBe(transportError);
+    await expect(communityReq.followers(cookie, cookie.ltuid_v2)).rejects.toBe(transportError);
   });
 });
 
@@ -204,11 +208,11 @@ describe.each(<const>["collections", "favoriteCollections"])(
         .mockResolvedValueOnce({ data: firstPage })
         .mockResolvedValueOnce({ data: lastPage });
 
-      const first = await communityReq[method](cookie, cookie.ltuid);
+      const first = await communityReq[method](cookie, cookie.ltuid_v2);
       expect(first).toEqual({ ...firstPage, data: { ...firstPage.data, next_offset: "20" } });
       expect(first.data.next_offset.trim()).toBe("20");
 
-      const last = await communityReq[method](cookie, cookie.ltuid, first.data.next_offset);
+      const last = await communityReq[method](cookie, cookie.ltuid_v2, first.data.next_offset);
       expect(mocks.get.mock.calls.at(-1)?.[1].query.offset).toBe("20");
       expect(last).toEqual({ ...lastPage, data: { ...lastPage.data, next_offset: "0" } });
     });
@@ -226,7 +230,7 @@ describe.each(<const>["collections", "favoriteCollections"])(
         },
       });
 
-      const response = await communityReq[method](cookie, cookie.ltuid);
+      const response = await communityReq[method](cookie, cookie.ltuid_v2);
       expect(response.data.next_offset).toBe(expected);
       expect(response.data.is_last).toBe(true);
     });
@@ -235,7 +239,7 @@ describe.each(<const>["collections", "favoriteCollections"])(
       const response = { retcode: 1001, message: "permission denied", data: null };
       mocks.get.mockResolvedValueOnce({ data: response });
 
-      await expect(communityReq[method](cookie, cookie.ltuid)).resolves.toEqual(response);
+      await expect(communityReq[method](cookie, cookie.ltuid_v2)).resolves.toEqual(response);
     });
   },
 );
@@ -270,7 +274,11 @@ describe("communityReq favorite write requests", () => {
     await communityReq.setPostFavorite(cookie, "79040314", true);
 
     const body = { post_id: "79040314", is_cancel: 0 };
-    const favoriteCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+    const favoriteCookie = {
+      ltmid_v2: cookie.mid,
+      ltoken_v2: cookie.ltoken_v2,
+      ltuid_v2: cookie.ltuid_v2,
+    };
     expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
       favoriteCookie,
       "POST",
@@ -295,7 +303,11 @@ describe("communityReq favorite write requests", () => {
     await communityReq.unfavoritePost(cookie, "79040314");
 
     const body = { post_id: "79040314", is_cancel: 1 };
-    const favoriteCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+    const favoriteCookie = {
+      ltmid_v2: cookie.mid,
+      ltoken_v2: cookie.ltoken_v2,
+      ltuid_v2: cookie.ltuid_v2,
+    };
     expect(mocks.getRequestHeader).toHaveBeenLastCalledWith(
       favoriteCookie,
       "POST",
@@ -460,7 +472,7 @@ describe("communityReq follow write requests", () => {
       { headers: { ...appHeaders, "Content-Type": "application/json" }, body },
     );
 
-    await expect(communityReq.setFollow(cookie, cookie.ltuid, true)).rejects.toThrow(
+    await expect(communityReq.setFollow(cookie, cookie.ltuid_v2, true)).rejects.toThrow(
       "不能关注自己",
     );
     expect(mocks.post).toHaveBeenCalledTimes(1);

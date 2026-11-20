@@ -296,7 +296,7 @@ const displayedEmojiItems = computed<Array<TGApp.BBS.Emoji.Item>>(() =>
   searchActive.value ? searchEmojiItems(emojiSeries.value, emojiQuery.value) : emojiItems.value,
 );
 
-watch(() => [contextId, gid, cookie?.ltuid, cookie?.ltoken], reset, { flush: "sync" });
+watch(() => [contextId, gid, cookie?.ltuid_v2, cookie?.ltoken_v2], reset, { flush: "sync" });
 watch(
   () => allowCustomEmoticon,
   (allowed) => {
@@ -386,10 +386,10 @@ function clearImagePicker(): void {
 }
 
 function getCookie(): TGApp.App.Account.LoginCookie {
-  if (!cookie || !matchesCurrentAccount({ uid: cookie.ltuid, cookie })) {
+  if (!cookie || !matchesCurrentAccount({ uid: cookie.ltuid_v2, cookie })) {
     throw new Error("账号状态已变化，请重新打开编辑器");
   }
-  return { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  return { ltoken_v2: cookie.ltoken_v2, ltuid_v2: cookie.ltuid_v2 };
 }
 
 function resolveActivator(event?: MouseEvent): HTMLElement | undefined {

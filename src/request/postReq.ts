@@ -1,9 +1,10 @@
 /**
  * 帖子相关的请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 import bbsEnum from "@enum/bbs.js";
 import { isCollectionPostsResp, isPostDynamicResp, isPostFullResp } from "@req/respValidator.js";
+import { getCookieTokenCookie } from "@utils/account/accountCookie.js";
 import {
   getReplyContentFromSendNodes,
   serializeReplySendNodes,
@@ -36,7 +37,7 @@ function assertPositiveId(value: string, name: string): void {
 /**
  * 创建回复读取请求头
  * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
+ * @param cookie - 包含 ltoken_v2 与 ltuid_v2 的 Cookie
  * @param params - 请求参数
  * @returns 带签名的请求头
  */
@@ -53,7 +54,7 @@ function getReplyReadHeaders(
 /**
  * 创建回复变更请求头
  * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
+ * @param cookie - 包含 ltoken_v2 与 ltuid_v2 的 Cookie
  * @param body - 请求体
  * @returns 带签名的 JSON 请求头
  */
@@ -81,7 +82,7 @@ function assertReplyContent(content: string): void {
 
 /**
  * 获取单个帖子信息
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param postId - 帖子 ID
  * @param cookie - Cookie
  * @param challenge - 极验验证参数
@@ -89,7 +90,7 @@ function assertReplyContent(content: string): void {
  */
 async function getPostFull(
   postId: number | string,
-  cookie?: Record<string, string>,
+  cookie?: TGApp.App.Account.LoginCookie,
   challenge?: string,
 ): Promise<TGApp.BBS.Post.FullResp> {
   const param = { post_id: postId, read: 1 };
@@ -447,7 +448,7 @@ async function searchPosts(
 
 /**
  * 获取用户收藏帖子
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param cookie - 用户 cookie
  * @param uid - 用户 UID
  * @param offset - 偏移量
@@ -458,7 +459,7 @@ async function userFavouritePost(
   uid: string,
   offset: string = "",
 ): Promise<TGApp.BBS.Collection.UserPostResp> {
-  const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
+  const ck = getCookieTokenCookie(cookie);
   const params = { size: "20", uid, offset };
   const resp = await TGHttps.get<TGApp.BBS.Collection.UserPostResp>(`${bapBu}userFavouritePost`, {
     headers: getRequestHeader(ck, "GET", params),

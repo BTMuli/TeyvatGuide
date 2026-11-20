@@ -147,10 +147,10 @@ const selectedTitle = computed<string>(() =>
 
 watch(
   () => [
-    accountCookie?.ltuid,
-    accountCookie?.ltoken,
-    accountCookie?.account_id,
-    accountCookie?.cookie_token,
+    accountCookie?.ltuid_v2,
+    accountCookie?.ltoken_v2,
+    accountCookie?.account_id_v2,
+    accountCookie?.cookie_token_v2,
   ],
   () => void loadCollections(),
   { immediate: true, flush: "sync" },

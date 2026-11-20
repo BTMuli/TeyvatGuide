@@ -217,9 +217,9 @@ const onlyLz = ref<boolean>(false);
 const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const readCookie = computed<TGApp.App.Account.LoginCookie | undefined>(() => {
-  if (!uid.value || !cookie.value?.ltoken.trim() || cookie.value.ltuid !== uid.value)
+  if (!uid.value || !cookie.value?.ltoken_v2.trim() || cookie.value.ltuid_v2 !== uid.value)
     return undefined;
-  return { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  return { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
 });
 const isHot = computed<boolean>(() => orderType.value === bbsEnum.post.replyOrderType.HOT);
 const replyOrder = computed<TGApp.BBS.Reply.ReplyOrderTypeEnum | undefined>(() => {
@@ -236,7 +236,7 @@ watch(
 );
 
 watch(
-  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken, cookie.value?.ltuid],
+  () => [props.postId, props.gid, uid.value, cookie.value?.ltoken_v2, cookie.value?.ltuid_v2],
   async () => {
     replyTarget.value = undefined;
     replyAncestors.value = [];

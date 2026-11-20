@@ -63,13 +63,13 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 
 /**
  * 封面上传凭据。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 type CollectionCoverCookie = {
   /** 米游社登录令牌 */
-  ltoken: string;
+  ltoken_v2: string;
   /** 米游社账号 ID */
-  ltuid: string;
+  ltuid_v2: string;
 };
 
 /**
@@ -166,7 +166,7 @@ async function handleCoverChange(event: Event): Promise<void> {
   try {
     const image = await replyAssetReq.uploadImage(
       file,
-      { ltoken: props.cookie.ltoken, ltuid: props.cookie.ltuid },
+      { ltoken_v2: props.cookie.ltoken_v2, ltuid_v2: props.cookie.ltuid_v2 },
       2,
       controller.signal,
     );

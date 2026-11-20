@@ -3,6 +3,7 @@
  * @since Beta v0.13.2
  */
 
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import {
   getCollectionRequestHeader,
   getCommunityCookie,
@@ -26,7 +27,7 @@ type CommunityQuery = Record<string, string | number>;
 
 /**
  * 判断 UID 是否指向当前登录用户
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param cookie - 当前账户 Cookie
  * @param uid - 待请求的用户 ID
  * @returns 是否为当前登录用户
@@ -34,7 +35,7 @@ type CommunityQuery = Record<string, string | number>;
 function isCurrentUser(cookie: TGApp.App.Account.Cookie, uid: string): boolean {
   const normalizedUid = uid.trim();
   if (!normalizedUid) return false;
-  return [cookie.account_id, cookie.ltuid, cookie.stuid].some(
+  return [cookie.account_id_v2, cookie.ltuid_v2, cookie.stuid].some(
     (currentUid) => currentUid.trim() === normalizedUid,
   );
 }
@@ -244,7 +245,7 @@ async function getFavorites(
 
 /**
  * 设置帖子收藏状态
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param cookie - 账户 Cookie
  * @param postId - 帖子 ID
  * @param favorite - 是否收藏
@@ -255,7 +256,7 @@ async function setPostFavorite(
   postId: string,
   favorite: boolean,
 ): Promise<TGApp.BBS.Response.Base> {
-  const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  const authCookie = getLTokenCookie(cookie);
   const body = { post_id: postId, is_cancel: favorite ? 0 : 1 };
   const resp = await TGHttps.post<TGApp.BBS.Response.Base>(
     `${communityApiBaseUrl}post/wapi/collectPost`,
@@ -461,7 +462,7 @@ async function setFollow(
  * @param cookie - 账户 Cookie
  * @param offset - 下一页偏移量
  * @returns 浏览历史响应数据
- * @remarks 该接口只识别 SToken 登录态，使用 cookie_token 会返回空列表
+ * @remarks 该接口只识别 SToken 登录态，使用 cookie_token_v2 会返回空列表
  */
 async function getHistory(
   cookie: TGApp.App.Account.Cookie,

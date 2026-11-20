@@ -193,7 +193,7 @@ async function refreshUser(uid: string, full: boolean) {
         const ltokenRes = await passportReq.lToken.get(ck);
         if (ltokenRes.retcode === 0) {
           await showLoading.update("获取 LToken 成功");
-          ck.ltoken = ltokenRes.data.ltoken;
+          ck.ltoken_v2 = ltokenRes.data.ltoken_v2;
           await TGLogger.Info("[tc-userBadge][refreshUser] 获取 LToken 成功");
         } else {
           await showLoading.update("获取 LToken 失败");
@@ -221,7 +221,7 @@ async function refreshUser(uid: string, full: boolean) {
     const cookieTokenRes = await passportReq.cookieToken(ck);
     if (cookieTokenRes.retcode === 0) {
       await showLoading.update("获取 CookieToken 成功");
-      ck.cookie_token = cookieTokenRes.data.cookie_token;
+      ck.cookie_token_v2 = cookieTokenRes.data.cookie_token_v2;
       await TGLogger.Info("[tc-userBadge][refreshUser] 获取 CookieToken 成功");
     } else {
       await showLoading.update("获取 CookieToken 失败");
@@ -240,7 +240,7 @@ async function refreshUser(uid: string, full: boolean) {
   account.cookie = ck;
   await showLoading.update("正在获取用户信息");
   try {
-    const infoRes = await bbsReq.userInfo(ck);
+    const infoRes = await bbsReq.currentUserInfo(ck);
     if (infoRes.retcode !== 0) {
       await showLoading.update("获取用户信息失败");
       showSnackbar.error(`[${infoRes.retcode}]${infoRes.message}`);

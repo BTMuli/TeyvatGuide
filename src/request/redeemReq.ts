@@ -1,7 +1,8 @@
 /**
  * 国服游戏兑换请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
+import { getWebAccountCookies } from "@utils/account/accountCookie.js";
 import { isValidRedeemCode } from "@utils/game/redeemCode.js";
 import { getRedeemConfigByBiz, isRedeemRoleSupported } from "@utils/game/redeemConfig.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -20,7 +21,7 @@ function isNumericUid(value: string): boolean {
 
 /**
  * 校验角色所属账号
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 function validateAccount(role: TGApp.Sqlite.Account.Game, cookie: TGApp.App.Account.Cookie): void {
   if (!isRedeemRoleSupported(role)) {
@@ -28,29 +29,26 @@ function validateAccount(role: TGApp.Sqlite.Account.Game, cookie: TGApp.App.Acco
   }
   if (
     !isNumericUid(role.gameUid) ||
-    !cookie.account_id ||
-    !cookie.cookie_token ||
-    cookie.account_id !== role.uid
+    !cookie.account_id_v2 ||
+    !cookie.cookie_token_v2 ||
+    cookie.account_id_v2 !== role.uid
   ) {
     throw new Error("登录凭据不可用，请重新登录");
   }
-  if ([cookie.ltuid, cookie.stuid].some((uid) => uid && uid !== cookie.account_id)) {
+  if ([cookie.ltuid_v2, cookie.stuid].some((uid) => uid && uid !== cookie.account_id_v2)) {
     throw new Error("登录凭据账号不一致，请重新登录");
   }
 }
 
 /**
  * 只序列化兑换所需的已校验凭据
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param cookie - 当前账号凭据
  * @returns Cookie 请求头
  */
 function serializeCookie(cookie: TGApp.App.Account.Cookie): string {
   const credentials = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-    ltuid: cookie.ltuid,
-    ltoken: cookie.ltoken,
+    ...getWebAccountCookies(cookie),
     stuid: cookie.stuid,
     stoken: cookie.stoken,
     mid: cookie.mid,
@@ -86,7 +84,7 @@ function getRedeemMessage(retcode: number): string {
 
 /**
  * 使用当前角色所属账号的凭据兑换一个国服游戏兑换码，不重试
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param code - 兑换码
  * @param role - 当前选中的游戏角色
  * @param cookie - 角色所属账号的凭据

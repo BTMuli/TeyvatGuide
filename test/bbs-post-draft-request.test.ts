@@ -32,7 +32,7 @@ import {
   isPostDraftSaveResp,
 } from "../src/request/respValidator.js";
 
-const cookie = { ltoken: "ltoken-value", ltuid: "100000001" };
+const cookie = { ltmid_v2: "mid-value", ltoken_v2: "ltoken-value", ltuid_v2: "100000001" };
 const settings: TGApp.BBS.PostEdit.Settings = {
   gid: 2,
   forumId: 29,
@@ -163,7 +163,7 @@ describe("postDraftReq.detail", () => {
           draft: {
             post: {
               post_id: "0",
-              uid: cookie.ltuid,
+              uid: cookie.ltuid_v2,
               game_id: 2,
               f_forum_id: 29,
               subject: "嵌套草稿",
@@ -194,7 +194,7 @@ describe("postDraftReq.detail", () => {
             link_card_list: [{ card_id: "card-1", title: "附带卡片" }],
             release_time_type: "NOW",
             future_release_time: 0,
-            user: { uid: cookie.ltuid },
+            user: { uid: cookie.ltuid_v2 },
             stat: { view_num: 0 },
           },
         },
@@ -217,7 +217,7 @@ describe("postDraftReq.detail", () => {
       blockReplyImg: 1,
       collectionId: "456",
     });
-    expect(response.data.ownerUid).toBe(cookie.ltuid);
+    expect(response.data.ownerUid).toBe(cookie.ltuid_v2);
     expect(response.data.topics).toEqual([
       {
         id: "7",
@@ -399,7 +399,7 @@ describe("postDraftReq.save", () => {
       id: "123",
       settings,
       updatedAt: 0,
-      ownerUid: cookie.ltuid,
+      ownerUid: cookie.ltuid_v2,
       raw: { custom_metadata: "keep-me", is_profit: false },
     };
 
@@ -411,7 +411,7 @@ describe("postDraftReq.save", () => {
     if (response.data === null) throw new Error("保存响应缺少数据");
 
     expect(response.data.draft_id).toBe("123");
-    expect(response.data.draft?.ownerUid).toBe(cookie.ltuid);
+    expect(response.data.draft?.ownerUid).toBe(cookie.ltuid_v2);
     expect(response.data.draft?.raw).toMatchObject({
       is_profit: false,
       draft_id: "123",

@@ -97,7 +97,7 @@ onMounted(async () => {
     return;
   }
   let ck: Record<string, string> | undefined = undefined;
-  if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  if (cookie.value) ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
   try {
     const resp = await postReq.post(postId, ck);
     if (resp.retcode !== 0) {

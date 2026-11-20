@@ -1,6 +1,6 @@
 /**
  * 米游社回复变更账号校验回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -10,7 +10,7 @@ import { executeReplyForCurrentAccount } from "../src/utils/bbs/replyAccount.js"
 
 const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
   uid: "100000001",
-  cookie: { ltoken: "ltoken-value", ltuid: "100000001" },
+  cookie: { ltmid_v2: "mid-value", ltoken_v2: "ltoken-value", ltuid_v2: "100000001" },
 };
 
 /**
@@ -23,10 +23,11 @@ const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
  */
 function serializedAccount(
   uid: string = snapshot.uid,
-  ltoken: string = snapshot.cookie.ltoken,
-  ltuid: string = snapshot.cookie.ltuid,
+  ltoken: string = snapshot.cookie.ltoken_v2,
+  ltuid: string = snapshot.cookie.ltuid_v2,
+  ltmid: string = snapshot.cookie.ltmid_v2,
 ): string {
-  return JSON.stringify({ uid, cookie: { ltoken, ltuid } });
+  return JSON.stringify({ uid, cookie: { ltmid_v2: ltmid, ltoken_v2: ltoken, ltuid_v2: ltuid } });
 }
 
 /**
@@ -71,22 +72,31 @@ describe("executeReplyForCurrentAccount", () => {
       { name: "missing cookie", stored: JSON.stringify({ uid: snapshot.uid }) },
       { name: "token mismatch", stored: serializedAccount(snapshot.uid, "other-token") },
       {
-        name: "ltuid mismatch",
-        stored: serializedAccount(snapshot.uid, snapshot.cookie.ltoken, "100000002"),
+        name: "ltuid_v2 mismatch",
+        stored: serializedAccount(snapshot.uid, snapshot.cookie.ltoken_v2, "100000002"),
       },
       {
         name: "token changed",
         stored: serializedAccount(),
         currentSnapshot: {
           ...snapshot,
-          cookie: { ...snapshot.cookie, ltoken: "new-token" },
+          cookie: { ...snapshot.cookie, ltoken_v2: "new-token" },
         },
+      },
+      {
+        name: "mid changed",
+        stored: serializedAccount(
+          snapshot.uid,
+          snapshot.cookie.ltoken_v2,
+          snapshot.cookie.ltuid_v2,
+          "other-mid",
+        ),
       },
       { name: "blank token", stored: serializedAccount(snapshot.uid, "  ") },
       {
         name: "blank snapshot uid",
         stored: serializedAccount("", "", ""),
-        currentSnapshot: { uid: "", cookie: { ltoken: "", ltuid: "" } },
+        currentSnapshot: { uid: "", cookie: { ltmid_v2: "", ltoken_v2: "", ltuid_v2: "" } },
       },
       {
         name: "storage error",

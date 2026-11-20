@@ -1,6 +1,6 @@
 /**
  * 米游社回复 UID 卡片回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { describe, expect, it } from "vitest";
@@ -90,19 +90,23 @@ describe("bbsGameUid", () => {
     expect(() => validateGameUidInfo({ ...info, game_uid: "0" })).toThrow();
   });
 
-  it("rejects credentials that mix account_id and ltuid", () => {
+  it("uses the signed-in account for UID cards with or without a cookie_token_v2", () => {
     const cookie = {
-      account_id: "100000001",
-      cookie_token: "cookie-token",
-      ltoken: "ltoken",
-      ltuid: "100000001",
-      mid: "",
-      stoken: "",
-      stuid: "",
+      account_id_v2: "100000001",
+      cookie_token_v2: "",
+      ltoken_v2: "ltoken",
+      ltuid_v2: "100000001",
+      mid: "mid",
+      stoken: "stoken",
+      stuid: "100000001",
     };
 
-    expect(validateGameUidCookie(cookie)).toMatchObject(cookie);
-    expect(() => validateGameUidCookie({ ...cookie, account_id: "100000002" })).toThrow();
+    const withCookieToken = { ...cookie, cookie_token_v2: "cookie" };
+    expect(validateGameUidCookie(cookie)).toEqual(cookie);
+    expect(validateGameUidCookie(withCookieToken)).toEqual(withCookieToken);
+    expect(() => validateGameUidCookie({ ...cookie, account_id_v2: "100000002" })).toThrow();
+    expect(() => validateGameUidCookie({ ...cookie, stuid: "100000002" })).toThrow();
+    expect(() => validateGameUidCookie({ ...withCookieToken, stoken: "" })).toThrow();
   });
 });
 

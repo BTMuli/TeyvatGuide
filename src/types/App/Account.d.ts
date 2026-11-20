@@ -1,6 +1,6 @@
 /**
  * App 账号相关类型定义文件
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 declare namespace TGApp.App.Account {
@@ -35,18 +35,18 @@ declare namespace TGApp.App.Account {
   };
 
   /**
-   * 用户cookie
-   * @since Beta v0.6.0
+   * 米游社网页 V2 Cookie 与原生登录凭据
+   * @since Beta v0.13.2
    */
   type Cookie = {
     /** 账号ID */
-    account_id: string;
+    account_id_v2: string;
     /** Cookie Token */
-    cookie_token: string;
+    cookie_token_v2: string;
     /** LongTime Token */
-    ltoken: string;
+    ltoken_v2: string;
     /** LongTime UID */
-    ltuid: string;
+    ltuid_v2: string;
     /** Mid */
     mid: string;
     /** SToken_v2 */
@@ -56,10 +56,10 @@ declare namespace TGApp.App.Account {
   };
 
   /**
-   * 登录凭据子集
-   * @since Beta v0.13.0
+   * LToken V2 请求 Cookie
+   * @since Beta v0.13.2
    */
-  type LoginCookie = Pick<Cookie, "ltoken" | "ltuid">;
+  type LoginCookie = Pick<Cookie, "ltoken_v2" | "ltuid_v2"> & { ltmid_v2: string };
 
   /**
    * 签到凭据子集
@@ -68,22 +68,24 @@ declare namespace TGApp.App.Account {
   type SignCookie = Pick<Cookie, "stoken" | "stuid" | "mid">;
 
   /**
-   * CookieToken 凭据子集
-   * @since Beta v0.13.0
+   * CookieToken V2 请求 Cookie
+   * @since Beta v0.13.2
    */
-  type CookieTokenCookie = Pick<Cookie, "account_id" | "cookie_token">;
+  type CookieTokenCookie = Pick<Cookie, "account_id_v2" | "cookie_token_v2"> & {
+    account_mid_v2: string;
+  };
 
   /**
    * 帖子编辑器凭据子集
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
    */
-  type EditorCookie = Pick<Cookie, "ltoken" | "ltuid" | "stoken" | "stuid" | "mid">;
+  type EditorCookie = Pick<Cookie, "ltoken_v2" | "ltuid_v2" | "stoken" | "stuid" | "mid">;
 
   /**
    * 带 UID 校验的签到凭据子集
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
    */
-  type SignUidCookie = Pick<Cookie, "ltuid" | "stoken" | "stuid" | "mid">;
+  type SignUidCookie = Pick<Cookie, "ltuid_v2" | "stoken" | "stuid" | "mid">;
 
   /**
    * 获取当前刷新账号返回

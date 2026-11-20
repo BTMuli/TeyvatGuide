@@ -1,6 +1,6 @@
 /**
  * 米游社收藏表情请求契约回归测试
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,10 +20,10 @@ vi.mock("@utils/network/getRequestHeader.js", async (importOriginal) => ({
 import customEmoticonReq from "../src/request/customEmoticonReq.js";
 
 const cookie = {
-  account_id: "account-id",
-  cookie_token: "cookie-token",
-  ltoken: "ltoken-value",
-  ltuid: "100000001",
+  account_id_v2: "account-id",
+  cookie_token_v2: "cookie-token",
+  ltoken_v2: "ltoken-value",
+  ltuid_v2: "100000001",
   mid: "mid-value",
   stoken: "stoken-value",
   stuid: "100000001",
@@ -67,10 +67,10 @@ describe("customEmoticonReq.list", () => {
       },
     ]);
     expect(mocks.getRequestHeader).toHaveBeenCalledWith(authCookie, "GET", {}, "K2", true);
-    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("ltoken");
-    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("ltuid");
-    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("account_id");
-    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("cookie_token");
+    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("ltoken_v2");
+    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("ltuid_v2");
+    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("account_id_v2");
+    expect(mocks.getRequestHeader.mock.calls[0]?.[0]).not.toHaveProperty("cookie_token_v2");
     expect(mocks.get).toHaveBeenCalledWith(
       "https://bbs-api.miyoushe.com/misc/api/customEmoticonList",
       {
@@ -87,7 +87,7 @@ describe("customEmoticonReq.list", () => {
       { ...cookie, stoken: "" },
       { ...cookie, mid: "" },
       { ...cookie, stuid: "" },
-      { ...cookie, ltuid: "" },
+      { ...cookie, ltuid_v2: "" },
     ]) {
       await expect(customEmoticonReq.list(invalidCookie)).rejects.toThrow("登录凭据不完整");
     }
@@ -95,7 +95,7 @@ describe("customEmoticonReq.list", () => {
     expect(mocks.get).not.toHaveBeenCalled();
   });
 
-  it("rejects credentials whose stuid does not match ltuid", async () => {
+  it("rejects credentials whose stuid does not match ltuid_v2", async () => {
     await expect(customEmoticonReq.list({ ...cookie, stuid: "100000002" })).rejects.toThrow(
       "UID 不一致",
     );

@@ -1,8 +1,9 @@
 /**
  * Takumi 相关请求函数
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  */
-import { getRequestHeader } from "@utils/network/getRequestHeader.js";
+import { getWebAccountCookies } from "@utils/account/accountCookie.js";
+import { getAppSignCookie, getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
 // TakumiApiBaseUrl => taBu
@@ -104,22 +105,35 @@ async function genAuthKey2(
 }
 
 /**
- * 通过cookie获取游戏账号
- * @since Beta v0.10.1
- * @param cookie - cookie
+ * 米游社角色列表的响应格式，角色等级可为数字。
+ * @since Beta v0.13.2
+ */
+type GameRoleListResp = TGApp.BBS.Response.BaseWithData<{
+  list: Array<Omit<TGApp.BBS.Game.Account, "level"> & { level: number | string }>;
+}>;
+
+/**
+ * 使用 stoken 获取当前账号绑定的游戏角色
+ * @since Beta v0.13.2
+ * @param cookie - 含 stuid、stoken、mid 和 ltuid_v2 的凭据
  * @returns 游戏账号响应数据
  */
-async function getUserGameRolesByCookie(
-  cookie: TGApp.App.Account.Cookie,
+async function getUserGameRolesByStoken(
+  cookie: TGApp.App.Account.SignUidCookie,
 ): Promise<TGApp.BBS.Game.AccountResp> {
-  const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-  const resp = await TGHttps.get<TGApp.BBS.Game.AccountResp>(
-    `${taBu}binding/api/getUserGameRolesByCookie`,
+  const ck = getAppSignCookie(cookie);
+  const { data: response } = await TGHttps.get<GameRoleListResp>(
+    "https://api-takumi.miyoushe.com/binding/api/getUserGameRolesByStoken",
     {
-      headers: getRequestHeader(ck, "GET", {}),
+      headers: {
+        ...getRequestHeader(ck, "GET", {}, "K2", true),
+        "x-rpc-client_type": "2",
+      },
     },
   );
-  return resp.data;
+  if (response.retcode !== 0) return <TGApp.BBS.Game.AccountResp>response;
+  const list = response.data.list.map((role) => ({ ...role, level: String(role.level) }));
+  return { ...response, data: { ...response.data, list } };
 }
 
 /**
@@ -153,7 +167,7 @@ async function getObcHomePosition(): Promise<TGApp.BBS.Obc.PositionResp> {
 
 /**
  * 批量计算角色或武器养成材料
- * @since Beta v0.11.1
+ * @since Beta v0.13.2
  * @param cookie - 用户 Cookie
  * @param params - 养成计算参数
  * @returns 养成计算响应数据
@@ -162,12 +176,7 @@ async function batchCompute(
   cookie: TGApp.App.Account.Cookie,
   params: TGApp.Game.Calculate.Params,
 ): Promise<TGApp.Game.Calculate.Resp> {
-  const ck = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-    ltoken: cookie.ltoken,
-    ltuid: cookie.ltuid,
-  };
+  const ck = getWebAccountCookies(cookie);
   const body = JSON.stringify(params);
   const headers = {
     ...getRequestHeader(ck, "POST", body),
@@ -183,7 +192,7 @@ async function batchCompute(
 
 /**
  * 获取全部可养成角色
- * @since Beta v0.11.1
+ * @since Beta v0.13.2
  * @param cookie - 用户 Cookie
  * @param params - 角色列表参数
  * @returns 角色列表响应数据
@@ -192,12 +201,7 @@ async function getAvatarList(
   cookie: TGApp.App.Account.Cookie,
   params: TGApp.Game.Calculate.AvatarListParams,
 ): Promise<TGApp.Game.Calculate.AvatarListResp> {
-  const ck = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-    ltoken: cookie.ltoken,
-    ltuid: cookie.ltuid,
-  };
+  const ck = getWebAccountCookies(cookie);
   const body = JSON.stringify(params);
   const headers = {
     ...getRequestHeader(ck, "POST", body),
@@ -212,7 +216,7 @@ async function getAvatarList(
 
 /**
  * 获取全部可养成武器
- * @since Beta v0.11.1
+ * @since Beta v0.13.2
  * @param cookie - 用户 Cookie
  * @param params - 武器列表参数
  * @returns 武器列表响应数据
@@ -221,12 +225,7 @@ async function getWeaponList(
   cookie: TGApp.App.Account.Cookie,
   params: TGApp.Game.Calculate.WeaponListParams,
 ): Promise<TGApp.Game.Calculate.WeaponListResp> {
-  const ck = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-    ltoken: cookie.ltoken,
-    ltuid: cookie.ltuid,
-  };
+  const ck = getWebAccountCookies(cookie);
   const body = JSON.stringify(params);
   const headers = {
     ...getRequestHeader(ck, "POST", body),
@@ -241,7 +240,7 @@ async function getWeaponList(
 
 /**
  * 同步用户角色列表
- * @since Beta v0.11.2
+ * @since Beta v0.13.2
  * @param cookie - 用户 Cookie
  * @param params - 同步角色列表参数
  * @returns 同步角色列表响应数据
@@ -250,12 +249,7 @@ async function syncAvatarList(
   cookie: TGApp.App.Account.Cookie,
   params: TGApp.Game.Calculate.SyncAvatarParams,
 ): Promise<TGApp.Game.Calculate.SyncAvatarResp> {
-  const ck = {
-    account_id: cookie.account_id,
-    cookie_token: cookie.cookie_token,
-    ltoken: cookie.ltoken,
-    ltuid: cookie.ltuid,
-  };
+  const ck = getWebAccountCookies(cookie);
   const body = JSON.stringify(params);
   const headers = {
     ...getRequestHeader(ck, "POST", body),
@@ -270,7 +264,7 @@ async function syncAvatarList(
 
 const takumiReq = {
   auth: { actionTicket: getActionTicketBySToken },
-  bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByCookie },
+  bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByStoken },
   calculate: {
     avatar: { list: getAvatarList, sync: syncAvatarList },
     batch: batchCompute,

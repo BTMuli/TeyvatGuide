@@ -704,7 +704,7 @@ export async function saveDraft(
   cookie: TGApp.App.Account.LoginCookie,
   source?: TGApp.BBS.PostDraft.Detail,
 ): Promise<TGApp.BBS.PostDraft.SaveResp> {
-  if (source?.ownerUid !== undefined && source.ownerUid !== cookie.ltuid) {
+  if (source?.ownerUid !== undefined && source.ownerUid !== cookie.ltuid_v2) {
     throw new Error("草稿作者与当前米社账号不一致");
   }
   const body = buildSaveBody(settings, source);
@@ -739,7 +739,7 @@ export async function saveDraft(
     updatedAt: 0,
     ...(source?.version === undefined ? {} : { version: source.version }),
     raw: { ...body },
-    ownerUid: cookie.ltuid,
+    ownerUid: cookie.ltuid_v2,
   };
   return {
     ...response.data,

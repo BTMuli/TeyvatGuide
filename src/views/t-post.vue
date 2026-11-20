@@ -279,7 +279,7 @@ onMounted(async () => {
   await showLoading.update(`帖子ID: ${postId}`);
   let ck: undefined | Record<string, string> = undefined;
   if (cookie.value && incognito.value === false) {
-    ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+    ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
   }
   try {
     let resp = await postReq.post(postId, ck);
@@ -509,7 +509,7 @@ async function createPostJson(postId: number): Promise<void> {
 
 async function syncDynamic(): Promise<void> {
   if (!cookie.value || !postData.value) return;
-  const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
   try {
     const resp = await postReq.dynamic([postData.value.post.post_id], ck);
     if (resp.retcode !== 0) {
@@ -578,7 +578,7 @@ async function tryLike(): Promise<void> {
     showSnackbar.error("数据未加载");
     return;
   }
-  const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
   try {
     const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
     if (resp.retcode !== 0) {

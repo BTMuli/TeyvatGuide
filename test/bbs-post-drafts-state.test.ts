@@ -1,6 +1,6 @@
 /**
  * 米游社云草稿列表异步状态回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { readFileSync } from "node:fs";
@@ -64,7 +64,7 @@ const compiled = ts.transpileModule(script.content, {
 const list = vi.fn();
 const detail = vi.fn();
 const deleteDraftRequest =
-  vi.fn<(id: string, cookie: { ltoken: string; ltuid: string }) => Promise<DeleteResponse>>();
+  vi.fn<(id: string, cookie: { ltoken_v2: string; ltuid_v2: string }) => Promise<DeleteResponse>>();
 const dialogCheck =
   vi.fn<
     (options: {
@@ -79,7 +79,7 @@ const snackbarSuccess = vi.fn();
 const snackbarWarn = vi.fn();
 const account = {
   uid: Vue.ref<string>("1001"),
-  cookie: Vue.ref({ ltoken: "token-1001", ltuid: "1001" }),
+  cookie: Vue.ref({ ltoken_v2: "token-1001", ltuid_v2: "1001" }),
 };
 const routerPush = vi.fn();
 const dispose: Array<() => void> = [];
@@ -169,19 +169,19 @@ function mountDraftList(gid: number = 2): DraftListBindings {
     "@utils/bbs/replyAccount.js": {
       matchesCurrentAccount: (snapshot: {
         uid: string;
-        cookie: { ltuid: string; ltoken: string };
+        cookie: { ltuid_v2: string; ltoken_v2: string };
       }) =>
         snapshot.uid === account.uid.value &&
-        snapshot.cookie.ltuid === account.cookie.value.ltuid &&
-        snapshot.cookie.ltoken === account.cookie.value.ltoken,
+        snapshot.cookie.ltuid_v2 === account.cookie.value.ltuid_v2 &&
+        snapshot.cookie.ltoken_v2 === account.cookie.value.ltoken_v2,
       executeReplyForCurrentAccount: async <T>(
-        snapshot: { uid: string; cookie: { ltuid: string; ltoken: string } },
+        snapshot: { uid: string; cookie: { ltuid_v2: string; ltoken_v2: string } },
         action: () => Promise<T>,
       ): Promise<{ allowed: false } | { allowed: true; data: T }> => {
         const isCurrent =
           snapshot.uid === account.uid.value &&
-          snapshot.cookie.ltuid === account.cookie.value.ltuid &&
-          snapshot.cookie.ltoken === account.cookie.value.ltoken;
+          snapshot.cookie.ltuid_v2 === account.cookie.value.ltuid_v2 &&
+          snapshot.cookie.ltoken_v2 === account.cookie.value.ltoken_v2;
         if (!isCurrent) return { allowed: false };
         return { allowed: true, data: await action() };
       },
@@ -248,7 +248,7 @@ async function settle(): Promise<void> {
 beforeEach(() => {
   vi.resetAllMocks();
   account.uid.value = "1001";
-  account.cookie.value = { ltoken: "token-1001", ltuid: "1001" };
+  account.cookie.value = { ltoken_v2: "token-1001", ltuid_v2: "1001" };
   list.mockResolvedValue(listResponse(createDraft("draft-1", "默认草稿")));
   dialogCheck.mockResolvedValue(false);
   deleteDraftRequest.mockResolvedValue({ retcode: 0, message: "OK", data: null });
@@ -310,7 +310,7 @@ describe("云草稿列表异步状态", () => {
     detail.mockReturnValueOnce(request.promise);
     const opening = panel.openDraft({ ...createDraft("123", "旧账号草稿"), gid: 0 });
     account.uid.value = "2002";
-    account.cookie.value = { ltoken: "token-2002", ltuid: "2002" };
+    account.cookie.value = { ltoken_v2: "token-2002", ltuid_v2: "2002" };
     await settle();
     request.resolve({ retcode: 0, message: "OK", data: { settings: { gid: 6, viewType: 1 } } });
     await opening;
@@ -349,8 +349,8 @@ describe("云草稿列表异步状态", () => {
     await panel.deleteDraft(first);
 
     expect(deleteDraftRequest).toHaveBeenCalledWith("draft-1", {
-      ltoken: "token-1001",
-      ltuid: "1001",
+      ltoken_v2: "token-1001",
+      ltuid_v2: "1001",
     });
     expect(panel.drafts.value).toEqual([second]);
     expect(snackbarSuccess).toHaveBeenCalledWith("草稿已删除");
@@ -424,7 +424,7 @@ describe("云草稿列表异步状态", () => {
     await settle();
 
     account.uid.value = "2002";
-    account.cookie.value = { ltoken: "token-2002", ltuid: "2002" };
+    account.cookie.value = { ltoken_v2: "token-2002", ltuid_v2: "2002" };
     await settle();
     confirmation.resolve(true);
     await deletion;
@@ -472,7 +472,7 @@ describe("云草稿列表异步状态", () => {
     const deletion = panel.deleteDraft(first);
     await settle();
     account.uid.value = "2002";
-    account.cookie.value = { ltoken: "token-2002", ltuid: "2002" };
+    account.cookie.value = { ltoken_v2: "token-2002", ltuid_v2: "2002" };
     await settle();
     request.resolve({ retcode: 0, message: "OK", data: null });
     await deletion;
@@ -515,7 +515,7 @@ describe("云草稿列表异步状态", () => {
     panel.visible.value = true;
     await settle();
     account.uid.value = "2002";
-    account.cookie.value = { ltoken: "token-2002", ltuid: "2002" };
+    account.cookie.value = { ltoken_v2: "token-2002", ltuid_v2: "2002" };
     await settle();
     expect(list).toHaveBeenCalledTimes(2);
 
@@ -525,7 +525,7 @@ describe("云草稿列表异步状态", () => {
     await settle();
 
     expect(panel.drafts.value.map((item) => item.subject)).toEqual(["新账号草稿"]);
-    expect(list.mock.calls[1][0]).toEqual({ ltoken: "token-2002", ltuid: "2002" });
+    expect(list.mock.calls[1][0]).toEqual({ ltoken_v2: "token-2002", ltuid_v2: "2002" });
   });
 
   it("切换帖子类型后旧响应不会写入另一类型的列表", async () => {

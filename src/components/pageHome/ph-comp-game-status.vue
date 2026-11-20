@@ -280,7 +280,8 @@ async function loadDailyNoteData(): Promise<void> {
 }
 
 async function loadSignData(): Promise<void> {
-  if (!isLogin.value || uid.value === undefined || !cookie.value) {
+  const ck = cookie.value;
+  if (!isLogin.value || uid.value === undefined || !ck) {
     signAccounts.value = [];
     return;
   }
@@ -294,7 +295,6 @@ async function loadSignData(): Promise<void> {
   }
   loadingSign.value = true;
   loadingProgress.value = 0;
-  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
   for (let i = 0; i < accounts.length; i++) {
     const acc = accounts[i];
     loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${maskUidTail(acc.gameUid)}...`;

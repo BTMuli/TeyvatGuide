@@ -187,9 +187,9 @@ const resignCount = computed<number>(() => resignInfo.value?.quality_cnt ?? 0);
 
 // 刷新数据
 async function refreshData(): Promise<void> {
-  if (!cookie.value) return;
+  const ck = cookie.value;
+  if (!ck) return;
   isRefresh.value = true;
-  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
   let infoResp: TGApp.BBS.Sign.HomeResp | undefined;
   try {
     infoResp = await lunaReq.sign.info(props.account, ck);
@@ -296,8 +296,8 @@ async function handleRewardCellClick(index: number): Promise<void> {
 }
 
 async function loadResignInfo(): Promise<void> {
-  if (!cookie.value) return;
-  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  const ck = cookie.value;
+  if (!ck) return;
   let resignResp: TGApp.BBS.Sign.ResignInfoResp | undefined;
   try {
     resignResp = await lunaReq.resign.info(props.account, ck);
@@ -346,17 +346,13 @@ function updateLocalDataAfterResign(): void {
 }
 
 async function handleSign(): Promise<void> {
-  if (!cookie.value) {
+  const ck = cookie.value;
+  if (!ck) {
     showSnackbar.warn("请先登录");
     return;
   }
   isSign.value = true;
-  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-  const ckSign = {
-    stoken: cookie.value.stoken,
-    stuid: cookie.value.stuid,
-    mid: cookie.value.mid,
-  };
+  const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
 
   let check = false;
   let challenge: string | undefined = undefined;
@@ -422,7 +418,8 @@ async function handleSign(): Promise<void> {
 }
 
 async function handleResign(): Promise<void> {
-  if (!cookie.value) {
+  const ck = cookie.value;
+  if (!ck) {
     showSnackbar.warn("请先登录");
     return;
   }
@@ -464,12 +461,7 @@ async function handleResign(): Promise<void> {
 
   isResign.value = true;
   try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const ckSign = {
-      stoken: cookie.value.stoken,
-      stuid: cookie.value.stuid,
-      mid: cookie.value.mid,
-    };
+    const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
 
     let check = false;
     let challenge: string | undefined = undefined;

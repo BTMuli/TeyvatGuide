@@ -364,7 +364,7 @@ const publishTypes = computed<Array<PublishType>>(() => {
   ];
 });
 const canWrite = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 const reqCk = computed<TGApp.App.Account.Cookie | undefined>(() => {
   if (incognito.value) return undefined;

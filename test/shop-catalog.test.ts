@@ -1,6 +1,6 @@
 /**
  * 兑换中心分页筛选与详情异步顺序回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { readFileSync } from "node:fs";
@@ -73,7 +73,7 @@ const gameRoles = vi.fn();
 const snackbarError = vi.fn();
 const account = {
   uid: Vue.ref("398265412"),
-  cookie: Vue.ref({ ltuid: "398265412", account_id: "398265412", ltoken: "test-token" }),
+  cookie: Vue.ref({ ltuid_v2: "398265412", account_id_v2: "398265412", ltoken_v2: "test-token" }),
   briefInfo: Vue.ref({ nickname: "旅行者" }),
 };
 const communityBrowsing = {
@@ -228,7 +228,11 @@ beforeEach(() => {
   communityBrowsing.shopGoodsType = "all";
   communityBrowsing.shopStock = "all";
   account.uid.value = "398265412";
-  account.cookie.value = { ltuid: "398265412", account_id: "398265412", ltoken: "test-token" };
+  account.cookie.value = {
+    ltuid_v2: "398265412",
+    account_id_v2: "398265412",
+    ltoken_v2: "test-token",
+  };
   point.mockResolvedValue({ retcode: 0, message: "OK", data: { points: 1000 } });
   goods.mockResolvedValue(listResponse([createGoods()], 1));
 });

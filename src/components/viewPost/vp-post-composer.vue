@@ -599,7 +599,7 @@ const contentLength = computed<number>(() => {
   }
 });
 const canWrite = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 const canDeleteDraft = computed<boolean>(
   () =>
@@ -635,8 +635,8 @@ async function loadPreviewLevel(): Promise<void> {
 const toolCookie = computed<TGApp.App.Account.EditorCookie | undefined>(() =>
   canWrite.value && cookie.value
     ? {
-        ltoken: cookie.value.ltoken,
-        ltuid: cookie.value.ltuid,
+        ltoken_v2: cookie.value.ltoken_v2,
+        ltuid_v2: cookie.value.ltuid_v2,
         stoken: cookie.value.stoken,
         stuid: cookie.value.stuid,
         mid: cookie.value.mid,
@@ -767,8 +767,8 @@ watch(
     props.forumId,
     props.initialTopic?.id,
     uid.value,
-    cookie.value?.ltoken,
-    cookie.value?.ltuid,
+    cookie.value?.ltoken_v2,
+    cookie.value?.ltuid_v2,
   ],
   () => {
     closeComponentDialog();
@@ -885,8 +885,8 @@ async function initialize(force: boolean = false): Promise<void> {
     if (props.draftId) {
       if (!cookie.value || !canWrite.value) throw new Error("请先登录米游社账号");
       const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-        uid: cookie.value.ltuid,
-        cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+        uid: cookie.value.ltuid_v2,
+        cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
       };
       const response = await postDraftReq.detail(props.draftId, snapshot.cookie);
       if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
@@ -1046,7 +1046,7 @@ async function saveVote(request: TGApp.BBS.Vote.CreateRequest): Promise<void> {
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: snapshotUid,
-    cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+    cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
   };
   componentDialog.value.loading = true;
   componentDialog.value.error = "";
@@ -1314,7 +1314,7 @@ async function savePost(): Promise<void> {
   )
     return;
   const version = contextVersion.value;
-  const requestCookie = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
+  const requestCookie = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
   const settings = structuredClone(toRaw(draft.value));
   const source = seed;
   const action = source ? "保存修改" : isPicture.value ? "发布图片帖" : "发布长文";
@@ -1353,7 +1353,7 @@ async function savePost(): Promise<void> {
     }
     if (!active || version !== contextVersion.value || !canWrite.value) return;
     const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-      uid: requestCookie.ltuid,
+      uid: requestCookie.ltuid_v2,
       cookie: requestCookie,
     };
     if (!source) {
@@ -1388,7 +1388,7 @@ async function savePost(): Promise<void> {
     if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
     if (
       latest.data.post.post.post_id !== source.post.post_id ||
-      latest.data.post.post.uid !== requestCookie.ltuid ||
+      latest.data.post.post.uid !== requestCookie.ltuid_v2 ||
       latest.data.post.post.updated_at !== source.post.updated_at ||
       JSON.stringify(getPostEditSettings(latest.data.post)) !==
         JSON.stringify(getPostEditSettings(source))
@@ -1446,8 +1446,8 @@ async function saveDraft(): Promise<void> {
   if (!canSubmit.value || props.source || !cookie.value) return;
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-    uid: cookie.value.ltuid,
-    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    uid: cookie.value.ltuid_v2,
+    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
   };
   const settings = structuredClone(toRaw(draft.value));
   pending.value = true;
@@ -1492,8 +1492,8 @@ async function deleteDraft(): Promise<void> {
   if (!id || !canDeleteDraft.value || !cookie.value) return;
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-    uid: cookie.value.ltuid,
-    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    uid: cookie.value.ltuid_v2,
+    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
   };
   pending.value = true;
   draftDeletePending.value = true;

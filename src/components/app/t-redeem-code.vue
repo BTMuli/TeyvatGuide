@@ -171,7 +171,7 @@ const actionCodes = computed<Array<string>>(() =>
   liveCodes === undefined ? codes.value : availableCodes.value,
 );
 const canRedeem = computed<boolean>(() =>
-  Boolean(selectedRole.value && cookie.value?.cookie_token),
+  Boolean(selectedRole.value && cookie.value?.cookie_token_v2),
 );
 watch(
   [() => gid, uid],
@@ -222,7 +222,7 @@ async function submit(selectedCodes: Array<string>): Promise<void> {
       selectedCodes,
       async (code) => {
         currentCode.value = code;
-        if (!isCurrentTarget(target, credential.account_id)) {
+        if (!isCurrentTarget(target, credential.account_id_v2)) {
           return { retcode: -2, message: "未兑换，窗口已关闭或当前账号已变更" };
         }
         if (!cookie.value) return { retcode: -2, message: "未兑换，登录已失效" };
@@ -246,7 +246,7 @@ function isCurrentTarget(target: TGApp.Sqlite.Account.Game, accountId: string): 
     current.gameBiz === target.gameBiz &&
     current.gameUid === target.gameUid &&
     uid.value === target.uid &&
-    cookie.value.account_id === accountId
+    cookie.value.account_id_v2 === accountId
   );
 }
 </script>

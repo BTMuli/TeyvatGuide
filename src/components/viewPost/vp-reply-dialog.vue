@@ -87,10 +87,10 @@ const draft = useReplyDraft(
     props.postId,
     props.gid,
     uid.value,
-    cookie.value?.ltoken,
-    cookie.value?.ltuid,
-    cookie.value?.account_id,
-    cookie.value?.cookie_token,
+    cookie.value?.ltoken_v2,
+    cookie.value?.ltuid_v2,
+    cookie.value?.account_id_v2,
+    cookie.value?.cookie_token_v2,
   ],
 );
 /**

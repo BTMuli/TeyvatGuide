@@ -1,6 +1,6 @@
 /**
  * 负责米游社客户端的 callback 处理
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -14,6 +14,7 @@ import useUserStore from "@store/user.js";
 import { core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { getWebAccountCookies } from "@utils/account/accountCookie.js";
 import { getDS4JS } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
@@ -580,35 +581,40 @@ class Client {
   }
 
   /**
-   * 获取米游社客户端的 cookie
-   * @since Beta v0.8.3
+   * 写入米游社网页使用的 V2 Cookie。
+   * @since Beta v0.13.2
+   * @param cookie - 当前账号的 Cookie
+   * @returns 无返回值
+   */
+  private async setWebAccountCookies(cookie: TGApp.App.Account.Cookie): Promise<void> {
+    const fields = getWebAccountCookies(cookie);
+    const js = `javascript:(function(){
+    const host = window.location.hostname;
+    const domain = host.endsWith('.miyoushe.com') ? '.miyoushe.com' : '.mihoyo.com';
+    for (const [key, value] of Object.entries(${JSON.stringify(fields)})) {
+      document.cookie = key + '=' + value + '; domain=' + domain + '; path=/;';
+    }
+    })();`;
+    await core.invoke("execute_js", { label: "mhy_client", js });
+  }
+
+  /**
+   * 获取米游社客户端的 Cookie。
+   * @since Beta v0.13.2
    * @param arg - 请求参数
    * @returns 无返回值
    */
   async getCookieInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
-    const user = useUserStore();
-    if (!user.cookie) return;
-    const executeJS = `javascript:(function(){
-    let domainCur = window.location.hostname;
-    if (domainCur.endsWith('.miyoushe.com')) domainCur = '.miyoushe.com';
-    else domainCur = '.mihoyo.com';
-    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/;';
-    })();`;
-    console.info(`[getCookieInfo] ${executeJS}`);
-    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
-    const data = { ltoken: user.cookie.ltoken, ltuid: user.cookie.ltuid, login_ticket: "" };
+    const { cookie } = useUserStore();
+    if (!cookie) return;
+    await this.setWebAccountCookies(cookie);
+    const data = { ltoken: cookie.ltoken_v2, ltuid: cookie.ltuid_v2, login_ticket: "" };
     await this.callback(arg.callback, data);
   }
 
   /**
-   * 获取米游社客户端的 cookie_token
-   * @since Beta v0.9.4
+   * 获取米游社客户端的 cookie_token_v2
+   * @since Beta v0.13.2
    * @param arg - 请求参数
    * @returns 无返回值
    */
@@ -616,37 +622,27 @@ class Client {
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>,
   ): Promise<void> {
     const user = useUserStore();
-    if (!user.cookie) return;
+    const cookie = user.cookie;
+    if (!cookie) return;
     if (typeof arg.payload === "object" && arg.payload.forceRefresh) {
       try {
-        const res = await passportReq.cookieToken(user.cookie);
+        const res = await passportReq.cookieToken(cookie);
+        if (user.cookie !== cookie) return;
         if (res.retcode !== 0) {
           await TGLogger.Warn(`[TGClient][getCookieToken] ${res.retcode}: ${res.message}`);
           return;
         }
-        user.cookie.cookie_token = res.data.cookie_token;
-        await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
+        cookie.cookie_token_v2 = res.data.cookie_token_v2;
+        await TGSqlite.saveAppData("cookie", JSON.stringify(cookie));
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
-        await TGLogger.Error(`[TGClient][getCookieToken] 获取cookie_token异常：${errMsg}`);
+        await TGLogger.Error(`[TGClient][getCookieToken] 获取 CookieToken V2 异常：${errMsg}`);
         return;
       }
     }
-    const executeJS = `javascript:(function(){
-    let domainCur = window.location.hostname;
-    if (domainCur.endsWith('.miyoushe.com')) domainCur = '.miyoushe.com';
-    else domainCur = '.mihoyo.com';
-    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/;';
-    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/;';
-    })();`;
-    console.info(`[getCookieToken] ${executeJS}`);
-    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
-    const data = { cookie_token: user.cookie.cookie_token };
+    if (user.cookie !== cookie) return;
+    await this.setWebAccountCookies(cookie);
+    const data = { cookie_token: cookie.cookie_token_v2 };
     await this.callback(arg.callback, data);
   }
 

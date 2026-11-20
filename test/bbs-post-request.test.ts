@@ -59,8 +59,12 @@ const pictureNodes: Array<TGApp.BBS.SctPost.Base> = [
   { insert: { mention: { uid: 100000002, nickname: "旅行者" } } },
   { insert: "\n" },
 ];
-const cookie = { ltoken: "ltoken-value", ltuid: "100000001" };
-const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+const cookie = { ltmid_v2: "mid-value", ltoken_v2: "ltoken-value", ltuid_v2: "100000001" };
+const authCookie = {
+  ltmid_v2: cookie.ltmid_v2,
+  ltoken_v2: cookie.ltoken_v2,
+  ltuid_v2: cookie.ltuid_v2,
+};
 const nodes: Array<TGApp.BBS.SctPost.Base> = [
   { insert: "hello", attributes: { bold: true } },
   { insert: "\n", attributes: { header: 1 } },
@@ -567,7 +571,7 @@ describe("postEditReq mutation requests", () => {
     );
 
     await expect(
-      postEditReq.update(source, settings, { ...cookie, ltuid: "100000002" }),
+      postEditReq.update(source, settings, { ...cookie, ltuid_v2: "100000002" }),
     ).rejects.toThrow("仅允许帖子作者");
     expect(mocks.post).toHaveBeenCalledTimes(1);
   });
@@ -1349,7 +1353,7 @@ describe("postEditReq source initialization and validation", () => {
       postEditReq.create({ ...getPostEditSettings(source), subject: "x".repeat(31) }, cookie),
     ).rejects.toThrow();
     await expect(
-      postEditReq.create(getPostEditSettings(source), { ltoken: "", ltuid: cookie.ltuid }),
+      postEditReq.create(getPostEditSettings(source), { ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }),
     ).rejects.toThrow();
 
     const unsupportedSource = structuredClone(source);

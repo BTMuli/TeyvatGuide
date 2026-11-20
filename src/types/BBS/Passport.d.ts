@@ -1,39 +1,39 @@
 /**
  * Passport 相关类型定义
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  */
 
 declare namespace TGApp.BBS.Passport {
   /**
    * 获取 CookieToken 返回响应
-   * @since Beta v0.10.1
+   * @since Beta v0.13.2
    */
-  type CookieTokenResp = TGApp.BBS.Response.BaseWithData<CookieTokenRes>;
+  type CookieTokenResp = TGApp.BBS.Response.Base | TGApp.BBS.Response.BaseWithData<CookieTokenRes>;
 
   /**
    * 获取 CookieToken 返回数据
-   * @since Beta v0.10.1
+   * @since Beta v0.13.2
    */
   type CookieTokenRes = {
     /** 用户 UID */
     uid: string;
     /** CookieToken */
-    cookie_token: string;
+    cookie_token_v2: string;
   };
 
   /**
    * 获取 LToken 返回响应
-   * @since Beta v0.10.1
+   * @since Beta v0.13.2
    */
-  type LTokenResp = TGApp.BBS.Response.BaseWithData<LTokenRes>;
+  type LTokenResp = TGApp.BBS.Response.Base | TGApp.BBS.Response.BaseWithData<LTokenRes>;
 
   /**
    * 获取 LToken 返回数据
-   * @since Beta v0.10.1
+   * @since Beta v0.13.2
    */
   type LTokenRes = {
     /** LToken */
-    ltoken: string;
+    ltoken_v2: string;
   };
 
   /**

@@ -154,7 +154,7 @@ const contextError = computed<string>(() => {
   return "";
 });
 const canWrite = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 const accountName = computed<string>(() => briefInfo.value.nickname || uid.value || "");
 const fromTopic = computed<boolean>(

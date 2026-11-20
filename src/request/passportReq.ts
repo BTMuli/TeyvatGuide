@@ -1,17 +1,36 @@
 /**
  * Passport 相关请求
- * @since Beta v0.12.5
+ * @since Beta v0.13.2
  */
 import TGBbs from "@utils/bbs/TGBbs.js";
-import { getDeviceInfo } from "@utils/common/toolFunc.js";
+import { getDeviceInfo, getRandomString } from "@utils/common/toolFunc.js";
 import { getDS4JS, getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
+import Md5 from "js-md5";
 import { JSEncrypt } from "jsencrypt";
+import { v4 } from "uuid";
 
 /* PassportApiBaseUrl => pAbu */
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";
 /* PassportV4ApiBaseUrl => p4Abu */
 const p4Abu: Readonly<string> = "https://passport-api-v4.mihoyo.com/";
+/* 米游社 Android APK 2.119.0 的通行证 SDK 生产环境配置，见 classes5.dex */
+const PASSPORT_SDK_VERSION = "2.44.0";
+const PASSPORT_DS_SALT = "JwYDpKvLj6MrMqqYU6jTKF17KNO2PXoS";
+const PASSPORT_LIFECYCLE_ID = v4();
+const TokenType = <const>{ SToken: 1, LToken: 2, CookieToken: 4 };
+
+/**
+ * 通行证 V2 换票响应。
+ * @since Beta v0.13.2
+ */
+type TokenExchangeResp =
+  | TGApp.BBS.Response.Base
+  | TGApp.BBS.Response.BaseWithData<{
+      token: { token: string };
+      user_info?: { aid?: string | number };
+    }>;
+
 /* 加密密钥 */
 const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
@@ -135,62 +154,90 @@ async function createQrLogin(): Promise<TGApp.BBS.GameLogin.GetLoginQrResponse> 
 }
 
 /**
- * 获取 stoken 换票请求头
- * @since Beta v0.12.5
- * @param cookie - Cookie
- * @param clientType - 客户端类型
- * @param aigis - 极验验证数据，非空时携带 x-rpc-aigis
- * @returns 请求头
+ * 使用通行证 V2 接口将 stoken 换成指定凭证。
+ * @since Beta v0.13.2
+ * @param cookie - 当前账号的 stoken 与 mid
+ * @param target - 目标凭证类型
+ * @returns 换票响应
  */
-function getPassportHeaders(
-  cookie: TGApp.App.Account.Cookie,
-  clientType: string = "5",
-  aigis?: string,
-): Record<string, string> {
-  const ck = { mid: cookie.mid, stoken: cookie.stoken };
-  const params = { stoken: cookie.stoken };
-  const headers = getRequestHeader(ck, "GET", params);
-  headers["x-rpc-client_type"] = clientType;
-  if (aigis) headers["x-rpc-aigis"] = aigis;
-  return headers;
-}
-
-/**
- * 根据 stoken 获取 cookie_token
- * @since Beta v0.12.5
- * @param cookie - Cookie
- * @param clientType - 客户端类型，默认 `2`
- * @param aigis - 极验验证数据，非空时携带 x-rpc-aigis
- * @returns cookie_token 响应数据
- */
-async function getCookieAccountInfoBySToken(
-  cookie: TGApp.App.Account.Cookie,
-  clientType: string = "2",
-  aigis?: string,
-): Promise<TGApp.BBS.Passport.CookieTokenResp> {
-  const params = { stoken: cookie.stoken };
-  const resp = await TGHttps.get<TGApp.BBS.Passport.CookieTokenResp>(
-    `${pAbu}account/auth/api/getCookieAccountInfoBySToken`,
-    { headers: getPassportHeaders(cookie, clientType, aigis), query: params },
+async function exchangeWebToken(
+  cookie: Pick<TGApp.App.Account.Cookie, "stoken" | "mid">,
+  target: typeof TokenType.LToken | typeof TokenType.CookieToken,
+): Promise<TokenExchangeResp> {
+  if (!cookie.stoken || !cookie.mid) throw new Error("换票所需的 stoken 或 mid 缺失");
+  const body = JSON.stringify({
+    dst_token_type: target,
+    src_token: { token: cookie.stoken, token_type: TokenType.SToken },
+    mid: cookie.mid,
+  }).replace(
+    /[<>&='\u2028\u2029]/gu,
+    (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"),
   );
-  return resp.data;
+  const time = Math.floor(Date.now() / 1000);
+  const nonce = getRandomString(6);
+  const digest = Md5.md5(`salt=${PASSPORT_DS_SALT}&t=${time}&r=${nonce}&b=${body}&q=`);
+  const headers = {
+    accept: "application/json",
+    "content-type": "application/json",
+    DS: `${time},${nonce},${digest}`,
+    "user-agent": TGBbs.ua,
+    "x-rpc-app_version": TGBbs.version,
+    "x-rpc-client_type": "2",
+    "x-rpc-app_id": "bll8iq97cem8",
+    "x-rpc-device_fp": encodeURIComponent(getDeviceInfo("device_fp")),
+    "x-rpc-device_name": encodeURIComponent(getDeviceInfo("device_name")),
+    "x-rpc-device_id": getDeviceInfo("device_id"),
+    "x-rpc-device_model": encodeURIComponent(getDeviceInfo("product")),
+    "x-rpc-game_biz": "bbs_cn",
+    "x-rpc-sys_version": "12",
+    "x-rpc-sdk_version": PASSPORT_SDK_VERSION,
+    "x-rpc-account_version": PASSPORT_SDK_VERSION,
+    "x-rpc-lifecycle_id": PASSPORT_LIFECYCLE_ID,
+  };
+  const { data: response } = await TGHttps.post<TokenExchangeResp>(
+    `${pAbu}account/ma-cn-session/app/exchange`,
+    { headers, body },
+  );
+  const token = response.data?.token?.token;
+  if (response.retcode === 0 && (typeof token !== "string" || !token.trim())) {
+    throw new Error("通行证换票响应缺少有效凭证");
+  }
+  return response;
 }
 
 /**
- * 根据 stoken_v2 获取 ltoken
- * @since Beta v0.12.5
+ * 根据 stoken 换取 cookie_token_v2
+ * @since Beta v0.13.2
  * @param cookie - Cookie
- * @returns ltoken 响应数据
+ * @returns V2 CookieToken 响应数据
+ */
+async function getCookieTokenBySToken(
+  cookie: TGApp.App.Account.Cookie,
+): Promise<TGApp.BBS.Passport.CookieTokenResp> {
+  const response = await exchangeWebToken(cookie, TokenType.CookieToken);
+  if (response.retcode !== 0) return <TGApp.BBS.Response.Base>response;
+  return {
+    retcode: 0,
+    message: response.message,
+    data: {
+      cookie_token_v2: response.data.token.token,
+      uid: String(response.data.user_info?.aid ?? cookie.account_id_v2),
+    },
+  };
+}
+
+/**
+ * 根据 stoken 换取 ltoken_v2
+ * @since Beta v0.13.2
+ * @param cookie - Cookie
+ * @returns V2 LToken 响应数据
  */
 async function getLTokenBySToken(
   cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Passport.LTokenResp> {
-  const params = { stoken: cookie.stoken };
-  const resp = await TGHttps.get<TGApp.BBS.Passport.LTokenResp>(
-    `${pAbu}account/auth/api/getLTokenBySToken`,
-    { headers: getPassportHeaders(cookie), query: params },
-  );
-  return resp.data;
+  const response = await exchangeWebToken(cookie, TokenType.LToken);
+  if (response.retcode !== 0) return <TGApp.BBS.Response.Base>response;
+  return { retcode: 0, message: response.message, data: { ltoken_v2: response.data.token.token } };
 }
 
 /**
@@ -249,16 +296,16 @@ async function queryLoginStatus(
 }
 
 /**
- * 验证 ltoken 有效性，返回 mid
- * @since Beta v0.10.1
+ * 验证 ltoken_v2 有效性，返回 mid
+ * @since Beta v0.13.2
  * @param cookie - 账户 cookie
  * @returns 验证响应数据
  */
 async function verifyLToken(
   cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Passport.VerifyLTokenResp> {
-  const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
-  const data = { ltoken: cookie.ltoken };
+  const ck = { ltoken_v2: cookie.ltoken_v2, ltuid_v2: cookie.ltuid_v2, ltmid_v2: cookie.mid };
+  const data = { ltoken: cookie.ltoken_v2 };
   const resp = await TGHttps.post<TGApp.BBS.Passport.VerifyLTokenResp>(
     `${p4Abu}account/ma-cn-session/web/verifyLtoken`,
     { headers: getRequestHeader(ck, "POST", data), body: data },
@@ -268,7 +315,7 @@ async function verifyLToken(
 
 const passportReq = {
   authTicket: createAuthTicketByGameBiz,
-  cookieToken: getCookieAccountInfoBySToken,
+  cookieToken: getCookieTokenBySToken,
   lToken: { get: getLTokenBySToken, verify: verifyLToken },
   qrLogin: { create: createQrLogin, query: queryLoginStatus },
   captcha: { create: createLoginCaptcha, login: loginByMobileCaptcha },

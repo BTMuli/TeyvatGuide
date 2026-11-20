@@ -415,10 +415,10 @@ watch(
   () => [
     props.contextId,
     props.gid,
-    props.cookie?.ltuid,
-    props.cookie?.ltoken,
-    props.cookie?.account_id,
-    props.cookie?.cookie_token,
+    props.cookie?.ltuid_v2,
+    props.cookie?.ltoken_v2,
+    props.cookie?.account_id_v2,
+    props.cookie?.cookie_token_v2,
   ],
   resetContext,
   { flush: "sync" },
@@ -492,8 +492,8 @@ defineExpose({ cancelUpload });
 
 function openImagePicker(): void {
   if (props.disabled || !replyAssetCapabilities.imageUpload || !props.cookie) return;
-  const cookie = { ltoken: props.cookie.ltoken, ltuid: props.cookie.ltuid };
-  if (!matchesCurrentAccount({ uid: cookie.ltuid, cookie })) {
+  const cookie = { ltoken_v2: props.cookie.ltoken_v2, ltuid_v2: props.cookie.ltuid_v2 };
+  if (!matchesCurrentAccount({ uid: cookie.ltuid_v2, cookie })) {
     clearImagePicker();
     showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
     return;
@@ -549,8 +549,8 @@ async function loadGameUidAccounts(): Promise<void> {
   try {
     const execution = await executeReplyForCurrentAccount(
       {
-        uid: requestCookie.ltuid,
-        cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+        uid: requestCookie.ltuid_v2,
+        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
       },
       () => takumiReq.bind.gameRoles(requestCookie),
     );
@@ -558,8 +558,8 @@ async function loadGameUidAccounts(): Promise<void> {
     if (
       !execution.allowed ||
       !matchesCurrentAccount({
-        uid: requestCookie.ltuid,
-        cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+        uid: requestCookie.ltuid_v2,
+        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
       })
     ) {
       gameUidAccounts.value = [];
@@ -624,8 +624,8 @@ async function lookupMention(): Promise<void> {
   try {
     const execution = await executeReplyForCurrentAccount(
       {
-        uid: requestCookie.ltuid,
-        cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+        uid: requestCookie.ltuid_v2,
+        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
       },
       () => replyAssetReq.resolveMention(nickname, requestCookie, props.gid, controller.signal),
     );
@@ -682,8 +682,8 @@ async function selectImage(event: Event): Promise<void> {
       try {
         const execution = await executeReplyForCurrentAccount(
           {
-            uid: requestCookie.ltuid,
-            cookie: { ltoken: requestCookie.ltoken, ltuid: requestCookie.ltuid },
+            uid: requestCookie.ltuid_v2,
+            cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
           },
           () => replyAssetReq.uploadImage(file, requestCookie, picker.gid, controller.signal),
         );
@@ -691,7 +691,7 @@ async function selectImage(event: Event): Promise<void> {
         if (
           !execution.allowed ||
           !matchesCurrentAccount({
-            uid: requestCookie.ltuid,
+            uid: requestCookie.ltuid_v2,
             cookie: requestCookie,
           })
         ) {

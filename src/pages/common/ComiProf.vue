@@ -149,10 +149,10 @@ const canViewProfile = computed<boolean>(() => {
     currentUid !== undefined &&
     currentUid.trim() !== "" &&
     currentCookie !== undefined &&
-    currentCookie.ltuid === currentUid &&
-    currentCookie.ltoken.trim() !== "" &&
-    currentCookie.account_id.trim() !== "" &&
-    currentCookie.cookie_token.trim() !== ""
+    currentCookie.ltuid_v2 === currentUid &&
+    currentCookie.ltoken_v2.trim() !== "" &&
+    currentCookie.account_id_v2.trim() !== "" &&
+    currentCookie.cookie_token_v2.trim() !== ""
   );
 });
 const profileAccessMessage = computed<string>(() => {
@@ -194,10 +194,10 @@ watch(
     isLogin,
     uid,
     profileUid,
-    () => cookie.value?.account_id,
-    () => cookie.value?.cookie_token,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.account_id_v2,
+    () => cookie.value?.cookie_token_v2,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
   ],
   () => void loadProfile(),
   { immediate: true },
@@ -241,10 +241,10 @@ function isCurrentAccount(snapshot: AccountSnapshot): boolean {
     canViewProfile.value &&
     uid.value === snapshot.uid &&
     profileUid.value === snapshot.profileUid &&
-    currentCookie?.account_id === snapshot.cookie.account_id &&
-    currentCookie?.cookie_token === snapshot.cookie.cookie_token &&
-    currentCookie?.ltuid === snapshot.cookie.ltuid &&
-    currentCookie?.ltoken === snapshot.cookie.ltoken
+    currentCookie?.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    currentCookie?.cookie_token_v2 === snapshot.cookie.cookie_token_v2 &&
+    currentCookie?.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    currentCookie?.ltoken_v2 === snapshot.cookie.ltoken_v2
   );
 }
 

@@ -1,6 +1,6 @@
 /**
  * 米游社商店商品状态与兑换参数工具。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 /**
@@ -144,7 +144,7 @@ export function getShopResponseError(
 
 /**
  * 构建商店兑换请求体。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  * @param goods - 商品详情
  * @param cookie - 当前账户 Cookie
  * @param role - 游戏商品的目标角色；BBS 商品不需要
@@ -170,8 +170,8 @@ export function buildShopExchangeParams(
     address_id: Number.isInteger(addressId) && addressId >= 0 ? addressId : 0,
   };
   if (goods.game === "bbs") {
-    const accountId = cookie.account_id.trim();
-    const ltuid = cookie.ltuid.trim();
+    const accountId = cookie.account_id_v2.trim();
+    const ltuid = cookie.ltuid_v2.trim();
     if (accountId && ltuid && accountId !== ltuid) {
       throw new Error("登录凭据账号 ID 不一致，请刷新登录凭据");
     }

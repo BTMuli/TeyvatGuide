@@ -1,7 +1,8 @@
 /**
  * 签到模块请求
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  */
+import { getCookieTokenCookie } from "@utils/account/accountCookie.js";
 import TGBbs from "@utils/bbs/TGBbs.js";
 import { getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -45,15 +46,37 @@ function getActConf(region: string): ReqParam | false {
 }
 
 /**
+ * 构建签到查询头。
+ * @since Beta v0.13.2
+ * @param cookie - 账号凭据
+ * @param host - 签到服务的游戏标识
+ * @returns 带 V2 Cookie 的查询请求头
+ */
+function getLunaQueryHeaders(
+  cookie: TGApp.App.Account.Cookie,
+  host?: string,
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    "user-agent": TGBbs.ua,
+    referer: "https://act.mihoyo.com",
+    cookie: Object.entries(getCookieTokenCookie(cookie))
+      .map(([key, value]) => `${key}=${value}`)
+      .join("; "),
+  };
+  if (host) headers["x-rpc-signgame"] = host;
+  return headers;
+}
+
+/**
  * 获取签到奖励列表
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param account - 账号信息
  * @param cookie - cookies
  * @returns 签到奖励列表响应数据
  */
 async function getLunaHome(
   account: TGApp.Sqlite.Account.Game,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Sign.HomeResp> {
   const conf = getActConf(account.gameBiz);
   if (conf === false) {
@@ -61,31 +84,23 @@ async function getLunaHome(
   }
   const url = conf.host ? `${telaBu}${conf.host}/home` : `${telaBu}home`;
   const params = { lang: "zh-cn", act_id: conf.actId };
-  const header: Record<string, string> = {
-    "user-agent": TGBbs.ua,
-    referer: "https://act.mihoyo.com",
-    cookie: Object.keys(cookie)
-      .map((key) => `${key}=${cookie[key]}`)
-      .join("; "),
-  };
-  if (conf.host) header["x-rpc-signgame"] = conf.host;
   const resp = await TGHttps.get<TGApp.BBS.Sign.HomeResp>(url, {
     query: params,
-    headers: header,
+    headers: getLunaQueryHeaders(cookie, conf.host),
   });
   return resp.data;
 }
 
 /**
  * 获取签到信息
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param account - 账号信息
  * @param cookie - cookies
  * @returns 签到信息响应数据
  */
 async function getLunaInfo(
   account: TGApp.Sqlite.Account.Game,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Sign.InfoResp> {
   const conf = getActConf(account.gameBiz);
   if (conf === false) {
@@ -98,24 +113,16 @@ async function getLunaInfo(
     region: account.region,
     uid: account.gameUid,
   };
-  const header: Record<string, string> = {
-    "user-agent": TGBbs.ua,
-    referer: "https://act.mihoyo.com",
-    cookie: Object.keys(cookie)
-      .map((key) => `${key}=${cookie[key]}`)
-      .join("; "),
-  };
-  if (conf.host) header["x-rpc-signgame"] = conf.host;
   const resp = await TGHttps.get<TGApp.BBS.Sign.InfoResp>(url, {
     query: params,
-    headers: header,
+    headers: getLunaQueryHeaders(cookie, conf.host),
   });
   return resp.data;
 }
 
 /**
  * 签到
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param account - 账号信息
  * @param cookie - cookies
  * @param challenge - 极验信息
@@ -123,7 +130,7 @@ async function getLunaInfo(
  */
 async function lunaSign(
   account: TGApp.Sqlite.Account.Game,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.Cookie,
   challenge?: string,
 ): Promise<TGApp.BBS.Sign.SignResp> {
   const conf = getActConf(account.gameBiz);
@@ -138,7 +145,7 @@ async function lunaSign(
     uid: account.gameUid,
   };
   const header: Record<string, string> = {
-    ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
+    ...getRequestHeader(getCookieTokenCookie(cookie), "POST", JSON.stringify(data), "X6"),
     "x-rpc-client_type": "2",
   };
   if (conf.host) header["x-rpc-signgame"] = conf.host;
@@ -152,14 +159,14 @@ async function lunaSign(
 
 /**
  * 获取补签信息
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param account - 账号信息
  * @param cookie - cookies
  * @returns 补签信息响应数据
  */
 async function getResignInfo(
   account: TGApp.Sqlite.Account.Game,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.Sign.ResignInfoResp> {
   const conf = getActConf(account.gameBiz);
   if (conf === false) {
@@ -172,24 +179,16 @@ async function getResignInfo(
     region: account.region,
     uid: account.gameUid,
   };
-  const header: Record<string, string> = {
-    "user-agent": TGBbs.ua,
-    referer: "https://act.mihoyo.com",
-    cookie: Object.keys(cookie)
-      .map((key) => `${key}=${cookie[key]}`)
-      .join("; "),
-  };
-  if (conf.host) header["x-rpc-signgame"] = conf.host;
   const resp = await TGHttps.get<TGApp.BBS.Sign.ResignInfoResp>(url, {
     query: params,
-    headers: header,
+    headers: getLunaQueryHeaders(cookie, conf.host),
   });
   return resp.data;
 }
 
 /**
  * 补签
- * @since Beta v0.10.1
+ * @since Beta v0.13.2
  * @param account - 账号信息
  * @param cookie - cookies
  * @param challenge - 极验信息
@@ -197,7 +196,7 @@ async function getResignInfo(
  */
 async function lunaResign(
   account: TGApp.Sqlite.Account.Game,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.Cookie,
   challenge?: string,
 ): Promise<TGApp.BBS.Sign.ResignResp> {
   const conf = getActConf(account.gameBiz);
@@ -212,7 +211,7 @@ async function lunaResign(
     uid: account.gameUid,
   };
   const header: Record<string, string> = {
-    ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
+    ...getRequestHeader(getCookieTokenCookie(cookie), "POST", JSON.stringify(data), "X6"),
     "x-rpc-client_type": "2",
   };
   if (conf.host) header["x-rpc-signgame"] = conf.host;

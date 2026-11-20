@@ -1,6 +1,6 @@
 /**
  * APK 发现推荐流请求契约回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -83,10 +83,10 @@ describe("painterReq discover", () => {
       stuid: "10001",
       stoken: "native-token",
       mid: "mid",
-      ltuid: "10001",
-      ltoken: "web-token",
-      account_id: "10001",
-      cookie_token: "cookie-token",
+      ltuid_v2: "10001",
+      ltoken_v2: "web-token",
+      account_id_v2: "10001",
+      cookie_token_v2: "cookie-token",
     };
 
     await painterReq.discover(2, "", true, cookie);

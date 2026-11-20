@@ -146,10 +146,10 @@ watch(
     () => category,
     isLogin,
     uid,
-    () => cookie.value?.account_id,
-    () => cookie.value?.cookie_token,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.account_id_v2,
+    () => cookie.value?.cookie_token_v2,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
   ],
   () => {
     generation += 1;
@@ -180,10 +180,10 @@ function getSnapshot(): AccountSnapshot | undefined {
     !isLogin.value ||
     !loginUid ||
     !cookie.value ||
-    cookie.value.ltuid !== loginUid ||
-    !cookie.value.cookie_token.trim() ||
-    !cookie.value.account_id.trim() ||
-    !cookie.value.ltoken.trim()
+    cookie.value.ltuid_v2 !== loginUid ||
+    !cookie.value.cookie_token_v2.trim() ||
+    !cookie.value.account_id_v2.trim() ||
+    !cookie.value.ltoken_v2.trim()
   )
     return undefined;
   return { uid: loginUid, cookie: { ...cookie.value } };
@@ -195,10 +195,10 @@ function isCurrent(snapshot: AccountSnapshot, version: number): boolean {
     active &&
     generation === version &&
     current?.uid === snapshot.uid &&
-    current.cookie.account_id === snapshot.cookie.account_id &&
-    current.cookie.cookie_token === snapshot.cookie.cookie_token &&
-    current.cookie.ltuid === snapshot.cookie.ltuid &&
-    current.cookie.ltoken === snapshot.cookie.ltoken
+    current.cookie.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    current.cookie.cookie_token_v2 === snapshot.cookie.cookie_token_v2 &&
+    current.cookie.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    current.cookie.ltoken_v2 === snapshot.cookie.ltoken_v2
   );
 }
 

@@ -404,14 +404,14 @@ const canViewProfile = computed<boolean>(() => {
     currentUid.trim() !== "" &&
     props.profile.uid === currentUid &&
     currentCookie !== undefined &&
-    currentCookie.ltuid === currentUid &&
-    currentCookie.ltoken.trim() !== "" &&
-    currentCookie.account_id.trim() !== "" &&
-    currentCookie.cookie_token.trim() !== ""
+    currentCookie.ltuid_v2 === currentUid &&
+    currentCookie.ltoken_v2.trim() !== "" &&
+    currentCookie.account_id_v2.trim() !== "" &&
+    currentCookie.cookie_token_v2.trim() !== ""
   );
 });
 const canWriteProfile = computed<boolean>(
-  () => canViewProfile.value && cookie.value?.account_id === props.profile.uid,
+  () => canViewProfile.value && cookie.value?.account_id_v2 === props.profile.uid,
 );
 const privacyDirty = computed<boolean>(
   () =>
@@ -476,10 +476,10 @@ watch(
     () => props.profile.uid,
     isLogin,
     uid,
-    () => cookie.value?.account_id,
-    () => cookie.value?.cookie_token,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.account_id_v2,
+    () => cookie.value?.cookie_token_v2,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
     () => cookie.value?.stuid,
     () => cookie.value?.stoken,
     () => cookie.value?.mid,
@@ -520,7 +520,7 @@ function getAccountSnapshot(): AccountSnapshot | undefined {
 
 function getWriteSnapshot(): AccountSnapshot | undefined {
   const snapshot = getAccountSnapshot();
-  if (!snapshot || snapshot.cookie.account_id !== snapshot.profileUid) return undefined;
+  if (!snapshot || snapshot.cookie.account_id_v2 !== snapshot.profileUid) return undefined;
   if (!matchesPersistedSnapshot(snapshot)) return undefined;
   return snapshot;
 }
@@ -528,7 +528,7 @@ function getWriteSnapshot(): AccountSnapshot | undefined {
 function matchesPersistedSnapshot(snapshot: AccountSnapshot): boolean {
   return matchesCurrentAccount({
     uid: snapshot.uid,
-    cookie: { ltoken: snapshot.cookie.ltoken, ltuid: snapshot.cookie.ltuid },
+    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
   });
 }
 
@@ -538,10 +538,10 @@ function matchesAccount(snapshot: AccountSnapshot): boolean {
     canViewProfile.value &&
     uid.value === snapshot.uid &&
     props.profile.uid === snapshot.profileUid &&
-    currentCookie?.account_id === snapshot.cookie.account_id &&
-    currentCookie?.cookie_token === snapshot.cookie.cookie_token &&
-    currentCookie?.ltuid === snapshot.cookie.ltuid &&
-    currentCookie?.ltoken === snapshot.cookie.ltoken &&
+    currentCookie?.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    currentCookie?.cookie_token_v2 === snapshot.cookie.cookie_token_v2 &&
+    currentCookie?.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    currentCookie?.ltoken_v2 === snapshot.cookie.ltoken_v2 &&
     currentCookie?.stuid === snapshot.cookie.stuid &&
     currentCookie?.stoken === snapshot.cookie.stoken &&
     currentCookie?.mid === snapshot.cookie.mid

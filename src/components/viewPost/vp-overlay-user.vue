@@ -189,7 +189,7 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
 
 /**
  * 获取当前账户与目标用户的可关注快照
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @returns 账户快照；未登录、凭据不可用或目标为本人时返回 undefined
  */
 function getAccountSnapshot(): AccountSnapshot | undefined {
@@ -197,14 +197,14 @@ function getAccountSnapshot(): AccountSnapshot | undefined {
   const accountCookie = cookie.value;
   if (!isLogin.value || !accountUid.value || !accountCookie || !targetUid) return undefined;
   if (targetUid === accountUid.value.trim()) return undefined;
-  if (accountCookie.account_id.trim() === "" || accountCookie.cookie_token.trim() === "")
+  if (accountCookie.account_id_v2.trim() === "" || accountCookie.cookie_token_v2.trim() === "")
     return undefined;
   return { uid: accountUid.value, targetUid, cookie: { ...accountCookie } };
 }
 
 /**
  * 校验关注操作前后的账户与目标用户是否一致
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param snapshot - 操作前的账户快照
  * @returns 账户与目标用户是否仍与快照一致
  */
@@ -214,8 +214,8 @@ function isCurrentAccount(snapshot: AccountSnapshot): boolean {
     isLogin.value &&
     accountUid.value === snapshot.uid &&
     userInfo.value?.uid.trim() === snapshot.targetUid &&
-    accountCookie?.account_id === snapshot.cookie.account_id &&
-    accountCookie?.cookie_token === snapshot.cookie.cookie_token
+    accountCookie?.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    accountCookie?.cookie_token_v2 === snapshot.cookie.cookie_token_v2
   );
 }
 

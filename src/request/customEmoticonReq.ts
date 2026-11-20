@@ -1,6 +1,6 @@
 /**
  * 米游社收藏表情请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { getAppSignCookie, getRequestHeader } from "@utils/network/getRequestHeader.js";
@@ -54,7 +54,7 @@ function assertWriteSucceeded(
 /**
  * 获取收藏表情列表
  * @since Beta v0.13.0
- * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid
+ * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid_v2
  * @param signal - 可选的请求取消信号
  * @returns 可用的收藏表情列表
  */
@@ -91,7 +91,7 @@ async function getCustomEmoticonList(
 /**
  * 新增收藏表情
  * @since Beta v0.13.0
- * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid
+ * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid_v2
  * @param image - 已上传的图片地址、尺寸与文件大小
  * @param signal - 可选的请求取消信号
  */
@@ -129,7 +129,7 @@ async function addCustomEmoticon(
 /**
  * 删除收藏表情
  * @since Beta v0.13.0
- * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid
+ * @param cookie - 用户 Cookie，仅使用 stuid、stoken、mid 与 ltuid_v2
  * @param id - 收藏表情 ID
  * @param signal - 可选的请求取消信号
  */

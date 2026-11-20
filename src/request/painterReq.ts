@@ -1,8 +1,9 @@
 /**
  * painter 下的请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 import bbsEnum from "@enum/bbs.js";
+import { getLTokenCookie, getWebAccountCookies } from "@utils/account/accountCookie.js";
 import { getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
@@ -72,7 +73,7 @@ async function getNewsList(
 
 /**
  * 获取最近版块热门帖子列表
- * @since Beta v0.10.0
+ * @since Beta v0.13.2
  * @param forumId - 版块 ID
  * @param gid - 社区 ID
  * @param pageSize - 每页数量
@@ -95,7 +96,9 @@ async function getHotForumPostList(
   };
   if (lastId) params.last_id = lastId;
   let header: Record<string, string> = { cookie: "" };
-  if (cookie) header = getRequestHeader(cookie, "GET", params);
+  if (cookie) {
+    header = getRequestHeader({ ...cookie, ...getWebAccountCookies(cookie) }, "GET", params);
+  }
   const resp = await TGHttps.get<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getHotForumPostList`, {
     query: params,
     headers: header,
@@ -105,7 +108,7 @@ async function getHotForumPostList(
 
 /**
  * 获取最近版块帖子列表
- * @since Beta v0.10.0
+ * @since Beta v0.13.2
  * @param forumId - 版块 ID
  * @param gid - 社区 ID
  * @param type - 排序方式: 1-最新回复，2-最新发布
@@ -131,7 +134,9 @@ async function getRecentForumPostList(
   };
   if (lastId) params.last_id = lastId;
   let header: Record<string, string> = { cookie: "" };
-  if (cookie) header = getRequestHeader(cookie, "GET", params);
+  if (cookie) {
+    header = getRequestHeader({ ...cookie, ...getWebAccountCookies(cookie) }, "GET", params);
+  }
   const resp = await TGHttps.get<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getRecentForumPostList`, {
     query: params,
     headers: header,
@@ -141,7 +146,7 @@ async function getRecentForumPostList(
 
 /**
  * 获取关注动态帖子
- * @since Beta v0.10.0
+ * @since Beta v0.13.2
  * @param cookie - 用户 Cookie
  * @param offset - 偏移量
  * @returns 帖子
@@ -152,7 +157,7 @@ async function getTimelineList(
 ): Promise<TGApp.BBS.Post.FollowPostResp> {
   let param: Record<string, number> = { gids: 0, size: 20 };
   if (offset) param = { ...param, offset };
-  const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  const ck = getLTokenCookie(cookie);
   const header = getRequestHeader(ck, "GET", param, "X4", true);
   const resp = await TGHttps.get<TGApp.BBS.Post.FollowPostResp>(`${bapBu}timeline/list`, {
     headers: header,

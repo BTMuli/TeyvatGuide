@@ -150,13 +150,13 @@ type AccountSnapshot = {
 
 /**
  * 封面上传凭据。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 type CoverCookie = {
   /** 米游社登录令牌 */
-  ltoken: string;
+  ltoken_v2: string;
   /** 米游社账号 ID */
-  ltuid: string;
+  ltuid_v2: string;
 };
 
 const props = withDefaults(defineProps<CollectionFormProps>(), { collection: undefined });
@@ -175,10 +175,10 @@ const isEditing = computed<boolean>(() => props.collection !== undefined);
 const coverCookie = computed<CoverCookie | undefined>(() => {
   const current = cookie.value;
   if (!current) return undefined;
-  const ltoken = current.ltoken.trim();
-  const ltuid = current.ltuid.trim();
-  if (!ltoken || !ltuid) return undefined;
-  return { ltoken, ltuid };
+  const ltoken_v2 = current.ltoken_v2.trim();
+  const ltuid_v2 = current.ltuid_v2.trim();
+  if (!ltoken_v2 || !ltuid_v2) return undefined;
+  return { ltoken_v2, ltuid_v2 };
 });
 const titleError = computed<string>(() => {
   if (!submitted.value) return "";
@@ -232,10 +232,10 @@ function getSnapshot(): AccountSnapshot | undefined {
   const currentCookie = cookie.value;
   if (!isLogin.value || !loginUid || !currentCookie) return undefined;
   if (
-    currentCookie.ltuid !== loginUid ||
-    !currentCookie.ltoken.trim() ||
-    !currentCookie.cookie_token.trim() ||
-    !currentCookie.account_id.trim()
+    currentCookie.ltuid_v2 !== loginUid ||
+    !currentCookie.ltoken_v2.trim() ||
+    !currentCookie.cookie_token_v2.trim() ||
+    !currentCookie.account_id_v2.trim()
   )
     return undefined;
   return { uid: loginUid, cookie: { ...currentCookie } };
@@ -247,17 +247,17 @@ function isCurrent(snapshot: AccountSnapshot, version: number): boolean {
     active &&
     version === requestVersion &&
     current?.uid === snapshot.uid &&
-    current.cookie.account_id === snapshot.cookie.account_id &&
-    current.cookie.cookie_token === snapshot.cookie.cookie_token &&
-    current.cookie.ltuid === snapshot.cookie.ltuid &&
-    current.cookie.ltoken === snapshot.cookie.ltoken
+    current.cookie.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    current.cookie.cookie_token_v2 === snapshot.cookie.cookie_token_v2 &&
+    current.cookie.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    current.cookie.ltoken_v2 === snapshot.cookie.ltoken_v2
   );
 }
 
 function matchesPersistedAccount(snapshot: AccountSnapshot): boolean {
   return matchesCurrentAccount({
     uid: snapshot.uid,
-    cookie: { ltoken: snapshot.cookie.ltoken, ltuid: snapshot.cookie.ltuid },
+    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
   });
 }
 

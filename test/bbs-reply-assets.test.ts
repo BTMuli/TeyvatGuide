@@ -1,6 +1,6 @@
 /**
  * 米游社回复资源请求契约回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -24,15 +24,19 @@ import replyAssetReq, {
 } from "../src/request/replyAssetReq.js";
 
 const cookie = {
-  account_id: "account-id-must-not-be-sent",
-  cookie_token: "cookie-token-must-not-be-sent",
-  ltoken: "ltoken-value",
-  ltuid: "100000001",
+  account_id_v2: "account-id-must-not-be-sent",
+  cookie_token_v2: "cookie-token-must-not-be-sent",
+  ltoken_v2: "ltoken-value",
+  ltuid_v2: "100000001",
   mid: "mid-value",
   stoken: "stoken-value",
   stuid: "100000001",
 };
-const authCookie = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+const authCookie = {
+  ltmid_v2: cookie.mid,
+  ltoken_v2: cookie.ltoken_v2,
+  ltuid_v2: cookie.ltuid_v2,
+};
 const customAuthCookie = { stuid: cookie.stuid, stoken: cookie.stoken, mid: cookie.mid };
 const imageBytes = Uint8Array.from([1, 2, 3, 4]);
 const preparedImage: TGApp.BBS.ReplyAsset.PreparedImage = {
@@ -84,15 +88,16 @@ type TestEnvironment = {
  * @returns 序列化的账号状态
  */
 function serializedAccount(
-  uid: string = cookie.ltuid,
-  ltoken: string = cookie.ltoken,
-  ltuid: string = cookie.ltuid,
+  uid: string = cookie.ltuid_v2,
+  ltoken: string = cookie.ltoken_v2,
+  ltuid: string = cookie.ltuid_v2,
 ): string {
   return JSON.stringify({
     uid,
     cookie: {
-      ltoken,
-      ltuid,
+      ltoken_v2: ltoken,
+      ltmid_v2: cookie.mid,
+      ltuid_v2: ltuid,
       mid: cookie.mid,
       stoken: cookie.stoken,
       stuid: cookie.stuid,
@@ -318,8 +323,8 @@ describe("resolveMention", () => {
     mocks.post.mockResolvedValueOnce({ data: { retcode: 0, message: "ok", data: {} } });
     await expect(resolveMention("Alice", cookie, 2)).rejects.toThrow("nickname_uid_info");
     const requestConfig = mocks.post.mock.calls[0]?.[1];
-    expect(JSON.stringify(requestConfig)).not.toContain(cookie.cookie_token);
-    expect(JSON.stringify(requestConfig)).not.toContain(cookie.account_id);
+    expect(JSON.stringify(requestConfig)).not.toContain(cookie.cookie_token_v2);
+    expect(JSON.stringify(requestConfig)).not.toContain(cookie.account_id_v2);
   });
 
   it("rejects invalid input before making an HTTP request", async () => {
@@ -327,8 +332,13 @@ describe("resolveMention", () => {
       () => resolveMention("  ", cookie, 2),
       () => resolveMention("Alice", cookie, 0),
       () => resolveMention("Alice", cookie, 1.5),
-      () => resolveMention("Alice", { ltoken: "", ltuid: cookie.ltuid }, 2),
-      () => resolveMention("Alice", <TGApp.App.Account.LoginCookie>{ ltoken: cookie.ltoken }, 2),
+      () => resolveMention("Alice", { ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }, 2),
+      () =>
+        resolveMention(
+          "Alice",
+          <TGApp.App.Account.LoginCookie>{ ltmid_v2: cookie.mid, ltoken_v2: cookie.ltoken_v2 },
+          2,
+        ),
     ];
 
     for (const request of requests) await expect(request()).rejects.toThrow();
@@ -426,10 +436,10 @@ describe("uploadCustomAvatarImage", () => {
     );
     environment.storage.setStored(
       JSON.stringify({
-        uid: cookie.ltuid,
+        uid: cookie.ltuid_v2,
         cookie: {
-          ltoken: cookie.ltoken,
-          ltuid: cookie.ltuid,
+          ltoken_v2: cookie.ltoken_v2,
+          ltuid_v2: cookie.ltuid_v2,
           mid: "different-mid",
           stoken: cookie.stoken,
           stuid: cookie.stuid,
@@ -488,8 +498,8 @@ describe("uploadImage", () => {
       maxRedirections: 0,
       signal: expect.any(AbortSignal),
     });
-    expect(JSON.stringify(ossConfig.headers)).not.toContain(cookie.ltoken);
-    expect(JSON.stringify(ossConfig.headers)).not.toContain(cookie.ltuid);
+    expect(JSON.stringify(ossConfig.headers)).not.toContain(cookie.ltoken_v2);
+    expect(JSON.stringify(ossConfig.headers)).not.toContain(cookie.ltuid_v2);
 
     const entries = Array.from((<FormData>ossConfig.body).entries());
     expect(entries.map(([key]) => key)).toEqual([
@@ -713,7 +723,8 @@ describe("uploadImage", () => {
     const file = new File([imageBytes], "avatar.gif", { type: "image/gif" });
     const controller = new AbortController();
     const requests = [
-      () => uploadImage(file, { ltoken: "", ltuid: cookie.ltuid }, 2),
+      () =>
+        uploadImage(file, { ltmid_v2: cookie.mid, ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }, 2),
       () => uploadImage(file, cookie, 0),
       () => uploadImage(file, cookie, 1.5),
       () => uploadImage(new File([imageBytes], "", { type: "image/gif" }), cookie, 2),

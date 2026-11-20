@@ -1,6 +1,6 @@
 /**
  * 米游社 APK 投票创建请求契约测试。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -16,7 +16,7 @@ vi.mock("@utils/network/getRequestHeader.js", () => ({ getRequestHeader: mocks.g
 import postVoteReq from "../src/request/postVoteReq.js";
 
 const cookie = {
-  ltuid: "100000001",
+  ltuid_v2: "100000001",
   stuid: "100000001",
   stoken: "stoken-value",
   mid: "mid-value",
@@ -65,7 +65,7 @@ describe("postVoteReq", () => {
     { ...cookie, stuid: "100000002" },
     { ...cookie, stoken: "" },
     { ...cookie, mid: "" },
-    { ...cookie, ltuid: "" },
+    { ...cookie, ltuid_v2: "" },
   ])("rejects an account snapshot that cannot be safely signed: %j", async (invalidCookie) => {
     await expect(postVoteReq.create(body, invalidCookie)).rejects.toThrow();
     expect(mocks.post).not.toHaveBeenCalled();

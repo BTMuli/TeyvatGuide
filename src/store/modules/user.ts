@@ -1,10 +1,11 @@
 /**
  * 用户信息模块
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import { normalizeAccountCookie } from "@utils/account/accountCookie.js";
 import { maskUid } from "@utils/display/TGUid.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
@@ -117,6 +118,11 @@ const useUserStore = defineStore(
         key: "curAccount",
         storage: window.localStorage,
         pick: ["uid", "briefInfo", "cookie", "account"],
+        afterHydrate: ({ store }) => {
+          if (!store.cookie) return;
+          store.cookie = normalizeAccountCookie(store.cookie);
+          store.$persist();
+        },
       },
     ],
   },

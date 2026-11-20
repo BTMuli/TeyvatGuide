@@ -236,7 +236,6 @@ async function refreshState(ck: TGApp.App.Account.Cookie, uid: string): Promise<
       signAccounts.value.push({ selected: true, account: ac, info });
     }
   }
-  const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
   const dayNow = new Date().getDate();
   for (const item of signAccounts.value) {
     if (item.reward && item.stat?.is_sign) continue;
@@ -246,7 +245,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie, uid: string): Promise<
     if (item.reward === undefined) {
       let rewardResp: TGApp.BBS.Sign.HomeResp | undefined;
       try {
-        rewardResp = await lunaReq.sign.info(item.account, cookie);
+        rewardResp = await lunaReq.sign.info(item.account, ck);
         console.log("签到奖励", item, rewardResp);
         if (rewardResp.retcode !== 0) {
           await TGLogger.Script(
@@ -262,7 +261,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie, uid: string): Promise<
     }
     let statResp: TGApp.BBS.Sign.InfoResp | undefined;
     try {
-      statResp = await lunaReq.sign.stat(item.account, cookie);
+      statResp = await lunaReq.sign.stat(item.account, ck);
       console.log("签到状态", item, statResp);
       if (statResp.retcode !== 0) {
         await TGLogger.Script(`[签到任务]获取签到状态失败:${statResp.retcode} ${statResp.message}`);
@@ -281,7 +280,6 @@ async function trySign(
   ck: TGApp.App.Account.Cookie,
   skip: boolean,
 ): Promise<void> {
-  const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
   for (const item of ac) {
     if (item.stat?.is_sign) {
@@ -295,7 +293,7 @@ async function trySign(
     while (!check) {
       let signResp: TGApp.BBS.Sign.SignResp | undefined;
       try {
-        signResp = await lunaReq.sign.oper(item.account, cookie, challenge);
+        signResp = await lunaReq.sign.oper(item.account, ck, challenge);
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
         await TGLogger.Script(`[签到任务]签到异常:${errMsg}`);

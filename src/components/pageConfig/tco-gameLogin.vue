@@ -155,14 +155,15 @@ async function cycleGetDataGame(): Promise<void> {
       model.value = false;
       return;
     }
+    const uid = String(userInfo.aid);
     const ck: TGApp.App.Account.Cookie = {
-      account_id: userInfo.aid,
-      ltuid: userInfo.aid,
-      stuid: userInfo.aid,
+      account_id_v2: uid,
+      ltuid_v2: uid,
+      stuid: uid,
       mid: userInfo.mid,
-      cookie_token: "",
+      cookie_token_v2: "",
       stoken: token,
-      ltoken: "",
+      ltoken_v2: "",
     };
     await TGLogger.Info("[用户登录][扫码][token] 登录凭证交换成功");
     qrLoginActive = false;

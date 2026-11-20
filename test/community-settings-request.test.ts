@@ -1,6 +1,6 @@
 /**
  * 米游社个人中心设置请求契约回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -29,15 +29,19 @@ import communitySettingsReq, {
 } from "../src/request/communitySettingsReq.js";
 
 const cookie = {
-  account_id: "account-id",
-  cookie_token: "cookie-token",
-  ltoken: "ltoken-value",
-  ltuid: "100000001",
+  account_id_v2: "account-id",
+  cookie_token_v2: "cookie-token",
+  ltoken_v2: "ltoken-value",
+  ltuid_v2: "100000001",
   mid: "mid-value",
   stoken: "stoken-value",
   stuid: "100000001",
 };
-const authCookie = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+const authCookie = {
+  account_id_v2: cookie.account_id_v2,
+  account_mid_v2: cookie.mid,
+  cookie_token_v2: cookie.cookie_token_v2,
+};
 const successResponse = { retcode: 0, message: "ok", data: null };
 const privacyInfo = {
   privacy_invisible: { post_and_instant: true, reply: false, collect: true, watermark: false },

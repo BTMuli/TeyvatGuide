@@ -67,6 +67,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TusMoRecord from "@comp/userScripts/tus-mo-record.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
+import { getCookieTokenCookie } from "@utils/account/accountCookie.js";
 import TGNotify from "@utils/app/TGNotify.js";
 import { createPost } from "@utils/app/TGWindow.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -211,7 +212,7 @@ async function tryAuto(skip: boolean = false): Promise<void> {
 }
 
 async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
-  const ckState = { cookie_token: ck.cookie_token, account_id: ck.account_id };
+  const ckState = getCookieTokenCookie(ck);
   await TGLogger.Script("[米游币任务]刷新任务状态");
   if (missionList.value.length === 0) {
     await TGLogger.Script("[米游币任务]未检测到任务列表，正在获取");

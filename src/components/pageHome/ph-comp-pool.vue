@@ -62,6 +62,7 @@ import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
+import { getWebAccountCookies } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -132,7 +133,9 @@ async function handleRefresh(): Promise<void> {
 
 async function loadUserPool(forceReload: boolean = false): Promise<void> {
   if (userPools.value.length > 0 && !forceReload) return;
-  if (!cookie.value) {
+  const ck = cookie.value;
+  const role = account.value;
+  if (!ck) {
     showSnackbar.warn("获取限时祈愿失败：未登录");
     isLogin.value = false;
     if (isInit.value) await showLoading.end();
@@ -144,7 +147,7 @@ async function loadUserPool(forceReload: boolean = false): Promise<void> {
     if (homeStore.actCalendarData && !forceReload) {
       data = homeStore.actCalendarData;
     } else {
-      const resp = await recordReq.actCalendar(cookie.value, account.value);
+      const resp = await recordReq.actCalendar(ck, role);
       console.log(resp);
       if (<number>resp.retcode === 1034) {
         await TGLogger.Warn("[PhCompPool][loadUserPool] 触发1034验证");
@@ -155,10 +158,7 @@ async function loadUserPool(forceReload: boolean = false): Promise<void> {
           await loadObcPool();
           return;
         }
-        const challenge = await miscReq.challenge({
-          account_id: cookie.value.account_id,
-          cookie_token: cookie.value.cookie_token,
-        });
+        const challenge = await miscReq.challenge(getWebAccountCookies(ck));
         if (challenge === false) {
           if (isInit.value) {
             showSnackbar.error("极验验证失败，已切换至百科模式");
@@ -169,7 +169,7 @@ async function loadUserPool(forceReload: boolean = false): Promise<void> {
           await loadObcPool();
           return;
         }
-        const resp2 = await recordReq.actCalendar(cookie.value, account.value, challenge);
+        const resp2 = await recordReq.actCalendar(ck, role, challenge);
         if (resp2.retcode !== 0) {
           if (isInit.value) {
             showSnackbar.warn(`[${resp2.retcode}] ${resp2.message}`);

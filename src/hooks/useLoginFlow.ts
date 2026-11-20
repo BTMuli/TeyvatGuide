@@ -1,6 +1,6 @@
 /**
  * 米游社账号登录流程组合式函数。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -13,6 +13,7 @@ import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { hasSTokenCredentials, parseAccountCookie } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -20,7 +21,7 @@ import { ref } from "vue";
 
 /**
  * 创建一组米游社账号登录流程状态。
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @returns 二维码浮层开关、登录中标记与四条登录入口
  */
 export function useLoginFlow() {
@@ -46,8 +47,88 @@ export function useLoginFlow() {
   }
 
   /**
+   * 保存登录账号并更新当前登录状态。
+   * @since Beta v0.13.2
+   * @param ck - 账号 Cookie
+   * @param brief - 用户简略信息
+   * @returns 是否保存成功
+   */
+  async function saveLoginAccount(
+    ck: TGApp.App.Account.Cookie,
+    brief: TGApp.App.Account.BriefInfo,
+  ): Promise<boolean> {
+    await showLoading.update("正在保存用户数据");
+    try {
+      await TSUserAccount.account.saveAccount({
+        uid: brief.uid,
+        cookie: ck,
+        brief,
+        updated: "",
+      });
+    } catch (e) {
+      await TGLogger.Error("[用户登录][saveLoginAccount] 保存用户数据失败：" + loginErrorKind(e));
+      return false;
+    }
+    uid.value = brief.uid;
+    briefInfo.value = brief;
+    cookie.value = ck;
+    isLogin.value = true;
+    return true;
+  }
+
+  /**
+   * 获取并保存账号绑定的游戏角色，载入默认游戏账号。
+   * @since Beta v0.13.2
+   * @param accountUid - 米社账号 UID
+   * @param ck - 含 stoken 的账号 Cookie
+   * @returns 是否成功载入
+   */
+  async function loadGameAccounts(
+    accountUid: string,
+    ck: TGApp.App.Account.Cookie,
+  ): Promise<boolean> {
+    await TGLogger.Info("[用户登录][loadGameAccounts] 开始获取游戏账号");
+    await showLoading.update("正在获取游戏账号");
+    let gameRes: TGApp.BBS.Game.AccountResp;
+    try {
+      gameRes = await takumiReq.bind.gameRoles(ck);
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`获取游戏账号失败：${errMsg}`);
+      await TGLogger.Error("[用户登录][loadGameAccounts] 获取游戏账号异常：" + loginErrorKind(e));
+      return false;
+    }
+    if (gameRes.retcode !== 0) {
+      showSnackbar.error(`[${gameRes.retcode}] ${gameRes.message}`);
+      await TGLogger.Warn(
+        "[用户登录][loadGameAccounts] 获取游戏账号失败，retcode=" + gameRes.retcode,
+      );
+      return false;
+    }
+    showSnackbar.success("获取游戏账号成功");
+    await TGLogger.Info(
+      "[用户登录][loadGameAccounts] 获取游戏账号成功，数量=" + gameRes.data.list.length,
+    );
+    try {
+      await TSUserAccount.game.saveAccounts(accountUid, gameRes.data.list);
+      const curAccount = await TSUserAccount.game.getCurAccount(accountUid);
+      if (!curAccount) {
+        await TGLogger.Warn("[用户登录][loadGameAccounts] 用户已登录，但未找到可用的默认游戏账号");
+        showSnackbar.warn("未检测到游戏账号，请重新刷新");
+        return false;
+      }
+      account.value = curAccount;
+    } catch (e) {
+      await TGLogger.Error("[用户登录][loadGameAccounts] 保存游戏账号失败：" + loginErrorKind(e));
+      showSnackbar.error("保存或载入游戏账号失败，请重试");
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * 通过米游社登录票据补全 Cookie 并落库。
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
    * @param ck - 含 stoken 的米游社 Cookie
    */
   async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
@@ -69,7 +150,7 @@ export function useLoginFlow() {
         return;
       }
       showSnackbar.success("获取LToken成功");
-      ck.ltoken = ltokenRes.data.ltoken;
+      ck.ltoken_v2 = ltokenRes.data.ltoken_v2;
       await TGLogger.Info("[用户登录][tryGetTokens] 获取 LToken 成功");
     } catch (e) {
       const errMsg = TGHttps.getErrMsg(e);
@@ -94,7 +175,7 @@ export function useLoginFlow() {
         return;
       }
       showSnackbar.success("获取CookieToken成功");
-      ck.cookie_token = cookieTokenRes.data.cookie_token;
+      ck.cookie_token_v2 = cookieTokenRes.data.cookie_token_v2;
       await TGLogger.Info("[用户登录][tryGetTokens] 获取 CookieToken 成功");
     } catch (e) {
       const errMsg = TGHttps.getErrMsg(e);
@@ -108,7 +189,7 @@ export function useLoginFlow() {
     await TGLogger.Info("[用户登录][tryGetTokens] 开始：" + stage);
     await showLoading.update("正在获取用户信息");
     try {
-      const briefRes = await bbsReq.userInfo(ck);
+      const briefRes = await bbsReq.currentUserInfo(ck);
       if (briefRes.retcode !== 0) {
         await showLoading.end();
         showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
@@ -126,20 +207,6 @@ export function useLoginFlow() {
         avatar: briefRes.data.user_info.avatar_url,
         desc: briefRes.data.user_info.introduce,
       };
-      stage = "保存用户数据";
-      await TGLogger.Info("[用户登录][tryGetTokens] 开始：" + stage);
-      await showLoading.update("正在保存用户数据");
-      await TSUserAccount.account.saveAccount({
-        uid: briefInfoGet.uid,
-        cookie: ck,
-        brief: briefInfoGet,
-        updated: "",
-      });
-      await TGLogger.Info("[用户登录][tryGetTokens] 保存用户数据成功");
-      uid.value = briefInfoGet.uid;
-      briefInfo.value = briefInfoGet;
-      cookie.value = ck;
-      isLogin.value = true;
     } catch (e) {
       const errMsg = TGHttps.getErrMsg(e);
       await showLoading.end();
@@ -154,49 +221,19 @@ export function useLoginFlow() {
       isTryLogin.value = false;
       return;
     }
-    stage = "获取游戏账号";
+    stage = "保存用户数据";
     await TGLogger.Info("[用户登录][tryGetTokens] 开始：" + stage);
-    await showLoading.update("正在获取游戏账号");
-    let gameRes: TGApp.BBS.Game.AccountResp | undefined;
-    try {
-      gameRes = await takumiReq.bind.gameRoles(cookie.value);
-      if (gameRes.retcode !== 0) {
-        await showLoading.end();
-        showSnackbar.error(`[${gameRes.retcode}] ${gameRes.message}`);
-        await TGLogger.Warn(
-          "[用户登录][tryGetTokens] " + stage + "失败，retcode=" + gameRes.retcode,
-        );
-        isTryLogin.value = false;
-        return;
-      }
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
+    if (!(await saveLoginAccount(ck, briefInfoGet))) {
       await showLoading.end();
-      showSnackbar.error(`获取游戏账号失败：${errMsg}`);
-      await TGLogger.Error("[用户登录][tryGetTokens] 获取游戏账号异常：" + loginErrorKind(e));
+      showSnackbar.error("保存用户数据失败，请重试");
       isTryLogin.value = false;
       return;
     }
-    showSnackbar.success("获取游戏账号成功");
-    stage = "保存并载入游戏账号";
-    await TGLogger.Info(
-      "[用户登录][tryGetTokens] 获取游戏账号成功，数量=" + gameRes.data.list.length,
-    );
-    try {
-      await TSUserAccount.game.saveAccounts(briefInfoGet.uid, gameRes.data.list);
-      const curAccount = await TSUserAccount.game.getCurAccount(briefInfoGet.uid);
-      if (!curAccount) {
-        await TGLogger.Warn("[用户登录][tryGetTokens] 用户已登录，但未找到可用的默认游戏账号");
-        showSnackbar.warn("未检测到游戏账号，请重新刷新");
-        await showLoading.end();
-        isTryLogin.value = false;
-        return;
-      }
-      account.value = curAccount;
-    } catch (e) {
-      await TGLogger.Error("[用户登录][tryGetTokens] " + stage + "失败：" + loginErrorKind(e));
+    await TGLogger.Info("[用户登录][tryGetTokens] 保存用户数据成功");
+    stage = "获取游戏账号";
+    await TGLogger.Info("[用户登录][tryGetTokens] 开始：" + stage);
+    if (!(await loadGameAccounts(briefInfoGet.uid, ck))) {
       await showLoading.end();
-      showSnackbar.error("保存或载入游戏账号失败，请重试");
       isTryLogin.value = false;
       return;
     }
@@ -299,7 +336,7 @@ export function useLoginFlow() {
 
   /**
    * 手机号验证码登录。
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
    */
   async function tryCaptchaLogin(): Promise<void> {
     if (showLoginQr.value) showLoginQr.value = false;
@@ -340,14 +377,15 @@ export function useLoginFlow() {
       return;
     }
     await showLoading.start("正在尝试登录...");
+    const aid = String(loginResp.user_info.aid);
     const ck: TGApp.App.Account.Cookie = {
-      account_id: loginResp.user_info.aid,
-      ltuid: loginResp.user_info.aid,
-      stuid: loginResp.user_info.aid,
+      account_id_v2: aid,
+      ltuid_v2: aid,
+      stuid: aid,
       mid: loginResp.user_info.mid,
-      cookie_token: "",
+      cookie_token_v2: "",
       stoken: loginResp.token.token,
-      ltoken: "",
+      ltoken_v2: "",
     };
     await tryGetTokens(ck);
   }
@@ -362,10 +400,10 @@ export function useLoginFlow() {
 
   /**
    * 手动输入 Cookie 添加账号。
-   * @since Beta v0.13.0
+   * @since Beta v0.13.2
+   * @remarks 需要 stuid/stoken/mid，V2 字段可作为 stuid 与 mid 来源
    */
   async function addByCookie(): Promise<void> {
-    let stage: string;
     if (showLoginQr.value) showLoginQr.value = false;
     isTryLogin.value = true;
     await TGLogger.Info("[用户登录][addByCookie] 开始");
@@ -376,192 +414,26 @@ export function useLoginFlow() {
       isTryLogin.value = false;
       return;
     }
-    if (ckInput === "") {
-      showSnackbar.warn("请输入Cookie!");
-      isTryLogin.value = false;
-      return;
-    }
-    const ckArr = ckInput.split(";");
-    const ckRes = { stoken: "", stuid: "", mid: "" };
-    for (const ck of ckArr) {
-      if (ck.startsWith("mid=")) ckRes.mid = ck.substring(4);
-      else if (ck.startsWith("stoken=")) ckRes.stoken = ck.substring(7);
-      else if (ck.startsWith("stuid=")) ckRes.stuid = ck.substring(6);
-    }
-    if (ckRes.mid === "" || ckRes.stoken === "" || ckRes.stuid === "") {
-      showSnackbar.warn("Cookie格式错误");
-      await TGLogger.Warn("[用户登录][addByCookie] Cookie 格式错误，缺少必要字段");
+    const parsed = parseAccountCookie(ckInput);
+    const ck = parsed.cookie;
+    if (!hasSTokenCredentials(ck)) {
+      const legacy = parsed.legacyKeys.length > 0;
+      await TGLogger.Warn(
+        "[用户登录][addByCookie] Cookie 缺少换票凭据，旧版字段=" +
+          (legacy ? parsed.legacyKeys.join(",") : "无"),
+      );
+      let message = "Cookie 缺少 mid 或 stuid";
+      if (ck.stoken === "") {
+        message = legacy
+          ? "旧版 Cookie 已失效，请重新登录后复制"
+          : "Cookie 缺少 stoken，请重新登录后复制";
+      }
+      showSnackbar.warn(message);
       isTryLogin.value = false;
       return;
     }
     await showLoading.start("正在添加用户", "正在尝试刷新Cookie");
-    const ck: TGApp.App.Account.Cookie = {
-      account_id: ckRes.stuid,
-      ltuid: ckRes.stuid,
-      stuid: ckRes.stuid,
-      mid: ckRes.mid,
-      cookie_token: "",
-      stoken: ckRes.stoken,
-      ltoken: "",
-    };
-    stage = "获取LToken";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在获取 LToken");
-    try {
-      const ltokenRes = await passportReq.lToken.get(ck);
-      if (ltokenRes.retcode !== 0) {
-        await showLoading.end();
-        showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
-        await TGLogger.Warn(
-          "[用户登录][addByCookie] " + stage + "失败，retcode=" + ltokenRes.retcode,
-        );
-        isTryLogin.value = false;
-        return;
-      }
-      ck.ltoken = ltokenRes.data.ltoken;
-      await TGLogger.Info("[用户登录][addByCookie] 获取 LToken 成功");
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
-      await showLoading.end();
-      showSnackbar.error(`获取LToken失败：${errMsg}`);
-      await TGLogger.Error("[用户登录][addByCookie] " + stage + "失败：" + loginErrorKind(e));
-      isTryLogin.value = false;
-      return;
-    }
-    stage = "获取CookieToken";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在获取 CookieToken");
-    try {
-      const cookieTokenRes = await passportReq.cookieToken(ck);
-      if (cookieTokenRes.retcode !== 0) {
-        await showLoading.end();
-        showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
-        await TGLogger.Warn(
-          "[用户登录][addByCookie] " + stage + "失败，retcode=" + cookieTokenRes.retcode,
-        );
-        isTryLogin.value = false;
-        return;
-      }
-      ck.cookie_token = cookieTokenRes.data.cookie_token;
-      await TGLogger.Info("[用户登录][addByCookie] 获取 CookieToken 成功");
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
-      await showLoading.end();
-      showSnackbar.error(`获取CookieToken失败：${errMsg}`);
-      await TGLogger.Error("[用户登录][addByCookie] " + stage + "失败：" + loginErrorKind(e));
-      isTryLogin.value = false;
-      return;
-    }
-    stage = "获取用户信息";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在获取用户信息");
-    let briefGet: TGApp.App.Account.BriefInfo | undefined;
-    try {
-      const briefRes = await bbsReq.userInfo(ck);
-      if (briefRes.retcode !== 0) {
-        await showLoading.end();
-        showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
-        await TGLogger.Warn(
-          "[用户登录][addByCookie] " + stage + "失败，retcode=" + briefRes.retcode,
-        );
-        isTryLogin.value = false;
-        return;
-      }
-      await TGLogger.Info("[用户登录][addByCookie] 获取用户信息成功");
-      briefGet = {
-        nickname: briefRes.data.user_info.nickname,
-        uid: briefRes.data.user_info.uid,
-        avatar: briefRes.data.user_info.avatar_url,
-        desc: briefRes.data.user_info.introduce,
-      };
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
-      await showLoading.end();
-      showSnackbar.error(`获取用户信息失败：${errMsg}`);
-      await TGLogger.Error("[用户登录][addByCookie] " + stage + "失败：" + loginErrorKind(e));
-      isTryLogin.value = false;
-      return;
-    }
-    if (!briefGet) {
-      await showLoading.end();
-      showSnackbar.error("获取用户信息失败");
-      isTryLogin.value = false;
-      return;
-    }
-    uid.value = briefGet.uid;
-    briefInfo.value = briefGet;
-    cookie.value = ck;
-    isLogin.value = true;
-    stage = "保存用户数据";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在保存用户数据");
-    try {
-      await TSUserAccount.account.saveAccount({
-        uid: briefGet.uid,
-        cookie: ck,
-        brief: briefGet,
-        updated: "",
-      });
-      await TGLogger.Info("[用户登录][addByCookie] 保存用户数据成功");
-    } catch (e) {
-      await TGLogger.Error("[用户登录][addByCookie] " + stage + "失败：" + loginErrorKind(e));
-      await showLoading.end();
-      showSnackbar.error("保存用户数据失败，请重试");
-      isTryLogin.value = false;
-      return;
-    }
-    stage = "获取游戏账号";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在获取游戏账号");
-    let gameRes: TGApp.BBS.Game.AccountResp | undefined;
-    try {
-      gameRes = await takumiReq.bind.gameRoles(ck);
-      if (gameRes.retcode !== 0) {
-        await showLoading.end();
-        showSnackbar.error(`[${gameRes.retcode}] ${gameRes.message}`);
-        await TGLogger.Warn(
-          "[用户登录][addByCookie] " + stage + "失败，retcode=" + gameRes.retcode,
-        );
-        isTryLogin.value = false;
-        return;
-      }
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
-      await showLoading.end();
-      showSnackbar.error(`获取游戏账号失败：${errMsg}`);
-      await TGLogger.Error("[用户登录][addByCookie] 获取游戏账号异常：" + loginErrorKind(e));
-      isTryLogin.value = false;
-      return;
-    }
-    stage = "保存游戏账号";
-    await TGLogger.Info("[用户登录][addByCookie] 开始：" + stage);
-    await showLoading.update("正在保存游戏账号");
-    stage = "保存并载入游戏账号";
-    await TGLogger.Info(
-      "[用户登录][addByCookie] 获取游戏账号成功，数量=" + gameRes.data.list.length,
-    );
-    try {
-      await TSUserAccount.game.saveAccounts(briefGet.uid, gameRes.data.list);
-      const curAccount = await TSUserAccount.game.getCurAccount(briefGet.uid);
-      if (!curAccount) {
-        await showLoading.end();
-        await TGLogger.Warn("[用户登录][addByCookie] 用户已登录，但未找到可用的默认游戏账号");
-        showSnackbar.warn("未检测到游戏账号，请重新刷新");
-        isTryLogin.value = false;
-        return;
-      }
-      account.value = curAccount;
-    } catch (e) {
-      await TGLogger.Error("[用户登录][addByCookie] " + stage + "失败：" + loginErrorKind(e));
-      await showLoading.end();
-      showSnackbar.error("保存或载入游戏账号失败，请重试");
-      isTryLogin.value = false;
-      return;
-    }
-    await showLoading.end();
-    await TGLogger.Info("[用户登录][addByCookie] 登录完成，已载入默认游戏账号");
-    showSnackbar.success("成功添加用户!");
-    isTryLogin.value = false;
+    await tryGetTokens(ck);
   }
 
   return { showLoginQr, isTryLogin, tryGetTokens, tryCaptchaLogin, tryCodeLogin, addByCookie };

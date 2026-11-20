@@ -90,14 +90,18 @@ const backLabel = computed<string>(() => (fromDetail.value ? "返回帖子" : "�
 const accountName = computed<string>(() => briefInfo.value.nickname || uid.value || "");
 const editorPending = computed<boolean>(() => composer.value?.pending ?? false);
 const canEdit = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken,
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2,
 );
 const editorBusy = computed<boolean>(() => composer.value?.busy ?? false);
 const editorSaveDisabled = computed<boolean>(() => !(composer.value?.canSubmit ?? false));
 
-watch([postId, uid, () => cookie.value?.ltoken, () => cookie.value?.ltuid], () => void loadPost(), {
-  immediate: true,
-});
+watch(
+  [postId, uid, () => cookie.value?.ltoken_v2, () => cookie.value?.ltuid_v2],
+  () => void loadPost(),
+  {
+    immediate: true,
+  },
+);
 onBeforeRouteLeave(() => !editorBusy.value);
 onBeforeRouteUpdate(() => !editorBusy.value);
 onBeforeUnmount(() => {
@@ -117,7 +121,7 @@ async function loadPost(): Promise<void> {
   }
   const snapshot = {
     uid: uid.value,
-    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
   };
   loading.value = true;
   try {

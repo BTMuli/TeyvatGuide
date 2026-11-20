@@ -63,7 +63,7 @@ let contextVersion = 0;
 let active = true;
 
 const hasCurrentAccount = computed<boolean>(
-  () => !!uid.value && !!cookie.value?.ltoken.trim() && cookie.value?.ltuid === uid.value,
+  () => !!uid.value && !!cookie.value?.ltoken_v2.trim() && cookie.value?.ltuid_v2 === uid.value,
 );
 const canManage = computed<boolean>(
   () => hasCurrentAccount.value && props.source.post.uid === uid.value,
@@ -83,8 +83,8 @@ watch(
     () => props.source.post.subject,
     () => props.source.post.structured_content,
     () => uid.value,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
   ],
   () => {
     contextVersion += 1;
@@ -116,7 +116,7 @@ async function deletePost(): Promise<void> {
   }
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: currentUid,
-    cookie: { ltoken: currentCookie.ltoken, ltuid: currentCookie.ltuid },
+    cookie: { ltoken_v2: currentCookie.ltoken_v2, ltuid_v2: currentCookie.ltuid_v2 },
   };
   const postId = props.source.post.post_id;
   const originalSubject = props.source.post.subject;

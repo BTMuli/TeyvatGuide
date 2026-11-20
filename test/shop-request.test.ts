@@ -1,6 +1,6 @@
 /**
  * 米游社商店请求回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -17,10 +17,10 @@ vi.mock("@utils/network/TGHttps.js", () => ({
 import shopReq from "../src/request/shopReq.js";
 
 const cookie: TGApp.App.Account.Cookie = {
-  account_id: "398265412",
-  cookie_token: "cookie-token",
-  ltoken: "ltoken",
-  ltuid: "398265412",
+  account_id_v2: "398265412",
+  cookie_token_v2: "cookie-token",
+  ltoken_v2: "ltoken",
+  ltuid_v2: "398265412",
   mid: "mid",
   stoken: "stoken",
   stuid: "398265412",
@@ -49,7 +49,9 @@ describe("shop request headers and query", () => {
           "x-rpc-app_version": "2.102.0",
           Origin: "https://www.miyoushe.com",
           Referer: "https://webstatic.mihoyo.com/app/community-shop/index.html",
-          Cookie: "account_id=398265412; cookie_token=cookie-token; ltoken=ltoken; ltuid=398265412",
+          Cookie:
+            "account_id_v2=398265412; cookie_token_v2=cookie-token; " +
+            "ltoken_v2=ltoken; ltuid_v2=398265412",
         }),
         query: { app_id: 1, point_sn: "myb" },
       },

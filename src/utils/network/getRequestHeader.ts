@@ -1,9 +1,10 @@
 /**
  * 请求头构建与登录凭据提取
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import bbsEnum from "@enum/bbs.js";
+import { getCookieTokenCookie } from "@utils/account/accountCookie.js";
 import Md5 from "js-md5";
 
 import TGBbs from "../bbs/TGBbs.js";
@@ -193,10 +194,10 @@ export function getDS4JS(
 
 /**
  * 提取米游社 App 端接口签名所需的最小 Cookie
- * @since Beta v0.13.0
- * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
+ * @since Beta v0.13.2
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid_v2 的 Cookie
  * @returns 仅包含 stuid、stoken 与 mid 的 Cookie
- * @remarks 凭据缺失、无效或 stuid 与 ltuid 不一致时抛出错误
+ * @remarks 凭据缺失、无效或 stuid 与 ltuid_v2 不一致时抛出错误
  */
 export function getAppSignCookie(
   cookie: TGApp.App.Account.SignUidCookie,
@@ -207,7 +208,7 @@ export function getAppSignCookie(
   const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
   const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
   const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
-  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
+  const ltuid = typeof cookie.ltuid_v2 === "string" ? cookie.ltuid_v2.trim() : "";
   if (!stuid || !stoken || !mid || !ltuid) {
     throw new Error("登录凭据不完整，请刷新登录凭据");
   }
@@ -217,27 +218,27 @@ export function getAppSignCookie(
 
 /**
  * 提取回复与帖子编辑请求所需的登录凭据
- * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
+ * @since Beta v0.13.2
+ * @param cookie - 包含 ltoken_v2、ltuid_v2 与 ltmid_v2 的 Cookie
  * @returns 供请求头签名使用的最小 Cookie
  */
 export function getReplyCookie(
   cookie: TGApp.App.Account.LoginCookie,
 ): TGApp.App.Account.LoginCookie {
-  const ltoken = cookie?.ltoken?.trim();
-  const ltuid = cookie?.ltuid?.trim();
-  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
-  return { ltoken, ltuid };
+  const ltoken = cookie?.ltoken_v2?.trim();
+  const ltuid = cookie?.ltuid_v2?.trim();
+  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken_v2 或 ltuid_v2");
+  return { ltmid_v2: cookie.ltmid_v2, ltoken_v2: ltoken, ltuid_v2: ltuid };
 }
 
 /**
  * 提取个人中心读取请求所需的最小 Cookie
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param cookie - 完整账户 Cookie
  * @returns 用于请求头签名的最小 Cookie
  */
 export function getCommunityCookie(
   cookie: TGApp.App.Account.Cookie,
 ): TGApp.App.Account.CookieTokenCookie {
-  return { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  return getCookieTokenCookie(cookie);
 }

@@ -1,9 +1,10 @@
 /**
  * 米游社回复 UID 卡片工具
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import { isRecord } from "@utils/common/typeGuards.js";
+import { getAppSignCookie } from "@utils/network/getRequestHeader.js";
 
 /**
  * 大别野分区 ID，该分区为跨游戏社区，UID 卡片不限制游戏范围
@@ -37,27 +38,25 @@ function hasExactKeys(value: Record<string, unknown>, keys: Array<string>): bool
 
 /**
  * 校验 UID 卡片请求使用的登录凭据
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param value - 待校验的凭据
  * @returns 已整理的登录凭据
  */
-export function validateGameUidCookie(value: unknown): TGApp.App.Account.Cookie {
-  if (!isRecord(value)) throw new TypeError("登录凭据无效");
-  const accountId = typeof value.account_id === "string" ? value.account_id.trim() : "";
-  const cookieToken = typeof value.cookie_token === "string" ? value.cookie_token.trim() : "";
-  const ltoken = typeof value.ltoken === "string" ? value.ltoken.trim() : "";
-  const ltuid = typeof value.ltuid === "string" ? value.ltuid.trim() : "";
-  if (!accountId || !cookieToken || !ltoken || !ltuid || accountId !== ltuid) {
+export function validateGameUidCookie(value: TGApp.App.Account.Cookie): TGApp.App.Account.Cookie {
+  const { stoken, stuid, mid } = getAppSignCookie(value);
+  const accountId = value.account_id_v2.trim();
+  const ltoken = value.ltoken_v2.trim();
+  if (accountId !== stuid || !ltoken) {
     throw new TypeError("登录凭据缺少 UID 卡片所需字段");
   }
   return {
-    account_id: accountId,
-    cookie_token: cookieToken,
-    ltoken,
-    ltuid,
-    mid: typeof value.mid === "string" ? value.mid : "",
-    stoken: typeof value.stoken === "string" ? value.stoken : "",
-    stuid: typeof value.stuid === "string" ? value.stuid : "",
+    ...value,
+    account_id_v2: accountId,
+    ltoken_v2: ltoken,
+    ltuid_v2: stuid,
+    stoken,
+    stuid,
+    mid,
   };
 }
 

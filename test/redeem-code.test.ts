@@ -1,6 +1,6 @@
 /**
  * 国服兑换码请求与批量执行回归测试
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -23,10 +23,10 @@ const role: TGApp.Sqlite.Account.Game = {
   updated: "",
 };
 const cookie: TGApp.App.Account.Cookie = {
-  account_id: "123",
-  cookie_token: "test-token",
-  ltuid: "123",
-  ltoken: "test-ltoken",
+  account_id_v2: "123",
+  cookie_token_v2: "test-token",
+  ltuid_v2: "123",
+  ltoken_v2: "test-ltoken",
   stuid: "123",
   stoken: "test-stoken",
   mid: "test-mid",
@@ -157,7 +157,7 @@ describe("redeemCode", () => {
       "https://hk4e-api.mihoyo.com/common/apicdkey/api/webExchangeCdkey",
       {
         headers: {
-          Cookie: expect.stringContaining("account_id=123;"),
+          Cookie: expect.stringContaining("account_id_v2=123;"),
           Referer: "https://webstatic.mihoyo.com/",
         },
         query: {
@@ -188,9 +188,9 @@ describe("redeemCode", () => {
 
   it("请求前拒绝非国服角色、错账号和缺失凭据", async () => {
     await expect(redeemCode("CODE", { ...role, gameBiz: "hk4e_global" }, cookie)).rejects.toThrow();
-    await expect(redeemCode("CODE", role, { ...cookie, account_id: "456" })).rejects.toThrow();
-    await expect(redeemCode("CODE", role, { ...cookie, cookie_token: "" })).rejects.toThrow();
-    await expect(redeemCode("CODE", role, { ...cookie, ltuid: "456" })).rejects.toThrow();
+    await expect(redeemCode("CODE", role, { ...cookie, account_id_v2: "456" })).rejects.toThrow();
+    await expect(redeemCode("CODE", role, { ...cookie, cookie_token_v2: "" })).rejects.toThrow();
+    await expect(redeemCode("CODE", role, { ...cookie, ltuid_v2: "456" })).rejects.toThrow();
     expect(get).not.toHaveBeenCalled();
   });
 });

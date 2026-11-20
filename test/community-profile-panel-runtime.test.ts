@@ -56,10 +56,10 @@ vi.mock("@store/user.js", async () => {
       state: () => ({
         uid: "123456789",
         cookie: {
-          account_id: "123456789",
-          cookie_token: "test-cookie",
-          ltoken: "test-ltoken",
-          ltuid: "123456789",
+          account_id_v2: "123456789",
+          cookie_token_v2: "test-cookie",
+          ltoken_v2: "test-ltoken",
+          ltuid_v2: "123456789",
           mid: "test-mid",
           stoken: "test-stoken",
           stuid: "123456789",

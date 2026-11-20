@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -8,6 +8,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
+import { formatAccountCookie, normalizeAccountCookie } from "@utils/account/accountCookie.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { maskUidTail } from "@utils/display/TGUid.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -18,7 +19,7 @@ import TGSqlite from "../index.js";
 
 /**
  * 数据库转成可用数据
- * @since Beta v0.6.0
+ * @since Beta v0.13.2
  * @param data - 用户数据
  * @returns 解析后的数据
  */
@@ -26,7 +27,7 @@ function parseUser(data: TGApp.Sqlite.Account.User): TGApp.App.Account.User {
   return {
     uid: data.uid,
     brief: JSON.parse(data.brief),
-    cookie: JSON.parse(data.cookie),
+    cookie: normalizeAccountCookie(JSON.parse(data.cookie)),
     updated: data.updated,
   };
 }
@@ -135,12 +136,12 @@ async function updateAllAccountCk(): Promise<void> {
 
 /**
  * 更新用户Cookie
- * @since Beta v0.11.2
+ * @since Beta v0.13.2
  * @param data - 用户信息
  * @returns 是否更新成功
  */
 async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
-  const ck = data.cookie;
+  const ck = { ...data.cookie };
   await showLoading.update("正在获取 LToken");
   try {
     const ltokenRes = await passportReq.lToken.get(ck);
@@ -150,7 +151,7 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
       await TGLogger.Warn(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
       return false;
     }
-    ck.ltoken = ltokenRes.data.ltoken;
+    ck.ltoken_v2 = ltokenRes.data.ltoken_v2;
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
@@ -169,7 +170,7 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
       );
       return false;
     }
-    ck.cookie_token = cookieTokenRes.data.cookie_token;
+    ck.cookie_token_v2 = cookieTokenRes.data.cookie_token_v2;
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
@@ -180,7 +181,7 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
   await showLoading.update("正在获取用户信息");
   let briefInfo: TGApp.App.Account.BriefInfo | undefined;
   try {
-    const briefRes = await bbsReq.userInfo(ck);
+    const briefRes = await bbsReq.currentUserInfo(ck);
     if (briefRes.retcode !== 0) {
       await showLoading.end();
       showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
@@ -239,7 +240,7 @@ async function backUpAccount(dir: string): Promise<void> {
 
 /**
  * 恢复用户数据
- * @since Beta v0.12.0
+ * @since Beta v0.13.2
  * @param dir - 恢复目录
  * @returns 是否恢复成功
  */
@@ -257,7 +258,7 @@ async function restoreAccount(dir: string): Promise<boolean> {
     const data = await appFs.readTextFile(filePath);
     const accounts: Array<TGApp.App.Account.User> = JSON.parse(data);
     for (const account of accounts) {
-      await saveAccount(account);
+      await saveAccount({ ...account, cookie: normalizeAccountCookie(account.cookie) });
     }
   } catch (e) {
     await TGLogger.Error(`[UserAccount][restoreAccount] ${e}`);
@@ -267,35 +268,13 @@ async function restoreAccount(dir: string): Promise<boolean> {
 }
 
 /**
- * 复制cookie
- * @since Beta v0.6.0
+ * 复制账号 Cookie，格式与 Cookie 登录解析保持一致。
+ * @since Beta v0.13.2
  * @param cookie - cookie
  * @returns ck
  */
 function copyCookie(cookie: TGApp.App.Account.Cookie): string {
-  let res = "";
-  if (cookie.ltuid && cookie.ltuid !== "") {
-    res += `ltuid=${cookie.ltuid};`;
-  }
-  if (cookie.ltoken && cookie.ltoken !== "") {
-    res += `ltoken=${cookie.ltoken};`;
-  }
-  if (cookie.mid && cookie.mid !== "") {
-    res += `mid=${cookie.mid};`;
-  }
-  if (cookie.cookie_token && cookie.cookie_token !== "") {
-    res += `cookie_token=${cookie.cookie_token};`;
-  }
-  if (cookie.stoken && cookie.stoken !== "") {
-    res += `stoken=${cookie.stoken};`;
-  }
-  if (cookie.stuid && cookie.stuid !== "") {
-    res += `stuid=${cookie.stuid};`;
-  }
-  if (cookie.account_id && cookie.account_id !== "") {
-    res += `account_id=${cookie.account_id};`;
-  }
-  return res;
+  return formatAccountCookie(cookie);
 }
 
 /**

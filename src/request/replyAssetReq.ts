@@ -1,8 +1,9 @@
 /**
  * 米游社回复资源请求
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { prepareReplyImage } from "@utils/bbs/replyImage.js";
 import { assertPositiveNumber, isNonBlankString, isRecord } from "@utils/common/typeGuards.js";
@@ -69,16 +70,16 @@ type CustomUploadParamsResp = {
 
 /**
  * 提取回复资源请求所需的登录凭据
- * @since Beta v0.13.0
- * @param cookie - 包含 ltoken 与 ltuid 的 Cookie
+ * @since Beta v0.13.2
+ * @param cookie - 包含 ltoken_v2、ltuid_v2 与 ltmid_v2 的 Cookie
  * @returns 仅包含回复接口所需字段的 Cookie
  */
 function getReplyCookie(cookie: TGApp.App.Account.LoginCookie): TGApp.App.Account.LoginCookie {
   if (!isRecord(cookie)) throw new TypeError("登录凭据无效");
-  const ltoken = typeof cookie.ltoken === "string" ? cookie.ltoken.trim() : "";
-  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
-  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken 或 ltuid");
-  return { ltoken, ltuid };
+  const ltoken = typeof cookie.ltoken_v2 === "string" ? cookie.ltoken_v2.trim() : "";
+  const ltuid = typeof cookie.ltuid_v2 === "string" ? cookie.ltuid_v2.trim() : "";
+  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken_v2 或 ltuid_v2");
+  return { ltmid_v2: cookie.ltmid_v2, ltoken_v2: ltoken, ltuid_v2: ltuid };
 }
 
 /**
@@ -649,7 +650,7 @@ function combineSignals(signal: AbortSignal | undefined, accountSignal: AbortSig
  * 解析米游社用户昵称
  * @since Beta v0.13.0
  * @param nickname - 待查询的昵称
- * @param cookie - 用户 Cookie，仅使用 ltoken 与 ltuid
+ * @param cookie - 用户 Cookie，仅使用 ltoken_v2 与 ltuid_v2
  * @param gid - 社区 ID
  * @param signal - 可选的取消信号
  * @returns 用户 UID 与规范化昵称
@@ -701,8 +702,8 @@ function assertImageFile(file: File): void {
 
 /**
  * 提取自定义头像上传所需的 App Cookie
- * @since Beta v0.13.0
- * @param cookie - 包含 stuid、stoken、mid 与 ltuid 的 Cookie
+ * @since Beta v0.13.2
+ * @param cookie - 包含 stuid、stoken、mid 与 ltuid_v2 的 Cookie
  * @returns 用于 API_BBS K2 签名的 Cookie
  */
 function getCustomAvatarUploadCookie(
@@ -712,7 +713,7 @@ function getCustomAvatarUploadCookie(
   const stuid = typeof cookie.stuid === "string" ? cookie.stuid.trim() : "";
   const stoken = typeof cookie.stoken === "string" ? cookie.stoken.trim() : "";
   const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
-  const ltuid = typeof cookie.ltuid === "string" ? cookie.ltuid.trim() : "";
+  const ltuid = typeof cookie.ltuid_v2 === "string" ? cookie.ltuid_v2.trim() : "";
   if (!stuid || !stoken || !mid || !ltuid) {
     throw new Error("登录凭据不完整，请刷新登录凭据");
   }
@@ -741,8 +742,8 @@ export async function uploadCustomAvatarImage(
   if (typeof window === "undefined") throw new Error("当前账号状态不可用");
   const storage = window.localStorage;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-    uid: cookie.ltuid,
-    cookie: { ltoken: cookie.ltoken, ltuid: cookie.ltuid },
+    uid: cookie.ltuid_v2,
+    cookie: getLTokenCookie(cookie),
   };
   const accountAbortController = new AbortController();
   const requestSignal = combineSignals(signal, accountAbortController.signal);
@@ -814,9 +815,9 @@ export async function uploadCustomAvatarImage(
 
 /**
  * 上传回复图片
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param file - 待上传的图片文件
- * @param cookie - 用户 Cookie，仅使用 ltoken 与 ltuid
+ * @param cookie - 用户 Cookie，仅使用 ltoken_v2 与 ltuid_v2
  * @param gid - 社区 ID
  * @param signal - 可选的取消信号
  * @returns 已上传图片的信息
@@ -835,7 +836,7 @@ export async function uploadImage(
   if (typeof window === "undefined") throw new Error("当前账号状态不可用");
   const storage = window.localStorage;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
-    uid: authCookie.ltuid,
+    uid: authCookie.ltuid_v2,
     cookie: authCookie,
   };
   if (!matchesCurrentAccount(snapshot, storage)) throw new Error(accountChangedMessage);

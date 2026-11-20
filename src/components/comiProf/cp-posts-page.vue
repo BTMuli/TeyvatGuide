@@ -228,10 +228,10 @@ watch(
     isLogin,
     uid,
     profileUid,
-    () => cookie.value?.account_id,
-    () => cookie.value?.cookie_token,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.account_id_v2,
+    () => cookie.value?.cookie_token_v2,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
   ],
   () => {
     initializedContextKey = "";
@@ -266,10 +266,10 @@ function getContextKey(): string {
     isLogin.value ? "1" : "0",
     uid.value ?? "",
     profileUid.value,
-    cookie.value?.account_id ?? "",
-    cookie.value?.cookie_token ?? "",
-    cookie.value?.ltuid ?? "",
-    cookie.value?.ltoken ?? "",
+    cookie.value?.account_id_v2 ?? "",
+    cookie.value?.cookie_token_v2 ?? "",
+    cookie.value?.ltuid_v2 ?? "",
+    cookie.value?.ltoken_v2 ?? "",
   ].join("\u001f");
 }
 
@@ -285,10 +285,10 @@ function isCurrentAccount(snapshot: AccountSnapshot): boolean {
     canViewProfile.value &&
     uid.value === snapshot.uid &&
     profileUid.value === snapshot.profileUid &&
-    currentCookie?.account_id === snapshot.cookie.account_id &&
-    currentCookie?.cookie_token === snapshot.cookie.cookie_token &&
-    currentCookie?.ltuid === snapshot.cookie.ltuid &&
-    currentCookie?.ltoken === snapshot.cookie.ltoken
+    currentCookie?.account_id_v2 === snapshot.cookie.account_id_v2 &&
+    currentCookie?.cookie_token_v2 === snapshot.cookie.cookie_token_v2 &&
+    currentCookie?.ltuid_v2 === snapshot.cookie.ltuid_v2 &&
+    currentCookie?.ltoken_v2 === snapshot.cookie.ltoken_v2
   );
 }
 
@@ -414,7 +414,7 @@ async function deletePost(post: TGApp.BBS.Post.FullData): Promise<void> {
   const subject = post.post.subject.trim() || `帖子 ${postId}`;
   const account: TGApp.BBS.Reply.AccountSnapshot = {
     uid: snapshot.uid,
-    cookie: { ltoken: snapshot.cookie.ltoken, ltuid: snapshot.cookie.ltuid },
+    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
   };
   const requestCookie = { ...account.cookie };
   const version = postsController.getVersion();

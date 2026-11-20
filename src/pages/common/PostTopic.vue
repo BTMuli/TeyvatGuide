@@ -251,7 +251,7 @@ const publishGid = computed<number>(() =>
   curGid.value > 0 ? curGid.value : (curGame.value?.id ?? 0),
 );
 const canWrite = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 const publishTypes = computed<Array<PublishType>>(() => {
   if (publishGid.value <= 0) return [];

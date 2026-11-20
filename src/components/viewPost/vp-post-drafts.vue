@@ -153,7 +153,7 @@ const isLast = ref<boolean>(true);
 const nextOffset = ref<string>("0");
 const viewType = ref<TGApp.BBS.PostDraft.ViewType>(1);
 const accountReady = computed<boolean>(
-  () => !!uid.value && cookie.value?.ltuid === uid.value && !!cookie.value?.ltoken.trim(),
+  () => !!uid.value && cookie.value?.ltuid_v2 === uid.value && !!cookie.value?.ltoken_v2.trim(),
 );
 let active = true;
 let requestVersion = 0;
@@ -179,10 +179,10 @@ watch(
 watch(
   [
     uid,
-    () => cookie.value?.account_id,
-    () => cookie.value?.cookie_token,
-    () => cookie.value?.ltuid,
-    () => cookie.value?.ltoken,
+    () => cookie.value?.account_id_v2,
+    () => cookie.value?.cookie_token_v2,
+    () => cookie.value?.ltuid_v2,
+    () => cookie.value?.ltoken_v2,
   ],
   () => {
     if (!visible.value) return;
@@ -211,7 +211,7 @@ function getAccountSnapshot(): TGApp.BBS.Reply.AccountSnapshot | undefined {
   if (!accountReady.value || !uid.value || !cookie.value) return undefined;
   return {
     uid: uid.value,
-    cookie: { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid },
+    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
   };
 }
 

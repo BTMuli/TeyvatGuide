@@ -1,6 +1,6 @@
 /**
  * 米游社商店状态与兑换参数回归测试。
- * @since Beta v0.13.1
+ * @since Beta v0.13.2
  */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -15,10 +15,10 @@ import {
 import { getShopStatusText, isShopBatchSoldOut } from "../src/utils/community/shopDisplay.js";
 
 const accountCookie: TGApp.App.Account.Cookie = {
-  account_id: "398265412",
-  cookie_token: "cookie-token",
-  ltoken: "ltoken",
-  ltuid: "398265412",
+  account_id_v2: "398265412",
+  cookie_token_v2: "cookie-token",
+  ltoken_v2: "ltoken",
+  ltuid_v2: "398265412",
   mid: "mid",
   stoken: "stoken",
   stuid: "398265412",
@@ -238,7 +238,7 @@ describe("shop exchange params", () => {
 
   it("rejects mixed account cookies and mismatched roles", () => {
     expect(() =>
-      buildShopExchangeParams(createGoods(), { ...accountCookie, ltuid: "998" }),
+      buildShopExchangeParams(createGoods(), { ...accountCookie, ltuid_v2: "998" }),
     ).toThrow("账号 ID 不一致");
     const role: TGApp.BBS.Shop.Role = {
       game_biz: "nap_cn",

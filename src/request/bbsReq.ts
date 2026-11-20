@@ -1,9 +1,12 @@
 /**
  * BBS 请求模块
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  */
 
+import { getCookieTokenCookie, getWebAccountCookies } from "@utils/account/accountCookie.js";
+import TGBbs from "@utils/bbs/TGBbs.js";
 import {
+  getAppSignCookie,
   getCollectionRequestHeader,
   getCommunityCookie,
   getRequestHeader,
@@ -24,8 +27,30 @@ async function getEmoticonSet(): Promise<TGApp.BBS.Emoji.Resp> {
 }
 
 /**
+ * 从米游社原生接口读取登录账号的资料。
+ * @since Beta v0.13.2
+ * @param cookie - 当前账号的原生凭据
+ * @returns 用户信息响应数据
+ */
+async function getCurrentUserInfo(
+  cookie: TGApp.App.Account.SignUidCookie,
+): Promise<TGApp.BBS.User.InfoResp> {
+  const ck = getAppSignCookie(cookie);
+  const params = { uid: ck.stuid };
+  const resp = await TGHttps.get<TGApp.BBS.User.InfoResp>(`${mbBu}user/api/getUserFullInfo`, {
+    headers: {
+      ...getRequestHeader(ck, "GET", params, "K2", true),
+      "user-agent": TGBbs.ua,
+      "x-rpc-client_type": "2",
+    },
+    query: params,
+  });
+  return resp.data;
+}
+
+/**
  * 根据 cookie 获取用户信息
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param cookie - 账户 cookie
  * @param gid - 分区 ID，默认原神分区
  * @returns 用户信息响应数据
@@ -34,7 +59,7 @@ async function getUserFullInfo(
   cookie: TGApp.App.Account.Cookie,
   gid: string = "2",
 ): Promise<TGApp.BBS.User.InfoResp> {
-  const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
+  const ck = getWebAccountCookies(cookie);
   const params = { gids: gid };
   const resp = await TGHttps.get<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
     headers: getRequestHeader(ck, "GET", params, "X4", true),
@@ -45,7 +70,7 @@ async function getUserFullInfo(
 
 /**
  * 根据gid和id获取用户信息
- * @since Beta v0.13.0
+ * @since Beta v0.13.2
  * @param gid - gid
  * @param userId - 用户 id
  * @param cookie - 当前账户 cookie，传入后才能获取真实关注关系
@@ -57,10 +82,7 @@ async function getOtherUserInfo(
   cookie?: TGApp.App.Account.Cookie,
 ): Promise<TGApp.BBS.User.InfoResp> {
   const params = { gids: gid.toString(), uid: userId };
-  const ck: Record<string, string> =
-    cookie === undefined
-      ? {}
-      : { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  const ck = cookie === undefined ? {} : getWebAccountCookies(cookie);
   const resp = await TGHttps.get<TGApp.BBS.User.InfoResp>(`${mbBu}user/wapi/getUserFullInfo`, {
     headers: getRequestHeader(ck, "GET", params, "X4", true),
     query: params,
@@ -98,7 +120,7 @@ async function getCollectionDetail(
 
 /**
  * 获取米游币消耗/增加记录
- * @since Beta v0.10.5
+ * @since Beta v0.13.2
  * @param cookie - 用户ck
  * @param isCostAction - 是否获取消耗记录
  * @param lastTime - 最后一项的时间戳，初始为0
@@ -109,7 +131,7 @@ async function getMybRecordDetail(
   isCostAction: boolean = false,
   lastTime: string = "0",
 ): Promise<TGApp.BBS.Mission.MybRecResp> {
-  const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
+  const ck = getCookieTokenCookie(cookie);
   const params = {
     app_id: "1",
     point_sn: "myb",
@@ -129,6 +151,7 @@ async function getMybRecordDetail(
 
 const bbsReq = {
   collection: getCollectionDetail,
+  currentUserInfo: getCurrentUserInfo,
   emojis: getEmoticonSet,
   userInfo: getUserFullInfo,
   otherUserInfo: getOtherUserInfo,
