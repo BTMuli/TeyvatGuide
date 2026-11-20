@@ -9,6 +9,10 @@ Update: 2026-11-18
 >
 > 更新于 `2026-11-18 12:56:42`
 
+# CHANGELOG v0.12.x
+
+> 本文仅记录 v0.12.x 版本的更新内容
+
 ## [0.13.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.13.1) (2026-11-18)
 
 - ✨ 完善背包材料历史记录管理
