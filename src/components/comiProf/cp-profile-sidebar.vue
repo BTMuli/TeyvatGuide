@@ -37,7 +37,7 @@
         />
         <v-btn
           v-if="!isOwnProfile"
-          :to="getCommunityProfileRoute('posts', undefined, { gid: String(sectionGid) })"
+          :to="getCommunityProfileRoute('history', undefined, { gid: String(sectionGid) })"
           aria-label="我的主页"
           icon="mdi-home-outline"
           size="x-small"
@@ -347,6 +347,8 @@ async function toggleFollow(): Promise<void> {
 .community-profile-sidebar-heading {
   display: flex;
   min-width: 0;
+  height: 28px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   padding: 0 6px;
