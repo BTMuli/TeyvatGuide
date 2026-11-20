@@ -25,15 +25,16 @@
             <img :src="item.info.icon" alt="icon" />
           </div>
           <span>{{ maskUidTail(item.account.gameUid) }} {{ item.account.regionName }}</span>
-          <v-icon
+          <button
             v-if="item.account.gameBiz !== 'hk4e_cn'"
-            color="var(--tgc-od-red)"
-            size="14"
+            aria-label="删除账户"
+            class="tg-icon-button"
             title="删除账户"
+            type="button"
             @click.stop="deleteAccount(item)"
           >
-            mdi-delete
-          </v-icon>
+            <v-icon aria-hidden="true" color="var(--tgc-od-red)" size="14">mdi-delete</v-icon>
+          </button>
         </div>
         <div class="tuss-stat">
           <div

@@ -27,8 +27,10 @@
 - 操作按钮放 `#footer`；没有分享需求时显式传 `:showShare="false"`，避免出现无意义的分享按钮。
 - 尺寸与滚动由 `panelWidth`、`panelMaxHeight`、`contentMaxHeight` 控制，先用默认值（800px / 480px），
   内容确实受限时再覆盖；不要用全局样式改面板。
-- 提交或保存进行中传 `:closeDisabled`，它会同时禁用关闭按钮与点击外部关闭；需要单独控制点击外部时
+- 提交或保存进行中传 `:closeDisabled`，它会同时禁用关闭按钮、点击外部关闭和 Esc 关闭。需要单独控制点击外部时
   再用局部 `outerClose` 开关（参考 `src/components/pageConfig/tco-imgQuality.vue` 的 `clickOuter`）。
+- Esc 关闭由 `TopOverlay` 的公共面板壳处理。业务内容避免重复监听同一个关闭动作。表单需要把焦点移到
+  输入框或在关闭后还给触发控件时，使用 `after-enter` / `after-leave`。
 - 只需要遮罩、不需要面板壳时使用 `@comp/app/t-overlay.vue`；不要自行拼装 `position: fixed` 遮罩、
   blur 与 z-index。
 - 不要在浮层内叠加 `v-dialog` 等 Vuetify 遮罩；需要二级内容时优先在同一面板内切换视图，简单确认

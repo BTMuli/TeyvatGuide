@@ -135,24 +135,21 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <div
-                  ref="rowButtons"
-                  :aria-controls="detailId"
-                  :aria-expanded="selectedId === row.id"
-                  :data-item-id="row.id"
-                  class="rerun-name"
-                  role="button"
-                  tabindex="0"
-                  @click="selectRow(row.id)"
-                  @keydown.enter.prevent="selectRow(row.id)"
-                  @keydown.space.prevent="selectRow(row.id)"
-                >
+                <div ref="rowButtons" :data-item-id="row.id" class="rerun-name">
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
                   <span class="rerun-name-text">
                     <strong>{{ row.name }}</strong>
                     <span class="rerun-mobile-wait">{{ waitingLabel(row) }}</span>
                   </span>
                   <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
+                  <button
+                    :aria-controls="detailId"
+                    :aria-expanded="selectedId === row.id"
+                    :aria-label="`${row.name}，查看详情`"
+                    class="rerun-name-hit"
+                    type="button"
+                    @click="selectRow(row.id)"
+                  />
                 </div>
               </th>
               <td>
@@ -220,24 +217,21 @@
               :class="{ selected: selectedId === row.id }"
             >
               <th class="rerun-identity" scope="row">
-                <div
-                  ref="rowButtons"
-                  :aria-controls="detailId"
-                  :aria-expanded="selectedId === row.id"
-                  :data-item-id="row.id"
-                  class="rerun-name"
-                  role="button"
-                  tabindex="0"
-                  @click="selectRow(row.id)"
-                  @keydown.enter.prevent="selectRow(row.id)"
-                  @keydown.space.prevent="selectRow(row.id)"
-                >
+                <div ref="rowButtons" :data-item-id="row.id" class="rerun-name">
                   <TItemBox :modelValue="row.boxData" aria-hidden="true" />
                   <span class="rerun-name-text">
                     <strong>{{ row.name }}</strong>
                     <span class="rerun-muted">{{ waitingLabel(row) }}</span>
                   </span>
                   <v-icon class="rerun-name-arrow" icon="mdi-chevron-right" />
+                  <button
+                    :aria-controls="detailId"
+                    :aria-expanded="selectedId === row.id"
+                    :aria-label="`${row.name}，查看详情`"
+                    class="rerun-name-hit"
+                    type="button"
+                    @click="selectRow(row.id)"
+                  />
                 </div>
               </th>
               <td v-for="vg in displayVersionGroups" :key="vg.version">
@@ -950,6 +944,7 @@ function clearSearch(): void {
 }
 
 .rerun-name {
+  position: relative;
   display: flex;
   width: 100%;
   height: 44px;
@@ -966,13 +961,24 @@ function clearSearch(): void {
     background: var(--box-bg-4);
   }
 
+  :deep(.tib-box) {
+    flex-shrink: 0;
+  }
+}
+
+.rerun-name-hit {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  inset: 0;
+
   &:focus-visible {
     outline: 2px solid var(--tgc-yellow-3);
     outline-offset: 2px;
-  }
-
-  :deep(.tib-box) {
-    flex-shrink: 0;
   }
 }
 

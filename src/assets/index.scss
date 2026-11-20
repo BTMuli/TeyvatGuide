@@ -100,3 +100,62 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--tgc-od-orange);
 }
+
+/**
+ * 通用无背景图标按钮
+ * @since Beta v0.13.1
+ */
+
+.tg-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.tg-icon-button:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.tg-icon-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/**
+ * 通用行内文字按钮
+ * @since Beta v0.13.1
+ */
+
+.tg-text-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  gap: 2px;
+  text-align: inherit;
+}
+
+.tg-text-button:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.tg-text-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}

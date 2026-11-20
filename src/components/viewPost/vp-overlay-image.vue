@@ -75,11 +75,54 @@
           </div>
         </template>
         <div class="tpoi-tools">
-          <v-icon v-if="!showOri" title="查看原图" @click="showOri = true">mdi-magnify</v-icon>
-          <v-icon v-else title="切换背景色" @click="setBlackBg">mdi-format-color-fill</v-icon>
-          <v-icon v-if="showCopy" title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
-          <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
-          <v-icon title="关闭浮窗" @click="visible = false">mdi-close</v-icon>
+          <button
+            v-if="!showOri"
+            aria-label="查看原图"
+            class="tg-icon-button"
+            title="查看原图"
+            type="button"
+            @click="showOri = true"
+          >
+            <v-icon aria-hidden="true">mdi-magnify</v-icon>
+          </button>
+          <button
+            v-else
+            aria-label="切换背景色"
+            class="tg-icon-button"
+            title="切换背景色"
+            type="button"
+            @click="setBlackBg"
+          >
+            <v-icon aria-hidden="true">mdi-format-color-fill</v-icon>
+          </button>
+          <button
+            v-if="showCopy"
+            aria-label="复制到剪贴板"
+            class="tg-icon-button"
+            title="复制到剪贴板"
+            type="button"
+            @click="onCopy"
+          >
+            <v-icon aria-hidden="true">mdi-content-copy</v-icon>
+          </button>
+          <button
+            aria-label="下载到本地"
+            class="tg-icon-button"
+            title="下载到本地"
+            type="button"
+            @click="onDownload"
+          >
+            <v-icon aria-hidden="true">mdi-download</v-icon>
+          </button>
+          <button
+            aria-label="关闭浮窗"
+            class="tg-icon-button"
+            title="关闭浮窗"
+            type="button"
+            @click="visible = false"
+          >
+            <v-icon aria-hidden="true">mdi-close</v-icon>
+          </button>
         </div>
       </div>
     </div>

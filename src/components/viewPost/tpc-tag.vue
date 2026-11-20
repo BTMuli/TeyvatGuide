@@ -1,7 +1,12 @@
 <template>
-  <span :title="`点击跳转#${props.tag}#`" class="tag-label">
+  <component
+    :is="interactive ? 'button' : 'span'"
+    :title="`点击跳转#${props.tag}#`"
+    :type="interactive ? 'button' : undefined"
+    class="tag-label"
+  >
     {{ props.tag }}
-  </span>
+  </component>
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
@@ -9,9 +14,9 @@ import { str2Color } from "@utils/display/colorFunc.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 
-type TpcTagProps = { tag: string };
+type TpcTagProps = { tag: string; interactive?: boolean };
 
-const props = defineProps<TpcTagProps>();
+const props = withDefaults(defineProps<TpcTagProps>(), { interactive: false });
 const { theme } = storeToRefs(useAppStore());
 const isDarkMode = computed<boolean>(() => theme.value === "dark");
 const tagColor = computed<string>(() => tag2Color(props.tag, isDarkMode.value));
@@ -28,10 +33,12 @@ function tag2Color(str: string, isDarkMode: boolean = false): string {
   align-items: center;
   justify-content: center;
   padding: 0 6px;
+  border: 0;
   border-radius: 12px;
   background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
   color: v-bind(tagColor); /* stylelint-disable-line value-keyword-case */
   cursor: pointer;
+  font: inherit;
   gap: 2px;
 
   &:hover {

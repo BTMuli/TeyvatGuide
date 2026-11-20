@@ -15,13 +15,16 @@
           <div v-if="ac.uid === currentUid" title="当前登录账号">
             <v-icon color="green">mdi-account-check</v-icon>
           </div>
-          <v-icon
+          <button
             v-else
-            icon="mdi-account-convert"
-            size="small"
+            aria-label="切换用户"
+            class="tg-icon-button"
             title="切换用户"
+            type="button"
             @click="switchUser(ac.uid)"
-          />
+          >
+            <v-icon aria-hidden="true" icon="mdi-account-convert" size="small" />
+          </button>
         </template>
       </v-list-item>
     </v-list>

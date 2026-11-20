@@ -114,18 +114,15 @@
       <div class="game-path-copy">
         <div class="game-path-label">
           <span>安装路径</span>
-          <v-icon
+          <button
             aria-label="打开安装目录"
             class="game-path-open"
-            icon="mdi-folder-open-outline"
-            role="button"
-            size="16"
-            tabindex="0"
             title="打开安装目录"
+            type="button"
             @click="handleOpenPath"
-            @keydown.enter="handleOpenPath"
-            @keydown.space.prevent="handleOpenPath"
-          />
+          >
+            <v-icon aria-hidden="true" icon="mdi-folder-open-outline" size="16" />
+          </button>
         </div>
         <strong>{{ installation.executablePath }}</strong>
       </div>
@@ -847,13 +844,26 @@ async function handleUninstall(): Promise<void> {
 }
 
 .game-path-open {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
   color: var(--box-text-2);
   cursor: pointer;
 
-  &:hover,
-  &:focus-visible {
+  &:hover {
     color: var(--tgc-od-orange);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-orange);
+    outline-offset: 2px;
   }
 }
 

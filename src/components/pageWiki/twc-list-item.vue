@@ -4,10 +4,6 @@
     :aria-label="props.dimmed ? `${props.data.name}，未拥有` : props.data.name"
     :class="{ selected: props.curItem.id === props.data.id, 'is-unowned': props.dimmed }"
     class="twc-li-box"
-    role="button"
-    tabindex="0"
-    @keydown.enter.self="triggerClick"
-    @keydown.space.self.prevent="triggerClick"
   >
     <div class="twc-li-left">
       <img :src="`/icon/bg/${props.data.star}-Star.webp`" alt="" class="bg" />
@@ -79,10 +75,6 @@ const extraCostumes = computed<Array<TGApp.App.Character.Costume>>(() => {
   if (props.mode !== "character") return [];
   return props.data.costumes.filter((costume) => !costume.isDefault);
 });
-
-function triggerClick(event: KeyboardEvent): void {
-  if (event.currentTarget instanceof HTMLElement) event.currentTarget.click();
-}
 </script>
 <style lang="scss" scoped>
 $twc-li-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
@@ -109,11 +101,6 @@ $twc-li-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
     border-color: var(--common-shadow-2);
     background: var(--box-bg-2);
     box-shadow: 0 1px 4px var(--common-shadow-t-2);
-  }
-
-  &:focus-visible {
-    outline: 2px solid $twc-li-base;
-    outline-offset: 1px;
   }
 }
 

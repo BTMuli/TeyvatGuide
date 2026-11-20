@@ -10,13 +10,16 @@
               <span>{{ data.name }}</span>
               <span>{{ data.title }}</span>
               <div class="twc-bi-title-actions">
-                <img
+                <button
                   v-if="props.item.contentId !== 0"
-                  alt="前往观测枢"
-                  src="/platforms/mhy/observer.webp"
+                  aria-label="前往观测枢"
+                  class="tg-icon-button"
                   title="前往观测枢"
+                  type="button"
                   @click="toWiki()"
-                />
+                >
+                  <img alt="" src="/platforms/mhy/observer.webp" />
+                </button>
                 <v-btn
                   :class="{ planned: inPlan }"
                   :icon="inPlan ? 'mdi-clipboard-check-outline' : 'mdi-calculator-variant-outline'"

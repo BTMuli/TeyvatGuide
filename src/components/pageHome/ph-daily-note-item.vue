@@ -5,20 +5,29 @@
       <div class="dni-header-title">
         <span>{{ props.account.nickname }}</span>
         <span class="dni-header-acts" data-html2canvas-ignore>
-          <v-icon
-            :size="16"
-            color="var(--tgc-od-orange)"
-            icon="mdi-share-variant"
-            variant="elevated"
+          <button
+            aria-label="分享实时便笺"
+            class="tg-icon-button"
+            title="分享"
+            type="button"
             @click="handleShare"
-          />
-          <v-icon
-            :size="16"
-            color="var(--tgc-od-orange)"
-            icon="mdi-refresh"
-            variant="elevated"
+          >
+            <v-icon
+              aria-hidden="true"
+              :size="16"
+              color="var(--tgc-od-orange)"
+              icon="mdi-share-variant"
+            />
+          </button>
+          <button
+            aria-label="刷新实时便笺"
+            class="tg-icon-button"
+            title="刷新"
+            type="button"
             @click="handleRefresh"
-          />
+          >
+            <v-icon aria-hidden="true" :size="16" color="var(--tgc-od-orange)" icon="mdi-refresh" />
+          </button>
         </span>
       </div>
       <div class="dni-header-append">

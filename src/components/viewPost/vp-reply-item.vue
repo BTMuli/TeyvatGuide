@@ -14,11 +14,8 @@
     </div>
     <div
       :aria-label="props.preview ? undefined : `查看 ${props.modelValue.user.nickname} 的用户信息`"
-      :role="props.preview ? undefined : 'button'"
-      :tabindex="props.preview ? undefined : 0"
       class="tpr-user"
       @click="handleUser()"
-      @keydown.enter.space.prevent="handleUser()"
     >
       <div class="tpru-left">
         <div class="avatar">
@@ -67,18 +64,8 @@
           <v-icon v-else size="small">mdi-thumb-up</v-icon>
           {{ likeCount }}
         </button>
-        <span
-          v-if="props.modelValue.sub_reply_count > 0"
-          :aria-expanded="showSub"
-          aria-label="查看回复"
-          class="tpr-reply"
-          role="button"
-          tabindex="0"
-          title="查看回复"
-          @click.stop="showReply()"
-          @keydown.enter.space.prevent.stop="showReply()"
-        >
-          <v-icon size="small">mdi-message-text</v-icon>
+        <span v-if="props.modelValue.sub_reply_count > 0" class="tpr-reply" title="查看回复">
+          <v-icon aria-hidden="true" size="small">mdi-message-text</v-icon>
           <span>{{ props.modelValue.sub_reply_count }}</span>
           <v-menu
             v-model="showSub"
@@ -111,6 +98,13 @@
               </div>
             </v-list>
           </v-menu>
+          <button
+            :aria-expanded="showSub"
+            aria-label="查看回复"
+            class="tpr-reply-hit"
+            type="button"
+            @click="showReply()"
+          />
         </span>
       </div>
     </div>
@@ -838,11 +832,6 @@ async function handleUser(): Promise<void> {
   opacity: 0.82;
 }
 
-.tpr-user:focus-visible {
-  outline: 2px solid var(--common-text-title);
-  outline-offset: 2px;
-}
-
 .tpru-left {
   position: relative;
   display: flex;
@@ -997,6 +986,7 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-reply {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1004,7 +994,18 @@ async function handleUser(): Promise<void> {
   gap: 4px;
 }
 
-.tpr-reply:focus-visible {
+.tpr-reply-hit {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  inset: 0;
+}
+
+.tpr-reply-hit:focus-visible {
   outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }

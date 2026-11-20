@@ -1,15 +1,12 @@
 <!-- 养成计算-角色/武器选择列表项 -->
 <template>
-  <div
+  <button
     :aria-pressed="selected"
     :class="{ selected }"
     :title
     class="ucpli-item"
-    role="button"
-    tabindex="0"
+    type="button"
     @click="emit('select')"
-    @keydown.enter.prevent="emit('select')"
-    @keydown.space.prevent="emit('select')"
   >
     <UcItemIcon :alt="name" :icon="icon" :primaryBadge :size="56" :star="star" />
     <span class="ucpli-content">
@@ -25,7 +22,7 @@
       </span>
     </span>
     <v-icon v-if="selected" class="ucpli-selected" size="18">mdi-check-circle</v-icon>
-  </div>
+  </button>
 </template>
 
 <script lang="ts" setup>
@@ -64,6 +61,7 @@ const emit = defineEmits<{
   background: var(--common-shadow-t-2);
   color: var(--common-text-title);
   cursor: pointer;
+  font: inherit;
   gap: 10px;
   text-align: left;
   transition:

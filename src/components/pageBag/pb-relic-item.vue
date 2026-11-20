@@ -1,20 +1,14 @@
 <!-- 背包圣遗物物品项 -->
 <template>
   <div
-    :aria-label="props.relic.brief.name"
-    :aria-selected="props.selected"
     :class="{ selected: props.selected, detail: props.detail }"
     :style="{
       backgroundImage: `url('/icon/bg/${props.relic.brief.star}-Star.webp')`,
       backgroundSize: 'cover',
     }"
-    role="option"
-    tabindex="0"
     :title="props.relic.brief.name"
     class="pb-ri-box"
     @click="toRelic()"
-    @keydown.enter.prevent="toRelic()"
-    @keydown.space.prevent="toRelic()"
   >
     <img
       :src="`/WIKI/relic/${props.relic.brief.icon}.webp`"
@@ -103,11 +97,6 @@ $pb-ri-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
       outline: 2px solid var(--tgc-od-blue);
       outline-offset: -2px;
     }
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: 2px;
   }
 }
 

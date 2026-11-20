@@ -120,6 +120,7 @@
     </div>
     <template v-for="material in visibleMaterials" :key="material.info.id">
       <TMaterialStarChip
+        :interactive="true"
         mode="bag"
         :id="material.info.id"
         :name="material.info.name"

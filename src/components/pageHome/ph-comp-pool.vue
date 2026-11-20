@@ -3,9 +3,15 @@
   <THomeCard :append="isLogin" modernShare title="限时祈愿">
     <template #title>
       <span>限时祈愿</span>
-      <v-icon class="tp-refresh" size="small" title="刷新" @click.stop="handleRefresh()">
-        mdi-refresh
-      </v-icon>
+      <button
+        aria-label="刷新"
+        class="tp-refresh tg-icon-button"
+        title="刷新"
+        type="button"
+        @click.stop="handleRefresh()"
+      >
+        <v-icon aria-hidden="true" size="small">mdi-refresh</v-icon>
+      </button>
     </template>
     <template v-if="isLogin" #title-append>
       <v-switch v-model="isUserPool" class="tp-switch"></v-switch>

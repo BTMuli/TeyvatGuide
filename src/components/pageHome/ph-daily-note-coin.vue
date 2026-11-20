@@ -10,22 +10,24 @@
         <span>{{ current }}/{{ max }}</span>
       </div>
       <div class="pdb-coin-desc">
-        <span
+        <button
           v-if="!showCountdown && fullTimeText"
           :title="'点击查看倒计时'"
-          class="pdb-coin-fulltime clickable"
+          class="pdb-coin-fulltime clickable tg-text-button"
+          type="button"
           @click="showCountdown = true"
         >
           {{ fullTimeText }}回满
-        </span>
-        <span
+        </button>
+        <button
           v-if="showCountdown"
           :title="fullTimeText ? `${fullTimeText}回满` : ''"
-          class="pdb-coin-countdown clickable"
+          class="pdb-coin-countdown clickable tg-text-button"
+          type="button"
           @click="showCountdown = false"
         >
           {{ formattedTime }}
-        </span>
+        </button>
       </div>
     </div>
   </div>

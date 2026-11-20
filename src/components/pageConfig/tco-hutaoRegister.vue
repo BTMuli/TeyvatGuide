@@ -65,9 +65,14 @@
           label="密码（至少8位）"
         >
           <template #append-inner>
-            <v-icon :aria-label="showPwd ? '隐藏密码' : '显示密码'" @click="showPwd = !showPwd">
-              {{ showPwd ? "mdi-eye" : "mdi-eye-off" }}
-            </v-icon>
+            <button
+              :aria-label="showPwd ? '隐藏密码' : '显示密码'"
+              class="tg-icon-button"
+              type="button"
+              @click="showPwd = !showPwd"
+            >
+              <v-icon aria-hidden="true">{{ showPwd ? "mdi-eye" : "mdi-eye-off" }}</v-icon>
+            </button>
           </template>
         </v-text-field>
         <v-text-field
@@ -81,12 +86,14 @@
           label="确认密码"
         >
           <template #append-inner>
-            <v-icon
+            <button
               :aria-label="showConfirmPwd ? '隐藏确认密码' : '显示确认密码'"
+              class="tg-icon-button"
+              type="button"
               @click="showConfirmPwd = !showConfirmPwd"
             >
-              {{ showConfirmPwd ? "mdi-eye" : "mdi-eye-off" }}
-            </v-icon>
+              <v-icon aria-hidden="true">{{ showConfirmPwd ? "mdi-eye" : "mdi-eye-off" }}</v-icon>
+            </button>
           </template>
         </v-text-field>
         <v-card-actions class="thrc-actions">

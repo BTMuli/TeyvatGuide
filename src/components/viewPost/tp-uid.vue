@@ -1,10 +1,17 @@
 <template>
   <div class="tpu-box">
     <div class="tpu-top">
-      <span v-if="props.copyable !== false" data-html2canvas-ignore @click="copyUid()">
-        <v-icon size="12">mdi-content-copy</v-icon>
+      <button
+        v-if="props.copyable !== false"
+        aria-label="复制 UID"
+        class="tg-text-button"
+        data-html2canvas-ignore
+        type="button"
+        @click="copyUid()"
+      >
+        <v-icon aria-hidden="true" size="12">mdi-content-copy</v-icon>
         <span>复制</span>
-      </span>
+      </button>
       <span class="tpu-game">{{
         props.data.insert.game_user_info.game_name || gameInfo?.name || "未知游戏"
       }}</span>

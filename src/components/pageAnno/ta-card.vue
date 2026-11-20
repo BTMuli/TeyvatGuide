@@ -1,5 +1,5 @@
 <template>
-  <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card" @click="console.log(props)">
+  <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card">
     <div :title="props.anno.title" class="anno-cover" @click="createAnno">
       <TMiImg v-if="props.anno.banner !== ''" :ori="true" :src="props.anno.banner" alt="cover" />
       <img v-else alt="cover" src="/UI/post/defaultCover.webp" />

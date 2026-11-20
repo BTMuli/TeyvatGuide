@@ -20,17 +20,12 @@
       <div class="pgop-methods">
         <div
           :aria-disabled="registering || discovering || undefined"
-          :aria-pressed="method === 'auto'"
           :class="{ selected: method === 'auto' }"
-          :tabindex="registering || discovering ? -1 : 0"
           class="pgop-method"
-          role="button"
           @click="handleRescan"
-          @keydown.enter.prevent="handleRescan"
-          @keydown.space.prevent="handleRescan"
         >
           <div class="pgop-method-icon">
-            <v-icon>mdi-magnify</v-icon>
+            <v-icon aria-hidden="true">mdi-magnify</v-icon>
           </div>
           <div class="pgop-method-copy">
             <strong>自动识别</strong>
@@ -39,17 +34,12 @@
         </div>
         <div
           :aria-disabled="registering || undefined"
-          :aria-pressed="method === 'manual'"
           :class="{ selected: method === 'manual' }"
-          :tabindex="registering ? -1 : 0"
           class="pgop-method"
-          role="button"
           @click="pickExecutable"
-          @keydown.enter.prevent="pickExecutable"
-          @keydown.space.prevent="pickExecutable"
         >
           <div class="pgop-method-icon">
-            <v-icon>mdi-folder-open</v-icon>
+            <v-icon aria-hidden="true">mdi-folder-open</v-icon>
           </div>
           <div class="pgop-method-copy">
             <strong>手动选择</strong>
@@ -477,11 +467,6 @@ watch(
   &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.64;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-orange);
-    outline-offset: 2px;
   }
 
   &.selected {

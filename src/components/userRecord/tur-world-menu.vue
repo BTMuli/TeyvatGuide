@@ -37,16 +37,16 @@
             <TMiImg :ori="true" :src="world.icon" :style="{ filter: imgFilter }" alt="" />
           </div>
           <span :title="`${world.name}探索信息`">{{ world.name }}探索信息</span>
-          <v-icon
+          <button
             aria-label="分享探索信息"
-            class="tur-wm-share"
+            class="tur-wm-share tg-icon-button"
             data-html2canvas-ignore
-            size="12"
             title="分享探索信息"
+            type="button"
             @click.stop="shareMenu"
           >
-            mdi-share-variant
-          </v-icon>
+            <v-icon aria-hidden="true" size="12">mdi-share-variant</v-icon>
+          </button>
         </div>
         <div class="tur-wm-exploration">
           <span class="tur-wm-exploration-label">总探索度</span>

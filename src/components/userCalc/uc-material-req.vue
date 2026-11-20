@@ -10,12 +10,8 @@
       static: !interactive,
     }"
     class="ucmr-item"
-    :role="interactive ? 'button' : undefined"
-    :tabindex="interactive ? 0 : undefined"
     :title="interactive ? '查看材料详情' : undefined"
     @click="onSelect"
-    @keydown.enter="onSelect"
-    @keydown.space.prevent="onSelect"
   >
     <div class="ucmr-icon">
       <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
@@ -94,11 +90,6 @@ function onSelect(): void {
   background: var(--common-shadow-t-1);
   cursor: pointer;
   transition: opacity 160ms ease;
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: -2px;
-  }
 
   &.missing {
     border-color: var(--tgc-od-red);

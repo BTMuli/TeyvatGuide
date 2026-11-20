@@ -26,13 +26,12 @@
     </template>
 
     <template #groups>
-      <div aria-label="圣遗物分组" class="pb-rw-group-list" role="listbox">
+      <div aria-label="圣遗物分组" class="pb-rw-group-list" role="group">
         <button
           v-for="group in props.groups"
           :key="group.key"
-          :aria-selected="group.key === currentGroup?.key"
+          :aria-current="group.key === currentGroup?.key ? 'true' : undefined"
           class="pb-rw-group-option"
-          role="option"
           type="button"
           @click="selectGroup(group.key)"
         >
@@ -180,7 +179,7 @@
         v-if="currentItems.length > 0"
         :aria-label="currentGroup ? `${currentGroup.setName}套装实例` : '圣遗物'"
         class="pb-rw-items-grid"
-        role="listbox"
+        role="group"
       >
         <PbRelicItem
           v-for="relic in renderedItems"
@@ -775,7 +774,7 @@ function handleBack(): void {
   opacity: 1;
 }
 
-.pb-rw-group-option[aria-selected="true"] {
+.pb-rw-group-option[aria-current="true"] {
   background: var(--bag-surface-selected);
   opacity: 1;
 }

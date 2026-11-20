@@ -23,18 +23,25 @@
             />
           </div>
           <div class="dialog-btn-box">
-            <button class="dialog-btn no-btn" @click="handleCancel">
+            <button class="dialog-btn no-btn" type="button" @click="handleCancel">
               <span>></span>
               <span>{{ data.cancelLabel }}</span>
             </button>
-            <button class="dialog-btn ok-btn" @click="handleConfirm">
+            <button class="dialog-btn ok-btn" type="button" @click="handleConfirm">
               <span>></span>
               <span>{{ data.confirmLabel }}</span>
             </button>
           </div>
-          <div v-if="!!data.otcancel" class="dialog-close-btn" title="关闭" @click="handleOuter">
+          <button
+            v-if="!!data.otcancel"
+            aria-label="关闭"
+            class="dialog-close-btn"
+            title="关闭"
+            type="button"
+            @click="handleOuter"
+          >
             x
-          </div>
+          </button>
         </div>
       </transition>
     </div>
@@ -358,8 +365,7 @@ defineExpose({ displayInputBox, displayCheckBox });
   height: 24px;
   align-items: center;
   justify-content: center;
-  padding-bottom: 3px;
-  padding-left: 1px;
+  padding: 0 0 3px 1px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 50%;
   background: var(--dialog-bg);

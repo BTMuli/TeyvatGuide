@@ -82,7 +82,7 @@
     </template>
 
     <template #groups>
-      <div :aria-labelledby="groupsTitleId" class="pb-wws-groups-list" role="listbox">
+      <div :aria-labelledby="groupsTitleId" class="pb-wws-groups-list" role="group">
         <template v-if="visibleGroups.length > 0">
           <button
             v-for="group in visibleGroups"
@@ -92,12 +92,11 @@
                 ? `${group.name}，${group.weaponType}，匹配 ${group.visibleCount} 件，共 ${group.totalCount} 件`
                 : `${group.name}，${group.weaponType}，共 ${group.totalCount} 件`
             "
-            :aria-selected="group.key === selectedGroup?.key"
+            :aria-current="group.key === selectedGroup?.key ? 'true' : undefined"
             :class="[
               'pb-wws-group-option',
               { 'pb-wws-group-selected': group.key === selectedGroup?.key },
             ]"
-            role="option"
             type="button"
             @click="selectGroup(group.key)"
           >
@@ -198,7 +197,7 @@
                 : "请选择一个武器分组"
           }}
         </div>
-        <div v-else :aria-labelledby="itemsTitleId" class="pb-wws-item-list" role="listbox">
+        <div v-else :aria-labelledby="itemsTitleId" class="pb-wws-item-list" role="group">
           <PbWeaponItem
             v-for="item in renderedItems"
             :key="item.guid"

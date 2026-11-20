@@ -1,6 +1,6 @@
 <!-- UGC关卡组件 TODO:UI调整-->
 <template>
-  <div class="tul-card-box" @click="console.log(props.data)">
+  <div class="tul-card-box">
     <TMiImg
       @click="toLevel()"
       class="tul-cover"

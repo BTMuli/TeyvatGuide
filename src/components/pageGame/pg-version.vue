@@ -37,42 +37,37 @@
       :tone="verifyCaptionTone"
     >
       <template #actions>
-        <v-icon
+        <button
           v-if="verifyActive"
           aria-label="暂停校验"
           class="verify-act"
-          role="button"
-          size="16"
-          tabindex="0"
           title="暂停"
+          type="button"
           @click="cancelVerify"
         >
-          mdi-pause-circle-outline
-        </v-icon>
-        <v-icon
+          <v-icon aria-hidden="true" icon="mdi-pause-circle-outline" size="16" />
+        </button>
+        <button
           v-else-if="verifyCanResume"
           aria-label="继续校验"
           class="verify-act"
-          role="button"
-          size="16"
-          tabindex="0"
           title="继续"
+          type="button"
           @click="verifyInstallation"
         >
-          mdi-play-circle-outline
-        </v-icon>
-        <v-icon
+          <v-icon aria-hidden="true" icon="mdi-play-circle-outline" size="16" />
+        </button>
+        <button
           v-if="!verifyStopping"
           aria-label="停止校验"
           class="verify-act"
-          role="button"
-          size="16"
-          tabindex="0"
+          :disabled="verifyClearing"
           title="停止"
+          type="button"
           @click="clearVerifyTask"
         >
-          mdi-stop-circle-outline
-        </v-icon>
+          <v-icon aria-hidden="true" icon="mdi-stop-circle-outline" size="16" />
+        </button>
       </template>
     </PgProgress>
 
@@ -1189,8 +1184,27 @@ onUnmounted(() => {
 }
 
 .verify-act {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
   color: var(--box-text-2);
   cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-orange);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: wait;
+    opacity: 0.6;
+  }
 }
 
 .plan-title {

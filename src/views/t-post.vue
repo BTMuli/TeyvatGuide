@@ -116,6 +116,7 @@
       <TpcTag
         v-for="topic in postData.topics"
         :key="topic.id"
+        :interactive="true"
         :tag="topic.name"
         class="tp-post-topic"
         @click="toTopic(topic)"

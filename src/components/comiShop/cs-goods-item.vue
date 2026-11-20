@@ -1,13 +1,5 @@
 <template>
-  <div
-    :aria-disabled="disabled || undefined"
-    :tabindex="disabled ? -1 : 0"
-    class="cs-good"
-    role="button"
-    @click="handleOpen"
-    @keydown.enter.prevent="handleOpen"
-    @keydown.space.prevent="handleOpen"
-  >
+  <div :aria-disabled="disabled || undefined" class="cs-good" @click="handleOpen">
     <CsGoodsCover :goods />
     <div class="cs-good-body" :class="{ 'is-sold-out': soldOut }">
       <h2 class="cs-good-title">{{ goods.goods_name }}</h2>
@@ -70,11 +62,6 @@ function handleOpen(): void {
 
   &:hover {
     background: var(--box-bg-4);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
   }
 
   &[aria-disabled="true"] {

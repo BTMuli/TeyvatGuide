@@ -1,13 +1,16 @@
 <template>
   <div class="config-section">
     <div class="section-title">
-      <v-icon
-        :class="{ clickable: iconClickable }"
-        class="section-icon"
-        size="16"
-        :icon
+      <button
+        v-if="iconClickable"
+        :aria-label="`${title}操作`"
+        class="section-icon clickable tg-icon-button"
+        type="button"
         @click="handleIconClick"
-      />
+      >
+        <v-icon aria-hidden="true" :icon size="16" />
+      </button>
+      <v-icon v-else class="section-icon" :icon size="16" />
       <span>{{ title }}</span>
       <slot name="titleAction" />
     </div>

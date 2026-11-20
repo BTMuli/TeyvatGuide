@@ -51,7 +51,14 @@
           label="新密码"
         >
           <template #append-inner>
-            <v-icon @click="showPwd = !showPwd">{{ showPwd ? "mdi-eye" : "mdi-eye-off" }}</v-icon>
+            <button
+              :aria-label="showPwd ? '隐藏密码' : '显示密码'"
+              class="tg-icon-button"
+              type="button"
+              @click="showPwd = !showPwd"
+            >
+              <v-icon aria-hidden="true">{{ showPwd ? "mdi-eye" : "mdi-eye-off" }}</v-icon>
+            </button>
           </template>
         </v-text-field>
       </v-form>

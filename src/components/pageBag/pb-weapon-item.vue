@@ -1,15 +1,10 @@
 <!-- 背包武器物品项 -->
 <template>
   <div
-    :aria-label="`${props.info.name}，Lv.${props.tb.info.level}`"
-    :aria-selected="props.selected"
     :class="{ selected: props.selected, detail: props.detail }"
     :title="props.info.name"
     class="pb-wi-box"
-    role="option"
-    tabindex="0"
     @click="toWeapon"
-    @keydown="handleKeydown"
   >
     <div class="pb-wi-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
@@ -82,12 +77,6 @@ function getAffixLevel(): number {
   return getWeaponRefineLevel(weaponItem.value);
 }
 
-function handleKeydown(event: KeyboardEvent): void {
-  if (event.key !== "Enter" && event.key !== " ") return;
-  event.preventDefault();
-  toWeapon();
-}
-
 const idColor = computed<string>(() => getOdStarColor(props.info.star));
 </script>
 <style lang="scss" scoped>
@@ -117,11 +106,6 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
       border: 0;
       filter: unset;
     }
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: 2px;
   }
 }
 

@@ -28,19 +28,18 @@
       :offset="8"
     >
       <template #activator="{ props: menuProps }">
-        <div
-          v-bind="menuProps"
-          class="tgn-redeem-anchor"
-          role="button"
-          tabindex="0"
-          @keydown.enter.prevent="menuProps.onClick"
-          @keydown.space.prevent="menuProps.onClick"
-        >
+        <div v-bind="menuProps" class="tgn-redeem-anchor">
           <TGameNavItem :mini class="tgn-nav" label="手动兑换">
             <template #icon
               ><v-icon color="var(--tgc-od-orange)" size="28">mdi-code-braces</v-icon></template
             >
           </TGameNavItem>
+          <button
+            aria-label="手动兑换"
+            class="tgn-redeem-hit"
+            type="button"
+            @click.stop="menuProps.onClick"
+          />
         </div>
       </template>
       <div class="tgn-redeem"><TRedeemCode :gid /></div>
@@ -234,12 +233,23 @@ async function toBBS(link: URL): Promise<void> {
 }
 
 .tgn-redeem-anchor {
+  position: relative;
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
+}
+
+.tgn-redeem-hit {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  inset: 0;
 
   &:focus-visible {
-    border-radius: 4px;
     outline: 2px solid var(--app-page-content);
     outline-offset: 2px;
   }

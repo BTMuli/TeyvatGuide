@@ -266,15 +266,16 @@
               v-for="card in gameUidInfos"
               :key="`${card.game_biz}:${card.game_uid}`"
               :aria-disabled="disabled || undefined"
-              :aria-label="`${card.game_name}，UID ${card.game_uid}，${card.nickname}，${card.region_name}`"
-              :tabindex="disabled ? -1 : 0"
               class="vprt-game-item"
-              role="button"
-              @click="insertGameUid(card)"
-              @keydown.enter.prevent="insertGameUid(card)"
-              @keydown.space.prevent="insertGameUid(card)"
             >
               <TpUid :copyable="false" :data="{ insert: { game_user_info: card } }" />
+              <button
+                :aria-label="`${card.game_name}，UID ${card.game_uid}，${card.nickname}，${card.region_name}`"
+                :disabled="disabled"
+                class="vprt-game-hit"
+                type="button"
+                @click="insertGameUid(card)"
+              />
             </div>
           </div>
         </div>
@@ -987,6 +988,7 @@ async function selectImage(event: Event): Promise<void> {
 }
 
 .vprt-game-item {
+  position: relative;
   display: block;
   width: 100%;
   min-width: 0;
@@ -999,6 +1001,26 @@ async function selectImage(event: Event): Promise<void> {
   text-align: left;
 }
 
+.vprt-game-hit {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  inset: 0;
+}
+
+.vprt-game-hit:focus-visible {
+  outline: 2px solid var(--common-text-title);
+  outline-offset: 2px;
+}
+
+.vprt-game-hit:disabled {
+  cursor: default;
+}
+
 .vprt-game-item :deep(.tpu-box) {
   min-height: 72px;
 }
@@ -1006,8 +1028,7 @@ async function selectImage(event: Event): Promise<void> {
 .vprt-tool:focus-visible,
 .vprt-action:focus-visible,
 .vprt-series-item:focus-visible,
-.vprt-emoji:focus-visible,
-.vprt-game-item:focus-visible {
+.vprt-emoji:focus-visible {
   outline: 2px solid var(--common-text-title);
   outline-offset: 2px;
 }

@@ -32,16 +32,54 @@
           </div>
         </div>
         <div class="pao-bc-top-tools">
-          <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
-          <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
+          <button
+            aria-label="复制到剪贴板"
+            class="tg-icon-button"
+            title="复制到剪贴板"
+            type="button"
+            @click="onCopy"
+          >
+            <v-icon aria-hidden="true">mdi-content-copy</v-icon>
+          </button>
+          <button
+            aria-label="下载到本地"
+            class="tg-icon-button"
+            title="下载到本地"
+            type="button"
+            @click="onDownload"
+          >
+            <v-icon aria-hidden="true">mdi-download</v-icon>
+          </button>
           <template v-if="showText && birthScenes && birthScenes.length > 1">
-            <v-icon title="上一幕" @click="switchScene(false)">mdi-arrow-left</v-icon>
+            <button
+              aria-label="上一幕"
+              class="tg-icon-button"
+              title="上一幕"
+              type="button"
+              @click="switchScene(false)"
+            >
+              <v-icon aria-hidden="true">mdi-arrow-left</v-icon>
+            </button>
           </template>
-          <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
-            {{ showText ? "mdi-eye-off" : "mdi-eye" }}
-          </v-icon>
+          <button
+            :aria-label="showText ? '隐藏对白' : '显示对白'"
+            class="tg-icon-button"
+            :title="showText ? '隐藏对白' : '显示对白'"
+            type="button"
+            @click="showComments()"
+          >
+            <v-icon aria-hidden="true">{{ showText ? "mdi-eye-off" : "mdi-eye" }}</v-icon>
+          </button>
           <template v-if="showText && birthScenes && birthScenes.length > 1">
-            <v-icon title="下一幕" @click="switchScene(true)">mdi-arrow-right</v-icon>
+            <button
+              aria-label="下一幕"
+              class="tg-icon-button"
+              title="下一幕"
+              type="button"
+              @click="switchScene(true)"
+            >
+              <v-icon aria-hidden="true">mdi-arrow-right</v-icon>
+            </button>
           </template>
         </div>
       </div>

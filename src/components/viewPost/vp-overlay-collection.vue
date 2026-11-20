@@ -2,7 +2,9 @@
   <TOverlay v-model="visible" blur-val="5px">
     <div class="tpoc-box">
       <div class="tpoc-top">
-        <span @click="toCollection">{{ props.collection.collection_title }}</span>
+        <button class="tg-text-button" type="button" @click="toCollection">
+          {{ props.collection.collection_title }}
+        </button>
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
       <div ref="postListRef" class="tpoc-list">

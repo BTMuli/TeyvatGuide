@@ -4,12 +4,8 @@
     <div
       :aria-disabled="coverDisabled ? 'true' : undefined"
       :aria-label="hasCover ? '更换合集封面' : '添加合集封面'"
-      :tabindex="coverDisabled ? -1 : 0"
       class="cpcc-cover"
-      role="button"
       @click="chooseCover"
-      @keydown.enter.prevent="chooseCover"
-      @keydown.space.prevent="chooseCover"
     >
       <TMiImg v-if="coverUrl" :src="coverUrl" alt="合集封面预览" />
       <v-icon v-else aria-hidden="true" size="36">mdi-image-plus-outline</v-icon>
@@ -212,11 +208,6 @@ async function handleCoverChange(event: Event): Promise<void> {
   background: var(--box-bg-2);
   color: var(--box-text-4);
   cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--common-text-title);
-    outline-offset: 2px;
-  }
 
   &[aria-disabled="true"] {
     cursor: default;

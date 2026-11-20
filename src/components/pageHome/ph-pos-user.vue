@@ -9,15 +9,16 @@
           </v-icon>
           <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
           <span>{{ props.pos.name }}</span>
-          <v-icon
-            class="share"
+          <button
+            aria-label="分享活动"
+            class="share tg-icon-button"
             data-html2canvas-ignore
-            size="12"
             title="分享活动"
+            type="button"
             @click.stop="sharePos()"
           >
-            mdi-share-variant
-          </v-icon>
+            <v-icon aria-hidden="true" size="12">mdi-share-variant</v-icon>
+          </button>
         </div>
         <div class="subtitle">
           <!-- 处理幽境危战 -->

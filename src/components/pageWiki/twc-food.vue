@@ -6,12 +6,8 @@
       :key="`${item.type}-${item.material.id}`"
       :aria-label="`查看${item.label}${item.material.name}详情`"
       class="twcf-item"
-      role="button"
       :title="`查看${item.label}${item.material.name}详情`"
-      tabindex="0"
       @click="showFoodDetail(item.material, index)"
-      @keydown.enter.prevent="showFoodDetail(item.material, index)"
-      @keydown.space.prevent="showFoodDetail(item.material, index)"
     >
       <div class="twcf-icon">
         <img :src="`/icon/bg/${item.material.star}-Star.webp`" alt="" aria-hidden="true" />
@@ -163,11 +159,6 @@ function resolveFoodItem(
 
   &:hover {
     background: var(--box-bg-3);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-yellow-1);
-    outline-offset: 2px;
   }
 }
 

@@ -61,8 +61,9 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 - 消息反馈统一用 `showSnackbar`（`src/components/func/snackbar.ts`），弹层统一用 `TopOverlay`
   （`src/components/app/top-overlay.vue`）；不使用 `v-dialog`、`v-alert`。详见
   [界面反馈与浮层规则](../../rules/ui-components-rules.md)。
-- 可点击卡片、列表项等复合区域使用容器 + `@click`，只有单一动作才用 `button` / `v-btn`；键盘与焦点状态
-  见 [交互元素与点击区域规则](../../rules/interaction-rules.md)。
+- 先区分控件与区域：图标按钮、工具栏等真实控件用 `button` / `v-btn`；卡片、列表项、封面等整块点击区域
+  用容器 + `@click`，默认只做鼠标入口，不补键盘路径。需要键盘入口时在区域内放真实按钮/链接。详见
+  [交互元素与点击区域规则](../../rules/interaction-rules.md)。
 
 ## 深浅主题
 

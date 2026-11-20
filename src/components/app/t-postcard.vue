@@ -35,7 +35,7 @@
         <v-icon size="10">mdi-folder-multiple-image</v-icon>
         <span>{{ imgCnt }}</span>
       </div>
-      <div v-if="!(selectMode && !listMode)" class="tpc-info-id" @click="shareCard()">
+      <div v-if="!(selectMode && !listMode)" class="tpc-info-id" @click.stop="shareCard()">
         <span>{{ props.post.post.post_id }}</span>
         <template v-if="isDevEnv">
           <span data-html2canvas-ignore>[{{ props.post.post.view_type }}]</span>
@@ -50,11 +50,11 @@
       />
     </div>
     <div class="tpc-body">
-      <div :title="card.title" class="tpc-title" @click="shareCard()">
+      <div :title="card.title" class="tpc-title" @click.stop="shareCard()">
         <TpTitle :single-line="listMode" :text="card.title" />
       </div>
       <div v-if="card.user !== null" class="tpc-mid">
-        <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
+        <TpAvatar :data="card.user" position="left" @click.stop="onUserClick()" />
       </div>
       <div class="tpc-bottom">
         <div
@@ -73,16 +73,20 @@
           <TpcTag
             v-for="topic in visibleTopics"
             :key="topic.id"
+            :interactive="true"
             :tag="topic.name"
-            @click="toTopic(topic)"
+            @click.stop="toTopic(topic)"
           />
-          <span
+          <button
             v-if="props.listMode"
             :class="['tpc-tags-more', { 'tpc-tags-more--hidden': !hasHiddenTags }]"
+            aria-label="展开更多标签"
+            class="tg-icon-button"
+            type="button"
             @click.stop="toggleTagsMenu()"
           >
-            <v-icon>mdi-dots-horizontal</v-icon>
-          </span>
+            <v-icon aria-hidden="true">mdi-dots-horizontal</v-icon>
+          </button>
           <Teleport to="body">
             <div v-if="showTagsMenu && hasHiddenTags" :style="popupStyle" class="tpc-tags-popup">
               <div
@@ -97,8 +101,9 @@
               <TpcTag
                 v-for="topic in hiddenTopics"
                 :key="topic.id"
+                :interactive="true"
                 :tag="topic.name"
-                @click="toTopic(topic)"
+                @click.stop="toTopic(topic)"
               />
             </div>
           </Teleport>

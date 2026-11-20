@@ -6,15 +6,16 @@
         <div class="ph-pool-type" title="查看卡池详情" @click="openPoolOverlay()">
           {{ props.pool.pool_name }}
         </div>
-        <v-icon
-          class="ph-pool-share"
+        <button
+          aria-label="分享卡池"
+          class="ph-pool-share tg-icon-button"
           data-html2canvas-ignore
-          size="12"
           title="分享卡池"
+          type="button"
           @click.stop="sharePool()"
         >
-          mdi-share-variant
-        </v-icon>
+          <v-icon aria-hidden="true" size="12">mdi-share-variant</v-icon>
+        </button>
       </div>
     </div>
     <div class="ph-pool-duration">

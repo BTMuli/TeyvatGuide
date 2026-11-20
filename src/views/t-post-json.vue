@@ -9,9 +9,15 @@
         </template>
         <template #text>
           <div class="tpj-box">
-            <span class="tpj-box-copy" @click="copyContent(jsonData)" title="复制全部内容到剪贴板">
-              <v-icon small>mdi-content-copy</v-icon>
-            </span>
+            <button
+              aria-label="复制全部内容到剪贴板"
+              class="tg-icon-button tpj-box-copy"
+              title="复制全部内容到剪贴板"
+              type="button"
+              @click="copyContent(jsonData)"
+            >
+              <v-icon aria-hidden="true" small>mdi-content-copy</v-icon>
+            </button>
             <VueJsonPretty
               :data="JSON.parse(JSON.stringify(jsonData))"
               :show-icon="true"
@@ -33,9 +39,15 @@
         </template>
         <template #text>
           <div class="tpj-box">
-            <span class="tpj-box-copy" @click="copyContent(parseData)" title="复制全部内容到剪贴板">
-              <v-icon small>mdi-content-copy</v-icon>
-            </span>
+            <button
+              aria-label="复制全部内容到剪贴板"
+              class="tg-icon-button tpj-box-copy"
+              title="复制全部内容到剪贴板"
+              type="button"
+              @click="copyContent(parseData)"
+            >
+              <v-icon aria-hidden="true" small>mdi-content-copy</v-icon>
+            </button>
             <VueJsonPretty
               :data="parseData"
               :show-icon="true"

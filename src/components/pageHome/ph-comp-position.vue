@@ -3,9 +3,15 @@
   <THomeCard :append="isLogin" modernShare title="近期活动">
     <template #title>
       <span>近期活动</span>
-      <v-icon class="tp-refresh" size="small" title="刷新" @click.stop="handleRefresh()">
-        mdi-refresh
-      </v-icon>
+      <button
+        aria-label="刷新"
+        class="tp-refresh tg-icon-button"
+        title="刷新"
+        type="button"
+        @click.stop="handleRefresh()"
+      >
+        <v-icon aria-hidden="true" size="small">mdi-refresh</v-icon>
+      </button>
     </template>
     <template v-if="isLogin" #title-append>
       <v-switch v-model="isUserPos" class="tp-switch"></v-switch>

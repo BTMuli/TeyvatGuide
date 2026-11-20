@@ -12,16 +12,20 @@
         subtitle="Tauri 版本"
       >
         <template #subtitleAction>
-          <v-icon
-            :rounded="false"
+          <button
             aria-label="打开 Tauri 官网"
-            color="var(--tgc-od-orange)"
-            icon="mdi-open-in-new"
-            size="12"
+            class="tg-icon-button"
             title="打开 Tauri 官网"
-            variant="text"
+            type="button"
             @click="openUrl('https://v2.tauri.app/')"
-          />
+          >
+            <v-icon
+              aria-hidden="true"
+              color="var(--tgc-od-orange)"
+              icon="mdi-open-in-new"
+              size="12"
+            />
+          </button>
         </template>
       </TcInfoItem>
       <TcInfoItem :title="TGBbs.version" icon="/platforms/mhy/mys.webp" subtitle="米游社版本" />
@@ -42,17 +46,21 @@
             variant="text"
             @click.stop="toggleMachineIdVisibility"
           />
-          <v-icon
-            :disabled="!machineId"
-            :rounded="false"
+          <button
             aria-label="复制设备ID"
-            color="var(--tgc-od-orange)"
-            icon="mdi-content-copy"
-            size="12"
+            class="tg-icon-button"
+            :disabled="!machineId"
             title="复制设备ID"
-            variant="text"
+            type="button"
             @click="copyMachineId"
-          />
+          >
+            <v-icon
+              aria-hidden="true"
+              color="var(--tgc-od-orange)"
+              icon="mdi-content-copy"
+              size="12"
+            />
+          </button>
         </template>
       </TcInfoItem>
       <TcInfoItem :icon="iconPlatform" :title="osPlatform" subtitle="系统平台" />

@@ -67,15 +67,10 @@
       </h2>
       <TpAvatar
         v-if="post.user"
-        :aria-label="canOpenAuthor ? '查看用户：' + post.user.nickname : undefined"
         :data="post.user"
-        :role="canOpenAuthor ? 'button' : undefined"
-        :tabindex="canOpenAuthor ? 0 : undefined"
         class="rank-post-author"
         position="left"
         @click="openAuthor"
-        @keydown.enter.prevent="openAuthor"
-        @keydown.space.prevent="openAuthor"
       />
       <div v-if="metrics.length || dates.length" class="rank-post-footer">
         <ul v-if="metrics.length" aria-label="帖子数据" class="rank-post-metrics" role="list">

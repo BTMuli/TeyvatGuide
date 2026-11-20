@@ -10,22 +10,24 @@
       </div>
       <div v-else-if="expedition.status === dnEnum.expedition.ONGOING" class="dni-exp-info-content">
         <div class="dni-exp-status">派遣中</div>
-        <span
+        <button
           v-if="!showCountdown && fullTimeText"
           :title="'点击查看倒计时'"
-          class="dni-exp-time clickable"
+          class="dni-exp-time clickable tg-text-button"
+          type="button"
           @click="showCountdown = true"
         >
           {{ fullTimeText }}完成
-        </span>
-        <span
+        </button>
+        <button
           v-else-if="showCountdown"
           :title="fullTimeText ? `${fullTimeText}完成` : ''"
-          class="dni-exp-time clickable"
+          class="dni-exp-time clickable tg-text-button"
+          type="button"
           @click="showCountdown = false"
         >
           {{ formattedTime }}
-        </span>
+        </button>
       </div>
       <div v-else class="dni-exp-status empty">未派遣</div>
     </div>

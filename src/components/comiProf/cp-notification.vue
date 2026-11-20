@@ -23,7 +23,7 @@
           :aria-label="senderLabel"
           :type="senderLabel ? 'button' : undefined"
           class="cp-notification-author"
-          @click="openSender"
+          @click.stop="openSender"
         >
           <span class="cp-notification-avatar">
             <img v-if="isGifAvatar" :src="avatarUrl" alt="" />

@@ -75,21 +75,30 @@
               <div v-if="ac.uid === uid" title="当前登录账号">
                 <v-icon color="green">mdi-account-check</v-icon>
               </div>
-              <v-icon
+              <button
                 v-else
-                icon="mdi-account-convert"
-                size="small"
+                aria-label="切换用户"
+                class="tg-icon-button"
                 title="切换用户"
+                type="button"
                 @click="loadAccount(ac.uid)"
-              />
-              <v-icon
-                color="var(--tgc-od-red)"
-                class="tcu-btn"
-                icon="mdi-delete"
-                size="small"
+              >
+                <v-icon aria-hidden="true" icon="mdi-account-convert" size="small" />
+              </button>
+              <button
+                aria-label="删除用户"
+                class="tcu-btn tg-icon-button"
                 title="删除用户"
+                type="button"
                 @click="clearUser(ac)"
-              />
+              >
+                <v-icon
+                  aria-hidden="true"
+                  color="var(--tgc-od-red)"
+                  icon="mdi-delete"
+                  size="small"
+                />
+              </button>
             </template>
           </v-list-item>
         </v-list>

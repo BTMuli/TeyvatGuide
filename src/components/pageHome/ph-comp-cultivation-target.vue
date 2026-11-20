@@ -29,23 +29,24 @@
       </small>
     </div>
     <div v-if="sortedMissingMaterials.length > 0" class="phct-materials" title="材料需求">
-      <UcItemIcon
+      <button
         v-for="material in sortedMissingMaterials.slice(0, 4)"
         :key="material.id"
-        :alt="material.name"
         :aria-label="`查看${material.name}材料`"
-        :icon="`/icon/material/${material.id}.webp`"
-        :size="32"
-        :star="material.star"
         :title="getMaterialCountTitle(material)"
         class="phct-material"
-        circular
-        role="button"
-        tabindex="0"
+        type="button"
         @click.stop="openMaterial(material.id)"
-        @keydown.enter.stop.prevent="openMaterial(material.id)"
-        @keydown.space.stop.prevent="openMaterial(material.id)"
-      />
+      >
+        <UcItemIcon
+          :alt="material.name"
+          :icon="`/icon/material/${material.id}.webp`"
+          :size="32"
+          :star="material.star"
+          aria-hidden="true"
+          circular
+        />
+      </button>
       <span v-if="sortedMissingMaterials.length > 4">
         +{{ sortedMissingMaterials.length - 4 }}
       </span>
@@ -215,6 +216,10 @@ async function openMaterial(materialId: number): Promise<void> {
   .phct-material {
     position: relative;
     z-index: 1;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
 
     & + .phct-material {
       margin-left: -10px;
@@ -231,7 +236,7 @@ async function openMaterial(materialId: number): Promise<void> {
     }
   }
 
-  span {
+  > span {
     display: grid;
     width: 32px;
     height: 32px;

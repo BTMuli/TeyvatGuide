@@ -1,25 +1,31 @@
 <!-- 材料星级色条芯片（Wiki / 背包 / 合成共用） -->
 <template>
-  <div :class="[`star${star}`, mode, { empty: isEmpty }]" :title="name" class="tmsc-box">
-    <div class="tmsc-left">
+  <component
+    :is="interactive ? 'button' : 'div'"
+    :class="[`star${star}`, mode, { empty: isEmpty }]"
+    :title="name"
+    :type="interactive ? 'button' : undefined"
+    class="tmsc-box"
+  >
+    <span class="tmsc-left">
       <img :src="`/icon/bg/${star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/icon/material/${id}.webp`" alt="icon" class="icon" />
-    </div>
-    <div class="tmsc-right">
+    </span>
+    <span class="tmsc-right">
       <span class="tmsc-title">{{ name }}</span>
       <span v-if="mode === 'convert' && required !== undefined" class="tmsc-required">
         x{{ fmtUtil.num(required) }}
       </span>
-    </div>
-    <div
+    </span>
+    <span
       v-if="mode !== 'wiki' && owned !== undefined"
       :title="mode === 'convert' ? `持有：${fmtUtil.num(owned)}` : undefined"
       class="tmsc-owned"
     >
       {{ fmtUtil.num(owned) }}
-    </div>
-    <div class="tmsc-extra">{{ type }}·{{ id }}</div>
-  </div>
+    </span>
+    <span class="tmsc-extra">{{ type }}·{{ id }}</span>
+  </component>
 </template>
 
 <script lang="ts" setup>
@@ -38,6 +44,8 @@ type TMaterialStarChipProps = {
   owned?: number;
   /** 合成需求量（仅 convert 展示 xN） */
   required?: number;
+  /** 是否作为可点击控件，使用原生 button 根节点 */
+  interactive?: boolean;
 };
 
 const {
@@ -48,6 +56,7 @@ const {
   mode = "wiki",
   owned,
   required,
+  interactive = false,
 } = defineProps<TMaterialStarChipProps>();
 
 const isEmpty = computed<boolean>(() => {
@@ -68,10 +77,13 @@ const isEmpty = computed<boolean>(() => {
   box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
-  padding-right: 8px;
+  padding: 0 8px 0 0;
   border-radius: 4px;
+  color: inherit;
   column-gap: 4px;
   cursor: pointer;
+  font: inherit;
+  text-align: left;
 
   &.convert {
     min-width: 200px;

@@ -171,20 +171,20 @@ onMounted(() => searchInput.value?.focus());
 
 ## Choose the right interactive element
 
-- Use a native `<button type="button">` or `v-btn` only for a single action whose content is simple phrasing
-  content (text, an icon, inline spans). Never place `div`, `p`, headings, sections, or nested interactive
-  elements inside a button.
+- Use a native `<button type="button">` or `v-btn` for a control with one action whose content is simple
+  phrasing content (text, an icon, inline spans). Never place `div`, `p`, headings, sections, or nested
+  interactive elements inside a button.
 - Judge custom and Vuetify components by their rendered root, not their tag name. A `div`-rooted
   component inside a button is still invalid; `v-progress-circular` accepts `tag="span"`, while card-like
   components should move to a container.
-- Build compound click regions such as cards, goods rows, list rows, and media tiles as a container
-  (`div`, `article`, or `li`) with `@click` and whatever block layout they need. Do not use a button as a layout
-  wrapper.
-- When the whole region is one action with no nested controls, add `role="button"`, `tabindex="0"`,
-  Enter/Space handlers, and a `:focus-visible` style. When the region contains nested controls, keep the outer
-  click as a pointer convenience, put the keyboard path on the real inner controls, and guard outer key
-  handlers with `.self` or a target check.
-- Keep real buttons for simple text and icon actions; do not replace them with `div + @click`.
+- Separate controls from regions. Icon actions, toolbar actions, form controls, and other discrete operations
+  are controls: use a native button and keep its built-in keyboard and assistive behavior. Whole-card,
+  goods-row, list-row, and media-tile clicks are regions: use a container (`div`, `article`, or `li`) with
+  `@click` and whatever block layout they need. Do not use a button as a layout wrapper.
+- TeyvatGuide is mouse-first. Do not add `role="button"`, `tabindex`, Enter/Space handlers, or a focus ring to a
+  region container. If a region needs a keyboard or assistive-technology entry, put the action on a real inner
+  button or link; keep the outer click as a mouse convenience and use `@click.stop` on child actions.
+- Add custom key handlers only for an explicit requirement or a recurring workflow they simplify.
 - Follow [the interaction element rules](../../rules/interaction-rules.md) for examples and migration scope.
 
 ## Validate the result

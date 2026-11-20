@@ -4,12 +4,24 @@
     <div class="tusm-top">
       <div class="tusm-title" @click="genShare()">
         <span>米游币任务({{ todayPoints }}/{{ totalPoints }})</span>
-        <v-icon color="var(--tgc-od-blue)" size="16" title="相关记录" @click.stop="openRecord()">
-          mdi-receipt-text
-        </v-icon>
-        <v-icon color="var(--tgc-od-red)" size="16" title="相关公告" @click.stop="toInfoPost()">
-          mdi-bullhorn
-        </v-icon>
+        <button
+          aria-label="相关记录"
+          class="tg-icon-button"
+          title="相关记录"
+          type="button"
+          @click.stop="openRecord()"
+        >
+          <v-icon aria-hidden="true" color="var(--tgc-od-blue)" size="16">mdi-receipt-text</v-icon>
+        </button>
+        <button
+          aria-label="相关公告"
+          class="tg-icon-button"
+          title="相关公告"
+          type="button"
+          @click.stop="toInfoPost()"
+        >
+          <v-icon aria-hidden="true" color="var(--tgc-od-red)" size="16">mdi-bullhorn</v-icon>
+        </button>
       </div>
       <div class="tusm-acts" data-html2canvas-ignore>
         <v-btn :loading="loadState" class="tusm-btn" @click="tryRefresh()">刷新</v-btn>

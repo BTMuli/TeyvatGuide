@@ -88,6 +88,7 @@
       v-for="material in visibleMaterials"
       :key="material.id"
       class="twm-item"
+      :interactive="true"
       mode="wiki"
       :id="material.id"
       :name="material.name"

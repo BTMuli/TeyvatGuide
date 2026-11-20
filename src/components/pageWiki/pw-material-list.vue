@@ -4,16 +4,13 @@
     <TMaterialStarChip
       v-for="(material, index) in materialList"
       :key="material.id"
+      :interactive="true"
       mode="wiki"
       :id="material.id"
       :name="material.name"
-      role="button"
       :star="material.star"
-      tabindex="0"
       :type="material.type"
       @click="checkData(material, index)"
-      @keydown.enter.prevent="checkData(material, index)"
-      @keydown.space.prevent="checkData(material, index)"
     />
   </div>
   <TwoMaterial v-if="curData" v-model="showOverlay" :data="curData">
