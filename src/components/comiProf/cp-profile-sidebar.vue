@@ -173,7 +173,7 @@ const navigation = computed<Array<NavigationItem>>(() => {
   if (isOwnProfile.value) {
     const badge = (category: TGApp.BBS.Notification.Category): TGApp.BBS.Notification.Badge =>
       getNotificationBadge(category, unreadCounts, notificationSettings);
-    items.splice(1, 0, { section: "history", label: "浏览历史", icon: "mdi-history" });
+    items.unshift({ section: "history", label: "浏览历史", icon: "mdi-history" });
     items.push(
       {
         section: "reply",
