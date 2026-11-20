@@ -45,29 +45,3 @@ export function getRankCoverRatio(post: TGApp.BBS.Forum.ImageRankPost): number {
   if (!cover || cover.width <= 0 || cover.height <= 0) return 4 / 3;
   return Math.min(2.2, Math.max(0.65, cover.width / cover.height));
 }
-
-/**
- * 按卡片宽度请求米游社封面缩略图，保留原图格式。
- * @since Beta v0.13.2
- * @param source - 帖子的原始封面地址
- * @param width - 卡片布局宽度
- * @param quality - 有损图片的目标质量
- * @returns 卡片使用的封面地址
- */
-export function getRankCoverThumbnailUrl(source: string, width: number, quality: number): string {
-  if (!URL.canParse(source) || !Number.isFinite(width) || width <= 0) return source;
-  const url = new URL(source);
-  if (
-    (url.protocol !== "https:" && url.protocol !== "http:") ||
-    (url.hostname !== "upload-bbs.miyoushe.com" && url.hostname !== "upload-bbs.mihoyo.com")
-  ) {
-    return source;
-  }
-  const fitWidth = Math.min(16384, Math.ceil(width));
-  const qualityStep =
-    /\.(?:jpe?g|webp)$/i.test(url.pathname) && quality >= 1 && quality < 100
-      ? `/quality,Q_${Math.round(quality)}`
-      : "";
-  url.searchParams.set("x-oss-process", `image/resize,w_${fitWidth}${qualityStep}`);
-  return url.href;
-}

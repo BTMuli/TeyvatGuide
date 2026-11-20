@@ -1,6 +1,6 @@
 <template>
   <component
-    :is="getTpName(tp)"
+    :is="getTpName(tp, imageComponent)"
     v-for="(tp, index) in getParsedData(props.data)"
     :key="index"
     :data="tp"
@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 import TpUgcLevel from "@comp/viewPost/tp-ugc-level.vue";
 import TpUgcTag from "@comp/viewPost/tp-ugc-tag.vue";
-import type { Component } from "vue";
+import { type Component, type ComputedRef, computed, inject, provide } from "vue";
 
 import TpBackupText from "./tp-backupText.vue";
 import TpDivider from "./tp-divider.vue";
@@ -28,9 +28,18 @@ import TpVod from "./tp-vod.vue";
 import TpVote from "./tp-vote.vue";
 
 type SctPostDataArr = Array<TGApp.BBS.SctPost.Base>;
-type TpParserProps = { data: SctPostDataArr };
+type TpParserProps = { data: SctPostDataArr; imageComponent?: Component };
 
 const props = defineProps<TpParserProps>();
+const imageComponentKey = "tp-parser-image-component";
+const inheritedImageComponent = inject<ComputedRef<Component> | undefined>(
+  imageComponentKey,
+  undefined,
+);
+const imageComponent = computed<Component>(
+  () => props.imageComponent ?? inheritedImageComponent?.value ?? TpImage,
+);
+provide(imageComponentKey, imageComponent);
 
 function getParsedData(data: SctPostDataArr): SctPostDataArr {
   const res: SctPostDataArr = [];
@@ -94,7 +103,7 @@ function getParsedText(data: TpTextType): Array<TpTextType> {
   return [data];
 }
 
-function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
+function getTpName(tp: TGApp.BBS.SctPost.Base, imageRenderer: Component = TpImage): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "undefined") return TpUnknown;
   if (typeof tp.insert === "string") return TpText;
@@ -107,7 +116,7 @@ function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
     return TpBackupText;
   }
   if ("divider" in tp.insert) return TpDivider;
-  if ("image" in tp.insert) return TpImage;
+  if ("image" in tp.insert) return imageRenderer;
   if ("level" in tp.insert) return TpUgcLevel;
   if ("link_card" in tp.insert) return TpLinkCard;
   if ("mention" in tp.insert) return TpMention;

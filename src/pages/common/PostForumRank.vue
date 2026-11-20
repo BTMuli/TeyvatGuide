@@ -168,6 +168,7 @@ import useBBSStore from "@store/bbs.js";
 import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import { getImageRankOptions } from "@utils/bbs/forumRank.js";
 import { getRankMasonryTimings } from "@utils/bbs/forumRankMasonry.js";
+import { getPostImageOriginalUrl } from "@utils/bbs/postImage.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -431,10 +432,8 @@ function showAuthor(uid: string): void {
 }
 
 function showCoverPreview(cover: TGApp.BBS.Forum.ImageRankCover): void {
-  if (!URL.canParse(cover.url)) return;
-  const url = new URL(cover.url);
-  if (url.protocol !== "https:" && url.protocol !== "http:") return;
-  url.searchParams.delete("x-oss-process");
+  const url = getPostImageOriginalUrl(cover.url);
+  if (!url) return;
   previewCover.value = { ...cover, url: url.href };
   previewFormat.value = url.pathname.match(/\.([a-z0-9]+)$/i)?.[1].toLowerCase() ?? "png";
   showUser.value = false;

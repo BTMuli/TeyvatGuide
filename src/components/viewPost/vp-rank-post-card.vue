@@ -105,7 +105,8 @@
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import useAppStore from "@store/app.js";
 import { createPost } from "@utils/app/TGWindow.js";
-import { getRankCover, getRankCoverRatio, getRankCoverThumbnailUrl } from "@utils/bbs/forumRank.js";
+import { getRankCover, getRankCoverRatio } from "@utils/bbs/forumRank.js";
+import { getPostImageThumbnailUrl } from "@utils/bbs/postImage.js";
 import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGShare from "@utils/share/TGShare.js";
@@ -139,7 +140,7 @@ const coverSource = computed<string>(
   () => cover.value?.url || post.post.cover || post.post.images[0] || "",
 );
 const coverUrl = computed<string>(() =>
-  getRankCoverThumbnailUrl(coverSource.value, coverWidth, appStore.imageQualityPercent),
+  getPostImageThumbnailUrl(coverSource.value, coverWidth, appStore.imageQualityPercent),
 );
 const imageCount = computed<number>(() => post.post.images.length || post.image_list.length);
 const coverRatio = computed<number>(() => getRankCoverRatio(post));

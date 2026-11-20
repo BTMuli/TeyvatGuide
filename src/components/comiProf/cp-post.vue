@@ -1,5 +1,6 @@
 <template>
   <article
+    ref="cardEl"
     :class="['cp-post', { 'cp-post--selectable': selectable, 'cp-post--selected': selected }]"
     @click.capture="handleCardClick"
   >
@@ -10,11 +11,22 @@
             v-if="selectable"
             :class="['cp-post-select-indicator', { 'is-selected': selected }]"
             aria-hidden="true"
+            data-html2canvas-ignore
           >
             <v-icon size="20">{{ selected ? "mdi-check-circle" : "mdi-circle-outline" }}</v-icon>
           </span>
           <CpTypeBadge v-if="typeLabel" :icon="typeIcon" :label="typeLabel" />
-          <CpTypeBadge class="cp-post-id" :label="`PID:${post.post.post_id}`" />
+          <button
+            :aria-label="`分享帖子 ${post.post.post_id} 的卡片`"
+            :disabled="sharing"
+            class="cp-post-share"
+            data-post-card-action
+            title="分享帖子卡片"
+            type="button"
+            @click.stop="shareCard"
+          >
+            <CpTypeBadge class="cp-post-id" :label="`PID:${post.post.post_id}`" />
+          </button>
           <CpChannelTag
             v-if="game"
             :aria-label="`进入分区：${game.name}`"
@@ -66,13 +78,57 @@
       </button>
     </h3>
     <div v-if="images.length" class="cp-post-images">
-      <span v-for="(image, index) in images" :key="`${index}:${image}`" class="cp-post-image">
-        <TMiImg :src="image" :alt="`第 ${index + 1} 张帖子图片`" />
-        <span v-if="index === images.length - 1 && remainingImages > 0" class="cp-post-image-more">
-          <v-icon aria-hidden="true" size="10">mdi-folder-multiple-image</v-icon>
-          +{{ fmtUtil.num(remainingImages) }}
-        </span>
-      </span>
+      <div
+        ref="imageViewport"
+        class="cp-post-image-viewport"
+        @click="openPost"
+        @scroll.passive="updateImageScroll"
+      >
+        <div ref="imageTrack" class="cp-post-image-track">
+          <CpImageThumbnail
+            v-for="(image, index) in images"
+            :key="`${index}:${image.source}`"
+            :alt="`第 ${index + 1} 张帖子图片`"
+            :attributes="image.attributes"
+            :source="image.source"
+            class="cp-post-image"
+          >
+            <span
+              v-if="index === images.length - 1 && remainingImages > 0"
+              class="cp-post-image-more"
+            >
+              <v-icon aria-hidden="true" size="10">mdi-folder-multiple-image</v-icon>
+              +{{ fmtUtil.num(remainingImages) }}
+            </span>
+          </CpImageThumbnail>
+        </div>
+      </div>
+      <template v-if="canScrollImagesLeft || canScrollImagesRight">
+        <button
+          :disabled="!canScrollImagesLeft"
+          aria-label="向左移动帖子图片"
+          class="cp-post-image-arrow cp-post-image-arrow--left"
+          data-html2canvas-ignore
+          data-post-card-action
+          title="向左移动"
+          type="button"
+          @click.stop="scrollImages(-1)"
+        >
+          <v-icon aria-hidden="true" icon="mdi-chevron-left" size="20" />
+        </button>
+        <button
+          :disabled="!canScrollImagesRight"
+          aria-label="向右移动帖子图片"
+          class="cp-post-image-arrow cp-post-image-arrow--right"
+          data-html2canvas-ignore
+          data-post-card-action
+          title="向右移动"
+          type="button"
+          @click.stop="scrollImages(1)"
+        >
+          <v-icon aria-hidden="true" icon="mdi-chevron-right" size="20" />
+        </button>
+      </template>
     </div>
     <div v-if="post.topics.length" class="cp-post-topics">
       <RouterLink
@@ -113,7 +169,7 @@
           {{ fmtUtil.num(post.stat.forward_num) }}
         </span>
       </div>
-      <div v-if="$slots.actions" class="cp-post-actions">
+      <div v-if="$slots.actions" class="cp-post-actions" data-html2canvas-ignore>
         <slot name="actions" />
       </div>
     </footer>
@@ -121,7 +177,7 @@
 </template>
 
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
+import type { TpImage } from "@comp/viewPost/tp-image.vue";
 import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import useBBSStore from "@store/bbs.js";
@@ -134,14 +190,17 @@ import {
 } from "@utils/community/profile.js";
 import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
+import TGShare from "@utils/share/TGShare.js";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { computed, onWatcherCleanup, ref, useTemplateRef, watch } from "vue";
 
 import CpAvatar from "./cp-avatar.vue";
 import CpChannelTag from "./cp-channel-tag.vue";
+import CpImageThumbnail from "./cp-image-thumbnail.vue";
 import CpTypeBadge from "./cp-type-badge.vue";
 
 type PostGame = { name: string; icon?: string };
+type CpPostThumbnail = { source: string; attributes?: TpImage["attributes"] };
 
 const {
   post,
@@ -165,6 +224,12 @@ const emit = defineEmits<{
 }>();
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
+const cardEl = useTemplateRef<HTMLElement>("cardEl");
+const sharing = ref<boolean>(false);
+const imageViewport = useTemplateRef<HTMLDivElement>("imageViewport");
+const imageTrack = useTemplateRef<HTMLDivElement>("imageTrack");
+const canScrollImagesLeft = ref<boolean>(false);
+const canScrollImagesRight = ref<boolean>(false);
 const game = computed<PostGame | undefined>(() => {
   if (gameOverride) return gameOverride;
   const find = gameList.value.find((item) => item.id === post.post.game_id);
@@ -181,17 +246,80 @@ const typeIcon = computed<string | undefined>(() => getPostTypeIcon(post));
 const idBg = computed<string>(() =>
   str2Color(post.post.post_id, 0).replace(/^rgb\((.+)\)$/, "rgba($1, 0.45)"),
 );
-const images = computed<Array<string>>(() => getPostPreviewImages(post));
+const images = computed<Array<CpPostThumbnail>>(() =>
+  getPostPreviewImages(post).map((source) => {
+    const metadata =
+      post.image_list?.find(({ url }) => url === source) ??
+      (post.cover?.url === source ? post.cover : undefined);
+    const attributes =
+      metadata && metadata.width > 0 && metadata.height > 0
+        ? { width: metadata.width, height: metadata.height, size: Number(metadata.size) }
+        : undefined;
+    return { source, attributes };
+  }),
+);
 const remainingImages = computed<number>(() =>
   Math.max(getPostImageCount(post) - images.value.length, 0),
+);
+
+watch(
+  [imageViewport, imageTrack],
+  ([viewport, track]) => {
+    updateImageScroll();
+    if (!viewport || !track) return;
+    const observer = new ResizeObserver(updateImageScroll);
+    observer.observe(viewport);
+    observer.observe(track);
+    onWatcherCleanup(() => observer.disconnect());
+  },
+  { flush: "post" },
 );
 
 function openPost(): void {
   emit("openPost", post.post.post_id, post.post.subject);
 }
 
+async function shareCard(): Promise<void> {
+  const card = cardEl.value;
+  if (!card || sharing.value) return;
+  const imageOffset = imageViewport.value?.scrollLeft ?? 0;
+  sharing.value = true;
+  try {
+    await TGShare.modern(`PostCard_${post.post.post_id}`, card, 2.5, false, {
+      backdropBlurScale: 0.7,
+      onCloneNode: (cloned) => {
+        if (!(cloned instanceof HTMLElement)) return;
+        const title = cloned.querySelector<HTMLButtonElement>(".cp-post-title > button");
+        if (title) {
+          title.style.width = "100%";
+          title.style.boxSizing = "border-box";
+        }
+        const track = cloned.querySelector<HTMLElement>(".cp-post-image-track");
+        if (track && imageOffset > 0) track.style.transform = `translateX(${-imageOffset}px)`;
+      },
+    });
+  } finally {
+    sharing.value = false;
+  }
+}
+
+function updateImageScroll(): void {
+  const viewport = imageViewport.value;
+  const scrollLeft = viewport?.scrollLeft ?? 0;
+  const maxScroll = viewport ? viewport.scrollWidth - viewport.clientWidth : 0;
+  canScrollImagesLeft.value = scrollLeft > 1;
+  canScrollImagesRight.value = scrollLeft < maxScroll - 1;
+}
+
+function scrollImages(direction: -1 | 1): void {
+  const viewport = imageViewport.value;
+  if (viewport) viewport.scrollBy({ left: direction * viewport.clientWidth });
+}
+
 function handleCardClick(event: MouseEvent): void {
   if (!selectable) return;
+  const target = event.target;
+  if (target instanceof Element && target.closest("[data-post-card-action]")) return;
   event.preventDefault();
   event.stopPropagation();
   emit("toggleSelect");
@@ -263,7 +391,28 @@ function handleCardClick(event: MouseEvent): void {
   gap: 8px;
 }
 
-.cp-post-channels .cp-post-id {
+.cp-post-share {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: progress;
+  }
+}
+
+.cp-post-id {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   background: v-bind(idBg); /* stylelint-disable-line value-keyword-case */
@@ -351,33 +500,68 @@ function handleCardClick(event: MouseEvent): void {
 }
 
 .cp-post-images {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  gap: 8px;
+  position: relative;
+  z-index: 2;
+  min-width: 0;
 }
 
-.cp-post-image {
-  position: relative;
-  display: grid;
-  overflow: hidden;
-  width: 160px;
-  max-width: 100%;
-  flex: 0 1 160px;
-  border-radius: 4px;
-  aspect-ratio: 1;
-  background: var(--box-bg-2);
-  place-items: center;
+.cp-post-image-viewport {
+  cursor: pointer;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
 
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.cp-post-image-track {
+  display: flex;
+  width: max-content;
+  gap: 8px;
 }
 
 .cp-post:hover .cp-post-image {
   background: var(--box-bg-1);
+}
+
+.cp-post-image-arrow {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--common-shadow-t-2);
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--box-bg-t-1) 76%, transparent);
+  box-shadow: 0 2px 8px var(--tgc-dark-2);
+  color: var(--box-bg-1);
+  cursor: pointer;
+  place-items: center;
+  transform: translateY(-50%);
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--box-bg-1);
+    outline-offset: 2px;
+  }
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--box-bg-t-1) 88%, transparent);
+  }
+}
+
+.cp-post-image-arrow--left {
+  left: 8px;
+}
+
+.cp-post-image-arrow--right {
+  right: 8px;
 }
 
 .cp-post-image-more {
@@ -396,6 +580,7 @@ function handleCardClick(event: MouseEvent): void {
   column-gap: 2px;
   font-size: 12px;
   line-height: 18px;
+  white-space: nowrap;
 }
 
 .cp-post-topics {
@@ -439,6 +624,7 @@ function handleCardClick(event: MouseEvent): void {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
   }
 }
 
@@ -448,6 +634,12 @@ function handleCardClick(event: MouseEvent): void {
   align-items: center;
   margin-left: auto;
   gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-post-image-viewport {
+    scroll-behavior: auto;
+  }
 }
 
 @media (width <= 640px) {

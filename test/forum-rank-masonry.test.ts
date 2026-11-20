@@ -5,8 +5,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { getRankCoverThumbnailUrl } from "../src/utils/bbs/forumRank.js";
 import { getRankMasonryTimings, layoutRankMasonry } from "../src/utils/bbs/forumRankMasonry.js";
+import { getPostImageOriginalUrl, getPostImageThumbnailUrl } from "../src/utils/bbs/postImage.js";
 
 const items = [
   { id: "1", ratio: 1 },
@@ -47,7 +47,7 @@ describe("forum ranking masonry", () => {
 describe("forum ranking covers", () => {
   it("sizes the thumbnail to the rendered card and applies the selected JPEG quality", () => {
     const source = "https://upload-bbs.miyoushe.com/cover.jpg?key=abc";
-    const thumbnail = new URL(getRankCoverThumbnailUrl(source, 319.5, 80));
+    const thumbnail = new URL(getPostImageThumbnailUrl(source, 319.5, 80));
 
     expect(thumbnail.searchParams.get("x-oss-process")).toBe("image/resize,w_320/quality,Q_80");
     expect(thumbnail.searchParams.get("key")).toBe("abc");
@@ -59,11 +59,21 @@ describe("forum ranking covers", () => {
     const other = "https://example.com/cover.jpg";
 
     for (const source of [png, gif]) {
-      const thumbnail = new URL(getRankCoverThumbnailUrl(source, 320, 80));
+      const thumbnail = new URL(getPostImageThumbnailUrl(source, 320, 80));
       expect(thumbnail.searchParams.get("x-oss-process")).toBe("image/resize,w_320");
       expect(thumbnail.pathname).toBe(new URL(source).pathname);
     }
-    expect(getRankCoverThumbnailUrl(other, 320, 80)).toBe(other);
-    expect(getRankCoverThumbnailUrl(png, 0, 80)).toBe(png);
+    expect(getPostImageThumbnailUrl(other, 320, 80)).toBe(other);
+    expect(getPostImageThumbnailUrl(png, 0, 80)).toBe(png);
+  });
+
+  it("sizes a community post thumbnail by height and removes cropping from the image preview", () => {
+    const source =
+      "https://upload-bbs.miyoushe.com/post.webp?key=abc&x-oss-process=image/crop,w_100";
+    const thumbnail = new URL(getPostImageThumbnailUrl(source, 160, 80, "height"));
+    const original = getPostImageOriginalUrl(source);
+
+    expect(thumbnail.searchParams.get("x-oss-process")).toBe("image/resize,h_160/quality,Q_80");
+    expect(original?.href).toBe("https://upload-bbs.miyoushe.com/post.webp?key=abc");
   });
 });

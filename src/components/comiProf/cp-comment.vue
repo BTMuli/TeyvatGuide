@@ -1,20 +1,16 @@
 <template>
   <article
-    :aria-label="postId ? `打开原帖：${postTitle}` : undefined"
     :class="{ 'is-clickable': postId }"
     class="cp-comment"
-    :role="postId ? 'button' : undefined"
-    :tabindex="postId ? 0 : undefined"
     :title="postId ? `打开原帖：${postTitle}` : undefined"
     @click="handleCardClick"
-    @keydown.enter.space="handleCardKeydown"
   >
     <header v-if="createdAtLabel" class="cp-comment-header">
       <time :datetime="createdAtIso">{{ createdAtLabel }}</time>
     </header>
 
     <div aria-label="评论内容" class="cp-comment-content">
-      <TpParser v-if="contentNodes.length" :data="contentNodes" />
+      <TpParser v-if="contentNodes.length" :data="contentNodes" :imageComponent="CpContentImage" />
       <span v-else class="cp-comment-empty">[无文字内容]</span>
     </div>
 
@@ -25,12 +21,19 @@
           {{ fmtUtil.num(likeCount) }}
         </span>
       </span>
-      <span :title="`原帖：${postTitle}`" class="cp-comment-source">
+      <component
+        :is="postId ? 'button' : 'span'"
+        :aria-label="postId ? `打开原帖：${postTitle}` : undefined"
+        :title="`原帖：${postTitle}`"
+        :type="postId ? 'button' : undefined"
+        class="cp-comment-source"
+        @click.stop="handleOpenPost"
+      >
         <v-icon size="14" aria-hidden="true">mdi-post-outline</v-icon>
         <span class="cp-comment-source-title">
           <TpTitle :singleLine="true" :text="postTitle" />
         </span>
-      </span>
+      </component>
     </footer>
   </article>
 </template>
@@ -41,6 +44,8 @@ import TpTitle from "@comp/viewPost/tp-title.vue";
 import { getCommunityCommentContent } from "@utils/community/comment.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import { computed } from "vue";
+
+import CpContentImage from "./cp-content-image.vue";
 
 type CpCommentProps = { comment: TGApp.BBS.Community.Comment };
 
@@ -73,16 +78,10 @@ function handleCardClick(event: MouseEvent): void {
   if (!(event.target instanceof Element)) return;
   if (
     event.target.closest(
-      ".cp-comment-content a, .cp-comment-content button, .cp-comment-content summary, .cp-comment-content [role='button'], .cp-comment-content [role='link'], .cp-comment-content .tp-text-link, .cp-comment-content .tp-mention-box, .cp-comment-content .tp-image-box, .cp-comment-content .tp-emo-box, .cp-comment-content .tp-lc-box, .cp-comment-content .tp-backup-lottery",
+      ".cp-comment-content a, .cp-comment-content button, .cp-comment-content summary, .cp-comment-content [role='button'], .cp-comment-content [role='link'], .cp-comment-content .tp-text-link, .cp-comment-content .tp-mention-box, .cp-comment-content .cp-content-image, .cp-comment-content .tp-emo-box, .cp-comment-content .tp-lc-box, .cp-comment-content .tp-backup-lottery",
     ) !== null
   )
     return;
-  handleOpenPost();
-}
-
-function handleCardKeydown(event: KeyboardEvent): void {
-  if (event.target !== event.currentTarget) return;
-  event.preventDefault();
   handleOpenPost();
 }
 
@@ -112,11 +111,6 @@ function handleOpenPost(): void {
     &:hover {
       border-color: var(--common-shadow-2);
       background: var(--box-bg-4);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--common-text-title);
-      outline-offset: 2px;
     }
   }
 }
@@ -150,11 +144,26 @@ function handleOpenPost(): void {
   min-width: 0;
   flex: 1 1 auto;
   justify-content: flex-end;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   gap: 4px;
   line-height: 16px;
+  text-align: right;
 
   > .v-icon {
     flex: 0 0 auto;
+  }
+
+  &[type="button"] {
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: 2px;
   }
 }
 
@@ -184,21 +193,7 @@ function handleOpenPost(): void {
   line-height: 20px;
   overflow-wrap: anywhere;
 
-  :deep(.tp-image-box) {
-    width: fit-content;
-    max-width: min(100%, 320px);
-    justify-content: flex-start;
-    margin: 8px 0;
-  }
-
-  :deep(.tp-image-box img) {
-    width: auto;
-    max-width: min(100%, 320px);
-    max-height: 240px;
-    margin: 0;
-    object-fit: contain;
-  }
-
+  :deep(.tp-image-load),
   :deep(.tp-emo-box) {
     width: fit-content;
     max-width: min(100%, 320px);
