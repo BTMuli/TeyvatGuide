@@ -1905,7 +1905,7 @@
   },
   {
     "id": 10000137,
-    "contentId": 0,
+    "contentId": 510136,
     "dropDays": [3, 6, 7],
     "name": "瓦列里",
     "itemType": "character",
@@ -3051,7 +3051,7 @@
   },
   {
     "id": 14525,
-    "contentId": 0,
+    "contentId": 510280,
     "dropDays": [3, 6, 7],
     "name": "秘星典谕",
     "itemType": "weapon",
