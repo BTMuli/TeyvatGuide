@@ -1,24 +1,30 @@
 /**
  * Misc路径下的请求
- * @since Beta v0.10.1
+ * @since Beta v0.14.1
  */
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getRequestHeader } from "@utils/network/getRequestHeader.js";
 import TGHttps from "@utils/network/TGHttps.js";
 
+/**
+ * 极验接口接受的登录凭据：K2 签名使用 App 凭据，X4 签名使用 CookieToken V2。
+ * @since Beta v0.14.1
+ */
+type VerificationCookie = TGApp.App.Account.SignCookie | TGApp.App.Account.CookieTokenCookie;
+
 // BBSApiMiscBaseUrl => bamBu
 const bamBu: Readonly<string> = "https://bbs-api.miyoushe.com/misc/api/";
 
 /**
  * 创建极验验证
- * @since Beta v0.10.1
- * @param cookie - Cookie
+ * @since Beta v0.14.1
+ * @param cookie - 登录凭据；useK2 为 true 时使用 App 凭据，否则使用 CookieToken V2
  * @param useK2 - 是否使用 K2
  * @returns 极验创建响应数据
  */
 async function createVerification(
-  cookie: Record<string, string>,
+  cookie: VerificationCookie,
   useK2: boolean = true,
 ): Promise<TGApp.BBS.Geetest.CreateResp> {
   const param = { is_high: true };
@@ -38,15 +44,15 @@ async function createVerification(
 
 /**
  * 验证极验验证
- * @since Beta v0.10.1
+ * @since Beta v0.14.1
  * @param data - 极验验证数据
- * @param cookie - Cookie
+ * @param cookie - 登录凭据；useK2 为 true 时使用 App 凭据，否则使用 CookieToken V2
  * @param useK2 - 是否使用 K2
  * @returns 验证响应数据
  */
 async function verifyVerification(
   data: TGApp.BBS.Geetest.GeetestVerifyRes,
-  cookie: Record<string, string>,
+  cookie: VerificationCookie,
   useK2: boolean = true,
 ): Promise<TGApp.BBS.Geetest.VerifyResp> {
   let header;
@@ -65,13 +71,13 @@ async function verifyVerification(
 
 /**
  * 获取极验验证 challenge
- * @since Beta v0.10.1
- * @param cookie - Cookie
+ * @since Beta v0.14.1
+ * @param cookie - 登录凭据；useK2 为 true 时使用 App 凭据，否则使用 CookieToken V2
  * @param useK2 - 是否使用 K2
  * @returns challenge 字符串
  */
 async function getGeetestChallenge(
-  cookie: Record<string, string>,
+  cookie: VerificationCookie,
   useK2: boolean = false,
 ): Promise<string | false> {
   let createResp: TGApp.BBS.Geetest.CreateResp | undefined;

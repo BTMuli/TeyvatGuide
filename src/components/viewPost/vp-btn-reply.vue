@@ -145,6 +145,7 @@ import { createReplyInteraction, replyInteractionKey } from "@hooks/useReplyInte
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
 import { emit } from "@tauri-apps/api/event";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -219,7 +220,7 @@ const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const readCookie = computed<TGApp.App.Account.LoginCookie | undefined>(() => {
   if (!uid.value || !cookie.value?.ltoken_v2.trim() || cookie.value.ltuid_v2 !== uid.value)
     return undefined;
-  return { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  return getLTokenCookie(cookie.value);
 });
 const isHot = computed<boolean>(() => orderType.value === bbsEnum.post.replyOrderType.HOT);
 const replyOrder = computed<TGApp.BBS.Reply.ReplyOrderTypeEnum | undefined>(() => {

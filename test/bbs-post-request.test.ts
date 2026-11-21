@@ -1,6 +1,6 @@
 /**
  * 米游社普通图文帖请求契约回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -1353,7 +1353,11 @@ describe("postEditReq source initialization and validation", () => {
       postEditReq.create({ ...getPostEditSettings(source), subject: "x".repeat(31) }, cookie),
     ).rejects.toThrow();
     await expect(
-      postEditReq.create(getPostEditSettings(source), { ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }),
+      postEditReq.create(getPostEditSettings(source), {
+        ltmid_v2: cookie.ltmid_v2,
+        ltoken_v2: "",
+        ltuid_v2: cookie.ltuid_v2,
+      }),
     ).rejects.toThrow();
 
     const unsupportedSource = structuredClone(source);

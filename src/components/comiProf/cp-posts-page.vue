@@ -173,6 +173,7 @@ import postEditReq from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { createPost } from "@utils/app/TGWindow.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -414,7 +415,7 @@ async function deletePost(post: TGApp.BBS.Post.FullData): Promise<void> {
   const subject = post.post.subject.trim() || `帖子 ${postId}`;
   const account: TGApp.BBS.Reply.AccountSnapshot = {
     uid: snapshot.uid,
-    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
+    cookie: getLTokenCookie(snapshot.cookie),
   };
   const requestCookie = { ...account.cookie };
   const version = postsController.getVersion();

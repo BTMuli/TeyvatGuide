@@ -1,6 +1,6 @@
 /**
  * 账号 Cookie 的兼容读取、解析与格式化。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { isRecord } from "@utils/common/typeGuards.js";
@@ -174,16 +174,19 @@ export function hasSTokenCredentials(cookie: TGApp.App.Account.Cookie): boolean 
 
 /**
  * 提取 CookieToken V2 及配套账号字段。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  * @param cookie - 账号凭据
  * @returns 请求使用的 CookieToken V2 字段
+ * @remarks mid 必须存在，否则无法构建 account_mid_v2
  */
 export function getCookieTokenCookie(
   cookie: Pick<TGApp.App.Account.Cookie, "account_id_v2" | "cookie_token_v2" | "mid">,
 ): TGApp.App.Account.CookieTokenCookie {
+  const mid = typeof cookie.mid === "string" ? cookie.mid.trim() : "";
+  if (!mid) throw new Error("登录凭据缺少 mid，无法构建 account_mid_v2");
   return {
     account_id_v2: cookie.account_id_v2,
-    account_mid_v2: cookie.mid,
+    account_mid_v2: mid,
     cookie_token_v2: cookie.cookie_token_v2,
   };
 }
@@ -206,11 +209,13 @@ export function getLTokenCookie(
 
 /**
  * 提取米游社网页会话的 V2 Cookie。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  * @param cookie - 当前账号的凭据
  * @returns 两组 V2 凭据及各自的 MID 字段
  */
-export function getWebAccountCookies(cookie: TGApp.App.Account.Cookie): Record<string, string> {
+export function getWebAccountCookies(
+  cookie: TGApp.App.Account.Cookie,
+): TGApp.App.Account.CookieTokenCookie & TGApp.App.Account.LoginCookie {
   return {
     ...getCookieTokenCookie(cookie),
     ...getLTokenCookie(cookie),

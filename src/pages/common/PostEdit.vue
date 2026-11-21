@@ -68,6 +68,7 @@
 import VpPostComposer from "@comp/viewPost/vp-post-composer.vue";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
@@ -121,7 +122,7 @@ async function loadPost(): Promise<void> {
   }
   const snapshot = {
     uid: uid.value,
-    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+    cookie: getLTokenCookie(cookie.value),
   };
   loading.value = true;
   try {

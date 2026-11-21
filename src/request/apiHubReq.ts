@@ -1,6 +1,6 @@
 /**
  * apiHub下的请求
- * @since Beta v0.13.0
+ * @since Beta v0.14.1
  */
 
 import TGBbs from "@utils/bbs/TGBbs.js";
@@ -68,11 +68,13 @@ async function getGameList(): Promise<TGApp.BBS.Game.ListResp> {
 
 /**
  * 获取用户米游币任务列表
- * @since Beta v0.10.1
- * @param cookie - 用户 Cookie
+ * @since Beta v0.14.1
+ * @param cookie - CookieToken V2 凭据
  * @returns 用户米游币任务列表响应数据
  */
-async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mission.InfoResp> {
+async function getMissions(
+  cookie: TGApp.App.Account.CookieTokenCookie,
+): Promise<TGApp.BBS.Mission.InfoResp> {
   const param = { point_sn: "myb" };
   const header = getRequestHeader(cookie, "GET", param);
   const resp = await TGHttps.get<TGApp.BBS.Mission.InfoResp>(`${Mahbu}wapi/getMissions`, {
@@ -84,15 +86,15 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 
 /**
  * 获取分享配置
- * @since Beta v0.10.1
+ * @since Beta v0.14.1
  * @remarks **需要验证码登录返回的 Cookie**
  * @param postId - 帖子 ID
- * @param cookie - 用户 Cookie
+ * @param cookie - 用户 Cookie，需包含 ltoken_v2、ltmid_v2 与 ltuid_v2
  * @returns 基础响应数据
  */
 async function getShareConf(
   postId: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
 ): Promise<TGApp.BBS.Response.Base> {
   const params = { entity_id: postId, entity_type: 1 };
   const header = {
@@ -108,13 +110,13 @@ async function getShareConf(
 
 /**
  * 获取用户米游币任务完成状态
- * @since Beta v0.10.1
+ * @since Beta v0.14.1
  * @remarks **需要验证码登录的 Cookie**
- * @param cookie - 用户 Cookie
+ * @param cookie - CookieToken V2 凭据
  * @returns 米游币任务完成状态响应数据
  */
 async function getUserMissionsState(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.CookieTokenCookie,
 ): Promise<TGApp.BBS.Mission.StateResp> {
   const param = { point_sn: "myb" };
   const header = getRequestHeader(cookie, "GET", param);
@@ -171,15 +173,15 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.HomeResp> {
 
 /**
  * 签到
- * @since Beta v0.12.4
+ * @since Beta v0.14.1
  * @remarks **需要验证码登录获取的 Cookie**
- * @param cookie - 用户 Cookie
+ * @param cookie - 含 stoken、stuid 与 mid 的 App 凭据
  * @param gid - 分区ID
  * @param challenge - 极验参数
  * @returns 基础响应数据
  */
 async function signIn(
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.SignCookie,
   gid: number = 2,
   challenge?: string,
 ): Promise<TGApp.BBS.Response.Base> {
@@ -200,21 +202,22 @@ async function signIn(
 
 /**
  * 点赞
- * @since Beta v0.10.1
+ * @since Beta v0.14.1
  * @param id - 帖子 ID
- * @param cookie - 用户 Cookie
+ * @param cookie - 用户 Cookie，需包含 ltoken_v2、ltmid_v2 与 ltuid_v2
  * @param cancel - 是否取消点赞
  * @returns 基础响应数据
  */
 async function upVotePost(
   id: string,
-  cookie: Record<string, string>,
+  cookie: TGApp.App.Account.LoginCookie,
   cancel: boolean = false,
 ): Promise<TGApp.BBS.Response.Base> {
   const data = { is_cancel: cancel, post_id: id };
   const header = {
     ...getRequestHeader(cookie, "POST", data, "K2", true),
     "x-rpc-client_type": "2",
+    "Content-Type": "application/json",
   };
   const resp = await TGHttps.post<TGApp.BBS.Response.Base>(`${Mahbu}api/upvotePost`, {
     headers: header,

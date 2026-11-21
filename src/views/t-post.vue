@@ -210,6 +210,7 @@ import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit, type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { parseLink, parsePost } from "@utils/app/linkParser.js";
 import TGClient from "@utils/app/TGClient.js";
 import { createTGWindow } from "@utils/app/TGWindow.js";
@@ -277,18 +278,18 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`帖子ID: ${postId}`);
-  let ck: undefined | Record<string, string> = undefined;
+  let ck: undefined | TGApp.App.Account.LoginCookie = undefined;
   if (cookie.value && incognito.value === false) {
-    ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+    ck = getLTokenCookie(cookie.value);
   }
   try {
     let resp = await postReq.post(postId, ck);
     if (<number>resp.retcode === 1034) {
       await TGLogger.Info(`[t-post][${postId}][onMounted] 触发 1034 验证`);
       await showLoading.update("需要完成极验验证");
-      const signCookie: Record<string, string> = cookie.value
+      const signCookie: TGApp.App.Account.SignCookie = cookie.value
         ? { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid }
-        : {};
+        : { stoken: "", stuid: "", mid: "" };
       const challenge = await miscReq.challenge(signCookie);
       if (challenge === false) {
         await showLoading.empty("数据加载失败", "[1034] 验证未完成");
@@ -509,7 +510,7 @@ async function createPostJson(postId: number): Promise<void> {
 
 async function syncDynamic(): Promise<void> {
   if (!cookie.value || !postData.value) return;
-  const ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  const ck = getLTokenCookie(cookie.value);
   try {
     const resp = await postReq.dynamic([postData.value.post.post_id], ck);
     if (resp.retcode !== 0) {
@@ -578,7 +579,7 @@ async function tryLike(): Promise<void> {
     showSnackbar.error("数据未加载");
     return;
   }
-  const ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  const ck = getLTokenCookie(cookie.value);
   try {
     const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
     if (resp.retcode !== 0) {

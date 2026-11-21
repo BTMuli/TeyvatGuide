@@ -74,6 +74,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -96,8 +97,8 @@ onMounted(async () => {
     await showLoading.empty("未获取到PostID");
     return;
   }
-  let ck: Record<string, string> | undefined = undefined;
-  if (cookie.value) ck = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  let ck: TGApp.App.Account.LoginCookie | undefined = undefined;
+  if (cookie.value) ck = getLTokenCookie(cookie.value);
   try {
     const resp = await postReq.post(postId, ck);
     if (resp.retcode !== 0) {

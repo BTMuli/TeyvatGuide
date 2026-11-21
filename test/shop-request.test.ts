@@ -1,6 +1,6 @@
 /**
  * 米游社商店请求回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -50,7 +50,8 @@ describe("shop request headers and query", () => {
           Origin: "https://www.miyoushe.com",
           Referer: "https://webstatic.mihoyo.com/app/community-shop/index.html",
           Cookie:
-            "account_id_v2=398265412; cookie_token_v2=cookie-token; " +
+            "account_id_v2=398265412; account_mid_v2=mid; " +
+            "cookie_token_v2=cookie-token; ltmid_v2=mid; " +
             "ltoken_v2=ltoken; ltuid_v2=398265412",
         }),
         query: { app_id: 1, point_sn: "myb" },

@@ -1,6 +1,6 @@
 /**
  * 米游社帖子编辑器云草稿加载与保存回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { readFileSync } from "node:fs";
@@ -181,6 +181,13 @@ function mountComposer(draftId: string | null = "draft-1"): ComposerBindings {
       buildPicturePostDocument: vi.fn(() => ({ nodes: [], text: "", images: [], length: 0 })),
     },
     "@utils/bbs/postPublish.js": { canPublishForumPost: () => true },
+    "@utils/account/accountCookie.js": {
+      getLTokenCookie: (cookie: { mid?: string; ltoken_v2: string; ltuid_v2: string }) => ({
+        ltmid_v2: cookie.mid ?? "",
+        ltoken_v2: cookie.ltoken_v2,
+        ltuid_v2: cookie.ltuid_v2,
+      }),
+    },
     "@utils/bbs/replyAccount.js": {
       executeReplyForCurrentAccount: async (
         snapshot: { uid: string; cookie: { ltuid_v2: string; ltoken_v2: string } },
@@ -331,6 +338,7 @@ describe("帖子编辑器云草稿", () => {
 
     expect(postEditReq.create).toHaveBeenCalledTimes(1);
     expect(postDraftReq.delete).toHaveBeenCalledWith("draft-1", {
+      ltmid_v2: "mid-1001",
       ltoken_v2: "token-1001",
       ltuid_v2: "1001",
     });
@@ -395,6 +403,7 @@ describe("帖子编辑器云草稿", () => {
       title: "删除草稿「删除后仍保留的内容」？",
     });
     expect(postDraftReq.delete).toHaveBeenCalledWith("draft-1", {
+      ltmid_v2: "mid-1001",
       ltoken_v2: "token-1001",
       ltuid_v2: "1001",
     });
@@ -500,6 +509,7 @@ describe("帖子编辑器云草稿", () => {
     await settle();
 
     expect(postDraftReq.detail).toHaveBeenCalledWith("draft-1", {
+      ltmid_v2: "mid-1001",
       ltoken_v2: "token-1001",
       ltuid_v2: "1001",
     });
@@ -577,6 +587,7 @@ describe("帖子编辑器云草稿", () => {
 
     expect(composer.draft.value.subject).toBe("新账号草稿");
     expect(postDraftReq.detail.mock.calls[1][1]).toEqual({
+      ltmid_v2: "mid-2002",
       ltoken_v2: "token-2002",
       ltuid_v2: "2002",
     });

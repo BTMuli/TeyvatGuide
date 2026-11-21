@@ -40,6 +40,7 @@ import bbsEnum from "@enum/bbs.js";
 import postEditReq from "@req/postEditReq.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { storeToRefs } from "pinia";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
@@ -116,7 +117,7 @@ async function deletePost(): Promise<void> {
   }
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: currentUid,
-    cookie: { ltoken_v2: currentCookie.ltoken_v2, ltuid_v2: currentCookie.ltuid_v2 },
+    cookie: getLTokenCookie(currentCookie),
   };
   const postId = props.source.post.post_id;
   const originalSubject = props.source.post.subject;

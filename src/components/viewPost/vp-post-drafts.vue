@@ -133,6 +133,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import postDraftReq from "@req/postDraftReq.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
@@ -211,7 +212,7 @@ function getAccountSnapshot(): TGApp.BBS.Reply.AccountSnapshot | undefined {
   if (!accountReady.value || !uid.value || !cookie.value) return undefined;
   return {
     uid: uid.value,
-    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+    cookie: getLTokenCookie(cookie.value),
   };
 }
 

@@ -108,9 +108,9 @@ const currentGameUid = computed<string>(() => account.value?.gameUid || "");
 
 /**
  * 构建验证用的签名 Cookie
- * @since Beta v0.10.2
+ * @since Beta v0.14.1
  */
-function buildSignCookie(): Record<string, string> {
+function buildSignCookie(): TGApp.App.Account.SignCookie {
   return {
     stoken: cookie.value!.stoken,
     stuid: cookie.value!.stuid,

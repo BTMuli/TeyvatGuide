@@ -299,6 +299,7 @@ import bbsReq from "@req/bbsReq.js";
 import replyAssetReq, { replyAssetCapabilities } from "@req/replyAssetReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useBBSStore from "@store/bbs.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { searchEmojiItems } from "@utils/bbs/emojiSearch.js";
 import { getGameUidInfos, validateGameUidCookie } from "@utils/bbs/gameUid.js";
 import { executeReplyForCurrentAccount, matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
@@ -492,7 +493,7 @@ defineExpose({ cancelUpload });
 
 function openImagePicker(): void {
   if (props.disabled || !replyAssetCapabilities.imageUpload || !props.cookie) return;
-  const cookie = { ltoken_v2: props.cookie.ltoken_v2, ltuid_v2: props.cookie.ltuid_v2 };
+  const cookie = getLTokenCookie(props.cookie);
   if (!matchesCurrentAccount({ uid: cookie.ltuid_v2, cookie })) {
     clearImagePicker();
     showSnackbar.warn("账号状态已变化，请重新打开帖子窗口");
@@ -550,7 +551,7 @@ async function loadGameUidAccounts(): Promise<void> {
     const execution = await executeReplyForCurrentAccount(
       {
         uid: requestCookie.ltuid_v2,
-        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
+        cookie: getLTokenCookie(requestCookie),
       },
       () => takumiReq.bind.gameRoles(requestCookie),
     );
@@ -559,7 +560,7 @@ async function loadGameUidAccounts(): Promise<void> {
       !execution.allowed ||
       !matchesCurrentAccount({
         uid: requestCookie.ltuid_v2,
-        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
+        cookie: getLTokenCookie(requestCookie),
       })
     ) {
       gameUidAccounts.value = [];
@@ -614,7 +615,7 @@ async function loadEmoji(): Promise<void> {
 async function lookupMention(): Promise<void> {
   const nickname = mentionQuery.value.trim();
   if (props.disabled || mentionLoading.value || !nickname || !props.cookie) return;
-  const requestCookie = { ...props.cookie };
+  const requestCookie = getLTokenCookie(props.cookie);
   const version = contextVersion;
   const controller = new AbortController();
   mentionController = controller;
@@ -625,7 +626,7 @@ async function lookupMention(): Promise<void> {
     const execution = await executeReplyForCurrentAccount(
       {
         uid: requestCookie.ltuid_v2,
-        cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
+        cookie: requestCookie,
       },
       () => replyAssetReq.resolveMention(nickname, requestCookie, props.gid, controller.signal),
     );
@@ -683,7 +684,7 @@ async function selectImage(event: Event): Promise<void> {
         const execution = await executeReplyForCurrentAccount(
           {
             uid: requestCookie.ltuid_v2,
-            cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
+            cookie: requestCookie,
           },
           () => replyAssetReq.uploadImage(file, requestCookie, picker.gid, controller.signal),
         );

@@ -1,6 +1,6 @@
 /**
  * 米游社回复请求契约回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -26,6 +26,8 @@ const cookie = {
   cookie_token_v2: "cookie-token",
   ltoken_v2: "ltoken-value",
   ltuid_v2: "100000001",
+  ltmid_v2: "mid-value",
+  mid: "mid-value",
 };
 const authCookie = {
   ltmid_v2: cookie.mid,
@@ -431,7 +433,12 @@ describe("postReq.reply mutation requests", () => {
       () => postReq.reply.like("123", "456", cookie, false, 0),
       () => postReq.reply.delete("123", "0", cookie),
       () => postReq.reply.delete("123", "456", cookie, 1.5),
-      () => postReq.reply.pin("123", "456", { ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }),
+      () =>
+        postReq.reply.pin("123", "456", {
+          ltmid_v2: cookie.mid,
+          ltoken_v2: "",
+          ltuid_v2: cookie.ltuid_v2,
+        }),
       () => postReq.reply.pin("123", "456", cookie, false, -1),
       () => postReq.reply.main("123", 2, true, undefined, false, undefined, 20, cookieWithoutToken),
       () => postReq.reply.sub(3, 2, "123", undefined, 20, cookieWithoutUid),

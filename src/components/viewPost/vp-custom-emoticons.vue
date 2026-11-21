@@ -151,6 +151,7 @@
 <script lang="ts" setup>
 import customEmoticonReq from "@req/customEmoticonReq.js";
 import replyAssetReq from "@req/replyAssetReq.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
@@ -315,7 +316,7 @@ async function addFavorite(event: Event): Promise<void> {
     const cookie = getCookie();
     const image = await replyAssetReq.uploadImage(
       file,
-      { ltoken_v2: cookie.ltoken_v2, ltuid_v2: cookie.ltuid_v2 },
+      getLTokenCookie(cookie),
       props.gid,
       request.signal,
     );

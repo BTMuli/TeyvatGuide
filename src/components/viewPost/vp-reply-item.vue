@@ -44,12 +44,12 @@
       </div>
       <div v-if="!props.preview" class="tpri-right">
         <button
-          :aria-pressed="isLiked"
-          :disabled="interactionBusy || actionBusy !== null"
           :aria-busy="actionBusy === 'like'"
-          :class="{ active: isLiked, 'tpr-action-busy': actionBusy === 'like' }"
-          :title="isLiked ? '取消点赞' : '点赞'"
           :aria-label="isLiked ? '取消点赞' : '点赞'"
+          :aria-pressed="isLiked"
+          :class="{ active: isLiked, 'tpr-action-busy': actionBusy === 'like' }"
+          :disabled="interactionBusy || actionBusy !== null"
+          :title="isLiked ? '取消点赞' : '点赞'"
           class="tpr-action tpr-like"
           type="button"
           @click.stop="tryLike()"
@@ -137,9 +137,9 @@
       </button>
       <button
         v-if="isPinned && canPin"
-        :disabled="interactionBusy || actionBusy !== null"
         :aria-busy="actionBusy === 'pin'"
         :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
+        :disabled="interactionBusy || actionBusy !== null"
         aria-label="取消置顶"
         class="tpr-action tpr-pin actionable"
         title="取消置顶"
@@ -162,9 +162,9 @@
       </span>
       <button
         v-else-if="canPin"
-        :disabled="interactionBusy || actionBusy !== null"
         :aria-busy="actionBusy === 'pin'"
         :class="{ 'tpr-action-busy': actionBusy === 'pin' }"
+        :disabled="interactionBusy || actionBusy !== null"
         aria-label="置顶回复"
         class="tpr-action tpr-pin actionable"
         title="置顶回复"
@@ -183,9 +183,9 @@
       </button>
       <button
         v-if="canDeleteReply"
-        :disabled="interactionBusy || actionBusy !== null"
         :aria-busy="actionBusy === 'delete'"
         :class="{ 'tpr-action-busy': actionBusy === 'delete' }"
+        :disabled="interactionBusy || actionBusy !== null"
         aria-label="删除回复"
         class="tpr-action tpr-delete"
         data-html2canvas-ignore
@@ -203,8 +203,8 @@
         <v-icon v-else size="small">mdi-delete-outline</v-icon>
       </button>
       <button
-        :disabled="interactionBusy"
         :aria-busy="interactionBusy"
+        :disabled="interactionBusy"
         aria-label="导出数据"
         class="tpr-action tpr-debug"
         data-html2canvas-ignore
@@ -242,6 +242,7 @@ import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { executeReplyForCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { resolveReplyAncestors } from "@utils/bbs/replyChain.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
@@ -390,7 +391,7 @@ function getReplyContent(): Array<TGApp.BBS.SctPost.Base> {
 function getReadCookie(): TGApp.App.Account.LoginCookie | undefined {
   if (!uid.value || !cookie.value?.ltoken_v2.trim() || cookie.value.ltuid_v2 !== uid.value)
     return undefined;
-  return { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  return getLTokenCookie(cookie.value);
 }
 
 function getWriteSnapshot(): WriteSnapshot | undefined {
@@ -405,7 +406,7 @@ function getWriteSnapshot(): WriteSnapshot | undefined {
   }
   return {
     uid: uid.value,
-    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+    cookie: getLTokenCookie(cookie.value),
     postId: props.modelValue.reply.post_id,
     replyId: props.modelValue.reply.reply_id,
     gid: props.modelValue.reply.game_id,

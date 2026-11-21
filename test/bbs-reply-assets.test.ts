@@ -1,6 +1,6 @@
 /**
  * 米游社回复资源请求契约回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,6 +28,7 @@ const cookie = {
   cookie_token_v2: "cookie-token-must-not-be-sent",
   ltoken_v2: "ltoken-value",
   ltuid_v2: "100000001",
+  ltmid_v2: "mid-value",
   mid: "mid-value",
   stoken: "stoken-value",
   stuid: "100000001",
@@ -332,7 +333,12 @@ describe("resolveMention", () => {
       () => resolveMention("  ", cookie, 2),
       () => resolveMention("Alice", cookie, 0),
       () => resolveMention("Alice", cookie, 1.5),
-      () => resolveMention("Alice", { ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 }, 2),
+      () =>
+        resolveMention(
+          "Alice",
+          { ltmid_v2: cookie.mid, ltoken_v2: "", ltuid_v2: cookie.ltuid_v2 },
+          2,
+        ),
       () =>
         resolveMention(
           "Alice",

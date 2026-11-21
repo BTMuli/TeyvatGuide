@@ -454,6 +454,7 @@ import postVoteReq from "@req/postVoteReq.js";
 import topicReq from "@req/topicReq.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { assertPostDocumentContent, buildPostDocument } from "@utils/bbs/postDocument.js";
 import { assertPicturePostDocument, buildPicturePostDocument } from "@utils/bbs/postPicture.js";
 import { canPublishForumPost } from "@utils/bbs/postPublish.js";
@@ -886,7 +887,7 @@ async function initialize(force: boolean = false): Promise<void> {
       if (!cookie.value || !canWrite.value) throw new Error("请先登录米游社账号");
       const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
         uid: cookie.value.ltuid_v2,
-        cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+        cookie: getLTokenCookie(cookie.value),
       };
       const response = await postDraftReq.detail(props.draftId, snapshot.cookie);
       if (!active || version !== contextVersion.value || !matchesCurrentAccount(snapshot)) return;
@@ -909,7 +910,7 @@ async function initialize(force: boolean = false): Promise<void> {
       draftSeed.value = undefined;
       seed = structuredClone(toRaw(props.source));
       if (force && toolCookie.value) {
-        const latest = await postReq.post(seed.post.post_id, toolCookie.value);
+        const latest = await postReq.post(seed.post.post_id, getLTokenCookie(toolCookie.value));
         if (!active || version !== contextVersion.value) return;
         if (latest.retcode !== 0) throw new Error(`[${latest.retcode}] ${latest.message}`);
         if (
@@ -1046,7 +1047,7 @@ async function saveVote(request: TGApp.BBS.Vote.CreateRequest): Promise<void> {
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: snapshotUid,
-    cookie: { ltoken_v2: requestCookie.ltoken_v2, ltuid_v2: requestCookie.ltuid_v2 },
+    cookie: getLTokenCookie(requestCookie),
   };
   componentDialog.value.loading = true;
   componentDialog.value.error = "";
@@ -1314,7 +1315,7 @@ async function savePost(): Promise<void> {
   )
     return;
   const version = contextVersion.value;
-  const requestCookie = { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 };
+  const requestCookie = getLTokenCookie(cookie.value);
   const settings = structuredClone(toRaw(draft.value));
   const source = seed;
   const action = source ? "保存修改" : isPicture.value ? "发布图片帖" : "发布长文";
@@ -1447,7 +1448,7 @@ async function saveDraft(): Promise<void> {
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: cookie.value.ltuid_v2,
-    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+    cookie: getLTokenCookie(cookie.value),
   };
   const settings = structuredClone(toRaw(draft.value));
   pending.value = true;
@@ -1493,7 +1494,7 @@ async function deleteDraft(): Promise<void> {
   const version = contextVersion.value;
   const snapshot: TGApp.BBS.Reply.AccountSnapshot = {
     uid: cookie.value.ltuid_v2,
-    cookie: { ltoken_v2: cookie.value.ltoken_v2, ltuid_v2: cookie.value.ltuid_v2 },
+    cookie: getLTokenCookie(cookie.value),
   };
   pending.value = true;
   draftDeletePending.value = true;

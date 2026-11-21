@@ -150,14 +150,9 @@ type AccountSnapshot = {
 
 /**
  * 封面上传凭据。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
-type CoverCookie = {
-  /** 米游社登录令牌 */
-  ltoken_v2: string;
-  /** 米游社账号 ID */
-  ltuid_v2: string;
-};
+type CoverCookie = Pick<TGApp.App.Account.Cookie, "ltoken_v2" | "ltuid_v2" | "mid">;
 
 const props = withDefaults(defineProps<CollectionFormProps>(), { collection: undefined });
 const visible = defineModel<boolean>({ required: true });
@@ -175,10 +170,11 @@ const isEditing = computed<boolean>(() => props.collection !== undefined);
 const coverCookie = computed<CoverCookie | undefined>(() => {
   const current = cookie.value;
   if (!current) return undefined;
+  const mid = current.mid.trim();
   const ltoken_v2 = current.ltoken_v2.trim();
   const ltuid_v2 = current.ltuid_v2.trim();
-  if (!ltoken_v2 || !ltuid_v2) return undefined;
-  return { ltoken_v2, ltuid_v2 };
+  if (!ltoken_v2 || !ltuid_v2 || !mid) return undefined;
+  return { ltuid_v2, ltoken_v2, mid };
 });
 const titleError = computed<string>(() => {
   if (!submitted.value) return "";

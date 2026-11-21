@@ -132,6 +132,7 @@ import { createReplyDraft } from "@hooks/useReplyDraft.js";
 import { useReplyInteraction } from "@hooks/useReplyInteraction.js";
 import postReq from "@req/postReq.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { parseCustomEmoticon } from "@utils/bbs/customEmoticon.js";
 import { validateGameUidInfo } from "@utils/bbs/gameUid.js";
 import { executeReplyForCurrentAccount } from "@utils/bbs/replyAccount.js";
@@ -390,10 +391,7 @@ async function publishReply(): Promise<void> {
     structuredContent: document.structuredContent,
     replyId: props.target?.reply.reply_id,
   };
-  const requestCookie = {
-    ltoken_v2: cookie.value.ltoken_v2,
-    ltuid_v2: cookie.value.ltuid_v2,
-  };
+  const requestCookie = getLTokenCookie(cookie.value);
   const title = props.target ? "发布回复" : "发布评论";
   await interaction.run(async () => {
     publishing.value = true;

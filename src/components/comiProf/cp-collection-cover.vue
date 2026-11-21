@@ -58,19 +58,15 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import replyAssetReq from "@req/replyAssetReq.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
 
 /**
  * 封面上传凭据。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
-type CollectionCoverCookie = {
-  /** 米游社登录令牌 */
-  ltoken_v2: string;
-  /** 米游社账号 ID */
-  ltuid_v2: string;
-};
+type CollectionCoverCookie = Pick<TGApp.App.Account.Cookie, "ltoken_v2" | "ltuid_v2" | "mid">;
 
 /**
  * 合集封面参数。
@@ -166,7 +162,7 @@ async function handleCoverChange(event: Event): Promise<void> {
   try {
     const image = await replyAssetReq.uploadImage(
       file,
-      { ltoken_v2: props.cookie.ltoken_v2, ltuid_v2: props.cookie.ltuid_v2 },
+      getLTokenCookie(props.cookie),
       2,
       controller.signal,
     );

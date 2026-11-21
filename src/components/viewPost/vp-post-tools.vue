@@ -233,6 +233,7 @@
 <script lang="ts" setup>
 import bbsReq from "@req/bbsReq.js";
 import replyAssetReq from "@req/replyAssetReq.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { searchEmojiItems } from "@utils/bbs/emojiSearch.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
@@ -389,7 +390,7 @@ function getCookie(): TGApp.App.Account.LoginCookie {
   if (!cookie || !matchesCurrentAccount({ uid: cookie.ltuid_v2, cookie })) {
     throw new Error("账号状态已变化，请重新打开编辑器");
   }
-  return { ltoken_v2: cookie.ltoken_v2, ltuid_v2: cookie.ltuid_v2 };
+  return getLTokenCookie(cookie);
 }
 
 function resolveActivator(event?: MouseEvent): HTMLElement | undefined {

@@ -1,6 +1,6 @@
 /**
  * 请求头构建与登录凭据提取
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -218,17 +218,21 @@ export function getAppSignCookie(
 
 /**
  * 提取回复与帖子编辑请求所需的登录凭据
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  * @param cookie - 包含 ltoken_v2、ltuid_v2 与 ltmid_v2 的 Cookie
  * @returns 供请求头签名使用的最小 Cookie
+ * @remarks 三项凭据必须齐全，缺失时直接报错，避免向服务端发送 `ltmid_v2=undefined`
  */
 export function getReplyCookie(
   cookie: TGApp.App.Account.LoginCookie,
 ): TGApp.App.Account.LoginCookie {
   const ltoken = cookie?.ltoken_v2?.trim();
   const ltuid = cookie?.ltuid_v2?.trim();
-  if (!ltoken || !ltuid) throw new Error("登录凭据缺少 ltoken_v2 或 ltuid_v2");
-  return { ltmid_v2: cookie.ltmid_v2, ltoken_v2: ltoken, ltuid_v2: ltuid };
+  const ltmid = cookie?.ltmid_v2?.trim();
+  if (!ltoken || !ltuid || !ltmid) {
+    throw new Error("登录凭据缺少 ltoken_v2、ltmid_v2 或 ltuid_v2");
+  }
+  return { ltmid_v2: ltmid, ltoken_v2: ltoken, ltuid_v2: ltuid };
 }
 
 /**

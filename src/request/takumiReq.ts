@@ -1,6 +1,6 @@
 /**
  * Takumi 相关请求函数
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 import { getWebAccountCookies } from "@utils/account/accountCookie.js";
 import { getAppSignCookie, getRequestHeader } from "@utils/network/getRequestHeader.js";
@@ -88,13 +88,13 @@ async function genAuthKey(
 
 /**
  * 生成authkey-v2，专门用于JSBridge
- * @since Beta v0.10.1
- * @param cookie - cookie
+ * @since Beta v0.14.1
+ * @param cookie - 含 stoken 与 mid 的账号凭据
  * @param payload - payload
  * @returns authkey2响应数据
  */
 async function genAuthKey2(
-  cookie: Record<string, string>,
+  cookie: Pick<TGApp.App.Account.Cookie, "mid" | "stoken">,
   payload: Record<string, string>,
 ): Promise<TGApp.BBS.Auth.AuthKeyResp> {
   const resp = await TGHttps.post<TGApp.BBS.Auth.AuthKeyResp>(`${taBu}binding/api/genAuthKey`, {
