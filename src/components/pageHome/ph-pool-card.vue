@@ -1,71 +1,103 @@
 <template>
-  <div class="ph-pool-card">
+  <div ref="cardRef" :class="{ 'is-collapsed': collapsed }" class="ph-pool-card">
     <div class="ph-pool-title" :title="props.pool.title" @click="openPoolOverlay()">
-      {{ props.pool.title }}
+      <v-icon
+        v-if="collapsed && isCountingDown"
+        aria-hidden="true"
+        class="ph-pool-title-icon"
+        icon="mdi-clock-outline"
+        size="14"
+      />
+      <span class="ph-pool-title-text">{{ collapsed ? restText : props.pool.title }}</span>
+      <button
+        aria-label="分享卡池"
+        class="ph-pool-share tg-icon-button"
+        data-html2canvas-ignore
+        title="分享卡池"
+        type="button"
+        @click.stop="sharePool()"
+      >
+        <v-icon aria-hidden="true" icon="mdi-share-variant" size="12" />
+      </button>
     </div>
     <div class="ph-pool-cover" @click="toPool()">
-      <img v-if="cover" :src="cover" alt="cover" />
+      <TMiImg v-if="cover" :alt="props.pool.title" :ori="true" :size="64" :src="cover" />
       <img v-else alt="empty" class="empty" src="/UI/app/empty.webp" />
     </div>
-    <div class="ph-pool-bottom">
-      <div v-if="avatars.length < 5" class="ph-pool-avatars">
-        <div
-          v-for="avatar in avatars"
-          :key="avatar.url"
-          class="ph-pool-icon"
-          @click="toAvatar(avatar)"
+    <Transition name="ph-pool-bottom">
+      <div v-show="!collapsed" :id="bottomId" class="ph-pool-bottom">
+        <div v-if="avatars.length < 5" class="ph-pool-avatars">
+          <div
+            v-for="avatar in avatars"
+            :key="avatar.url"
+            class="ph-pool-icon"
+            @click="toAvatar(avatar)"
+          >
+            <TItemBox
+              v-if="avatar.info"
+              :model-value="getBox(avatar.info)"
+              :title="avatar.info.name"
+            />
+            <TMiImg v-else-if="avatar.icon" :ori="true" :size="60" :src="avatar.icon" alt="icon" />
+            <img v-else alt="icon" src="/UI/app/empty.webp" />
+          </div>
+        </div>
+        <Swiper
+          v-else
+          :autoplay="{ delay: 1000, disableOnInteraction: false, stopOnLastSlide: false }"
+          :centered-slides="false"
+          :loop="true"
+          :modules="swiperModules"
+          :navigation="true"
+          :slides-per-view="4"
+          :space-between="8"
+          class="ph-pool-avatars swiper"
         >
-          <TItemBox
-            v-if="avatar.info"
-            :model-value="getBox(avatar.info)"
-            :title="avatar.info.name"
+          <SwiperSlide
+            v-for="avatar in avatars"
+            :key="avatar.url"
+            class="ph-pool-icon"
+            @click="toAvatar(avatar)"
+          >
+            <TItemBox
+              v-if="avatar.info"
+              :model-value="getBox(avatar.info)"
+              :title="avatar.info.name"
+            />
+            <TMiImg v-else-if="avatar.icon" :ori="true" :size="60" :src="avatar.icon" alt="icon" />
+            <img v-else alt="icon" src="/UI/app/empty.webp" />
+          </SwiperSlide>
+        </Swiper>
+        <div class="ph-pool-info">
+          <div class="ph-pool-time">
+            <v-icon>mdi-calendar-clock</v-icon>
+            <span>{{ props.pool.start_time }} ~ {{ props.pool.end_time }}</span>
+          </div>
+          <v-progress-linear
+            :reverse="true"
+            :model-value="percent"
+            :rounded="true"
+            color="var(--tgc-od-green)"
           />
-          <img v-else :src="avatar.icon" alt="icon" />
+          <div v-if="restTs > durationTs" class="ph-pool-stat">未开始</div>
+          <div v-else-if="restTs > 0" class="ph-pool-stat">
+            剩余时间：{{ fmtUtil.remainingTime(restTs) }}
+          </div>
+          <div v-else class="ph-pool-stat">已结束</div>
         </div>
       </div>
-      <Swiper
-        v-else
-        :autoplay="{ delay: 1000, disableOnInteraction: false, stopOnLastSlide: false }"
-        :centered-slides="false"
-        :loop="true"
-        :modules="swiperModules"
-        :navigation="true"
-        :slides-per-view="4"
-        :space-between="8"
-        class="ph-pool-avatars swiper"
-      >
-        <SwiperSlide
-          v-for="avatar in avatars"
-          :key="avatar.url"
-          class="ph-pool-icon"
-          @click="toAvatar(avatar)"
-        >
-          <TItemBox
-            v-if="avatar.info"
-            :model-value="getBox(avatar.info)"
-            :title="avatar.info.name"
-          />
-          <img v-else :src="avatar.icon" alt="icon" />
-        </SwiperSlide>
-      </Swiper>
-      <div class="ph-pool-info">
-        <div class="ph-pool-time">
-          <v-icon>mdi-calendar-clock</v-icon>
-          <span>{{ props.pool.start_time }} ~ {{ props.pool.end_time }}</span>
-        </div>
-        <v-progress-linear
-          :reverse="true"
-          :model-value="percent"
-          :rounded="true"
-          color="var(--tgc-od-green)"
-        />
-        <div v-if="restTs > durationTs" class="ph-pool-stat">未开始</div>
-        <div v-else-if="restTs > 0" class="ph-pool-stat">
-          剩余时间：{{ fmtUtil.remainingTime(restTs) }}
-        </div>
-        <div v-else class="ph-pool-stat">已结束</div>
-      </div>
-    </div>
+    </Transition>
+    <button
+      :aria-controls="bottomId"
+      :aria-expanded="!collapsed"
+      :aria-label="collapsed ? '展开卡池信息' : '收起卡池信息'"
+      :style="{ left: toggleLeft }"
+      class="ph-pool-toggle"
+      type="button"
+      @click="collapsed = !collapsed"
+    >
+      <v-icon aria-hidden="true" class="ph-pool-toggle-icon" icon="mdi-chevron-down" size="16" />
+    </button>
   </div>
   <PhPoolItemOverlay
     v-if="detail"
@@ -83,18 +115,21 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useHomeStore from "@store/home.js";
-import { createPost, createTGWindow } from "@utils/app/TGWindow.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { createPost } from "@utils/app/TGWindow.js";
 import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGHttps from "@utils/network/TGHttps.js";
+import TGShare from "@utils/share/TGShare.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useId, useTemplateRef } from "vue";
 
 import PhPoolItemOverlay, {
   type PhPoolItemOverlayItem,
@@ -120,15 +155,35 @@ const { poolCover } = storeToRefs(useHomeStore());
 const props = defineProps<PhPoolCardProps>();
 
 const cover = ref<string>();
-const endTs = ref<number>(0);
-const restTs = ref<number>(0);
-const durationTs = ref<number>(0);
+const endTs = ref<number>(new Date(props.pool.end_time).getTime());
+const restTs = ref<number>(endTs.value - Date.now());
+const durationTs = ref<number>(endTs.value - new Date(props.pool.start_time).getTime());
 const avatars = shallowRef<Array<PhPoolAvatar>>([]);
 const detail = shallowRef<PhPoolDetail>();
 const detailShow = ref<boolean>(false);
+const collapsed = ref<boolean>(false);
+const bottomId = useId();
+const cardRef = useTemplateRef<HTMLDivElement>("cardRef");
 const poolTitleBg = computed<string>(() =>
   str2Color(`${props.pool.title}${props.pool.activity_url}`, 0),
 );
+// 折叠按钮左边缘 = 左侧角色图标最后一项右侧 + 8px。
+// 少于 5 项时按 60px 图标 + 8px 间距计算；5 项及以上使用 280px 宽的 Swiper，
+// 第 4 个可见项右侧为 284px，因此按钮左边缘为 292px。
+const toggleLeft = computed<string>(() => {
+  const count = props.pool.pool.length;
+  if (count === 0) return "16px";
+  if (count >= 5) return "292px";
+  return `${count * 68 + 8}px`;
+});
+const isCountingDown = computed<boolean>(
+  () => restTs.value > 0 && restTs.value <= durationTs.value,
+);
+const restText = computed<string>(() => {
+  if (restTs.value > durationTs.value) return "未开始";
+  if (restTs.value > 0) return fmtUtil.remainingTime(restTs.value);
+  return "已结束";
+});
 const percent = computed<number>(() => {
   if (restTs.value > durationTs.value) return 100;
   return (restTs.value * 100) / durationTs.value;
@@ -160,9 +215,6 @@ onMounted(async () => {
     avTmp.push({ ...av, info: infoFind });
   }
   avatars.value = avTmp;
-  endTs.value = new Date(props.pool.end_time).getTime();
-  restTs.value = endTs.value - Date.now();
-  durationTs.value = endTs.value - new Date(props.pool.start_time).getTime();
   if (restTs.value > 0) {
     if (timer !== null) clearInterval(timer);
     timer = setInterval(handlePosition, 1000);
@@ -178,7 +230,7 @@ async function loadCover(): Promise<void> {
   }
   let resp: TGApp.BBS.Post.FullResp | undefined;
   try {
-    resp = await postReq.post(postId, {});
+    resp = await postReq.post(postId);
     if (resp.retcode !== 0) {
       showSnackbar.error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
       await TGLogger.Warn(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
@@ -222,7 +274,7 @@ async function toAvatar(avatar: PhPoolAvatar): Promise<void> {
     showSnackbar.warn("链接为空!");
     return;
   }
-  await createTGWindow(url, "Sub_window", `Pool_${props.pool.title}`, 1200, 800, true, true);
+  await openUrl(url);
 }
 
 async function openDetailOverlay(info: TGApp.App.Character.WikiBriefInfo): Promise<void> {
@@ -304,6 +356,15 @@ function getBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
   };
 }
 
+/**
+ * 分享当前卡池
+ * @since Beta v0.14.1
+ */
+async function sharePool(): Promise<void> {
+  if (!cardRef.value) return;
+  await TGShare.modern(`限时祈愿_${props.pool.title}`, cardRef.value, 2.5);
+}
+
 async function toPool(): Promise<void> {
   const postId = Number(props.pool.activity_url.split("/").pop());
   if (isNaN(postId)) {
@@ -341,12 +402,88 @@ async function toPool(): Promise<void> {
   border-top-left-radius: 4px;
   box-shadow: -2px -2px 8px var(--tgc-dark-1);
   color: var(--tgc-white-1);
+  column-gap: 4px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 14px;
+  font-variant-numeric: tabular-nums;
   text-overflow: ellipsis;
   text-shadow: 0 0 4px var(--tgc-dark-1);
   white-space: nowrap;
+}
+
+.ph-pool-title-icon {
+  flex-shrink: 0;
+}
+
+.ph-pool-title-text {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ph-pool-share {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--tgc-white-1);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    color: var(--tgc-yellow-2);
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-white-1);
+    outline-offset: -2px;
+  }
+}
+
+.ph-pool-toggle {
+  position: absolute;
+  z-index: 2;
+  bottom: -16px;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--tgc-dark-2) 64%, transparent);
+  box-shadow: 0 2px 8px var(--common-shadow-4);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform 0.18s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px var(--common-shadow-4);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: 2px;
+  }
+}
+
+.ph-pool-toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.ph-pool-card.is-collapsed .ph-pool-toggle-icon {
+  transform: rotate(180deg);
 }
 
 .ph-pool-icon {
@@ -412,6 +549,23 @@ async function toPool(): Promise<void> {
   box-shadow: 0 -2px 10px var(--common-shadow-2);
 }
 
+.ph-pool-bottom-enter-active,
+.ph-pool-bottom-leave-active {
+  transition:
+    opacity 0.16s ease,
+    transform 0.22s ease;
+}
+
+.ph-pool-bottom-enter-from,
+.ph-pool-bottom-leave-to {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.ph-pool-bottom-leave-active {
+  pointer-events: none;
+}
+
 .ph-pool-avatars {
   position: relative;
   display: flex;
@@ -460,5 +614,14 @@ async function toPool(): Promise<void> {
 
 .ph-pool-stat {
   margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-pool-toggle,
+  .ph-pool-toggle-icon,
+  .ph-pool-bottom-enter-active,
+  .ph-pool-bottom-leave-active {
+    transition-duration: 0.01ms;
+  }
 }
 </style>
