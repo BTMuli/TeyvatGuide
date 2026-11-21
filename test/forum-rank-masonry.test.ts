@@ -1,10 +1,11 @@
 /**
  * 榜单瀑布流定位回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { describe, expect, it } from "vitest";
 
+import { getImageRankOption, getImageRankOptions } from "../src/utils/bbs/forumRank.js";
 import { getRankMasonryTimings, layoutRankMasonry } from "../src/utils/bbs/forumRankMasonry.js";
 import { getPostImageOriginalUrl, getPostImageThumbnailUrl } from "../src/utils/bbs/postImage.js";
 
@@ -41,6 +42,23 @@ describe("forum ranking masonry", () => {
     expect(after.positions.slice(0, 3)).toEqual(before.positions);
     expect(narrow.positions.every(({ left }) => left === 0)).toBe(true);
     expect(narrow.positions[1].height).not.toBe(350);
+  });
+});
+
+describe("forum ranking periods", () => {
+  it("maps each selectable leaderboard period to its own icon", () => {
+    const options = getImageRankOptions([1, 2, 3, 4]);
+
+    expect(options.map(({ value, icon }) => [value, icon])).toEqual([
+      [1, "mdi-calendar-today"],
+      [2, "mdi-calendar-week"],
+      [3, "mdi-calendar-month-outline"],
+      [4, "mdi-account-star-outline"],
+    ]);
+    for (const option of options) {
+      expect(getImageRankOption(option.value)).toEqual(option);
+    }
+    expect(getImageRankOption(0)).toBeUndefined();
   });
 });
 

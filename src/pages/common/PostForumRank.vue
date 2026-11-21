@@ -117,6 +117,7 @@
     <VpRankPostFlow
       v-if="posts.length && !flowLeaving"
       :key="flowVersion"
+      :period="period"
       :posts
       @image-click="showCoverPreview"
       @user-click="showAuthor"

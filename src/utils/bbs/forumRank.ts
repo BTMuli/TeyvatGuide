@@ -1,9 +1,19 @@
 /**
  * 图区榜单类型与封面。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
-const imageRankOptions = [
+/** 榜单类型选项。 @since Beta v0.14.1 */
+type ImageRankOption = {
+  /** 榜单名称 */
+  title: string;
+  /** 榜单类型值 */
+  value: number;
+  /** 榜单图标 */
+  icon: string;
+};
+
+const imageRankOptions: Array<ImageRankOption> = [
   { title: "日榜", value: 1, icon: "mdi-calendar-today" },
   { title: "周榜", value: 2, icon: "mdi-calendar-week" },
   { title: "月榜", value: 3, icon: "mdi-calendar-month-outline" },
@@ -20,6 +30,16 @@ export function getImageRankOptions(
   types: Array<number>,
 ): Array<{ title: string; value: number; icon: string }> {
   return imageRankOptions.filter(({ value }) => types.includes(value));
+}
+
+/**
+ * 获取单个榜单类型选项。
+ * @since Beta v0.14.1
+ * @param value - 榜单类型值
+ * @returns 榜单选项；未知类型时为 undefined
+ */
+export function getImageRankOption(value: number): ImageRankOption | undefined {
+  return imageRankOptions.find((item) => item.value === value);
 }
 
 /**

@@ -10,13 +10,14 @@
         @click="openPost"
       >
         <img
+          ref="coverImg"
           v-if="coverUrl && !imageFailed"
           :src="coverUrl"
           alt=""
           class="rank-post-cover-image"
           decoding="async"
           loading="lazy"
-          @error="imageFailed = true"
+          @error="handleCoverError"
         />
         <v-icon v-else aria-hidden="true" icon="mdi-image-outline" size="36" />
       </button>
@@ -47,6 +48,11 @@
           size="16"
         />
       </button>
+      <!-- 分享标识：仅通过 onCloneNode 在截图副本中显示 -->
+      <span v-if="sharing && shareDate" aria-hidden="true" class="rank-post-share-stamp">
+        <v-icon v-if="periodIcon" :icon="periodIcon" aria-hidden="true" size="14" />
+        <span>分享于 {{ shareDate }}</span>
+      </span>
       <span v-if="imageCount > 1" :title="'图片数：' + imageCount" class="rank-post-image-count">
         <v-icon aria-hidden="true" icon="mdi-folder-multiple-image" size="12" />
         <span>{{ imageCount }}</span>
@@ -100,15 +106,16 @@
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import useAppStore from "@store/app.js";
 import { createPost } from "@utils/app/TGWindow.js";
-import { getRankCover, getRankCoverRatio } from "@utils/bbs/forumRank.js";
-import { getPostImageThumbnailUrl } from "@utils/bbs/postImage.js";
+import { getImageRankOption, getRankCover, getRankCoverRatio } from "@utils/bbs/forumRank.js";
+import { getPostImageOriginalUrl, getPostImageThumbnailUrl } from "@utils/bbs/postImage.js";
 import { str2Color } from "@utils/display/colorFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
 import TGShare from "@utils/share/TGShare.js";
-import { computed, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 
 type VpRankPostCardProps = {
   coverWidth: number;
+  period?: number;
   post: TGApp.BBS.Forum.ImageRankPost;
   rank: number;
 };
@@ -118,11 +125,14 @@ type VpRankPostCardEmits = {
   imageClick: [cover: TGApp.BBS.Forum.ImageRankCover];
 };
 
-const { coverWidth, post, rank } = defineProps<VpRankPostCardProps>();
+const { coverWidth, period, post, rank } = defineProps<VpRankPostCardProps>();
 const emits = defineEmits<VpRankPostCardEmits>();
 const appStore = useAppStore();
 const cardEl = useTemplateRef<HTMLElement>("cardEl");
+const coverImg = useTemplateRef<HTMLImageElement>("coverImg");
+const coverUsesOriginal = ref<boolean>(false);
 const imageFailed = ref<boolean>(false);
+const shareDate = ref<string>("");
 const sharing = ref<boolean>(false);
 const title = computed<string>(() => post.post.subject || "无标题帖子");
 const canOpenAuthor = computed<boolean>(() => /^[1-9]\d*$/.test(post.user?.uid ?? ""));
@@ -134,11 +144,18 @@ const cover = computed<TGApp.BBS.Forum.ImageRankCover | undefined>(() => getRank
 const coverSource = computed<string>(
   () => cover.value?.url || post.post.cover || post.post.images[0] || "",
 );
-const coverUrl = computed<string>(() =>
-  getPostImageThumbnailUrl(coverSource.value, coverWidth, appStore.imageQualityPercent),
-);
+const coverUrl = computed<string>(() => {
+  if (coverUsesOriginal.value) {
+    const original = getPostImageOriginalUrl(coverSource.value);
+    if (original) return original.href;
+  }
+  return getPostImageThumbnailUrl(coverSource.value, coverWidth, appStore.imageQualityPercent);
+});
 const imageCount = computed<number>(() => post.post.images.length || post.image_list.length);
 const coverRatio = computed<number>(() => getRankCoverRatio(post));
+const periodIcon = computed<string | undefined>(() =>
+  period === undefined ? undefined : getImageRankOption(period)?.icon,
+);
 const metrics = computed<Array<{ label: string; icon: string; value: number }>>(() => {
   const stat = post.stat;
   if (!stat) return [];
@@ -179,10 +196,19 @@ async function openPost(): Promise<void> {
   await createPost({ postId: post.post.post_id, title: title.value });
 }
 
+function handleCoverError(): void {
+  if (coverUsesOriginal.value) {
+    coverUsesOriginal.value = false;
+    return;
+  }
+  imageFailed.value = true;
+}
+
 function previewCover(): void {
   if (!coverSource.value) return;
+  coverUsesOriginal.value = true;
   emits("imageClick", {
-    url: coverSource.value,
+    url: getPostImageOriginalUrl(coverSource.value)?.href ?? coverSource.value,
     width: cover.value?.width ?? 0,
     height: cover.value?.height ?? 0,
   });
@@ -192,16 +218,42 @@ function openAuthor(): void {
   if (post.user && canOpenAuthor.value) emits("userClick", post.user.uid);
 }
 
+/**
+ * 等待封面切换到原图并完成加载，避免分享图仍截到缩略图或空白。
+ * @returns 无返回值
+ */
+function waitCoverImage(): Promise<void> {
+  const image = coverImg.value;
+  if (!image || image.complete) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    let timeout = 0;
+    const finish = (): void => {
+      image.removeEventListener("load", finish);
+      image.removeEventListener("error", finish);
+      window.clearTimeout(timeout);
+      resolve();
+    };
+    timeout = window.setTimeout(finish, 8000);
+    image.addEventListener("load", finish);
+    image.addEventListener("error", finish);
+  });
+}
+
 async function shareCard(): Promise<void> {
   const card = cardEl.value;
   if (!card || sharing.value) return;
+  shareDate.value = fmtUtil.dateTime(Date.now()).slice(0, 10);
+  coverUsesOriginal.value = true;
   sharing.value = true;
   try {
+    await nextTick();
+    await waitCoverImage();
     await TGShare.modern("PostCard_" + post.post.post_id, card, 2.5, false, {
       backdropBlurScale: 0.7,
       onCloneNode: (cloned) => {
         if (!(cloned instanceof HTMLElement)) return;
-        if (cloned.classList.contains("rank-post-cover-image")) cloned.style.transform = "none";
+        const stamp = cloned.querySelector<HTMLElement>(".rank-post-share-stamp");
+        if (stamp !== null) stamp.style.opacity = "1";
       },
     });
   } finally {
@@ -302,6 +354,30 @@ async function shareCard(): Promise<void> {
   }
 }
 
+.rank-post-share-stamp {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #000000a6;
+  box-shadow: 0 1px 4px #0000003d;
+  color: var(--tgc-white-1);
+  column-gap: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+
+  > .v-icon {
+    flex-shrink: 0;
+  }
+}
+
 .rank-post-image-count {
   position: absolute;
   right: 0;
@@ -368,7 +444,6 @@ async function shareCard(): Promise<void> {
   overflow-wrap: anywhere;
   text-align: left;
 
-  &:hover,
   &:focus-visible {
     text-decoration: underline;
   }

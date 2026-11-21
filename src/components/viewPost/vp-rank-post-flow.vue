@@ -17,6 +17,7 @@
       <div class="rank-flow-content">
         <VpRankPostCard
           :coverWidth="layout.width"
+          :period
           :post="posts[item.index]"
           :rank="item.index + 1"
           @image-click="emits('imageClick', $event)"
@@ -33,11 +34,16 @@ import { getRankCoverRatio } from "@utils/bbs/forumRank.js";
 import { getRankMasonryTimings, layoutRankMasonry } from "@utils/bbs/forumRankMasonry.js";
 import { computed, onMounted, onScopeDispose, ref, shallowReactive, useTemplateRef } from "vue";
 
+type VpRankPostFlowProps = {
+  posts: Array<TGApp.BBS.Forum.ImageRankPost>;
+  period?: number;
+};
+
 type VpRankPostFlowEmits = {
   userClick: [uid: string];
   imageClick: [cover: TGApp.BBS.Forum.ImageRankCover];
 };
-const { posts } = defineProps<{ posts: Array<TGApp.BBS.Forum.ImageRankPost> }>();
+const { posts, period } = defineProps<VpRankPostFlowProps>();
 const emits = defineEmits<VpRankPostFlowEmits>();
 const visibilityThreshold = 0.25;
 const flowEl = useTemplateRef<HTMLOListElement>("flowEl");
