@@ -137,6 +137,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showLoading from "@comp/func/loading.js";
 import gameEnum from "@enum/game.js";
 import { parseHtmlText } from "@utils/common/toolFunc.js";
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -230,8 +231,18 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
 }
 
 async function sharePos(): Promise<void> {
-  if (!posEl.value) return;
-  await TGShare.modern(`活动-${props.pos.name}`, posEl.value, 2.5);
+  const el = posEl.value;
+  if (!el) return;
+  const fileName = `活动-${props.pos.name}`;
+  await showLoading.start("正在生成分享图片", fileName);
+  try {
+    // 网格会把卡片拉伸到同高，截图期间取消拉伸，让分享图按内容高度生成
+    el.classList.add("is-sharing");
+    await TGShare.modern(fileName, el, 2.5);
+  } finally {
+    el.classList.remove("is-sharing");
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -249,6 +260,11 @@ async function sharePos(): Promise<void> {
   background: var(--box-bg-1);
   color: var(--box-text-1);
   row-gap: 4px;
+}
+
+.ph-pos-user-card.is-sharing {
+  height: auto;
+  align-self: start;
 }
 
 .ph-puc-content {
