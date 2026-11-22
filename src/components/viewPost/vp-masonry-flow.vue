@@ -1,50 +1,58 @@
-<!-- 榜单瀑布流 -->
+<!-- 瀑布流布局 -->
 <template>
-  <ol ref="flowEl" :style="{ height: layout.height + 'px' }" class="rank-flow" role="list">
+  <ol ref="flowEl" :style="{ height: layout.height + 'px' }" class="masonry-flow" role="list">
     <li
       v-for="item in layout.positions"
       :key="item.id"
       :ref="(element) => observeCell(item.id, element)"
       :aria-posinset="item.index + 1"
-      :aria-setsize="posts.length"
-      :class="{ 'rank-flow-cell-visible': visibleIds.has(item.id) }"
+      :aria-setsize="items.length"
+      :class="{ 'masonry-flow-cell-visible': visibleIds.has(item.id) }"
       :style="[
         { top: item.top + 'px', left: item.left + 'px', width: layout.width + 'px' },
         entryStyles.get(item.id),
       ]"
-      class="rank-flow-cell"
+      class="masonry-flow-cell"
     >
-      <div class="rank-flow-content">
-        <VpRankPostCard
-          :coverWidth="layout.width"
-          :period
-          :post="posts[item.index]"
-          :rank="item.index + 1"
-          @image-click="emits('imageClick', $event)"
-          @user-click="emits('userClick', $event)"
-        />
+      <div class="masonry-flow-content">
+        <slot :index="item.index" :width="layout.width" />
       </div>
     </li>
   </ol>
 </template>
 
 <script lang="ts" setup>
-import VpRankPostCard from "@comp/viewPost/vp-rank-post-card.vue";
-import { getRankCoverRatio } from "@utils/bbs/forumRank.js";
 import { getRankMasonryTimings, layoutRankMasonry } from "@utils/bbs/forumRankMasonry.js";
-import { computed, onMounted, onScopeDispose, ref, shallowReactive, useTemplateRef } from "vue";
+import type { MasonryItem } from "@utils/bbs/forumRankMasonry.js";
+import {
+  computed,
+  onMounted,
+  onScopeDispose,
+  ref,
+  shallowReactive,
+  useTemplateRef,
+  watch,
+} from "vue";
 
-type VpRankPostFlowProps = {
-  posts: Array<TGApp.BBS.Forum.ImageRankPost>;
-  period?: number;
+type VpMasonryFlowProps = {
+  items: Array<MasonryItem>;
+  estimatedBodyHeight?: number;
+  maxColumns?: number;
+  maxCoverHeight?: number;
 };
 
-type VpRankPostFlowEmits = {
-  userClick: [uid: string];
-  imageClick: [cover: TGApp.BBS.Forum.ImageRankCover];
+type VpMasonryFlowSlots = {
+  default(props: { index: number; width: number }): unknown;
 };
-const { posts, period } = defineProps<VpRankPostFlowProps>();
-const emits = defineEmits<VpRankPostFlowEmits>();
+
+const {
+  items,
+  estimatedBodyHeight = 144,
+  maxColumns = Infinity,
+  maxCoverHeight = Infinity,
+} = defineProps<VpMasonryFlowProps>();
+const emits = defineEmits<{ layout: [lowestBottom: number | undefined] }>();
+defineSlots<VpMasonryFlowSlots>();
 const visibilityThreshold = 0.25;
 const flowEl = useTemplateRef<HTMLOListElement>("flowEl");
 const width = ref<number>(0);
@@ -53,10 +61,20 @@ const visibleIds = shallowReactive(new Set<string>());
 const entryStyles = shallowReactive(new Map<string, Record<string, string>>());
 const cells = new Map<string, Element>();
 const cellIds = new WeakMap<Element, string>();
-const items = computed<Array<{ id: string; ratio: number }>>(() =>
-  posts.map((post) => ({ id: post.post.post_id, ratio: getRankCoverRatio(post) })),
+const layout = computed(() =>
+  layoutRankMasonry(items, width.value, sizes, estimatedBodyHeight, maxColumns, maxCoverHeight),
 );
-const layout = computed(() => layoutRankMasonry(items.value, width.value, sizes));
+const lowestColumnBottom = computed<number | undefined>(() => {
+  const { columns, positions } = layout.value;
+  if (columns <= 0 || positions.length === 0) return undefined;
+  const bottoms = Array<number>(columns).fill(0);
+  for (const { column, top, height } of positions) {
+    const bottom = top + height;
+    if (bottom > bottoms[column]) bottoms[column] = bottom;
+  }
+  return Math.min(...bottoms);
+});
+watch(lowestColumnBottom, (value) => emits("layout", value), { flush: "post", immediate: true });
 let resizeObserver: ResizeObserver | undefined;
 let intersectionObserver: IntersectionObserver | undefined;
 let headerOffset = -1;
@@ -66,7 +84,7 @@ onMounted(() => {
   const element = flowEl.value;
   if (!element) return;
   resizeObserver = new ResizeObserver((entries) => {
-    if (element.hasAttribute("data-rank-flow-leaving")) return;
+    if (element.hasAttribute("data-masonry-flow-leaving")) return;
     for (const entry of entries) {
       if (entry.target === element) {
         syncLayout();
@@ -94,7 +112,7 @@ onScopeDispose(() => {
 
 function syncLayout(): void {
   const element = flowEl.value;
-  if (!element || element.hasAttribute("data-rank-flow-leaving")) return;
+  if (!element || element.hasAttribute("data-masonry-flow-leaving")) return;
   width.value = element.clientWidth;
   const barHeight =
     Number.parseFloat(window.getComputedStyle(element).getPropertyValue("--v-layout-top")) || 0;
@@ -110,7 +128,7 @@ function syncLayout(): void {
 
 function updateVisibility(entries: Array<IntersectionObserverEntry>): void {
   const element = flowEl.value;
-  if (!element || element.hasAttribute("data-rank-flow-leaving")) return;
+  if (!element || element.hasAttribute("data-masonry-flow-leaving")) return;
   const entering = new Set<string>();
   for (const {
     target,
@@ -139,8 +157,8 @@ function updateVisibility(entries: Array<IntersectionObserverEntry>): void {
   arrivals.forEach(({ id }, index) => {
     const { duration, delay } = timings[index];
     entryStyles.set(id, {
-      "--rank-flow-entry-delay": `${delay}ms`,
-      "--rank-flow-entry-duration": `${duration}ms`,
+      "--masonry-flow-entry-delay": `${delay}ms`,
+      "--masonry-flow-entry-duration": `${duration}ms`,
     });
   });
 }
@@ -161,27 +179,38 @@ function observeCell(id: string, element: unknown): void {
     intersectionObserver?.observe(element);
   }
 }
+
+/**
+ * 获取最矮一列的内容底部，用于判断瀑布流首屏是否仍有未铺满空间。
+ * @since Beta v0.14.1
+ * @returns 最矮列底部；尚未完成布局时为 undefined
+ */
+function getLowestColumnBottom(): number | undefined {
+  return lowestColumnBottom.value;
+}
+
+defineExpose({ getLowestColumnBottom });
 </script>
 
 <style lang="scss" scoped>
-.rank-flow {
+.masonry-flow {
   position: relative;
   min-width: 0;
   list-style: none;
   margin-block: 0;
   padding-inline: 0;
 
-  &[data-rank-flow-leaving] {
+  &[data-masonry-flow-leaving] {
     pointer-events: none;
   }
 }
 
-.rank-flow-cell {
+.masonry-flow-cell {
   position: absolute;
   min-width: 0;
 }
 
-.rank-flow-content {
+.masonry-flow-content {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-18px) scale(0.97);
@@ -190,27 +219,27 @@ function observeCell(id: string, element: unknown): void {
     transform 400ms ease;
 }
 
-.rank-flow-cell-visible > .rank-flow-content {
-  animation: rank-flow-appear var(--rank-flow-entry-duration, 520ms) cubic-bezier(0.2, 0.65, 0.3, 1)
-    var(--rank-flow-entry-delay, 0ms) backwards;
+.masonry-flow-cell-visible > .masonry-flow-content {
+  animation: masonry-flow-appear var(--masonry-flow-entry-duration, 520ms)
+    cubic-bezier(0.2, 0.65, 0.3, 1) var(--masonry-flow-entry-delay, 0ms) backwards;
 }
 
-.rank-flow-cell-visible > .rank-flow-content,
-.rank-flow-cell:focus-within > .rank-flow-content {
+.masonry-flow-cell-visible > .masonry-flow-content,
+.masonry-flow-cell:focus-within > .masonry-flow-content {
   opacity: 1;
   pointer-events: auto;
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rank-flow-content,
-  .rank-flow-cell-visible > .rank-flow-content {
+  .masonry-flow-content,
+  .masonry-flow-cell-visible > .masonry-flow-content {
     animation: none;
     transition: none;
   }
 }
 
-@keyframes rank-flow-appear {
+@keyframes masonry-flow-appear {
   0% {
     opacity: 0;
     transform: translateY(36px) scale(0.94);

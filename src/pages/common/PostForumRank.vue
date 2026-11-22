@@ -114,14 +114,24 @@
   </v-app-bar>
 
   <Transition :css="false" mode="out-in" @leave="leaveFlow" @after-leave="finishLeave">
-    <VpRankPostFlow
+    <VpMasonryFlow
       v-if="posts.length && !flowLeaving"
       :key="flowVersion"
-      :period="period"
-      :posts
-      @image-click="showCoverPreview"
-      @user-click="showAuthor"
-    />
+      ref="rankFlow"
+      :items="flowItems"
+      @layout="handleRankFlowLayout"
+    >
+      <template #default="{ index, width }">
+        <VpRankPostCard
+          :coverWidth="width"
+          :period
+          :post="posts[index]"
+          :rank="index + 1"
+          @image-click="showCoverPreview"
+          @user-click="showAuthor"
+        />
+      </template>
+    </VpMasonryFlow>
   </Transition>
   <template v-if="!posts.length && !flowLeaving">
     <TStatePanel v-if="loading" message="正在加载榜单…" variant="loading" />
@@ -161,21 +171,37 @@
 import TGameNav from "@comp/app/t-gameNav.vue";
 import TStatePanel from "@comp/app/t-state-panel.vue";
 import type { TpImage } from "@comp/viewPost/tp-image.vue";
+import VpMasonryFlow from "@comp/viewPost/vp-masonry-flow.vue";
 import VpOverlayImage from "@comp/viewPost/vp-overlay-image.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
-import VpRankPostFlow from "@comp/viewPost/vp-rank-post-flow.vue";
+import VpRankPostCard from "@comp/viewPost/vp-rank-post-card.vue";
 import forumRankReq from "@req/forumRankReq.js";
 import useBBSStore from "@store/bbs.js";
 import useCommunityBrowsingStore from "@store/communityBrowsing.js";
-import { getImageRankOptions } from "@utils/bbs/forumRank.js";
+import { getImageRankOptions, getRankCoverRatio } from "@utils/bbs/forumRank.js";
 import { getRankMasonryTimings } from "@utils/bbs/forumRankMasonry.js";
+import type { MasonryItem } from "@utils/bbs/forumRankMasonry.js";
 import { getPostImageOriginalUrl } from "@utils/bbs/postImage.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onScopeDispose, ref, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onScopeDispose,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { RouteLocationRaw } from "vue-router";
+
+type RankFlowInstance = {
+  $el?: HTMLElement;
+  getLowestColumnBottom: () => number | undefined;
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -225,8 +251,12 @@ const period = computed<number | undefined>({
   set: (value) => (rankPeriod.value = value),
 });
 const posts = shallowRef<Array<TGApp.BBS.Forum.ImageRankPost>>([]);
+const flowItems = computed<Array<MasonryItem>>(() =>
+  posts.value.map((post) => ({ id: post.post.post_id, ratio: getRankCoverRatio(post) })),
+);
 const nextCursor = ref<string>();
 const rankMore = useTemplateRef<HTMLDivElement>("rankMore");
+const rankFlow = useTemplateRef<RankFlowInstance>("rankFlow");
 const postLoading = ref<boolean>(false);
 const postFailed = ref<boolean>(false);
 const flowVersion = ref<number>(0);
@@ -379,6 +409,25 @@ async function loadPosts(cursor: string = "0"): Promise<void> {
   } finally {
     if (!signal.aborted) postLoading.value = false;
   }
+  if (signal.aborted) return;
+  await nextTick();
+  autoFillRankFlow();
+}
+
+function autoFillRankFlow(): void {
+  if (postLoading.value || flowLeaving.value || postFailed.value || !nextCursor.value) return;
+  const flow = rankFlow.value;
+  const root = flow?.$el;
+  if (!flow || !root) return;
+  const lowest = flow.getLowestColumnBottom();
+  if (lowest === undefined) return;
+  const flowTop = root.getBoundingClientRect().top + (window.scrollY || 0);
+  if (flowTop + lowest > window.innerHeight) return;
+  loadMore();
+}
+
+function handleRankFlowLayout(): void {
+  autoFillRankFlow();
 }
 
 function refresh(): void {
@@ -394,7 +443,7 @@ function loadMore(): void {
 
 function leaveFlow(element: Element, done: () => void): void {
   flowLeaving.value = true;
-  element.setAttribute("data-rank-flow-leaving", "");
+  element.setAttribute("data-masonry-flow-leaving", "");
   if (
     typeof element.animate !== "function" ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -402,7 +451,7 @@ function leaveFlow(element: Element, done: () => void): void {
     done();
     return;
   }
-  const cards = [...element.querySelectorAll(".rank-flow-cell-visible")];
+  const cards = [...element.querySelectorAll(".masonry-flow-cell-visible")];
   const timings = getRankMasonryTimings(cards.length, 800);
   const animations = cards.map(
     (card, index) =>

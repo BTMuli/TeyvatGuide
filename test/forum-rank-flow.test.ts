@@ -1,6 +1,6 @@
 /**
  * 榜单切换时瀑布流首屏渲染回归测试。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import { readFileSync } from "node:fs";
@@ -50,14 +50,14 @@ vi.mock("@comp/viewPost/vp-rank-post-card.vue", () => ({
   },
 }));
 
-import VpRankPostFlow from "../src/components/viewPost/vp-rank-post-flow.vue";
+import VpMasonryFlow from "../src/components/viewPost/vp-masonry-flow.vue";
 import PostForumRank from "../src/pages/common/PostForumRank.vue";
 
 const { createRenderer, h, nextTick, ssrContextKey } = Vue;
 
 /**
  * 给内存渲染器编译真实页面的客户端模板。Vitest 在 Node 中默认编译 SSR 模板。
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 function compileClientRender(path: string): Vue.RenderFunction {
   const filename = fileURLToPath(new URL(path, import.meta.url));
@@ -74,7 +74,7 @@ function compileClientRender(path: string): Vue.RenderFunction {
   return runInNewContext("(function(Vue) {" + code + "})(Vue)", { Vue });
 }
 
-VpRankPostFlow.render = compileClientRender("../src/components/viewPost/vp-rank-post-flow.vue");
+VpMasonryFlow.render = compileClientRender("../src/components/viewPost/vp-masonry-flow.vue");
 PostForumRank.render = compileClientRender("../src/pages/common/PostForumRank.vue");
 
 /** 瀑布流组件测试中的渲染节点。 @since Beta v0.13.2 */
@@ -257,7 +257,7 @@ describe("forum ranking flow", () => {
           clientWidth: 600,
           getBoundingClientRect: () => ({
             top: node.parent?.children.some(
-              (item) => item !== node && item.hasAttribute("data-rank-flow-leaving"),
+              (item) => item !== node && item.hasAttribute("data-masonry-flow-leaving"),
             )
               ? 2400
               : 100 - scrollTop,
@@ -391,28 +391,28 @@ describe("forum ranking flow", () => {
         const lastCell = getCell("5");
         const firstCell = getCell("monthly");
         expect(lastCell).toBeDefined();
-        expect(lastCell?.props.get("class")).not.toContain("rank-flow-cell-visible");
-        expect(firstCell?.props.get("class")).toContain("rank-flow-cell-visible");
+        expect(lastCell?.props.get("class")).not.toContain("masonry-flow-cell-visible");
+        expect(firstCell?.props.get("class")).toContain("masonry-flow-cell-visible");
 
         scrollTop = 255;
         intersectionChecks.forEach((check) => check());
         await nextTick();
-        expect(firstCell?.props.get("class")).toContain("rank-flow-cell-visible");
+        expect(firstCell?.props.get("class")).toContain("masonry-flow-cell-visible");
 
         scrollTop = 300;
         intersectionChecks.forEach((check) => check());
         await nextTick();
-        expect(firstCell?.props.get("class")).not.toContain("rank-flow-cell-visible");
-        expect(lastCell?.props.get("class")).not.toContain("rank-flow-cell-visible");
+        expect(firstCell?.props.get("class")).not.toContain("masonry-flow-cell-visible");
+        expect(lastCell?.props.get("class")).not.toContain("masonry-flow-cell-visible");
 
         scrollTop = 360;
         intersectionChecks.forEach((check) => check());
         await nextTick();
 
         expect(getCell("5")).toBe(lastCell);
-        expect(lastCell?.props.get("class")).toContain("rank-flow-cell-visible");
+        expect(lastCell?.props.get("class")).toContain("masonry-flow-cell-visible");
         expect(getCell("monthly")).toBe(firstCell);
-        expect(firstCell?.props.get("class")).not.toContain("rank-flow-cell-visible");
+        expect(firstCell?.props.get("class")).not.toContain("masonry-flow-cell-visible");
         expect(mocks.imagePosts).toHaveBeenCalledTimes(3);
 
         scrollTop = 1000;
@@ -428,14 +428,14 @@ describe("forum ranking flow", () => {
         await nextTick();
         const firstNewCard = getCell("7");
         const secondNewCard = getCell("8");
-        expect(firstNewCard?.props.get("class")).toContain("rank-flow-cell-visible");
-        expect(secondNewCard?.props.get("class")).toContain("rank-flow-cell-visible");
+        expect(firstNewCard?.props.get("class")).toContain("masonry-flow-cell-visible");
+        expect(secondNewCard?.props.get("class")).toContain("masonry-flow-cell-visible");
         expect(firstNewCard?.props.get("style")).toMatchObject({
-          "--rank-flow-entry-delay": "0ms",
-          "--rank-flow-entry-duration": `${(520 / 3) * 2}ms`,
+          "--masonry-flow-entry-delay": "0ms",
+          "--masonry-flow-entry-duration": `${(520 / 3) * 2}ms`,
         });
         expect(secondNewCard?.props.get("style")).toMatchObject({
-          "--rank-flow-entry-delay": `${520 / 3}ms`,
+          "--masonry-flow-entry-delay": `${520 / 3}ms`,
         });
         expect(mocks.imagePosts).toHaveBeenCalledTimes(4);
         expect(mocks.imagePosts).toHaveBeenLastCalledWith(29, 3, "2", expect.any(AbortSignal));

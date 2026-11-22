@@ -1,52 +1,75 @@
 /**
- * 榜单瀑布流布局计算。
- * @since Beta v0.13.2
+ * 瀑布流布局计算，供榜单与帖子列表共用。
+ * @since Beta v0.14.1
  */
 
-/** 待排版帖子的标识与封面比例。 @since Beta v0.13.2 */
-type MasonryItem = { id: string; ratio: number };
+/**
+ * 待排版帖子的标识与封面比例。
+ * @since Beta v0.14.1
+ */
+export type MasonryItem = { id: string; ratio: number };
 /** 卡片的实测尺寸。 @since Beta v0.13.2 */
 type MasonrySize = { width: number; height: number };
-/** 卡片在瀑布流中的位置与对应榜单索引。 @since Beta v0.13.2 */
-type MasonryPosition = { id: string; index: number; top: number; left: number; height: number };
-/** 瀑布流的卡片宽度、内容总高度和位置。 @since Beta v0.13.2 */
-type MasonryLayout = { width: number; height: number; positions: Array<MasonryPosition> };
+/** 卡片在瀑布流中的位置、列与对应条目索引。 @since Beta v0.14.1 */
+type MasonryPosition = {
+  id: string;
+  index: number;
+  column: number;
+  top: number;
+  left: number;
+  height: number;
+};
+/** 瀑布流的列数、卡片宽度、内容总高度和位置。 @since Beta v0.14.1 */
+type MasonryLayout = {
+  width: number;
+  height: number;
+  columns: number;
+  positions: Array<MasonryPosition>;
+};
 /** 单张卡片的过渡时长与启动延时。 @since Beta v0.13.2 */
 type MasonryTiming = { duration: number; delay: number };
 
 const gap = 12;
 const minCardWidth = 256;
-const estimatedBodyHeight = 144;
 
 /**
  * 按预估高度分列，使用实测高度计算位置。实测高度变化时保留所在列。
- * @since Beta v0.13.2
- * @param items - 按榜单顺序排列的帖子及其封面宽高比
+ * @since Beta v0.14.1
+ * @param items - 按显示顺序排列的帖子及其封面宽高比
  * @param width - 容器宽度
  * @param sizes - 近期测量的卡片尺寸
- * @returns 卡片位置、宽度和列表总高度
+ * @param estimatedBodyHeight - 封面之外内容的预估高度
+ * @param maxColumns - 最大列数
+ * @param maxCoverHeight - 封面最大高度
+ * @returns 列数、卡片宽度、位置和列表总高度
  */
 export function layoutRankMasonry(
   items: ReadonlyArray<MasonryItem>,
   width: number,
   sizes: ReadonlyMap<string, MasonrySize>,
+  estimatedBodyHeight: number = 144,
+  maxColumns: number = Infinity,
+  maxCoverHeight: number = Infinity,
 ): MasonryLayout {
-  if (width <= 0 || items.length === 0) return { width: 0, height: 0, positions: [] };
-  const columns = Math.max(1, Math.floor((width + gap) / (minCardWidth + gap)));
+  if (width <= 0 || items.length === 0) return { width: 0, height: 0, columns: 0, positions: [] };
+  const columns = Math.max(
+    1,
+    Math.min(Math.floor(maxColumns), Math.floor((width + gap) / (minCardWidth + gap))),
+  );
   const cardWidth = (width - (columns - 1) * gap) / columns;
   const estimatedBottoms = Array<number>(columns).fill(0);
   const actualBottoms = Array<number>(columns).fill(0);
   const positions = items.map<MasonryPosition>(({ id, ratio }, index) => {
     const column = estimatedBottoms.indexOf(Math.min(...estimatedBottoms));
-    const estimate = Math.ceil(cardWidth / ratio) + estimatedBodyHeight;
+    const estimate = Math.ceil(Math.min(cardWidth / ratio, maxCoverHeight)) + estimatedBodyHeight;
     const size = sizes.get(id);
     const height = size && Math.abs(cardWidth - size.width) < 1 ? size.height : estimate;
     const top = actualBottoms[column];
     estimatedBottoms[column] += estimate + gap;
     actualBottoms[column] += height + gap;
-    return { id, index, top, left: column * (cardWidth + gap), height };
+    return { id, index, column, top, left: column * (cardWidth + gap), height };
   });
-  return { width: cardWidth, height: Math.max(...actualBottoms) - gap, positions };
+  return { width: cardWidth, height: Math.max(...actualBottoms) - gap, columns, positions };
 }
 
 /**

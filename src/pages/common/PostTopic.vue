@@ -26,17 +26,20 @@
           label="同步刷新"
         />
         <v-btn-toggle
-          v-model="postGridMode"
+          v-model="postLayoutMode"
           :divided="false"
           :mandatory="true"
           class="post-topic-view-conf"
           color="var(--tgc-od-blue)"
           variant="outlined"
         >
-          <v-btn :value="true" size="small" title="网格布局">
+          <v-btn :value="postLayout.GRID" size="small" title="网格布局">
             <v-icon size="16">mdi-view-grid</v-icon>
           </v-btn>
-          <v-btn :value="false" size="small" title="列表布局">
+          <v-btn :value="postLayout.WATERFALL" size="small" title="瀑布流布局">
+            <v-icon size="16">mdi-view-quilt</v-icon>
+          </v-btn>
+          <v-btn :value="postLayout.LIST" size="small" title="列表布局">
             <v-icon size="20">mdi-view-list</v-icon>
           </v-btn>
         </v-btn-toggle>
@@ -142,10 +145,39 @@
       </v-btn>
     </div>
   </v-app-bar>
-  <div :class="{ grid: postGridMode }" class="post-topic-grid">
-    <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
-    </div>
+  <div
+    :class="{
+      grid: postLayoutMode === postLayout.GRID,
+      waterfall: postLayoutMode === postLayout.WATERFALL,
+    }"
+    class="post-topic-grid"
+  >
+    <template v-if="postLayoutMode === postLayout.WATERFALL">
+      <VpMasonryFlow
+        :estimatedBodyHeight="POST_CARD_ESTIMATED_BODY_HEIGHT"
+        :items="postFlowItems"
+        :maxColumns="POST_WATERFALL_MAX_COLUMNS"
+        :maxCoverHeight="POST_COVER_MAX_HEIGHT"
+      >
+        <template #default="{ index, width }">
+          <VpPostCard
+            :coverWidth="width"
+            :post="posts[index]"
+            @image-click="showCoverPreview"
+            @user-click="handleUserClick"
+          />
+        </template>
+      </VpMasonryFlow>
+    </template>
+    <template v-else>
+      <div v-for="post in posts" :key="post.post.post_id">
+        <TPostCard
+          :listMode="postLayoutMode === postLayout.LIST"
+          :post
+          @user-click="handleUserClick"
+        />
+      </div>
+    </template>
   </div>
   <VpOverlaySearch
     v-model="showSearch"
@@ -155,6 +187,18 @@
     @user-click="handleUserClick"
   />
   <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
+  <Teleport to="body">
+    <VpOverlayImage
+      v-if="previewCover && previewImage"
+      :key="previewCover.url"
+      v-model="showImage"
+      :format="previewFormat"
+      :image="previewImage"
+      :link="previewCover.url"
+      :ori="true"
+      style="z-index: calc(var(--tgi-loading) - 1)"
+    />
+  </Teleport>
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
@@ -162,8 +206,12 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import type { TpImage } from "@comp/viewPost/tp-image.vue";
+import VpMasonryFlow from "@comp/viewPost/vp-masonry-flow.vue";
+import VpOverlayImage from "@comp/viewPost/vp-overlay-image.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import VpPostCard from "@comp/viewPost/vp-post-card.vue";
 import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
@@ -174,6 +222,10 @@ import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useUserStore from "@store/user.js";
 import { createPost } from "@utils/app/TGWindow.js";
 import { parseBrowsingId, resolveBrowsingOption } from "@utils/bbs/browsing.js";
+import type { MasonryItem } from "@utils/bbs/forumRankMasonry.js";
+import { POST_COVER_MAX_HEIGHT, getPostCoverRatio } from "@utils/bbs/postCover.js";
+import { getPostImageOriginalUrl } from "@utils/bbs/postImage.js";
+import { postLayout } from "@utils/bbs/postLayout.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import TGLogger from "@utils/system/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -181,9 +233,12 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 type SortSelect<T extends number = number> = { text: string; value: T };
-type PostMiniData = { isLast: boolean; lastId: string; total: number };
+type PostMiniData = { isLast: boolean; lastId: string };
 type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
 type PublishType = { value: 1 | 2; title: string; desc: string; icon: string };
+
+const POST_CARD_ESTIMATED_BODY_HEIGHT = 210;
+const POST_WATERFALL_MAX_COLUMNS = 5;
 
 // 简单封装选项生成
 const genSortOrderItem = (
@@ -197,7 +252,7 @@ const route = useRoute();
 const router = useRouter();
 
 const { isReachBottom } = usePageReachBottom();
-const { sidebar, postGridMode } = storeToRefs(useAppStore());
+const { sidebar, postLayoutMode } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 const { recentGid, topicSortType } = storeToRefs(useCommunityBrowsingStore());
 const { cookie, uid } = storeToRefs(useUserStore());
@@ -214,6 +269,9 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
+const showImage = ref<boolean>(false);
+const previewCover = shallowRef<TGApp.BBS.Post.CoverImage>();
+const previewFormat = ref<string>("png");
 
 const isReq = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
@@ -221,9 +279,23 @@ const syncRefresh = ref<boolean>(true);
 const hasPendingChange = ref<boolean>(false);
 let hasPendingRouteChange = false;
 let appliedRoute = "";
-const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
+const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "" });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const postFlowItems = computed<Array<MasonryItem>>(() =>
+  posts.value.map((post) => ({ id: post.post.post_id, ratio: getPostCoverRatio(post) })),
+);
+const previewImage = computed<TpImage | undefined>(() => {
+  const cover = previewCover.value;
+  if (!cover) return undefined;
+  return {
+    insert: { image: cover.url },
+    attributes:
+      cover.width > 0 && cover.height > 0
+        ? { width: cover.width, height: cover.height }
+        : undefined,
+  };
+});
 const games = computed<Array<GameList>>(() =>
   (topicInfo.value?.game_info_list ?? []).map((item) => ({
     ...item,
@@ -402,6 +474,9 @@ async function freshPostData(): Promise<void> {
     await router.push(target);
     if (route.fullPath === target.fullPath) appliedRoute = target.fullPath;
   }
+  if (showSearch.value) showSearch.value = false;
+  if (showUser.value) showUser.value = false;
+  if (showImage.value) showImage.value = false;
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
   let postList: TGApp.BBS.Topic.PostResp | undefined;
@@ -428,7 +503,6 @@ async function freshPostData(): Promise<void> {
   postRaw.value = {
     isLast: postList.data.is_last,
     lastId: postList.data.last_id,
-    total: postList.data.posts.length,
   };
   posts.value = postList.data.posts;
   await showLoading.end();
@@ -441,14 +515,13 @@ async function loadMore(): Promise<void> {
   isReq.value = true;
   if (showSearch.value) showSearch.value = false;
   if (showUser.value) showUser.value = false;
+  if (showImage.value) showImage.value = false;
   if (postRaw.value.isLast) {
     showSnackbar.warn("已经到底了");
     isReq.value = false;
     return;
   }
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
-  const mod20 = postRaw.value.total % 20;
-  const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   let resp: TGApp.BBS.Topic.PostResp | undefined;
   try {
     resp = await postReq.topic(
@@ -456,7 +529,7 @@ async function loadMore(): Promise<void> {
       curTopic.value,
       curSortType.value,
       postRaw.value.lastId,
-      pageSize,
+      20,
     );
     if (resp.retcode !== 0) {
       await showLoading.end();
@@ -477,7 +550,6 @@ async function loadMore(): Promise<void> {
   postRaw.value = {
     isLast: resp.data.is_last,
     lastId: resp.data.last_id,
-    total: postRaw.value.total + resp.data.posts.length,
   };
   posts.value = posts.value.concat(resp.data.posts);
   await showLoading.end();
@@ -533,7 +605,16 @@ async function newPost(viewType: 1 | 2): Promise<void> {
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   curGid.value = gid;
   curUid.value = user.uid;
+  showImage.value = false;
   showUser.value = true;
+}
+
+function showCoverPreview(cover: TGApp.BBS.Post.CoverImage): void {
+  const url = getPostImageOriginalUrl(cover.url);
+  previewCover.value = { ...cover, url: url?.href ?? cover.url };
+  previewFormat.value = url?.pathname.match(/\.([a-z0-9]+)$/i)?.[1].toLowerCase() ?? "png";
+  showUser.value = false;
+  showImage.value = true;
 }
 </script>
 <style lang="scss" scoped>
@@ -661,6 +742,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
 .post-topic-grid {
   display: grid;
+  width: 100%;
   font-family: var(--font-title);
   gap: 12px;
   grid-auto-rows: auto;
@@ -668,6 +750,10 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
   &.grid {
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+
+  &.waterfall {
+    display: block;
   }
 }
 

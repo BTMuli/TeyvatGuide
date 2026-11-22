@@ -1,14 +1,16 @@
 /**
  * 应用状态管理
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import bbsEnum from "@enum/bbs.js";
 import gameEnum from "@enum/game.js";
 import { path } from "@tauri-apps/api";
+import { postLayout } from "@utils/bbs/postLayout.js";
+import type { PostLayout } from "@utils/bbs/postLayout.js";
 import { getInitDeviceInfo } from "@utils/common/toolFunc.js";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const useAppStore = defineStore(
   "app",
@@ -58,8 +60,15 @@ const useAppStore = defineStore(
     const hideUid = ref<boolean>(false);
     /** 帖子宽窄视图 */
     const postViewWide = ref<boolean>(true);
-    /** 帖子网格/列表视图 */
-    const postGridMode = ref<boolean>(true);
+    /** 帖子列表布局 */
+    const postLayoutMode = ref<PostLayout>(postLayout.GRID);
+    /** 兼容仅支持网格/列表的帖子页面 */
+    const postGridMode = computed<boolean>({
+      get: () => postLayoutMode.value !== postLayout.LIST,
+      set: (value) => {
+        postLayoutMode.value = value ? postLayout.GRID : postLayout.LIST;
+      },
+    });
     /** 祈愿记录网格/列表视图 */
     const gachaGridMode = ref<boolean>(false);
     /** 是否取消点赞 */
@@ -124,7 +133,7 @@ const useAppStore = defineStore(
       incognito.value = true;
       hideUid.value = false;
       postViewWide.value = true;
-      postGridMode.value = true;
+      postLayoutMode.value = postLayout.GRID;
       gachaGridMode.value = false;
       cancelLike.value = true;
       closeToTray.value = false;
@@ -198,6 +207,7 @@ const useAppStore = defineStore(
       incognito,
       hideUid,
       postViewWide,
+      postLayoutMode,
       postGridMode,
       gachaGridMode,
       cancelLike,
@@ -235,7 +245,7 @@ const useAppStore = defineStore(
           "hideUid",
           "sidebar",
           "postViewWide",
-          "postGridMode",
+          "postLayoutMode",
           "gachaGridMode",
           "cancelLike",
           "closeToTray",

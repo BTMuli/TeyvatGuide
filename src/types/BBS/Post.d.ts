@@ -1,6 +1,6 @@
 /**
  * 帖子类型定义文件
- * @since Beta v0.9.9
+ * @since Beta v0.14.1
  */
 
 declare namespace TGApp.BBS.Post {
@@ -594,6 +594,12 @@ declare namespace TGApp.BBS.Post {
      */
     aigc_meta: string;
   };
+
+  /**
+   * 帖子卡片的封面地址与尺寸。
+   * @since Beta v0.14.1
+   */
+  type CoverImage = Pick<Image, "url" | "width" | "height">;
 
   /**
    * 图片裁剪信息
