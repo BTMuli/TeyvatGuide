@@ -188,6 +188,7 @@ async function signIn(
   const data = { gids: gid };
   let header: Record<string, string> = {
     ...getRequestHeader(cookie, "POST", JSON.stringify(data), "X6"),
+    "Content-Type": "application/json",
     "user-agent": TGBbs.ua,
     "x-rpc-client_type": "2",
     referer: "https://app.mihoyo.com",
