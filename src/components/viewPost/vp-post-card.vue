@@ -30,10 +30,7 @@
           :src="defaultCoverUrl"
         />
       </button>
-      <span v-if="coverTruncated" class="post-card-long-image">
-        <span aria-hidden="true" class="post-card-long-image-fade" />
-        <span class="post-card-long-image-label">长图</span>
-      </span>
+      <span v-if="coverTruncated" class="post-card-long-image">长图</span>
       <span class="post-card-id" title="帖子 ID">{{ post.post.post_id }}</span>
       <button
         v-if="forum"
@@ -61,7 +58,12 @@
           size="16"
         />
       </button>
-      <span v-if="sharing && shareDate" aria-hidden="true" class="post-card-share-stamp">
+      <span
+        v-if="sharing && shareDate"
+        aria-hidden="true"
+        :class="{ 'post-card-share-stamp--clear-long-image': coverTruncated }"
+        class="post-card-share-stamp"
+      >
         <v-icon aria-hidden="true" icon="mdi-clock-outline" size="14" />
         <span>分享于 {{ shareDate }}</span>
       </span>
@@ -424,32 +426,14 @@ async function shareCard(): Promise<void> {
   position: absolute;
   bottom: 0;
   left: 50%;
-  display: flex;
-  width: 64%;
-  justify-content: center;
-  pointer-events: none;
-  transform: translateX(-50%);
-}
-
-.post-card-long-image-fade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(to top, #0000008c, transparent);
-}
-
-.post-card-long-image-label {
-  position: relative;
-  z-index: 1;
-  padding: 0 6px;
-  border-radius: 4px;
+  padding: 0 12px;
+  border-radius: 9px 9px 0 0;
   background: #000000a6;
   color: var(--tgc-white-1);
   font-size: 11px;
-  line-height: 16px;
+  line-height: 18px;
+  pointer-events: none;
+  transform: translateX(-50%);
   white-space: nowrap;
 }
 
@@ -557,6 +541,10 @@ async function shareCard(): Promise<void> {
   > .v-icon {
     flex-shrink: 0;
   }
+}
+
+.post-card-share-stamp--clear-long-image {
+  bottom: 26px; /* 让开 18px 高的长图标识，另留 8px 间距 */
 }
 
 .post-card-image-count {
