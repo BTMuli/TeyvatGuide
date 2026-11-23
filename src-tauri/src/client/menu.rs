@@ -1,10 +1,13 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.11.3
+//! @since Beta v0.14.1
 
+#[cfg(windows)]
+use crate::client::cookies_windows::clear_page_cookies;
 use crate::client::utils;
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
-use tauri::{AppHandle, LogicalSize, Manager, Size, Window, Wry};
+use tauri::{AppHandle, LogicalSize, Manager, Size, WebviewWindow, Window, Wry};
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use url::Url;
 
 /// 根据功能名返回米游社客户端对应的 URL。
@@ -36,7 +39,7 @@ pub fn get_mhy_client_url(func: &str) -> Result<Url, String> {
 
 /// 创建米游社客户端的“工具”子菜单。
 ///
-/// @since Beta v0.11.3
+/// @since Beta v0.14.1
 ///
 /// # 参数
 /// - `app`: Tauri 应用句柄。
@@ -65,6 +68,7 @@ fn create_utils_menu(app: AppHandle) -> Result<Submenu<Wry>, String> {
     .item(&remove_overlay_submenu)
     .item(&rotate_window_submenu)
     .item(&open_with_webview_submenu)
+    .text("mhy_clear_cookies", "清除 CK")
     .build()
     .map_err(|error| error.to_string())?;
   Ok(utils_menu)
@@ -101,7 +105,7 @@ pub fn create_mhy_menu(app: AppHandle) -> Result<Menu<Wry>, String> {
 
 /// 按菜单事件 ID 分发到对应的处理函数。
 ///
-/// @since Beta v0.11.3
+/// @since Beta v0.14.1
 ///
 /// # 参数
 /// - `window`: 触发事件的窗口。
@@ -116,8 +120,104 @@ pub fn handle_menu_event(window: &Window, event: MenuEvent) {
     "remove_overlay" => handle_menu_remove_overlay(window),
     "rotate_window" => handle_menu_rotate_window(window),
     "open_with_webview" => handle_menu_open_with_webview(window),
+    "mhy_clear_cookies" => handle_menu_clear_cookies(window),
     _ => {}
   }
+}
+
+/// 在米游社子窗口确认后清除当前网页的 Cookie，并显示结果。
+///
+/// @since Beta v0.14.1
+///
+/// # 参数
+/// - `window`: 用于定位米游社客户端窗口的窗口引用。
+fn handle_menu_clear_cookies(window: &Window) {
+  let Some(webview) = window.get_webview_window("mhy_client") else {
+    return;
+  };
+  let url = match webview.url() {
+    Ok(url) if matches!(url.scheme(), "http" | "https") => url,
+    Ok(_) => {
+      show_clear_cookies_result(&webview, Err("当前页面没有可清除的 HTTP Cookie。"));
+      return;
+    }
+    Err(error) => {
+      log::warn!("[mhy_client] 获取当前网页地址失败：{error}");
+      show_clear_cookies_result(&webview, Err("无法获取当前网页地址，请重试。"));
+      return;
+    }
+  };
+  let host = url.host_str().unwrap_or_default();
+
+  webview
+    .dialog()
+    .message(format!("将清除 {host} 当前网页使用的 Cookie，清除后可能需要重新登录。"))
+    .title("清除 CK？")
+    .kind(MessageDialogKind::Warning)
+    .buttons(MessageDialogButtons::OkCancelCustom("清除".into(), "取消".into()))
+    .parent(&webview)
+    .show(move |confirmed| {
+      if !confirmed {
+        return;
+      }
+
+      // 等待 Cookie 操作完成时保持窗口事件线程可用。
+      tauri::async_runtime::spawn_blocking(move || {
+        let result = clear_page_cookies(&webview, url).map_err(|error| {
+          log::warn!("[mhy_client] 清除 CK 失败：{error}");
+          "未能清除当前网页的全部 Cookie，请重试。"
+        });
+        show_clear_cookies_result(&webview, result);
+      });
+    });
+}
+
+/// 在米游社子窗口显示 Cookie 清除结果。
+///
+/// @since Beta v0.14.1
+///
+/// # 参数
+/// - `webview`: 米游社客户端窗口。
+/// - `result`: 清除结果，失败时包含面向用户的提示。
+fn show_clear_cookies_result(webview: &WebviewWindow, result: Result<(), &str>) {
+  let (title, message, kind) = match result {
+    Ok(()) => ("清除 CK", "已清除当前网页的 Cookie。", MessageDialogKind::Info),
+    Err(message) => ("清除 CK 失败", message, MessageDialogKind::Error),
+  };
+  webview
+    .dialog()
+    .message(message)
+    .title(title)
+    .kind(kind)
+    .buttons(MessageDialogButtons::OkCustom("确定".into()))
+    .parent(webview)
+    .show(|_| {});
+}
+
+/// 通过 Tauri 删除并复查当前网页 URL 对应的 Cookie，包括 HttpOnly Cookie。
+///
+/// @since Beta v0.14.1
+///
+/// # 参数
+/// - `webview`: 米游社客户端窗口。
+/// - `url`: 用户确认清除 Cookie 的网页地址。
+///
+/// # 返回
+/// Cookie 全部清除后返回 `Ok(())`，读取或删除失败时返回错误描述。
+#[cfg(not(windows))]
+fn clear_page_cookies(webview: &WebviewWindow, url: Url) -> Result<(), String> {
+  let cookies =
+    webview.cookies_for_url(url.clone()).map_err(|error| format!("读取 Cookie 失败：{error}"))?;
+  for cookie in cookies {
+    webview.delete_cookie(cookie).map_err(|error| format!("删除 Cookie 失败：{error}"))?;
+  }
+
+  let remaining =
+    webview.cookies_for_url(url).map_err(|error| format!("复查 Cookie 失败：{error}"))?;
+  if !remaining.is_empty() {
+    return Err("当前网页仍有 Cookie".into());
+  }
+  Ok(())
 }
 
 /// 将米游社客户端窗口置顶。
