@@ -612,8 +612,12 @@ async function changeGame(gid: number): Promise<void> {
   if (!game || !firstLoad.value || isReq.value) return;
   recentGid.value = gid;
   if (curGid.value === gid) return;
+  const previousForum = selectedForum.value;
   curGid.value = gid;
-  selectedForum.value = getPreferredForum();
+  const matchingForum =
+    curForums.value.find((forum) => forum.value === previousForum?.value) ??
+    curForums.value.find((forum) => forum.text === previousForum?.text);
+  selectedForum.value = matchingForum ?? getPreferredForum();
   hasPendingRouteChange = true;
   await applyFilterChange(`已将分区切换到 ${game.text}`);
 }
