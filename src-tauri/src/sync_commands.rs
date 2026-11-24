@@ -24,7 +24,7 @@ struct Connection {
   unsafe_http: bool,
 }
 
-/// Windows 唯一发布端：从读取数据库到发布成功，整段操作互斥。
+/// Windows 唯一发布端：从连接预检到发布成功，整段操作互斥。
 /// @since Beta v0.14.1
 #[tauri::command]
 async fn publish<R: Runtime>(
@@ -36,14 +36,13 @@ async fn publish<R: Runtime>(
     return Err("SYNC_NOT_ALLOWED：只允许在 Windows 主窗口上传记录".into());
   }
   let _guard = SYNC_OPERATION.try_lock().map_err(|_| "SYNC_BUSY：已有同步操作进行中")?;
-  let snapshot = export_sync_snapshot_internal(&db_instances).await?;
   upload_snapshot(
     &connection.address,
     connection.username,
     connection.password,
     connection.use_proxy,
     connection.unsafe_http,
-    snapshot,
+    export_sync_snapshot_internal(&db_instances),
   )
   .await
 }

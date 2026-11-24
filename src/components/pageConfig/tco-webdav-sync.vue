@@ -193,6 +193,8 @@ async function sync(): Promise<void> {
   if (busy.value) return;
   const settings = getSettings();
   if (!settings) {
+    resultText.value = "";
+    publishedId.value = "";
     showSnackbar.error("请检查 WebDAV 地址、用户名、密码和 HTTP 安全选项。");
     return;
   }

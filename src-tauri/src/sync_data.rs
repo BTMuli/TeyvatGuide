@@ -402,10 +402,7 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
         return Err(LIMIT.into());
       }
       let mut record = decode_row(table, &row)?;
-      if table.name == "RoleCombat" {
-        // 外链不是应用使用的剧诗业务数据，可能含 UID 或凭据；不能进入上传快照。
-        redact_lineup_link(record.get_mut("detail").ok_or_else(|| INVALID.to_string())?)?;
-      }
+      normalize_export_record(table, &mut record)?;
       let value = Value::Object(record);
       bytes = bytes
         .checked_add(serde_json::to_vec(&value).map_err(|_| DATABASE.to_string())?.len() + 1)
@@ -432,19 +429,121 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   Ok(serialized)
 }
 
-/// 仅在导出内存副本中清除剧诗阵容外链，其余字段保留原业务值。
+/// 只规范导出内存副本中的已知历史字段，输出仍由原有 v1 校验器验收。
 /// @since Beta v0.14.1
-fn redact_lineup_link(value: &mut Value) -> Result<(), String> {
-  let mut detail = parse_json(value.as_str().ok_or_else(|| INVALID.to_string())?, MAX_FIELD_BYTES)?;
-  let Some(Value::String(link)) = detail.as_object_mut().and_then(|o| o.get_mut("lineup_link"))
-  else {
-    return Err(INVALID.into());
+fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Result<(), String> {
+  let columns: &[&str] = match table.name {
+    "SpiralAbyss" => &["floors"],
+    "RoleCombat" => &["stat", "detail"],
+    "HardChallenge" => &["single", "mp", "blings"],
+    _ => &[],
   };
-  if !link.is_empty() {
-    link.clear();
-    *value = Value::String(serde_json::to_string(&detail).map_err(|_| INVALID.to_string())?);
+  for &column in columns {
+    let invalid_column =
+      || format!("SYNC_INVALID：{}.{column} 数据格式不受支持；未更改数据库", table.name);
+    let raw = row.get_mut(column).ok_or_else(invalid_column)?;
+    if table.name == "HardChallenge"
+      && (raw.is_null() || raw.as_str().is_some_and(|text| text.trim().is_empty()))
+    {
+      return Err(LEGACY_CHALLENGE.into());
+    }
+    let text = raw.as_str().ok_or_else(invalid_column)?;
+    let mut value = parse_json(text, MAX_FIELD_BYTES)
+      .map_err(|error| if error == INVALID { invalid_column() } else { error })?;
+    let mut changed = false;
+    if table.name == "RoleCombat" && column == "stat" {
+      changed |= normalize_legacy_combat_stat(&mut value);
+    } else if table.name == "RoleCombat" && column == "detail" {
+      let detail = value.as_object_mut().ok_or_else(invalid_column)?;
+      // 阵容外链不属于可同步的战绩；字段缺失、为空或类型变化时同样不传原值。
+      if detail.get("lineup_link").and_then(Value::as_str) != Some("") {
+        detail.insert("lineup_link".into(), Value::String(String::new()));
+        changed = true;
+      }
+      if let Some(stat) = detail.get_mut("detail_stat") {
+        changed |= normalize_legacy_combat_stat(stat);
+      }
+      let legacy_rounds = detail
+        .get("detail_stat")
+        .and_then(|stat| stat.get("difficulty_id"))
+        .and_then(Value::as_u64)
+        .is_some_and(|difficulty| difficulty <= 4);
+      if let Some(rounds) = detail.get_mut("rounds_data").and_then(Value::as_array_mut) {
+        for round in rounds {
+          let Some(round) = round.as_object_mut() else { continue };
+          // 仅旧非月谕难度可补双缺标记；不把损坏的新月谕记录伪装成非月谕。
+          if legacy_rounds
+            && !round.contains_key("is_tarot")
+            && !round.contains_key("tarot_serial_no")
+          {
+            round.insert("is_tarot".into(), Value::Bool(false));
+            round.insert("tarot_serial_no".into(), Value::from(0));
+            changed = true;
+          }
+          if let Some(timestamp) = round.get("finish_time").and_then(Value::as_u64) {
+            if timestamp <= 999_999_999_999_999 {
+              round.insert("finish_time".into(), Value::String(timestamp.to_string()));
+              changed = true;
+            }
+          }
+        }
+      }
+    } else if table.name == "HardChallenge" && matches!(column, "single" | "mp") {
+      let challenge = value.as_object_mut().ok_or_else(invalid_column)?;
+      // 历史记录可能没有最佳项；保留已有挑战和最佳数据，不生成虚构成绩。
+      if !challenge.contains_key("best") {
+        challenge.insert("best".into(), Value::Null);
+        changed = true;
+      }
+    }
+    changed |= replace_unsupported_export_images(&mut value);
+    if changed {
+      *raw = Value::String(serde_json::to_string(&value).map_err(|_| invalid_column())?);
+    }
   }
   Ok(())
+}
+
+/// 旧剧诗没有月谕统计；仅为非月谕难度补零，不推断缺失的月谕成绩。
+/// @since Beta v0.14.1
+fn normalize_legacy_combat_stat(value: &mut Value) -> bool {
+  let Some(stat) = value.as_object_mut() else { return false };
+  if !stat.contains_key("tarot_finished_cnt")
+    && stat.get("difficulty_id").and_then(Value::as_u64).is_some_and(|difficulty| difficulty <= 4)
+  {
+    stat.insert("tarot_finished_cnt".into(), Value::from(0));
+    return true;
+  }
+  false
+}
+
+/// 仅处理已选战绩 JSON 列中 v1 已知的图片键，未受信任的图片不进入快照。
+/// @since Beta v0.14.1
+fn replace_unsupported_export_images(value: &mut Value) -> bool {
+  match value {
+    Value::Array(items) => {
+      let mut changed = false;
+      for item in items {
+        changed |= replace_unsupported_export_images(item);
+      }
+      changed
+    }
+    Value::Object(fields) => {
+      let mut changed = false;
+      for (key, value) in fields {
+        if matches!(key.as_str(), "icon" | "image" | "side_icon" | "avatar_icon") {
+          if (value.is_string() || value.is_null()) && !safe_image(value) {
+            *value = Value::String("/UI/app/empty.webp".into());
+            changed = true;
+          }
+        } else {
+          changed |= replace_unsupported_export_images(value);
+        }
+      }
+      changed
+    }
+    _ => false,
+  }
 }
 
 /// 已验证快照的四表记录，与 TABLES 顺序一致。
@@ -569,6 +668,28 @@ fn dated_image_path(path: &str) -> bool {
       digit_segment(d, 2) && image_path(file, false))
 }
 
+/// 匹配养成计算器 CDN 的已知静态图标目录，不接受同活动的 API、页面或任意资源。
+/// @since Beta v0.14.1
+fn calculator_image_path(path: &str) -> bool {
+  let Some(path) = path.strip_prefix("hk4e/e20200928calculate/") else { return false };
+  if let Some(path) = path.strip_prefix("static/player/") {
+    return image_path(path, false);
+  }
+  let Some((group, path)) = path.split_once('/') else { return false };
+  ["item_icon", "item_avatar_side_icon", "item_monster_icon", "item_role_combat"].iter().any(
+    |prefix| {
+      group == *prefix
+        || group.strip_prefix(prefix).and_then(|suffix| suffix.strip_prefix('_')).is_some_and(
+          |suffix| {
+            !suffix.is_empty()
+              && suffix.len() <= 16
+              && suffix.bytes().all(|byte| byte.is_ascii_alphanumeric())
+          },
+        )
+    },
+  ) && image_path(path, false)
+}
+
 /// 只允许空图像、应用资源及静态官方 HTTPS 图片；不在同步时加载资源。
 /// @since Beta v0.14.1
 fn safe_image(value: &Value) -> bool {
@@ -598,7 +719,8 @@ fn safe_image(value: &Value) -> bool {
   {
     return path
       .strip_prefix("game_record/genshin/")
-      .is_some_and(|p| p.contains('/') && image_path(p, false));
+      .is_some_and(|p| p.contains('/') && image_path(p, false))
+      || calculator_image_path(path);
   }
   if ["fastcdn.mihoyo.com", "fastcdn.hoyoverse.com"].iter().any(|h| host.eq_ignore_ascii_case(h)) {
     return path.strip_prefix("static-resource-v2/").is_some_and(dated_image_path);
@@ -911,13 +1033,70 @@ fn combat_card(value: &Value) -> bool {
     && number(&o["id"], 1_000_000_000)
 }
 
-/// 验证剧诗增益效果。
+/// 验证剧诗增益效果及官方游戏内词条元数据；词条不是可导航 URL。
 /// @since Beta v0.14.1
 fn combat_effect(value: &Value) -> bool {
-  let Some(o) = object(value, &["icon", "name", "desc"], &[]) else {
+  let Some(o) = object(value, &["icon", "name", "desc"], &["links"]) else {
     return false;
   };
-  safe_image(&o["icon"]) && legacy_backup_text(&o["name"]) && legacy_backup_text(&o["desc"])
+  safe_image(&o["icon"])
+    && legacy_backup_text(&o["name"])
+    && combat_effect_text(&o["desc"])
+    && o.get("links").is_none_or(combat_effect_links)
+}
+
+/// 验证有界的数字词条字典；只保存 ID、名称和纯游戏文本，不接受外部链接字段。
+/// @since Beta v0.14.1
+fn combat_effect_links(value: &Value) -> bool {
+  let Some(links) = value.as_object() else { return false };
+  links.len() <= MAX_ARRAY
+    && links.iter().all(|(key, value)| {
+      let Some(link) = object(value, &["id", "name", "desc"], &[]) else { return false };
+      !key.is_empty()
+        && key.len() <= 20
+        && key.bytes().all(|byte| byte.is_ascii_digit())
+        && number(&link["id"], 1_000_000_000)
+        && legacy_backup_text(&link["name"])
+        && legacy_backup_text(&link["desc"])
+    })
+}
+
+/// 允许成对的游戏词条标记，剥离标记后仍执行原文本与旧备份安全检查。
+/// @since Beta v0.14.1
+fn combat_effect_text(value: &Value) -> bool {
+  let Some(text) = value.as_str().filter(|text| text.len() <= 16 * 1024) else {
+    return false;
+  };
+  let mut rest = text;
+  let mut plain = String::with_capacity(text.len());
+  let mut inside_link = false;
+  while let Some(offset) = rest.find('{') {
+    plain.push_str(&rest[..offset]);
+    rest = &rest[offset..];
+    if let Some(after_open) = rest.strip_prefix("{LINK#") {
+      let Some((identifier, after_close)) = after_open.split_once('}') else { return false };
+      if inside_link
+        || identifier.is_empty()
+        || identifier.len() > 32
+        || !identifier.bytes().all(|byte| byte.is_ascii_alphanumeric())
+      {
+        return false;
+      }
+      inside_link = true;
+      rest = after_close;
+    } else if let Some(after_close) = rest.strip_prefix("{/LINK}") {
+      if !inside_link {
+        return false;
+      }
+      inside_link = false;
+      rest = after_close;
+    } else {
+      plain.push('{');
+      rest = &rest[1..];
+    }
+  }
+  plain.push_str(rest);
+  !inside_link && legacy_backup_text(&Value::String(plain))
 }
 
 /// 验证剧诗增益。
@@ -969,7 +1148,7 @@ fn game_date(value: &Value) -> bool {
     && number(&o["second"], 59)
 }
 
-/// 验证剧诗每一幕。
+/// 验证剧诗每一幕；非月谕回合保留官方 -1 序号哨兵，不接受其他负数。
 /// @since Beta v0.14.1
 fn combat_round(value: &Value) -> bool {
   let Some(o) = object(
@@ -1001,7 +1180,8 @@ fn combat_round(value: &Value) -> bool {
     && array(&o["enemies"], combat_enemy)
     && combat_splendour(&o["splendour_buff"])
     && o["is_tarot"].is_boolean()
-    && number(&o["tarot_serial_no"], 1_000)
+    && (number(&o["tarot_serial_no"], 1_000)
+      || (o["is_tarot"].as_bool() == Some(false) && o["tarot_serial_no"].as_i64() == Some(-1)))
 }
 
 /// 验证剧诗详情；暂不接受任何外部阵容链接。
@@ -1021,10 +1201,22 @@ fn combat_detail(value: &Value) -> bool {
     && combat_fight(&o["fight_statisic"])
 }
 
-/// 验证内嵌 JSON 字符串，而不是只验证其外层类型。
+/// 只用固定字段名与固定理由定位错误，不携带原始键、记录值或解析器错误。
 /// @since Beta v0.14.1
-fn nested(value: &Value, validate: fn(&Value) -> bool) -> bool {
-  parse_nested(value).is_some_and(|v| validate(&v))
+type RecordIssue = (&'static str, &'static str);
+
+/// 验证内嵌 JSON，并区分无法解析与结构不兼容。
+/// @since Beta v0.14.1
+fn validate_json_field(
+  row: &Map<String, Value>,
+  field: &'static str,
+  validate: fn(&Value) -> bool,
+) -> Result<(), RecordIssue> {
+  let value = parse_nested(&row[field]).ok_or((field, "不是有效的 JSON"))?;
+  if !validate(&value) {
+    return Err((field, "JSON 详情的结构或字段值不受支持"));
+  }
+  Ok(())
 }
 
 /// 解析存放在 SQLite TEXT 列中的 JSON；不改写存储文本。
@@ -1074,67 +1266,79 @@ fn same_business_record(
   })
 }
 
-/// 验证四表行的完整结构、范围与所有可渲染字段。
+/// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
 /// @since Beta v0.14.1
-fn validate_record(table: &Table, row: &Map<String, Value>) -> bool {
-  if row.len() != table.columns.len() || table.columns.iter().any(|c| !row.contains_key(c.name)) {
-    return false;
-  }
+fn validate_record(table: &Table, row: &Map<String, Value>) -> Result<(), RecordIssue> {
+  let check = |valid, field, reason| if valid { Ok(()) } else { Err((field, reason)) };
   for c in table.columns {
-    let value = &row[c.name];
+    let value = row.get(c.name).ok_or((c.name, "缺少字段"))?;
     if value.is_null() && c.nullable {
       continue;
     }
-    match c.kind {
-      Kind::Text | Kind::Json if value.as_str().is_some_and(|s| s.len() <= MAX_FIELD_BYTES) => {}
-      Kind::Integer if value.as_i64().is_some_and(|n| (0..=MAX_SAFE_INTEGER).contains(&n)) => {}
-      Kind::Boolean if matches!(value.as_i64(), Some(0 | 1)) => {}
-      _ => return false,
-    }
+    let valid = match c.kind {
+      Kind::Text | Kind::Json => value.as_str().is_some_and(|s| s.len() <= MAX_FIELD_BYTES),
+      Kind::Integer => value.as_i64().is_some_and(|n| (0..=MAX_SAFE_INTEGER).contains(&n)),
+      Kind::Boolean => matches!(value.as_i64(), Some(0 | 1)),
+    };
+    check(valid, c.name, "字段类型或范围不受支持")?;
   }
-  if !digits(&row["uid"], 20) || !date(&row["updated"]) {
-    return false;
-  }
+  check(row.len() == table.columns.len(), "记录", "包含未知字段")?;
+  check(digits(&row["uid"], 20), "uid", "游戏 UID 格式不受支持")?;
+  check(date(&row["updated"]), "updated", "日期时间格式不受支持")?;
   if table.name == "GachaRecords" {
-    return digits(&row["id"], 32)
-      && digits(&row["gachaType"], 12)
-      && digits(&row["uigfType"], 12)
-      && date(&row["time"])
-      && (row["itemId"].is_null() || digits(&row["itemId"], 16))
-      && safe_text(&row["name"])
-      && (row["type"].is_null() || safe_text(&row["type"]))
-      && (row["rank"].is_null() || matches!(row["rank"].as_str(), Some("3" | "4" | "5")))
-      && digits(&row["count"], 12);
+    for (field, max) in [("id", 32), ("gachaType", 12), ("uigfType", 12), ("count", 12)] {
+      check(digits(&row[field], max), field, "数字文本格式不受支持")?;
+    }
+    check(date(&row["time"]), "time", "日期时间格式不受支持")?;
+    check(row["itemId"].is_null() || digits(&row["itemId"], 16), "itemId", "道具 ID 格式不受支持")?;
+    check(safe_text(&row["name"]), "name", "文本格式不受支持")?;
+    check(row["type"].is_null() || safe_text(&row["type"]), "type", "文本格式不受支持")?;
+    return check(
+      row["rank"].is_null() || matches!(row["rank"].as_str(), Some("3" | "4" | "5")),
+      "rank",
+      "星级不受支持",
+    );
   }
-  if !number(&row["id"], 1_000_000_000) || !date(&row["startTime"]) || !date(&row["endTime"]) {
-    return false;
+  check(number(&row["id"], 1_000_000_000), "id", "期次编号不受支持")?;
+  for field in ["startTime", "endTime"] {
+    check(date(&row[field]), field, "日期时间格式不受支持")?;
   }
   match table.name {
     "SpiralAbyss" => {
-      numbers(row, &["totalBattleTimes", "totalWinTimes"], 1_000_000)
-        && number(&row["totalStar"], 1_000)
-        && legacy_backup_text(&row["maxFloor"])
-        && (row["skippedFloor"].is_null() || legacy_backup_text(&row["skippedFloor"]))
-        && [
-          "revealRank",
-          "defeatRank",
-          "damageRank",
-          "takeDamageRank",
-          "normalSkillRank",
-          "energySkillRank",
-        ]
-        .iter()
-        .all(|key| nested(&row[*key], |v| array(v, abyss_rank)))
-        && nested(&row["floors"], |v| array(v, abyss_floor))
+      for (field, max) in
+        [("totalBattleTimes", 1_000_000), ("totalWinTimes", 1_000_000), ("totalStar", 1_000)]
+      {
+        check(number(&row[field], max), field, "数值范围不受支持")?;
+      }
+      check(legacy_backup_text(&row["maxFloor"]), "maxFloor", "文本格式不受支持")?;
+      check(
+        row["skippedFloor"].is_null() || legacy_backup_text(&row["skippedFloor"]),
+        "skippedFloor",
+        "文本格式不受支持",
+      )?;
+      for field in [
+        "revealRank",
+        "defeatRank",
+        "damageRank",
+        "takeDamageRank",
+        "normalSkillRank",
+        "energySkillRank",
+      ] {
+        validate_json_field(row, field, |v| array(v, abyss_rank))?;
+      }
+      validate_json_field(row, "floors", |v| array(v, abyss_floor))
     }
-    "RoleCombat" => nested(&row["stat"], combat_stat) && nested(&row["detail"], combat_detail),
+    "RoleCombat" => {
+      validate_json_field(row, "stat", combat_stat)?;
+      validate_json_field(row, "detail", combat_detail)
+    }
     "HardChallenge" => {
-      safe_text(&row["name"])
-        && nested(&row["single"], challenge_data)
-        && nested(&row["mp"], challenge_data)
-        && nested(&row["blings"], |v| array(v, challenge_bling))
+      check(safe_text(&row["name"]), "name", "文本格式不受支持")?;
+      validate_json_field(row, "single", challenge_data)?;
+      validate_json_field(row, "mp", challenge_data)?;
+      validate_json_field(row, "blings", |v| array(v, challenge_bling))
     }
-    _ => false,
+    _ => Err(("记录", "表不支持同步")),
   }
 }
 
@@ -1195,9 +1399,9 @@ fn validate_snapshot_value(mut root: Value) -> Result<Records, String> {
           }
         }
       }
-      if !validate_record(table, &row) {
-        return Err(INVALID.into());
-      }
+      validate_record(table, &row).map_err(|(field, reason)| {
+        format!("SYNC_INVALID：{}.{field}（{reason}）；未更改数据库", table.name)
+      })?;
       let id = if table.name == "GachaRecords" {
         row["id"].as_str().unwrap().to_owned()
       } else {
@@ -1318,6 +1522,10 @@ async fn import_into_pool(pool: &SqlitePool, records: &Records) -> Result<SyncIm
     }
   }
 }
+
+#[cfg(test)]
+#[path = "sync_e2e_tests.rs"]
+mod e2e_tests;
 
 #[cfg(test)]
 mod tests {
@@ -1689,13 +1897,36 @@ mod tests {
       let db = pool().await;
       sqlx::query("INSERT INTO main.GachaRecords (id, uid, gachaType, uigfType, time, itemId, name, type, rank, count, updated) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)")
         .bind("100").bind("123456789").bind("301").bind("301").bind("2026-01-02 03:04:05")
-        .bind("10001").bind("<img src=x onerror=alert(1)>").bind("角色").bind("5").bind("1").bind("2026-01-02 03:04:05")
+        .bind("10001").bind("<PRIVATE_RECORD_SENTINEL>").bind("角色").bind("5").bind("1").bind("2026-01-02 03:04:05")
         .execute(&db).await.unwrap();
-      assert_eq!(export_from_pool(&db).await.err().unwrap(), INVALID);
+      assert_eq!(
+        export_from_pool(&db).await.unwrap_err(),
+        "SYNC_INVALID：GachaRecords.name（文本格式不受支持）；未更改数据库"
+      );
       let count: i64 =
         sqlx::query_scalar("SELECT COUNT(*) FROM main.GachaRecords").fetch_one(&db).await.unwrap();
       assert_eq!(count, 1);
     });
+  }
+
+  /// 嵌套详情的语法与结构错误有区分，未知键与记录内容不出现在错误中。
+  /// @since Beta v0.14.1
+  #[test]
+  fn record_error_reports_safe_field_without_echoing_values() {
+    let mut row = combat("123456789", 1);
+    row["stat"] = json!("{invalid JSON PRIVATE_RECORD_SENTINEL");
+    assert_eq!(
+      validate_snapshot(&snapshot(vec![], vec![], vec![row], vec![])).unwrap_err(),
+      "SYNC_INVALID：RoleCombat.stat（不是有效的 JSON）；未更改数据库"
+    );
+    let mut row = combat("123456789", 1);
+    let mut detail = parse_nested(&row["detail"]).unwrap();
+    detail["PRIVATE_UNKNOWN_FIELD"] = json!("PRIVATE_RECORD_SENTINEL");
+    row["detail"] = json!(detail.to_string());
+    assert_eq!(
+      validate_snapshot(&snapshot(vec![], vec![], vec![row], vec![])).unwrap_err(),
+      "SYNC_INVALID：RoleCombat.detail（JSON 详情的结构或字段值不受支持）；未更改数据库"
+    );
   }
 
   /// 不导出其他表中的数据。
@@ -1764,7 +1995,7 @@ mod tests {
     oversized["single"] = json!(details.to_string());
     assert_eq!(
       validate_snapshot(&snapshot(vec![], vec![], vec![], vec![oversized])).unwrap_err(),
-      INVALID
+      "SYNC_INVALID：HardChallenge.single（JSON 详情的结构或字段值不受支持）；未更改数据库"
     );
   }
 
@@ -1781,6 +2012,11 @@ mod tests {
       "https://act-webstatic.hoyoverse.com:443/game_record/genshin/enemy_icon/UI_MonsterIcon_Test.webp",
       "https://webstatic.mihoyo.com/upload/static-resource/2022/02/24/abc_123.jpg",
       "https://fastcdn.hoyoverse.com/static-resource-v2/2026/01/02/abc_123.jpeg",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_icon/u3ce5g/UI_Test.png",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_avatar_side_icon_u3ce5g/UI_Test.png",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_monster_icon_u3ce5g/UI_Test.webp",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_role_combat_u3ce5g/UI_Test.png",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/static/player/UI_Test.png",
     ] {
       assert!(safe_image(&json!(url)), "known image rejected: {url}");
     }
@@ -1806,6 +2042,11 @@ mod tests {
       "https://act-webstatic.mihoyo.com/api/redirect/x.png",
       "https://fastcdn.mihoyo.com/static-resource-v2/not/dated/icon.png",
       "https://upload-bbs.mihoyo.com/upload/2026/01/02/user-content.jpg",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/api/x.png",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_icon_evil/path/../x.png",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_icon/x.svg",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_icon/x.png?redirect=evil",
+      "https://act-webstatic.mihoyo.com/hk4e/e20200928calculate/item_icon_evil.example/x.png",
     ] {
       assert!(!safe_image(&json!(url)), "dangerous image accepted: {url}");
     }
@@ -1814,6 +2055,178 @@ mod tests {
     details["challenge"][0]["monster"]["icon"] = json!("https://example.com/a.png");
     row["single"] = json!(details.to_string());
     assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
+  }
+
+  /// 报错所涉及的三类图片和旧字段只在导出副本中规范，快照仍能由 v1 导入。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_export_normalizes_images_and_missing_fields_without_changing_source() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let unlisted = "https://unlisted.example/art.png?key=LOCAL_IMAGE_SENTINEL";
+      let placeholder = "/UI/app/empty.webp";
+      let mut abyss_row = abyss("123456789", 1);
+      let mut floors = parse_nested(&abyss_row["floors"]).unwrap();
+      floors[0]["levels"][0]["upBattle"]["monsters"][0]["icon"] = json!(unlisted);
+      abyss_row["floors"] = json!(floors.to_string());
+
+      let mut combat_row = combat("123456789", 1);
+      let mut combat_detail = parse_nested(&combat_row["detail"]).unwrap();
+      let original_avatar = combat_detail["rounds_data"][0]["avatars"][0].clone();
+      combat_detail["backup_avatars"] = json!([original_avatar]);
+      combat_detail["rounds_data"][0]["avatars"][0]["image"] = Value::Null;
+      combat_detail.as_object_mut().unwrap().remove("lineup_link");
+      combat_row["detail"] = json!(combat_detail.to_string());
+
+      let mut challenge_row = challenge("123456789", 1, "历史危战");
+      let mut single = parse_nested(&challenge_row["single"]).unwrap();
+      single.as_object_mut().unwrap().remove("best");
+      challenge_row["single"] = json!(single.to_string());
+      let mp = json!({"best":{"difficulty":6,"second":42,"icon":unlisted},
+        "has_data":true,"challenge":[]});
+      challenge_row["mp"] = json!(mp.to_string());
+
+      let raw = snapshot(
+        vec![],
+        vec![abyss_row.clone()],
+        vec![combat_row.clone()],
+        vec![challenge_row.clone()],
+      );
+      assert!(validate_snapshot(&raw).is_err());
+      let mut tx = source.begin().await.unwrap();
+      for (table, row) in TABLES.iter().skip(1).zip([&abyss_row, &combat_row, &challenge_row]) {
+        insert_record(&mut tx, table, row.as_object().unwrap()).await.unwrap();
+      }
+      tx.commit().await.unwrap();
+
+      let exported = export_from_pool(&source).await.unwrap();
+      assert!(!exported.contains("LOCAL_IMAGE_SENTINEL"));
+      let records = validate_snapshot(&exported).unwrap();
+      let mut expected_floors = floors;
+      expected_floors[0]["levels"][0]["upBattle"]["monsters"][0]["icon"] = json!(placeholder);
+      assert_eq!(parse_nested(&records[1][0]["floors"]).unwrap(), expected_floors);
+      let mut expected_combat = combat_detail;
+      expected_combat["rounds_data"][0]["avatars"][0]["image"] = json!(placeholder);
+      expected_combat["lineup_link"] = json!("");
+      assert_eq!(parse_nested(&records[2][0]["detail"]).unwrap(), expected_combat);
+      let mut expected_single = single;
+      expected_single["best"] = Value::Null;
+      assert_eq!(parse_nested(&records[3][0]["single"]).unwrap(), expected_single);
+      let mut expected_mp = mp;
+      expected_mp["best"]["icon"] = json!(placeholder);
+      assert_eq!(parse_nested(&records[3][0]["mp"]).unwrap(), expected_mp);
+
+      let destination = pool().await;
+      let inserted = import_into_pool(&destination, &records).await.unwrap();
+      assert_eq!(inserted.spiral_abyss.inserted, 1);
+      assert_eq!(inserted.role_combat.inserted, 1);
+      assert_eq!(inserted.hard_challenge.inserted, 1);
+      let again = import_into_pool(&destination, &records).await.unwrap();
+      assert_eq!(again.spiral_abyss.identical, 1);
+      assert_eq!(again.role_combat.identical, 1);
+      assert_eq!(again.hard_challenge.identical, 1);
+
+      let mut tx = source.begin().await.unwrap();
+      for (table, row) in TABLES.iter().skip(1).zip([&abyss_row, &combat_row, &challenge_row]) {
+        let before = row.as_object().unwrap();
+        assert_eq!(existing_row(&mut tx, table, before).await.unwrap().as_ref(), Some(before));
+      }
+    });
+  }
+
+  /// 实库旧剧诗的缺月谕字段、数字时间与词条详情都保留业务语义。
+  /// @since Beta v0.14.1
+  #[test]
+  fn historical_combat_rounds_and_effect_links_are_supported() {
+    let mut row = combat("123456789", 1);
+    let mut old_stat = stat();
+    old_stat.as_object_mut().unwrap().remove("tarot_finished_cnt");
+    row["stat"] = json!(old_stat.to_string());
+    let mut detail = parse_nested(&row["detail"]).unwrap();
+    detail["detail_stat"] = old_stat;
+    let round = detail["rounds_data"][0].as_object_mut().unwrap();
+    round.remove("is_tarot");
+    round.remove("tarot_serial_no");
+    round.insert("finish_time".into(), json!(1767280000));
+    let effect = json!({"icon":"", "name":"词条测试",
+      "desc":"<color=#3399CC>{LINK#N123}保留文本{/LINK}</color>",
+      "links":{"123":{"id":123,"name":"说明","desc":"<color=#123456>解释</color>"}}});
+    detail["rounds_data"][0]["splendour_buff"]["buffs"][0]["level_effect"] =
+      json!([effect.clone()]);
+    row["detail"] = json!(detail.to_string());
+    normalize_export_record(&TABLES[2], row.as_object_mut().unwrap()).unwrap();
+    assert!(validate_snapshot(&snapshot(vec![], vec![], vec![row.clone()], vec![])).is_ok());
+    assert_eq!(parse_nested(&row["stat"]).unwrap()["tarot_finished_cnt"], json!(0));
+    let normalized = parse_nested(&row["detail"]).unwrap();
+    assert_eq!(normalized["detail_stat"]["tarot_finished_cnt"], json!(0));
+    assert_eq!(normalized["rounds_data"][0]["is_tarot"], json!(false));
+    assert_eq!(normalized["rounds_data"][0]["tarot_serial_no"], json!(0));
+    assert_eq!(normalized["rounds_data"][0]["finish_time"], json!("1767280000"));
+    assert_eq!(
+      normalized["rounds_data"][0]["splendour_buff"]["buffs"][0]["level_effect"][0],
+      effect
+    );
+
+    let mut invalid = effect;
+    invalid["links"]["123"]["url"] = json!("https://example.invalid/private");
+    assert!(!combat_effect(&invalid));
+    invalid["links"]["123"].as_object_mut().unwrap().remove("url");
+    invalid["links"]["123"]["desc"] = json!("<img src=x onerror=alert(1)>");
+    assert!(!combat_effect(&invalid));
+    for text in [
+      "{LINK#https://example.invalid}test{/LINK}",
+      "{LINK#N123}unclosed",
+      "{/LINK}",
+      "{LINK#N123}<img src=x>{/LINK}",
+      "{LINK#N123}D\u{27}s{/LINK}",
+    ] {
+      assert!(!combat_effect_text(&json!(text)));
+    }
+    // 正式 API 用 -1 标记非月谕回合，不可将其当成无效负数或改写为成绩。
+    let mut round = normalized["rounds_data"][0].clone();
+    round["tarot_serial_no"] = json!(-1);
+    assert!(combat_round(&round));
+    round["is_tarot"] = json!(true);
+    assert!(!combat_round(&round));
+    round["is_tarot"] = json!(false);
+    round["tarot_serial_no"] = json!(-2);
+    assert!(!combat_round(&round));
+    let mut tarot_stat = stat();
+    tarot_stat["difficulty_id"] = json!(5);
+    tarot_stat.as_object_mut().unwrap().remove("tarot_finished_cnt");
+    assert!(!normalize_legacy_combat_stat(&mut tarot_stat));
+    assert!(!combat_stat(&tarot_stat));
+    let mut missing_tarot_round = combat("123456789", 2);
+    let mut detail = parse_nested(&missing_tarot_round["detail"]).unwrap();
+    detail["detail_stat"]["difficulty_id"] = json!(5);
+    let round = detail["rounds_data"][0].as_object_mut().unwrap();
+    round.remove("is_tarot");
+    round.remove("tarot_serial_no");
+    missing_tarot_round["detail"] = json!(detail.to_string());
+    normalize_export_record(&TABLES[2], missing_tarot_round.as_object_mut().unwrap()).unwrap();
+    let detail = parse_nested(&missing_tarot_round["detail"]).unwrap();
+    assert!(detail["rounds_data"][0].get("is_tarot").is_none());
+    assert!(!combat_detail(&detail));
+  }
+
+  /// 不猜测缺失的整个剧诗详情；保留安全的字段级错误而不泄露原内容。
+  /// @since Beta v0.14.1
+  #[test]
+  fn unknown_combat_detail_is_not_fabricated() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let mut row = combat("123456789", 1);
+      row["hasDetailData"] = json!(0);
+      row["detail"] = json!("null");
+      let mut tx = source.begin().await.unwrap();
+      insert_record(&mut tx, &TABLES[2], row.as_object().unwrap()).await.unwrap();
+      tx.commit().await.unwrap();
+      let error = export_from_pool(&source).await.unwrap_err();
+      assert!(error.starts_with("SYNC_INVALID：RoleCombat.detail "));
+      let retained: String =
+        sqlx::query_scalar("SELECT detail FROM main.RoleCombat").fetch_one(&source).await.unwrap();
+      assert_eq!(retained, "null");
+    });
   }
 
   /// 导出不泄露储存中的阵容外链，合并不覆盖本机外链，也不误报冲突。

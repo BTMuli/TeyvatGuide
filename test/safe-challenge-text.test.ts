@@ -70,10 +70,15 @@ describe("parseSafeChallengeText", () => {
     expect(html).not.toContain('src="');
   });
 
-  it("does not interpret game links or malformed tags as markup", () => {
-    const input = "{LINK#N123}词条{/LINK} <color=#abcdef;display:none>保留</color>";
-    const parts = parseSafeChallengeText(input);
-    expect(parts.map((part) => part.text).join("")).toBe(input);
-    expect(parts.every((part) => part.color === undefined)).toBe(true);
+  it("renders game-link labels as plain text without interpreting URLs or malformed tags", () => {
+    const parts = parseSafeChallengeText(
+      "<color=#abcdef>{LINK#N123}词条{/LINK}</color> <color=#abcdef;display:none>保留</color>",
+    );
+    expect(parts).toEqual([
+      { text: "词条", color: "#abcdef" },
+      { text: " <color=#abcdef;display:none>保留</color>", color: undefined },
+    ]);
+    const malformed = "{LINK#https://evil.test}不打开{/LINK} {LINK#N123}未闭合";
+    expect(parseSafeChallengeText(malformed)).toEqual([{ text: malformed, color: undefined }]);
   });
 });

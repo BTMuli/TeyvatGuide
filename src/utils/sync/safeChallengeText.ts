@@ -19,6 +19,8 @@ export type SafeChallengeTextPart = {
  * @returns 可由 Vue 文本插值安全展示的片段
  */
 export function parseSafeChallengeText(input: string): Array<SafeChallengeTextPart> {
+  // 游戏词条仅保留可见文字，不创建链接、HTML、tooltip 或可执行行为。
+  const textInput = input.replace(/\{LINK#[a-z0-9]{1,32}\}([\s\S]*?)\{\/LINK\}/gi, "$1");
   const parts: Array<SafeChallengeTextPart> = [];
   const colors: Array<string> = [];
   const buffer: Array<string> = [];
@@ -37,8 +39,8 @@ export function parseSafeChallengeText(input: string): Array<SafeChallengeTextPa
     parts.push({ text, color: colors.at(-1) });
   }
 
-  for (const match of input.matchAll(tokens)) {
-    buffer.push(input.slice(offset, match.index));
+  for (const match of textInput.matchAll(tokens)) {
+    buffer.push(textInput.slice(offset, match.index));
     const token = match[0];
     if (match[1] !== undefined) {
       flush();
@@ -55,7 +57,7 @@ export function parseSafeChallengeText(input: string): Array<SafeChallengeTextPa
     }
     offset = match.index + token.length;
   }
-  buffer.push(input.slice(offset));
+  buffer.push(textInput.slice(offset));
   flush();
   return parts;
 }

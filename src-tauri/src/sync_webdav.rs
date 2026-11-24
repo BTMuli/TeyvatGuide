@@ -16,7 +16,7 @@ use reqwest::{
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::time::Duration;
+use std::{future::Future, time::Duration};
 use url::Url;
 use uuid::Uuid;
 
@@ -38,6 +38,7 @@ const TIMEOUT: &str = "WEBDAV_TIMEOUT：传输超时，请先拉取核对发布�
 const AUTH: &str = "WEBDAV_AUTH：认证失败或无访问权限";
 const REDIRECT: &str = "WEBDAV_REDIRECT：服务器重定向不受支持";
 const HTTP_ERROR: &str = "WEBDAV_HTTP_ERROR：服务器请求失败，请检查目录和服务状态";
+const DIRECTORY_NOT_FOUND: &str = "WEBDAV_DIRECTORY_NOT_FOUND：远程目录不存在，请检查目录地址";
 const NOT_FOUND: &str = "WEBDAV_NOT_FOUND：找不到当前快照；已有快照时，可尝试用之前的快照 ID 恢复";
 const HISTORY_NOT_FOUND: &str = "WEBDAV_NOT_FOUND：找不到指定快照 ID 的历史清单";
 const INVALID_SNAPSHOT_ID: &str = "WEBDAV_INVALID_SNAPSHOT_ID：历史快照 ID 格式无效";
@@ -149,7 +150,8 @@ fn create_webdav(
 }
 
 impl Webdav {
-  /// 把受控文件名作为单一路径段添加，不接受服务器提供的 URL。
+  /// 把受控文件名作为单一路径段添加；空文件名返回以 `/` 结尾的目录 URL。
+  /// 不接受服务器提供的 URL。
   ///
   /// @since Beta v0.14.1
   fn resource_url(&self, filename: &str) -> SyncResult<Url> {
@@ -170,6 +172,22 @@ impl Webdav {
         .header(ACCEPT_ENCODING, "identity")
         .header(CACHE_CONTROL, "no-cache, no-store"),
     )
+  }
+
+  /// 首次发布时只检查目录的 HTTP 状态，不读响应体，也不据此判断写入能力。
+  ///
+  /// @since Beta v0.14.1
+  async fn check_directory(&self) -> SyncResult<()> {
+    let method = Method::from_bytes(b"PROPFIND").map_err(|_| CLIENT_ERROR)?;
+    let response =
+      self.request(method, "")?.header("depth", "0").send().await.map_err(network_error)?;
+    match response.status() {
+      StatusCode::MULTI_STATUS | StatusCode::METHOD_NOT_ALLOWED | StatusCode::NOT_IMPLEMENTED => {
+        Ok(())
+      }
+      StatusCode::NOT_FOUND | StatusCode::GONE => Err(DIRECTORY_NOT_FOUND),
+      status => Err(status_error(status)),
+    }
   }
 
   /// 读取一个文件；404 与其他错误明确区分，响应大小受到限制。
@@ -416,19 +434,30 @@ async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
   Ok(())
 }
 
-/// 创建并读回数据和独立清单，再按旧 ETag 条件发布 current；只在发布验证后返回 ID。
+/// 只读预检：校验已有快照并保留其 ETag；仅首次发布时检查目录。
 ///
 /// @since Beta v0.14.1
-async fn upload_inner(webdav: Webdav, snapshot: String) -> SyncResult<String> {
-  let previous_etag = if let Some(resource) = webdav.get(CURRENT_FILE, MAX_METADATA_BYTES).await? {
+async fn preflight_publish(webdav: &Webdav) -> SyncResult<Option<HeaderValue>> {
+  if let Some(resource) = webdav.get(CURRENT_FILE, MAX_METADATA_BYTES).await? {
     let metadata = parse_metadata(&resource.bytes, None)?;
     let etag = resource.etag.ok_or(UNSUPPORTED)?;
     // 保持失败关闭：已有快照损坏时不覆盖其指针，也不尝试修复。
-    verified_snapshot(&webdav, &metadata).await?;
-    Some(etag)
+    verified_snapshot(webdav, &metadata).await?;
+    Ok(Some(etag))
   } else {
-    None
-  };
+    webdav.check_directory().await?;
+    Ok(None)
+  }
+}
+
+/// 创建并读回数据和独立清单，再按预检所得 ETag 条件发布 current；只在发布验证后返回 ID。
+///
+/// @since Beta v0.14.1
+async fn upload_inner(
+  webdav: Webdav,
+  snapshot: String,
+  previous_etag: Option<HeaderValue>,
+) -> SyncResult<String> {
   probe_conditions(&webdav).await?;
 
   let id = Uuid::new_v4();
@@ -485,7 +514,7 @@ async fn download_inner(webdav: Webdav, id: Option<Uuid>) -> SyncResult<String> 
   String::from_utf8(snapshot).map_err(|_| INTEGRITY)
 }
 
-/// 上传快照，返回已确认发布的 ID。明文 HTTP 必须由调用方显式允许。
+/// 连接预检成功后才导出并上传快照，返回已确认发布的 ID。明文 HTTP 必须显式允许。
 ///
 /// @since Beta v0.14.1
 pub(crate) async fn upload_snapshot(
@@ -494,17 +523,20 @@ pub(crate) async fn upload_snapshot(
   password: String,
   use_proxy: bool,
   unsafe_http: bool,
-  snapshot: String,
+  load_snapshot: impl Future<Output = Result<String, String>>,
 ) -> Result<String, String> {
-  if snapshot.len() > MAX_SNAPSHOT_BYTES {
-    return Err(TOO_LARGE.to_string());
-  }
   let webdav =
     create_webdav(address, username, password, use_proxy, unsafe_http).map_err(str::to_string)?;
-  tokio::time::timeout(OPERATION_TIMEOUT, upload_inner(webdav, snapshot))
-    .await
-    .map_err(|_| TIMEOUT.to_string())?
-    .map_err(str::to_string)
+  tokio::time::timeout(OPERATION_TIMEOUT, async {
+    let previous_etag = preflight_publish(&webdav).await.map_err(str::to_string)?;
+    let snapshot = load_snapshot.await?;
+    if snapshot.len() > MAX_SNAPSHOT_BYTES {
+      return Err(TOO_LARGE.to_string());
+    }
+    upload_inner(webdav, snapshot, previous_etag).await.map_err(str::to_string)
+  })
+  .await
+  .map_err(|_| TIMEOUT.to_string())?
 }
 
 /// 拉取当前或指定 ID 的快照；只有元数据、长度、摘要和 UTF-8 全部通过才返回内容。
@@ -535,7 +567,6 @@ mod tests {
   use super::*;
   use std::{
     collections::HashMap,
-    future::Future,
     io::{Read, Write},
     net::{SocketAddr, TcpListener, TcpStream},
     sync::{
@@ -582,6 +613,10 @@ mod tests {
   struct ServerState {
     objects: HashMap<String, Object>,
     next_revision: u64,
+    directory_status: Option<u16>,
+    disconnect_current_get: bool,
+    requests: Vec<(String, String)>,
+    saw_authenticated_directory_probe: bool,
     ignore_conditions: bool,
     weak_etag: bool,
     race_pointer: bool,
@@ -654,7 +689,7 @@ mod tests {
     format!("\"revision-{}\"", object.revision)
   }
 
-  /// 处理一个合成的 GET 或条件 PUT；所有远程内容均为测试数据。
+  /// 处理合成的 GET、PROPFIND 和条件 PUT；所有远程内容均为测试数据。
   ///
   /// @since Beta v0.14.1
   fn handle_connection(mut stream: TcpStream, state: &Arc<Mutex<ServerState>>) {
@@ -678,7 +713,7 @@ mod tests {
     let mut lines = text.split("\r\n");
     let mut request_line = lines.next().unwrap().split_whitespace();
     let method = request_line.next().unwrap_or("").to_string();
-    let path = request_line.next().unwrap_or("");
+    let path = request_line.next().unwrap_or("").to_string();
     let name = path.rsplit('/').next().unwrap_or("").to_string();
     let mut headers = HashMap::new();
     for line in lines {
@@ -699,11 +734,20 @@ mod tests {
     let (status, output, etag) = {
       let mut state = state.lock().unwrap();
       state.request_count += 1;
-      state.saw_basic_auth |=
+      state.requests.push((method.clone(), path));
+      let has_test_auth =
         headers.get("authorization").is_some_and(|value| value == "Basic dXNlcjpzZWNyZXQ=");
+      state.saw_basic_auth |= has_test_auth;
       if let Some(status) = state.status_override {
         (status, b"private-response-user-secret".to_vec(), None)
+      } else if method == "PROPFIND" {
+        state.saw_authenticated_directory_probe |=
+          has_test_auth && headers.get("depth").is_some_and(|value| value == "0");
+        (state.directory_status.unwrap_or(405), b"private-response-user-secret".to_vec(), None)
       } else if method == "GET" {
+        if name == CURRENT_FILE && state.disconnect_current_get {
+          return;
+        }
         match state.objects.get(&name) {
           Some(object) => {
             let tag = object_etag(object);
@@ -809,14 +853,16 @@ mod tests {
   ///
   /// @since Beta v0.14.1
   fn upload(server: &FakeServer, snapshot: &str) -> Result<String, String> {
-    run(upload_snapshot(
-      &server.url(),
-      "user".into(),
-      "secret".into(),
-      false,
-      true,
-      snapshot.into(),
-    ))
+    run(upload_snapshot(&server.url(), "user".into(), "secret".into(), false, true, async {
+      Ok(snapshot.into())
+    }))
+  }
+
+  /// 测试连接失败分支；若意外轮询快照导出则立即失败。
+  ///
+  /// @since Beta v0.14.1
+  async fn unexpected_snapshot_loader() -> Result<String, String> {
+    panic!("连接预检失败时不应轮询导出")
   }
 
   /// 使用合成账号从本机测试服务下载 current。
@@ -1098,14 +1144,175 @@ mod tests {
     }
   }
 
-  /// 输入超过上限时在创建客户端和访问网络前失败，不截断数据。
+  /// 本地连接参数不合法时，既不发送请求也不轮询导出。
   ///
   /// @since Beta v0.14.1
   #[test]
-  fn snapshot_size_limit_is_enforced_before_network() {
+  fn invalid_upload_connection_does_not_poll_snapshot_loader() {
+    let server = FakeServer::new();
+    let http_address = server.url();
+    for (address, error) in [("invalid-url", INVALID_URL), (http_address.as_str(), INSECURE_HTTP)] {
+      assert_eq!(
+        run(upload_snapshot(
+          address,
+          "user".into(),
+          "secret".into(),
+          false,
+          false,
+          unexpected_snapshot_loader(),
+        ))
+        .unwrap_err(),
+        error
+      );
+    }
+    assert_eq!(server.state.lock().unwrap().request_count, 0);
+  }
+
+  /// current 读取失败时不检查目录也不轮询导出，并且只返回脱敏错误。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn current_request_failure_does_not_poll_snapshot_loader() {
+    for (status, expected) in [(None, NETWORK), (Some(401), AUTH), (Some(403), AUTH)] {
+      let server = FakeServer::new();
+      {
+        let mut state = server.state.lock().unwrap();
+        state.status_override = status;
+        state.disconnect_current_get = status.is_none();
+      }
+      let error = run(upload_snapshot(
+        &server.url(),
+        "user".into(),
+        "secret".into(),
+        false,
+        true,
+        unexpected_snapshot_loader(),
+      ))
+      .unwrap_err();
+      assert_eq!(error, expected);
+      let state = server.state.lock().unwrap();
+      assert_eq!(state.requests, [("GET".to_string(), format!("/dav/{CURRENT_FILE}"))]);
+      assert!(state.objects.is_empty());
+    }
+  }
+
+  /// 目录探测错误不得触发导出或写入，不把响应体、地址或凭证带入错误。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn directory_probe_failure_does_not_poll_snapshot_loader() {
+    for (status, expected) in [
+      (404, DIRECTORY_NOT_FOUND),
+      (410, DIRECTORY_NOT_FOUND),
+      (401, AUTH),
+      (403, AUTH),
+      (302, REDIRECT),
+      (500, HTTP_ERROR),
+    ] {
+      let server = FakeServer::new();
+      server.state.lock().unwrap().directory_status = Some(status);
+      let address = format!("http://{}/dav", server.address);
+      let error = run(upload_snapshot(
+        &address,
+        "user".into(),
+        "secret".into(),
+        false,
+        true,
+        unexpected_snapshot_loader(),
+      ))
+      .unwrap_err();
+      assert_eq!(error, expected);
+      for private in [address.as_str(), "user", "secret", "private-response"] {
+        assert!(!error.contains(private));
+      }
+      let state = server.state.lock().unwrap();
+      assert_eq!(
+        state.requests,
+        [
+          ("GET".to_string(), format!("/dav/{CURRENT_FILE}")),
+          ("PROPFIND".to_string(), "/dav/".to_string()),
+        ]
+      );
+      assert!(state.saw_authenticated_directory_probe);
+      assert!(state.objects.is_empty());
+    }
+  }
+
+  /// 首次发布允许 207 和明确未实现的状态，但不在导出成功前执行写入探针。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn first_publish_loader_failure_leaves_remote_untouched() {
+    const EXPORT_ERROR: &str = "SYNC_INVALID：合成导出错误";
+    for status in [207, 405, 501] {
+      let server = FakeServer::new();
+      server.state.lock().unwrap().directory_status = Some(status);
+      let error =
+        run(upload_snapshot(&server.url(), "user".into(), "secret".into(), false, true, async {
+          assert_eq!(server.state.lock().unwrap().request_count, 2);
+          Err(EXPORT_ERROR.to_string())
+        }))
+        .unwrap_err();
+      assert_eq!(error, EXPORT_ERROR);
+      let state = server.state.lock().unwrap();
+      assert_eq!(
+        state.requests,
+        [
+          ("GET".to_string(), format!("/dav/{CURRENT_FILE}")),
+          ("PROPFIND".to_string(), "/dav/".to_string()),
+        ]
+      );
+      assert!(state.saw_authenticated_directory_probe);
+      assert!(state.objects.is_empty());
+    }
+  }
+
+  /// 已有 current 只预检一次，发布必须使用导出前读到的 ETag。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn existing_current_uses_etag_from_before_snapshot_loader() {
+    let server = FakeServer::new();
+    let old_id = upload(&server, "old").unwrap();
+    server.state.lock().unwrap().requests.clear();
+    let current_path = format!("/dav/{CURRENT_FILE}");
+    let snapshot_path = format!("/dav/teyvatguide-sync-{old_id}.json");
+    let address = server.url();
+    let result =
+      run(upload_snapshot(&address, "user".into(), "secret".into(), false, true, async {
+        let mut state = server.state.lock().unwrap();
+        assert_eq!(
+          state.requests,
+          [("GET".to_string(), current_path.clone()), ("GET".to_string(), snapshot_path)]
+        );
+        state.next_revision += 1;
+        let revision = state.next_revision;
+        state.objects.get_mut(CURRENT_FILE).unwrap().revision = revision;
+        Ok("new".to_string())
+      }));
+    assert_eq!(result.unwrap_err(), CONFLICT);
+    let state = server.state.lock().unwrap();
+    assert_eq!(
+      state
+        .requests
+        .iter()
+        .filter(|(method, path)| method == "GET" && path == &current_path)
+        .count(),
+      1
+    );
+    assert!(!state.requests.iter().any(|(method, _)| method == "PROPFIND"));
+  }
+
+  /// 输入超过上限时在只读预检之后、任何写入之前失败，不截断数据。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn snapshot_size_limit_is_enforced_before_writes() {
     let server = FakeServer::new();
     let too_large = "x".repeat(MAX_SNAPSHOT_BYTES + 1);
     assert_eq!(upload(&server, &too_large).unwrap_err(), TOO_LARGE);
-    assert_eq!(server.state.lock().unwrap().request_count, 0);
+    let state = server.state.lock().unwrap();
+    assert_eq!(state.request_count, 2);
+    assert!(state.objects.is_empty());
   }
 }
