@@ -1,6 +1,6 @@
 /**
- * UID 掩码工具回归测试
- * @since Beta v0.13.0
+ * UID 展示与记录选择回归测试
+ * @since Beta v0.14.1
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +9,7 @@ import {
   maskUid,
   maskUidName,
   maskUidTail,
+  recordUidOptions,
   uidHint,
   uidItemTitle,
   uidItemValue,
@@ -80,5 +81,23 @@ describe("UID 掩码", () => {
     expect(uidItemTitle({ value: "x" })).toBe("");
     expect(uidItemValue("500299765")).toBe("500299765");
     expect(uidItemValue(500299765)).toBe(500299765);
+  });
+});
+
+describe("记录页 UID 选项", () => {
+  it("未登录时显示已有记录的 UID，不加入空账号", () => {
+    expect(recordUidOptions(["", "100000001", "100000002"], "")).toEqual([
+      "100000001",
+      "100000002",
+    ]);
+    expect(recordUidOptions([], "")).toEqual([]);
+  });
+
+  it("优先选择当前登录账号，保留其他本地 UID 并去重", () => {
+    expect(recordUidOptions(["100000001", "100000002"], "100000002")).toEqual([
+      "100000002",
+      "100000001",
+    ]);
+    expect(recordUidOptions(["100000001"], "100000002")).toEqual(["100000002", "100000001"]);
   });
 });

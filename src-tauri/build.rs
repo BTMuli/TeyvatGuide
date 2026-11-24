@@ -1,13 +1,17 @@
 // 构建文件
-// @since Beta v0.13.2
+// @since Beta v0.14.1
 
 use std::path::Path;
+use tauri_build::{Attributes, InlinedPlugin};
 
-/// 执行 Tauri 构建，并在 Windows 上选择 Yae 配置、编译本地 HDiffPatch。
+/// 执行 Tauri 构建、生成同步权限，并在 Windows 上选择 Yae 配置及编译本地 HDiffPatch。
 ///
-/// @since Beta v0.13.2
+/// @since Beta v0.14.1
 fn main() {
-  tauri_build::build();
+  tauri_build::try_build(
+    Attributes::new().plugin("record-sync", InlinedPlugin::new().commands(&["publish", "pull"])),
+  )
+  .expect("Tauri 构建配置无效");
   if std::env::var("CARGO_CFG_TARGET_OS").ok().as_deref() == Some("windows") {
     println!("cargo:rerun-if-changed=lib");
     let conf_file =

@@ -23,6 +23,25 @@
       /></template>
     </TcConfigItem>
     <TcConfigItem
+      v-if="syncAvailable"
+      subtitle="Windows 上传，macOS 拉取祈愿与高难记录"
+      title="跨设备同步"
+      icon="mdi-cloud-sync-outline"
+      @activate="showSync = true"
+    >
+      <template #append>
+        <v-btn
+          aria-label="打开跨设备同步"
+          size="small"
+          type="button"
+          variant="tonal"
+          @click.stop="showSync = true"
+        >
+          打开
+        </v-btn>
+      </template>
+    </TcConfigItem>
+    <TcConfigItem
       subtitle="更新数据库到最新版本"
       title="数据更新"
       icon="mdi-database-arrow-up"
@@ -85,6 +104,7 @@
   </TcConfigSection>
   <TcoDeviceInfo v-model="showDeviceEditor" />
   <TcoHutaoImport v-model="showHutaoImport" />
+  <TcoWebdavSync v-if="syncAvailable" v-model="showSync" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -97,6 +117,7 @@ import useCommunityBrowsingStore from "@store/communityBrowsing.js";
 import useHomeStore from "@store/home.js";
 import { core } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
+import { platform } from "@tauri-apps/plugin-os";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/account/dataBS.js";
 import { getCacheDir, getDeviceInfo, getRandomString } from "@utils/common/toolFunc.js";
@@ -111,6 +132,7 @@ import TcConfigSection from "./tc-config-section.vue";
 import TcConfigSwitch from "./tc-config-switch.vue";
 import TcoDeviceInfo from "./tco-device-info.vue";
 import TcoHutaoImport from "./tco-hutao-import.vue";
+import TcoWebdavSync from "./tco-webdav-sync.vue";
 
 const appStore = useAppStore();
 const { deviceInfo, userDir, buildTime, autoUpdateDatabase } = storeToRefs(appStore);
@@ -130,6 +152,8 @@ const displayedDeviceFp = computed<string>(() =>
 );
 const showDeviceEditor = ref<boolean>(false);
 const showHutaoImport = ref<boolean>(false);
+const syncAvailable = computed<boolean>(() => ["windows", "macos"].includes(platform()));
+const showSync = ref<boolean>(false);
 
 function getDisplayedDeviceValue(value: string): string {
   return deviceInfoVisible.value ? value : maskDeviceValue(value);

@@ -38,11 +38,14 @@
         </div>
       </div>
       <div ref="rightDesc" class="right-desc">
-        <span
-          v-for="(desc, idx) in props.data.monster.desc"
-          :key="idx"
-          v-html="parseHtmlText(desc)"
-        />
+        <span v-for="(desc, idx) in props.data.monster.desc" :key="idx">
+          <span
+            v-for="(part, partIdx) in parseSafeChallengeText(desc)"
+            :key="partIdx"
+            :style="{ color: part.color }"
+            >{{ part.text }}</span
+          >
+        </span>
       </div>
       <div class="monster-icon">
         <TMiImg :alt="props.data.name" :ori="true" :src="props.data.monster.icon" />
@@ -53,7 +56,8 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getRcStar, getZhElement, parseHtmlText } from "@utils/common/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/common/toolFunc.js";
+import { parseSafeChallengeText } from "@utils/sync/safeChallengeText.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import TucMonsterTag from "./tuc-monster-tag.vue";
@@ -227,6 +231,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
     font-size: 14px;
     line-height: 1.2;
     text-align: left;
+    white-space: pre-wrap;
 
     :deep(span) {
       filter: var(--gs-filter);

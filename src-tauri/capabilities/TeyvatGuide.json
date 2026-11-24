@@ -39,6 +39,8 @@
     "opener:default",
     "process:default",
     "process:allow-exit",
+    "record-sync:allow-publish",
+    "record-sync:allow-pull",
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",

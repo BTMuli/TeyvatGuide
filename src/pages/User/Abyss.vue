@@ -180,6 +180,7 @@ import {
   maskUid,
   maskUidName,
   maskUidTail,
+  recordUidOptions,
   uidItemTitle,
   uidItemValue,
 } from "@utils/display/TGUid.js";
@@ -243,14 +244,8 @@ function getMaxFloor(abyss: TGApp.Sqlite.Abyss.TableTrans): string {
 }
 
 async function reloadUid(uid?: string): Promise<void> {
-  uidList.value = await TSUserAbyss.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
-  if (uidList.value.includes(account.value.gameUid)) {
-    if (uid === undefined) uidCur.value = account.value.gameUid;
-  } else {
-    uidList.value = [account.value.gameUid, ...uidList.value];
-    if (uid === undefined) uidCur.value = uidList.value[0];
-  }
+  uidList.value = recordUidOptions(await TSUserAbyss.getAllUid(), account.value.gameUid);
+  if (uid === undefined) uidCur.value = uidList.value[0];
 }
 
 async function toCombat(): Promise<void> {
