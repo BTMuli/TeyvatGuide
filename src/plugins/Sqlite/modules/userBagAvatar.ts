@@ -1,6 +1,6 @@
 /**
  * 用户背包角色模块
- * @since Beta v0.12.0
+ * @since Beta v0.14.1
  */
 
 import fmtUtil from "@utils/display/fmtUtil.js";
@@ -8,17 +8,24 @@ import fmtUtil from "@utils/display/fmtUtil.js";
 import TGSqlite from "../index.js";
 
 /**
- * 保存Yae获取的角色数据
- * @since Beta v0.12.0
+ * 按 Yae 快照同步当前存档正式拥有的角色。
+ * @since Beta v0.14.1
  * @param uid - 存档UID
  * @param list - 角色数据列表
- * @returns 无返回值
+ * @returns 导入的角色数量
  */
-async function saveYaeData(uid: number, list: Array<TGApp.Plugins.Yae.AvatarInfo>): Promise<void> {
-  if (list.length === 0) return;
-  const now = Date.now();
-  const updated = fmtUtil.dateTime(now);
-  const statements: Array<TGApp.App.Sqlite.SqlStatement> = list.map((item) => ({
+async function saveYaeData(
+  uid: number,
+  list: Array<TGApp.Plugins.Yae.AvatarInfo>,
+): Promise<number> {
+  const owned = new Map(
+    list.filter((item) => item.avatar_type === 1).map((item) => [item.avatar_id, item]),
+  );
+  // 类型字段缺失或未解析时，保留已有角色记录。
+  if (owned.size === 0) return 0;
+
+  const updated = fmtUtil.dateTime(Date.now());
+  const statements: Array<TGApp.App.Sqlite.SqlStatement> = Array.from(owned.values(), (item) => ({
     query: `INSERT INTO UserBagAvatar(uid, rid, equips, raw, updated)
             VALUES ($1, $2, $3, $4, $5)
             ON CONFLICT(uid, rid) DO UPDATE
@@ -31,7 +38,18 @@ async function saveYaeData(uid: number, list: Array<TGApp.Plugins.Yae.AvatarInfo
       updated,
     ],
   }));
+  // 有未知角色类型时，快照可能缺少可识别的正式角色。
+  if (
+    list.every(({ avatar_type }) => avatar_type === 1 || avatar_type === 2 || avatar_type === 3)
+  ) {
+    statements.push({
+      query: `DELETE FROM UserBagAvatar
+              WHERE uid = $1 AND rid NOT IN (SELECT value FROM json_each($2));`,
+      values: [uid, JSON.stringify(Array.from(owned.keys()))],
+    });
+  }
   await TGSqlite.executeTransaction(statements);
+  return owned.size;
 }
 
 /**

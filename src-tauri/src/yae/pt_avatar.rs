@@ -1,5 +1,5 @@
 //! Yae 角色信息的 Protobuf 定义&解析
-//! @since Beta v0.12.0
+//! @since Beta v0.14.1
 #![cfg(target_os = "windows")]
 
 use prost::Message;
@@ -144,28 +144,32 @@ fn looks_like_avatar_info(element: &[u8]) -> bool {
   has_field1 && has_field2 && seen.len() >= 4
 }
 
-/// 解析 AvatarDataNotify，只取 avatar_list 字段。
-/// 由于每个版本 avatar_list 的字段号会变，这里对所有顶层 wire=2 字段
-/// 按元素是否像 AvatarInfo 打分，取最高分字段进行解析。
+/// 完整解析 AvatarDataNotify，从唯一得分最高的顶层字段读取角色列表。
+///
+/// @since Beta v0.14.1
+///
+/// # 参数
+/// - `bytes`: 角色通知的 Protobuf 字节。
+///
+/// # 返回
+/// 数据完整且可唯一识别时返回角色列表。空消息返回空列表。
 pub fn parse_avatar_list(bytes: &[u8]) -> Result<Vec<AvatarInfo>, String> {
+  if bytes.is_empty() {
+    return Ok(Vec::new());
+  }
   let mut cursor = Cursor::new(bytes);
-  let mut candidates: HashMap<u32, Vec<Vec<u8>>> = HashMap::new();
-  loop {
-    let (field, wire_type) = match decode_key(&mut cursor) {
-      Ok(value) => value,
-      Err(_) => break,
-    };
+  let mut candidates: HashMap<u32, Vec<&[u8]>> = HashMap::new();
+  while cursor.position() < bytes.len() as u64 {
+    let (field, wire_type) =
+      decode_key(&mut cursor).map_err(|e| format!("读取顶层字段失败: {e}"))?;
     match wire_type {
       WireType::LengthDelimited => {
-        let len = match decode_varint(&mut cursor) {
-          Ok(length) => length as usize,
-          Err(e) => return Err(format!("读取长度失败: {e}")),
-        };
-        let mut buf = vec![0u8; len];
-        if cursor.read_exact(&mut buf).is_err() {
-          break;
-        }
-        candidates.entry(field).or_default().push(buf);
+        let len = decode_varint(&mut cursor).map_err(|e| format!("读取长度失败: {e}"))?;
+        let len = usize::try_from(len).map_err(|e| format!("顶层字段长度超出范围: {e}"))?;
+        let start = cursor.position() as usize;
+        let element = bytes[start..].get(..len).ok_or("顶层字段数据不完整")?;
+        cursor.set_position((start + len) as u64);
+        candidates.entry(field).or_default().push(element);
       }
       WireType::Varint => {
         let _ = decode_varint(&mut cursor).map_err(|e| format!("跳过 varint 失败: {e}"))?;
@@ -181,20 +185,20 @@ pub fn parse_avatar_list(bytes: &[u8]) -> Result<Vec<AvatarInfo>, String> {
       _ => return Err("顶层存在未知 wire type".to_string()),
     }
   }
-  let best_field = candidates
-    .iter()
-    .max_by_key(|(_, elements)| elements.iter().filter(|e| looks_like_avatar_info(e)).count())
-    .map(|(field, _)| *field);
-  let Some(field) = best_field else {
-    println!("AvatarDataNotify 中未找到 AvatarInfo 字段");
-    return Ok(Vec::new());
-  };
-  let elements = &candidates[&field];
-  let mut avatars = Vec::with_capacity(elements.len());
-  for element in elements {
-    let avatar =
-      AvatarInfo::decode(element.as_slice()).map_err(|e| format!("AvatarInfo 解析失败: {e}"))?;
-    avatars.push(avatar);
+  let mut best_score = 0;
+  let mut best_elements = None;
+  for elements in candidates.into_values() {
+    let score = elements.iter().filter(|e| looks_like_avatar_info(e)).count();
+    if score > best_score {
+      best_score = score;
+      best_elements = Some(elements);
+    } else if score == best_score {
+      best_elements = None;
+    }
   }
-  Ok(avatars)
+  best_elements
+    .ok_or("AvatarDataNotify 中无法唯一识别 AvatarInfo 字段")?
+    .into_iter()
+    .map(|element| AvatarInfo::decode(element).map_err(|e| format!("AvatarInfo 解析失败: {e}")))
+    .collect()
 }

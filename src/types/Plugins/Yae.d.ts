@@ -1,6 +1,6 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.12.0
+ * @since Beta v0.14.1
  */
 
 declare namespace TGApp.Plugins.Yae {
@@ -43,7 +43,7 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 后端返回的角色信息
-   * @since Beta v0.12.0
+   * @since Beta v0.14.1
    */
   type AvatarInfo = {
     /** 角色 ID */
@@ -70,7 +70,7 @@ declare namespace TGApp.Plugins.Yae {
     skill_level_map: Record<string, number>;
     /** 天赋额外等级 */
     proud_skill_extra_level_map: Record<string, number>;
-    /** 角色类型 */
+    /** 角色类型：1 为正式拥有，2 和 3 为临时实例，0 为未识别。 */
     avatar_type: number;
     /** 风之翼 ID */
     wearing_flycloak_id: number;

@@ -399,7 +399,7 @@ async function loadYaeProp(uid: string, data: TGApp.Plugins.Yae.PropRes): Promis
 
 /**
  * 处理角色数据
- * @since Beta v0.13.0
+ * @since Beta v0.14.1
  * @param uid - 用户UID
  * @param data - 角色数据
  * @returns 无返回值
@@ -409,9 +409,14 @@ async function loadYaeAvatar(uid: string, data: TGApp.Plugins.Yae.AvatarListRes)
   await showLoading.start("正在导入角色数据", `UID:${maskUid(uid)},数量:${data.length}`);
   await TGLogger.Info(`[App][loadYaeAvatar] 开始处理 ${uid} 的 ${data.length} 个角色`);
   try {
-    await TSUserBagAvatar.saveYaeData(Number(uid), data);
-    showSnackbar.success(`成功导入 ${maskUid(uid)} 的 ${data.length} 个角色`);
-    await TGLogger.Info(`[App][loadYaeAvatar] 成功导入 ${uid} 的 ${data.length} 个角色`);
+    const count = await TSUserBagAvatar.saveYaeData(Number(uid), data);
+    if (count === 0) {
+      showSnackbar.warn("未识别到已拥有的角色，已跳过角色导入");
+      await TGLogger.Warn(`[App][loadYaeAvatar] UID:${uid} 未识别到正式角色，跳过导入`);
+      return;
+    }
+    showSnackbar.success(`成功导入 ${maskUid(uid)} 的 ${count} 个角色`);
+    await TGLogger.Info(`[App][loadYaeAvatar] 成功导入 ${uid} 的 ${count} 个角色`);
   } catch (error) {
     console.error(error);
     await TGLogger.Error(`[App][loadYaeAvatar] 角色数据导入失败：${error}`);
