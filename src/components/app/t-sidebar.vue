@@ -62,7 +62,7 @@
             <v-list-item
               :link="true"
               class="side-item-menu"
-              :to="{ name: '个人信息' }"
+              :to="{ name: '个人信息-history' }"
               title="主页"
             >
               <template #prepend>
@@ -85,6 +85,12 @@
           <template #title>成就</template>
           <template #prepend>
             <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
+          </template>
+        </v-list-item>
+        <v-list-item :title.attr="'七圣召唤'" :to="{ name: '七圣召唤' }">
+          <template #title>七圣召唤</template>
+          <template #prepend>
+            <img alt="" class="side-icon" src="/UI/nav/userGcg.webp" />
           </template>
         </v-list-item>
         <v-list-item v-if="isWindows" :link="true" :title.attr="'游戏安装'" href="/game">
@@ -111,64 +117,49 @@
               </template>
             </v-list-item>
           </template>
-          <v-list :nav="true" class="side-list-menu sub" density="compact">
-            <v-list-item
+          <nav aria-label="背包物品导航" class="side-list-menu side-menu-icons bag sub">
+            <button
               v-if="isWindows"
-              :link="true"
-              class="side-item-menu"
+              aria-label="导入"
+              class="side-menu-icon-item"
               title="导入"
+              type="button"
               @click="tryImportBag()"
             >
-              <template #prepend>
-                <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">
-                  mdi-import
-                </v-icon>
-              </template>
-            </v-list-item>
-            <v-list-item
-              :link="true"
-              class="side-item-menu"
+              <v-icon aria-hidden="true" color="var(--tgc-od-orange)" size="20">mdi-import</v-icon>
+            </button>
+            <a
+              aria-label="养成计划"
+              class="side-menu-icon-item"
               href="/user/cultivation"
               title="养成计划"
             >
-              <template #prepend>
-                <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">
-                  mdi-calculator-variant-outline
-                </v-icon>
-              </template>
-            </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/bag/material" title="材料">
-              <template #prepend>
-                <img alt="abyss" class="side-icon-menu" src="/icon/material/223.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
+              <v-icon aria-hidden="true" color="var(--tgc-od-orange)" size="20">
+                mdi-calculator-variant-outline
+              </v-icon>
+            </a>
+            <a aria-label="材料" class="side-menu-icon-item" href="/bag/material" title="材料">
+              <img alt="" src="/icon/material/223.webp" />
+            </a>
+            <a
               v-if="isWindows"
-              :link="true"
-              class="side-item-menu"
+              aria-label="武器"
+              class="side-menu-icon-item"
               href="/bag/weapon"
               title="武器"
             >
-              <template #prepend>
-                <img alt="combat" class="side-icon-menu" src="/WIKI/weapon/14522.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
+              <img alt="" src="/WIKI/weapon/14522.webp" />
+            </a>
+            <a
               v-if="isWindows"
-              :link="true"
-              class="side-item-menu"
+              aria-label="圣遗物"
+              class="side-menu-icon-item"
               href="/bag/relic"
               title="圣遗物"
             >
-              <template #prepend>
-                <img
-                  alt="challenge"
-                  class="side-icon-menu"
-                  src="/WIKI/relic/UI_RelicIcon_15001_1.webp"
-                />
-              </template>
-            </v-list-item>
-          </v-list>
+              <img alt="" src="/WIKI/relic/UI_RelicIcon_15001_1.webp" />
+            </a>
+          </nav>
         </v-menu>
         <v-divider />
         <v-list-item :link="true" :title.attr="'原神战绩'" href="/user/record">
@@ -262,39 +253,50 @@
               </template>
             </v-list-item>
           </template>
-          <v-list :nav="true" class="side-list-menu sub" density="compact">
-            <v-list-item
-              :link="true"
-              class="side-item-menu"
+          <nav aria-label="图鉴导航" class="side-list-menu side-menu-icons sub">
+            <a
+              aria-label="角色图鉴"
+              class="side-menu-icon-item"
               href="/wiki/character"
               title="角色图鉴"
             >
-              <template #prepend>
-                <img alt="characterIcon" class="side-icon-menu" src="/UI/nav/wikiAvatar.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/wiki/weapon" title="武器图鉴">
-              <template #prepend>
-                <img alt="weaponIcon" class="side-icon-menu" src="/UI/nav/wikiWeapon.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/wiki/nameCard">
-              <template #default>
-                <v-icon color="var(--tgc-yellow-2)" size="20">mdi-credit-card-outline</v-icon>
-                <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
-              </template>
-            </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/wiki/material" title="材料图鉴">
-              <template #prepend>
-                <img alt="gcgIcon" class="side-icon-menu" src="/UI/nav/wikiGCG.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/wiki/relic" title="圣遗物图鉴">
-              <template #prepend>
-                <img alt="relicIcon" class="side-icon-menu" src="/icon/relic/5.webp" />
-              </template>
-            </v-list-item>
-          </v-list>
+              <img alt="" src="/UI/nav/wikiAvatar.webp" />
+            </a>
+            <a
+              aria-label="武器图鉴"
+              class="side-menu-icon-item"
+              href="/wiki/weapon"
+              title="武器图鉴"
+            >
+              <img alt="" src="/UI/nav/wikiWeapon.webp" />
+            </a>
+            <a
+              aria-label="名片图鉴"
+              class="side-menu-icon-item"
+              href="/wiki/nameCard"
+              title="名片图鉴"
+            >
+              <v-icon aria-hidden="true" color="var(--tgc-yellow-2)" size="24">
+                mdi-credit-card-outline
+              </v-icon>
+            </a>
+            <a
+              aria-label="材料图鉴"
+              class="side-menu-icon-item"
+              href="/wiki/material"
+              title="材料图鉴"
+            >
+              <img alt="" src="/UI/nav/wikiGCG.webp" />
+            </a>
+            <a
+              aria-label="圣遗物图鉴"
+              class="side-menu-icon-item"
+              href="/wiki/relic"
+              title="圣遗物图鉴"
+            >
+              <img alt="" class="side-wiki-relic" src="/icon/relic/5.webp" />
+            </a>
+          </nav>
         </v-menu>
         <v-menu v-model="storyMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
           <template #activator="{ props }">
@@ -364,50 +366,51 @@
               </template>
             </v-list-item>
           </template>
-          <v-list :nav="true" class="side-list-menu sub" density="compact">
-            <v-list-item
-              v-if="isLogin"
-              class="side-item-menu"
+          <nav v-if="isLogin" aria-label="用户菜单" class="side-list-menu side-menu-icons sub">
+            <button
+              aria-label="签到"
+              class="side-menu-icon-item"
               title="签到"
+              type="button"
               @click="openClient('sign_in')"
             >
-              <template #prepend>
-                <img alt="sing_in" class="side-icon-menu" src="/UI/nav/subSign.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
-              v-if="isLogin"
-              class="side-item-menu"
+              <img alt="" src="/UI/nav/subSign.webp" />
+            </button>
+            <button
+              aria-label="战绩"
+              class="side-menu-icon-item"
               title="战绩"
+              type="button"
               @click="openClient('game_record')"
             >
-              <template #prepend>
-                <img alt="game_record" class="side-icon-menu" src="/UI/nav/subRecord.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
-              v-if="isLogin"
-              class="side-item-menu"
+              <img alt="" src="/UI/nav/subRecord.webp" />
+            </button>
+            <button
+              aria-label="便笺"
+              class="side-menu-icon-item"
               title="便笺"
+              type="button"
               @click="openClient('daily_note')"
             >
-              <template #prepend>
-                <img alt="daily_note" class="side-icon-menu" src="/icon/material/106.webp" />
-              </template>
-            </v-list-item>
+              <img alt="" src="/icon/material/106.webp" />
+            </button>
+            <a aria-label="收藏" class="side-menu-icon-item" href="/collection" title="收藏">
+              <img alt="" src="/UI/nav/posts.webp" />
+            </a>
+            <button
+              aria-label="关注"
+              class="side-menu-icon-item"
+              title="关注"
+              type="button"
+              @click="showFollow = true"
+            >
+              <img alt="" src="/platforms/mhy/mys.webp" />
+            </button>
+          </nav>
+          <v-list v-else :nav="true" class="side-list-menu sub" density="compact">
             <v-list-item :link="true" class="side-item-menu" href="/collection" title="收藏">
               <template #prepend>
                 <img alt="collect" class="side-icon-menu" src="/UI/nav/posts.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
-              v-if="isLogin"
-              class="side-item-menu"
-              title="关注"
-              @click="showFollow = true"
-            >
-              <template #prepend>
-                <img alt="follow" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
               </template>
             </v-list-item>
           </v-list>
@@ -551,7 +554,7 @@ const userStore = useUserStore();
 const { sidebar, theme, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 const { recentGid } = storeToRefs(useCommunityBrowsingStore());
-const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
+const { uid, briefInfo, account } = storeToRefs(userStore);
 const newsGid = computed<number>(() => {
   const rememberedGid =
     Number.isSafeInteger(recentGid.value) && recentGid.value > 0 ? recentGid.value : undefined;
@@ -623,18 +626,20 @@ async function loadAllGameAc(): Promise<void> {
 }
 
 async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void> {
-  const acM = await TSUserAccount.account.getAccount(ac.uid);
-  if (!acM) {
-    showSnackbar.warn(`未找到米社用户${maskUid(ac.uid)}的用户信息`);
-    return;
+  try {
+    const acM = await TSUserAccount.account.getAccount(ac.uid);
+    if (!acM) {
+      showSnackbar.warn(`未找到米社用户${maskUid(ac.uid)}的用户信息`);
+      return;
+    }
+    const res = await userStore.switchGameAccount(ac.gameUid, acM);
+    if (!res) return;
+    await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${ac.gameUid}成功`);
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`切换游戏账户失败：${errMsg}`);
+    await TGLogger.Error(`[ToSwitchAc] 切换游戏UID${ac.gameUid}失败：${errMsg}`);
   }
-  uid.value = ac.uid;
-  briefInfo.value = acM.brief;
-  cookie.value = acM.cookie;
-  const res = await userStore.switchGameAccount(ac.gameUid);
-  if (!res) return;
-  showSnackbar.success(`成功切换游戏UID-${maskUid(ac.gameUid)}`);
-  await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${ac.gameUid}成功`);
 }
 
 async function switchTheme(): Promise<void> {
@@ -765,9 +770,65 @@ async function openTravelersTales(): Promise<void> {
   box-shadow: -2px 0 4px var(--common-shadow-2) !important;
 }
 
-.side-item-menu {
+.side-item-menu,
+.side-menu-icon-item {
   border: 1px solid var(--common-shadow-2);
   background: var(--box-bg-1);
+}
+
+.side-menu-icons {
+  display: grid;
+  width: 144px;
+  padding: 8px;
+  border-radius: 8px;
+  gap: 4px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.side-menu-icon-item {
+  display: grid;
+  height: 40px;
+  padding: 0;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  grid-column: span 2;
+  place-items: center;
+  text-decoration: none;
+
+  &:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+
+  &:hover {
+    background: var(--box-bg-4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: -2px;
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+}
+
+.side-menu-icons.bag {
+  .side-menu-icon-item {
+    grid-column: span 2;
+
+    &:nth-child(-n + 2) {
+      grid-column: span 3;
+    }
+  }
+}
+
+.side-wiki-relic {
+  filter: var(--icon-filter);
 }
 
 .side-icon-menu {
