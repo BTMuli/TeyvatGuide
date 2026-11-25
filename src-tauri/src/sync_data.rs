@@ -591,9 +591,13 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   Ok(serialized)
 }
 
-/// 只规范导出内存副本中的已知历史字段，输出仍由原有 v1 校验器验收。
+/// 为发布和同键比较构造本机记录的 v1 语义视图；不修改数据库，也不用于外部解码。
 /// @since Beta v0.14.2
 fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Result<(), String> {
+  if table.name == "GachaRecords" {
+    normalize_legacy_wish_fields(row);
+    return Ok(());
+  }
   let columns: &[&str] = match table.name {
     "SpiralAbyss" => &["floors"],
     "RoleCombat" => &["stat", "detail"],
@@ -613,7 +617,9 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
     let mut value = parse_json(text, MAX_FIELD_BYTES)
       .map_err(|error| if error == INVALID { invalid_column() } else { error })?;
     let mut changed = false;
-    if table.name == "RoleCombat" && column == "stat" {
+    if table.name == "SpiralAbyss" {
+      changed |= normalize_abyss_optional_details(&mut value);
+    } else if table.name == "RoleCombat" && column == "stat" {
       changed |= normalize_legacy_combat_stat(&mut value);
     } else if table.name == "RoleCombat" && column == "detail" {
       let detail = value.as_object_mut().ok_or_else(invalid_column)?;
@@ -661,6 +667,9 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
         changed = true;
       }
       changed |= normalize_legacy_challenge_dps(challenge);
+      changed |= ChallengeV1Object::Mode.project(&mut value);
+    } else if table.name == "HardChallenge" && column == "blings" {
+      changed |= ChallengeV1Object::Bling.project_array(&mut value);
     }
     changed |= replace_unsupported_export_images(&mut value);
     if changed {
@@ -668,6 +677,45 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
     }
   }
   Ok(())
+}
+
+/// 旧祈愿写入器会把空值放进带引号的 SQL，从而留下字面字符串 `null`。
+/// 仅识别这个写法；数量缺省沿用当前备份恢复写入器的 1，不推断其他格式。
+/// @since Beta v0.14.2
+fn normalize_legacy_wish_fields(row: &mut Map<String, Value>) {
+  for field in ["itemId", "type", "rank"] {
+    if row.get(field).and_then(Value::as_str) == Some("null") {
+      row.insert(field.into(), Value::Null);
+    }
+  }
+  if row.get("count").and_then(Value::as_str) == Some("null") {
+    row.insert("count".into(), Value::String("1".into()));
+  }
+}
+
+/// 深渊页面把缺省和 null 同样视作没有该半场或怪物列表；只规范这些可选路径。
+/// @since Beta v0.14.2
+fn normalize_abyss_optional_details(value: &mut Value) -> bool {
+  let Some(floors) = value.as_array_mut() else { return false };
+  let mut changed = false;
+  for floor in floors {
+    let Some(levels) = floor.get_mut("levels").and_then(Value::as_array_mut) else { continue };
+    for level in levels {
+      let Some(level) = level.as_object_mut() else { continue };
+      for field in ["upBattle", "downBattle"] {
+        if level.get(field).is_some_and(Value::is_null) {
+          level.remove(field);
+          changed = true;
+        } else if let Some(battle) = level.get_mut(field).and_then(Value::as_object_mut) {
+          if battle.get("monsters").is_some_and(Value::is_null) {
+            battle.remove("monsters");
+            changed = true;
+          }
+        }
+      }
+    }
+  }
+  changed
 }
 
 /// 旧剧诗没有月谕统计；仅为非月谕难度补零，不推断缺失的月谕成绩。
@@ -696,7 +744,8 @@ fn normalize_legacy_combat_fight(value: &mut Value) -> bool {
       changed = true;
     }
   }
-  if !fight.contains_key("shortest_avatar_list") {
+  // 当前最短用时面板对 null 与 [] 都展示“暂无数据”，v1 使用空列表。
+  if fight.get("shortest_avatar_list").is_none_or(Value::is_null) {
     fight.insert("shortest_avatar_list".into(), Value::Array(Vec::new()));
     changed = true;
   }
@@ -1023,12 +1072,77 @@ fn abyss_floor(value: &Value) -> bool {
     && o.get("buff").is_none_or(|v| array(v, legacy_backup_text))
 }
 
+/// 危战 v1 的对象字段；当前危战备份/加载守卫识别这些业务值，但不拒绝本机的附加键。
+/// 入站仍按原 v1 白名单严格校验；本机发布和同键比较则复用同一字段表做投影。
+/// @since Beta v0.14.2
+#[derive(Clone, Copy)]
+enum ChallengeV1Object {
+  Mode,
+  Best,
+  Encounter,
+  Team,
+  Avatar,
+  Monster,
+  Tag,
+  Bling,
+}
+
+impl ChallengeV1Object {
+  /// 取固定协议字段，不纳入本机扩展数据。
+  /// @since Beta v0.14.2
+  fn fields(self) -> &'static [&'static str] {
+    match self {
+      Self::Mode => &["best", "challenge", "has_data"],
+      Self::Best => &["difficulty", "second", "icon"],
+      Self::Encounter => &["name", "second", "teams", "best_avatar", "monster"],
+      Self::Team => &["avatar_id", "name", "element", "image", "level", "rarity", "rank"],
+      Self::Avatar => &["avatar_id", "side_icon", "dps", "type"],
+      Self::Monster => &["name", "level", "icon", "desc", "tags", "monster_id"],
+      Self::Tag => &["type", "desc"],
+      Self::Bling => &["avatar_id", "name", "element", "image", "side_icon", "rarity", "is_plus"],
+    }
+  }
+
+  /// 在本机副本的已知对象层忽略非协议字段；不填缺值或改正非法的业务值。
+  /// @since Beta v0.14.2
+  fn project(self, value: &mut Value) -> bool {
+    let Some(object) = value.as_object_mut() else { return false };
+    let before = object.len();
+    object.retain(|field, _| self.fields().contains(&field.as_str()));
+    let mut changed = object.len() != before;
+    let (objects, arrays): (&[(&str, Self)], &[(&str, Self)]) = match self {
+      Self::Mode => (&[("best", Self::Best)], &[("challenge", Self::Encounter)]),
+      Self::Encounter => {
+        (&[("monster", Self::Monster)], &[("teams", Self::Team), ("best_avatar", Self::Avatar)])
+      }
+      Self::Monster => (&[], &[("tags", Self::Tag)]),
+      _ => (&[], &[]),
+    };
+    for (field, shape) in objects {
+      changed |= object.get_mut(*field).is_some_and(|v| shape.project(v));
+    }
+    for (field, shape) in arrays {
+      changed |= object.get_mut(*field).is_some_and(|v| shape.project_array(v));
+    }
+    changed
+  }
+
+  /// 仅投影数组内已知对象，保持原顺序和元素数量。
+  /// @since Beta v0.14.2
+  fn project_array(self, value: &mut Value) -> bool {
+    let Some(items) = value.as_array_mut() else { return false };
+    let mut changed = false;
+    for item in items {
+      changed |= self.project(item);
+    }
+    changed
+  }
+}
+
 /// 验证危战队伍角色。
 /// @since Beta v0.14.2
 fn challenge_team(value: &Value) -> bool {
-  let Some(o) =
-    object(value, &["avatar_id", "name", "element", "image", "level", "rarity", "rank"], &[])
-  else {
+  let Some(o) = object(value, ChallengeV1Object::Team.fields(), &[]) else {
     return false;
   };
   number(&o["avatar_id"], 1_000_000_000)
@@ -1043,7 +1157,7 @@ fn challenge_team(value: &Value) -> bool {
 /// 验证危战最佳角色。
 /// @since Beta v0.14.2
 fn challenge_avatar(value: &Value) -> bool {
-  let Some(o) = object(value, &["avatar_id", "side_icon", "dps", "type"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Avatar.fields(), &[]) else {
     return false;
   };
   number(&o["avatar_id"], 1_000_000_000)
@@ -1055,7 +1169,7 @@ fn challenge_avatar(value: &Value) -> bool {
 /// 验证危战怪物标签。
 /// @since Beta v0.14.2
 fn challenge_tag(value: &Value) -> bool {
-  let Some(o) = object(value, &["type", "desc"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Tag.fields(), &[]) else {
     return false;
   };
   safe_text(&o["type"]) && safe_text(&o["desc"])
@@ -1064,7 +1178,7 @@ fn challenge_tag(value: &Value) -> bool {
 /// 验证危战怪物及安全颜色描述。
 /// @since Beta v0.14.2
 fn challenge_monster(value: &Value) -> bool {
-  let Some(o) = object(value, &["name", "level", "icon", "desc", "tags", "monster_id"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Monster.fields(), &[]) else {
     return false;
   };
   safe_text(&o["name"])
@@ -1078,7 +1192,7 @@ fn challenge_monster(value: &Value) -> bool {
 /// 验证危战单场记录。
 /// @since Beta v0.14.2
 fn challenge_item(value: &Value) -> bool {
-  let Some(o) = object(value, &["name", "second", "teams", "best_avatar", "monster"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Encounter.fields(), &[]) else {
     return false;
   };
   safe_text(&o["name"])
@@ -1094,7 +1208,7 @@ fn challenge_best(value: &Value) -> bool {
   if value.is_null() {
     return true;
   }
-  let Some(o) = object(value, &["difficulty", "second", "icon"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Best.fields(), &[]) else {
     return false;
   };
   number(&o["difficulty"], 6) && number(&o["second"], 1_000_000) && safe_image(&o["icon"])
@@ -1103,7 +1217,7 @@ fn challenge_best(value: &Value) -> bool {
 /// 验证危战单人或联机详情。
 /// @since Beta v0.14.2
 fn challenge_data(value: &Value) -> bool {
-  let Some(o) = object(value, &["best", "challenge", "has_data"], &[]) else {
+  let Some(o) = object(value, ChallengeV1Object::Mode.fields(), &[]) else {
     return false;
   };
   challenge_best(&o["best"]) && array(&o["challenge"], challenge_item) && o["has_data"].is_boolean()
@@ -1112,11 +1226,7 @@ fn challenge_data(value: &Value) -> bool {
 /// 验证危战赋光角色。
 /// @since Beta v0.14.2
 fn challenge_bling(value: &Value) -> bool {
-  let Some(o) = object(
-    value,
-    &["avatar_id", "name", "element", "image", "side_icon", "rarity", "is_plus"],
-    &[],
-  ) else {
+  let Some(o) = object(value, ChallengeV1Object::Bling.fields(), &[]) else {
     return false;
   };
   number(&o["avatar_id"], 1_000_000_000)
@@ -1489,7 +1599,7 @@ fn business_differences(
       .collect::<Vec<_>>()
   };
   let raw = differing(existing);
-  if raw.is_empty() || table.name == "GachaRecords" {
+  if raw.is_empty() {
     return raw;
   }
   // 与发布相同的旧值规范仅在内存中进行；不可规范的本机行仍保留为冲突。
@@ -2831,6 +2941,165 @@ mod tests {
     assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
   }
 
+  /// 写入模拟历史客户端或备份恢复产生的本机记录，不把它当作外部 v1 输入。
+  /// @since Beta v0.14.2
+  async fn seed_legacy_local(db: &SqlitePool, table: &Table, row: &Value) {
+    let mut tx = db.begin().await.unwrap();
+    let projection = check_schema(&mut tx, table, SchemaUse::Import).await.unwrap();
+    insert_record(&mut tx, table, &projection, row.as_object().unwrap()).await.unwrap();
+    tx.commit().await.unwrap();
+  }
+
+  /// 比较和导出均不得改动本机原始字面值、战绩或附加数据。
+  /// @since Beta v0.14.2
+  async fn assert_legacy_retained(db: &SqlitePool, table: &Table, row: &Value) {
+    let mut tx = db.begin().await.unwrap();
+    let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
+    let raw = row.as_object().unwrap();
+    assert_eq!(existing_row(&mut tx, table, &projection, raw).await.unwrap().as_ref(), Some(raw));
+  }
+
+  /// 旧写入器把空字段写成字面 "null"；现代缺省和这类本机行应判为相同。
+  /// @since Beta v0.14.2
+  #[test]
+  fn legacy_storage_projection_accepts_historical_wish_null_text() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let table = &TABLES[0];
+      let mut canonical = gacha("100", "123456789", "冷刃");
+      for field in ["itemId", "type", "rank"] {
+        canonical[field] = Value::Null;
+      }
+      let mut legacy = canonical.clone();
+      for field in ["itemId", "type", "rank", "count"] {
+        legacy[field] = json!("null");
+      }
+      assert!(validate_snapshot(&snapshot(vec![legacy.clone()], vec![], vec![], vec![])).is_err());
+      seed_legacy_local(&db, table, &legacy).await;
+      let expected = snapshot(vec![canonical], vec![], vec![], vec![]);
+      assert_eq!(export_from_pool(&db).await.unwrap(), expected);
+      let stats = import_into_pool(&db, &validate_snapshot(&expected).unwrap()).await.unwrap();
+      assert_eq!((stats.gacha_records.identical, stats.gacha_records.conflicts), (1, 0));
+      assert!(stats.conflict_details.is_empty());
+      assert_legacy_retained(&db, table, &legacy).await;
+
+      let invalid = pool().await;
+      legacy["count"] = json!("NULL");
+      seed_legacy_local(&invalid, table, &legacy).await;
+      assert!(
+        export_from_pool(&invalid)
+          .await
+          .unwrap_err()
+          .starts_with("SYNC_INVALID：GachaRecords.count")
+      );
+    });
+  }
+
+  /// 当前页面把无上下半战斗或怪物列表的 null 与省略视为同一显示状态，不丢失跳层信息。
+  /// @since Beta v0.14.2
+  #[test]
+  fn legacy_storage_projection_projects_only_absent_optional_abyss_details() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let table = &TABLES[1];
+      let mut canonical = abyss("123456789", 1);
+      canonical["skippedFloor"] = json!("09-10");
+      let mut floors = parse_nested(&canonical["floors"]).unwrap();
+      let mut other_floor = floors[0].clone();
+      other_floor["id"] = json!(11);
+      floors.as_array_mut().unwrap().push(other_floor);
+      let level = floors[0]["levels"][0].as_object_mut().unwrap();
+      let mut down = level.remove("upBattle").unwrap();
+      down.as_object_mut().unwrap().remove("monsters");
+      level.insert("downBattle".into(), down);
+      canonical["floors"] = json!(floors.to_string());
+      floors[0]["levels"][0]["upBattle"] = Value::Null;
+      floors[0]["levels"][0]["downBattle"]["monsters"] = Value::Null;
+      let mut legacy = canonical.clone();
+      legacy["floors"] = json!(floors.to_string());
+      assert!(validate_snapshot(&snapshot(vec![], vec![legacy.clone()], vec![], vec![])).is_err());
+      seed_legacy_local(&db, table, &legacy).await;
+      let expected = snapshot(vec![], vec![canonical], vec![], vec![]);
+      assert_eq!(export_from_pool(&db).await.unwrap(), expected);
+      let stats = import_into_pool(&db, &validate_snapshot(&expected).unwrap()).await.unwrap();
+      assert_eq!((stats.spiral_abyss.identical, stats.spiral_abyss.conflicts), (1, 0));
+      assert!(stats.conflict_details.is_empty());
+      assert_legacy_retained(&db, table, &legacy).await;
+    });
+  }
+
+  /// 当前剧诗最短用时面板把 null 作为无队伍展示，v1 用空列表表达同一含义。
+  /// @since Beta v0.14.2
+  #[test]
+  fn legacy_storage_projection_handles_an_absent_combat_team() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let table = &TABLES[2];
+      let canonical = combat("123456789", 1);
+      let mut detail = parse_nested(&canonical["detail"]).unwrap();
+      detail["fight_statisic"]["shortest_avatar_list"] = Value::Null;
+      let mut legacy = canonical.clone();
+      legacy["detail"] = json!(detail.to_string());
+      assert!(validate_snapshot(&snapshot(vec![], vec![], vec![legacy.clone()], vec![])).is_err());
+      seed_legacy_local(&db, table, &legacy).await;
+      let expected = snapshot(vec![], vec![], vec![canonical], vec![]);
+      assert_eq!(export_from_pool(&db).await.unwrap(), expected);
+      let stats = import_into_pool(&db, &validate_snapshot(&expected).unwrap()).await.unwrap();
+      assert_eq!((stats.role_combat.identical, stats.role_combat.conflicts), (1, 0));
+      assert!(stats.conflict_details.is_empty());
+      assert_legacy_retained(&db, table, &legacy).await;
+    });
+  }
+
+  /// 危战页面和备份只要求业务字段存在；允许本机有额外数据，但不把它发到 DAV。
+  /// @since Beta v0.14.2
+  #[test]
+  fn legacy_storage_projection_limits_challenge_objects_to_v1_fields() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let target = pool().await;
+      let table = &TABLES[3];
+      let mut canonical = challenge("123456789", 1, "兼容期次");
+      let mut mp = parse_nested(&canonical["single"]).unwrap();
+      canonical["mp"] = json!(mp.to_string());
+      let mut blings = parse_nested(&canonical["blings"]).unwrap();
+      let unlisted = json!({"cookie":"PRIVATE_SENTINEL","link":"https://example.invalid/token"});
+      mp["client_revision"] = json!(1);
+      mp["best"]["extra"] = unlisted.clone();
+      mp["challenge"][0]["extra"] = unlisted.clone();
+      mp["challenge"][0]["teams"][0]["extra"] = unlisted.clone();
+      mp["challenge"][0]["best_avatar"][0]["extra"] = unlisted.clone();
+      mp["challenge"][0]["monster"]["extra"] = unlisted.clone();
+      mp["challenge"][0]["monster"]["tags"][0]["extra"] = unlisted.clone();
+      blings[0]["extra"] = unlisted;
+      let mut legacy = canonical.clone();
+      legacy["mp"] = json!(mp.to_string());
+      legacy["blings"] = json!(blings.to_string());
+      let untrusted = snapshot(vec![], vec![], vec![], vec![legacy.clone()]);
+      assert!(
+        validate_snapshot(&untrusted).unwrap_err().starts_with("SYNC_INVALID：HardChallenge.mp")
+      );
+      seed_legacy_local(&source, table, &legacy).await;
+      let expected = snapshot(vec![], vec![], vec![], vec![canonical.clone()]);
+      let exported = export_from_pool(&source).await.unwrap();
+      assert_eq!(exported, expected);
+      assert!(!exported.contains("PRIVATE_SENTINEL"));
+      let records = validate_snapshot(&exported).unwrap();
+      assert_eq!(import_into_pool(&target, &records).await.unwrap().hard_challenge.inserted, 1);
+      let stats = import_into_pool(&source, &records).await.unwrap();
+      assert_eq!((stats.hard_challenge.identical, stats.hard_challenge.conflicts), (1, 0));
+      assert!(stats.conflict_details.is_empty());
+      let mut changed = parse_nested(&canonical["mp"]).unwrap();
+      changed["challenge"][0]["second"] = json!(13);
+      canonical["mp"] = json!(changed.to_string());
+      let changed = validate_snapshot(&snapshot(vec![], vec![], vec![], vec![canonical])).unwrap();
+      let stats = serde_json::to_value(import_into_pool(&source, &changed).await.unwrap()).unwrap();
+      assert_eq!(stats["hardChallenge"]["conflicts"], json!(1));
+      assert_eq!(stats["conflictDetails"][0]["changes"], json!([{"field":"mp"}]));
+      assert_legacy_retained(&source, table, &legacy).await;
+    });
+  }
+
   /// 单人和联机中的数字 DPS 使用 v1 文本表示，不改本机行或现有文本。
   /// @since Beta v0.14.2
   #[test]
@@ -2993,7 +3262,7 @@ mod tests {
       json!({"is_show_battle_stats": true}),
       json!({"total_use_time": 124}),
       json!({"total_use_time": 124, "is_show_battle_stats": true, "max_defeat_avatar": 7}),
-      json!({"total_use_time": 124, "is_show_battle_stats": true, "shortest_avatar_list": null}),
+      json!({"total_use_time": 124, "is_show_battle_stats": true, "shortest_avatar_list": false}),
       json!({"total_use_time": 124, "is_show_battle_stats": true, "unknown_stat": 0}),
     ] {
       let mut row = combat("123456789", 1);
