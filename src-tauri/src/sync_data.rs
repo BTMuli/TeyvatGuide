@@ -660,7 +660,15 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
         }
       }
     } else if table.name == "HardChallenge" && matches!(column, "single" | "mp") {
-      let challenge = value.as_object_mut().ok_or_else(invalid_column)?;
+      let Some(challenge) = value.as_object_mut() else {
+        return Err(
+          RecordIssue::Challenge {
+            field: column,
+            issue: ChallengeV1Issue::at_value(ChallengeV1Reason::Object, &value),
+          }
+          .message(table),
+        );
+      };
       // 历史记录可能没有最佳项；保留已有挑战和最佳数据，不生成虚构成绩。
       if !challenge.contains_key("best") {
         challenge.insert("best".into(), Value::Null);
@@ -669,7 +677,7 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
       changed |= normalize_legacy_challenge_dps(challenge);
       changed |= ChallengeV1Object::Mode.project(&mut value);
     } else if table.name == "HardChallenge" && column == "blings" {
-      changed |= ChallengeV1Object::Bling.project_array(&mut value);
+      changed |= ChallengeV1Rule::Objects(ChallengeV1Object::Bling).project(&mut value);
     }
     changed |= replace_unsupported_export_images(&mut value);
     if changed {
@@ -1072,8 +1080,7 @@ fn abyss_floor(value: &Value) -> bool {
     && o.get("buff").is_none_or(|v| array(v, legacy_backup_text))
 }
 
-/// 危战 v1 的对象字段；当前危战备份/加载守卫识别这些业务值，但不拒绝本机的附加键。
-/// 入站仍按原 v1 白名单严格校验；本机发布和同键比较则复用同一字段表做投影。
+/// 固定的危战 v1 对象形状：本机字段投影和入站验证复用一份规则，不核对应用版本号。
 /// @since Beta v0.14.2
 #[derive(Clone, Copy)]
 enum ChallengeV1Object {
@@ -1087,155 +1094,242 @@ enum ChallengeV1Object {
   Bling,
 }
 
-impl ChallengeV1Object {
-  /// 取固定协议字段，不纳入本机扩展数据。
+/// 危战 v1 的字段值格式；数组上限、文本和图片继续使用原边界。
+/// @since Beta v0.14.2
+#[derive(Clone, Copy)]
+enum ChallengeV1Rule {
+  Integer(i64),
+  Text,
+  Image,
+  Boolean,
+  Object(ChallengeV1Object),
+  NullableObject(ChallengeV1Object),
+  Objects(ChallengeV1Object),
+  Texts,
+}
+
+/// 可对外显示的固定理由。只有协议上下限可作为数字输出，不能含原始值。
+/// @since Beta v0.14.2
+enum ChallengeV1Reason {
+  Missing,
+  Extra,
+  Object,
+  Array,
+  ArrayLimit,
+  Integer(i64),
+  String,
+  TextPolicy,
+  ImagePolicy,
+  Boolean,
+}
+
+impl fmt::Display for ChallengeV1Reason {
+  /// 只渲染协议约束，不格式化不可信输入。
   /// @since Beta v0.14.2
-  fn fields(self) -> &'static [&'static str] {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Self::Mode => &["best", "challenge", "has_data"],
-      Self::Best => &["difficulty", "second", "icon"],
-      Self::Encounter => &["name", "second", "teams", "best_avatar", "monster"],
-      Self::Team => &["avatar_id", "name", "element", "image", "level", "rarity", "rank"],
-      Self::Avatar => &["avatar_id", "side_icon", "dps", "type"],
-      Self::Monster => &["name", "level", "icon", "desc", "tags", "monster_id"],
-      Self::Tag => &["type", "desc"],
-      Self::Bling => &["avatar_id", "name", "element", "image", "side_icon", "rarity", "is_plus"],
+      Self::Missing => f.write_str("缺少必要字段"),
+      Self::Extra => f.write_str("含 v1 未知字段，未显示其名称"),
+      Self::Object => f.write_str("须为对象"),
+      Self::Array => f.write_str("须为数组"),
+      Self::ArrayLimit => write!(f, "数组超过 {MAX_ARRAY} 项上限"),
+      Self::Integer(max) => write!(f, "须为 0 到 {max} 的整数"),
+      Self::String => f.write_str("须为文本"),
+      Self::TextPolicy => f.write_str("文本标记、字符或长度不受支持"),
+      Self::ImagePolicy => f.write_str("图片路径不符合 v1 白名单"),
+      Self::Boolean => f.write_str("须为布尔值"),
+    }
+  }
+}
+
+/// 只携带固定路径、固定理由和值类别；不存储记录内容、实际索引或未知键。
+/// @since Beta v0.14.2
+struct ChallengeV1Issue {
+  path: String,
+  reason: ChallengeV1Reason,
+  observed: &'static str,
+}
+
+impl ChallengeV1Issue {
+  /// 把原始值仅映射为安全类型标签。
+  /// @since Beta v0.14.2
+  fn at_value(reason: ChallengeV1Reason, value: &Value) -> Self {
+    let observed = match value {
+      Value::Null => "空值",
+      Value::Bool(_) => "布尔值",
+      Value::Number(_) => "数字",
+      Value::String(_) => "文本",
+      Value::Array(_) => "数组",
+      Value::Object(_) => "对象",
+    };
+    Self { path: String::new(), reason, observed }
+  }
+
+  /// 追加由协议声明给出的父字段，不接受动态键。
+  /// @since Beta v0.14.2
+  fn in_field(mut self, field: &'static str) -> Self {
+    self.path.insert_str(0, field);
+    self.path.insert(0, '.');
+    self
+  }
+
+  /// 数组只显示类别，不返回失败记录的位置。
+  /// @since Beta v0.14.2
+  fn in_item(mut self) -> Self {
+    self.path.insert_str(0, "[]");
+    self
+  }
+}
+
+impl ChallengeV1Object {
+  /// 危战对象字段和规则只在此声明一次，保持 v1 的既有取值范围。
+  /// @since Beta v0.14.2
+  fn fields(self) -> &'static [(&'static str, ChallengeV1Rule)] {
+    use ChallengeV1Rule::{Boolean, Image, Integer, NullableObject, Object, Objects, Text, Texts};
+    match self {
+      Self::Mode => &[
+        ("best", NullableObject(Self::Best)),
+        ("challenge", Objects(Self::Encounter)),
+        ("has_data", Boolean),
+      ],
+      Self::Best => &[("difficulty", Integer(6)), ("second", Integer(1_000_000)), ("icon", Image)],
+      Self::Encounter => &[
+        ("name", Text),
+        ("second", Integer(1_000_000)),
+        ("teams", Objects(Self::Team)),
+        ("best_avatar", Objects(Self::Avatar)),
+        ("monster", Object(Self::Monster)),
+      ],
+      Self::Team => &[
+        ("avatar_id", Integer(1_000_000_000)),
+        ("name", Text),
+        ("element", Text),
+        ("image", Image),
+        ("level", Integer(1_000)),
+        ("rarity", Integer(5)),
+        ("rank", Integer(6)),
+      ],
+      Self::Avatar => &[
+        ("avatar_id", Integer(1_000_000_000)),
+        ("side_icon", Image),
+        ("dps", Text),
+        ("type", Integer(2)),
+      ],
+      Self::Monster => &[
+        ("name", Text),
+        ("level", Integer(1_000)),
+        ("icon", Image),
+        ("desc", Texts),
+        ("tags", Objects(Self::Tag)),
+        ("monster_id", Integer(1_000_000_000)),
+      ],
+      Self::Tag => &[("type", Text), ("desc", Text)],
+      Self::Bling => &[
+        ("avatar_id", Integer(1_000_000_000)),
+        ("name", Text),
+        ("element", Text),
+        ("image", Image),
+        ("side_icon", Image),
+        ("rarity", Integer(5)),
+        ("is_plus", Boolean),
+      ],
     }
   }
 
-  /// 在本机副本的已知对象层忽略非协议字段；不填缺值或改正非法的业务值。
+  /// 仅在本机副本中筛掉非 v1 字段，不更动已知字段的类型或业务值。
   /// @since Beta v0.14.2
   fn project(self, value: &mut Value) -> bool {
     let Some(object) = value.as_object_mut() else { return false };
+    let fields = self.fields();
     let before = object.len();
-    object.retain(|field, _| self.fields().contains(&field.as_str()));
+    object.retain(|field, _| fields.iter().any(|(known, _)| *known == field.as_str()));
     let mut changed = object.len() != before;
-    let (objects, arrays): (&[(&str, Self)], &[(&str, Self)]) = match self {
-      Self::Mode => (&[("best", Self::Best)], &[("challenge", Self::Encounter)]),
-      Self::Encounter => {
-        (&[("monster", Self::Monster)], &[("teams", Self::Team), ("best_avatar", Self::Avatar)])
-      }
-      Self::Monster => (&[], &[("tags", Self::Tag)]),
-      _ => (&[], &[]),
-    };
-    for (field, shape) in objects {
-      changed |= object.get_mut(*field).is_some_and(|v| shape.project(v));
-    }
-    for (field, shape) in arrays {
-      changed |= object.get_mut(*field).is_some_and(|v| shape.project_array(v));
+    for &(field, rule) in fields {
+      changed |= object.get_mut(field).is_some_and(|value| rule.project(value));
     }
     changed
   }
 
-  /// 仅投影数组内已知对象，保持原顺序和元素数量。
+  /// 严格验证对象并返回首个失败；未知字段名不会被用作报错路径。
   /// @since Beta v0.14.2
-  fn project_array(self, value: &mut Value) -> bool {
-    let Some(items) = value.as_array_mut() else { return false };
-    let mut changed = false;
-    for item in items {
-      changed |= self.project(item);
+  fn validate(self, value: &Value) -> Result<(), ChallengeV1Issue> {
+    let object = value
+      .as_object()
+      .ok_or_else(|| ChallengeV1Issue::at_value(ChallengeV1Reason::Object, value))?;
+    let fields = self.fields();
+    if let Some(&(field, _)) = fields.iter().find(|(name, _)| !object.contains_key(*name)) {
+      return Err(
+        ChallengeV1Issue {
+          path: String::new(),
+          reason: ChallengeV1Reason::Missing,
+          observed: "缺失",
+        }
+        .in_field(field),
+      );
     }
-    changed
+    if object.len() != fields.len() {
+      return Err(ChallengeV1Issue::at_value(ChallengeV1Reason::Extra, value));
+    }
+    for &(field, rule) in fields {
+      rule.validate(&object[field]).map_err(|issue| issue.in_field(field))?;
+    }
+    Ok(())
   }
 }
 
-/// 验证危战队伍角色。
-/// @since Beta v0.14.2
-fn challenge_team(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Team.fields(), &[]) else {
-    return false;
-  };
-  number(&o["avatar_id"], 1_000_000_000)
-    && safe_text(&o["name"])
-    && safe_text(&o["element"])
-    && safe_image(&o["image"])
-    && number(&o["level"], 1_000)
-    && number(&o["rarity"], 5)
-    && number(&o["rank"], 6)
-}
-
-/// 验证危战最佳角色。
-/// @since Beta v0.14.2
-fn challenge_avatar(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Avatar.fields(), &[]) else {
-    return false;
-  };
-  number(&o["avatar_id"], 1_000_000_000)
-    && safe_image(&o["side_icon"])
-    && safe_text(&o["dps"])
-    && number(&o["type"], 2)
-}
-
-/// 验证危战怪物标签。
-/// @since Beta v0.14.2
-fn challenge_tag(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Tag.fields(), &[]) else {
-    return false;
-  };
-  safe_text(&o["type"]) && safe_text(&o["desc"])
-}
-
-/// 验证危战怪物及安全颜色描述。
-/// @since Beta v0.14.2
-fn challenge_monster(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Monster.fields(), &[]) else {
-    return false;
-  };
-  safe_text(&o["name"])
-    && number(&o["level"], 1_000)
-    && safe_image(&o["icon"])
-    && array(&o["desc"], safe_text)
-    && array(&o["tags"], challenge_tag)
-    && number(&o["monster_id"], 1_000_000_000)
-}
-
-/// 验证危战单场记录。
-/// @since Beta v0.14.2
-fn challenge_item(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Encounter.fields(), &[]) else {
-    return false;
-  };
-  safe_text(&o["name"])
-    && number(&o["second"], 1_000_000)
-    && array(&o["teams"], challenge_team)
-    && array(&o["best_avatar"], challenge_avatar)
-    && challenge_monster(&o["monster"])
-}
-
-/// 验证危战最佳信息。
-/// @since Beta v0.14.2
-fn challenge_best(value: &Value) -> bool {
-  if value.is_null() {
-    return true;
+impl ChallengeV1Rule {
+  /// 按同一个字段规则投影已知子对象，保持数组长度和顺序。
+  /// @since Beta v0.14.2
+  fn project(self, value: &mut Value) -> bool {
+    match self {
+      Self::Object(shape) | Self::NullableObject(shape) => shape.project(value),
+      Self::Objects(shape) => value.as_array_mut().is_some_and(|items| {
+        let mut changed = false;
+        for item in items {
+          changed |= shape.project(item);
+        }
+        changed
+      }),
+      _ => false,
+    }
   }
-  let Some(o) = object(value, ChallengeV1Object::Best.fields(), &[]) else {
-    return false;
-  };
-  number(&o["difficulty"], 6) && number(&o["second"], 1_000_000) && safe_image(&o["icon"])
-}
 
-/// 验证危战单人或联机详情。
-/// @since Beta v0.14.2
-fn challenge_data(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Mode.fields(), &[]) else {
-    return false;
-  };
-  challenge_best(&o["best"]) && array(&o["challenge"], challenge_item) && o["has_data"].is_boolean()
-}
+  /// 校验数组边界并用协议路径标记失败元素，不回传内容或序号。
+  /// @since Beta v0.14.2
+  fn validate_array(
+    value: &Value,
+    validate_item: impl Fn(&Value) -> Result<(), ChallengeV1Issue>,
+  ) -> Result<(), ChallengeV1Issue> {
+    let items = value
+      .as_array()
+      .ok_or_else(|| ChallengeV1Issue::at_value(ChallengeV1Reason::Array, value))?;
+    if items.len() > MAX_ARRAY {
+      return Err(ChallengeV1Issue::at_value(ChallengeV1Reason::ArrayLimit, value));
+    }
+    for item in items {
+      validate_item(item).map_err(ChallengeV1Issue::in_item)?;
+    }
+    Ok(())
+  }
 
-/// 验证危战赋光角色。
-/// @since Beta v0.14.2
-fn challenge_bling(value: &Value) -> bool {
-  let Some(o) = object(value, ChallengeV1Object::Bling.fields(), &[]) else {
-    return false;
-  };
-  number(&o["avatar_id"], 1_000_000_000)
-    && safe_text(&o["name"])
-    && safe_text(&o["element"])
-    && safe_image(&o["image"])
-    && safe_image(&o["side_icon"])
-    && number(&o["rarity"], 5)
-    && o["is_plus"].is_boolean()
+  /// 检查原 v1 规则；失败时只生成固定理由，不放宽取值或修复来路不明的快照。
+  /// @since Beta v0.14.2
+  fn validate(self, value: &Value) -> Result<(), ChallengeV1Issue> {
+    use ChallengeV1Reason as Reason;
+    let reason = match self {
+      Self::Integer(max) if !number(value, max) => Reason::Integer(max),
+      Self::Text | Self::Image if !value.is_string() => Reason::String,
+      Self::Text if !safe_text(value) => Reason::TextPolicy,
+      Self::Image if !safe_image(value) => Reason::ImagePolicy,
+      Self::Boolean if !value.is_boolean() => Reason::Boolean,
+      Self::NullableObject(_) if value.is_null() => return Ok(()),
+      Self::Object(shape) | Self::NullableObject(shape) => return shape.validate(value),
+      Self::Objects(shape) => return Self::validate_array(value, |item| shape.validate(item)),
+      Self::Texts => return Self::validate_array(value, |item| Self::Text.validate(item)),
+      _ => return Ok(()),
+    };
+    Err(ChallengeV1Issue::at_value(reason, value))
+  }
 }
 
 /// 验证剧诗统计数据。
@@ -1519,9 +1613,36 @@ fn combat_detail(value: &Value) -> bool {
     && combat_fight(&o["fight_statisic"])
 }
 
-/// 只用固定字段名与固定理由定位错误，不携带原始键、记录值或解析器错误。
+/// 只用白名单字段、固定理由和值类型定位错误，不携带原始键、值或解析器错误。
 /// @since Beta v0.14.2
-type RecordIssue = (&'static str, &'static str);
+enum RecordIssue {
+  Field { field: &'static str, reason: &'static str },
+  Challenge { field: &'static str, issue: ChallengeV1Issue },
+}
+
+impl From<(&'static str, &'static str)> for RecordIssue {
+  /// 保留其他三表既有的字段级错误格式。
+  /// @since Beta v0.14.2
+  fn from((field, reason): (&'static str, &'static str)) -> Self {
+    Self::Field { field, reason }
+  }
+}
+
+impl RecordIssue {
+  /// 格式化固定协议名和可共享的失败理由；不回显数据库、连接或记录数据。
+  /// @since Beta v0.14.2
+  fn message(self, table: &Table) -> String {
+    match self {
+      Self::Field { field, reason } => {
+        format!("SYNC_INVALID：{}.{field}（{reason}）；未更改数据库", table.name)
+      }
+      Self::Challenge { field, issue } => format!(
+        "SYNC_INVALID：{}.{field}{}（{}；实际类型：{}）；未更改数据库",
+        table.name, issue.path, issue.reason, issue.observed,
+      ),
+    }
+  }
+}
 
 /// 验证内嵌 JSON，并区分无法解析与结构不兼容。
 /// @since Beta v0.14.2
@@ -1532,9 +1653,20 @@ fn validate_json_field(
 ) -> Result<(), RecordIssue> {
   let value = parse_nested(&row[field]).ok_or((field, "不是有效的 JSON"))?;
   if !validate(&value) {
-    return Err((field, "JSON 详情的结构或字段值不受支持"));
+    return Err((field, "JSON 详情的结构或字段值不受支持").into());
   }
   Ok(())
+}
+
+/// 危战的已知 JSON 子字段直接由同一个 v1 验证器定位，不再按整列报告笼统的结构错误。
+/// @since Beta v0.14.2
+fn validate_challenge_json_field(
+  row: &Map<String, Value>,
+  field: &'static str,
+  rule: ChallengeV1Rule,
+) -> Result<(), RecordIssue> {
+  let value = parse_nested(&row[field]).ok_or((field, "不是有效的 JSON"))?;
+  rule.validate(&value).map_err(|issue| RecordIssue::Challenge { field, issue })
 }
 
 /// 解析存放在 SQLite TEXT 列中的 JSON；不改写存储文本。
@@ -1707,7 +1839,9 @@ fn conflict_detail(
 /// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
 /// @since Beta v0.14.2
 fn validate_record(table: &Table, row: &Map<String, Value>) -> Result<(), RecordIssue> {
-  let check = |valid, field, reason| if valid { Ok(()) } else { Err((field, reason)) };
+  let check = |valid, field, reason| {
+    if valid { Ok(()) } else { Err(RecordIssue::from((field, reason))) }
+  };
   for c in table.columns {
     let value = row.get(c.name).ok_or((c.name, "缺少字段"))?;
     if value.is_null() && c.nullable {
@@ -1772,11 +1906,16 @@ fn validate_record(table: &Table, row: &Map<String, Value>) -> Result<(), Record
     }
     "HardChallenge" => {
       check(safe_text(&row["name"]), "name", "文本格式不受支持")?;
-      validate_json_field(row, "single", challenge_data)?;
-      validate_json_field(row, "mp", challenge_data)?;
-      validate_json_field(row, "blings", |v| array(v, challenge_bling))
+      let mode = ChallengeV1Rule::Object(ChallengeV1Object::Mode);
+      validate_challenge_json_field(row, "single", mode)?;
+      validate_challenge_json_field(row, "mp", mode)?;
+      validate_challenge_json_field(
+        row,
+        "blings",
+        ChallengeV1Rule::Objects(ChallengeV1Object::Bling),
+      )
     }
-    _ => Err(("记录", "表不支持同步")),
+    _ => Err(("记录", "表不支持同步").into()),
   }
 }
 
@@ -1844,9 +1983,7 @@ fn decode_v1_snapshot(mut root: Value) -> Result<Records, String> {
           }
         }
       }
-      validate_record(table, &row).map_err(|(field, reason)| {
-        format!("SYNC_INVALID：{}.{field}（{reason}）；未更改数据库", table.name)
-      })?;
+      validate_record(table, &row).map_err(|issue| issue.message(table))?;
       let id = if table.name == "GachaRecords" {
         row["id"].as_str().unwrap().to_owned()
       } else {
@@ -2879,7 +3016,73 @@ mod tests {
     oversized["single"] = json!(details.to_string());
     assert_eq!(
       validate_snapshot(&snapshot(vec![], vec![], vec![], vec![oversized])).unwrap_err(),
-      "SYNC_INVALID：HardChallenge.single（JSON 详情的结构或字段值不受支持）；未更改数据库"
+      "SYNC_INVALID：HardChallenge.single.challenge[].monster.desc（数组超过 256 项上限；实际类型：数组）；未更改数据库"
+    );
+  }
+
+  /// 同一坏字段在上传和外部快照中报告同一脱敏路径，不回写本机记录。
+  /// @since Beta v0.14.2
+  #[test]
+  fn challenge_sync_diagnostics_identify_the_nested_field_in_both_directions() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let mut row = challenge("999000101", 31, "PRIVATE_NAME_SENTINEL");
+      let mut mp = parse_nested(&row["single"]).unwrap();
+      mp["challenge"][0]["best_avatar"][0]["type"] = json!(99);
+      row["mp"] = json!(mp.to_string());
+      let untrusted = snapshot(vec![], vec![], vec![], vec![row.clone()]);
+      let expected = "SYNC_INVALID：HardChallenge.mp.challenge[].best_avatar[].type（须为 0 到 2 的整数；实际类型：数字）；未更改数据库";
+      assert_eq!(validate_snapshot(&untrusted).unwrap_err(), expected);
+      seed_legacy_local(&db, &TABLES[3], &row).await;
+      assert_eq!(export_from_pool(&db).await.unwrap_err(), expected);
+      assert_legacy_retained(&db, &TABLES[3], &row).await;
+    });
+  }
+
+  /// 缺字段、错误类型和未知附加键可区分，但报告不能回显原始文本或键。
+  /// @since Beta v0.14.2
+  #[test]
+  fn challenge_sync_diagnostics_do_not_echo_unknown_keys_or_raw_values() {
+    let mut row = challenge("999000101", 31, "PRIVATE_NAME_SENTINEL");
+    let normal = parse_nested(&row["single"]).unwrap();
+    let mut mp = normal.clone();
+    mp["challenge"][0]["best_avatar"][0].as_object_mut().unwrap().remove("dps");
+    row["mp"] = json!(mp.to_string());
+    let issue =
+      validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row.clone()])).unwrap_err();
+    assert_eq!(
+      issue,
+      "SYNC_INVALID：HardChallenge.mp.challenge[].best_avatar[].dps（缺少必要字段；实际类型：缺失）；未更改数据库"
+    );
+
+    mp = normal.clone();
+    mp["challenge"][0]["best_avatar"][0]["type"] = json!("PRIVATE_VALUE_SENTINEL");
+    row["mp"] = json!(mp.to_string());
+    let issue =
+      validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row.clone()])).unwrap_err();
+    assert_eq!(
+      issue,
+      "SYNC_INVALID：HardChallenge.mp.challenge[].best_avatar[].type（须为 0 到 2 的整数；实际类型：文本）；未更改数据库"
+    );
+
+    mp = normal.clone();
+    mp["challenge"][0]["monster"]["tags"][0]["PRIVATE_KEY_SENTINEL"] =
+      json!("PRIVATE_VALUE_SENTINEL");
+    row["mp"] = json!(mp.to_string());
+    let issue =
+      validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row.clone()])).unwrap_err();
+    assert_eq!(
+      issue,
+      "SYNC_INVALID：HardChallenge.mp.challenge[].monster.tags[]（含 v1 未知字段，未显示其名称；实际类型：对象）；未更改数据库"
+    );
+
+    mp = normal;
+    mp["challenge"][0]["monster"]["icon"] = json!("https://example.invalid/PRIVATE_URL_SENTINEL");
+    row["mp"] = json!(mp.to_string());
+    let issue = validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).unwrap_err();
+    assert_eq!(
+      issue,
+      "SYNC_INVALID：HardChallenge.mp.challenge[].monster.icon（图片路径不符合 v1 白名单；实际类型：文本）；未更改数据库"
     );
   }
 
