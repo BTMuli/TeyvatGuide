@@ -15,6 +15,8 @@ const MAX_SNAPSHOT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_FIELD_BYTES: usize = 1024 * 1024;
 const MAX_ROWS: usize = 100_000;
 const MAX_ARRAY: usize = 256;
+const MAX_CONFLICT_DETAILS: usize = 20;
+const MAX_CONFLICT_NAME_BYTES: usize = 96;
 const MAX_SAFE_INTEGER: i64 = 9_007_199_254_740_991;
 // 记录协议版本独立于 SQLite 表结构版本和应用版本。不要就地改写 v1 的契约。
 const SNAPSHOT_V1: u64 = 1;
@@ -157,7 +159,7 @@ pub struct SyncTableStats {
   pub conflicts: u64,
 }
 
-/// 按表汇总的导入结果；冲突保留本机原值。
+/// 按表汇总的导入结果及有界的只读冲突明细；不会改写本机冲突记录。
 /// @since Beta v0.14.1
 #[derive(Default, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -166,6 +168,49 @@ pub struct SyncImportStats {
   pub spiral_abyss: SyncTableStats,
   pub role_combat: SyncTableStats,
   pub hard_challenge: SyncTableStats,
+  conflict_details: Vec<SyncConflictDetail>,
+  omitted_conflicts: u64,
+}
+
+/// 快照中冲突记录的定位信息与实际不同的业务字段，不携带原始记录。
+/// @since Beta v0.14.1
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SyncConflictDetail {
+  table: &'static str,
+  uid: String,
+  id: String,
+  time: String,
+  end_time: Option<String>,
+  changes: Vec<SyncConflictChange>,
+}
+
+/// 只允许固定的同步字段名；结构化内容和不允许展示的值仅报告字段名。
+/// @since Beta v0.14.1
+#[derive(Serialize)]
+struct SyncConflictChange {
+  field: &'static str,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  values: Option<SyncConflictValues>,
+}
+
+/// 仅在两侧都符合展示白名单时返回可比较的值。
+/// @since Beta v0.14.1
+#[derive(Serialize)]
+struct SyncConflictValues {
+  local: SyncConflictValue,
+  snapshot: SyncConflictValue,
+}
+
+/// 专用标量，不允许传出任意 JSON 值。
+/// @since Beta v0.14.1
+#[derive(Serialize)]
+#[serde(untagged)]
+enum SyncConflictValue {
+  Text(String),
+  Integer(i64),
+  Boolean(bool),
+  Unset,
 }
 
 /// 严格 JSON 值，递归拒绝重复对象键，避免解析歧义。
@@ -1403,56 +1448,150 @@ fn same_json(left: &Value, right: &Value) -> bool {
   }
 }
 
-/// 同键比较不计更新时间和已验证可省略的旧字段；业务 JSON 按值比较。
+/// 比较投影中的单个字段；忽略本地配队外链和无跳层值的储存差异。
 /// @since Beta v0.14.1
-fn same_projected_fields(
-  table: &Table,
-  projection: &SchemaProjection,
-  left: &Map<String, Value>,
-  right: &Map<String, Value>,
-) -> bool {
-  table.columns.iter().filter(|c| c.name != "updated" && !projection.missing.contains(&c.name)).all(
-    |c| {
-      let (a, b) = (&left[c.name], &right[c.name]);
-      a == b
-        || (table.name == "SpiralAbyss"
-          && c.name == "skippedFloor"
-          && no_skipped_floor(a)
-          && no_skipped_floor(b))
-        || (c.kind == Kind::Json
-          && parse_nested(a).zip(parse_nested(b)).is_some_and(|(mut a, mut b)| {
-            if table.name == "RoleCombat" && c.name == "detail" {
-              // 阵容外链不在同步范围内，本机已有外链不构成业务冲突。
-              if let Some(detail) = a.as_object_mut() {
-                detail.remove("lineup_link");
-              }
-              if let Some(detail) = b.as_object_mut() {
-                detail.remove("lineup_link");
-              }
+fn same_projected_field(table: &Table, column: &Column, a: &Value, b: &Value) -> bool {
+  a == b
+    || (table.name == "SpiralAbyss"
+      && column.name == "skippedFloor"
+      && no_skipped_floor(a)
+      && no_skipped_floor(b))
+    || (column.kind == Kind::Json
+      && parse_nested(a).zip(parse_nested(b)).is_some_and(|(mut a, mut b)| {
+        if table.name == "RoleCombat" && column.name == "detail" {
+          // 阵容外链不在同步范围内，本机已有外链不构成业务冲突。
+          for value in [&mut a, &mut b] {
+            if let Some(detail) = value.as_object_mut() {
+              detail.remove("lineup_link");
             }
-            same_json(&a, &b)
-          }))
-    },
-  )
+          }
+        }
+        same_json(&a, &b)
+      }))
 }
 
-/// 只在内存中按发布规则规范本地旧行再比较；无法规范的旧行仍保留为冲突。
+/// 同一比较结果用于判定和解释冲突；超出明细预算时找到首个差异即可。
 /// @since Beta v0.14.1
-fn same_business_record(
+fn business_differences(
   table: &Table,
   projection: &SchemaProjection,
   existing: &Map<String, Value>,
   incoming: &Map<String, Value>,
-) -> bool {
-  if same_projected_fields(table, projection, existing, incoming) {
-    return true;
+  include_details: bool,
+) -> Vec<&'static Column> {
+  let differing = |left: &Map<String, Value>| {
+    table
+      .columns
+      .iter()
+      .filter(|c| c.name != "updated" && !projection.missing.contains(&c.name))
+      .filter(|c| !same_projected_field(table, c, &left[c.name], &incoming[c.name]))
+      .take(if include_details { table.columns.len() } else { 1 })
+      .collect::<Vec<_>>()
+  };
+  let raw = differing(existing);
+  if raw.is_empty() || table.name == "GachaRecords" {
+    return raw;
   }
-  if table.name == "GachaRecords" {
-    return false;
-  }
+  // 与发布相同的旧值规范仅在内存中进行；不可规范的本机行仍保留为冲突。
   let mut local = existing.clone();
-  normalize_export_record(table, &mut local).is_ok()
-    && same_projected_fields(table, projection, &local, incoming)
+  if normalize_export_record(table, &mut local).is_ok() { differing(&local) } else { raw }
+}
+
+/// 祈愿名称仅接受随应用附带的词条，不把备份里任意的名称文本转交给 WebView。
+/// @since Beta v0.14.1
+fn is_catalog_wish_name(name: &str) -> bool {
+  /// 应用图鉴中用于冲突展示的唯一字段。
+  /// @since Beta v0.14.1
+  #[derive(serde::Deserialize)]
+  struct WikiName {
+    name: String,
+  }
+  static NAMES: std::sync::LazyLock<HashSet<String>> = std::sync::LazyLock::new(|| {
+    [
+      include_str!("../../src/data/app/character.json"),
+      include_str!("../../src/data/app/weapon.json"),
+    ]
+    .into_iter()
+    .flat_map(|json| serde_json::from_str::<Vec<WikiName>>(json).unwrap_or_default())
+    .map(|entry| entry.name)
+    .collect()
+  });
+  name.len() <= MAX_CONFLICT_NAME_BYTES && NAMES.contains(name)
+}
+
+/// 将明确许可且形状受限的业务标量投影到 IPC；本机旧数据同样不能跳过此约束。
+/// @since Beta v0.14.1
+fn conflict_value(table: &Table, column: &Column, value: &Value) -> Option<SyncConflictValue> {
+  use SyncConflictValue::{Boolean, Integer, Text, Unset};
+  let text = || value.as_str().map(|s| Text(s.to_owned()));
+  let bounded_int = |max| value.as_i64().filter(|n| (0..=max).contains(n)).map(Integer);
+  match (table.name, column.name) {
+    ("GachaRecords", "uid") if digits(value, 20) => text(),
+    ("GachaRecords", "gachaType" | "uigfType" | "count") if digits(value, 12) => text(),
+    ("GachaRecords", "itemId") if digits(value, 16) => text(),
+    ("GachaRecords", "name") if value.as_str().is_some_and(is_catalog_wish_name) => text(),
+    ("GachaRecords", "type") if matches!(value.as_str(), Some("角色" | "武器")) => text(),
+    ("GachaRecords", "rank") if matches!(value.as_str(), Some("3" | "4" | "5")) => text(),
+    ("GachaRecords", "time") | (_, "startTime" | "endTime") if date(value) => text(),
+    ("SpiralAbyss", "totalBattleTimes" | "totalWinTimes") => bounded_int(1_000_000),
+    ("SpiralAbyss", "totalStar") => bounded_int(1_000),
+    ("SpiralAbyss", "maxFloor" | "skippedFloor")
+      if value.as_str().is_some_and(|s| {
+        s.is_empty()
+          || (s.len() <= 8
+            && s
+              .split('-')
+              .all(|p| !p.is_empty() && p.len() <= 2 && p.bytes().all(|b| b.is_ascii_digit())))
+      }) =>
+    {
+      text()
+    }
+    ("SpiralAbyss", "isUnlock") | ("RoleCombat", "hasData" | "hasDetailData") => {
+      match value.as_i64() {
+        Some(0) => Some(Boolean(false)),
+        Some(1) => Some(Boolean(true)),
+        _ => None,
+      }
+    }
+    ("GachaRecords", "itemId" | "type" | "rank") | ("SpiralAbyss", "skippedFloor")
+      if value.is_null() =>
+    {
+      Some(Unset)
+    }
+    _ => None,
+  }
+}
+
+/// 标识信息来自已通过 v1 校验的快照，差异值仅限白名单标量；不能用明细重建原记录。
+/// @since Beta v0.14.1
+fn conflict_detail(
+  table: &Table,
+  fields: &[&Column],
+  existing: &Map<String, Value>,
+  incoming: &Map<String, Value>,
+) -> SyncConflictDetail {
+  let is_wish = table.name == "GachaRecords";
+  let changes = fields
+    .iter()
+    .map(|field| SyncConflictChange {
+      field: field.name,
+      values: conflict_value(table, field, &existing[field.name])
+        .zip(conflict_value(table, field, &incoming[field.name]))
+        .map(|(local, snapshot)| SyncConflictValues { local, snapshot }),
+    })
+    .collect();
+  SyncConflictDetail {
+    table: table.name,
+    uid: incoming["uid"].as_str().unwrap().to_owned(),
+    id: if is_wish {
+      incoming["id"].as_str().unwrap().to_owned()
+    } else {
+      incoming["id"].as_i64().unwrap().to_string()
+    },
+    time: incoming[if is_wish { "time" } else { "startTime" }].as_str().unwrap().to_owned(),
+    end_time: incoming.get("endTime").and_then(Value::as_str).map(str::to_owned),
+    changes,
+  }
 }
 
 /// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
@@ -1678,7 +1817,7 @@ async fn insert_record(
   Ok(())
 }
 
-/// 先检查整包能否写入本地表版本，再在同一事务内查重和插入；不传播删除。
+/// 在同一事务内查重、插入并生成只读的冲突明细；不覆盖原值或传播删除。
 /// @since Beta v0.14.1
 async fn import_transaction(
   tx: &mut Transaction<'_, Sqlite>,
@@ -1705,10 +1844,20 @@ async fn import_transaction(
           insert_record(tx, table, projection, row).await?;
           stats.inserted += 1;
         }
-        Some(existing) if same_business_record(table, projection, &existing, row) => {
-          stats.identical += 1;
+        Some(existing) => {
+          let include = result.conflict_details.len() < MAX_CONFLICT_DETAILS;
+          let fields = business_differences(table, projection, &existing, row, include);
+          if fields.is_empty() {
+            stats.identical += 1;
+          } else {
+            stats.conflicts += 1;
+            if include {
+              result.conflict_details.push(conflict_detail(table, &fields, &existing, row));
+            } else {
+              result.omitted_conflicts += 1;
+            }
+          }
         }
-        Some(_) => stats.conflicts += 1,
       }
     }
   }
@@ -1867,6 +2016,108 @@ mod tests {
     });
   }
 
+  /// 同 ID 的祈愿只报告业务差异，ID 不经过浮点转换，重拉仍保留原记录。
+  /// @since Beta v0.14.1
+  #[test]
+  fn wish_conflict_explains_the_exact_name_difference_without_writing() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let id = "899999999999990001";
+      let uid = "999000101";
+      let local = snapshot(vec![gacha(id, uid, "冷刃")], vec![], vec![], vec![]);
+      import_into_pool(&db, &validate_snapshot(&local).unwrap()).await.unwrap();
+      let mut wish = gacha(id, uid, "无锋剑");
+      // 数据刷新时间不同不构成冲突，也不应写进解释。
+      wish["updated"] = json!("2026-01-03 03:04:05");
+      let incoming = snapshot(vec![wish], vec![], vec![], vec![]);
+      let records = validate_snapshot(&incoming).unwrap();
+      for _ in 0..2 {
+        let result = serde_json::to_value(import_into_pool(&db, &records).await.unwrap()).unwrap();
+        assert_eq!(result["gachaRecords"], json!({"inserted":0,"identical":0,"conflicts":1}));
+        assert_eq!(result["omittedConflicts"], json!(0));
+        assert_eq!(
+          result["conflictDetails"],
+          json!([{
+            "table":"GachaRecords","uid":uid,"id":id,"time":"2026-01-02 03:04:05","endTime":null,
+            "changes":[{"field":"name","values":{"local":"冷刃","snapshot":"无锋剑"}}]
+          }])
+        );
+        assert_eq!(export_from_pool(&db).await.unwrap(), local);
+      }
+    });
+  }
+
+  /// 同键的敏感旧值、未知本机列和 JSON 键都不会进入 IPC 明细。
+  /// @since Beta v0.14.1
+  #[test]
+  fn conflict_details_do_not_echo_untrusted_values_or_nested_json() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let uid = "123456789";
+      let initial = snapshot(vec![gacha("100", uid, "冷刃")], vec![], vec![combat(uid, 1)], vec![]);
+      let valid = validate_snapshot(&initial).unwrap();
+      import_into_pool(&db, &valid).await.unwrap();
+      sqlx::query("ALTER TABLE GachaRecords ADD COLUMN private_column TEXT")
+        .execute(&db)
+        .await
+        .unwrap();
+      sqlx::query("UPDATE GachaRecords SET name=$1, private_column=$2")
+        .bind("https://example.invalid/secret?token=NAME_SENTINEL")
+        .bind("COLUMN_SENTINEL")
+        .execute(&db)
+        .await
+        .unwrap();
+      let mut detail = parse_nested(&valid[2][0]["detail"]).unwrap();
+      detail["lineup_link"] = json!("https://example.invalid/LINEUP_SENTINEL");
+      detail["NESTED_KEY_SENTINEL"] = json!("NESTED_VALUE_SENTINEL");
+      sqlx::query("UPDATE RoleCombat SET detail=$1")
+        .bind(detail.to_string())
+        .execute(&db)
+        .await
+        .unwrap();
+      let result = serde_json::to_value(import_into_pool(&db, &valid).await.unwrap()).unwrap();
+      let serialized = result.to_string();
+      for forbidden in ["SENTINEL", "https://", "private_column", "rounds_data", "lineup_link"] {
+        assert!(!serialized.contains(forbidden));
+      }
+      assert_eq!(result["gachaRecords"]["conflicts"], json!(1));
+      assert_eq!(result["roleCombat"]["conflicts"], json!(1));
+      assert_eq!(result["conflictDetails"][0]["changes"], json!([{"field":"name"}]));
+      assert_eq!(
+        result["conflictDetails"][1],
+        json!({
+          "table":"RoleCombat","uid":uid,"id":"1","time":"2026-01-02 03:04:05",
+          "endTime":"2026-01-02 03:04:05","changes":[{"field":"detail"}]
+        })
+      );
+    });
+  }
+
+  /// 明细全局限额独立于真实计数，超额的其他类别仍会计数。
+  /// @since Beta v0.14.1
+  #[test]
+  fn conflict_details_are_bounded_but_counts_remain_exact() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let uid = "123456789";
+      let wishes = |name: &str| {
+        (1..=MAX_CONFLICT_DETAILS + 1).map(|id| gacha(&format!("{id:03}"), uid, name)).collect()
+      };
+      let local = snapshot(wishes("冷刃"), vec![], vec![combat(uid, 1)], vec![]);
+      import_into_pool(&db, &validate_snapshot(&local).unwrap()).await.unwrap();
+      let mut period = combat(uid, 1);
+      period["hasData"] = json!(0);
+      let incoming = snapshot(wishes("无锋剑"), vec![], vec![period], vec![]);
+      let valid = validate_snapshot(&incoming).unwrap();
+      let result = import_into_pool(&db, &valid).await.unwrap();
+      assert_eq!(result.gacha_records.conflicts, (MAX_CONFLICT_DETAILS + 1) as u64);
+      assert_eq!(result.role_combat.conflicts, 1);
+      assert_eq!(result.conflict_details.len(), MAX_CONFLICT_DETAILS);
+      assert_eq!(result.omitted_conflicts, 2);
+      assert_eq!(export_from_pool(&db).await.unwrap(), local);
+    });
+  }
+
   /// 全局祈愿 id 不因 UID 不同而覆盖；复合键允许相同 id 的不同 UID。
   /// @since Beta v0.14.1
   #[test]
@@ -1890,6 +2141,15 @@ mod tests {
       assert_eq!(result.gacha_records.conflicts, 1);
       assert_eq!(result.gacha_records.inserted, 1);
       assert_eq!(result.spiral_abyss.inserted, 1);
+      let report = serde_json::to_value(result).unwrap();
+      assert_eq!(report["conflictDetails"][0]["uid"], json!("222222222"));
+      assert_eq!(
+        report["conflictDetails"][0]["changes"],
+        json!([
+          {"field":"uid","values":{"local":"111111111","snapshot":"222222222"}},
+          {"field":"name"}
+        ])
+      );
       let original: (String, String) =
         sqlx::query_as("SELECT uid, name FROM GachaRecords WHERE id = '100'")
           .fetch_one(&db)
@@ -2035,6 +2295,7 @@ mod tests {
       assert_eq!(stats.spiral_abyss.identical, 1);
       assert_eq!(stats.role_combat.identical, 1);
       assert_eq!(stats.hard_challenge.identical, 1);
+      assert!(stats.conflict_details.is_empty());
       assert_eq!(export_from_pool(&db).await.unwrap(), initial);
 
       let mut details = parse_nested(&challenge_row["single"]).unwrap();
@@ -2043,6 +2304,8 @@ mod tests {
       let changed = snapshot(vec![], vec![], vec![], vec![challenge_row]);
       let stats = import_into_pool(&db, &validate_snapshot(&changed).unwrap()).await.unwrap();
       assert_eq!(stats.hard_challenge.conflicts, 1);
+      let result = serde_json::to_value(stats).unwrap();
+      assert_eq!(result["conflictDetails"][0]["changes"], json!([{"field":"single"}]));
       assert_eq!(export_from_pool(&db).await.unwrap(), initial);
     });
   }
@@ -2365,6 +2628,19 @@ mod tests {
       assert!(row["skippedFloor"].is_null());
       let absent = validate_snapshot(&snapshot(vec![], vec![row.clone()], vec![], vec![])).unwrap();
       import_into_pool(&db, &absent).await.unwrap();
+      let mut row = row;
+      row["skippedFloor"] = json!("09-10");
+      row["totalStar"] = json!(9);
+      let skipped = validate_snapshot(&snapshot(vec![], vec![row], vec![], vec![])).unwrap();
+      let null_local = import_into_pool(&db, &skipped).await.unwrap();
+      let result = serde_json::to_value(null_local).unwrap();
+      assert_eq!(
+        result["conflictDetails"][0]["changes"],
+        json!([
+          {"field":"totalStar","values":{"local":3,"snapshot":9}},
+          {"field":"skippedFloor","values":{"local":null,"snapshot":"09-10"}}
+        ])
+      );
       sqlx::query("UPDATE main.SpiralAbyss SET skippedFloor=$1 WHERE uid=$2 AND id=$3")
         .bind("")
         .bind("123456789")
@@ -2375,9 +2651,7 @@ mod tests {
       let same = import_into_pool(&db, &absent).await.unwrap();
       assert_eq!(same.spiral_abyss.identical, 1);
       assert_eq!(same.spiral_abyss.conflicts, 0);
-      let mut row = row;
-      row["skippedFloor"] = json!("09-10");
-      let skipped = validate_snapshot(&snapshot(vec![], vec![row], vec![], vec![])).unwrap();
+      assert!(same.conflict_details.is_empty());
       let different = import_into_pool(&db, &skipped).await.unwrap();
       assert_eq!(different.spiral_abyss.conflicts, 1);
       let retained: Option<String> =
@@ -2590,12 +2864,19 @@ mod tests {
       mp["challenge"][0]["best_avatar"][0]["dps"] = json!("45.125");
       canonical["single"] = json!(single.to_string());
       canonical["mp"] = json!(mp.to_string());
-      assert_eq!(exported, snapshot(vec![], vec![], vec![], vec![canonical]));
+      assert_eq!(exported, snapshot(vec![], vec![], vec![], vec![canonical.clone()]));
       let valid = validate_snapshot(&exported).unwrap();
       let remote = import_into_pool(&target, &valid).await.unwrap().hard_challenge;
       assert_eq!((remote.inserted, remote.identical, remote.conflicts), (1, 0, 0));
-      let local = import_into_pool(&source, &valid).await.unwrap().hard_challenge;
-      assert_eq!((local.inserted, local.identical, local.conflicts), (0, 1, 0));
+      let local = import_into_pool(&source, &valid).await.unwrap();
+      assert_eq!(local.hard_challenge.identical, 1);
+      assert!(local.conflict_details.is_empty());
+      single["best"]["second"] = json!(13);
+      canonical["single"] = json!(single.to_string());
+      let actual = validate_snapshot(&snapshot(vec![], vec![], vec![], vec![canonical])).unwrap();
+      let result = serde_json::to_value(import_into_pool(&source, &actual).await.unwrap()).unwrap();
+      assert_eq!(result["hardChallenge"]["conflicts"], json!(1));
+      assert_eq!(result["conflictDetails"][0]["changes"], json!([{"field":"single"}]));
       let mut tx = source.begin().await.unwrap();
       let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
       let row = row.as_object().unwrap();
@@ -2674,12 +2955,23 @@ mod tests {
       let exported = export_from_pool(&source).await.unwrap();
       assert_eq!(
         exported,
-        snapshot(vec![], vec![], vec![canonical, combat("123456789", 2)], vec![])
+        snapshot(vec![], vec![], vec![canonical.clone(), combat("123456789", 2)], vec![])
       );
       let validated = validate_snapshot(&exported).unwrap();
       assert_eq!(import_into_pool(&target, &validated).await.unwrap().role_combat.inserted, 2);
-      let report = import_into_pool(&source, &validated).await.unwrap().role_combat;
-      assert_eq!((report.inserted, report.identical, report.conflicts), (0, 2, 0));
+      let report = import_into_pool(&source, &validated).await.unwrap();
+      assert_eq!(report.role_combat.identical, 2);
+      assert!(report.conflict_details.is_empty());
+      canonical["hasDetailData"] = json!(0);
+      let actual = validate_snapshot(&snapshot(vec![], vec![], vec![canonical], vec![])).unwrap();
+      let result = serde_json::to_value(import_into_pool(&source, &actual).await.unwrap()).unwrap();
+      assert_eq!(result["roleCombat"]["conflicts"], json!(1));
+      assert_eq!(
+        result["conflictDetails"][0]["changes"],
+        json!([
+          {"field":"hasDetailData","values":{"local":true,"snapshot":false}}
+        ])
+      );
       let mut tx = source.begin().await.unwrap();
       let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
       for row in [&legacy, &empty_legacy] {
