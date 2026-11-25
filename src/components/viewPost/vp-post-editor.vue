@@ -145,18 +145,9 @@
             <p v-if="linkError" class="tgpe-link-error" role="alert">{{ linkError }}</p>
             <p v-else class="tgpe-link-hint">{{ linkMenuHint }}</p>
             <div class="tgpe-link-actions">
-              <v-btn size="small" variant="text" @click="linkOpen = false">取消</v-btn>
-              <v-btn v-if="linkTarget" size="small" variant="text" @click="removeLink"
-                >移除链接</v-btn
-              >
-              <v-btn
-                color="var(--tgc-btn-1)"
-                size="small"
-                type="button"
-                variant="flat"
-                @click="applyLink"
-                >应用</v-btn
-              >
+              <v-btn variant="text" @click="linkOpen = false">取消</v-btn>
+              <v-btn v-if="linkTarget" variant="text" @click="removeLink">移除链接</v-btn>
+              <v-btn type="button" variant="flat" @click="applyLink">应用</v-btn>
             </div>
           </div>
         </v-menu>
@@ -1752,6 +1743,8 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+@use "@styles/utils.scss" as utils;
+
 .tgpe-editor-shell {
   min-width: 0;
 }
@@ -1900,7 +1893,19 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 8px;
+
+  :deep(.v-btn) {
+    height: 36px;
+    min-height: 36px;
+    border-radius: 4px;
+    font-family: var(--font-text);
+    font-size: 14px;
+  }
+
+  :deep(.v-btn--variant-flat) {
+    @include utils.overlay-primary-button;
+  }
 }
 
 .tgpe-tool[aria-pressed="true"],

@@ -80,15 +80,8 @@
       </div>
     </div>
     <div class="tgpe-color-actions">
-      <v-btn size="small" variant="text" @click="handleCancel">取消</v-btn>
-      <v-btn
-        color="var(--tgc-btn-1)"
-        size="small"
-        type="button"
-        variant="flat"
-        @click="handleConfirm"
-        >确认</v-btn
-      >
+      <v-btn variant="text" @click="handleCancel">取消</v-btn>
+      <v-btn type="button" variant="flat" @click="handleConfirm">确认</v-btn>
     </div>
   </div>
 </template>
@@ -307,6 +300,8 @@ function handleCancel(): void {
 </script>
 
 <style lang="scss" scoped>
+@use "@styles/utils.scss" as utils;
+
 .tgpe-color-panel {
   display: flex;
   width: 300px;
@@ -483,6 +478,18 @@ function handleCancel(): void {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 8px;
+
+  :deep(.v-btn) {
+    height: 36px;
+    min-height: 36px;
+    border-radius: 4px;
+    font-family: var(--font-text);
+    font-size: 14px;
+  }
+
+  :deep(.v-btn--variant-flat) {
+    @include utils.overlay-primary-button;
+  }
 }
 </style>
