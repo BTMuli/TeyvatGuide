@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-11-20
+Update: 2026-11-25
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-11-20 22:51:40`
+> 更新于 `2026-11-25 12:43:03`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -64,14 +64,12 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 帖子收藏
   - [x] 帖子评论查看&分享
   - [x] 同人图/COS榜单查看
+  - [x] 七圣召唤卡牌图鉴
 
 - 登陆功能：
 
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
-  - [x] 限时祈愿（首页组件）
-  - [x] 近期活动（首页组件）
-  - [x] 游戏签到（首页组件）
-  - [x] 实时便笺（首页组件）
+  - [x] 首页组件：限时祈愿、近期活动、游戏签到、实时便笺
   - [x] 养成计划与材料缺口统计
   - [x] 原神战绩
   - [x] 角色详情
