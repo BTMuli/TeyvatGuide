@@ -1,6 +1,6 @@
 /**
  * 米游社窗口关闭后的桥接回调回归测试。
- * @since Beta v0.13.0
+ * @since Beta v0.14.1
  */
 
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
@@ -27,7 +27,7 @@ vi.mock("@req/bbsReq.js", () => ({ default: {} }));
 vi.mock("@req/otherReq.js", () => ({ default: {} }));
 vi.mock("@req/passportReq.js", () => ({ default: {} }));
 vi.mock("@req/takumiReq.js", () => ({ default: {} }));
-vi.mock("@Sql/index.js", () => ({ default: {} }));
+vi.mock("@Sqlm/userAccount.js", () => ({ default: {} }));
 vi.mock("@store/app.js", () => ({ default: vi.fn() }));
 vi.mock("@store/user.js", () => ({ default: vi.fn() }));
 vi.mock("../src/utils/network/getRequestHeader.js", () => ({ getDS4JS: vi.fn() }));

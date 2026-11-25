@@ -1,12 +1,12 @@
 /**
  * JSBridge 插件相关类型定义文件
- * @since Beta v0.8.4
+ * @since Beta v0.14.1
  */
 
 declare namespace TGApp.Plugins.JSBridge {
   /**
    * JSBridge 通用 arg 参数
-   * @since Beta v0.3.9
+   * @since Beta v0.14.1
    */
   type Arg<T> = {
     /** 方法名 */
@@ -14,7 +14,18 @@ declare namespace TGApp.Plugins.JSBridge {
     /** 参数 */
     payload: T;
     /** 回调函数名 */
-    callback: string;
+    callback?: string;
+    /** 宿主验证后附加的会话标识，网页 payload 不提供此字段 */
+    sessionId?: string;
+  };
+
+  /**
+   * 宿主桥接事件，使用非凭据会话标识关联窗口与账号。
+   * @since Beta v0.14.1
+   */
+  type EventPayload<T> = {
+    sessionId: string;
+    request: Arg<T>;
   };
 
   /**
@@ -104,11 +115,11 @@ declare namespace TGApp.Plugins.JSBridge {
 
   /**
    * getCookieToken 方法参数
-   * @since Beta v0.3.9
+   * @since Beta v0.14.1
    */
   type GetCookieTokenPayload = {
     /** 是否强制刷新 */
-    forceRefresh: boolean;
+    forceRefresh?: boolean;
   };
 
   /**

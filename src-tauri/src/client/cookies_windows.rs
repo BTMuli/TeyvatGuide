@@ -1,9 +1,13 @@
-//! 在 Windows WebView2 中清除指定网页的 Cookie。
+//! 管理 Windows WebView2 的账号 Cookie 轮换与当前网页 Cookie 清理。
 //! @since Beta v0.14.1
 
+use super::account_cookies::{WebAccountCookies, should_delete_cookie, web_cookie_specs};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::sync::mpsc::channel;
+use std::{
+  sync::mpsc::{RecvTimeoutError, channel},
+  time::Duration,
+};
 use tauri::WebviewWindow;
 use url::Url;
 use webview2_com::CallDevToolsProtocolMethodCompletedHandler;
@@ -30,6 +34,56 @@ struct CookieKey {
   partition_key: Option<Value>,
   #[serde(skip_serializing)]
   partition_key_opaque: Option<bool>,
+}
+
+/// 在米游社两个根域轮换认证 Cookie。
+///
+/// WebView2 的 Cookie API 在同步调用中可能阻塞 UI 线程，因此调用方必须在
+/// `spawn_blocking` 中执行此函数。
+///
+/// @since Beta v0.14.1
+///
+/// # 参数
+/// - `webview`: 米游社客户端窗口。
+/// - `cookies`: 当前账号的六项网页 V2 Cookie；为空时只清理认证 Cookie。
+/// - `write_cookies`: 目标页面是否允许写入新凭据。
+///
+/// # 返回
+/// Cookie 清理与写入结果。
+pub(super) fn rotate_web_account_cookies(
+  webview: &WebviewWindow,
+  cookies: Option<&WebAccountCookies>,
+  write_cookies: bool,
+) -> Result<(), String> {
+  let response = call_cookie_protocol(webview, "Network.getAllCookies", &json!({}))?;
+  let page: PageCookies = serde_json::from_str(&response)
+    .map_err(|_| "无法读取 WebView2 返回的 Cookie 列表".to_string())?;
+
+  for cookie in
+    page.cookies.into_iter().filter(|cookie| should_delete_cookie(&cookie.name, &cookie.domain))
+  {
+    if cookie.partition_key_opaque == Some(true) {
+      return Err("无法安全定位分区认证 Cookie，已停止 Cookie 轮换".into());
+    }
+    call_cookie_protocol(webview, "Network.deleteCookies", &cookie)?;
+  }
+
+  let set_cookies: Vec<Value> = web_cookie_specs(write_cookies.then_some(cookies).flatten())
+    .into_iter()
+    .map(|cookie| {
+      json!({
+        "name": cookie.name,
+        "value": cookie.value,
+        "domain": cookie.domain,
+        "path": cookie.path,
+        "secure": cookie.secure,
+      })
+    })
+    .collect();
+  if !set_cookies.is_empty() {
+    call_cookie_protocol(webview, "Network.setCookies", &json!({"cookies": set_cookies}))?;
+  }
+  Ok(())
 }
 
 /// 清除用户确认时网页 URL 匹配的 Cookie，并等待每次删除完成。
@@ -97,7 +151,10 @@ fn call_cookie_protocol(
     })
     .map_err(|error| format!("访问 WebView2 失败：{error}"))?;
   result_rx
-    .recv()
-    .map_err(|error| format!("接收 {method} 结果失败：{error}"))?
+    .recv_timeout(Duration::from_secs(10))
+    .map_err(|error| match error {
+      RecvTimeoutError::Timeout => format!("等待 {method} 结果超时"),
+      RecvTimeoutError::Disconnected => format!("接收 {method} 结果失败：通道已断开"),
+    })?
     .map_err(|error| format!("{method} 失败：{error}"))
 }
