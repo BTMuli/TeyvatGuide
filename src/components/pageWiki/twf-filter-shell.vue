@@ -16,7 +16,7 @@
       </div>
       <div class="twf-heading">
         <h2 :id="titleId">{{ props.title }}</h2>
-        <p>{{ props.description }}</p>
+        <p v-if="props.description">{{ props.description }}</p>
       </div>
       <slot name="headerActions" />
     </template>
@@ -25,7 +25,7 @@
       <slot />
     </div>
 
-    <template #footerStart>
+    <template v-if="props.showFooterHint !== false" #footerStart>
       <slot name="footerStart">
         <span>未选择或全选均表示不限</span>
       </slot>
@@ -46,7 +46,8 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import { useId } from "vue";
 
 type TwfFilterShellProps = {
-  description: string;
+  description?: string;
+  showFooterHint?: boolean;
   title: string;
   topOffset?: string;
 };
