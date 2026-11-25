@@ -197,29 +197,24 @@
       </div>
 
       <template #footer>
-        <div class="ucce-footer">
-          <v-btn variant="text" @click="cancelEdit">取消</v-btn>
-          <div class="ucce-footer-actions">
-            <v-btn
-              data-html2canvas-ignore="true"
-              prepend-icon="mdi-restore"
-              variant="tonal"
-              @click="restoreDraft"
-            >
-              重置修改
-            </v-btn>
-            <v-btn
-              color="var(--tgc-btn-1)"
-              data-html2canvas-ignore="true"
-              :disabled="saveDisabled"
-              prepend-icon="mdi-content-save-outline"
-              variant="flat"
-              @click="applyScheme"
-            >
-              采用方案
-            </v-btn>
-          </div>
-        </div>
+        <v-btn variant="text" @click="cancelEdit">取消</v-btn>
+        <v-btn
+          data-html2canvas-ignore="true"
+          prepend-icon="mdi-restore"
+          variant="tonal"
+          @click="restoreDraft"
+        >
+          重置修改
+        </v-btn>
+        <v-btn
+          data-html2canvas-ignore="true"
+          :disabled="saveDisabled"
+          prepend-icon="mdi-content-save-outline"
+          variant="flat"
+          @click="applyScheme"
+        >
+          采用方案
+        </v-btn>
       </template>
     </TopOverlay>
   </Teleport>
@@ -829,22 +824,6 @@ function applyScheme(): void {
   line-height: 16px;
 }
 
-.ucce-footer {
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.ucce-footer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 @media (width <= 480px) {
   .ucce-source-row {
     grid-template-columns: 32px minmax(0, 1fr);
@@ -857,10 +836,6 @@ function applyScheme(): void {
 
   .ucce-cost-list {
     grid-template-columns: 1fr;
-  }
-
-  .ucce-footer-actions {
-    width: 100%;
   }
 }
 </style>

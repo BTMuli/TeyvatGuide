@@ -111,17 +111,15 @@
     </div>
 
     <template #footer>
-      <div class="post-drafts-footer">
-        <v-btn
-          v-if="!isLast && !loading && !error"
-          :disabled="deletingId !== undefined"
-          type="button"
-          variant="tonal"
-          @click="loadNextPage"
-        >
-          加载更多
-        </v-btn>
-      </div>
+      <v-btn
+        v-if="!isLast && !loading && !error"
+        :disabled="deletingId !== undefined"
+        type="button"
+        variant="tonal"
+        @click="loadNextPage"
+      >
+        加载更多
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -565,8 +563,7 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
 }
 
 .post-drafts-inline-error,
-.post-drafts-loading,
-.post-drafts-footer {
+.post-drafts-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -590,9 +587,5 @@ async function deleteDraft(draft: TGApp.BBS.PostDraft.Item): Promise<void> {
   padding: 8px 0 0;
   color: var(--app-page-content);
   font-size: 12px;
-}
-
-.post-drafts-footer {
-  min-height: 36px;
 }
 </style>

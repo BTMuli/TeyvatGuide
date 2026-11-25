@@ -24,7 +24,10 @@
   父级绑定，再透传给 `TopOverlay`；不要另传 `visible`/`open` 之类的自定义 prop 或维护第二份开关。
 - 标题放在 `#header` 插槽，用 `useId()` 生成 id，同时传给 `titleId` 并绑定到标题元素，保证
   `aria-labelledby` 有效；`closeAriaLabel` 必须描述关闭对象。
-- 操作按钮放 `#footer`；没有分享需求时显式传 `:showShare="false"`，避免出现无意义的分享按钮。
+- 操作按钮直接放 `#footer`，由公共面板统一右对齐、换行与按钮间距，不再增加业务级布局容器；
+  提示等左侧内容放 `#footerStart`。主操作排在最后，使用 `variant="flat"`；取消、关闭等次操作使用
+  `variant="text"`，危险操作保留其语义颜色。按钮尺寸、圆角、字体与主操作配色由公共面板维护，
+  不在业务组件重复声明。没有分享需求时显式传 `:showShare="false"`，避免出现无意义的分享按钮。
 - 尺寸与滚动由 `panelWidth`、`panelMaxHeight`、`contentMaxHeight` 控制，先用默认值（800px / 480px），
   内容确实受限时再覆盖；不要用全局样式改面板。
 - 提交或保存进行中传 `:closeDisabled`，它会同时禁用关闭按钮、点击外部关闭和 Esc 关闭。需要单独控制点击外部时

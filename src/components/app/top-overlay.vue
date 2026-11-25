@@ -38,6 +38,9 @@
         <template v-if="slots.toolbar" #toolbar>
           <slot name="toolbar" />
         </template>
+        <template v-if="slots.footerStart" #footerStart>
+          <slot name="footerStart" />
+        </template>
         <template v-if="slots.footer" #footer>
           <slot name="footer" />
         </template>
@@ -104,6 +107,7 @@ type TopOverlayEmits = {
   share: [];
 };
 
+/** TopOverlay 插槽契约。 @since Beta v0.14.1 */
 type TopOverlaySlots = {
   /** 头部操作区 */
   actions?: () => unknown;
@@ -111,6 +115,8 @@ type TopOverlaySlots = {
   default?: () => unknown;
   /** 底部区域 */
   footer?: () => unknown;
+  /** 底部左侧附加内容 */
+  footerStart?: () => unknown;
   /** 头部标题 */
   header?: () => unknown;
   /** 左侧附加内容 */

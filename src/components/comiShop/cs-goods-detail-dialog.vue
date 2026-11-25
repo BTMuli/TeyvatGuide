@@ -99,27 +99,23 @@
       </template>
     </div>
     <template #footer>
-      <div class="cs-footer-actions">
-        <v-btn
-          v-if="props.needsVerification || props.exchangeUncertain || props.goods?.type === 1"
-          variant="tonal"
-          @click="emit('official')"
-        >
-          前往官方商店
-        </v-btn>
-        <v-btn :disabled="props.exchanging" variant="text" @click="open = false">关闭</v-btn>
-        <v-btn
-          v-if="props.goods && props.goods.type !== 1"
-          :disabled="!props.canExchange"
-          :loading="props.exchanging"
-          class="cs-primary-action"
-          color="var(--tgc-yellow-3)"
-          variant="flat"
-          @click="emit('exchange')"
-        >
-          {{ props.exchangeButtonText }}
-        </v-btn>
-      </div>
+      <v-btn :disabled="props.exchanging" variant="text" @click="open = false">关闭</v-btn>
+      <v-btn
+        v-if="props.needsVerification || props.exchangeUncertain || props.goods?.type === 1"
+        :variant="props.goods?.type === 1 ? 'flat' : 'tonal'"
+        @click="emit('official')"
+      >
+        前往官方商店
+      </v-btn>
+      <v-btn
+        v-if="props.goods && props.goods.type !== 1"
+        :disabled="!props.canExchange"
+        :loading="props.exchanging"
+        variant="flat"
+        @click="emit('exchange')"
+      >
+        {{ props.exchangeButtonText }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -275,15 +271,6 @@ const showStock = computed<boolean>(() => !!props.goods && goodsStatus.value !==
   flex: 1;
 }
 
-.cs-footer-actions {
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 .cs-detail-summary {
   display: grid;
   align-items: start;
@@ -409,15 +396,6 @@ const showStock = computed<boolean>(() => !!props.goods && goodsStatus.value !==
   line-height: 16px;
   opacity: 0.7;
   overflow-wrap: anywhere;
-}
-
-.cs-primary-action {
-  color: var(--tgc-dark-2);
-
-  &:disabled {
-    background: var(--box-bg-3);
-    color: var(--box-text-2);
-  }
 }
 
 .cs-sr-only {

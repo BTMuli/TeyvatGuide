@@ -57,18 +57,10 @@
     </div>
 
     <template #footer>
-      <div class="cppp-footer-actions">
-        <v-btn type="button" variant="text" @click="visible = false">取消</v-btn>
-        <v-btn
-          :disabled="!canConfirm"
-          class="cppp-confirm"
-          type="button"
-          variant="flat"
-          @click="handleConfirm"
-        >
-          {{ confirmLabel }}
-        </v-btn>
-      </div>
+      <v-btn type="button" variant="text" @click="visible = false">取消</v-btn>
+      <v-btn :disabled="!canConfirm" type="button" variant="flat" @click="handleConfirm">
+        {{ confirmLabel }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -247,8 +239,6 @@ function handleConfirm(): void {
 </script>
 
 <style lang="scss" scoped>
-@use "@styles/utils.scss" as utils;
-
 .cppp-heading {
   display: flex;
   min-width: 0;
@@ -286,13 +276,5 @@ function handleConfirm(): void {
   flex-direction: column;
   padding: 0;
   gap: 16px;
-}
-
-.cppp-footer-actions {
-  @include utils.overlay-footer-actions;
-}
-
-.cppp-confirm {
-  @include utils.overlay-confirm-button;
 }
 </style>

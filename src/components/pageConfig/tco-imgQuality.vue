@@ -48,14 +48,11 @@
       />
     </div>
 
+    <template #footerStart>可调范围 5%–100%</template>
+
     <template #footer>
-      <span class="toi-hint">可调范围 5%–100%</span>
-      <div class="toi-actions">
-        <v-btn class="toi-cancel" variant="text" @click="onCancel">取消</v-btn>
-        <v-btn class="toi-confirm" prepend-icon="mdi-check" variant="flat" @click="onConfirm">
-          确定
-        </v-btn>
-      </div>
+      <v-btn variant="text" @click="onCancel">取消</v-btn>
+      <v-btn prepend-icon="mdi-check" variant="flat" @click="onConfirm">确定</v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -158,34 +155,5 @@ async function handleSliderEnd(): Promise<void> {
   :deep(.v-field__input) {
     font-size: 14px;
   }
-}
-
-.toi-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.toi-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: 8px;
-}
-
-.toi-cancel,
-.toi-confirm {
-  border-radius: 4px;
-  font-family: var(--font-text);
-}
-
-.toi-cancel {
-  color: var(--box-text-2);
-}
-
-.toi-confirm {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

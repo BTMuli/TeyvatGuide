@@ -45,8 +45,17 @@
       <slot name="toolbar" />
     </div>
 
-    <footer v-if="hasFooter" class="tolp-footer" data-html2canvas-ignore="true">
-      <slot name="footer" />
+    <footer
+      v-if="slots.footerStart !== undefined || slots.footer !== undefined"
+      class="tolp-footer"
+      data-html2canvas-ignore="true"
+    >
+      <div v-if="slots.footerStart !== undefined" class="tolp-footer-start">
+        <slot name="footerStart" />
+      </div>
+      <div v-if="slots.footer !== undefined" class="tolp-footer-actions">
+        <slot name="footer" />
+      </div>
     </footer>
 
     <div v-if="hasShare" class="tolp-share">
@@ -101,6 +110,17 @@ type TolpEmits = {
   share: [];
 };
 
+/** TOverlayPanel 插槽契约。 @since Beta v0.14.1 */
+type TolpSlots = {
+  actions?: () => unknown;
+  default?: () => unknown;
+  footer?: () => unknown;
+  footerStart?: () => unknown;
+  header?: () => unknown;
+  share?: () => unknown;
+  toolbar?: () => unknown;
+};
+
 const props = withDefaults(defineProps<TolpProps>(), {
   closeAriaLabel: "关闭",
   contentMaxHeight: "480px",
@@ -119,7 +139,6 @@ const shareLoading = ref<boolean>(false);
 const version = ref<string>("...");
 
 const hasToolbar = computed<boolean>(() => slots.toolbar !== undefined);
-const hasFooter = computed<boolean>(() => slots.footer !== undefined);
 const hasShare = computed<boolean>(() => {
   if (slots.share !== undefined) return true;
   return props.shareCaption.trim().length > 0;
@@ -264,17 +283,12 @@ defineExpose({
   panel,
 });
 
-defineSlots<{
-  actions?: () => unknown;
-  default?: () => unknown;
-  footer?: () => unknown;
-  header?: () => unknown;
-  share?: () => unknown;
-  toolbar?: () => unknown;
-}>();
+defineSlots<TolpSlots>();
 </script>
 
 <style lang="scss" scoped>
+@use "@styles/utils.scss" as utils;
+
 .tolp-panel {
   position: relative;
   display: flex;
@@ -335,12 +349,46 @@ defineSlots<{
 .tolp-footer {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 12px 16px;
   border-top: 1px solid var(--common-shadow-1);
   background: var(--dialog-footer-bg);
-  gap: 16px;
+  color: var(--box-text-2);
+  gap: 8px 16px;
+}
+
+.tolp-footer-start {
+  min-width: 0;
+  flex: 1 1 240px;
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tolp-footer-actions {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+
+  :deep(.v-btn) {
+    height: 36px;
+    min-height: 36px;
+    border-radius: 4px;
+    font-family: var(--font-text);
+    font-size: 14px;
+  }
+
+  :deep(.v-btn--variant-flat) {
+    @include utils.overlay-primary-button;
+  }
 }
 
 .tolp-share {

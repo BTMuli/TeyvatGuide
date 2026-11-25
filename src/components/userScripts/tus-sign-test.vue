@@ -91,7 +91,8 @@
       <v-btn
         :disabled="!account || busy || loadingGames || boards.length === 0"
         :loading="running"
-        class="tust-submit"
+        type="button"
+        variant="flat"
         @click="trySign()"
       >
         测试打卡
@@ -489,11 +490,5 @@ async function trySign(): Promise<void> {
     font-size: 13px;
     overflow-wrap: anywhere;
   }
-}
-
-.tust-submit {
-  margin-left: auto;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

@@ -108,47 +108,43 @@
       <PgNotice v-if="errorMessage !== null" :text="errorMessage" tone="error" />
     </div>
 
+    <template #footerStart>
+      {{ occupyingTask === null ? "评估期间不会修改游戏目录" : "任务状态已与主页面同步" }}
+    </template>
+
     <template #footer>
-      <span class="update-footer-hint">
-        {{ occupyingTask === null ? "评估期间不会修改游戏目录" : "任务状态已与主页面同步" }}
-      </span>
-      <div class="update-actions">
-        <v-btn :disabled="busy" variant="text" @click="visible = false">
-          {{ occupyingTask === null ? "取消" : "关闭" }}
-        </v-btn>
-        <v-btn
-          v-if="occupyingTask !== null"
-          :disabled="busy"
-          :loading="busy"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-refresh"
-          variant="flat"
-          @click="refreshOccupyingTask"
-        >
-          刷新任务
-        </v-btn>
-        <v-btn
-          v-else-if="plan === null"
-          :disabled="busy"
-          :loading="busy"
-          color="var(--tgc-od-orange)"
-          variant="flat"
-          @click="evaluatePlan"
-        >
-          重新评估
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!plan.hasSufficientSpace"
-          :loading="busy"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-download"
-          variant="flat"
-          @click="startTask"
-        >
-          下载并更新
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" variant="text" @click="visible = false">
+        {{ occupyingTask === null ? "取消" : "关闭" }}
+      </v-btn>
+      <v-btn
+        v-if="occupyingTask !== null"
+        :disabled="busy"
+        :loading="busy"
+        prepend-icon="mdi-refresh"
+        variant="flat"
+        @click="refreshOccupyingTask"
+      >
+        刷新任务
+      </v-btn>
+      <v-btn
+        v-else-if="plan === null"
+        :disabled="busy"
+        :loading="busy"
+        variant="flat"
+        @click="evaluatePlan"
+      >
+        重新评估
+      </v-btn>
+      <v-btn
+        v-else
+        :disabled="!plan.hasSufficientSpace"
+        :loading="busy"
+        prepend-icon="mdi-download"
+        variant="flat"
+        @click="startTask"
+      >
+        下载并更新
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -443,17 +439,6 @@ watch(
   font-size: 11px;
   grid-column: 1 / -1;
   line-height: 16px;
-}
-
-.update-footer-hint {
-  color: var(--box-text-2);
-  font-size: 12px;
-}
-
-.update-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 @media (width <= 640px) {

@@ -80,26 +80,23 @@
     </form>
 
     <template #footer>
-      <div class="cpcf-footer-actions">
-        <v-btn
-          :disabled="saving || coverUploading"
-          type="button"
-          variant="text"
-          @click="visible = false"
-        >
-          取消
-        </v-btn>
-        <v-btn
-          :disabled="saving || coverUploading"
-          :form="formId"
-          :loading="saving"
-          class="cpcf-confirm"
-          type="submit"
-          variant="flat"
-        >
-          {{ isEditing ? "保存" : "创建" }}
-        </v-btn>
-      </div>
+      <v-btn
+        :disabled="saving || coverUploading"
+        type="button"
+        variant="text"
+        @click="visible = false"
+      >
+        取消
+      </v-btn>
+      <v-btn
+        :disabled="saving || coverUploading"
+        :form="formId"
+        :loading="saving"
+        type="submit"
+        variant="flat"
+      >
+        {{ isEditing ? "保存" : "创建" }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -294,8 +291,6 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-@use "@styles/utils.scss" as utils;
-
 .cpcf-heading {
   display: flex;
   min-width: 0;
@@ -379,13 +374,5 @@ async function handleSubmit(): Promise<void> {
   :deep(.v-icon) {
     flex: none;
   }
-}
-
-.cpcf-footer-actions {
-  @include utils.overlay-footer-actions;
-}
-
-.cpcf-confirm {
-  @include utils.overlay-confirm-button;
 }
 </style>

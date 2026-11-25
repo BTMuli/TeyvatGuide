@@ -154,18 +154,10 @@
     </div>
 
     <template #footer>
-      <div class="cpap-footer-actions">
-        <v-btn type="button" variant="text" @click="visible = false">取消</v-btn>
-        <v-btn
-          :disabled="!canConfirm"
-          class="cpap-confirm"
-          type="button"
-          variant="flat"
-          @click="handleConfirm"
-        >
-          {{ activeTab === "custom" ? "使用自定义头像" : "使用该头像" }}
-        </v-btn>
-      </div>
+      <v-btn type="button" variant="text" @click="visible = false">取消</v-btn>
+      <v-btn :disabled="!canConfirm" type="button" variant="flat" @click="handleConfirm">
+        {{ activeTab === "custom" ? "使用自定义头像" : "使用该头像" }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -327,8 +319,6 @@ function handleConfirm(): void {
 </script>
 
 <style lang="scss" scoped>
-@use "@styles/utils.scss" as utils;
-
 .cpap-heading {
   display: flex;
   min-width: 0;
@@ -456,14 +446,6 @@ function handleConfirm(): void {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-}
-
-.cpap-footer-actions {
-  @include utils.overlay-footer-actions;
-}
-
-.cpap-confirm {
-  @include utils.overlay-confirm-button;
 }
 
 @media (width <= 640px) {

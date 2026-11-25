@@ -90,32 +90,29 @@
       <PgNotice v-if="errorMessage !== null" :text="errorMessage" tone="error" />
     </div>
 
+    <template #footerStart>评估期间不会修改游戏目录</template>
+
     <template #footer>
-      <span class="predownload-footer-hint">评估期间不会修改游戏目录</span>
-      <div class="predownload-actions">
-        <v-btn :disabled="busy" variant="text" @click="visible = false">取消</v-btn>
-        <v-btn
-          v-if="plan === null"
-          :disabled="busy"
-          :loading="busy"
-          color="var(--tgc-od-orange)"
-          variant="flat"
-          @click="evaluatePlan"
-        >
-          重新评估
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!plan.cacheHasSufficientSpace"
-          :loading="busy"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-download"
-          variant="flat"
-          @click="startTask"
-        >
-          开始预下载
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" variant="text" @click="visible = false">取消</v-btn>
+      <v-btn
+        v-if="plan === null"
+        :disabled="busy"
+        :loading="busy"
+        variant="flat"
+        @click="evaluatePlan"
+      >
+        重新评估
+      </v-btn>
+      <v-btn
+        v-else
+        :disabled="!plan.cacheHasSufficientSpace"
+        :loading="busy"
+        prepend-icon="mdi-download"
+        variant="flat"
+        @click="startTask"
+      >
+        开始预下载
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -368,17 +365,6 @@ watch(
   font-size: 11px;
   grid-column: 1 / -1;
   line-height: 16px;
-}
-
-.predownload-footer-hint {
-  color: var(--box-text-2);
-  font-size: 12px;
-}
-
-.predownload-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 @media (width <= 640px) {

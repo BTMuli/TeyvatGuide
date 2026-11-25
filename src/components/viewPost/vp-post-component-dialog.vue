@@ -62,40 +62,34 @@
         </div>
       </div>
       <template #footer>
-        <div class="post-component-actions">
-          <v-btn
-            v-if="vote || fold"
-            :disabled="locked"
-            class="post-component-remove"
-            color="var(--post-component-danger-text)"
-            variant="text"
-            @click="emits('remove')"
-          >
-            移除组件
-          </v-btn>
-          <v-btn :disabled="locked" variant="text" @click="visible = false">取消</v-btn>
-          <v-btn
-            v-if="kind === 'vote' && !vote"
-            :disabled="locked"
-            :loading
-            class="post-component-submit"
-            color="var(--tgc-btn-1)"
-            variant="flat"
-            @click="voteEditor?.submit()"
-          >
-            {{ voteCreated ? "插入已创建的投票" : "创建并插入" }}
-          </v-btn>
-          <v-btn
-            v-else-if="kind === 'fold'"
-            :disabled="locked || !titleValid || !contentValid"
-            class="post-component-submit"
-            color="var(--tgc-btn-1)"
-            variant="flat"
-            @click="saveFold"
-          >
-            {{ fold ? "保存" : "插入" }}
-          </v-btn>
-        </div>
+        <v-btn
+          v-if="vote || fold"
+          :disabled="locked"
+          class="post-component-remove"
+          color="var(--post-component-danger-text)"
+          variant="text"
+          @click="emits('remove')"
+        >
+          移除组件
+        </v-btn>
+        <v-btn :disabled="locked" variant="text" @click="visible = false">取消</v-btn>
+        <v-btn
+          v-if="kind === 'vote' && !vote"
+          :disabled="locked"
+          :loading
+          variant="flat"
+          @click="voteEditor?.submit()"
+        >
+          {{ voteCreated ? "插入已创建的投票" : "创建并插入" }}
+        </v-btn>
+        <v-btn
+          v-else-if="kind === 'fold'"
+          :disabled="locked || !titleValid || !contentValid"
+          variant="flat"
+          @click="saveFold"
+        >
+          {{ fold ? "保存" : "插入" }}
+        </v-btn>
       </template>
     </TopOverlay>
   </Teleport>
@@ -232,8 +226,7 @@ function saveFold(): void {
 </script>
 
 <style lang="scss" scoped>
-.post-component-body,
-.post-component-actions {
+.post-component-body {
   --post-component-danger-text: color-mix(in srgb, var(--tgc-od-red) 65%, var(--app-page-content));
   --post-component-error-text: color-mix(in srgb, var(--tgc-od-red) 40%, var(--app-page-content));
 }
@@ -262,11 +255,6 @@ function saveFold(): void {
   background: var(--app-page-bg);
 }
 
-.post-component-submit {
-  border-radius: 4px;
-  color: var(--btn-text);
-}
-
 .post-component-error {
   display: flex;
   align-items: flex-start;
@@ -282,17 +270,8 @@ function saveFold(): void {
   overflow-wrap: anywhere;
 }
 
-.post-component-actions {
-  display: flex;
-  width: 100%;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 .post-component-remove {
-  margin-right: auto;
+  --post-component-danger-text: color-mix(in srgb, var(--tgc-od-red) 65%, var(--app-page-content));
 }
 
 @media (width <= 600px) {
