@@ -1100,6 +1100,7 @@ enum ChallengeV1Object {
 enum ChallengeV1Rule {
   Integer(i64),
   Text,
+  MonsterTagType,
   Image,
   Boolean,
   Object(ChallengeV1Object),
@@ -1223,7 +1224,7 @@ impl ChallengeV1Object {
         ("tags", Objects(Self::Tag)),
         ("monster_id", Integer(1_000_000_000)),
       ],
-      Self::Tag => &[("type", Text), ("desc", Text)],
+      Self::Tag => &[("type", ChallengeV1Rule::MonsterTagType), ("desc", Text)],
       Self::Bling => &[
         ("avatar_id", Integer(1_000_000_000)),
         ("name", Text),
@@ -1236,7 +1237,7 @@ impl ChallengeV1Object {
     }
   }
 
-  /// 仅在本机副本中筛掉非 v1 字段，不更动已知字段的类型或业务值。
+  /// 只在本机副本中投影 v1 字段及已知等价编码，保留业务值和数组顺序。
   /// @since Beta v0.14.2
   fn project(self, value: &mut Value) -> bool {
     let Some(object) = value.as_object_mut() else { return false };
@@ -1290,6 +1291,19 @@ impl ChallengeV1Rule {
         }
         changed
       }),
+      Self::MonsterTagType => {
+        let Value::Number(number) = value else { return false };
+        // 界面把类型插入 `buff-${type}`：1 和 1.0 都是 buff-1，-0.0 是 buff-0。
+        // 安全范围内的整数用整数文本；其他数字直接序列化，不取整或经浮点改写大整数。
+        let text = match number.as_f64() {
+          Some(n) if n.fract() == 0.0 && n.abs() <= MAX_SAFE_INTEGER as f64 => {
+            (n as i64).to_string()
+          }
+          _ => number.to_string(),
+        };
+        *value = Value::String(text);
+        true
+      }
       _ => false,
     }
   }
@@ -1318,8 +1332,8 @@ impl ChallengeV1Rule {
     use ChallengeV1Reason as Reason;
     let reason = match self {
       Self::Integer(max) if !number(value, max) => Reason::Integer(max),
-      Self::Text | Self::Image if !value.is_string() => Reason::String,
-      Self::Text if !safe_text(value) => Reason::TextPolicy,
+      Self::Text | Self::MonsterTagType | Self::Image if !value.is_string() => Reason::String,
+      Self::Text | Self::MonsterTagType if !safe_text(value) => Reason::TextPolicy,
       Self::Image if !safe_image(value) => Reason::ImagePolicy,
       Self::Boolean if !value.is_boolean() => Reason::Boolean,
       Self::NullableObject(_) if value.is_null() => return Ok(()),
@@ -3036,6 +3050,80 @@ mod tests {
       seed_legacy_local(&db, &TABLES[3], &row).await;
       assert_eq!(export_from_pool(&db).await.unwrap_err(), expected);
       assert_legacy_retained(&db, &TABLES[3], &row).await;
+    });
+  }
+
+  /// 实机报告的数字标签只在本机投影为文本：出线可被 v1 读入、同键判同、本机不改写。
+  /// @since Beta v0.14.2
+  #[test]
+  fn local_mp_numeric_monster_tag_types_export_as_equivalent_v1_text() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let target = pool().await;
+      let table = &TABLES[3];
+      let mut canonical = challenge("999000101", 31, "合成标签期次");
+      let mut wire_mp = parse_nested(&canonical["single"]).unwrap();
+      let mut local_mp = wire_mp.clone();
+      let cases = [
+        (json!(0), "0"),
+        (json!(1.0), "1"),
+        (json!(-0.0), "0"),
+        (json!(1.25), "1.25"),
+        (json!(9_007_199_254_740_993_u64), "9007199254740993"),
+      ];
+      let tag = |kind: Value| json!({"type":kind,"desc":"{SPRITE_PRESET#11001}元素"});
+      wire_mp["challenge"][0]["monster"]["tags"] =
+        Value::Array(cases.iter().map(|(_, text)| tag(json!(text))).collect());
+      local_mp["challenge"][0]["monster"]["tags"] =
+        Value::Array(cases.into_iter().map(|(number, _)| tag(number)).collect());
+      canonical["mp"] = json!(wire_mp.to_string());
+      let mut local = canonical.clone();
+      local["mp"] = json!(local_mp.to_string());
+      let untrusted = snapshot(vec![], vec![], vec![], vec![local.clone()]);
+      assert_eq!(
+        validate_snapshot(&untrusted).unwrap_err(),
+        "SYNC_INVALID：HardChallenge.mp.challenge[].monster.tags[].type（须为文本；实际类型：数字）；未更改数据库"
+      );
+      seed_legacy_local(&source, table, &local).await;
+      let expected = snapshot(vec![], vec![], vec![], vec![canonical]);
+      let exported = export_from_pool(&source).await.unwrap();
+      assert_eq!(exported, expected);
+      let rows = validate_snapshot(&exported).unwrap();
+      let stats = import_into_pool(&source, &rows).await.unwrap();
+      assert_eq!((stats.hard_challenge.identical, stats.hard_challenge.conflicts), (1, 0));
+      assert!(stats.conflict_details.is_empty());
+      assert_legacy_retained(&source, table, &local).await;
+      assert_eq!(import_into_pool(&target, &rows).await.unwrap().hard_challenge.inserted, 1);
+      assert_eq!(export_from_pool(&target).await.unwrap(), expected);
+    });
+  }
+
+  /// 只兼容该字段的数字编码，不改变标签描述或接收布尔、空值以及对象。
+  /// @since Beta v0.14.2
+  #[test]
+  fn monster_tag_projection_does_not_coerce_unrelated_or_non_numeric_values() {
+    tauri::async_runtime::block_on(async {
+      let table = &TABLES[3];
+      for (field, value, observed) in [
+        ("type", json!(true), "布尔值"),
+        ("type", Value::Null, "空值"),
+        ("type", json!({"value":1}), "对象"),
+        ("desc", json!(1), "数字"),
+      ] {
+        let db = pool().await;
+        let mut row = challenge("999000101", 31, "合成标签期次");
+        let mut mp = parse_nested(&row["single"]).unwrap();
+        mp["challenge"][0]["monster"]["tags"][0][field] = value;
+        row["mp"] = json!(mp.to_string());
+        seed_legacy_local(&db, table, &row).await;
+        assert_eq!(
+          export_from_pool(&db).await.unwrap_err(),
+          format!(
+            "SYNC_INVALID：HardChallenge.mp.challenge[].monster.tags[].{field}（须为文本；实际类型：{observed}）；未更改数据库"
+          )
+        );
+        assert_legacy_retained(&db, table, &row).await;
+      }
     });
   }
 
