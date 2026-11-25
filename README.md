@@ -97,8 +97,22 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 数据备份、恢复与缓存管理
   - [x] 隐藏 UID（仅界面、分享图与导出文件名；日志与数据文件不受影响）
   - [x] 米游社 JSBridge
-  - [x] 终端命令行调用
+  - [x] [终端命令行调用](#命令行执行实用脚本)
   - [x] 支持胡桃云
+
+### 命令行执行实用脚本
+
+先完全退出 TeyvatGuide（包括托盘中的实例），再用 `us` 子命令启动应用。以下命令会为应用内所有账号执行实用脚本，执行结束后退出。
+
+```powershell
+.\TeyvatGuide.exe us --exit
+```
+
+在 Windows 任务计划程序中，将 `TeyvatGuide.exe` 的完整路径填入「程序或脚本」，将 `us --exit` 填入「添加参数」。
+
+- `--uids`（`-u`）指定一个米游社 UID。指定多个账号时为每个 UID 重复写一次，例如 `us --uids 123456789 --uids 987654321 --exit`。省略 `--uids` 时执行所有账号。
+- `--exit`（`-e`）在脚本执行结束后退出应用。
+- `--skip`（`-s`）在触发极验时跳过验证，并将该次签到标记为失败。
 
 ## 贡献者 / Contributors
 
