@@ -13,11 +13,8 @@
 
     <div class="sync-content">
       <p class="sync-description">
-        {{
-          isWindows
-            ? "上传本机的原神祈愿、深渊、剧诗与危战记录，不含颂愿或登录信息。"
-            : "只导入本机缺少的祈愿与高难记录，不覆盖冲突，也不同步删除。"
-        }}
+        <span v-if="isWindows">上传本机的原神祈愿、深渊、剧诗与危战记录，不含颂愿或登录信息。</span>
+        拉取只导入本机缺少的祈愿与高难记录，不覆盖冲突，也不同步删除。
       </p>
       <v-text-field
         v-model="address"
@@ -58,12 +55,12 @@
         HTTP 会明文传输账号、密码和记录，仅应在可信网络中使用。
       </p>
       <v-text-field
-        v-if="!isWindows"
-        v-model="snapshotId"
+        v-model="historyId"
+        :aria-label="HistoryIdLabel"
         :disabled="busy"
+        :label="HistoryIdLabel"
         autocomplete="off"
         density="compact"
-        label="历史快照 ID（可选）"
         placeholder="留空使用最新快照"
         variant="outlined"
       />
@@ -80,13 +77,24 @@
         <v-btn :disabled="busy" type="button" variant="text" @click="visible = false">关闭</v-btn>
         <v-btn
           :disabled="busy"
-          :loading="busy"
+          :loading="busyOperation === 'pull'"
+          :variant="isWindows ? 'outlined' : 'flat'"
+          color="var(--tgc-btn-1)"
+          type="button"
+          @click="sync('pull')"
+        >
+          拉取记录
+        </v-btn>
+        <v-btn
+          v-if="isWindows"
+          :disabled="busy"
+          :loading="busyOperation === 'publish'"
           color="var(--tgc-btn-1)"
           type="button"
           variant="flat"
-          @click="sync"
+          @click="sync('publish')"
         >
-          {{ isWindows ? "上传记录" : "从 Windows 同步" }}
+          上传记录
         </v-btn>
       </div>
     </template>
@@ -116,8 +124,15 @@ type SyncImportStats = {
   hardChallenge: SyncCount;
 };
 
+/**
+ * 手动同步的操作方向。
+ * @since Beta v0.14.1
+ */
+type SyncOperation = "publish" | "pull";
+
 const AddressKey = "teyvatGuideSyncAddress";
 const UsernameKey = "teyvatGuideSyncUsername";
+const HistoryIdLabel = "历史快照 ID（仅拉取，可选）";
 const visible = defineModel<boolean>({ default: false });
 const titleId = useId();
 const isWindows = computed<boolean>(() => platform() === "windows");
@@ -125,9 +140,10 @@ const appStore = useAppStore();
 const address = ref<string>(localStorage.getItem(AddressKey) ?? "");
 const username = ref<string>(localStorage.getItem(UsernameKey) ?? "");
 const password = ref<string>("");
-const snapshotId = ref<string>("");
+const historyId = ref<string>("");
 const unsafeHttp = ref<boolean>(false);
-const busy = ref<boolean>(false);
+const busyOperation = ref<SyncOperation | null>(null);
+const busy = computed<boolean>(() => busyOperation.value !== null);
 const resultText = ref<string>("");
 const publishedId = ref<string>("");
 const isHttp = computed<boolean>(() => address.value.trim().toLowerCase().startsWith("http://"));
@@ -189,8 +205,13 @@ function summarize(stats: SyncImportStats): string {
   return `${summary} 以下冲突已保留本机版本：${conflicts}。`;
 }
 
-async function sync(): Promise<void> {
-  if (busy.value) return;
+/**
+ * 串行执行用户选择的同步操作，仅上传前需要确认。
+ * @since Beta v0.14.1
+ * @param operation - 同步操作方向
+ */
+async function sync(operation: SyncOperation): Promise<void> {
+  if (busy.value || (operation === "publish" && !isWindows.value)) return;
   const settings = getSettings();
   if (!settings) {
     resultText.value = "";
@@ -199,13 +220,14 @@ async function sync(): Promise<void> {
     return;
   }
 
-  busy.value = true;
+  busyOperation.value = operation;
   try {
-    if (isWindows.value) {
-      const confirmed = await showDialog.check(
-        "上传 Windows 记录？",
-        "游戏 UID 和记录会保存到你指定的 WebDAV 目录。",
-      );
+    if (operation === "publish") {
+      const confirmed = await showDialog.checkF({
+        title: "上传 Windows 记录？",
+        text: "游戏 UID 和记录会保存到你指定的 WebDAV 目录。",
+        confirmLabel: "确定",
+      });
       if (!confirmed) return;
     }
 
@@ -220,20 +242,20 @@ async function sync(): Promise<void> {
       useProxy: appStore.useProxy,
       unsafeHttp: unsafeHttp.value,
     };
-    if (isWindows.value) {
+    if (operation === "publish") {
       publishedId.value = await invoke<string>("plugin:record-sync|publish", { connection });
-      resultText.value = "上传完成。现在可以在 Mac 上拉取记录。";
+      resultText.value = "上传完成。可以在其他设备上拉取记录。";
     } else {
       const stats = await invoke<SyncImportStats>("plugin:record-sync|pull", {
         connection,
-        snapshotId: snapshotId.value.trim() || null,
+        snapshotId: historyId.value.trim() || null,
       });
       resultText.value = summarize(stats);
     }
   } catch (error) {
     resultText.value = describeFailure(error);
   } finally {
-    busy.value = false;
+    busyOperation.value = null;
   }
 }
 </script>

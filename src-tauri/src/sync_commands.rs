@@ -1,4 +1,4 @@
-//! 主窗口专用的单向同步命令。快照只在 Rust 中流转，不经过 WebView。
+//! 主窗口的手动同步命令：Windows 发布和拉取，macOS 只拉取，快照不经过 WebView。
 //! @since Beta v0.14.1
 
 use crate::sync_data::{
@@ -24,7 +24,25 @@ struct Connection {
   unsafe_http: bool,
 }
 
-/// Windows 唯一发布端：从连接预检到发布成功，整段操作互斥。
+/// 仅 Windows 可发布，Windows 和 macOS 可拉取。
+/// @since Beta v0.14.1
+#[derive(Clone, Copy)]
+enum SyncAction {
+  Publish,
+  Pull,
+}
+
+/// 同步命令与应用主窗口绑定，非主窗口和其他平台均不能调用。
+/// @since Beta v0.14.1
+fn permits_sync(os: &str, window_label: &str, action: SyncAction) -> bool {
+  window_label == "TeyvatGuide"
+    && match action {
+      SyncAction::Publish => os == "windows",
+      SyncAction::Pull => matches!(os, "windows" | "macos"),
+    }
+}
+
+/// Windows 主窗口发布；从连接预检到发布成功，整段操作互斥。
 /// @since Beta v0.14.1
 #[tauri::command]
 async fn publish<R: Runtime>(
@@ -32,7 +50,7 @@ async fn publish<R: Runtime>(
   db_instances: State<'_, DbInstances>,
   connection: Connection,
 ) -> Result<String, String> {
-  if !cfg!(target_os = "windows") || window.label() != "TeyvatGuide" {
+  if !permits_sync(std::env::consts::OS, window.label(), SyncAction::Publish) {
     return Err("SYNC_NOT_ALLOWED：只允许在 Windows 主窗口上传记录".into());
   }
   let _guard = SYNC_OPERATION.try_lock().map_err(|_| "SYNC_BUSY：已有同步操作进行中")?;
@@ -47,7 +65,7 @@ async fn publish<R: Runtime>(
   .await
 }
 
-/// macOS 仅拉取。在网络读取及校验全部完成后才进入 SQLite 写入事务。
+/// Windows 和 macOS 主窗口拉取；网络读取和完整校验完成后才进入 SQLite 写入事务。
 /// @since Beta v0.14.1
 #[tauri::command]
 async fn pull<R: Runtime>(
@@ -56,8 +74,8 @@ async fn pull<R: Runtime>(
   connection: Connection,
   snapshot_id: Option<String>,
 ) -> Result<SyncImportStats, String> {
-  if !cfg!(target_os = "macos") || window.label() != "TeyvatGuide" {
-    return Err("SYNC_NOT_ALLOWED：只允许在 macOS 主窗口拉取记录".into());
+  if !permits_sync(std::env::consts::OS, window.label(), SyncAction::Pull) {
+    return Err("SYNC_NOT_ALLOWED：只允许在 Windows 或 macOS 主窗口拉取记录".into());
   }
   let _guard = SYNC_OPERATION.try_lock().map_err(|_| "SYNC_BUSY：已有同步操作进行中")?;
   let snapshot = download_snapshot(
@@ -76,4 +94,30 @@ async fn pull<R: Runtime>(
 /// @since Beta v0.14.1
 pub(crate) fn init<R: Runtime>() -> plugin::TauriPlugin<R> {
   plugin::Builder::new("record-sync").invoke_handler(generate_handler![publish, pull]).build()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  /// Windows 新增拉取权限，macOS 保持只读，其他平台和子窗口继续拒绝。
+  /// @since Beta v0.14.1
+  #[test]
+  fn sync_actions_keep_the_platform_and_window_boundary() {
+    for (os, publish, pull) in [
+      ("windows", true, true),
+      ("macos", false, true),
+      ("linux", false, false),
+      ("android", false, false),
+      ("ios", false, false),
+      ("", false, false),
+    ] {
+      assert_eq!(permits_sync(os, "TeyvatGuide", SyncAction::Publish), publish);
+      assert_eq!(permits_sync(os, "TeyvatGuide", SyncAction::Pull), pull);
+      for label in ["Sub_window", "mhy_client", "Dev_JSON", "", "teyvatguide"] {
+        assert!(!permits_sync(os, label, SyncAction::Publish));
+        assert!(!permits_sync(os, label, SyncAction::Pull));
+      }
+    }
+  }
 }

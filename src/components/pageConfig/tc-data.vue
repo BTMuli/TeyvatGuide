@@ -24,7 +24,7 @@
     </TcConfigItem>
     <TcConfigItem
       v-if="syncAvailable"
-      subtitle="Windows 上传，macOS 拉取祈愿与高难记录"
+      subtitle="祈愿与高难记录：Windows 可上传，Windows 和 macOS 可拉取"
       title="跨设备同步"
       icon="mdi-cloud-sync-outline"
       @activate="showSync = true"
