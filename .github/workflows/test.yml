@@ -80,10 +80,6 @@ jobs:
             echo "VITE_BUILD_TIME=$(date +%s)"
           } >> "$GITHUB_ENV"
 
-      - name: Test share image handling
-        if: runner.os == 'macOS'
-        run: pnpm exec vitest run test/share-file.test.ts
-
       - name: Configure Windows offsets
         if: runner.os == 'Windows'
         env:

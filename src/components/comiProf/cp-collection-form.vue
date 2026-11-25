@@ -80,26 +80,23 @@
     </form>
 
     <template #footer>
-      <div class="cpcf-footer-actions">
-        <v-btn
-          :disabled="saving || coverUploading"
-          type="button"
-          variant="text"
-          @click="visible = false"
-        >
-          取消
-        </v-btn>
-        <v-btn
-          :disabled="saving || coverUploading"
-          :form="formId"
-          :loading="saving"
-          class="cpcf-confirm"
-          type="submit"
-          variant="flat"
-        >
-          {{ isEditing ? "保存" : "创建" }}
-        </v-btn>
-      </div>
+      <v-btn
+        :disabled="saving || coverUploading"
+        type="button"
+        variant="text"
+        @click="visible = false"
+      >
+        取消
+      </v-btn>
+      <v-btn
+        :disabled="saving || coverUploading"
+        :form="formId"
+        :loading="saving"
+        type="submit"
+        variant="flat"
+      >
+        {{ isEditing ? "保存" : "创建" }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -110,6 +107,7 @@ import CpCollectionCover from "@comp/comiProf/cp-collection-cover.vue";
 import communityReq from "@req/communityReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import { storeToRefs } from "pinia";
@@ -253,7 +251,7 @@ function isCurrent(snapshot: AccountSnapshot, version: number): boolean {
 function matchesPersistedAccount(snapshot: AccountSnapshot): boolean {
   return matchesCurrentAccount({
     uid: snapshot.uid,
-    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
+    cookie: getLTokenCookie(snapshot.cookie),
   });
 }
 
@@ -293,8 +291,6 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-@use "@styles/utils.scss" as utils;
-
 .cpcf-heading {
   display: flex;
   min-width: 0;
@@ -378,13 +374,5 @@ async function handleSubmit(): Promise<void> {
   :deep(.v-icon) {
     flex: none;
   }
-}
-
-.cpcf-footer-actions {
-  @include utils.overlay-footer-actions;
-}
-
-.cpcf-confirm {
-  @include utils.overlay-confirm-button;
 }
 </style>

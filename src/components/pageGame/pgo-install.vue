@@ -273,22 +273,14 @@
       </section>
     </div>
 
+    <template #footerStart>{{ footerHint }}</template>
+
     <template #footer>
-      <span class="install-footer-hint">{{ footerHint }}</span>
-      <div class="install-actions">
-        <v-btn :disabled="busy" variant="text" @click="onCancel">取消</v-btn>
-        <v-btn v-if="step > 1" :disabled="busy" variant="text" @click="goBack">上一步</v-btn>
-        <v-btn
-          :disabled="!canContinue"
-          :loading="busy"
-          class="install-confirm"
-          color="var(--tgc-od-orange)"
-          variant="flat"
-          @click="onContinue"
-        >
-          {{ continueLabel }}
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" variant="text" @click="onCancel">取消</v-btn>
+      <v-btn v-if="step > 1" :disabled="busy" variant="text" @click="goBack">上一步</v-btn>
+      <v-btn :disabled="!canContinue" :loading="busy" variant="flat" @click="onContinue">
+        {{ continueLabel }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -1163,13 +1155,6 @@ watch(
   }
 }
 
-.install-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
 .review-facts {
   display: grid;
   gap: 6px;
@@ -1247,20 +1232,6 @@ watch(
   color: var(--box-text-2);
   font-size: 11px;
   line-height: 16px;
-}
-
-.install-footer-hint {
-  min-width: 0;
-  color: var(--box-text-2);
-  font-size: 12px;
-}
-
-.install-actions {
-  flex-shrink: 0;
-}
-
-.install-confirm {
-  color: var(--box-text-1);
 }
 
 @media (width <= 640px) {

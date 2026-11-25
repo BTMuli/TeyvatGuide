@@ -16,7 +16,7 @@
       </div>
       <div class="twf-heading">
         <h2 :id="titleId">{{ props.title }}</h2>
-        <p>{{ props.description }}</p>
+        <p v-if="props.description">{{ props.description }}</p>
       </div>
       <slot name="headerActions" />
     </template>
@@ -25,20 +25,18 @@
       <slot />
     </div>
 
+    <template v-if="props.showFooterHint !== false" #footerStart>
+      <slot name="footerStart">
+        <span>未选择或全选均表示不限</span>
+      </slot>
+    </template>
+
     <template #footer>
       <slot name="footer">
-        <span class="twf-footer-hint">未选择或全选均表示不限</span>
-        <div class="twf-actions">
-          <v-btn class="twf-cancel" variant="text" @click="visible = false">取消</v-btn>
-          <v-btn
-            class="twf-confirm"
-            prepend-icon="mdi-check"
-            variant="flat"
-            @click="emits('confirm')"
-          >
-            应用筛选
-          </v-btn>
-        </div>
+        <v-btn type="button" variant="text" @click="visible = false">取消</v-btn>
+        <v-btn prepend-icon="mdi-check" type="button" variant="flat" @click="emits('confirm')">
+          应用筛选
+        </v-btn>
       </slot>
     </template>
   </TopOverlay>
@@ -48,22 +46,27 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import { useId } from "vue";
 
 type TwfFilterShellProps = {
-  description: string;
+  description?: string;
+  showFooterHint?: boolean;
   title: string;
   topOffset?: string;
 };
 type TwfFilterShellEmits = { confirm: [] };
+
+/** 筛选浮层插槽契约。 @since Beta v0.14.1 */
+type TwfFilterShellSlots = {
+  default?: () => unknown;
+  footer?: () => unknown;
+  footerStart?: () => unknown;
+  headerActions?: () => unknown;
+};
 
 const props = defineProps<TwfFilterShellProps>();
 const emits = defineEmits<TwfFilterShellEmits>();
 const visible = defineModel<boolean>({ default: false });
 const titleId = useId();
 
-defineSlots<{
-  default?: () => unknown;
-  footer?: () => unknown;
-  headerActions?: () => unknown;
-}>();
+defineSlots<TwfFilterShellSlots>();
 </script>
 <style lang="scss" scoped>
 .twf-header-icon {
@@ -194,34 +197,5 @@ defineSlots<{
   :deep(.twf-group-weapon .uav-scb-inner img) {
     filter: var(--icon-filter);
   }
-}
-
-.twf-footer-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.twf-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: 8px;
-}
-
-.twf-cancel,
-.twf-confirm {
-  border-radius: 4px;
-  font-family: var(--font-text);
-}
-
-.twf-cancel {
-  color: var(--box-text-2);
-}
-
-.twf-confirm {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

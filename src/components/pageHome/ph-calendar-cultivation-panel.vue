@@ -158,19 +158,12 @@
     </div>
 
     <template #footer>
-      <div class="phco-footer-actions">
-        <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="text" @click="openDetail">
-          {{ item.itemType === "character" ? "角色详情" : "武器详情" }}
-        </v-btn>
-        <v-btn
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-clipboard-text-outline"
-          variant="tonal"
-          @click="openPlan"
-        >
-          查看养成计划
-        </v-btn>
-      </div>
+      <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="text" @click="openDetail">
+        {{ item.itemType === "character" ? "角色详情" : "武器详情" }}
+      </v-btn>
+      <v-btn prepend-icon="mdi-clipboard-text-outline" variant="flat" @click="openPlan">
+        查看养成计划
+      </v-btn>
     </template>
   </TOverlayPanel>
 </template>
@@ -539,13 +532,6 @@ async function openPlan(): Promise<void> {
   border-radius: 8px;
   background: var(--common-shadow-t-1);
   color: var(--common-text-sub);
-  gap: 8px;
-}
-
-.phco-footer-actions {
-  display: flex;
-  flex: 1;
-  justify-content: flex-end;
   gap: 8px;
 }
 

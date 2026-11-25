@@ -1,12 +1,12 @@
 // 构建文件
-// @since Beta v0.14.1
+// @since Beta v0.14.2
 
 use std::path::Path;
 use tauri_build::{Attributes, InlinedPlugin};
 
 /// 执行 Tauri 构建、生成同步权限，并在 Windows 上选择 Yae 配置及编译本地 HDiffPatch。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn main() {
   tauri_build::try_build(
     Attributes::new().plugin("record-sync", InlinedPlugin::new().commands(&["publish", "pull"])),

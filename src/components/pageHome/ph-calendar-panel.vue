@@ -103,19 +103,12 @@
     </section>
 
     <template #footer>
-      <div class="phmo-footer-actions">
-        <v-btn prepend-icon="mdi-open-in-new" variant="text" @click="openObcDetail">
-          观测枢资料
-        </v-btn>
-        <v-btn
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-book-open-page-variant-outline"
-          variant="tonal"
-          @click="openDetail"
-        >
-          {{ itemTypeLabel }}详情
-        </v-btn>
-      </div>
+      <v-btn prepend-icon="mdi-open-in-new" variant="text" @click="openObcDetail">
+        观测枢资料
+      </v-btn>
+      <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="flat" @click="openDetail">
+        {{ itemTypeLabel }}详情
+      </v-btn>
     </template>
   </TOverlayPanel>
 </template>
@@ -330,13 +323,6 @@ async function openObcDetail(): Promise<void> {
   &.phmo-materials--weapon {
     grid-template-columns: repeat(2, 1fr);
   }
-}
-
-.phmo-footer-actions {
-  display: flex;
-  flex: 1;
-  justify-content: flex-end;
-  gap: 8px;
 }
 
 @media (width <= 600px) {

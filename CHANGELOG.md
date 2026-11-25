@@ -2,12 +2,28 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-11-20
-Update: 2026-11-20
+Update: 2026-11-25
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-11-20 22:51:48`
 >
-> 更新于 `2026-11-20 22:51:48`
+> 更新于 `2026-11-25 12:43:08`
+
+## [0.14.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.14.1) (2026-11-25)
+
+- 🍱 补充遗漏contentId
+- ✨ 添加帖子瀑布流布局并统一布局状态
+- ✨ 支持清除米游社子窗口当前网页的 Cookie
+- ✨ 添加七圣召唤战绩收藏与卡牌图鉴
+- 🐛 修复 Yae 背包导入混入试用角色的问题 [`#266`](https://github.com/BTMuli/TeyvatGuide/issues/266)
+- 🐛 修复米游社桥接回调与多账号网页会话
+- ♻️ 完善v2凭据使用，统一ck选取逻辑
+- 🚸 优化分区跳转时的版块处理逻辑
+- 🚸 调整侧栏用户主页跳转页面
+- 💄 完善榜单卡片分享图与封面原图处理
+- 💄 优化首页近期活动（用户源）分享图高度计算逻辑
+- 💄 统一浮层底部操作按钮样式与布局
+- 💄 调整部分侧栏子菜单布局
 
 ## [0.14.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.14.0) (2026-11-20)
 

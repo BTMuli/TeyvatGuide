@@ -32,7 +32,7 @@
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。
 - 分享截图或使用 `TGShare.modern` / modern-screenshot：读取
   [modern-screenshot 分享换行规则](.agents/rules/modern-screenshot-rules.md)，重点检查文本换行与冻结宽度。
-- 测试设计、Bug 回归、覆盖审查或交付验收：使用 `.agents/skills/testing/SKILL.md`，按改动风险
+- 交付验收或验证方式选择：使用 `.agents/skills/testing/SKILL.md`，按改动风险
   选择检查，不把 lint 通过当作功能验证完成。
 - Tauri 桌面 UI：除非用户明确要求截图识别，否则不主动使用 connector 调试桥；
   需要调用时遵循 `.agents/skills/tauri-connector/SKILL.md`，并优先复用已在运行的 debug 实例。
@@ -53,7 +53,7 @@
 ## 基本验证
 
 - 验证命令与适用范围统一维护在 `.agents/skills/testing/SKILL.md`，按改动选择最小充分检查。
-- `pnpm lint` 不包含类型检查、Vitest 或 Rust 检查，不能作为全部验证通过的依据。
+- `pnpm lint` 不包含类型检查或 Rust 检查，不能作为全部验证通过的依据；仓库当前未配置自动化测试。
 - 纯文档改动检查内容、链接、格式和技能有效性，不默认构建或启动应用。
 - 报告实际运行的命令、结果，以及未验证项和原因；交付或验收不等于提交授权。
 

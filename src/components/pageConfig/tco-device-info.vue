@@ -62,12 +62,8 @@
     </v-form>
 
     <template #footer>
-      <div class="device-actions">
-        <v-btn variant="text" @click="visible = false">取消</v-btn>
-        <v-btn :loading="saving" color="var(--tgc-btn-1)" variant="flat" @click="saveDeviceInfo">
-          保存
-        </v-btn>
-      </div>
+      <v-btn variant="text" @click="visible = false">取消</v-btn>
+      <v-btn :loading="saving" variant="flat" @click="saveDeviceInfo">保存</v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -165,11 +161,5 @@ async function saveDeviceInfo(): Promise<void> {
   display: grid;
   padding: 20px 8px 4px;
   gap: 4px;
-}
-
-.device-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }
 </style>

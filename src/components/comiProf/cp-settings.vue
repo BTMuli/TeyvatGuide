@@ -282,6 +282,7 @@ import communitySettingsReq, {
 } from "@req/communitySettingsReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { getLTokenCookie } from "@utils/account/accountCookie.js";
 import { matchesCurrentAccount } from "@utils/bbs/replyAccount.js";
 import { getUserAvatar } from "@utils/common/toolFunc.js";
 import TGHttps from "@utils/network/TGHttps.js";
@@ -528,7 +529,7 @@ function getWriteSnapshot(): AccountSnapshot | undefined {
 function matchesPersistedSnapshot(snapshot: AccountSnapshot): boolean {
   return matchesCurrentAccount({
     uid: snapshot.uid,
-    cookie: { ltoken_v2: snapshot.cookie.ltoken_v2, ltuid_v2: snapshot.cookie.ltuid_v2 },
+    cookie: getLTokenCookie(snapshot.cookie),
   });
 }
 

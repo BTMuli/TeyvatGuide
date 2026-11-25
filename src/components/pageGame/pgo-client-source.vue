@@ -59,20 +59,13 @@
       </button>
     </div>
 
+    <template #footerStart>下一步不会立即修改现有游戏</template>
+
     <template #footer>
-      <span class="source-footer-hint">下一步不会立即修改现有游戏</span>
-      <div class="source-actions">
-        <v-btn variant="text" @click="onCancel">取消</v-btn>
-        <v-btn
-          :disabled="selectedSource === null"
-          class="source-confirm"
-          color="var(--tgc-od-orange)"
-          variant="flat"
-          @click="onContinue"
-        >
-          {{ continueLabel }}
-        </v-btn>
-      </div>
+      <v-btn variant="text" @click="onCancel">取消</v-btn>
+      <v-btn :disabled="selectedSource === null" variant="flat" @click="onContinue">
+        {{ continueLabel }}
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -216,24 +209,6 @@ watch(visible, (open) => {
 
 .source-option.selected .source-option-state {
   color: var(--tgc-od-orange);
-}
-
-.source-footer-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.source-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-.source-confirm {
-  color: var(--box-text-1);
 }
 
 @media (width <= 640px) {

@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.14.1
+//! @since Beta v0.14.2
 
 mod client;
 mod commands;
@@ -80,7 +80,7 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
 
 /// 配置并启动 Tauri 应用。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(target_os = "windows")]

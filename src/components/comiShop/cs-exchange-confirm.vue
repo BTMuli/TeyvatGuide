@@ -50,18 +50,8 @@
       </p>
     </div>
     <template #footer>
-      <div class="cs-confirm-actions">
-        <v-btn :disabled="props.exchanging" variant="text" @click="open = false">取消</v-btn>
-        <v-btn
-          :loading="props.exchanging"
-          class="cs-primary-action"
-          color="var(--tgc-yellow-3)"
-          variant="flat"
-          @click="emits('confirm')"
-        >
-          确认兑换
-        </v-btn>
-      </div>
+      <v-btn :disabled="props.exchanging" variant="text" @click="open = false">取消</v-btn>
+      <v-btn :loading="props.exchanging" variant="flat" @click="emits('confirm')"> 确认兑换 </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -201,14 +191,6 @@ const titleId = useId();
   line-height: 28px;
 }
 
-.cs-confirm-actions {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 .cs-confirm-price {
   display: inline-flex;
   align-items: center;
@@ -217,14 +199,5 @@ const titleId = useId();
   font-weight: 600;
   gap: 6px;
   line-height: 24px;
-}
-
-.cs-primary-action {
-  color: var(--tgc-dark-2);
-
-  &:disabled {
-    background: var(--box-bg-3);
-    color: var(--box-text-2);
-  }
 }
 </style>

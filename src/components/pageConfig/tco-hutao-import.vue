@@ -75,21 +75,18 @@
       </div>
     </div>
     <template #footer>
-      <div class="import-footer">
-        <v-btn :disabled="busy" variant="text" @click="visible = false">关闭</v-btn>
-        <v-btn v-if="needsRefresh" :disabled="busy" variant="outlined" @click="refreshApp">
-          刷新应用
-        </v-btn>
-        <v-btn
-          :disabled="busy || selectedRows.length === 0"
-          :loading="busy"
-          color="var(--tgc-btn-1)"
-          variant="flat"
-          @click="runImport(selectedRows)"
-        >
-          导入已选文件
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" variant="text" @click="visible = false">关闭</v-btn>
+      <v-btn v-if="needsRefresh" :disabled="busy" variant="outlined" @click="refreshApp">
+        刷新应用
+      </v-btn>
+      <v-btn
+        :disabled="busy || selectedRows.length === 0"
+        :loading="busy"
+        variant="flat"
+        @click="runImport(selectedRows)"
+      >
+        导入已选文件
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -366,16 +363,11 @@ function refreshApp(): void {
   grid-row: 1;
 }
 
-.import-actions,
-.import-footer {
+.import-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
-}
-
-.import-footer {
-  width: 100%;
 }
 
 @media (width <= 640px) {

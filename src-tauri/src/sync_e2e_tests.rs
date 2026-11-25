@@ -3,7 +3,7 @@
 //! SOURCE 必须是已完成备份、无 WAL 的独立副本；WORKDIR 必须是新建、空且私有的目录。
 //! DAV_CONFIG 必须是 {address,username,password}，仅接受 /e2e-<random>/ 或 /dav/e2e-<random>/。
 //! 本测试保留私有接收库与专用远端对象供验收，不清理或打印任何用户数据、路径及秘密。
-//! @since Beta v0.14.1
+//! @since Beta v0.14.2
 
 use super::*;
 use crate::sync_webdav;
@@ -23,11 +23,11 @@ use std::{
 use url::Url;
 
 /// 错误中只能保存固定阶段与固定类别；不携带底层错误、记录或配置。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 type E2eResult<T> = Result<T, (&'static str, &'static str)>;
 
 /// 仅从显式环境变量读取的测试凭证，不实现 Debug。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(DeriveDeserialize)]
 #[serde(deny_unknown_fields)]
 struct DavConfig {
@@ -37,7 +37,7 @@ struct DavConfig {
 }
 
 /// 经路径与测试目录限制后的单次运行环境，不实现 Debug。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct Environment {
   source: PathBuf,
   workdir: PathBuf,
@@ -46,25 +46,25 @@ struct Environment {
 }
 
 /// 只输出固定阶段和固定错误类别，避免 Result/Value 的 Debug 泄露。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn finish<T>(result: E2eResult<T>) -> T {
   result.unwrap_or_else(|(stage, category)| panic!("E2E {stage} {category}"))
 }
 
 /// 把任意底层错误丢弃，只保留调用点指定的固定类别。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn fixed<T, E>(result: Result<T, E>, stage: &'static str, category: &'static str) -> E2eResult<T> {
   result.map_err(|_| (stage, category))
 }
 
 /// 条件断言不输出被比较的值、主键或秘密。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn ensure(condition: bool, stage: &'static str, category: &'static str) -> E2eResult<()> {
   if condition { Ok(()) } else { Err((stage, category)) }
 }
 
 /// 业务/传输错误仅映射为白名单类别，绝不输出返回文本。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn checked<T>(result: Result<T, String>, stage: &'static str) -> E2eResult<T> {
   result.map_err(|error| {
     let category = match error.split('：').next().unwrap_or("") {
@@ -94,7 +94,7 @@ fn checked<T>(result: Result<T, String>, stage: &'static str) -> E2eResult<T> {
 
 /// 三个变量必须同时完整；仅允许绝对隔离路径和专用 DAV 子目录。
 /// Windows 的私有目录 ACL 与 source 的独立复制由运行本测试的主线程预先核验。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn environment() -> E2eResult<Environment> {
   let source = fixed(std::env::var("TG_SYNC_E2E_SOURCE"), "config", "ENV_REQUIRED")?;
   let workdir = fixed(std::env::var("TG_SYNC_E2E_WORKDIR"), "config", "ENV_REQUIRED")?;
@@ -167,7 +167,7 @@ fn environment() -> E2eResult<Environment> {
 }
 
 /// 只读 immutable 会忽略 WAL，故拒绝未封口的副本，而不是悄悄少读数据。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn no_source_sidecars(source: &Path) -> E2eResult<()> {
   for suffix in ["-wal", "-shm", "-journal"] {
     let mut sidecar = source.as_os_str().to_os_string();
@@ -181,7 +181,7 @@ fn no_source_sidecars(source: &Path) -> E2eResult<()> {
 }
 
 /// 使用 create_new 创建本次专属文件；Unix 文件权限显式限制为 0600。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn private_file(path: &Path) -> E2eResult<()> {
   let mut options = OpenOptions::new();
   options.write(true).create_new(true);
@@ -195,7 +195,7 @@ fn private_file(path: &Path) -> E2eResult<()> {
 }
 
 /// 流式摘要仅用于内存比较，绝不输出摘要、文件路径或文件内容。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn source_hash(path: &Path) -> E2eResult<Vec<u8>> {
   let mut file = fixed(File::open(path), "source", "HASH_READ_FAILED")?;
   let mut hash = Sha256::new();
@@ -211,7 +211,7 @@ fn source_hash(path: &Path) -> E2eResult<Vec<u8>> {
 }
 
 /// 独立只读连接，不执行建表、journal_mode 切换或任何业务写入，不记录语句。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn source_pool(env: &Environment) -> E2eResult<SqlitePool> {
   let options = SqliteConnectOptions::new()
     .filename(&env.source)
@@ -230,7 +230,7 @@ async fn source_pool(env: &Environment) -> E2eResult<SqlitePool> {
 
 /// 只从编译期 Column/Kind 白名单生成磁盘接收库；不引入账号、设置或其他表。
 /// fault 指定表的 CHECK(0) 专供验证后表失败时前表插入回滚；扩列仅存在于专用接收库。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn receiver(
   env: &Environment,
   name: &'static str,
@@ -310,7 +310,7 @@ async fn receiver(
 }
 
 /// 获取四表计数，不读取或输出其他表中的账户字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn counts(pool: &SqlitePool) -> E2eResult<Vec<u64>> {
   let mut counts = Vec::new();
   for table in TABLES {
@@ -324,7 +324,7 @@ async fn counts(pool: &SqlitePool) -> E2eResult<Vec<u64>> {
 }
 
 /// 独立按 JSON 语义比较数值、对象与有序数组，不使用待测业务相等函数。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn semantic_equal(left: &Value, right: &Value) -> bool {
   match (left, right) {
     (Value::Number(left), Value::Number(right)) => left.as_f64() == right.as_f64(),
@@ -343,7 +343,7 @@ fn semantic_equal(left: &Value, right: &Value) -> bool {
 }
 
 /// 在同一读取事务检查结构并逐行比较全部同步列，避免重新导出掩盖接收库的错误值。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn verify_rows(pool: &SqlitePool, expected: &Records, stage: &'static str) -> E2eResult<()> {
   ensure(expected.len() == TABLES.len(), stage, "TABLE_COUNT_MISMATCH")?;
   let mut tx = fixed(pool.begin().await, stage, "BEGIN_FAILED")?;
@@ -383,7 +383,7 @@ async fn verify_rows(pool: &SqlitePool, expected: &Records, stage: &'static str)
 }
 
 /// 首次插入/重入的统计必须逐表准确；错误不包含任何记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn verify_stats(stats: &SyncImportStats, expected: &[u64], repeated: bool) -> E2eResult<()> {
   let all = [&stats.gacha_records, &stats.spiral_abyss, &stats.role_combat, &stats.hard_challenge];
   ensure(expected.len() == all.len(), "stats", "TABLE_COUNT_MISMATCH")?;
@@ -403,7 +403,7 @@ fn verify_stats(stats: &SyncImportStats, expected: &[u64], repeated: bool) -> E2
 }
 
 /// 传入实际导出步骤或已知快照，在生产发布路径中完成连接预检和写入。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn publish(
   env: &Environment,
   load_snapshot: impl std::future::Future<Output = Result<String, String>>,
@@ -423,13 +423,13 @@ async fn publish(
 }
 
 /// 重发已校验的快照也经过同一条发布路径。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn upload(env: &Environment, snapshot: &str) -> E2eResult<String> {
   publish(env, async { Ok(snapshot.to_owned()) }).await
 }
 
 /// 下载当前或独立历史清单，仍使用实际生产传输函数。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn download(env: &Environment, id: Option<String>) -> Result<String, String> {
   sync_webdav::download_snapshot(
     &env.dav.address,
@@ -443,7 +443,7 @@ async fn download(env: &Environment, id: Option<String>) -> Result<String, Strin
 }
 
 /// 与实际流程相同：传输校验、完整业务验证全部成功后才调用事务导入。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn receive(
   env: &Environment,
   pool: &SqlitePool,
@@ -455,7 +455,7 @@ async fn receive(
 }
 
 /// 独立检查传输信封和列白名单，不读取真实库账号字段，也不依赖导入器丢弃额外数据。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn verify_export_whitelist(snapshot: &str) -> E2eResult<()> {
   let root: Value = fixed(serde_json::from_str(snapshot), "whitelist", "JSON_INVALID")?;
   let root = root.as_object().ok_or(("whitelist", "ENVELOPE_INVALID"))?;
@@ -485,7 +485,7 @@ fn verify_export_whitelist(snapshot: &str) -> E2eResult<()> {
 }
 
 /// 将同一真实 v1 快照两次拉入扩列接收库，确保默认值和本地标记不被同步改写。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn schema_skew(
   env: &Environment,
   expected: &Records,
@@ -555,7 +555,7 @@ async fn schema_skew(
 }
 
 /// 核心真实库 roundtrip；安全故障验收在此之后运行，不用合成数据库替代源库。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn roundtrip(env: &Environment) -> E2eResult<()> {
   ensure(
     TABLES.iter().map(|table| table.name).eq([
@@ -631,7 +631,7 @@ async fn roundtrip(env: &Environment) -> E2eResult<()> {
 }
 
 /// 故障注入只操作本次专用目录中的固定 current 或已确认 UUID 的数据对象。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn resource_url(env: &Environment, name: &str) -> E2eResult<Url> {
   let snapshot = name
     .strip_prefix("teyvatguide-sync-")
@@ -645,7 +645,7 @@ fn resource_url(env: &Environment, name: &str) -> E2eResult<Url> {
 }
 
 /// 独立客户端仅供显式故障注入；正常上传下载始终走生产传输函数。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn fault_client() -> E2eResult<Client> {
   fixed(
     Client::builder()
@@ -660,7 +660,7 @@ fn fault_client() -> E2eResult<Client> {
 }
 
 /// 有界读取本次对象及强 ETag；错误不保留 URL、响应体或认证信息。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn remote_resource(
   env: &Environment,
   name: &str,
@@ -704,7 +704,7 @@ async fn remote_resource(
 }
 
 /// 仅在原内容符合预期且强 ETag 匹配时破坏/恢复本次对象，不进行无条件覆盖。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn replace_remote(
   env: &Environment,
   name: &str,
@@ -737,7 +737,7 @@ async fn replace_remote(
 
 /// 基于已导出的实库记录验证全包校验、事务回滚和真实 HTTP 完整性/历史恢复。
 /// 故障后的远端恢复会在负向断言失败时仍尝试执行，不删除任何远端对象。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn safety_faults(
   env: &Environment,
   destination: &SqlitePool,
@@ -857,7 +857,7 @@ async fn safety_faults(
 
 /// 从真实首行副本生成一条业务冲突和一条同 UID、新合法主键的新增记录。
 /// 只构造内存测试包，不改源库或普通接收库；候选主键碰撞时继续寻找。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn merge_variants(
   table: &Table,
   rows: &[Map<String, Value>],
@@ -930,7 +930,7 @@ fn merge_variants(
 }
 
 /// 序列化并验证只含四表的内存增量包，上传前不允许发布不合法包。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn merge_snapshot(records: &Records) -> E2eResult<String> {
   ensure(records.len() == TABLES.len(), "merge", "TABLE_COUNT_MISMATCH")?;
   let mut tables = Map::new();
@@ -948,7 +948,7 @@ fn merge_snapshot(records: &Records) -> E2eResult<String> {
 }
 
 /// 逐表检查混合包的新增、相同与冲突统计；空源表没有构造测试记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn verify_merge_stats(
   stats: &SyncImportStats,
   expected: &Records,
@@ -973,7 +973,7 @@ fn verify_merge_stats(
 
 /// 独立磁盘库验证真实记录增量合并、冲突保留、重入及稀疏包不传播删除。
 /// 每一步均通过真实生产 DAV 上传/下载，再全列检查原始记录和新增记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn merge_semantics(
   env: &Environment,
   snapshot: &str,
@@ -1036,7 +1036,7 @@ async fn merge_semantics(
 }
 
 /// 显式运行仍要求三个环境变量齐备；失败路径也先校验源文件摘要未改变。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[test]
 #[ignore = "requires isolated real source DB, empty private workdir, and dedicated real WebDAV"]
 fn real_database_webdav_roundtrip() {

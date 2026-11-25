@@ -54,21 +54,18 @@
     </div>
 
     <template #footer>
-      <div class="cpcs-footer-actions">
-        <v-btn :disabled="props.saving" type="button" variant="text" @click="visible = false">
-          取消
-        </v-btn>
-        <v-btn
-          :disabled="!dirty || props.saving || items.length < 2"
-          :loading="props.saving"
-          class="cpcs-confirm"
-          type="button"
-          variant="flat"
-          @click="handleSave"
-        >
-          保存排序
-        </v-btn>
-      </div>
+      <v-btn :disabled="props.saving" type="button" variant="text" @click="visible = false">
+        取消
+      </v-btn>
+      <v-btn
+        :disabled="!dirty || props.saving || items.length < 2"
+        :loading="props.saving"
+        type="button"
+        variant="flat"
+        @click="handleSave"
+      >
+        保存排序
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -290,8 +287,6 @@ function handleSave(): void {
 </script>
 
 <style lang="scss" scoped>
-@use "@styles/utils.scss" as utils;
-
 .cpcs-heading {
   display: flex;
   min-width: 0;
@@ -366,13 +361,5 @@ function handleSave(): void {
   :deep(.v-icon) {
     flex: none;
   }
-}
-
-.cpcs-footer-actions {
-  @include utils.overlay-footer-actions;
-}
-
-.cpcs-confirm {
-  @include utils.overlay-confirm-button;
 }
 </style>

@@ -182,23 +182,20 @@
       <span>刷新失败，当前仍显示上次扫描的记录：{{ loadError }}</span>
     </p>
 
+    <template #footerStart> 扫描任务目录全部条目；清除记录不会影响游戏文件或共享缓存 </template>
+
     <template #footer>
-      <span class="task-history-footer-hint">
-        扫描任务目录全部条目；清除记录不会影响游戏文件或共享缓存
-      </span>
-      <div class="task-history-actions">
-        <v-btn variant="text" @click="closeOverlay">关闭</v-btn>
-        <v-btn
-          :disabled="terminalTasks.length === 0 || loading || removingAny"
-          :loading="clearingAll"
-          color="error"
-          prepend-icon="mdi-delete-sweep-outline"
-          variant="tonal"
-          @click="handleClearAll"
-        >
-          清除已结束
-        </v-btn>
-      </div>
+      <v-btn variant="text" @click="closeOverlay">关闭</v-btn>
+      <v-btn
+        :disabled="terminalTasks.length === 0 || loading || removingAny"
+        :loading="clearingAll"
+        color="error"
+        prepend-icon="mdi-delete-sweep-outline"
+        variant="tonal"
+        @click="handleClearAll"
+      >
+        清除已结束
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -809,24 +806,6 @@ watch(
   }
 }
 
-.task-history-footer-hint {
-  min-width: 0;
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.task-history-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-
-  .v-btn {
-    border-radius: 4px;
-  }
-}
-
 @media (width <= 720px) {
   .task-history-item {
     padding: 12px;
@@ -838,15 +817,6 @@ watch(
     span {
       width: 100%;
     }
-  }
-
-  .task-history-footer-hint {
-    display: none;
-  }
-
-  .task-history-actions {
-    width: 100%;
-    justify-content: flex-end;
   }
 }
 </style>

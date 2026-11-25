@@ -1,5 +1,5 @@
 //! 有界、只增量写入的四表同步快照。未支持的数据必须整体报错，绝不改写原值。
-//! @since Beta v0.14.1
+//! @since Beta v0.14.2
 
 use futures_util::TryStreamExt;
 use serde::Serialize;
@@ -34,7 +34,7 @@ const UNSUPPORTED_LINEUP: &str =
   "SYNC_UNSUPPORTED_LINEUP：剧诗记录包含不受支持的阵容链接；未应用同步数据";
 
 /// 受支持的 SQLite 存储类型。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Kind {
   Text,
@@ -44,7 +44,7 @@ enum Kind {
 }
 
 /// 固定列、SQLite 类型、允许的业务空值及预期主键位置。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct Column {
   name: &'static str,
   kind: Kind,
@@ -121,7 +121,7 @@ const CHALLENGE: &[Column] = &[
 ];
 
 /// 白名单表及其完整列。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct Table {
   name: &'static str,
   columns: &'static [Column],
@@ -135,7 +135,7 @@ const TABLES: &[Table] = &[
 ];
 
 /// 源库只读取白名单字段；目标库还须能为未同步的列提供默认值。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Clone, Copy)]
 enum SchemaUse {
   Export,
@@ -143,14 +143,14 @@ enum SchemaUse {
 }
 
 /// 同一读取或写入事务内生效的、由固定协议列构成的 SQLite 投影。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct SchemaProjection {
   missing: Vec<&'static str>,
   required: Vec<&'static str>,
 }
 
 /// 不含记录值和 UID 的单表导入统计。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncTableStats {
@@ -160,7 +160,7 @@ pub struct SyncTableStats {
 }
 
 /// 按表汇总的导入结果及有界的只读冲突明细；不会改写本机冲突记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Default, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncImportStats {
@@ -173,7 +173,7 @@ pub struct SyncImportStats {
 }
 
 /// 快照中冲突记录的定位信息与实际不同的业务字段，不携带原始记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SyncConflictDetail {
@@ -186,7 +186,7 @@ struct SyncConflictDetail {
 }
 
 /// 只允许固定的同步字段名；结构化内容和不允许展示的值仅报告字段名。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Serialize)]
 struct SyncConflictChange {
   field: &'static str,
@@ -195,7 +195,7 @@ struct SyncConflictChange {
 }
 
 /// 仅在两侧都符合展示白名单时返回可比较的值。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Serialize)]
 struct SyncConflictValues {
   local: SyncConflictValue,
@@ -203,7 +203,7 @@ struct SyncConflictValues {
 }
 
 /// 专用标量，不允许传出任意 JSON 值。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Serialize)]
 #[serde(untagged)]
 enum SyncConflictValue {
@@ -214,43 +214,43 @@ enum SyncConflictValue {
 }
 
 /// 严格 JSON 值，递归拒绝重复对象键，避免解析歧义。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct StrictValue(Value);
 
 impl<'de> Deserialize<'de> for StrictValue {
   /// 使用 JSON 访问器，避免重复键被静默覆盖。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
     struct StrictVisitor;
     impl<'de> Visitor<'de> for StrictVisitor {
       type Value = StrictValue;
       /// 描述解析器期望的值。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("a JSON value without duplicate keys")
       }
       /// 接收空值。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_unit<E: de::Error>(self) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::Null))
       }
       /// 接收布尔值。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_bool<E: de::Error>(self, v: bool) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::Bool(v)))
       }
       /// 接收有符号整数。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_i64<E: de::Error>(self, v: i64) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::Number(v.into())))
       }
       /// 接收无符号整数。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_u64<E: de::Error>(self, v: u64) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::Number(v.into())))
       }
       /// 接收有限浮点数；字段校验另行限制数值范围。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_f64<E: de::Error>(self, v: f64) -> Result<Self::Value, E> {
         Number::from_f64(v)
           .map(Value::Number)
@@ -258,17 +258,17 @@ impl<'de> Deserialize<'de> for StrictValue {
           .ok_or_else(|| E::custom("invalid number"))
       }
       /// 接收字符串。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_str<E: de::Error>(self, v: &str) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::String(v.to_owned())))
       }
       /// 接收自有字符串。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_string<E: de::Error>(self, v: String) -> Result<Self::Value, E> {
         Ok(StrictValue(Value::String(v)))
       }
       /// 递归接收数组。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
         let mut values = Vec::new();
         while let Some(value) = seq.next_element::<StrictValue>()? {
@@ -280,7 +280,7 @@ impl<'de> Deserialize<'de> for StrictValue {
         Ok(StrictValue(Value::Array(values)))
       }
       /// 递归接收对象，重复键立即失败。
-      /// @since Beta v0.14.1
+      /// @since Beta v0.14.2
       fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
         let mut values = Map::new();
         while let Some((key, value)) = map.next_entry::<String, StrictValue>()? {
@@ -299,7 +299,7 @@ impl<'de> Deserialize<'de> for StrictValue {
 }
 
 /// 解析限制大小的 JSON，并拒绝重复键。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn parse_json(input: &str, limit: usize) -> Result<Value, String> {
   if input.len() > limit {
     return Err(LIMIT.into());
@@ -308,7 +308,7 @@ fn parse_json(input: &str, limit: usize) -> Result<Value, String> {
 }
 
 /// 从 SQL 插件获取唯一的应用数据库池。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn sqlite_pool(instances: &DbInstances) -> Result<SqlitePool, String> {
   let instances = instances.0.read().await;
   match instances.get(DATABASE_URL) {
@@ -319,7 +319,7 @@ async fn sqlite_pool(instances: &DbInstances) -> Result<SqlitePool, String> {
 }
 
 /// 仅供受 ACL 保护的手动上传流程读取四表快照。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 pub(crate) async fn export_sync_snapshot_internal(
   instances: &DbInstances,
 ) -> Result<String, String> {
@@ -327,7 +327,7 @@ pub(crate) async fn export_sync_snapshot_internal(
 }
 
 /// 仅供受 ACL 保护的手动合并流程，写库之前验证完整快照。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 pub(crate) async fn import_sync_snapshot_internal(
   instances: &DbInstances,
   snapshot: &str,
@@ -337,7 +337,7 @@ pub(crate) async fn import_sync_snapshot_internal(
 }
 
 /// 只显示编译期已知的表、字段和原因，不输出实际列名、DDL 或记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn schema_problem(table: &Table, field: Option<&'static str>, reason: &'static str) -> String {
   let location =
     field.map_or_else(|| table.name.to_owned(), |name| format!("{}.{name}", table.name));
@@ -345,7 +345,7 @@ fn schema_problem(table: &Table, field: Option<&'static str>, reason: &'static s
 }
 
 /// 按名称将物理表投影到 v1；新增普通字段不加入协议，未知结构仍失败关闭。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn check_schema(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
@@ -426,13 +426,13 @@ async fn check_schema(
 }
 
 /// 无跳层信息在不同深渊表版本中用 NULL 或空串表示。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn no_skipped_floor(value: &Value) -> bool {
   value.is_null() || value.as_str() == Some("")
 }
 
 /// 写入前检查所有行都能无损存储；仅允许旧深渊省略无值的跳层字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn check_projection_rows(
   table: &Table,
   projection: &SchemaProjection,
@@ -455,7 +455,7 @@ fn check_projection_rows(
 }
 
 /// 发布前检查会被导出的列，避免将超大字段读入快照。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn check_export_field_sizes(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
@@ -482,13 +482,13 @@ async fn check_export_field_sizes(
 }
 
 /// 按 v1 次序读取值及存储类型；已知旧版缺列只投影为空值，不改变本地表。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn selection(table: &Table, projection: &SchemaProjection) -> String {
   projected_selection(table, projection, false)
 }
 
 /// 核对同键记录时在 SQLite 内截住超限值；不把它读进 Rust，也不误当 SQL NULL。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn projected_selection(table: &Table, projection: &SchemaProjection, bounded: bool) -> String {
   table
     .columns
@@ -513,7 +513,7 @@ fn projected_selection(table: &Table, projection: &SchemaProjection, bounded: bo
 }
 
 /// 无损读取有限大小的一行，仅接受 NULL、文本和预期的整数存储类型。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn decode_row(table: &Table, row: &sqlx::sqlite::SqliteRow) -> Result<Map<String, Value>, String> {
   let mut result = Map::new();
   for (index, column) in table.columns.iter().enumerate() {
@@ -540,7 +540,7 @@ fn decode_row(table: &Table, row: &sqlx::sqlite::SqliteRow) -> Result<Map<String
 }
 
 /// 使用同一读取事务导出四表；超出上限时不返回部分结果。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   let mut tx = pool.begin().await.map_err(|_| DATABASE.to_string())?;
   let mut tables = Map::new();
@@ -592,7 +592,7 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
 }
 
 /// 只规范导出内存副本中的已知历史字段，输出仍由原有 v1 校验器验收。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Result<(), String> {
   let columns: &[&str] = match table.name {
     "SpiralAbyss" => &["floors"],
@@ -671,7 +671,7 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
 }
 
 /// 旧剧诗没有月谕统计；仅为非月谕难度补零，不推断缺失的月谕成绩。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn normalize_legacy_combat_stat(value: &mut Value) -> bool {
   let Some(stat) = value.as_object_mut() else { return false };
   if !stat.contains_key("tarot_finished_cnt")
@@ -684,7 +684,7 @@ fn normalize_legacy_combat_stat(value: &mut Value) -> bool {
 }
 
 /// 补齐胡桃导入约定中可省略的剧诗摘要；只表示未提供，不改写现有统计或推断成绩。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn normalize_legacy_combat_fight(value: &mut Value) -> bool {
   let Some(fight) = value.as_object_mut() else { return false };
   let mut changed = false;
@@ -705,7 +705,7 @@ fn normalize_legacy_combat_fight(value: &mut Value) -> bool {
 
 /// 旧危战队伍摘要可能用 JSON 数字存储 DPS，转为该数字的文本表示供 v1 接收。
 /// 不猜测缺失值、不改动其他路径，也不将布尔值或对象视为成绩。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn normalize_legacy_challenge_dps(challenge: &mut Map<String, Value>) -> bool {
   let Some(battles) = challenge.get_mut("challenge").and_then(Value::as_array_mut) else {
     return false;
@@ -726,7 +726,7 @@ fn normalize_legacy_challenge_dps(challenge: &mut Map<String, Value>) -> bool {
 }
 
 /// 仅处理已选战绩 JSON 列中 v1 已知的图片键，未受信任的图片不进入快照。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn replace_unsupported_export_images(value: &mut Value) -> bool {
   match value {
     Value::Array(items) => {
@@ -755,11 +755,11 @@ fn replace_unsupported_export_images(value: &mut Value) -> bool {
 }
 
 /// 已验证快照的四表记录，与 TABLES 顺序一致。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 type Records = Vec<Vec<Map<String, Value>>>;
 
 /// 检查对象必需字段及可选字段，拒绝其他字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn object<'a>(
   value: &'a Value,
   required: &[&str],
@@ -775,14 +775,14 @@ fn object<'a>(
 }
 
 /// 检查数字为指定范围内的安全整数。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn number(value: &Value, max: i64) -> bool {
   let max = max.min(MAX_SAFE_INTEGER) as f64;
   value.as_f64().is_some_and(|n| n.fract() == 0.0 && (0.0..=max).contains(&n))
 }
 
 /// 检查非空 ASCII 十进制标识符，不进行数值转换。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn digits(value: &Value, max_len: usize) -> bool {
   value
     .as_str()
@@ -790,7 +790,7 @@ fn digits(value: &Value, max_len: usize) -> bool {
 }
 
 /// 检查格式化后的实际日期。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn date(value: &Value) -> bool {
   value.as_str().is_some_and(|s| {
     s.len() == 19 && chrono::NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S").is_ok()
@@ -798,7 +798,7 @@ fn date(value: &Value) -> bool {
 }
 
 /// 检查经 Vue 文本插值展示的内容，禁止游戏链接标记、尖括号和不可见控制字符。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn plain_segment(value: &str) -> bool {
   !value.contains("{LINK#")
     && !value.contains("{/LINK}")
@@ -808,7 +808,7 @@ fn plain_segment(value: &str) -> bool {
 }
 
 /// 仅允许安全的游戏颜色及换行标记，原始文本存储不变。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn safe_text(value: &Value) -> bool {
   let Some(s) = value.as_str() else {
     return false;
@@ -847,7 +847,7 @@ fn safe_text(value: &Value) -> bool {
 }
 
 /// 检查原始静态路径段；不接受点段、编码、反斜线、查询、锚点及其他保留字符。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn image_path(path: &str, local: bool) -> bool {
   let segment = |s: &str| {
     !s.is_empty()
@@ -867,7 +867,7 @@ fn image_path(path: &str, local: bool) -> bool {
 }
 
 /// 只匹配静态 CDN 已知的年月日路径，不匹配同主机上的 API 或动态页面。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn dated_image_path(path: &str) -> bool {
   let mut parts = path.split('/');
   let digit_segment = |s: &str, len: usize| s.len() == len && s.bytes().all(|b| b.is_ascii_digit());
@@ -877,7 +877,7 @@ fn dated_image_path(path: &str) -> bool {
 }
 
 /// 匹配养成计算器 CDN 的已知静态图标目录，不接受同活动的 API、页面或任意资源。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn calculator_image_path(path: &str) -> bool {
   let Some(path) = path.strip_prefix("hk4e/e20200928calculate/") else { return false };
   if let Some(path) = path.strip_prefix("static/player/") {
@@ -899,7 +899,7 @@ fn calculator_image_path(path: &str) -> bool {
 }
 
 /// 只允许空图像、应用资源及静态官方 HTTPS 图片；不在同步时加载资源。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn safe_image(value: &Value) -> bool {
   let Some(s) = value.as_str() else {
     return false;
@@ -938,25 +938,25 @@ fn safe_image(value: &Value) -> bool {
 }
 
 /// 深渊与剧诗的旧备份恢复会拼接单引号 SQL，故这些字段不能携带 SQL 分隔符。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn legacy_backup_text(value: &Value) -> bool {
   value.as_str().is_some_and(|s| !s.contains('\'')) && safe_text(value)
 }
 
 /// 约束数组大小并验证所有成员。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn array(value: &Value, validate: fn(&Value) -> bool) -> bool {
   value.as_array().is_some_and(|a| a.len() <= MAX_ARRAY && a.iter().all(validate))
 }
 
 /// 检查对象中多个非负数字字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn numbers(obj: &Map<String, Value>, keys: &[&str], max: i64) -> bool {
   keys.iter().all(|key| obj.get(*key).is_some_and(|value| number(value, max)))
 }
 
 /// 验证深渊排行中的角色。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_rank(value: &Value) -> bool {
   let Some(o) = object(value, &["id", "value", "star"], &[]) else {
     return false;
@@ -965,7 +965,7 @@ fn abyss_rank(value: &Value) -> bool {
 }
 
 /// 验证深渊角色条目。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_character(value: &Value) -> bool {
   let Some(o) = object(value, &["id", "level", "star"], &[]) else {
     return false;
@@ -974,7 +974,7 @@ fn abyss_character(value: &Value) -> bool {
 }
 
 /// 验证深渊怪物及受限的静态图像。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_monster(value: &Value) -> bool {
   let Some(o) = object(value, &["name", "icon", "level"], &[]) else {
     return false;
@@ -983,7 +983,7 @@ fn abyss_monster(value: &Value) -> bool {
 }
 
 /// 验证深渊战斗详情和可选历史怪物字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_battle(value: &Value) -> bool {
   let Some(o) = object(value, &["time", "characters"], &["monsters"]) else {
     return false;
@@ -994,7 +994,7 @@ fn abyss_battle(value: &Value) -> bool {
 }
 
 /// 验证深渊关卡和可选战斗。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_level(value: &Value) -> bool {
   let Some(o) = object(value, &["id", "winStar", "maxStar"], &["upBattle", "downBattle"]) else {
     return false;
@@ -1008,7 +1008,7 @@ fn abyss_level(value: &Value) -> bool {
 }
 
 /// 验证深渊楼层。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn abyss_floor(value: &Value) -> bool {
   let Some(o) = object(value, &["id", "isUnlock", "winStar", "maxStar", "levels"], &["buff"])
   else {
@@ -1024,7 +1024,7 @@ fn abyss_floor(value: &Value) -> bool {
 }
 
 /// 验证危战队伍角色。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_team(value: &Value) -> bool {
   let Some(o) =
     object(value, &["avatar_id", "name", "element", "image", "level", "rarity", "rank"], &[])
@@ -1041,7 +1041,7 @@ fn challenge_team(value: &Value) -> bool {
 }
 
 /// 验证危战最佳角色。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_avatar(value: &Value) -> bool {
   let Some(o) = object(value, &["avatar_id", "side_icon", "dps", "type"], &[]) else {
     return false;
@@ -1053,7 +1053,7 @@ fn challenge_avatar(value: &Value) -> bool {
 }
 
 /// 验证危战怪物标签。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_tag(value: &Value) -> bool {
   let Some(o) = object(value, &["type", "desc"], &[]) else {
     return false;
@@ -1062,7 +1062,7 @@ fn challenge_tag(value: &Value) -> bool {
 }
 
 /// 验证危战怪物及安全颜色描述。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_monster(value: &Value) -> bool {
   let Some(o) = object(value, &["name", "level", "icon", "desc", "tags", "monster_id"], &[]) else {
     return false;
@@ -1076,7 +1076,7 @@ fn challenge_monster(value: &Value) -> bool {
 }
 
 /// 验证危战单场记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_item(value: &Value) -> bool {
   let Some(o) = object(value, &["name", "second", "teams", "best_avatar", "monster"], &[]) else {
     return false;
@@ -1089,7 +1089,7 @@ fn challenge_item(value: &Value) -> bool {
 }
 
 /// 验证危战最佳信息。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_best(value: &Value) -> bool {
   if value.is_null() {
     return true;
@@ -1101,7 +1101,7 @@ fn challenge_best(value: &Value) -> bool {
 }
 
 /// 验证危战单人或联机详情。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_data(value: &Value) -> bool {
   let Some(o) = object(value, &["best", "challenge", "has_data"], &[]) else {
     return false;
@@ -1110,7 +1110,7 @@ fn challenge_data(value: &Value) -> bool {
 }
 
 /// 验证危战赋光角色。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn challenge_bling(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1129,7 +1129,7 @@ fn challenge_bling(value: &Value) -> bool {
 }
 
 /// 验证剧诗统计数据。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_stat(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1166,7 +1166,7 @@ fn combat_stat(value: &Value) -> bool {
 }
 
 /// 验证剧诗角色。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_avatar(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1185,7 +1185,7 @@ fn combat_avatar(value: &Value) -> bool {
 }
 
 /// 验证剧诗角色统计摘要。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_avatar_mini(value: &Value) -> bool {
   let Some(o) = object(value, &["avatar_id", "avatar_icon", "value"], &["rarity"]) else {
     return false;
@@ -1197,13 +1197,13 @@ fn combat_avatar_mini(value: &Value) -> bool {
 }
 
 /// 验证可能为空的角色统计摘要。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_avatar_or_null(value: &Value) -> bool {
   value.is_null() || combat_avatar_mini(value)
 }
 
 /// 验证剧诗战斗统计。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_fight(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1229,7 +1229,7 @@ fn combat_fight(value: &Value) -> bool {
 }
 
 /// 验证剧诗卡片。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_card(value: &Value) -> bool {
   let Some(o) = object(value, &["icon", "name", "desc", "is_enhanced", "id"], &[]) else {
     return false;
@@ -1242,7 +1242,7 @@ fn combat_card(value: &Value) -> bool {
 }
 
 /// 验证剧诗增益效果及官方游戏内词条元数据；词条不是可导航 URL。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_effect(value: &Value) -> bool {
   let Some(o) = object(value, &["icon", "name", "desc"], &["links"]) else {
     return false;
@@ -1254,7 +1254,7 @@ fn combat_effect(value: &Value) -> bool {
 }
 
 /// 验证有界的数字词条字典；只保存 ID、名称和纯游戏文本，不接受外部链接字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_effect_links(value: &Value) -> bool {
   let Some(links) = value.as_object() else { return false };
   links.len() <= MAX_ARRAY
@@ -1270,7 +1270,7 @@ fn combat_effect_links(value: &Value) -> bool {
 }
 
 /// 允许成对的游戏词条标记，剥离标记后仍执行原文本与旧备份安全检查。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_effect_text(value: &Value) -> bool {
   let Some(text) = value.as_str().filter(|text| text.len() <= 16 * 1024) else {
     return false;
@@ -1308,7 +1308,7 @@ fn combat_effect_text(value: &Value) -> bool {
 }
 
 /// 验证剧诗增益。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_buff(value: &Value) -> bool {
   let Some(o) = object(value, &["name", "icon", "level", "level_effect"], &[]) else {
     return false;
@@ -1320,7 +1320,7 @@ fn combat_buff(value: &Value) -> bool {
 }
 
 /// 验证剧诗总体增益。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_splendour(value: &Value) -> bool {
   let Some(o) = object(value, &["summary", "buffs"], &[]) else {
     return false;
@@ -1334,7 +1334,7 @@ fn combat_splendour(value: &Value) -> bool {
 }
 
 /// 验证剧诗敌人。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_enemy(value: &Value) -> bool {
   let Some(o) = object(value, &["name", "icon", "level"], &[]) else {
     return false;
@@ -1343,7 +1343,7 @@ fn combat_enemy(value: &Value) -> bool {
 }
 
 /// 验证游戏日期结构。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn game_date(value: &Value) -> bool {
   let Some(o) = object(value, &["year", "month", "day", "hour", "minute", "second"], &[]) else {
     return false;
@@ -1357,7 +1357,7 @@ fn game_date(value: &Value) -> bool {
 }
 
 /// 验证剧诗每一幕；非月谕回合保留官方 -1 序号哨兵，不接受其他负数。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_round(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1393,7 +1393,7 @@ fn combat_round(value: &Value) -> bool {
 }
 
 /// 验证剧诗详情；暂不接受任何外部阵容链接。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn combat_detail(value: &Value) -> bool {
   let Some(o) = object(
     value,
@@ -1410,11 +1410,11 @@ fn combat_detail(value: &Value) -> bool {
 }
 
 /// 只用固定字段名与固定理由定位错误，不携带原始键、记录值或解析器错误。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 type RecordIssue = (&'static str, &'static str);
 
 /// 验证内嵌 JSON，并区分无法解析与结构不兼容。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn validate_json_field(
   row: &Map<String, Value>,
   field: &'static str,
@@ -1428,13 +1428,13 @@ fn validate_json_field(
 }
 
 /// 解析存放在 SQLite TEXT 列中的 JSON；不改写存储文本。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn parse_nested(value: &Value) -> Option<Value> {
   value.as_str().and_then(|s| parse_json(s, MAX_FIELD_BYTES).ok())
 }
 
 /// 按客户端 JSON 数字和对象语义比较；数组顺序仍表示业务数据。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn same_json(left: &Value, right: &Value) -> bool {
   match (left, right) {
     (Value::Number(a), Value::Number(b)) => a.as_f64() == b.as_f64(),
@@ -1449,7 +1449,7 @@ fn same_json(left: &Value, right: &Value) -> bool {
 }
 
 /// 比较投影中的单个字段；忽略本地配队外链和无跳层值的储存差异。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn same_projected_field(table: &Table, column: &Column, a: &Value, b: &Value) -> bool {
   a == b
     || (table.name == "SpiralAbyss"
@@ -1471,7 +1471,7 @@ fn same_projected_field(table: &Table, column: &Column, a: &Value, b: &Value) ->
 }
 
 /// 同一比较结果用于判定和解释冲突；超出明细预算时找到首个差异即可。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn business_differences(
   table: &Table,
   projection: &SchemaProjection,
@@ -1498,10 +1498,10 @@ fn business_differences(
 }
 
 /// 祈愿名称仅接受随应用附带的词条，不把备份里任意的名称文本转交给 WebView。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn is_catalog_wish_name(name: &str) -> bool {
   /// 应用图鉴中用于冲突展示的唯一字段。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(serde::Deserialize)]
   struct WikiName {
     name: String,
@@ -1520,7 +1520,7 @@ fn is_catalog_wish_name(name: &str) -> bool {
 }
 
 /// 将明确许可且形状受限的业务标量投影到 IPC；本机旧数据同样不能跳过此约束。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn conflict_value(table: &Table, column: &Column, value: &Value) -> Option<SyncConflictValue> {
   use SyncConflictValue::{Boolean, Integer, Text, Unset};
   let text = || value.as_str().map(|s| Text(s.to_owned()));
@@ -1563,7 +1563,7 @@ fn conflict_value(table: &Table, column: &Column, value: &Value) -> Option<SyncC
 }
 
 /// 标识信息来自已通过 v1 校验的快照，差异值仅限白名单标量；不能用明细重建原记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn conflict_detail(
   table: &Table,
   fields: &[&Column],
@@ -1595,7 +1595,7 @@ fn conflict_detail(
 }
 
 /// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn validate_record(table: &Table, row: &Map<String, Value>) -> Result<(), RecordIssue> {
   let check = |valid, field, reason| if valid { Ok(()) } else { Err((field, reason)) };
   for c in table.columns {
@@ -1671,13 +1671,13 @@ fn validate_record(table: &Table, row: &Map<String, Value>) -> Result<(), Record
 }
 
 /// 校验快照、版本、所有记录和重复主键；失败时不访问数据库。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn validate_snapshot(snapshot: &str) -> Result<Records, String> {
   validate_snapshot_value(parse_json(snapshot, MAX_SNAPSHOT_BYTES)?)
 }
 
 /// 按记录协议版本分派，不将新版记录误当成 v1，也不猜测或删除其字段。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn validate_snapshot_value(root: Value) -> Result<Records, String> {
   match root.get("version").and_then(Value::as_u64) {
     Some(SNAPSHOT_V1) => decode_v1_snapshot(root),
@@ -1687,7 +1687,7 @@ fn validate_snapshot_value(root: Value) -> Result<Records, String> {
 }
 
 /// 保持已发布的 v1 白名单、数据结构及校验边界，与本地 SQLite 表版本无关。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn decode_v1_snapshot(mut root: Value) -> Result<Records, String> {
   object(&root, &["version", "tables"], &[]).ok_or_else(|| INVALID.to_string())?;
   let mut tables = match root["tables"].take() {
@@ -1754,7 +1754,7 @@ fn decode_v1_snapshot(mut root: Value) -> Result<Records, String> {
 }
 
 /// 只读取并限额核对本次传入主键对应的行；祈愿表仅按全局 id 检索。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn existing_row(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
@@ -1784,7 +1784,7 @@ async fn existing_row(
 }
 
 /// 只向目标有的 v1 列绑定参数；本地扩展列使用 SQLite 默认值，不覆盖旧记录。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn insert_record(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
@@ -1818,7 +1818,7 @@ async fn insert_record(
 }
 
 /// 在同一事务内查重、插入并生成只读的冲突明细；不覆盖原值或传播删除。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn import_transaction(
   tx: &mut Transaction<'_, Sqlite>,
   records: &Records,
@@ -1865,7 +1865,7 @@ async fn import_transaction(
 }
 
 /// 显式提交或回滚整包；并发写冲突返回脱敏错误而不重试覆盖。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn import_into_pool(pool: &SqlitePool, records: &Records) -> Result<SyncImportStats, String> {
   let mut tx = pool.begin().await.map_err(|_| DATABASE.to_string())?;
   match import_transaction(&mut tx, records).await {
@@ -1891,7 +1891,7 @@ mod tests {
   use sqlx::sqlite::SqlitePoolOptions;
 
   /// 创建仅存在于内存中的测试库，并使用项目现行建表 SQL。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn pool() -> SqlitePool {
     let pool =
       SqlitePoolOptions::new().max_connections(1).connect("sqlite::memory:").await.unwrap();
@@ -1903,14 +1903,14 @@ mod tests {
   }
 
   /// 构造不含任何真实用户资料的祈愿记录。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn gacha(id: &str, uid: &str, name: &str) -> Value {
     json!({"id":id,"uid":uid,"gachaType":"301","uigfType":"301","time":"2026-01-02 03:04:05",
       "itemId":"10001","name":name,"type":"角色","rank":"5","count":"1","updated":"2026-01-02 03:04:05"})
   }
 
   /// 构造带楼层和角色的本地资源深渊记录。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn abyss(uid: &str, id: i64) -> Value {
     let rank = json!([{"id":10001,"value":12,"star":5}]).to_string();
     let floors = json!([{"id":12,"isUnlock":1,"winStar":3,"maxStar":3,"buff":["效果"],
@@ -1925,14 +1925,14 @@ mod tests {
   }
 
   /// 构造完整剧诗统计。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn stat() -> Value {
     json!({"difficulty_id":1,"max_round_id":0,"heraldry":0,"get_medal_round_list":[],"medal_num":0,
       "coin_num":0,"avatar_bonus_num":0,"rent_cnt":0,"tarot_finished_cnt":0})
   }
 
   /// 构造含真实字段形状和合成静态资源的剧诗记录。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn combat(uid: &str, id: i64) -> Value {
     let avatar = json!({"avatar_id":10001,"avatar_type":1,"name":"测试角色","element":"Cryo",
       "image":"https://act-webstatic.mihoyo.com/game_record/genshin/character_icon/UI_AvatarIcon_Test.png",
@@ -1954,7 +1954,7 @@ mod tests {
   }
 
   /// 构造含队伍、最佳伤害、赋光、颜色文字和 CDN 图像的危战记录。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn challenge(uid: &str, id: i64, name: &str) -> Value {
     let image =
       "https://act-webstatic.mihoyo.com/game_record/genshin/character_icon/UI_AvatarIcon_Test.png";
@@ -1977,13 +1977,13 @@ mod tests {
   }
 
   /// 构造四表快照信封。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn snapshot(g: Vec<Value>, a: Vec<Value>, c: Vec<Value>, h: Vec<Value>) -> String {
     json!({"version":1,"tables":{"GachaRecords":g,"SpiralAbyss":a,"RoleCombat":c,"HardChallenge":h}}).to_string()
   }
 
   /// 四表往返保留字节值；再次导入视为相同而非覆盖。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn four_table_round_trip_is_insert_only_and_idempotent() {
     tauri::async_runtime::block_on(async {
@@ -2017,7 +2017,7 @@ mod tests {
   }
 
   /// 同 ID 的祈愿只报告业务差异，ID 不经过浮点转换，重拉仍保留原记录。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn wish_conflict_explains_the_exact_name_difference_without_writing() {
     tauri::async_runtime::block_on(async {
@@ -2048,7 +2048,7 @@ mod tests {
   }
 
   /// 同键的敏感旧值、未知本机列和 JSON 键都不会进入 IPC 明细。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn conflict_details_do_not_echo_untrusted_values_or_nested_json() {
     tauri::async_runtime::block_on(async {
@@ -2094,7 +2094,7 @@ mod tests {
   }
 
   /// 明细全局限额独立于真实计数，超额的其他类别仍会计数。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn conflict_details_are_bounded_but_counts_remain_exact() {
     tauri::async_runtime::block_on(async {
@@ -2119,7 +2119,7 @@ mod tests {
   }
 
   /// 全局祈愿 id 不因 UID 不同而覆盖；复合键允许相同 id 的不同 UID。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn keys_conflicts_and_uid_isolation() {
     tauri::async_runtime::block_on(async {
@@ -2173,7 +2173,7 @@ mod tests {
   }
 
   /// 即使后表插入受约束失败，前表插入也必须回滚。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn database_failure_rolls_back_every_table() {
     tauri::async_runtime::block_on(async {
@@ -2214,7 +2214,7 @@ mod tests {
   }
 
   /// v2 ALTER TABLE 追加的三列位于 updated 后，也必须按列名读写。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn migrated_column_order_and_legacy_nulls_are_handled_without_fabrication() {
     tauri::async_runtime::block_on(async {
@@ -2263,7 +2263,7 @@ mod tests {
   }
 
   /// 忽略更新时间、JSON 格式和数字记法，保留原始值并识别真实业务变化。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn business_equality_is_semantic_but_array_order_matters() {
     tauri::async_runtime::block_on(async {
@@ -2311,7 +2311,7 @@ mod tests {
   }
 
   /// 空库不发布；未证实的列重命名既不读取其值，也不产生部分导入。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn empty_export_and_unrecognized_rename_fail_closed() {
     tauri::async_runtime::block_on(async {
@@ -2339,7 +2339,7 @@ mod tests {
   }
 
   /// 源端的任意本地扩展值不得进入快照；目标端默认列及已存在的扩展值不被覆盖。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn additive_columns_use_local_defaults_and_do_not_leak_or_overwrite() {
     tauri::async_runtime::block_on(async {
@@ -2400,7 +2400,7 @@ mod tests {
   }
 
   /// 缺少历史可选列的深渊表可双向同步无值记录；有跳层值时旧库必须拒绝整包。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_abyss_projection_never_discards_skipped_floor() {
     tauri::async_runtime::block_on(async {
@@ -2453,7 +2453,7 @@ mod tests {
   }
 
   /// 新增必填列只能由非空默认值填充；调整已知列的空值约束也不能凭空补值。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn incompatible_required_columns_reject_the_entire_import() {
     tauri::async_runtime::block_on(async {
@@ -2518,7 +2518,7 @@ mod tests {
   }
 
   /// 快照业务版本有独立错误；畸形版本和 v1 额外字段仍不接受。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn record_protocol_rejects_unknown_versions_separately() {
     let future = r#"{"version":2,"future_records":[]}"#;
@@ -2539,7 +2539,7 @@ mod tests {
   }
 
   /// 同名临时表不能遮蔽主库或结构检查；有临时触发器时拒绝整包。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn temporary_objects_cannot_redirect_writes() {
     tauri::async_runtime::block_on(async {
@@ -2576,7 +2576,7 @@ mod tests {
   }
 
   /// 无关的大记录不影响小包导入；同键超限仍拒绝整包并保留发布限额。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn import_checks_field_limits_only_for_matching_rows() {
     tauri::async_runtime::block_on(async {
@@ -2619,7 +2619,7 @@ mod tests {
   }
 
   /// 两种旧版无跳层值不冲突；有实际跳层值时仍按真实冲突处理。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn absent_skipped_floor_is_identical_without_rewriting_existing_rows() {
     tauri::async_runtime::block_on(async {
@@ -2664,7 +2664,7 @@ mod tests {
   }
 
   /// 不可由本版本安全导入的本地记录也不得导出并覆盖远端快照。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn export_rejects_unimportable_source() {
     tauri::async_runtime::block_on(async {
@@ -2684,7 +2684,7 @@ mod tests {
   }
 
   /// 嵌套详情的语法与结构错误有区分，未知键与记录内容不出现在错误中。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn record_error_reports_safe_field_without_echoing_values() {
     let mut row = combat("123456789", 1);
@@ -2704,7 +2704,7 @@ mod tests {
   }
 
   /// 不导出其他表中的数据。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn export_never_selects_unlisted_tables() {
     tauri::async_runtime::block_on(async {
@@ -2730,7 +2730,7 @@ mod tests {
   }
 
   /// 校验器拒绝重复键、重复主键、未知列、格式欺骗及超大包。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn malicious_or_ambiguous_input_is_rejected() {
     let duplicate = r#"{"version":1,"version":1,"tables":{}}"#;
@@ -2752,7 +2752,7 @@ mod tests {
   }
 
   /// 行数、业务数组和字段字节上限分别检查。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn snapshot_collection_and_field_limits_are_enforced() {
     let too_many = snapshot(vec![Value::Null; MAX_ROWS], vec![Value::Null], vec![], vec![]);
@@ -2774,7 +2774,7 @@ mod tests {
   }
 
   /// 安全的本地与官方静态路径均可使用；拒绝任意域、动态路径和 URL 归一化欺骗。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn image_boundaries_allow_only_known_static_paths() {
     for url in [
@@ -2832,7 +2832,7 @@ mod tests {
   }
 
   /// 单人和联机中的数字 DPS 使用 v1 文本表示，不改本机行或现有文本。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_challenge_numeric_dps_exports_as_text_without_rewriting_source() {
     tauri::async_runtime::block_on(async {
@@ -2885,7 +2885,7 @@ mod tests {
   }
 
   /// 布尔、对象、空值和缺字段不是可转换的历史数值；其他字段仍使用原校验。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_challenge_dps_does_not_bypass_other_validation() {
     let table = &TABLES[3];
@@ -2917,7 +2917,7 @@ mod tests {
   }
 
   /// 历史可选摘要只在 v1 快照内补为空值；接收、判同与原库保留一起验证。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_combat_fight_can_export_missing_summaries_without_rewriting_source() {
     tauri::async_runtime::block_on(async {
@@ -2985,7 +2985,7 @@ mod tests {
   }
 
   /// 缺整个详情、缺必要统计、已存在的不合法值都不能被补空掩盖。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_combat_fight_does_not_mask_invalid_values_or_missing_required_fields() {
     for invalid in [
@@ -3009,7 +3009,7 @@ mod tests {
   }
 
   /// 旧字段和图片只在内存中规范，同一批原始业务记录拉取后不报冲突或改库。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn legacy_export_normalizes_images_and_missing_fields_without_changing_source() {
     tauri::async_runtime::block_on(async {
@@ -3099,7 +3099,7 @@ mod tests {
   }
 
   /// 实库旧剧诗的缺月谕字段、数字时间与词条详情都保留业务语义。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn historical_combat_rounds_and_effect_links_are_supported() {
     let mut row = combat("123456789", 1);
@@ -3174,7 +3174,7 @@ mod tests {
   }
 
   /// 不猜测缺失的整个剧诗详情；保留安全的字段级错误而不泄露原内容。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn unknown_combat_detail_is_not_fabricated() {
     tauri::async_runtime::block_on(async {
@@ -3196,7 +3196,7 @@ mod tests {
   }
 
   /// 导出不泄露储存中的阵容外链，合并不覆盖本机外链，也不误报冲突。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn lineup_links_stay_local_and_do_not_cause_conflicts() {
     tauri::async_runtime::block_on(async {
@@ -3232,7 +3232,7 @@ mod tests {
   }
 
   /// 保留安全文字、颜色和换行；拒绝导入阵容外链和旧恢复路径无法安全转义的文本。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn text_and_unused_link_boundaries() {
     assert!(safe_text(&json!(

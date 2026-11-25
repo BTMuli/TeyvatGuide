@@ -180,11 +180,11 @@
       :uid="currentUid"
     />
 
-    <template #toolbar>
+    <template #footer>
       <v-btn
-        color="var(--tgc-od-orange)"
         prepend-icon="mdi-calculator-variant-outline"
-        variant="tonal"
+        type="button"
+        variant="text"
         @click="openPlan"
       >
         前往养成计划
@@ -193,9 +193,9 @@
         :disabled="!canAddToPlan"
         :loading="planSaving"
         :title="addToPlanTitle"
-        color="var(--tgc-od-green)"
         prepend-icon="mdi-content-save-check-outline"
-        variant="tonal"
+        type="button"
+        variant="flat"
         @click="addToPlan"
       >
         {{ inPlan ? "更新当前养成计划" : "添加到当前养成计划" }}
@@ -1005,7 +1005,7 @@ async function openPlan(): Promise<void> {
 
 :deep(.tolp-panel.is-sharing) {
   .tolp-actions,
-  .tolp-toolbar,
+  .tolp-footer,
   .pwcc-level-nodes {
     display: none;
   }

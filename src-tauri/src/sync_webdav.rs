@@ -4,7 +4,7 @@
 //!
 //! HTTP 必须由调用方显式允许；它会泄露凭证和数据，也无法抵御篡改。
 //! 本模块不保存凭证、不删除远程对象，也不将 URL、凭证或响应体写入错误或日志。
-//! @since Beta v0.14.1
+//! @since Beta v0.14.2
 
 use reqwest::{
   Client, Method, Response, StatusCode,
@@ -56,7 +56,7 @@ type SyncResult<T> = Result<T, &'static str>;
 
 /// 只识别清单版本字段，不要求未来版本沿用 v1 的其他字段。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Deserialize)]
 struct ManifestVersion {
   format_version: u64,
@@ -64,7 +64,7 @@ struct ManifestVersion {
 
 /// current 和独立历史清单共用的 v1 信封；业务 JSON 由数据层验证。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SnapshotMetadata {
@@ -77,7 +77,7 @@ struct SnapshotMetadata {
 
 /// 已限制长度的 HTTP 响应及其强 ETag 候选值。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct Resource {
   bytes: Vec<u8>,
   etag: Option<HeaderValue>,
@@ -85,7 +85,7 @@ struct Resource {
 
 /// 仅在一次操作期间持有连接信息和认证凭证。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 struct Webdav {
   base: Url,
   client: Client,
@@ -95,7 +95,7 @@ struct Webdav {
 
 /// 校验目录地址，拒绝所有 URL 内认证信息、查询、片段及未明确允许的 HTTP。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn parse_directory(address: &str, unsafe_http: bool) -> SyncResult<Url> {
   if address.is_empty()
     || address.len() > 4096
@@ -131,7 +131,7 @@ fn parse_directory(address: &str, unsafe_http: bool) -> SyncResult<Url> {
 
 /// 创建不跟随重定向、启用正常证书校验且有超时的客户端。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn create_webdav(
   address: &str,
   username: String,
@@ -164,7 +164,7 @@ impl Webdav {
   /// 把受控文件名作为单一路径段添加；空文件名返回以 `/` 结尾的目录 URL。
   /// 不接受服务器提供的 URL。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn resource_url(&self, filename: &str) -> SyncResult<Url> {
     let mut url = self.base.clone();
     url.path_segments_mut().map_err(|_| INVALID_URL)?.pop_if_empty().push(filename);
@@ -173,7 +173,7 @@ impl Webdav {
 
   /// 构造不缓存、不重定向的带认证请求。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn request(&self, method: Method, filename: &str) -> SyncResult<reqwest::RequestBuilder> {
     Ok(
       self
@@ -187,7 +187,7 @@ impl Webdav {
 
   /// 首次发布时只检查目录的 HTTP 状态，不读响应体，也不据此判断写入能力。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn check_directory(&self) -> SyncResult<()> {
     let method = Method::from_bytes(b"PROPFIND").map_err(|_| CLIENT_ERROR)?;
     let response =
@@ -203,7 +203,7 @@ impl Webdav {
 
   /// 读取一个文件；404 与其他错误明确区分，响应大小受到限制。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn get(&self, filename: &str, limit: usize) -> SyncResult<Option<Resource>> {
     let response = self.request(Method::GET, filename)?.send().await.map_err(network_error)?;
     if response.status() == StatusCode::NOT_FOUND {
@@ -219,7 +219,7 @@ impl Webdav {
 
   /// 仅请求创建 UUID 对象；冲突时不重试，也不降级为无条件写入。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn put_new(&self, filename: &str, body: Vec<u8>) -> SyncResult<()> {
     let status = self.put(filename, body, (IF_NONE_MATCH, HeaderValue::from_static("*"))).await?;
     if put_succeeded(status) {
@@ -234,7 +234,7 @@ impl Webdav {
   /// 使用指定条件发送 PUT；只读取状态，丢弃服务端响应体。
   /// 调用方根据阶段解释请求失败是否意味着发布结果未知。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn put(
     &self,
     filename: &str,
@@ -255,14 +255,14 @@ impl Webdav {
 
 /// 返回不包含 URL 或底层错误文本的网络错误。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn network_error(error: reqwest::Error) -> &'static str {
   if error.is_timeout() { TIMEOUT } else { NETWORK }
 }
 
 /// 将明确的 HTTP 认证或权限拒绝映射为 AUTH，其他状态沿用调用阶段的错误。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn auth_or(status: StatusCode, fallback: &'static str) -> &'static str {
   match status {
     StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => AUTH,
@@ -272,14 +272,14 @@ fn auth_or(status: StatusCode, fallback: &'static str) -> &'static str {
 
 /// 把 HTTP 状态映射为不含地址和响应正文的固定错误。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn status_error(status: StatusCode) -> &'static str {
   auth_or(status, if status.is_redirection() { REDIRECT } else { HTTP_ERROR })
 }
 
 /// 限制实际读取的响应大小，也拒绝声明长度过大的响应。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn read_limited(mut response: Response, limit: usize) -> SyncResult<Vec<u8>> {
   if response.content_length().is_some_and(|length| length > limit as u64) {
     return Err(RESPONSE_TOO_LARGE);
@@ -296,7 +296,7 @@ async fn read_limited(mut response: Response, limit: usize) -> SyncResult<Vec<u8
 
 /// 仅接受单个、合法的强 ETag；弱 ETag 不可用于并发写入保护。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn strong_etag(headers: &HeaderMap) -> Option<HeaderValue> {
   let all_values = headers.get_all(ETAG);
   let mut values = all_values.iter();
@@ -319,21 +319,21 @@ fn strong_etag(headers: &HeaderMap) -> Option<HeaderValue> {
 
 /// 判断 PUT 成功状态，拒绝其他状态和所有重定向。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn put_succeeded(status: StatusCode) -> bool {
   matches!(status, StatusCode::OK | StatusCode::CREATED | StatusCode::NO_CONTENT)
 }
 
 /// 计算小写 SHA-256 摘要。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn digest(bytes: &[u8]) -> String {
   hex::encode(Sha256::digest(bytes))
 }
 
 /// 只允许标准小写 UUIDv4 标识作为输入，不接受路径、编码别名或其他 UUID 版本。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn parse_snapshot_id(id: &str) -> Option<Uuid> {
   if id.len() != 36 {
     return None;
@@ -347,14 +347,14 @@ fn parse_snapshot_id(id: &str) -> Option<Uuid> {
 
 /// 由已生成或验证的 UUID 构造数据文件名。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn snapshot_filename(id: Uuid) -> String {
   format!("teyvatguide-sync-{id}.json")
 }
 
 /// 由已生成或验证的 UUID 构造与数据同 ID 的独立历史清单名。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn manifest_filename(id: Uuid) -> String {
   format!("teyvatguide-sync-{id}.manifest.json")
 }
@@ -362,7 +362,7 @@ fn manifest_filename(id: Uuid) -> String {
 /// 先识别清单版本，再严格校验 v1 的 ID、受控文件名、字节长度与摘要。
 /// 历史清单还必须绑定请求的 ID。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn parse_metadata(bytes: &[u8], expected_id: Option<Uuid>) -> SyncResult<SnapshotMetadata> {
   let manifest = str::from_utf8(bytes).map_err(|_| INVALID_METADATA)?;
   // 清单必须是 JSON 对象；Serde 默认也允许用数组表示结构体。
@@ -391,7 +391,7 @@ fn parse_metadata(bytes: &[u8], expected_id: Option<Uuid>) -> SyncResult<Snapsho
 
 /// 从受限文件名读取快照并验证字节数和摘要后返回。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn verified_snapshot(webdav: &Webdav, metadata: &SnapshotMetadata) -> SyncResult<Vec<u8>> {
   let resource = webdav.get(&metadata.snapshot_file, MAX_SNAPSHOT_BYTES).await?.ok_or(INTEGRITY)?;
   if resource.bytes.len() as u64 != metadata.byte_length
@@ -406,7 +406,7 @@ async fn verified_snapshot(webdav: &Webdav, metadata: &SnapshotMetadata) -> Sync
 ///
 /// 探测只能发现本次请求中可观察到的协议错误，不能证明恶意服务器或不同资源上的行为。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
   let id = Uuid::new_v4();
   let filename = format!("teyvatguide-sync-probe-{id}.json");
@@ -463,7 +463,7 @@ async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
 
 /// 只读预检：校验已有快照并保留其 ETag；仅首次发布时检查目录。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn preflight_publish(webdav: &Webdav) -> SyncResult<Option<HeaderValue>> {
   if let Some(resource) = webdav.get(CURRENT_FILE, MAX_METADATA_BYTES).await? {
     let metadata = parse_metadata(&resource.bytes, None)?;
@@ -479,7 +479,7 @@ async fn preflight_publish(webdav: &Webdav) -> SyncResult<Option<HeaderValue>> {
 
 /// 创建并读回数据和独立清单，再按预检所得 ETag 条件发布 current；只在发布验证后返回 ID。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn upload_inner(
   webdav: Webdav,
   snapshot: String,
@@ -529,7 +529,7 @@ async fn upload_inner(
 
 /// 已知历史 ID 时只读取独立清单；否则保留从 current 拉取的路径。两者均不写入远端。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 async fn download_inner(webdav: Webdav, id: Option<Uuid>) -> SyncResult<String> {
   let (filename, not_found) = match id {
     Some(id) => (manifest_filename(id), HISTORY_NOT_FOUND),
@@ -543,7 +543,7 @@ async fn download_inner(webdav: Webdav, id: Option<Uuid>) -> SyncResult<String> 
 
 /// 连接预检成功后才导出并上传快照，返回已确认发布的 ID。明文 HTTP 必须显式允许。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 pub(crate) async fn upload_snapshot(
   address: &str,
   username: String,
@@ -568,7 +568,7 @@ pub(crate) async fn upload_snapshot(
 
 /// 拉取当前或指定 ID 的快照；只有元数据、长度、摘要和 UTF-8 全部通过才返回内容。
 ///
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 pub(crate) async fn download_snapshot(
   address: &str,
   username: String,
@@ -605,7 +605,7 @@ mod tests {
 
   /// 仅用于回环测试服务器的内存对象。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(Clone)]
   struct Object {
     bytes: Vec<u8>,
@@ -614,7 +614,7 @@ mod tests {
 
   /// current 写入时模拟连接在不同持久化阶段断开。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(Clone, Copy)]
   enum Disconnect {
     BeforeWrite,
@@ -624,7 +624,7 @@ mod tests {
 
   /// 回环服务可使用长度头、连接结束或分块对响应定界。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(Clone, Copy, Default)]
   enum ResponseFraming {
     #[default]
@@ -635,7 +635,7 @@ mod tests {
 
   /// 只对指定的条件 PUT 返回合成错误，不影响其他读写路径。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(Clone, Copy, Debug, PartialEq, Eq)]
   enum PutTarget {
     Current,
@@ -646,7 +646,7 @@ mod tests {
 
   /// 本地合成 WebDAV 状态；不访问用户数据或外部服务。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[derive(Default)]
   struct ServerState {
     objects: HashMap<String, Object>,
@@ -670,7 +670,7 @@ mod tests {
 
   /// 使用回环端口运行的最小合成 HTTP 服务。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   struct FakeServer {
     address: SocketAddr,
     state: Arc<Mutex<ServerState>>,
@@ -681,7 +681,7 @@ mod tests {
   impl FakeServer {
     /// 启动一个仅监听本机回环地址的服务。
     ///
-    /// @since Beta v0.14.1
+    /// @since Beta v0.14.2
     fn new() -> Self {
       let listener = TcpListener::bind("127.0.0.1:0").unwrap();
       let address = listener.local_addr().unwrap();
@@ -702,7 +702,7 @@ mod tests {
 
     /// 返回临时服务上的测试目录地址。
     ///
-    /// @since Beta v0.14.1
+    /// @since Beta v0.14.2
     fn url(&self) -> String {
       format!("http://{}/dav/", self.address)
     }
@@ -711,7 +711,7 @@ mod tests {
   impl Drop for FakeServer {
     /// 唤醒并关闭测试服务线程。
     ///
-    /// @since Beta v0.14.1
+    /// @since Beta v0.14.2
     fn drop(&mut self) {
       self.stop.store(true, Ordering::SeqCst);
       let _ = TcpStream::connect(self.address);
@@ -723,14 +723,14 @@ mod tests {
 
   /// 为合成对象生成强 ETag。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn object_etag(object: &Object) -> String {
     format!("\"revision-{}\"", object.revision)
   }
 
   /// 处理合成的 GET、PROPFIND 和条件 PUT；所有远程内容均为测试数据。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn handle_connection(mut stream: TcpStream, state: &Arc<Mutex<ServerState>>) {
     stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
     let mut received = Vec::new();
@@ -901,14 +901,14 @@ mod tests {
 
   /// 在 Tauri 运行时执行单个异步测试步骤。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn run<T>(future: impl Future<Output = T>) -> T {
     tauri::async_runtime::block_on(future)
   }
 
   /// 使用合成账号上传到本机测试服务。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn upload(server: &FakeServer, snapshot: &str) -> Result<String, String> {
     run(upload_snapshot(&server.url(), "user".into(), "secret".into(), false, true, async {
       Ok(snapshot.into())
@@ -917,21 +917,21 @@ mod tests {
 
   /// 测试连接失败分支；若意外轮询快照导出则立即失败。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   async fn unexpected_snapshot_loader() -> Result<String, String> {
     panic!("连接预检失败时不应轮询导出")
   }
 
   /// 使用合成账号从本机测试服务下载 current。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn download(server: &FakeServer) -> Result<String, String> {
     run(download_snapshot(&server.url(), "user".into(), "secret".into(), false, true, None))
   }
 
   /// 使用合成账号直接从独立清单恢复指定快照。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn download_history(server: &FakeServer, id: &str) -> Result<String, String> {
     run(download_snapshot(
       &server.url(),
@@ -945,7 +945,7 @@ mod tests {
 
   /// 地址认证边界和明文授权不允许被隐式绕过。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn directory_and_transport_validation() {
     assert!(parse_directory("https://example.test/dav", false).is_ok());
@@ -965,7 +965,7 @@ mod tests {
 
   /// 强 ETag 必须是唯一的合法实体标签。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn only_single_strong_etag_is_accepted() {
     let mut headers = HeaderMap::new();
@@ -982,7 +982,7 @@ mod tests {
 
   /// 完成两次发布后，current 返回新快照，旧 ID 仍可恢复原内容。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn upload_download_and_previous_snapshot_remains() {
     let server = FakeServer::new();
@@ -1003,7 +1003,7 @@ mod tests {
 
   /// 服务端不遵循条件写入或只提供弱 ETag 时不得修改旧指针。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn unsafe_servers_are_rejected_without_replacing_previous_pointer() {
     for weak in [false, true] {
@@ -1026,7 +1026,7 @@ mod tests {
 
   /// 创建快照失败或并发指针更新不得覆盖旧快照。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn failed_upload_and_conflict_preserve_previous_snapshot() {
     let server = FakeServer::new();
@@ -1046,7 +1046,7 @@ mod tests {
 
   /// 验证指定 PUT 失败的对外分类，以及旧指针和历史恢复均不受影响。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   fn assert_put_failure_preserves_previous(target: PutTarget, status: u16, error: &str) {
     let server = FakeServer::new();
     let old_id = upload(&server, "old").unwrap();
@@ -1065,7 +1065,7 @@ mod tests {
 
   /// 最终 current PUT 的认证拒绝是明确失败，500 仍是发布结果未知。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn final_current_put_distinguishes_auth_from_unknown() {
     for (status, error) in [(401, AUTH), (403, AUTH), (500, PUBLISH_UNKNOWN)] {
@@ -1075,7 +1075,7 @@ mod tests {
 
   /// 三次后续条件探针的认证拒绝都不是条件写入能力不受支持。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn later_probe_puts_report_auth_rejection() {
     for target in
@@ -1089,7 +1089,7 @@ mod tests {
 
   /// 确认独立清单的写入结果之前，不得变更 current。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn damaged_manifest_prevents_publish() {
     let server = FakeServer::new();
@@ -1102,7 +1102,7 @@ mod tests {
 
   /// 指针提交前后断线都报告未知状态，既不回滚也不删除历史快照。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn disconnect_before_or_after_publish_reports_unknown() {
     let server = FakeServer::new();
@@ -1118,7 +1118,7 @@ mod tests {
 
   /// 模拟服务端在断线后留下半个 current，旧 ID 仍能直接恢复且不尝试修复指针。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn truncated_current_after_disconnect_is_recoverable_by_old_id() {
     let server = FakeServer::new();
@@ -1141,7 +1141,7 @@ mod tests {
 
   /// 快照被破坏或信封试图引用其他路径时绝不返回数据。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn corrupted_snapshot_and_untrusted_metadata_are_rejected() {
     let server = FakeServer::new();
@@ -1164,7 +1164,7 @@ mod tests {
 
   /// 版本只接受对象中唯一的正整数；未知版本不能掩盖损坏的 JSON。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn malformed_manifest_versions_are_invalid_metadata() {
     for body in [
@@ -1192,7 +1192,7 @@ mod tests {
 
   /// 旧信封的字节格式保持不变；未知 current 不触发导出或写入，且旧历史仍可读取。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn future_current_blocks_publish_without_touching_v1_history() {
     let server = FakeServer::new();
@@ -1245,7 +1245,7 @@ mod tests {
 
   /// 历史 ID 须为规范 UUID，清单须绑定请求 ID，并通过版本、长度与摘要格式校验。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn invalid_history_ids_and_manifests_are_rejected() {
     let server = FakeServer::new();
@@ -1286,7 +1286,7 @@ mod tests {
 
   /// 认证和重定向时只返回脱敏错误，且不跟随跳转。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn errors_are_redacted_and_redirects_are_not_followed() {
     let server = FakeServer::new();
@@ -1307,7 +1307,7 @@ mod tests {
 
   /// 即使响应不声明 Content-Length，也要按实际流量检查上限。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn response_limits_cover_declared_close_delimited_and_chunked_bodies() {
     let server = FakeServer::new();
@@ -1328,7 +1328,7 @@ mod tests {
 
   /// 本地连接参数不合法时，既不发送请求也不轮询导出。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn invalid_upload_connection_does_not_poll_snapshot_loader() {
     let server = FakeServer::new();
@@ -1352,7 +1352,7 @@ mod tests {
 
   /// current 读取失败时不检查目录也不轮询导出，并且只返回脱敏错误。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn current_request_failure_does_not_poll_snapshot_loader() {
     for (status, expected) in [(None, NETWORK), (Some(401), AUTH), (Some(403), AUTH)] {
@@ -1380,7 +1380,7 @@ mod tests {
 
   /// 目录探测错误不得触发导出或写入，不把响应体、地址或凭证带入错误。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn directory_probe_failure_does_not_poll_snapshot_loader() {
     for (status, expected) in [
@@ -1422,7 +1422,7 @@ mod tests {
 
   /// 首次发布允许 207 和明确未实现的状态，但不在导出成功前执行写入探针。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn first_publish_loader_failure_leaves_remote_untouched() {
     const EXPORT_ERROR: &str = "SYNC_INVALID：合成导出错误";
@@ -1451,7 +1451,7 @@ mod tests {
 
   /// 已有 current 只预检一次，发布必须使用导出前读到的 ETag。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn existing_current_uses_etag_from_before_snapshot_loader() {
     let server = FakeServer::new();
@@ -1487,7 +1487,7 @@ mod tests {
 
   /// 输入超过上限时在只读预检之后、任何写入之前失败，不截断数据。
   ///
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn snapshot_size_limit_is_enforced_before_writes() {
     let server = FakeServer::new();

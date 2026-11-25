@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -221,7 +221,7 @@ export function decodeRegExp(data: string): string {
 
 /**
  * 根据 id 获取对应角色或武器，兼容缺少物品 ID 的历史祈愿记录。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  * @param id - 物品 ID
  * @returns 角色或武器数据，无匹配时返回 false
  */

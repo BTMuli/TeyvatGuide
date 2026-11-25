@@ -1,11 +1,11 @@
 /**
  * 高难挑战记录的安全文本解析
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 
 /**
  * 只包含文本和受限颜色的展示片段
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 export type SafeChallengeTextPart = {
   text: string;
@@ -14,7 +14,7 @@ export type SafeChallengeTextPart = {
 
 /**
  * 将游戏颜色标记和换行解析为纯文本片段，不解析任意 HTML 或链接。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  * @param input - 不可信的挑战描述
  * @returns 可由 Vue 文本插值安全展示的片段
  */
@@ -30,7 +30,7 @@ export function parseSafeChallengeText(input: string): Array<SafeChallengeTextPa
 
   /**
    * 将当前颜色下的文本写入结果
-   * @since Beta v0.14.1
+   * @since Beta v0.14.2
    */
   function flush(): void {
     const text = buffer.join("");

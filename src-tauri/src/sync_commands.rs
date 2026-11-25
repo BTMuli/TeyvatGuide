@@ -1,5 +1,5 @@
 //! 主窗口的手动同步命令：Windows 发布和拉取，macOS 只拉取，快照不经过 WebView。
-//! @since Beta v0.14.1
+//! @since Beta v0.14.2
 
 use crate::sync_data::{
   SyncImportStats, export_sync_snapshot_internal, import_sync_snapshot_internal,
@@ -13,7 +13,7 @@ use tokio::sync::Mutex;
 static SYNC_OPERATION: Mutex<()> = Mutex::const_new(());
 
 /// 单次操作的连接信息；不做跨操作持久化或调试输出。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Connection {
@@ -25,7 +25,7 @@ struct Connection {
 }
 
 /// 仅 Windows 可发布，Windows 和 macOS 可拉取。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[derive(Clone, Copy)]
 enum SyncAction {
   Publish,
@@ -33,7 +33,7 @@ enum SyncAction {
 }
 
 /// 同步命令与应用主窗口绑定，非主窗口和其他平台均不能调用。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 fn permits_sync(os: &str, window_label: &str, action: SyncAction) -> bool {
   window_label == "TeyvatGuide"
     && match action {
@@ -43,7 +43,7 @@ fn permits_sync(os: &str, window_label: &str, action: SyncAction) -> bool {
 }
 
 /// Windows 主窗口发布；从连接预检到发布成功，整段操作互斥。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[tauri::command]
 async fn publish<R: Runtime>(
   window: WebviewWindow<R>,
@@ -66,7 +66,7 @@ async fn publish<R: Runtime>(
 }
 
 /// Windows 和 macOS 主窗口拉取；网络读取和完整校验完成后才进入 SQLite 写入事务。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 #[tauri::command]
 async fn pull<R: Runtime>(
   window: WebviewWindow<R>,
@@ -91,7 +91,7 @@ async fn pull<R: Runtime>(
 }
 
 /// 使用独立插件权限；仅本地主窗口获得调用权限，不改变普通应用命令的授权方式。
-/// @since Beta v0.14.1
+/// @since Beta v0.14.2
 pub(crate) fn init<R: Runtime>() -> plugin::TauriPlugin<R> {
   plugin::Builder::new("record-sync").invoke_handler(generate_handler![publish, pull]).build()
 }
@@ -101,7 +101,7 @@ mod tests {
   use super::*;
 
   /// Windows 新增拉取权限，macOS 保持只读，其他平台和子窗口继续拒绝。
-  /// @since Beta v0.14.1
+  /// @since Beta v0.14.2
   #[test]
   fn sync_actions_keep_the_platform_and_window_boundary() {
     for (os, publish, pull) in [

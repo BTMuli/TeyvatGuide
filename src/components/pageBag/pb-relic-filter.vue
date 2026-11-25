@@ -139,14 +139,14 @@
       </div>
     </div>
 
+    <template #footerStart>
+      <span>未选择或全选均表示不限</span>
+    </template>
     <template #footer>
-      <span class="pbrf-footer-hint">未选择或全选均表示不限</span>
-      <div class="pbrf-actions">
-        <v-btn class="pbrf-reset" variant="text" @click="resetFilter">重置选项</v-btn>
-        <v-btn class="pbrf-confirm" prepend-icon="mdi-check" variant="flat" @click="confirmSelect">
-          确定
-        </v-btn>
-      </div>
+      <v-btn type="button" variant="text" @click="resetFilter">重置选项</v-btn>
+      <v-btn prepend-icon="mdi-check" type="button" variant="flat" @click="confirmSelect">
+        确定
+      </v-btn>
     </template>
   </TwfFilterShell>
 </template>
@@ -472,34 +472,5 @@ function confirmSelect(): void {
   font-size: 16px;
   font-weight: 600;
   text-align: center;
-}
-
-.pbrf-footer-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.pbrf-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: 8px;
-}
-
-.pbrf-reset,
-.pbrf-confirm {
-  border-radius: 4px;
-  font-family: var(--font-text);
-}
-
-.pbrf-reset {
-  color: var(--box-text-2);
-}
-
-.pbrf-confirm {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

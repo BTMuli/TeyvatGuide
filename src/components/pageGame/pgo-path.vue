@@ -124,23 +124,19 @@
       </section>
     </div>
 
+    <template #footerStart>确认后才会登记为当前安装</template>
+
     <template #footer>
-      <span class="pgop-footer-hint">确认后才会登记为当前安装</span>
-      <div class="pgop-actions">
-        <v-btn :disabled="registering" class="pgop-cancel" variant="text" @click="onCancel">
-          取消
-        </v-btn>
-        <v-btn
-          :disabled="!canConfirm"
-          :loading="registering"
-          class="pgop-confirm"
-          prepend-icon="mdi-check"
-          variant="flat"
-          @click="onConfirm"
-        >
-          确认
-        </v-btn>
-      </div>
+      <v-btn :disabled="registering" variant="text" @click="onCancel">取消</v-btn>
+      <v-btn
+        :disabled="!canConfirm"
+        :loading="registering"
+        prepend-icon="mdi-check"
+        variant="flat"
+        @click="onConfirm"
+      >
+        确认
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -636,34 +632,5 @@ watch(
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.pgop-footer-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.pgop-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: 8px;
-}
-
-.pgop-cancel,
-.pgop-confirm {
-  border-radius: 4px;
-  font-family: var(--font-text);
-}
-
-.pgop-cancel {
-  color: var(--box-text-2);
-}
-
-.pgop-confirm {
-  background: var(--tgc-btn-1);
-  color: var(--box-text-1);
 }
 </style>

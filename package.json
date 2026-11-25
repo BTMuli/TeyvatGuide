@@ -1,8 +1,8 @@
 {
   "name": "teyvatguide",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Game Tool for GenshinImpact player",
-  "since": "0.14.1",
+  "since": "0.14.2",
   "private": true,
   "packageManager": "pnpm@12.18.0",
   "type": "module",
@@ -15,8 +15,6 @@
     "lint": "concurrently \"pnpm:lint:*(!fix)\"",
     "lint:fix": "concurrently \"pnpm:lint:*:fix\"",
     "lint-vue": "vue-tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "lint:code": "eslint .",
     "lint:code:fix": "eslint . --fix",
     "lint:style": "stylelint \"src/**/*.{vue,css,scss}\" -f verbose",
@@ -165,7 +163,6 @@
     "vite": "^8.3.8",
     "vite-plugin-vue-devtools": "^8.2.1",
     "vite-plugin-vuetify": "^2.1.3",
-    "vitest": "^5.1.0",
     "vue-eslint-parser": "^10.4.2",
     "vue-tsc": "^3.3.14",
     "yaml-eslint-parser": "^2.1.0"

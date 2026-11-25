@@ -1,6 +1,6 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import gameEnum from "@enum/game.js";
@@ -148,6 +148,38 @@ async function index(
     query: params,
   });
   return resp.data;
+}
+
+/**
+ * 获取当前游戏账号的七圣召唤战绩或收藏数据。
+ * @since Beta v0.14.1
+ * @param cookie - 当前米游社账号的 Cookie
+ * @param user - 当前游戏账号
+ * @param endpoint - 七圣召唤接口路径
+ * @param query - 分页、筛选或详情参数
+ * @returns 接口数据
+ */
+async function gcgRecord<K extends keyof TGApp.Game.Gcg.Endpoints>(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+  endpoint: K,
+  query?: Record<string, string | number | boolean>,
+): Promise<TGApp.Game.Gcg.Endpoints[K]> {
+  const params = { ...query, role_id: user.gameUid, server: user.region };
+  const ck = getWebAccountCookies(cookie);
+  const { data: response } = await TGHttps.get<
+    TGApp.BBS.Response.BaseWithData<TGApp.Game.Gcg.Endpoints[K] | null> | TGApp.BBS.Response.Base
+  >(`${trgAbu}gcg/${endpoint}`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
+  if (response.retcode === 10001 || response.retcode === -100) {
+    throw new Error("请重新登录米游社后刷新");
+  }
+  if (response.retcode === 10307) throw new Error("版本更新期间，七圣召唤数据维护中");
+  if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+  if (response.data === null) throw new Error("米游社未返回七圣召唤数据");
+  return response.data;
 }
 
 /**
@@ -330,6 +362,7 @@ async function roleTps(
 
 const recordReq = {
   card: gameRecordCard,
+  gcg: gcgRecord,
   index: index,
   actCalendar: actCalendar,
   daily: dailyNote,

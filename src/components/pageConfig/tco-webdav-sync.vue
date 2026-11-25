@@ -126,30 +126,26 @@
     </div>
 
     <template #footer>
-      <div class="sync-actions">
-        <v-btn :disabled="busy" type="button" variant="text" @click="visible = false">关闭</v-btn>
-        <v-btn
-          :disabled="busy"
-          :loading="busyOperation === 'pull'"
-          :variant="isWindows ? 'outlined' : 'flat'"
-          color="var(--tgc-btn-1)"
-          type="button"
-          @click="sync('pull')"
-        >
-          拉取记录
-        </v-btn>
-        <v-btn
-          v-if="isWindows"
-          :disabled="busy"
-          :loading="busyOperation === 'publish'"
-          color="var(--tgc-btn-1)"
-          type="button"
-          variant="flat"
-          @click="sync('publish')"
-        >
-          上传记录
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" type="button" variant="text" @click="visible = false">关闭</v-btn>
+      <v-btn
+        :disabled="busy"
+        :loading="busyOperation === 'pull'"
+        :variant="isWindows ? 'outlined' : 'flat'"
+        type="button"
+        @click="sync('pull')"
+      >
+        拉取记录
+      </v-btn>
+      <v-btn
+        v-if="isWindows"
+        :disabled="busy"
+        :loading="busyOperation === 'publish'"
+        type="button"
+        variant="flat"
+        @click="sync('publish')"
+      >
+        上传记录
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -212,7 +208,7 @@ type SyncConflictValue = string | number | boolean | null;
 
 /**
  * 冲突记录的快照身份与本机/快照差异；不含原始详情。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 type SyncConflictDetail = {
   table: SyncConflictTable;
@@ -234,7 +230,7 @@ type SyncCount = {
 
 /**
  * 拉取结果，以及仅用于本机展示的有界冲突明细。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 type SyncImportStats = {
   gachaRecords: SyncCount;
@@ -247,7 +243,7 @@ type SyncImportStats = {
 
 /**
  * 手动同步的操作方向。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  */
 type SyncOperation = "publish" | "pull";
 
@@ -377,7 +373,7 @@ function summarize(stats: SyncImportStats): string {
 
 /**
  * 串行执行用户选择的同步操作，仅上传前需要确认。
- * @since Beta v0.14.1
+ * @since Beta v0.14.2
  * @param operation - 同步操作方向
  */
 async function sync(operation: SyncOperation): Promise<void> {
@@ -541,11 +537,5 @@ async function sync(operation: SyncOperation): Promise<void> {
 
 .sync-conflict-omitted {
   margin: 8px 0 0;
-}
-
-.sync-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
 }
 </style>

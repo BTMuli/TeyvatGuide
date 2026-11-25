@@ -47,14 +47,11 @@
       />
     </div>
 
+    <template #footerStart>可设置范围 0–255 MB</template>
+
     <template #footer>
-      <span class="tcss-hint">可设置范围 0–255 MB</span>
-      <div class="tcss-actions">
-        <v-btn class="tcss-cancel" variant="text" @click="onCancel">取消</v-btn>
-        <v-btn class="tcss-confirm" prepend-icon="mdi-check" variant="flat" @click="onConfirm">
-          确定
-        </v-btn>
-      </div>
+      <v-btn variant="text" @click="onCancel">取消</v-btn>
+      <v-btn prepend-icon="mdi-check" variant="flat" @click="onConfirm">确定</v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -172,34 +169,5 @@ async function handleSliderEnd(): Promise<void> {
   :deep(.v-field__input) {
     font-size: 14px;
   }
-}
-
-.tcss-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  opacity: 0.72;
-}
-
-.tcss-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  column-gap: 8px;
-}
-
-.tcss-cancel,
-.tcss-confirm {
-  border-radius: 4px;
-  font-family: var(--font-text);
-}
-
-.tcss-cancel {
-  color: var(--box-text-2);
-}
-
-.tcss-confirm {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
 }
 </style>

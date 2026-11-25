@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -104,6 +104,24 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
              updated = $4`,
     [user.uid, user.cookie, user.brief, user.updated],
   );
+}
+
+/**
+ * 更新指定用户的 Cookie。
+ * @since Beta v0.14.1
+ * @param uid - 用户 UID
+ * @param cookie - 用户 Cookie
+ * @returns 无返回值
+ */
+async function saveCookie(uid: string, cookie: TGApp.App.Account.Cookie): Promise<void> {
+  const db = await TGSqlite.getDB();
+  const result = await db.execute(
+    "UPDATE UserAccount SET cookie = $1, updated = $2 WHERE uid = $3;",
+    [JSON.stringify(cookie), fmtUtil.dateTime(new Date().getTime()), uid],
+  );
+  if (result.rowsAffected !== 1) {
+    throw new Error("更新账号 Cookie 失败，账号不存在或已变更");
+  }
 }
 
 /**
@@ -433,6 +451,7 @@ const TSUserAccount = {
     getAllAccount,
     getAccount: getUserAccount,
     saveAccount,
+    saveCookie,
     updateCk: updateAllAccountCk,
     copy: copyCookie,
     deleteAccount,

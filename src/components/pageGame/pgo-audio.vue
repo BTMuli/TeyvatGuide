@@ -124,36 +124,29 @@
       <PgNotice v-if="errorMessage !== null" :text="errorMessage" tone="error" />
     </div>
 
+    <template #footerStart> 确认后会下载并自动应用；检测到游戏运行时将先询问是否退出。 </template>
+
     <template #footer>
-      <span class="audio-footer-hint">
-        确认后会下载并自动应用；检测到游戏运行时将先询问是否退出。
-      </span>
-      <div class="audio-actions">
-        <v-btn :disabled="busy" variant="text" @click="visible = false">取消</v-btn>
-        <v-btn
-          v-if="plan === null"
-          :disabled="!selectionChanged || selectedLanguages.length === 0 || occupyingTask"
-          :loading="busy"
-          class="audio-confirm"
-          color="var(--tgc-od-orange)"
-          variant="flat"
-          @click="evaluatePlan"
-        >
-          评估变更
-        </v-btn>
-        <v-btn
-          v-else
-          :disabled="!plan.hasSufficientSpace"
-          :loading="busy"
-          class="audio-confirm"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-check"
-          variant="flat"
-          @click="startTask"
-        >
-          确认修改
-        </v-btn>
-      </div>
+      <v-btn :disabled="busy" variant="text" @click="visible = false">取消</v-btn>
+      <v-btn
+        v-if="plan === null"
+        :disabled="!selectionChanged || selectedLanguages.length === 0 || occupyingTask"
+        :loading="busy"
+        variant="flat"
+        @click="evaluatePlan"
+      >
+        评估变更
+      </v-btn>
+      <v-btn
+        v-else
+        :disabled="!plan.hasSufficientSpace"
+        :loading="busy"
+        prepend-icon="mdi-check"
+        variant="flat"
+        @click="startTask"
+      >
+        确认修改
+      </v-btn>
     </template>
   </TopOverlay>
 </template>
@@ -420,7 +413,6 @@ watch(
 .audio-header,
 .audio-option,
 .audio-plan-heading,
-.audio-actions,
 .audio-evaluating {
   display: flex;
   align-items: center;
@@ -673,21 +665,6 @@ watch(
     font-weight: normal;
     line-height: 22px;
   }
-}
-
-.audio-footer-hint {
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.audio-actions {
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.audio-confirm {
-  color: var(--box-text-1);
 }
 
 @media (width <= 560px) {

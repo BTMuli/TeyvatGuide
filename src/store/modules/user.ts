@@ -1,6 +1,6 @@
 /**
  * 用户信息模块
- * @since Beta v0.13.2
+ * @since Beta v0.14.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -36,32 +36,55 @@ const useUserStore = defineStore(
     const account = ref<TGApp.Sqlite.Account.Game>(getEmptyGameAccount());
     const uid = ref<string>();
     const cookie = ref<TGApp.App.Account.Cookie>();
+    let switchingGameAccount = false;
 
     /**
      * 切换当前账号的游戏账户
-     * @since Beta v0.13.0
+     * @since Beta v0.14.1
      * @param uidG - 目标游戏 UID
+     * @param targetUser - 可选的目标米游社用户
      * @returns 是否切换成功
      */
-    async function switchGameAccount(uidG: string): Promise<boolean> {
-      if (!uid.value) {
-        showSnackbar.warn("未找到登录用户");
-        return false;
+    async function switchGameAccount(
+      uidG: string,
+      targetUser?: TGApp.App.Account.User,
+    ): Promise<boolean> {
+      if (switchingGameAccount) return false;
+      switchingGameAccount = true;
+      try {
+        const sourceUid = uid.value;
+        const sourceCookie = cookie.value;
+        const targetUid = targetUser?.uid ?? uid.value;
+        if (!targetUid) {
+          showSnackbar.warn("未找到登录用户");
+          return false;
+        }
+        if (targetUid === uid.value && uidG === account.value.gameUid) {
+          showSnackbar.warn("该账户已经选中");
+          return false;
+        }
+        const gameAccounts = await TSUserAccount.game.getAccount(targetUid);
+        const accountFind = gameAccounts.find(
+          (gameAccount) => gameAccount.gameUid === uidG && gameAccount.gameBiz === "hk4e_cn",
+        );
+        if (!accountFind) {
+          showSnackbar.warn("未找到账户绑定的游戏账户");
+          return false;
+        }
+        if (uid.value !== sourceUid || cookie.value !== sourceCookie) return false;
+        await TSUserAccount.game.switchAccount(targetUid, uidG);
+        if (uid.value !== sourceUid || cookie.value !== sourceCookie) return false;
+        uid.value = targetUid;
+        if (targetUser !== undefined) {
+          briefInfo.value = targetUser.brief;
+          cookie.value = targetUser.cookie;
+        }
+        account.value = { ...accountFind, isChosen: 1 };
+        showSnackbar.success(`成功切换游戏账户为${maskUid(uidG)}`);
+        return true;
+      } finally {
+        switchingGameAccount = false;
       }
-      if (uidG === account.value.gameUid) {
-        showSnackbar.warn("该账户已经选中");
-        return false;
-      }
-      const gameAccounts = await TSUserAccount.game.getAccount(uid.value);
-      const accountFind = gameAccounts.find((a) => a.gameUid === uidG && a.gameBiz === "hk4e_cn");
-      if (!accountFind) {
-        showSnackbar.warn("未找到账户绑定的游戏账户");
-        return false;
-      }
-      account.value = accountFind;
-      await TSUserAccount.game.switchAccount(uid.value, uidG);
-      showSnackbar.success(`成功切换游戏账户为${maskUid(uidG)}`);
-      return true;
     }
 
     function clearLoginState(): void {
