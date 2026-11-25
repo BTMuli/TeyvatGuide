@@ -615,6 +615,7 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
         challenge.insert("best".into(), Value::Null);
         changed = true;
       }
+      changed |= normalize_legacy_challenge_dps(challenge);
     }
     changed |= replace_unsupported_export_images(&mut value);
     if changed {
@@ -653,6 +654,28 @@ fn normalize_legacy_combat_fight(value: &mut Value) -> bool {
   if !fight.contains_key("shortest_avatar_list") {
     fight.insert("shortest_avatar_list".into(), Value::Array(Vec::new()));
     changed = true;
+  }
+  changed
+}
+
+/// 旧危战队伍摘要可能用 JSON 数字存储 DPS，转为该数字的文本表示供 v1 接收。
+/// 不猜测缺失值、不改动其他路径，也不将布尔值或对象视为成绩。
+/// @since Beta v0.14.1
+fn normalize_legacy_challenge_dps(challenge: &mut Map<String, Value>) -> bool {
+  let Some(battles) = challenge.get_mut("challenge").and_then(Value::as_array_mut) else {
+    return false;
+  };
+  let mut changed = false;
+  for battle in battles {
+    let Some(avatars) = battle.get_mut("best_avatar").and_then(Value::as_array_mut) else {
+      continue;
+    };
+    for avatar in avatars {
+      if let Some(dps @ Value::Number(_)) = avatar.get_mut("dps") {
+        *dps = Value::String(dps.to_string());
+        changed = true;
+      }
+    }
   }
   changed
 }
@@ -2531,6 +2554,84 @@ mod tests {
     let mut details = parse_nested(&row["single"]).unwrap();
     details["challenge"][0]["monster"]["icon"] = json!("https://example.com/a.png");
     row["single"] = json!(details.to_string());
+    assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
+  }
+
+  /// 单人和联机中的数字 DPS 使用 v1 文本表示，不改本机行或现有文本。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_challenge_numeric_dps_exports_as_text_without_rewriting_source() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let target = pool().await;
+      let mut row = challenge("123456789", 1, "历史一期");
+      let mut single = parse_nested(&row["single"]).unwrap();
+      let mut mp = single.clone();
+      single["challenge"][0]["best_avatar"][0]["dps"] = json!(1234567);
+      let avatars = mp["challenge"][0]["best_avatar"].as_array_mut().unwrap();
+      avatars[0]["dps"] = json!(45.125);
+      let mut text = avatars[0].clone();
+      text["type"] = json!(2);
+      text["dps"] = json!("001.2500");
+      avatars.push(text);
+      row["single"] = json!(single.to_string());
+      row["mp"] = json!(mp.to_string());
+      assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row.clone()])).is_err());
+
+      let table = &TABLES[3];
+      let mut tx = source.begin().await.unwrap();
+      let projection = check_schema(&mut tx, table, SchemaUse::Import).await.unwrap();
+      insert_record(&mut tx, table, &projection, row.as_object().unwrap()).await.unwrap();
+      tx.commit().await.unwrap();
+
+      let exported = export_from_pool(&source).await.unwrap();
+      let mut canonical = row.clone();
+      single["challenge"][0]["best_avatar"][0]["dps"] = json!("1234567");
+      mp["challenge"][0]["best_avatar"][0]["dps"] = json!("45.125");
+      canonical["single"] = json!(single.to_string());
+      canonical["mp"] = json!(mp.to_string());
+      assert_eq!(exported, snapshot(vec![], vec![], vec![], vec![canonical]));
+      let valid = validate_snapshot(&exported).unwrap();
+      let remote = import_into_pool(&target, &valid).await.unwrap().hard_challenge;
+      assert_eq!((remote.inserted, remote.identical, remote.conflicts), (1, 0, 0));
+      let local = import_into_pool(&source, &valid).await.unwrap().hard_challenge;
+      assert_eq!((local.inserted, local.identical, local.conflicts), (0, 1, 0));
+      let mut tx = source.begin().await.unwrap();
+      let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
+      let row = row.as_object().unwrap();
+      assert_eq!(existing_row(&mut tx, table, &projection, row).await.unwrap().as_ref(), Some(row));
+    });
+  }
+
+  /// 布尔、对象、空值和缺字段不是可转换的历史数值；其他字段仍使用原校验。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_challenge_dps_does_not_bypass_other_validation() {
+    let table = &TABLES[3];
+    for unsupported in [Some(Value::Null), Some(json!(true)), Some(json!({"value": 7})), None] {
+      let mut row = challenge("123456789", 1, "历史一期");
+      let mut mp = parse_nested(&row["single"]).unwrap();
+      let avatar = mp["challenge"][0]["best_avatar"][0].as_object_mut().unwrap();
+      match unsupported {
+        Some(value) => {
+          avatar.insert("dps".into(), value);
+        }
+        None => {
+          avatar.remove("dps");
+        }
+      }
+      row["mp"] = json!(mp.to_string());
+      normalize_export_record(table, row.as_object_mut().unwrap()).unwrap();
+      let error = validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).unwrap_err();
+      assert!(error.starts_with("SYNC_INVALID：HardChallenge.mp"));
+    }
+
+    let mut row = challenge("123456789", 1, "历史一期");
+    let mut mp = parse_nested(&row["single"]).unwrap();
+    mp["challenge"][0]["best_avatar"][0]["dps"] = json!(42);
+    mp["challenge"][0]["best_avatar"][0]["type"] = json!(99);
+    row["mp"] = json!(mp.to_string());
+    normalize_export_record(table, row.as_object_mut().unwrap()).unwrap();
     assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
   }
 
