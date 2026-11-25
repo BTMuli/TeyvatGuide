@@ -22,8 +22,7 @@
    （`retcode` 为数字、`message` 为字符串；非零错误码只校验外壳，`data` 不检查，
    否则会打断 1034 验证重试等业务错误流）。失败路径 `console.error` Ajv issues 供排查。
 4. 请求模块调用 `TGHttps.get(url, config, guard)`，`T` 由守卫推断，不要手写泛型参数。
-5. 按 `test/network-validate.test.ts` 的模式补守卫行为测试；断言请求参数的既有测试需在
-   `toHaveBeenCalledWith` 末尾补 `expect.any(Function)`。
+5. 开发时用成功载荷、业务错误码载荷、骨架漂移载荷手动核对守卫；仓库已移除自动化测试，不再要求补 Vitest 用例。
 
 ## 已接入接口
 
@@ -34,5 +33,5 @@
 
 ## 验证
 
-- 守卫行为必须有 Vitest 覆盖（成功载荷、业务错误码载荷、骨架漂移载荷三类）。
+- 守卫行为需在开发阶段用成功载荷、业务错误码载荷、骨架漂移载荷三类输入手动核对。
 - `pnpm lint-vue` 会编译 schema 导入，`ajv.compile` 在引用失效时于模块加载期直接抛错。
