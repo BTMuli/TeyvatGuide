@@ -22,6 +22,7 @@ use uuid::Uuid;
 
 const MAX_SNAPSHOT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_METADATA_BYTES: usize = 8 * 1024;
+const MANIFEST_FORMAT_V1: u32 = 1;
 const CURRENT_FILE: &str = "teyvatguide-sync-current.json";
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
 const OPERATION_TIMEOUT: Duration = Duration::from_secs(300);
@@ -43,6 +44,8 @@ const NOT_FOUND: &str = "WEBDAV_NOT_FOUND：找不到当前快照；已有快照
 const HISTORY_NOT_FOUND: &str = "WEBDAV_NOT_FOUND：找不到指定快照 ID 的历史清单";
 const INVALID_SNAPSHOT_ID: &str = "WEBDAV_INVALID_SNAPSHOT_ID：历史快照 ID 格式无效";
 const INVALID_METADATA: &str = "WEBDAV_INVALID_METADATA：远程快照元数据无效或版本不受支持；当前快照不可用时，可尝试用之前的快照 ID 恢复";
+const VERSION_UNSUPPORTED: &str =
+  "WEBDAV_VERSION_UNSUPPORTED：远程快照清单版本不受支持，请升级应用，或尝试用之前的快照 ID 恢复";
 const INTEGRITY: &str =
   "WEBDAV_INTEGRITY：远程快照缺失或完整性校验失败；当前快照不可用时，可尝试用之前的快照 ID 恢复";
 const UNSUPPORTED: &str = "WEBDAV_UNSUPPORTED：服务器未正确支持强 ETag 和条件写入";
@@ -51,7 +54,15 @@ const PUBLISH_UNKNOWN: &str = "WEBDAV_PUBLISH_UNKNOWN：发布结果未知，请
 
 type SyncResult<T> = Result<T, &'static str>;
 
-/// current 和独立历史清单共用的信封；业务 JSON 由数据层验证。
+/// 只识别清单版本字段，不要求未来版本沿用 v1 的其他字段。
+///
+/// @since Beta v0.14.1
+#[derive(Deserialize)]
+struct ManifestVersion {
+  format_version: u64,
+}
+
+/// current 和独立历史清单共用的 v1 信封；业务 JSON 由数据层验证。
 ///
 /// @since Beta v0.14.1
 #[derive(Serialize, Deserialize)]
@@ -344,14 +355,26 @@ fn manifest_filename(id: Uuid) -> String {
   format!("teyvatguide-sync-{id}.manifest.json")
 }
 
-/// 检查信封版本、ID、受控文件名、字节长度与摘要；历史清单还必须绑定请求的 ID。
+/// 先识别清单版本，再严格校验 v1 的 ID、受控文件名、字节长度与摘要。
+/// 历史清单还必须绑定请求的 ID。
 ///
 /// @since Beta v0.14.1
 fn parse_metadata(bytes: &[u8], expected_id: Option<Uuid>) -> SyncResult<SnapshotMetadata> {
-  let metadata: SnapshotMetadata = serde_json::from_slice(bytes).map_err(|_| INVALID_METADATA)?;
+  let manifest = str::from_utf8(bytes).map_err(|_| INVALID_METADATA)?;
+  // 清单必须是 JSON 对象；Serde 默认也允许用数组表示结构体。
+  if !manifest.trim_start().starts_with('{') {
+    return Err(INVALID_METADATA);
+  }
+  let version: ManifestVersion = serde_json::from_str(manifest).map_err(|_| INVALID_METADATA)?;
+  if version.format_version == 0 {
+    return Err(INVALID_METADATA);
+  }
+  if version.format_version != u64::from(MANIFEST_FORMAT_V1) {
+    return Err(VERSION_UNSUPPORTED);
+  }
+  let metadata: SnapshotMetadata = serde_json::from_str(manifest).map_err(|_| INVALID_METADATA)?;
   let id = parse_snapshot_id(&metadata.snapshot_id).ok_or(INVALID_METADATA)?;
-  if metadata.format_version != 1
-    || expected_id.is_some_and(|expected| expected != id)
+  if expected_id.is_some_and(|expected| expected != id)
     || metadata.snapshot_file != snapshot_filename(id)
     || metadata.byte_length > MAX_SNAPSHOT_BYTES as u64
     || metadata.sha256.len() != 64
@@ -462,7 +485,7 @@ async fn upload_inner(
 
   let id = Uuid::new_v4();
   let metadata = SnapshotMetadata {
-    format_version: 1,
+    format_version: MANIFEST_FORMAT_V1,
     snapshot_id: id.to_string(),
     snapshot_file: snapshot_filename(id),
     byte_length: snapshot.len() as u64,
@@ -1062,6 +1085,87 @@ mod tests {
     assert_eq!(download(&server).unwrap_err(), INVALID_METADATA);
   }
 
+  /// 版本只接受对象中唯一的正整数；未知版本不能掩盖损坏的 JSON。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn malformed_manifest_versions_are_invalid_metadata() {
+    for body in [
+      "{}",
+      "[2]",
+      r#"{"format_version":0}"#,
+      r#"{"format_version":-2}"#,
+      r#"{"format_version":2.0}"#,
+      r#"{"format_version":2e0}"#,
+      r#"{"format_version":"2"}"#,
+      r#"{"format_version":true}"#,
+      r#"{"format_version":null}"#,
+      r#"{"format_version":1,"format_version":2}"#,
+      r#"{"format_version":2,"format\u005fversion":2}"#,
+      r#"{"format_version":2,"future":[}"#,
+      r#"{"format_version":2} {}"#,
+    ] {
+      assert_eq!(parse_metadata(body.as_bytes(), None).err(), Some(INVALID_METADATA), "{body}");
+    }
+    let invalid_utf8 = b"{\"format_version\":2,\"future\":\"\xff\"}";
+    assert_eq!(parse_metadata(invalid_utf8, None).err(), Some(INVALID_METADATA));
+    let future = br#"{"format_version":4294967296,"future":{"value":true}}"#;
+    assert_eq!(parse_metadata(future, None).err(), Some(VERSION_UNSUPPORTED));
+  }
+
+  /// 旧信封的字节格式保持不变；未知 current 不触发导出或写入，且旧历史仍可读取。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn future_current_blocks_publish_without_touching_v1_history() {
+    let server = FakeServer::new();
+    let old_snapshot = "old";
+    let old_id = upload(&server, old_snapshot).unwrap();
+    assert_eq!(download(&server).unwrap(), old_snapshot);
+    let manifest = format!("teyvatguide-sync-{old_id}.manifest.json");
+    let snapshot = format!("teyvatguide-sync-{old_id}.json");
+    let legacy_pointer = format!(
+      r#"{{"format_version":1,"snapshot_id":"{old_id}","snapshot_file":"{snapshot}","byte_length":3,"sha256":"{}"}}"#,
+      digest(old_snapshot.as_bytes())
+    );
+    let future_pointer = br#"{"format_version":2,"future":{"private-response":"do-not-follow"}}"#;
+    let (revision, object_count) = {
+      let mut state = server.state.lock().unwrap();
+      assert_eq!(state.objects[CURRENT_FILE].bytes, legacy_pointer.as_bytes());
+      assert_eq!(state.objects[&manifest].bytes, legacy_pointer.as_bytes());
+      state.objects.get_mut(CURRENT_FILE).unwrap().bytes = future_pointer.to_vec();
+      state.requests.clear();
+      (state.next_revision, state.objects.len())
+    };
+
+    let error = run(upload_snapshot(
+      &server.url(),
+      "user".into(),
+      "secret".into(),
+      false,
+      true,
+      unexpected_snapshot_loader(),
+    ))
+    .unwrap_err();
+    assert_eq!(error, VERSION_UNSUPPORTED);
+    assert_eq!(download(&server).unwrap_err(), VERSION_UNSUPPORTED);
+    assert_eq!(download_history(&server, &old_id).unwrap(), old_snapshot);
+
+    let state = server.state.lock().unwrap();
+    assert_eq!(
+      state.requests,
+      [
+        ("GET".to_string(), format!("/dav/{CURRENT_FILE}")),
+        ("GET".to_string(), format!("/dav/{CURRENT_FILE}")),
+        ("GET".to_string(), format!("/dav/{manifest}")),
+        ("GET".to_string(), format!("/dav/{snapshot}")),
+      ]
+    );
+    assert_eq!((state.next_revision, state.objects.len()), (revision, object_count));
+    assert_eq!(state.objects[CURRENT_FILE].bytes, future_pointer.as_slice());
+    assert_eq!(state.objects[&manifest].bytes, legacy_pointer.as_bytes());
+  }
+
   /// 历史 ID 须为规范 UUID，清单须绑定请求 ID，并通过版本、长度与摘要格式校验。
   ///
   /// @since Beta v0.14.1
@@ -1078,17 +1182,18 @@ mod tests {
     let name = format!("teyvatguide-sync-{id}.manifest.json");
     let original: serde_json::Value =
       serde_json::from_slice(&server.state.lock().unwrap().objects[&name].bytes).unwrap();
-    for (field, replacement) in [
-      ("format_version", serde_json::json!(2)),
-      ("byte_length", serde_json::json!(MAX_SNAPSHOT_BYTES + 1)),
-      ("sha256", serde_json::json!("g".repeat(64))),
-      ("snapshot_file", serde_json::json!("../other.json")),
+    for (field, replacement, error) in [
+      ("format_version", serde_json::json!(2), VERSION_UNSUPPORTED),
+      ("future_field", serde_json::json!(true), INVALID_METADATA),
+      ("byte_length", serde_json::json!(MAX_SNAPSHOT_BYTES + 1), INVALID_METADATA),
+      ("sha256", serde_json::json!("g".repeat(64)), INVALID_METADATA),
+      ("snapshot_file", serde_json::json!("../other.json"), INVALID_METADATA),
     ] {
       let mut metadata = original.clone();
       metadata[field] = replacement;
       server.state.lock().unwrap().objects.get_mut(&name).unwrap().bytes =
         serde_json::to_vec(&metadata).unwrap();
-      assert_eq!(download_history(&server, &id).unwrap_err(), INVALID_METADATA);
+      assert_eq!(download_history(&server, &id).unwrap_err(), error);
     }
     // 即使是另一份完全有效的清单，也不能用来回答此 ID 的请求。
     let other = upload(&server, "other").unwrap();

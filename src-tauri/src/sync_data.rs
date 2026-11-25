@@ -16,7 +16,11 @@ const MAX_FIELD_BYTES: usize = 1024 * 1024;
 const MAX_ROWS: usize = 100_000;
 const MAX_ARRAY: usize = 256;
 const MAX_SAFE_INTEGER: i64 = 9_007_199_254_740_991;
+// 记录协议版本独立于 SQLite 表结构版本和应用版本。不要就地改写 v1 的契约。
+const SNAPSHOT_V1: u64 = 1;
 const INVALID: &str = "SYNC_INVALID：同步数据无效或包含不受支持的字段；未更改数据库";
+const VERSION_UNSUPPORTED: &str =
+  "SYNC_VERSION_UNSUPPORTED：快照版本不受支持，请更新 TeyvatGuide；未更改数据库";
 const SCHEMA: &str = "SYNC_SCHEMA：数据库表结构不受支持；未更改数据库";
 const DATABASE: &str = "SYNC_DATABASE：数据库操作失败；未应用同步数据";
 const LIMIT: &str = "SYNC_LIMIT：同步数据超过大小或数量限制；未更改数据库";
@@ -127,6 +131,21 @@ const TABLES: &[Table] = &[
   Table { name: "RoleCombat", columns: COMBAT },
   Table { name: "HardChallenge", columns: CHALLENGE },
 ];
+
+/// 源库只读取白名单字段；目标库还须能为未同步的列提供默认值。
+/// @since Beta v0.14.1
+#[derive(Clone, Copy)]
+enum SchemaUse {
+  Export,
+  Import,
+}
+
+/// 同一读取或写入事务内生效的、由固定协议列构成的 SQLite 投影。
+/// @since Beta v0.14.1
+struct SchemaProjection {
+  missing: Vec<&'static str>,
+  required: Vec<&'static str>,
+}
 
 /// 不含记录值和 UID 的单表导入统计。
 /// @since Beta v0.14.1
@@ -272,62 +291,129 @@ pub(crate) async fn import_sync_snapshot_internal(
   import_into_pool(&sqlite_pool(instances).await?, &rows).await
 }
 
-/// 按列名（与物理顺序无关）检查完整结构，拒绝未知列、触发器及外键。
+/// 只显示编译期已知的表、字段和原因，不输出实际列名、DDL 或记录。
 /// @since Beta v0.14.1
-async fn check_schema(tx: &mut Transaction<'_, Sqlite>, table: &Table) -> Result<(), String> {
-  let kind: Option<String> =
-    sqlx::query_scalar("SELECT type FROM main.sqlite_master WHERE name = $1")
-      .bind(table.name)
-      .fetch_optional(&mut **tx)
-      .await
-      .map_err(|_| SCHEMA.to_string())?;
-  if kind.as_deref() != Some("table") {
-    return Err(SCHEMA.into());
+fn schema_problem(table: &Table, field: Option<&'static str>, reason: &'static str) -> String {
+  let location =
+    field.map_or_else(|| table.name.to_owned(), |name| format!("{}.{name}", table.name));
+  format!("SYNC_SCHEMA：{location}（{reason}）；请更新应用和数据库后重试；未更改数据库")
+}
+
+/// 按名称将物理表投影到 v1；新增普通字段不加入协议，未知结构仍失败关闭。
+/// @since Beta v0.14.1
+async fn check_schema(
+  tx: &mut Transaction<'_, Sqlite>,
+  table: &Table,
+  usage: SchemaUse,
+) -> Result<SchemaProjection, String> {
+  // 使用带主库限定的 PRAGMA，不让同名普通表或临时对象遮蔽 table-list 查询。
+  let table_info = format!("PRAGMA main.table_list(\"{}\")", table.name);
+  let info: Option<(String, String, String)> =
+    sqlx::query_as(&table_info).fetch_optional(&mut **tx).await.map_err(|_| SCHEMA.to_string())?;
+  if !matches!(info, Some((schema, name, kind)) if schema == "main" && name == table.name && kind == "table")
+  {
+    return Err(schema_problem(table, None, "缺少普通数据表"));
   }
   let pragma = format!("PRAGMA main.table_xinfo(\"{}\")", table.name);
   let columns = sqlx::query(&pragma).fetch_all(&mut **tx).await.map_err(|_| SCHEMA.to_string())?;
-  if columns.len() != table.columns.len() {
-    return Err(SCHEMA.into());
-  }
   let mut seen = HashSet::new();
+  let mut required = Vec::new();
+  let mut has_extra = false;
   for actual in &columns {
     let name: String = actual.try_get("name").map_err(|_| SCHEMA.to_string())?;
-    let expected =
-      table.columns.iter().find(|column| column.name == name).ok_or_else(|| SCHEMA.to_string())?;
-    let declared: String = actual.try_get("type").map_err(|_| SCHEMA.to_string())?;
     let pk: i64 = actual.try_get("pk").map_err(|_| SCHEMA.to_string())?;
     let hidden: i64 = actual.try_get("hidden").map_err(|_| SCHEMA.to_string())?;
+    let not_null = actual.try_get::<i64, _>("notnull").map_err(|_| SCHEMA.to_string())? != 0;
+    let Some(expected) =
+      table.columns.iter().find(|column| column.name.eq_ignore_ascii_case(&name))
+    else {
+      has_extra = true;
+      if pk != 0 || hidden != 0 {
+        return Err(schema_problem(table, None, "新增列参与主键或不是普通字段"));
+      }
+      if matches!(usage, SchemaUse::Import) && not_null {
+        let default: Option<String> =
+          actual.try_get("dflt_value").map_err(|_| SCHEMA.to_string())?;
+        if default.as_deref().is_none_or(|value| {
+          value
+            .trim_matches(|c: char| c.is_ascii_whitespace() || matches!(c, '(' | ')'))
+            .eq_ignore_ascii_case("NULL")
+        }) {
+          return Err(schema_problem(table, None, "新增必填字段没有可用的默认值"));
+        }
+      }
+      continue;
+    };
+    let declared: String = actual.try_get("type").map_err(|_| SCHEMA.to_string())?;
     let expected_type = match expected.kind {
       Kind::Text | Kind::Json => "TEXT",
       Kind::Integer => "INTEGER",
       Kind::Boolean => "BOOLEAN",
     };
-    if !seen.insert(name)
+    if !seen.insert(expected.name)
       || !declared.eq_ignore_ascii_case(expected_type)
       || pk != expected.pk
       || hidden != 0
     {
-      return Err(SCHEMA.into());
+      return Err(schema_problem(table, Some(expected.name), "字段类型、主键或存储方式不兼容"));
     }
+    if matches!(usage, SchemaUse::Import) && expected.nullable && not_null {
+      required.push(expected.name);
+    }
+  }
+  let missing: Vec<_> =
+    table.columns.iter().map(|c| c.name).filter(|c| !seen.contains(c)).collect();
+  // 1794df2b 引入可选 skippedFloor。只匹配完整的历史布局，不能把未知重命名误当成列缺失。
+  let legacy_abyss = !has_extra && table.name == "SpiralAbyss" && missing == ["skippedFloor"];
+  if !missing.is_empty() && !legacy_abyss {
+    return Err(schema_problem(table, missing.first().copied(), "缺少受支持的字段"));
   }
   let triggers: i64 = sqlx::query_scalar("SELECT (SELECT count(*) FROM main.sqlite_master WHERE type = 'trigger' AND tbl_name = $1 COLLATE NOCASE) + (SELECT count(*) FROM temp.sqlite_master WHERE type = 'trigger' AND tbl_name = $1 COLLATE NOCASE)")
     .bind(table.name).fetch_one(&mut **tx).await.map_err(|_| SCHEMA.to_string())?;
   if triggers != 0 {
-    return Err(SCHEMA.into());
+    return Err(schema_problem(table, None, "存在不受支持的触发器"));
   }
   let fk = format!("PRAGMA main.foreign_key_list(\"{}\")", table.name);
   if !sqlx::query(&fk).fetch_all(&mut **tx).await.map_err(|_| SCHEMA.to_string())?.is_empty() {
-    return Err(SCHEMA.into());
+    return Err(schema_problem(table, None, "存在不受支持的外键约束"));
+  }
+  Ok(SchemaProjection { missing, required })
+}
+
+/// 写入前检查所有行都能无损存储；仅允许旧深渊省略无值的跳层字段。
+/// @since Beta v0.14.1
+fn check_projection_rows(
+  table: &Table,
+  projection: &SchemaProjection,
+  rows: &[Map<String, Value>],
+) -> Result<(), String> {
+  for &field in &projection.missing {
+    if rows.iter().any(|row| {
+      let value = &row[field];
+      !(value.is_null() || (field == "skippedFloor" && value.as_str() == Some("")))
+    }) {
+      return Err(schema_problem(table, Some(field), "旧表没有位置保存快照中的字段值"));
+    }
+  }
+  for &field in &projection.required {
+    if rows.iter().any(|row| row[field].is_null()) {
+      return Err(schema_problem(table, Some(field), "目标字段不允许空值"));
+    }
   }
   Ok(())
 }
 
 /// 拒绝过大字段，避免拉取不受限本机数据到内存。
 /// @since Beta v0.14.1
-async fn check_field_sizes(tx: &mut Transaction<'_, Sqlite>, table: &Table) -> Result<(), String> {
+async fn check_field_sizes(
+  tx: &mut Transaction<'_, Sqlite>,
+  table: &Table,
+  projection: &SchemaProjection,
+) -> Result<(), String> {
   let checks = table
     .columns
     .iter()
+    .filter(|column| !projection.missing.contains(&column.name))
     .map(|c| format!("length(CAST(\"{}\" AS BLOB)) > $1", c.name))
     .collect::<Vec<_>>()
     .join(" OR ");
@@ -344,13 +430,19 @@ async fn check_field_sizes(tx: &mut Transaction<'_, Sqlite>, table: &Table) -> R
   Ok(())
 }
 
-/// 生成固定列选择列表，同时检查 SQLite 实际存储类型。
+/// 按 v1 次序读取值及存储类型；已知旧版缺列只投影为空值，不改变本地表。
 /// @since Beta v0.14.1
-fn selection(table: &Table) -> String {
+fn selection(table: &Table, projection: &SchemaProjection) -> String {
   table
     .columns
     .iter()
-    .map(|c| format!("\"{}\", typeof(\"{}\")", c.name, c.name))
+    .map(|c| {
+      if projection.missing.contains(&c.name) {
+        "NULL, 'null'".to_owned()
+      } else {
+        format!("\"{}\", typeof(\"{}\")", c.name, c.name)
+      }
+    })
     .collect::<Vec<_>>()
     .join(", ")
 }
@@ -389,11 +481,15 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   let mut total_rows = 0usize;
   let mut bytes = 0usize;
   for table in TABLES {
-    check_schema(&mut tx, table).await?;
-    check_field_sizes(&mut tx, table).await?;
+    let projection = check_schema(&mut tx, table, SchemaUse::Export).await?;
+    check_field_sizes(&mut tx, table, &projection).await?;
     let order = if table.name == "GachaRecords" { "\"id\"" } else { "\"uid\", \"id\"" };
-    let sql =
-      format!("SELECT {} FROM main.\"{}\" ORDER BY {}", selection(table), table.name, order);
+    let sql = format!(
+      "SELECT {} FROM main.\"{}\" ORDER BY {}",
+      selection(table, &projection),
+      table.name,
+      order
+    );
     let mut stream = sqlx::query(&sql).fetch(&mut *tx);
     let mut records = Vec::new();
     while let Some(row) = stream.try_next().await.map_err(|_| DATABASE.to_string())? {
@@ -418,7 +514,7 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   if total_rows == 0 {
     return Err(EMPTY.into());
   }
-  let result = serde_json::json!({"version": 1, "tables": tables});
+  let result = serde_json::json!({"version": SNAPSHOT_V1, "tables": tables});
   let serialized = serde_json::to_string(&result).map_err(|_| DATABASE.to_string())?;
   if serialized.len() > MAX_SNAPSHOT_BYTES {
     return Err(LIMIT.into());
@@ -1240,30 +1336,33 @@ fn same_json(left: &Value, right: &Value) -> bool {
   }
 }
 
-/// 同键比较不计更新时间；业务 JSON 按值比较，不改写原文本。
+/// 同键比较不计更新时间和已验证可省略的旧字段；业务 JSON 按值比较。
 /// @since Beta v0.14.1
 fn same_business_record(
   table: &Table,
+  projection: &SchemaProjection,
   left: &Map<String, Value>,
   right: &Map<String, Value>,
 ) -> bool {
-  table.columns.iter().filter(|c| c.name != "updated").all(|c| {
-    let (a, b) = (&left[c.name], &right[c.name]);
-    a == b
-      || (c.kind == Kind::Json
-        && parse_nested(a).zip(parse_nested(b)).is_some_and(|(mut a, mut b)| {
-          if table.name == "RoleCombat" && c.name == "detail" {
-            // 阵容外链不在同步范围内，本机已有外链不构成业务冲突。
-            if let Some(detail) = a.as_object_mut() {
-              detail.remove("lineup_link");
+  table.columns.iter().filter(|c| c.name != "updated" && !projection.missing.contains(&c.name)).all(
+    |c| {
+      let (a, b) = (&left[c.name], &right[c.name]);
+      a == b
+        || (c.kind == Kind::Json
+          && parse_nested(a).zip(parse_nested(b)).is_some_and(|(mut a, mut b)| {
+            if table.name == "RoleCombat" && c.name == "detail" {
+              // 阵容外链不在同步范围内，本机已有外链不构成业务冲突。
+              if let Some(detail) = a.as_object_mut() {
+                detail.remove("lineup_link");
+              }
+              if let Some(detail) = b.as_object_mut() {
+                detail.remove("lineup_link");
+              }
             }
-            if let Some(detail) = b.as_object_mut() {
-              detail.remove("lineup_link");
-            }
-          }
-          same_json(&a, &b)
-        }))
-  })
+            same_json(&a, &b)
+          }))
+    },
+  )
 }
 
 /// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
@@ -1348,13 +1447,20 @@ fn validate_snapshot(snapshot: &str) -> Result<Records, String> {
   validate_snapshot_value(parse_json(snapshot, MAX_SNAPSHOT_BYTES)?)
 }
 
-/// 导出和导入共用同一份结构校验；接管快照值，不额外复制记录。
+/// 按记录协议版本分派，不将新版记录误当成 v1，也不猜测或删除其字段。
 /// @since Beta v0.14.1
-fn validate_snapshot_value(mut root: Value) -> Result<Records, String> {
-  let envelope = object(&root, &["version", "tables"], &[]).ok_or_else(|| INVALID.to_string())?;
-  if envelope["version"].as_i64() != Some(1) {
-    return Err(INVALID.into());
+fn validate_snapshot_value(root: Value) -> Result<Records, String> {
+  match root.get("version").and_then(Value::as_u64) {
+    Some(SNAPSHOT_V1) => decode_v1_snapshot(root),
+    Some(version) if version > 0 => Err(VERSION_UNSUPPORTED.into()),
+    _ => Err(INVALID.into()),
   }
+}
+
+/// 保持已发布的 v1 白名单、数据结构及校验边界，与本地 SQLite 表版本无关。
+/// @since Beta v0.14.1
+fn decode_v1_snapshot(mut root: Value) -> Result<Records, String> {
+  object(&root, &["version", "tables"], &[]).ok_or_else(|| INVALID.to_string())?;
   let mut tables = match root["tables"].take() {
     Value::Object(tables) if tables.len() == TABLES.len() => tables,
     _ => return Err(INVALID.into()),
@@ -1423,11 +1529,17 @@ fn validate_snapshot_value(mut root: Value) -> Result<Records, String> {
 async fn existing_row(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
+  projection: &SchemaProjection,
   row: &Map<String, Value>,
 ) -> Result<Option<Map<String, Value>>, String> {
   let condition =
     if table.name == "GachaRecords" { "\"id\" = $1" } else { "\"uid\" = $1 AND \"id\" = $2" };
-  let sql = format!("SELECT {} FROM main.\"{}\" WHERE {}", selection(table), table.name, condition);
+  let sql = format!(
+    "SELECT {} FROM main.\"{}\" WHERE {}",
+    selection(table, projection),
+    table.name,
+    condition
+  );
   let query = sqlx::query(&sql);
   let found = if table.name == "GachaRecords" {
     query.bind(row["id"].as_str().unwrap()).fetch_optional(&mut **tx).await
@@ -1442,20 +1554,22 @@ async fn existing_row(
   found.map(|r| decode_row(table, &r)).transpose()
 }
 
-/// 参数化插入一条已验证的缺失记录，不使用覆盖或冲突忽略语句。
+/// 只向目标有的 v1 列绑定参数；本地扩展列使用 SQLite 默认值，不覆盖旧记录。
 /// @since Beta v0.14.1
 async fn insert_record(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
+  projection: &SchemaProjection,
   row: &Map<String, Value>,
 ) -> Result<(), String> {
-  let names =
-    table.columns.iter().map(|c| format!("\"{}\"", c.name)).collect::<Vec<_>>().join(", ");
-  let params = (1..=table.columns.len()).map(|n| format!("${n}")).collect::<Vec<_>>().join(", ");
+  let columns: Vec<_> =
+    table.columns.iter().filter(|c| !projection.missing.contains(&c.name)).collect();
+  let names = columns.iter().map(|c| format!("\"{}\"", c.name)).collect::<Vec<_>>().join(", ");
+  let params = (1..=columns.len()).map(|n| format!("${n}")).collect::<Vec<_>>().join(", ");
   // 语句级 ABORT 覆盖表上可能存在的 ON CONFLICT REPLACE / IGNORE 等策略。
   let sql = format!("INSERT OR ABORT INTO main.\"{}\" ({names}) VALUES ({params})", table.name);
   let mut query = sqlx::query(&sql);
-  for col in table.columns {
+  for col in columns {
     let value = &row[col.name];
     query = if value.is_null() {
       query.bind(None::<String>)
@@ -1474,18 +1588,21 @@ async fn insert_record(
   Ok(())
 }
 
-/// 在同一事务内检查结构、查重、统计冲突并插入，不传播删除。
+/// 先检查整包能否写入本地表版本，再在同一事务内查重和插入；不传播删除。
 /// @since Beta v0.14.1
 async fn import_transaction(
   tx: &mut Transaction<'_, Sqlite>,
   records: &Records,
 ) -> Result<SyncImportStats, String> {
   let mut result = SyncImportStats::default();
-  for table in TABLES {
-    check_schema(tx, table).await?;
-    check_field_sizes(tx, table).await?;
-  }
+  let mut projections = Vec::with_capacity(TABLES.len());
   for (index, table) in TABLES.iter().enumerate() {
+    let projection = check_schema(tx, table, SchemaUse::Import).await?;
+    check_field_sizes(tx, table, &projection).await?;
+    check_projection_rows(table, &projection, &records[index])?;
+    projections.push(projection);
+  }
+  for (index, (table, projection)) in TABLES.iter().zip(&projections).enumerate() {
     let stats = match table.name {
       "GachaRecords" => &mut result.gacha_records,
       "SpiralAbyss" => &mut result.spiral_abyss,
@@ -1494,12 +1611,14 @@ async fn import_transaction(
       _ => return Err(INVALID.into()),
     };
     for row in &records[index] {
-      match existing_row(tx, table, row).await? {
+      match existing_row(tx, table, projection, row).await? {
         None => {
-          insert_record(tx, table, row).await?;
+          insert_record(tx, table, projection, row).await?;
           stats.inserted += 1;
         }
-        Some(existing) if same_business_record(table, &existing, row) => stats.identical += 1,
+        Some(existing) if same_business_record(table, projection, &existing, row) => {
+          stats.identical += 1;
+        }
         Some(_) => stats.conflicts += 1,
       }
     }
@@ -1839,30 +1958,245 @@ mod tests {
     });
   }
 
-  /// 未识别的旧列和空快照均不可导出，也不可产生部分导入。
+  /// 空库不发布；未证实的列重命名既不读取其值，也不产生部分导入。
   /// @since Beta v0.14.1
   #[test]
-  fn empty_export_and_legacy_schema_fail_closed() {
+  fn empty_export_and_unrecognized_rename_fail_closed() {
     tauri::async_runtime::block_on(async {
       let db = pool().await;
-      assert_eq!(export_from_pool(&db).await.err().unwrap(), EMPTY);
-      sqlx::query("ALTER TABLE HardChallenge ADD COLUMN legacy TEXT").execute(&db).await.unwrap();
+      assert_eq!(export_from_pool(&db).await.unwrap_err(), EMPTY);
+      sqlx::query("ALTER TABLE main.SpiralAbyss RENAME COLUMN skippedFloor TO localRenamedField")
+        .execute(&db)
+        .await
+        .unwrap();
       let incoming = snapshot(vec![gacha("100", "123456789", "测试")], vec![], vec![], vec![]);
-      assert!(import_into_pool(&db, &validate_snapshot(&incoming).unwrap()).await.is_err());
-      assert!(export_from_pool(&db).await.is_err());
+      let error =
+        import_into_pool(&db, &validate_snapshot(&incoming).unwrap()).await.err().unwrap();
+      assert!(error.starts_with("SYNC_SCHEMA：SpiralAbyss.skippedFloor"));
+      assert!(!error.contains("localRenamedField"));
+      assert!(
+        export_from_pool(&db)
+          .await
+          .unwrap_err()
+          .starts_with("SYNC_SCHEMA：SpiralAbyss.skippedFloor")
+      );
       let count: i64 =
-        sqlx::query_scalar("SELECT COUNT(*) FROM GachaRecords").fetch_one(&db).await.unwrap();
+        sqlx::query_scalar("SELECT COUNT(*) FROM main.GachaRecords").fetch_one(&db).await.unwrap();
       assert_eq!(count, 0);
     });
   }
 
-  /// 遮蔽同名临时表不能影响主库；临时触发器会使整包失败。
+  /// 源端的任意本地扩展值不得进入快照；目标端默认列及已存在的扩展值不被覆盖。
+  /// @since Beta v0.14.1
+  #[test]
+  fn additive_columns_use_local_defaults_and_do_not_leak_or_overwrite() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let target = pool().await;
+      let original = snapshot(vec![gacha("100", "123456789", "测试")], vec![], vec![], vec![]);
+      let records = validate_snapshot(&original).unwrap();
+      import_into_pool(&source, &records).await.unwrap();
+      sqlx::raw_sql("ALTER TABLE main.GachaRecords ADD COLUMN sourceOnly TEXT;")
+        .execute(&source)
+        .await
+        .unwrap();
+      // 本地列超过单字段上限也不应影响快照大小或内容。
+      sqlx::query("UPDATE main.GachaRecords SET sourceOnly = $1")
+        .bind("x".repeat(MAX_FIELD_BYTES + 1))
+        .execute(&source)
+        .await
+        .unwrap();
+      assert_eq!(export_from_pool(&source).await.unwrap(), original);
+      assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT length(sourceOnly) FROM main.GachaRecords")
+          .fetch_one(&source)
+          .await
+          .unwrap(),
+        (MAX_FIELD_BYTES + 1) as i64
+      );
+
+      sqlx::raw_sql(
+        "ALTER TABLE main.GachaRecords ADD COLUMN localNote TEXT;
+        ALTER TABLE main.GachaRecords ADD COLUMN localOrigin TEXT NOT NULL DEFAULT 'target-only';",
+      )
+      .execute(&target)
+      .await
+      .unwrap();
+      let imported = import_into_pool(&target, &records).await.unwrap();
+      assert_eq!(imported.gacha_records.inserted, 1);
+      let values = || {
+        sqlx::query_as::<_, (Option<String>, String)>(
+          "SELECT localNote, localOrigin FROM main.GachaRecords",
+        )
+      };
+      assert_eq!(values().fetch_one(&target).await.unwrap(), (None, "target-only".into()));
+      sqlx::query("UPDATE main.GachaRecords SET localNote = $1, localOrigin = $2")
+        .bind("local note")
+        .bind("local origin")
+        .execute(&target)
+        .await
+        .unwrap();
+      let repeated = import_into_pool(&target, &records).await.unwrap();
+      assert_eq!(repeated.gacha_records.identical, 1);
+      assert_eq!(repeated.gacha_records.conflicts, 0);
+      assert_eq!(
+        values().fetch_one(&target).await.unwrap(),
+        (Some("local note".into()), "local origin".into())
+      );
+      assert_eq!(export_from_pool(&target).await.unwrap(), original);
+    });
+  }
+
+  /// 缺少历史可选列的深渊表可双向同步无值记录；有跳层值时旧库必须拒绝整包。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_abyss_projection_never_discards_skipped_floor() {
+    tauri::async_runtime::block_on(async {
+      let old = pool().await;
+      sqlx::query("ALTER TABLE main.SpiralAbyss DROP COLUMN skippedFloor")
+        .execute(&old)
+        .await
+        .unwrap();
+      let mut row = abyss("123456789", 1);
+      row["skippedFloor"] = json!("");
+      let empty = snapshot(vec![], vec![row.clone()], vec![], vec![]);
+      let records = validate_snapshot(&empty).unwrap();
+      assert_eq!(import_into_pool(&old, &records).await.unwrap().spiral_abyss.inserted, 1);
+      assert_eq!(import_into_pool(&old, &records).await.unwrap().spiral_abyss.identical, 1);
+      row["skippedFloor"] = Value::Null;
+      let normalized = snapshot(vec![], vec![row.clone()], vec![], vec![]);
+      assert_eq!(export_from_pool(&old).await.unwrap(), normalized);
+      let new = pool().await;
+      assert_eq!(
+        import_into_pool(&new, &validate_snapshot(&normalized).unwrap())
+          .await
+          .unwrap()
+          .spiral_abyss
+          .inserted,
+        1
+      );
+      assert_eq!(export_from_pool(&new).await.unwrap(), normalized);
+      let columns: i64 = sqlx::query_scalar(
+        "SELECT count(*) FROM pragma_table_info('SpiralAbyss', 'main') WHERE name='skippedFloor'",
+      )
+      .fetch_one(&old)
+      .await
+      .unwrap();
+      assert_eq!(columns, 0);
+
+      row["skippedFloor"] = json!("09-10");
+      let incoming = snapshot(vec![gacha("100", "123456789", "测试")], vec![row], vec![], vec![]);
+      let error =
+        import_into_pool(&old, &validate_snapshot(&incoming).unwrap()).await.err().unwrap();
+      assert!(error.starts_with("SYNC_SCHEMA：SpiralAbyss.skippedFloor"));
+      assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM main.GachaRecords")
+          .fetch_one(&old)
+          .await
+          .unwrap(),
+        0
+      );
+      assert_eq!(export_from_pool(&old).await.unwrap(), normalized);
+    });
+  }
+
+  /// 新增必填列只能由非空默认值填充；调整已知列的空值约束也不能凭空补值。
+  /// @since Beta v0.14.1
+  #[test]
+  fn incompatible_required_columns_reject_the_entire_import() {
+    tauri::async_runtime::block_on(async {
+      let database = pool().await;
+      sqlx::raw_sql(
+        "DROP TABLE main.HardChallenge;
+        CREATE TABLE main.HardChallenge (
+          uid TEXT, id INTEGER, startTime TEXT, endTime TEXT, name TEXT,
+          single TEXT, mp TEXT, blings TEXT, updated TEXT,
+          privateRequired TEXT NOT NULL DEFAULT (NULL), PRIMARY KEY(uid, id)
+        );",
+      )
+      .execute(&database)
+      .await
+      .unwrap();
+      let incoming = snapshot(
+        vec![gacha("100", "123456789", "测试")],
+        vec![],
+        vec![],
+        vec![challenge("123456789", 1, "一期")],
+      );
+      let error =
+        import_into_pool(&database, &validate_snapshot(&incoming).unwrap()).await.err().unwrap();
+      assert!(error.starts_with("SYNC_SCHEMA：HardChallenge"));
+      assert!(error.contains("没有可用的默认值"));
+      assert!(!error.contains("privateRequired"));
+      assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM main.GachaRecords")
+          .fetch_one(&database)
+          .await
+          .unwrap(),
+        0
+      );
+
+      let database = pool().await;
+      sqlx::query("ALTER TABLE main.SpiralAbyss DROP COLUMN skippedFloor")
+        .execute(&database)
+        .await
+        .unwrap();
+      sqlx::query("ALTER TABLE main.SpiralAbyss ADD COLUMN skippedFloor TEXT NOT NULL DEFAULT ''")
+        .execute(&database)
+        .await
+        .unwrap();
+      let incoming = snapshot(
+        vec![gacha("101", "123456789", "测试")],
+        vec![abyss("123456789", 1)],
+        vec![],
+        vec![],
+      );
+      let error =
+        import_into_pool(&database, &validate_snapshot(&incoming).unwrap()).await.err().unwrap();
+      assert!(error.starts_with("SYNC_SCHEMA：SpiralAbyss.skippedFloor"));
+      assert!(error.contains("不允许空值"));
+      assert_eq!(
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM main.GachaRecords")
+          .fetch_one(&database)
+          .await
+          .unwrap(),
+        0
+      );
+    });
+  }
+
+  /// 快照业务版本有独立错误；畸形版本和 v1 额外字段仍不接受。
+  /// @since Beta v0.14.1
+  #[test]
+  fn record_protocol_rejects_unknown_versions_separately() {
+    let future = r#"{"version":2,"future_records":[]}"#;
+    assert_eq!(validate_snapshot(future).unwrap_err(), VERSION_UNSUPPORTED);
+    for invalid in [
+      r#"{"version":0,"tables":{}}"#,
+      r#"{"version":"2","tables":{}}"#,
+      r#"{"version":2.0,"tables":{}}"#,
+      r#"{"version":2,"version":1,"tables":{}}"#,
+      r#"{"version":1,"tables":{},"future_records":[]}"#,
+    ] {
+      assert_eq!(validate_snapshot(invalid).unwrap_err(), INVALID);
+    }
+    assert!(
+      validate_snapshot(&snapshot(vec![gacha("100", "123456789", "测试")], vec![], vec![], vec![]))
+        .is_ok()
+    );
+  }
+
+  /// 同名临时表不能遮蔽主库或结构检查；有临时触发器时拒绝整包。
   /// @since Beta v0.14.1
   #[test]
   fn temporary_objects_cannot_redirect_writes() {
     tauri::async_runtime::block_on(async {
       let db = pool().await;
       sqlx::query("CREATE TEMP TABLE GachaRecords(id TEXT, name TEXT)").execute(&db).await.unwrap();
+      sqlx::query("CREATE TEMP TABLE pragma_table_list(schema TEXT, name TEXT, type TEXT)")
+        .execute(&db)
+        .await
+        .unwrap();
       sqlx::query("INSERT INTO temp.GachaRecords VALUES('shadow', 'untouched')")
         .execute(&db)
         .await
@@ -2095,7 +2429,8 @@ mod tests {
       assert!(validate_snapshot(&raw).is_err());
       let mut tx = source.begin().await.unwrap();
       for (table, row) in TABLES.iter().skip(1).zip([&abyss_row, &combat_row, &challenge_row]) {
-        insert_record(&mut tx, table, row.as_object().unwrap()).await.unwrap();
+        let projection = check_schema(&mut tx, table, SchemaUse::Import).await.unwrap();
+        insert_record(&mut tx, table, &projection, row.as_object().unwrap()).await.unwrap();
       }
       tx.commit().await.unwrap();
 
@@ -2129,7 +2464,11 @@ mod tests {
       let mut tx = source.begin().await.unwrap();
       for (table, row) in TABLES.iter().skip(1).zip([&abyss_row, &combat_row, &challenge_row]) {
         let before = row.as_object().unwrap();
-        assert_eq!(existing_row(&mut tx, table, before).await.unwrap().as_ref(), Some(before));
+        let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
+        assert_eq!(
+          existing_row(&mut tx, table, &projection, before).await.unwrap().as_ref(),
+          Some(before)
+        );
       }
     });
   }
@@ -2219,7 +2558,9 @@ mod tests {
       row["hasDetailData"] = json!(0);
       row["detail"] = json!("null");
       let mut tx = source.begin().await.unwrap();
-      insert_record(&mut tx, &TABLES[2], row.as_object().unwrap()).await.unwrap();
+      let table = &TABLES[2];
+      let projection = check_schema(&mut tx, table, SchemaUse::Import).await.unwrap();
+      insert_record(&mut tx, table, &projection, row.as_object().unwrap()).await.unwrap();
       tx.commit().await.unwrap();
       let error = export_from_pool(&source).await.unwrap_err();
       assert!(error.starts_with("SYNC_INVALID：RoleCombat.detail "));

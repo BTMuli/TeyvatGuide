@@ -75,6 +75,7 @@ fn checked<T>(result: Result<T, String>, stage: &'static str) -> E2eResult<T> {
       "SYNC_EMPTY" => "SYNC_EMPTY",
       "SYNC_LEGACY_CHALLENGE" => "SYNC_LEGACY_CHALLENGE",
       "SYNC_UNSUPPORTED_LINEUP" => "SYNC_UNSUPPORTED_LINEUP",
+      "SYNC_VERSION_UNSUPPORTED" => "SYNC_VERSION_UNSUPPORTED",
       "WEBDAV_AUTH" => "WEBDAV_AUTH",
       "WEBDAV_NETWORK" => "WEBDAV_NETWORK",
       "WEBDAV_TIMEOUT" => "WEBDAV_TIMEOUT",
@@ -84,6 +85,7 @@ fn checked<T>(result: Result<T, String>, stage: &'static str) -> E2eResult<T> {
       "WEBDAV_INVALID_METADATA" => "WEBDAV_INVALID_METADATA",
       "WEBDAV_NOT_FOUND" => "WEBDAV_NOT_FOUND",
       "WEBDAV_PUBLISH_UNKNOWN" => "WEBDAV_PUBLISH_UNKNOWN",
+      "WEBDAV_VERSION_UNSUPPORTED" => "WEBDAV_VERSION_UNSUPPORTED",
       _ => "OPERATION_FAILED",
     };
     (stage, category)
@@ -227,7 +229,7 @@ async fn source_pool(env: &Environment) -> E2eResult<SqlitePool> {
 }
 
 /// 只从编译期 Column/Kind 白名单生成磁盘接收库；不引入账号、设置或其他表。
-/// fault 指定表的 CHECK(0) 专供验证后表失败时前表插入回滚。
+/// fault 指定表的 CHECK(0) 专供验证后表失败时前表插入回滚；扩列仅存在于专用接收库。
 /// @since Beta v0.14.1
 async fn receiver(
   env: &Environment,
@@ -235,8 +237,15 @@ async fn receiver(
   fault: Option<usize>,
 ) -> E2eResult<SqlitePool> {
   ensure(
-    ["receiver.sqlite", "invalid.sqlite", "rollback.sqlite", "history.sqlite", "merge.sqlite"]
-      .contains(&name),
+    [
+      "receiver.sqlite",
+      "invalid.sqlite",
+      "rollback.sqlite",
+      "history.sqlite",
+      "merge.sqlite",
+      "new_schema.sqlite",
+    ]
+    .contains(&name),
     "receiver",
     "NAME_INVALID",
   )?;
@@ -263,6 +272,10 @@ async fn receiver(
         format!("\"{}\" {kind}{nullable}", column.name)
       })
       .collect::<Vec<_>>();
+    if name == "new_schema.sqlite" && table.name == "GachaRecords" {
+      columns.push("local_note TEXT".into());
+      columns.push("local_origin TEXT NOT NULL DEFAULT 'vm-new-db'".into());
+    }
     let mut keys = table.columns.iter().filter(|column| column.pk > 0).collect::<Vec<_>>();
     keys.sort_by_key(|column| column.pk);
     columns.push(format!(
@@ -290,7 +303,7 @@ async fn receiver(
   )?;
   let mut tx = fixed(pool.begin().await, "receiver", "BEGIN_FAILED")?;
   for table in TABLES {
-    checked(check_schema(&mut tx, table).await, "receiver")?;
+    checked(check_schema(&mut tx, table, SchemaUse::Import).await, "receiver")?;
   }
   fixed(tx.rollback().await, "receiver", "ROLLBACK_FAILED")?;
   Ok(pool)
@@ -329,14 +342,17 @@ fn semantic_equal(left: &Value, right: &Value) -> bool {
   }
 }
 
-/// 直接读取磁盘行，避免重新导出时的规范化掩盖接收库的错误值；所有列均比较。
+/// 在同一读取事务检查结构并逐行比较全部同步列，避免重新导出掩盖接收库的错误值。
 /// @since Beta v0.14.1
 async fn verify_rows(pool: &SqlitePool, expected: &Records, stage: &'static str) -> E2eResult<()> {
   ensure(expected.len() == TABLES.len(), stage, "TABLE_COUNT_MISMATCH")?;
+  let mut tx = fixed(pool.begin().await, stage, "BEGIN_FAILED")?;
   for (index, table) in TABLES.iter().enumerate() {
+    let projection = checked(check_schema(&mut tx, table, SchemaUse::Export).await, stage)?;
     let order = if table.name == "GachaRecords" { "\"id\"" } else { "\"uid\", \"id\"" };
-    let sql = format!("SELECT {} FROM main.\"{}\" ORDER BY {order}", selection(table), table.name);
-    let rows = fixed(sqlx::query(&sql).fetch_all(pool).await, stage, "ROW_READ_FAILED")?;
+    let columns = selection(table, &projection);
+    let sql = format!("SELECT {columns} FROM main.\"{}\" ORDER BY {order}", table.name);
+    let rows = fixed(sqlx::query(&sql).fetch_all(&mut *tx).await, stage, "ROW_READ_FAILED")?;
     ensure(rows.len() == expected[index].len(), stage, "ROW_COUNT_MISMATCH")?;
     for (actual, expected) in rows.iter().zip(&expected[index]) {
       let actual = checked(decode_row(table, actual), stage)?;
@@ -363,7 +379,7 @@ async fn verify_rows(pool: &SqlitePool, expected: &Records, stage: &'static str)
     }
     eprintln!("E2E {stage} {} rows={}", table.name, rows.len());
   }
-  Ok(())
+  fixed(tx.rollback().await, stage, "ROLLBACK_FAILED")
 }
 
 /// 首次插入/重入的统计必须逐表准确；错误不包含任何记录。
@@ -468,6 +484,76 @@ fn verify_export_whitelist(snapshot: &str) -> E2eResult<()> {
   Ok(())
 }
 
+/// 将同一真实 v1 快照两次拉入扩列接收库，确保默认值和本地标记不被同步改写。
+/// @since Beta v0.14.1
+async fn schema_skew(
+  env: &Environment,
+  expected: &Records,
+  expected_counts: &[u64],
+  snapshot_id: &str,
+) -> E2eResult<()> {
+  let gacha_rows = expected.first().ok_or(("schema_skew", "TABLE_COUNT_MISMATCH"))?;
+  let Some(first) = gacha_rows.first() else {
+    eprintln!("E2E schema_skew_skipped_empty GachaRecords rows=0");
+    return Ok(());
+  };
+  let id = first.get("id").and_then(Value::as_str).ok_or(("schema_skew", "ROW_KEY_INVALID"))?;
+  let pool = receiver(env, "new_schema.sqlite", None).await?;
+  let first_stage = "schema_skew_first";
+  let repeated_stage = "schema_skew_repeat";
+  let default_sql =
+    "SELECT count(*) FROM main.GachaRecords WHERE local_note IS NULL AND local_origin = $1";
+  let default_origin = "vm-new-db";
+  let local_note = "e2e-local-note";
+  let local_origin = "e2e-local-origin";
+
+  let inserted = receive(env, &pool, Some(snapshot_id.into())).await?;
+  verify_stats(&inserted, expected_counts, false)?;
+  verify_rows(&pool, expected, first_stage).await?;
+  let defaults: i64 = fixed(
+    sqlx::query_scalar(default_sql).bind(default_origin).fetch_one(&pool).await,
+    first_stage,
+    "LOCAL_COLUMNS_READ_FAILED",
+  )?;
+  ensure(defaults == gacha_rows.len() as i64, first_stage, "LOCAL_DEFAULT_MISMATCH")?;
+
+  let updated = fixed(
+    sqlx::query("UPDATE main.GachaRecords SET local_note = $1, local_origin = $2 WHERE id = $3")
+      .bind(local_note)
+      .bind(local_origin)
+      .bind(id)
+      .execute(&pool)
+      .await,
+    "schema_skew_marker",
+    "LOCAL_MARKER_WRITE_FAILED",
+  )?;
+  ensure(updated.rows_affected() == 1, "schema_skew_marker", "LOCAL_MARKER_COUNT_MISMATCH")?;
+
+  let repeated = receive(env, &pool, Some(snapshot_id.into())).await?;
+  verify_stats(&repeated, expected_counts, true)?;
+  verify_rows(&pool, expected, repeated_stage).await?;
+  let marker: i64 = fixed(
+    sqlx::query_scalar("SELECT count(*) FROM main.GachaRecords WHERE id = $1 AND local_note = $2 AND local_origin = $3")
+      .bind(id)
+      .bind(local_note)
+      .bind(local_origin)
+      .fetch_one(&pool)
+      .await,
+    repeated_stage,
+    "LOCAL_COLUMNS_READ_FAILED",
+  )?;
+  ensure(marker == 1, repeated_stage, "LOCAL_MARKER_MISMATCH")?;
+  let defaults_after: i64 = fixed(
+    sqlx::query_scalar(default_sql).bind(default_origin).fetch_one(&pool).await,
+    repeated_stage,
+    "LOCAL_COLUMNS_READ_FAILED",
+  )?;
+  ensure(defaults_after == defaults - 1, repeated_stage, "LOCAL_DEFAULT_MISMATCH")?;
+  pool.close().await;
+  eprintln!("E2E schema_skew_acceptance_complete");
+  Ok(())
+}
+
 /// 核心真实库 roundtrip；安全故障验收在此之后运行，不用合成数据库替代源库。
 /// @since Beta v0.14.1
 async fn roundtrip(env: &Environment) -> E2eResult<()> {
@@ -529,6 +615,7 @@ async fn roundtrip(env: &Environment) -> E2eResult<()> {
   let repeated = receive(env, &receiver, None).await?;
   verify_stats(&repeated, &expected_counts, true)?;
   verify_rows(&receiver, &expected, "repeat_import").await?;
+  schema_skew(env, &expected, &expected_counts, &old_id).await?;
   let new_id = upload(env, &snapshot).await?;
   ensure(new_id != old_id, "republish", "SNAPSHOT_ID_REUSED")?;
   let historical = checked(download(env, Some(old_id.clone())).await, "download_history")?;
