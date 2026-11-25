@@ -260,17 +260,21 @@ fn network_error(error: reqwest::Error) -> &'static str {
   if error.is_timeout() { TIMEOUT } else { NETWORK }
 }
 
+/// 将明确的 HTTP 认证或权限拒绝映射为 AUTH，其他状态沿用调用阶段的错误。
+///
+/// @since Beta v0.14.1
+fn auth_or(status: StatusCode, fallback: &'static str) -> &'static str {
+  match status {
+    StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => AUTH,
+    _ => fallback,
+  }
+}
+
 /// 把 HTTP 状态映射为不含地址和响应正文的固定错误。
 ///
 /// @since Beta v0.14.1
 fn status_error(status: StatusCode) -> &'static str {
-  if status == StatusCode::UNAUTHORIZED || status == StatusCode::FORBIDDEN {
-    AUTH
-  } else if status.is_redirection() {
-    REDIRECT
-  } else {
-    HTTP_ERROR
-  }
+  auth_or(status, if status.is_redirection() { REDIRECT } else { HTTP_ERROR })
 }
 
 /// 限制实际读取的响应大小，也拒绝声明长度过大的响应。
@@ -425,7 +429,7 @@ async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
 
   let status = webdav.put(&filename, replacement.clone(), (IF_NONE_MATCH, any)).await?;
   if status != StatusCode::PRECONDITION_FAILED {
-    return Err(UNSUPPORTED);
+    return Err(auth_or(status, UNSUPPORTED));
   }
   let after_none = webdav.get(&filename, MAX_METADATA_BYTES).await?.ok_or(UNSUPPORTED)?;
   if after_none.bytes != original || after_none.etag.as_ref() != Some(&first_etag) {
@@ -439,7 +443,7 @@ async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
   }
   let status = webdav.put(&filename, replacement.clone(), (IF_MATCH, stale)).await?;
   if status != StatusCode::PRECONDITION_FAILED {
-    return Err(UNSUPPORTED);
+    return Err(auth_or(status, UNSUPPORTED));
   }
   let after_stale = webdav.get(&filename, MAX_METADATA_BYTES).await?.ok_or(UNSUPPORTED)?;
   if after_stale.bytes != original || after_stale.etag.as_ref() != Some(&first_etag) {
@@ -448,7 +452,7 @@ async fn probe_conditions(webdav: &Webdav) -> SyncResult<()> {
 
   let status = webdav.put(&filename, replacement.clone(), (IF_MATCH, first_etag.clone())).await?;
   if !put_succeeded(status) {
-    return Err(UNSUPPORTED);
+    return Err(auth_or(status, UNSUPPORTED));
   }
   let changed = webdav.get(&filename, MAX_METADATA_BYTES).await?.ok_or(UNSUPPORTED)?;
   if changed.bytes != replacement || changed.etag.is_none() || changed.etag == Some(first_etag) {
@@ -505,14 +509,14 @@ async fn upload_inner(
     Some(etag) => (IF_MATCH, etag.clone()),
     None => (IF_NONE_MATCH, HeaderValue::from_static("*")),
   };
-  // 除明确的条件冲突外，失败也可能发生在服务端已修改 current 后，不能盲重试或回滚。
+  // 明确的条件冲突或权限拒绝除外；其余失败可能发生在服务端已修改 current 后，不能盲重试或回滚。
   let status =
     webdav.put(CURRENT_FILE, pointer.clone(), condition).await.map_err(|_| PUBLISH_UNKNOWN)?;
   if status == StatusCode::PRECONDITION_FAILED {
     return Err(CONFLICT);
   }
   if !put_succeeded(status) {
-    return Err(PUBLISH_UNKNOWN);
+    return Err(auth_or(status, PUBLISH_UNKNOWN));
   }
   let published =
     webdav.get(CURRENT_FILE, MAX_METADATA_BYTES).await.map_err(|_| PUBLISH_UNKNOWN)?;
@@ -629,6 +633,17 @@ mod tests {
     Chunked,
   }
 
+  /// 只对指定的条件 PUT 返回合成错误，不影响其他读写路径。
+  ///
+  /// @since Beta v0.14.1
+  #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+  enum PutTarget {
+    Current,
+    DuplicateNoneMatch,
+    StaleIfMatch,
+    CorrectIfMatch,
+  }
+
   /// 本地合成 WebDAV 状态；不访问用户数据或外部服务。
   ///
   /// @since Beta v0.14.1
@@ -646,6 +661,7 @@ mod tests {
     fail_snapshot_put: bool,
     damage_manifest_write: bool,
     disconnect_pointer: Option<Disconnect>,
+    put_status_override: Option<(PutTarget, u16)>,
     current_framing: ResponseFraming,
     status_override: Option<u16>,
     request_count: usize,
@@ -805,7 +821,25 @@ mod tests {
           let match_failed = headers
             .get("if-match")
             .is_some_and(|value| existing.is_none_or(|object| value != &object_etag(object)));
-          if !state.ignore_conditions && (none_failed || match_failed) {
+          let override_status = state.put_status_override.and_then(|(target, status)| {
+            let matches_target = if name == CURRENT_FILE {
+              target == PutTarget::Current
+            } else if name.starts_with("teyvatguide-sync-probe-") {
+              match target {
+                PutTarget::Current => false,
+                PutTarget::DuplicateNoneMatch => none_failed,
+                PutTarget::StaleIfMatch => match_failed,
+                PutTarget::CorrectIfMatch => headers.contains_key("if-match") && !match_failed,
+              }
+            } else {
+              false
+            };
+            matches_target.then_some(status)
+          });
+          if let Some(status) = override_status {
+            state.put_status_override = None;
+            (status, b"private-response-user-secret".to_vec(), None)
+          } else if !state.ignore_conditions && (none_failed || match_failed) {
             (412, Vec::new(), None)
           } else {
             let created = existing.is_none();
@@ -1008,6 +1042,49 @@ mod tests {
     assert_eq!(upload(&server, "new").unwrap_err(), CONFLICT);
     assert_eq!(download(&server).unwrap(), "old");
     assert_eq!(download_history(&server, &old_id).unwrap(), "old");
+  }
+
+  /// 验证指定 PUT 失败的对外分类，以及旧指针和历史恢复均不受影响。
+  ///
+  /// @since Beta v0.14.1
+  fn assert_put_failure_preserves_previous(target: PutTarget, status: u16, error: &str) {
+    let server = FakeServer::new();
+    let old_id = upload(&server, "old").unwrap();
+    let old_pointer = {
+      let mut state = server.state.lock().unwrap();
+      state.put_status_override = Some((target, status));
+      state.objects[CURRENT_FILE].clone()
+    };
+    assert_eq!(upload(&server, "new").unwrap_err(), error, "{target:?}, HTTP {status}");
+    assert_eq!(download_history(&server, &old_id).unwrap(), "old");
+    let state = server.state.lock().unwrap();
+    assert!(state.put_status_override.is_none(), "{target:?} did not return HTTP {status}");
+    assert_eq!(state.objects[CURRENT_FILE].bytes, old_pointer.bytes);
+    assert_eq!(state.objects[CURRENT_FILE].revision, old_pointer.revision);
+  }
+
+  /// 最终 current PUT 的认证拒绝是明确失败，500 仍是发布结果未知。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn final_current_put_distinguishes_auth_from_unknown() {
+    for (status, error) in [(401, AUTH), (403, AUTH), (500, PUBLISH_UNKNOWN)] {
+      assert_put_failure_preserves_previous(PutTarget::Current, status, error);
+    }
+  }
+
+  /// 三次后续条件探针的认证拒绝都不是条件写入能力不受支持。
+  ///
+  /// @since Beta v0.14.1
+  #[test]
+  fn later_probe_puts_report_auth_rejection() {
+    for target in
+      [PutTarget::DuplicateNoneMatch, PutTarget::StaleIfMatch, PutTarget::CorrectIfMatch]
+    {
+      for status in [401, 403] {
+        assert_put_failure_preserves_previous(target, status, AUTH);
+      }
+    }
   }
 
   /// 确认独立清单的写入结果之前，不得变更 current。

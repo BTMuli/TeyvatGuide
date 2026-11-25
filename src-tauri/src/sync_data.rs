@@ -380,6 +380,12 @@ async fn check_schema(
   Ok(SchemaProjection { missing, required })
 }
 
+/// 无跳层信息在不同深渊表版本中用 NULL 或空串表示。
+/// @since Beta v0.14.1
+fn no_skipped_floor(value: &Value) -> bool {
+  value.is_null() || value.as_str() == Some("")
+}
+
 /// 写入前检查所有行都能无损存储；仅允许旧深渊省略无值的跳层字段。
 /// @since Beta v0.14.1
 fn check_projection_rows(
@@ -390,7 +396,7 @@ fn check_projection_rows(
   for &field in &projection.missing {
     if rows.iter().any(|row| {
       let value = &row[field];
-      !(value.is_null() || (field == "skippedFloor" && value.as_str() == Some("")))
+      !(value.is_null() || (field == "skippedFloor" && no_skipped_floor(value)))
     }) {
       return Err(schema_problem(table, Some(field), "旧表没有位置保存快照中的字段值"));
     }
@@ -403,9 +409,9 @@ fn check_projection_rows(
   Ok(())
 }
 
-/// 拒绝过大字段，避免拉取不受限本机数据到内存。
+/// 发布前检查会被导出的列，避免将超大字段读入快照。
 /// @since Beta v0.14.1
-async fn check_field_sizes(
+async fn check_export_field_sizes(
   tx: &mut Transaction<'_, Sqlite>,
   table: &Table,
   projection: &SchemaProjection,
@@ -433,27 +439,42 @@ async fn check_field_sizes(
 /// 按 v1 次序读取值及存储类型；已知旧版缺列只投影为空值，不改变本地表。
 /// @since Beta v0.14.1
 fn selection(table: &Table, projection: &SchemaProjection) -> String {
+  projected_selection(table, projection, false)
+}
+
+/// 核对同键记录时在 SQLite 内截住超限值；不把它读进 Rust，也不误当 SQL NULL。
+/// @since Beta v0.14.1
+fn projected_selection(table: &Table, projection: &SchemaProjection, bounded: bool) -> String {
   table
     .columns
     .iter()
     .map(|c| {
       if projection.missing.contains(&c.name) {
-        "NULL, 'null'".to_owned()
+        return "NULL, 'null'".to_owned();
+      }
+      let column = format!("\"{}\"", c.name);
+      if bounded {
+        let too_large = format!("length(CAST({column} AS BLOB)) > {MAX_FIELD_BYTES}");
+        format!(
+          "CASE WHEN {too_large} THEN NULL ELSE {column} END, \
+           CASE WHEN {too_large} THEN 'sync_field_limit' ELSE typeof({column}) END"
+        )
       } else {
-        format!("\"{}\", typeof(\"{}\")", c.name, c.name)
+        format!("{column}, typeof({column})")
       }
     })
     .collect::<Vec<_>>()
     .join(", ")
 }
 
-/// 无损读取一行，仅接受 NULL、文本和预期的整数存储类型。
+/// 无损读取有限大小的一行，仅接受 NULL、文本和预期的整数存储类型。
 /// @since Beta v0.14.1
 fn decode_row(table: &Table, row: &sqlx::sqlite::SqliteRow) -> Result<Map<String, Value>, String> {
   let mut result = Map::new();
   for (index, column) in table.columns.iter().enumerate() {
     let actual: String = row.try_get(index * 2 + 1).map_err(|_| DATABASE.to_string())?;
     let value = match (actual.as_str(), column.kind) {
+      ("sync_field_limit", _) => return Err(LIMIT.into()),
       ("null", _) => Value::Null,
       ("text", Kind::Text | Kind::Json) => {
         let value: String = row.try_get(index * 2).map_err(|_| DATABASE.to_string())?;
@@ -482,7 +503,7 @@ async fn export_from_pool(pool: &SqlitePool) -> Result<String, String> {
   let mut bytes = 0usize;
   for table in TABLES {
     let projection = check_schema(&mut tx, table, SchemaUse::Export).await?;
-    check_field_sizes(&mut tx, table, &projection).await?;
+    check_export_field_sizes(&mut tx, table, &projection).await?;
     let order = if table.name == "GachaRecords" { "\"id\"" } else { "\"uid\", \"id\"" };
     let sql = format!(
       "SELECT {} FROM main.\"{}\" ORDER BY {}",
@@ -1338,7 +1359,7 @@ fn same_json(left: &Value, right: &Value) -> bool {
 
 /// 同键比较不计更新时间和已验证可省略的旧字段；业务 JSON 按值比较。
 /// @since Beta v0.14.1
-fn same_business_record(
+fn same_projected_fields(
   table: &Table,
   projection: &SchemaProjection,
   left: &Map<String, Value>,
@@ -1348,6 +1369,10 @@ fn same_business_record(
     |c| {
       let (a, b) = (&left[c.name], &right[c.name]);
       a == b
+        || (table.name == "SpiralAbyss"
+          && c.name == "skippedFloor"
+          && no_skipped_floor(a)
+          && no_skipped_floor(b))
         || (c.kind == Kind::Json
           && parse_nested(a).zip(parse_nested(b)).is_some_and(|(mut a, mut b)| {
             if table.name == "RoleCombat" && c.name == "detail" {
@@ -1363,6 +1388,25 @@ fn same_business_record(
           }))
     },
   )
+}
+
+/// 只在内存中按发布规则规范本地旧行再比较；无法规范的旧行仍保留为冲突。
+/// @since Beta v0.14.1
+fn same_business_record(
+  table: &Table,
+  projection: &SchemaProjection,
+  existing: &Map<String, Value>,
+  incoming: &Map<String, Value>,
+) -> bool {
+  if same_projected_fields(table, projection, existing, incoming) {
+    return true;
+  }
+  if table.name == "GachaRecords" {
+    return false;
+  }
+  let mut local = existing.clone();
+  normalize_export_record(table, &mut local).is_ok()
+    && same_projected_fields(table, projection, &local, incoming)
 }
 
 /// 验证四表行的完整结构、范围与所有可渲染字段；只返回首个失败的安全定位信息。
@@ -1524,7 +1568,7 @@ fn decode_v1_snapshot(mut root: Value) -> Result<Records, String> {
   Ok(records)
 }
 
-/// 从当前事务读取主键对应行，祈愿表仅按全局 id 检索。
+/// 只读取并限额核对本次传入主键对应的行；祈愿表仅按全局 id 检索。
 /// @since Beta v0.14.1
 async fn existing_row(
   tx: &mut Transaction<'_, Sqlite>,
@@ -1536,7 +1580,7 @@ async fn existing_row(
     if table.name == "GachaRecords" { "\"id\" = $1" } else { "\"uid\" = $1 AND \"id\" = $2" };
   let sql = format!(
     "SELECT {} FROM main.\"{}\" WHERE {}",
-    selection(table, projection),
+    projected_selection(table, projection, true),
     table.name,
     condition
   );
@@ -1598,7 +1642,6 @@ async fn import_transaction(
   let mut projections = Vec::with_capacity(TABLES.len());
   for (index, table) in TABLES.iter().enumerate() {
     let projection = check_schema(tx, table, SchemaUse::Import).await?;
-    check_field_sizes(tx, table, &projection).await?;
     check_projection_rows(table, &projection, &records[index])?;
     projections.push(projection);
   }
@@ -2223,6 +2266,83 @@ mod tests {
     });
   }
 
+  /// 无关的大记录不影响小包导入；同键超限仍拒绝整包并保留发布限额。
+  /// @since Beta v0.14.1
+  #[test]
+  fn import_checks_field_limits_only_for_matching_rows() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let oversized = "x".repeat(MAX_FIELD_BYTES + 1);
+      sqlx::query("INSERT INTO main.RoleCombat(uid,id,detail) VALUES ($1,$2,$3)")
+        .bind("222222222")
+        .bind(8_i64)
+        .bind(&oversized)
+        .execute(&db)
+        .await
+        .unwrap();
+      let wish_only = snapshot(vec![gacha("100", "111111111", "测试")], vec![], vec![], vec![]);
+      let stats = import_into_pool(&db, &validate_snapshot(&wish_only).unwrap()).await.unwrap();
+      assert_eq!(stats.gacha_records.inserted, 1);
+      assert_eq!(export_from_pool(&db).await.unwrap_err(), LIMIT);
+
+      let mixed = snapshot(
+        vec![gacha("101", "111111111", "必须回滚")],
+        vec![],
+        vec![combat("222222222", 8)],
+        vec![],
+      );
+      let error = import_into_pool(&db, &validate_snapshot(&mixed).unwrap()).await.err().unwrap();
+      assert_eq!(error, LIMIT);
+      let wishes: Vec<String> = sqlx::query_scalar("SELECT id FROM main.GachaRecords ORDER BY id")
+        .fetch_all(&db)
+        .await
+        .unwrap();
+      assert_eq!(wishes, ["100"]);
+      let length: i64 =
+        sqlx::query_scalar("SELECT length(detail) FROM main.RoleCombat WHERE uid=$1 AND id=$2")
+          .bind("222222222")
+          .bind(8_i64)
+          .fetch_one(&db)
+          .await
+          .unwrap();
+      assert_eq!(length, (MAX_FIELD_BYTES + 1) as i64);
+    });
+  }
+
+  /// 两种旧版无跳层值不冲突；有实际跳层值时仍按真实冲突处理。
+  /// @since Beta v0.14.1
+  #[test]
+  fn absent_skipped_floor_is_identical_without_rewriting_existing_rows() {
+    tauri::async_runtime::block_on(async {
+      let db = pool().await;
+      let row = abyss("123456789", 1);
+      assert!(row["skippedFloor"].is_null());
+      let absent = validate_snapshot(&snapshot(vec![], vec![row.clone()], vec![], vec![])).unwrap();
+      import_into_pool(&db, &absent).await.unwrap();
+      sqlx::query("UPDATE main.SpiralAbyss SET skippedFloor=$1 WHERE uid=$2 AND id=$3")
+        .bind("")
+        .bind("123456789")
+        .bind(1_i64)
+        .execute(&db)
+        .await
+        .unwrap();
+      let same = import_into_pool(&db, &absent).await.unwrap();
+      assert_eq!(same.spiral_abyss.identical, 1);
+      assert_eq!(same.spiral_abyss.conflicts, 0);
+      let mut row = row;
+      row["skippedFloor"] = json!("09-10");
+      let skipped = validate_snapshot(&snapshot(vec![], vec![row], vec![], vec![])).unwrap();
+      let different = import_into_pool(&db, &skipped).await.unwrap();
+      assert_eq!(different.spiral_abyss.conflicts, 1);
+      let retained: Option<String> =
+        sqlx::query_scalar("SELECT skippedFloor FROM main.SpiralAbyss")
+          .fetch_one(&db)
+          .await
+          .unwrap();
+      assert_eq!(retained.as_deref(), Some(""));
+    });
+  }
+
   /// 不可由本版本安全导入的本地记录也不得导出并覆盖远端快照。
   /// @since Beta v0.14.1
   #[test]
@@ -2391,7 +2511,7 @@ mod tests {
     assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
   }
 
-  /// 报错所涉及的三类图片和旧字段只在导出副本中规范，快照仍能由 v1 导入。
+  /// 旧字段和图片只在内存中规范，同一批原始业务记录拉取后不报冲突或改库。
   /// @since Beta v0.14.1
   #[test]
   fn legacy_export_normalizes_images_and_missing_fields_without_changing_source() {
@@ -2460,6 +2580,14 @@ mod tests {
       assert_eq!(again.spiral_abyss.identical, 1);
       assert_eq!(again.role_combat.identical, 1);
       assert_eq!(again.hard_challenge.identical, 1);
+
+      let unchanged = import_into_pool(&source, &records).await.unwrap();
+      let stats = [unchanged.spiral_abyss, unchanged.role_combat, unchanged.hard_challenge];
+      for table in stats {
+        assert_eq!(table.identical, 1);
+        assert_eq!(table.inserted, 0);
+        assert_eq!(table.conflicts, 0);
+      }
 
       let mut tx = source.begin().await.unwrap();
       for (table, row) in TABLES.iter().skip(1).zip([&abyss_row, &combat_row, &challenge_row]) {
