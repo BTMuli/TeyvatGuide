@@ -580,6 +580,9 @@ fn normalize_export_record(table: &Table, row: &mut Map<String, Value>) -> Resul
       if let Some(stat) = detail.get_mut("detail_stat") {
         changed |= normalize_legacy_combat_stat(stat);
       }
+      if let Some(fight) = detail.get_mut("fight_statisic") {
+        changed |= normalize_legacy_combat_fight(fight);
+      }
       let legacy_rounds = detail
         .get("detail_stat")
         .and_then(|stat| stat.get("difficulty_id"))
@@ -632,6 +635,26 @@ fn normalize_legacy_combat_stat(value: &mut Value) -> bool {
     return true;
   }
   false
+}
+
+/// 补齐胡桃导入约定中可省略的剧诗摘要；只表示未提供，不改写现有统计或推断成绩。
+/// @since Beta v0.14.1
+fn normalize_legacy_combat_fight(value: &mut Value) -> bool {
+  let Some(fight) = value.as_object_mut() else { return false };
+  let mut changed = false;
+  for key in
+    ["max_defeat_avatar", "max_damage_avatar", "max_take_damage_avatar", "total_coin_consumed"]
+  {
+    if !fight.contains_key(key) {
+      fight.insert(key.to_owned(), Value::Null);
+      changed = true;
+    }
+  }
+  if !fight.contains_key("shortest_avatar_list") {
+    fight.insert("shortest_avatar_list".into(), Value::Array(Vec::new()));
+    changed = true;
+  }
+  changed
 }
 
 /// 仅处理已选战绩 JSON 列中 v1 已知的图片键，未受信任的图片不进入快照。
@@ -2509,6 +2532,87 @@ mod tests {
     details["challenge"][0]["monster"]["icon"] = json!("https://example.com/a.png");
     row["single"] = json!(details.to_string());
     assert!(validate_snapshot(&snapshot(vec![], vec![], vec![], vec![row])).is_err());
+  }
+
+  /// 历史可选摘要只在 v1 快照内补为空值；接收、判同与原库保留一起验证。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_combat_fight_can_export_missing_summaries_without_rewriting_source() {
+    tauri::async_runtime::block_on(async {
+      let source = pool().await;
+      let target = pool().await;
+      let mut canonical = combat("123456789", 1);
+      let mut full_detail = parse_nested(&canonical["detail"]).unwrap();
+      full_detail["fight_statisic"]["max_damage_avatar"] =
+        json!({"avatar_id": 10001, "avatar_icon": "", "value": "123456", "rarity": 5});
+      full_detail["fight_statisic"]["shortest_avatar_list"] =
+        json!([{"avatar_id": 10001, "avatar_icon": "", "value": 42}]);
+      full_detail["fight_statisic"]["total_use_time"] = json!(124);
+      full_detail["fight_statisic"]["is_show_battle_stats"] = json!(true);
+      canonical["detail"] = json!(full_detail.to_string());
+
+      let mut legacy = canonical.clone();
+      full_detail["fight_statisic"].as_object_mut().unwrap().remove("max_defeat_avatar");
+      legacy["detail"] = json!(full_detail.to_string());
+      let mut empty_legacy = combat("123456789", 2);
+      let mut empty_detail = parse_nested(&empty_legacy["detail"]).unwrap();
+      empty_detail["fight_statisic"] = json!({"total_use_time":0,"is_show_battle_stats":false});
+      empty_legacy["detail"] = json!(empty_detail.to_string());
+      let legacy_snapshot =
+        snapshot(vec![], vec![], vec![legacy.clone(), empty_legacy.clone()], vec![]);
+      assert!(validate_snapshot(&legacy_snapshot).is_err());
+
+      let table = &TABLES[2];
+      let mut tx = source.begin().await.unwrap();
+      let projection = check_schema(&mut tx, table, SchemaUse::Import).await.unwrap();
+      for row in [&legacy, &empty_legacy] {
+        insert_record(&mut tx, table, &projection, row.as_object().unwrap()).await.unwrap();
+      }
+      tx.commit().await.unwrap();
+
+      let exported = export_from_pool(&source).await.unwrap();
+      assert_eq!(
+        exported,
+        snapshot(vec![], vec![], vec![canonical, combat("123456789", 2)], vec![])
+      );
+      let validated = validate_snapshot(&exported).unwrap();
+      assert_eq!(import_into_pool(&target, &validated).await.unwrap().role_combat.inserted, 2);
+      let report = import_into_pool(&source, &validated).await.unwrap().role_combat;
+      assert_eq!((report.inserted, report.identical, report.conflicts), (0, 2, 0));
+      let mut tx = source.begin().await.unwrap();
+      let projection = check_schema(&mut tx, table, SchemaUse::Export).await.unwrap();
+      for row in [&legacy, &empty_legacy] {
+        let row = row.as_object().unwrap();
+        assert_eq!(
+          existing_row(&mut tx, table, &projection, row).await.unwrap().as_ref(),
+          Some(row)
+        );
+      }
+    });
+  }
+
+  /// 缺整个详情、缺必要统计、已存在的不合法值都不能被补空掩盖。
+  /// @since Beta v0.14.1
+  #[test]
+  fn legacy_combat_fight_does_not_mask_invalid_values_or_missing_required_fields() {
+    for invalid in [
+      Value::Null,
+      json!({"is_show_battle_stats": true}),
+      json!({"total_use_time": 124}),
+      json!({"total_use_time": 124, "is_show_battle_stats": true, "max_defeat_avatar": 7}),
+      json!({"total_use_time": 124, "is_show_battle_stats": true, "shortest_avatar_list": null}),
+      json!({"total_use_time": 124, "is_show_battle_stats": true, "unknown_stat": 0}),
+    ] {
+      let mut row = combat("123456789", 1);
+      let mut detail = parse_nested(&row["detail"]).unwrap();
+      detail["fight_statisic"] = invalid;
+      row["detail"] = json!(detail.to_string());
+      normalize_export_record(&TABLES[2], row.as_object_mut().unwrap()).unwrap();
+      let normalized = snapshot(vec![], vec![], vec![row], vec![]);
+      assert!(
+        validate_snapshot(&normalized).unwrap_err().starts_with("SYNC_INVALID：RoleCombat.detail")
+      );
+    }
   }
 
   /// 旧字段和图片只在内存中规范，同一批原始业务记录拉取后不报冲突或改库。
