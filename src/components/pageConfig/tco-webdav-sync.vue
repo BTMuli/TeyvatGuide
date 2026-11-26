@@ -37,13 +37,41 @@
       <v-text-field
         v-model="password"
         :disabled="busy"
+        :hint="credentialHint"
         autocomplete="off"
         density="compact"
         label="WebDAV 密码"
+        persistentHint
         type="password"
         variant="outlined"
       />
-      <p class="sync-hint">地址和用户名仅保存在本机，密码不会保存。</p>
+      <div
+        v-if="canOfferCredentialSave || credentialStatus?.hasSaved"
+        class="sync-credential-actions"
+      >
+        <v-btn
+          v-if="canOfferCredentialSave"
+          :disabled="busy || !canSaveCredential"
+          :loading="busyOperation === 'save'"
+          size="small"
+          type="button"
+          variant="outlined"
+          @click="saveCredential"
+        >
+          {{ credentialStatus?.saved ? "替换本机已保存的密码" : "仅在本机安全记住密码" }}
+        </v-btn>
+        <v-btn
+          v-if="credentialStatus?.hasSaved"
+          :disabled="busy"
+          :loading="busyOperation === 'forget'"
+          size="small"
+          type="button"
+          variant="text"
+          @click="forgetCredential"
+        >
+          忘记本机密码
+        </v-btn>
+      </div>
       <v-checkbox
         v-if="isHttp"
         v-model="unsafeHttp"
@@ -247,6 +275,19 @@ type SyncImportStats = {
  */
 type SyncOperation = "publish" | "pull";
 
+type SyncEndpoint = { address: string; username: string };
+type SyncSettings = SyncEndpoint & { protocol: "http:" | "https:" };
+
+/**
+ * 只包含后端的硬件可用性和凭据绑定信息，不包含密码。
+ * @since Beta v0.14.2
+ */
+type SyncCredentialStatus = {
+  hardwareAvailable: boolean;
+  hasSaved: boolean;
+  saved: SyncEndpoint | null;
+};
+
 const AddressKey = "teyvatGuideSyncAddress";
 const UsernameKey = "teyvatGuideSyncUsername";
 const HistoryIdLabel = "历史快照 ID（仅拉取，可选）";
@@ -260,8 +301,9 @@ const username = ref<string>(localStorage.getItem(UsernameKey) ?? "");
 const password = ref<string>("");
 const historyId = ref<string>("");
 const unsafeHttp = ref<boolean>(false);
-const busyOperation = ref<SyncOperation | null>(null);
+const busyOperation = ref<SyncOperation | "save" | "forget" | null>(null);
 const busy = computed<boolean>(() => busyOperation.value !== null);
+const credentialStatus = shallowRef<SyncCredentialStatus | null | undefined>(undefined);
 const resultText = ref<string>("");
 const publishedId = ref<string>("");
 const pullStats = shallowRef<SyncImportStats | null>(null);
@@ -275,47 +317,164 @@ const statusText = computed<string>(() => {
   return stats === null ? resultText.value : summarize(stats);
 });
 const isHttp = computed<boolean>(() => address.value.trim().toLowerCase().startsWith("http://"));
+const syncSettings = computed<SyncSettings | null>(getSettings);
+const canOfferCredentialSave = computed<boolean>(
+  () => credentialStatus.value?.hardwareAvailable === true && !isHttp.value,
+);
+const canSaveCredential = computed<boolean>(
+  () =>
+    canOfferCredentialSave.value && syncSettings.value?.protocol === "https:" && !!password.value,
+);
+const canUseSavedPassword = computed<boolean>(() => {
+  const status = credentialStatus.value;
+  const settings = syncSettings.value;
+  return (
+    status?.hardwareAvailable === true &&
+    status.hasSaved &&
+    settings?.protocol === "https:" &&
+    status.saved?.address === settings.address &&
+    status.saved.username === settings.username
+  );
+});
+const credentialHint = computed<string>(() => {
+  if (isHttp.value) return "HTTP 不保存或使用本机已记住的密码。";
+  const status = credentialStatus.value;
+  if (status === undefined) return "";
+  if (status === null) return "无法检查本机密码状态，可手动输入。";
+  if (!status.hardwareAvailable) return "本机硬件保护不可用，请手动输入密码。";
+  if (canUseSavedPassword.value) return "留空使用本机已保存的密码。";
+  if (status.hasSaved) {
+    return status.saved === null
+      ? "没有可用的本机密码，请手动输入或重新保存。"
+      : "本机已记住其他目录或账号的密码，请手动输入。";
+  }
+  return "";
+});
 
-watch(visible, (isVisible) => {
-  if (!isVisible) {
+let panelVersion = 0;
+let latestStatusRequest = 0;
+
+watch(
+  visible,
+  (isVisible, _, onCleanup) => {
+    onCleanup(() => {
+      panelVersion += 1;
+    });
+    credentialStatus.value = undefined;
+    if (isVisible) {
+      void refreshCredentialStatus();
+      return;
+    }
     password.value = "";
     unsafeHttp.value = false;
     resetPullResult();
-  }
-});
+  },
+  { immediate: true, flush: "sync" },
+);
 
 watch(address, () => {
   unsafeHttp.value = false;
 });
 
-function getSettings(): { address: string; username: string } | null {
+function getSettings(): SyncSettings | null {
   const value = address.value.trim();
   const account = username.value.trim();
   try {
     const parsed = new URL(value);
+    const { protocol } = parsed;
     if (
-      !["http:", "https:"].includes(parsed.protocol) ||
+      (protocol !== "http:" && protocol !== "https:") ||
       parsed.username ||
       parsed.password ||
       parsed.search ||
       parsed.hash ||
-      !account ||
-      !password.value
+      !account
     ) {
       return null;
     }
-    if (parsed.protocol === "http:" && !unsafeHttp.value) return null;
+    return { address: value, username: account, protocol };
   } catch {
     return null;
   }
-  return { address: value, username: account };
 }
 
-function describeFailure(error: unknown): string {
+function persistEndpoint(settings: SyncEndpoint): void {
+  localStorage.setItem(AddressKey, settings.address);
+  localStorage.setItem(UsernameKey, settings.username);
+}
+
+function isCurrentPanel(version: number): boolean {
+  return visible.value && version === panelVersion;
+}
+
+async function refreshCredentialStatus(): Promise<void> {
+  if (!visible.value) return;
+  const version = panelVersion;
+  const request = ++latestStatusRequest;
+  let status: SyncCredentialStatus | null = null;
+  try {
+    status = await invoke<SyncCredentialStatus>("plugin:record-sync|credential_status");
+  } catch {
+    // 手动输入不依赖凭据状态。
+  }
+  if (isCurrentPanel(version) && request === latestStatusRequest) credentialStatus.value = status;
+}
+
+async function saveCredential(): Promise<void> {
+  const settings = syncSettings.value;
+  if (!visible.value || busy.value || !settings || !canSaveCredential.value) return;
+  const version = panelVersion;
+  busyOperation.value = "save";
+  let saved = false;
+  try {
+    await invoke<void>("plugin:record-sync|save_credential", {
+      address: settings.address,
+      username: settings.username,
+      password: password.value,
+    });
+    saved = true;
+    if (isCurrentPanel(version)) password.value = "";
+    persistEndpoint(settings);
+    if (isCurrentPanel(version)) showSnackbar.success("已在本机安全记住密码。");
+  } catch (error) {
+    if (isCurrentPanel(version)) {
+      if (saved) {
+        showSnackbar.warn("密码已保存，但未能记住 WebDAV 地址和用户名。");
+      } else {
+        showSnackbar.error(describeFailure(error, "未能在本机保存密码，可继续手动输入。"));
+      }
+    }
+  } finally {
+    await refreshCredentialStatus();
+    busyOperation.value = null;
+  }
+}
+
+async function forgetCredential(): Promise<void> {
+  if (!visible.value || busy.value || !credentialStatus.value?.hasSaved) return;
+  const version = panelVersion;
+  busyOperation.value = "forget";
+  try {
+    await invoke<void>("plugin:record-sync|forget_credential");
+    if (isCurrentPanel(version)) showSnackbar.success("已忘记本机保存的密码。");
+  } catch (error) {
+    if (isCurrentPanel(version)) {
+      showSnackbar.error(describeFailure(error, "未能忘记本机密码，请重试。"));
+    }
+  } finally {
+    await refreshCredentialStatus();
+    busyOperation.value = null;
+  }
+}
+
+function describeFailure(
+  error: unknown,
+  fallback = "同步失败，请检查 WebDAV 配置、网络和数据后重试。",
+): string {
   if (typeof error === "string" && (error.startsWith("WEBDAV_") || error.startsWith("SYNC_"))) {
     return error;
   }
-  return "同步失败，请检查 WebDAV 配置、网络和数据后重试。";
+  return fallback;
 }
 
 function conflictTableLabel(table: SyncConflictTable): string {
@@ -372,19 +531,33 @@ function summarize(stats: SyncImportStats): string {
 }
 
 /**
- * 串行执行用户选择的同步操作，仅上传前需要确认。
+ * 手动输入优先；仅同一 HTTPS 目录与账号允许使用已保存的密码。
  * @since Beta v0.14.2
  * @param operation - 同步操作方向
  */
 async function sync(operation: SyncOperation): Promise<void> {
-  if (busy.value || (operation === "publish" && !isWindows.value)) return;
-  const settings = getSettings();
-  if (!settings) {
+  if (!visible.value || busy.value || (operation === "publish" && !isWindows.value)) return;
+  const settings = syncSettings.value;
+  if (!settings || (settings.protocol === "http:" && !unsafeHttp.value)) {
     resetResult();
-    showSnackbar.error("请检查 WebDAV 地址、用户名、密码和 HTTP 安全选项。");
+    showSnackbar.error("请检查 WebDAV 地址、用户名和 HTTP 安全选项。");
+    return;
+  }
+  const manualPassword = password.value;
+  if (!manualPassword && !canUseSavedPassword.value) {
+    resetResult();
+    showSnackbar.error("请输入 WebDAV 密码。");
     return;
   }
 
+  const version = panelVersion;
+  const connection = {
+    address: settings.address,
+    username: settings.username,
+    password: manualPassword || null,
+    useProxy: appStore.useProxy,
+    unsafeHttp: unsafeHttp.value,
+  };
   busyOperation.value = operation;
   try {
     if (operation === "publish") {
@@ -393,31 +566,27 @@ async function sync(operation: SyncOperation): Promise<void> {
         text: "游戏 UID 和记录会保存到你指定的 WebDAV 目录。",
         confirmLabel: "确定",
       });
-      if (!confirmed) return;
+      if (!confirmed || !isCurrentPanel(version)) return;
     }
 
     resetResult();
-    localStorage.setItem(AddressKey, settings.address);
-    localStorage.setItem(UsernameKey, settings.username);
+    persistEndpoint(settings);
     await TGSqlite.getDB();
-    const connection = {
-      ...settings,
-      password: password.value,
-      useProxy: appStore.useProxy,
-      unsafeHttp: unsafeHttp.value,
-    };
+    if (!isCurrentPanel(version)) return;
     if (operation === "publish") {
-      publishedId.value = await invoke<string>("plugin:record-sync|publish", { connection });
+      const id = await invoke<string>("plugin:record-sync|publish", { connection });
+      if (!isCurrentPanel(version)) return;
+      publishedId.value = id;
       resultText.value = "上传完成。可以在其他设备上拉取记录。";
     } else {
       const stats = await invoke<SyncImportStats>("plugin:record-sync|pull", {
         connection,
         snapshotId: historyId.value.trim() || null,
       });
-      if (visible.value) pullStats.value = stats;
+      if (isCurrentPanel(version)) pullStats.value = stats;
     }
   } catch (error) {
-    resultText.value = describeFailure(error);
+    if (isCurrentPanel(version)) resultText.value = describeFailure(error);
   } finally {
     busyOperation.value = null;
   }
@@ -432,15 +601,15 @@ async function sync(operation: SyncOperation): Promise<void> {
 }
 
 .sync-description,
-.sync-hint,
 .sync-warning,
 .sync-result {
   margin: 0;
 }
 
-.sync-hint {
-  color: var(--box-text-4);
-  font-size: 12px;
+.sync-credential-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .sync-warning {

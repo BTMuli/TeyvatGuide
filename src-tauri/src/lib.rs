@@ -8,6 +8,7 @@ mod game;
 mod loopback;
 mod plugins;
 mod sync_commands;
+mod sync_credentials;
 mod sync_data;
 mod sync_webdav;
 mod travelers_tales;

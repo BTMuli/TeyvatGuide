@@ -19,6 +19,7 @@ use sha2::{Digest, Sha256};
 use std::{future::Future, time::Duration};
 use url::Url;
 use uuid::Uuid;
+use zeroize::Zeroizing;
 
 const MAX_SNAPSHOT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_METADATA_BYTES: usize = 8 * 1024;
@@ -90,13 +91,13 @@ struct Webdav {
   base: Url,
   client: Client,
   username: String,
-  password: String,
+  password: Zeroizing<String>,
 }
 
 /// 校验目录地址，拒绝所有 URL 内认证信息、查询、片段及未明确允许的 HTTP。
 ///
 /// @since Beta v0.14.2
-fn parse_directory(address: &str, unsafe_http: bool) -> SyncResult<Url> {
+pub(crate) fn parse_directory(address: &str, unsafe_http: bool) -> SyncResult<Url> {
   if address.is_empty()
     || address.len() > 4096
     || address != address.trim()
@@ -129,6 +130,30 @@ fn parse_directory(address: &str, unsafe_http: bool) -> SyncResult<Url> {
   Ok(url)
 }
 
+/// 校验 HTTP Basic 用户名，不允许冒号和控制字符。
+///
+/// @since Beta v0.14.2
+pub(crate) fn validate_username(username: &str) -> SyncResult<()> {
+  if username.is_empty()
+    || username.len() > 1024
+    || username.contains(':')
+    || username.bytes().any(|byte| byte.is_ascii_control())
+  {
+    return Err(INVALID_CREDENTIALS);
+  }
+  Ok(())
+}
+
+/// 限制 HTTP Basic 密码的大小并拒绝控制字符。
+///
+/// @since Beta v0.14.2
+pub(crate) fn validate_password(password: &str) -> SyncResult<()> {
+  if password.len() > 4096 || password.bytes().any(|byte| byte.is_ascii_control()) {
+    return Err(INVALID_CREDENTIALS);
+  }
+  Ok(())
+}
+
 /// 创建不跟随重定向、启用正常证书校验且有超时的客户端。
 ///
 /// @since Beta v0.14.2
@@ -139,16 +164,10 @@ fn create_webdav(
   use_proxy: bool,
   unsafe_http: bool,
 ) -> SyncResult<Webdav> {
+  let password = Zeroizing::new(password);
   let base = parse_directory(address, unsafe_http)?;
-  if username.is_empty()
-    || username.len() > 1024
-    || username.contains(':')
-    || username.bytes().any(|byte| byte.is_ascii_control())
-    || password.len() > 4096
-    || password.bytes().any(|byte| byte.is_ascii_control())
-  {
-    return Err(INVALID_CREDENTIALS);
-  }
+  validate_username(&username)?;
+  validate_password(&password)?;
   let mut builder = Client::builder()
     .redirect(Policy::none())
     .connect_timeout(Duration::from_secs(15))
@@ -179,7 +198,7 @@ impl Webdav {
       self
         .client
         .request(method, self.resource_url(filename)?)
-        .basic_auth(&self.username, Some(&self.password))
+        .basic_auth(&self.username, Some(self.password.as_str()))
         .header(ACCEPT_ENCODING, "identity")
         .header(CACHE_CONTROL, "no-cache, no-store"),
     )
