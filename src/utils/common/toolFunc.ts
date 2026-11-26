@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.13.0
+ * @since Beta v0.14.2
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -220,14 +220,15 @@ export function decodeRegExp(data: string): string {
 }
 
 /**
- * 根据id获取对应角色/武器数据
- * @since Beta v0.9.1
- * @param id - id
- * @returns 角色/武器数据
+ * 根据 id 获取对应角色或武器，兼容缺少物品 ID 的历史祈愿记录。
+ * @since Beta v0.14.2
+ * @param id - 物品 ID
+ * @returns 角色或武器数据，无匹配时返回 false
  */
 export function getWikiBrief(
-  id: number | string,
+  id: number | string | null | undefined,
 ): TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false {
+  if (id === null || id === undefined) return false;
   const find = AppCalendarData.find((i) => i.id.toString() === id.toString());
   if (find === undefined) return false;
   if (find.itemType === staticDataEnum.calendarItem.weapon) {

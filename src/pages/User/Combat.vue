@@ -197,6 +197,7 @@ import {
   maskUid,
   maskUidName,
   maskUidTail,
+  recordUidOptions,
   uidItemTitle,
   uidItemValue,
 } from "@utils/display/TGUid.js";
@@ -316,14 +317,8 @@ async function loadWiki(): Promise<void> {
 }
 
 async function reloadUid(uid?: string): Promise<void> {
-  uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
-  if (uidList.value.includes(account.value.gameUid)) {
-    if (uid === undefined) uidCur.value = account.value.gameUid;
-  } else {
-    uidList.value = [account.value.gameUid, ...uidList.value];
-    if (uid === undefined) uidCur.value = uidList.value[0];
-  }
+  uidList.value = recordUidOptions(await TSUserCombat.getAllUid(), account.value.gameUid);
+  if (uid === undefined) uidCur.value = uidList.value[0];
 }
 
 async function loadCombat(): Promise<void> {

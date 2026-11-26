@@ -29,7 +29,14 @@
             <span>辉彩祝福</span>
             <small>Lv. {{ props.modelValue.summary.total_level }}</small>
           </div>
-          <div class="tuc-buff-total" v-html="getBuffDesc(props.modelValue.summary.desc)" />
+          <div class="tuc-buff-total">
+            <span
+              v-for="(part, idx) in getBuffDesc(props.modelValue.summary.desc)"
+              :key="idx"
+              :style="{ color: part.color }"
+              >{{ part.text }}</span
+            >
+          </div>
         </div>
       </v-menu>
       <v-menu
@@ -61,9 +68,23 @@
               <div v-for="(effect, eIdx) in buff.level_effect" :key="eIdx" class="tuc-effect-item">
                 <div class="tuc-effect-title">
                   <img :src="effect.icon" alt="icon" />
-                  <span v-html="parseHtmlText(effect.name)" />
+                  <span>
+                    <span
+                      v-for="(part, idx) in parseSafeChallengeText(effect.name)"
+                      :key="idx"
+                      :style="{ color: part.color }"
+                      >{{ part.text }}</span
+                    >
+                  </span>
                 </div>
-                <span class="tuc-effect-desc" v-html="getEffectDesc(effect.desc)" />
+                <span class="tuc-effect-desc">
+                  <span
+                    v-for="(part, idx) in getEffectDesc(effect.desc)"
+                    :key="idx"
+                    :style="{ color: part.color }"
+                    >{{ part.text }}</span
+                  >
+                </span>
               </div>
             </template>
             <span v-else class="tuc-buff-empty">暂无祝福效果</span>
@@ -75,7 +96,8 @@
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { parseHtmlText } from "@utils/common/toolFunc.js";
+import { parseSafeChallengeText } from "@utils/sync/safeChallengeText.js";
+import type { SafeChallengeTextPart } from "@utils/sync/safeChallengeText.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 
@@ -95,12 +117,13 @@ const crownIcon = computed<string>(() =>
   isDark.value ? "/UI/combat/combatCrown2.webp" : "/UI/combat/combatCrown.webp",
 );
 
-function getBuffDesc(desc: string): string {
-  return parseHtmlText(desc.replaceAll("点，", "点，\n"));
+function getBuffDesc(desc: string): Array<SafeChallengeTextPart> {
+  return parseSafeChallengeText(desc.replaceAll("点，", "点，\n"));
 }
 
-function getEffectDesc(desc: string): string {
-  return parseHtmlText(desc.replaceAll("；", "；\n")).replaceAll("\n<br />", "<br />");
+function getEffectDesc(desc: string): Array<SafeChallengeTextPart> {
+  const formatted = desc.replaceAll("；", "；\n").replaceAll("\n<br />", "<br />");
+  return parseSafeChallengeText(formatted.replaceAll("\n\\n", "\\n"));
 }
 
 function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
@@ -285,6 +308,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   font-family: var(--font-title);
   font-size: 12px;
   font-weight: normal;
+  white-space: pre-wrap;
 }
 
 .tuc-effect-title img {

@@ -288,7 +288,13 @@ import { useGachaUigfFiles } from "@hooks/useGachaUigfFiles.js";
 import { useHutaoGachaSync } from "@hooks/useHutaoGachaSync.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useUserStore from "@store/user.js";
-import { maskUid, maskUidTail, uidItemTitle, uidItemValue } from "@utils/display/TGUid.js";
+import {
+  maskUid,
+  maskUidTail,
+  recordUidOptions,
+  uidItemTitle,
+  uidItemValue,
+} from "@utils/display/TGUid.js";
 import { filterGachaDisplayList } from "@utils/gacha/version.js";
 import TGHttps from "@utils/network/TGHttps.js";
 import fetchYattaJson from "@utils/network/Yatta.js";
@@ -416,14 +422,8 @@ async function loadGachaList(): Promise<void> {
 }
 
 async function reloadUid(uid?: string): Promise<void> {
-  uidList.value = await TSUserGacha.getUidList();
-  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
-  if (uidList.value.includes(account.value.gameUid)) {
-    if (uid === undefined) uidCur.value = account.value.gameUid;
-  } else {
-    uidList.value = [account.value.gameUid, ...uidList.value];
-    if (uid === undefined) uidCur.value = uidList.value[0];
-  }
+  uidList.value = recordUidOptions(await TSUserGacha.getUidList(), account.value.gameUid);
+  if (uid === undefined) uidCur.value = uidList.value[0];
 }
 
 async function toBeyond(): Promise<void> {

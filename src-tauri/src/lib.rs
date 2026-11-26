@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.13.2
+//! @since Beta v0.14.2
 
 mod client;
 mod commands;
@@ -7,6 +7,10 @@ mod game;
 #[cfg(target_os = "windows")]
 mod loopback;
 mod plugins;
+mod sync_commands;
+mod sync_credentials;
+mod sync_data;
+mod sync_webdav;
 mod travelers_tales;
 mod tray;
 mod utils;
@@ -77,7 +81,7 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
 
 /// 配置并启动 Tauri 应用。
 ///
-/// @since Beta v0.13.2
+/// @since Beta v0.14.2
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(target_os = "windows")]
@@ -133,6 +137,7 @@ pub fn run() {
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_process::init())
     .plugin(tauri_plugin_sql::Builder::default().build())
+    .plugin(sync_commands::init())
     .plugin(tauri_plugin_machine_uid::init())
     .plugin(plugins::custom_log::build_log_plugin())
     .setup(|_app| {

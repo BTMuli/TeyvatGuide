@@ -1,6 +1,6 @@
 /**
  * UID 展示工具
- * @since Beta v0.13.0
+ * @since Beta v0.14.2
  */
 
 import useAppStore from "@store/app.js";
@@ -71,6 +71,20 @@ export function uidItemTitle(item: unknown): string {
  */
 export function uidItemValue(item: unknown): unknown {
   return item;
+}
+
+/**
+ * 为记录页面准备 UID 选项，未登录时直接使用有存档的 UID。
+ * @since Beta v0.14.2
+ * @param storedUids - 本地有记录的 UID 列表
+ * @param accountUid - 当前登录的游戏 UID，未登录时为空
+ * @returns 优先放置当前账号的非空 UID 选项
+ */
+export function recordUidOptions(
+  storedUids: ReadonlyArray<string>,
+  accountUid: string,
+): Array<string> {
+  return [...new Set([accountUid, ...storedUids].filter(Boolean))];
 }
 
 /**

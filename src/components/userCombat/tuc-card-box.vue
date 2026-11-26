@@ -28,14 +28,21 @@
             <img :src="card.icon" alt="icon" />
             <span>{{ card.name }}</span>
           </div>
-          <div class="tuc-ci-desc" v-html="parseHtmlText(card.desc)" />
+          <div class="tuc-ci-desc">
+            <span
+              v-for="(part, idx) in parseSafeChallengeText(card.desc)"
+              :key="idx"
+              :style="{ color: part.color }"
+              >{{ part.text }}</span
+            >
+          </div>
         </div>
       </v-menu>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { parseHtmlText } from "@utils/common/toolFunc.js";
+import { parseSafeChallengeText } from "@utils/sync/safeChallengeText.js";
 
 type TucCardBoxProps = { modelValue: Array<TGApp.Game.Combat.Card> };
 
@@ -171,6 +178,7 @@ const props = defineProps<TucCardBoxProps>();
   position: relative;
   flex-shrink: 0;
   font-size: 12px;
+  white-space: pre-wrap;
   word-break: break-all;
 }
 
